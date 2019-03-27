@@ -62,6 +62,7 @@ namespace Microsoft.Identity.Client.Core
 
             if (config.MatsConfig != null)
             {
+                // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
                 Mats = Client.Mats.Mats.CreateMats(PlatformProxy, config.MatsConfig);
             }
         }

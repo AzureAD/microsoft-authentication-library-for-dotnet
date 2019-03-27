@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
 
 namespace Microsoft.Identity.Client.Mats.Internal
@@ -18,15 +16,13 @@ namespace Microsoft.Identity.Client.Mats.Internal
         private readonly int _maxActionDurationMillis;
         private readonly int _maxAggregationDurationMillis;
         private readonly HashSet<string> _telemetryAllowedScopes = new HashSet<string>();
-        private readonly HashSet<string> _telemetryAllowedResources = new HashSet<string>();
 
         public ActionStore(
             int maxActionDurationMillis,
             int maxAggregationDurationMillis,
             IErrorStore errorStore,
             IEventFilter eventFilter,
-            HashSet<string> telemetryAllowedScopes,
-            HashSet<string> telemetryAllowedResources)
+            HashSet<string> telemetryAllowedScopes)
         {
             _maxActionDurationMillis = maxActionDurationMillis;
             _maxAggregationDurationMillis = maxAggregationDurationMillis;
@@ -40,17 +36,9 @@ namespace Microsoft.Identity.Client.Mats.Internal
                     _telemetryAllowedScopes.Add(s);
                 }
             }
-
-            if (telemetryAllowedResources != null)
-            {
-                foreach (string s in telemetryAllowedResources)
-                {
-                    _telemetryAllowedResources.Add(s);
-                }
-            }
         }
 
-        public void EndAdalAction(AdalAction action, AuthOutcome outcome, ErrorSource errorSource, string error, string errorDescription)
+        public void EndMsalAction(MatsAction action, AuthOutcome outcome, ErrorSource errorSource, string error, string errorDescription)
         {
             EndGenericAction(action.ActionId, MatsConverter.AsString(outcome), errorSource, error, errorDescription, string.Empty);
         }
@@ -108,36 +96,36 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        public void ProcessAdalTelemetryBlob(IDictionary<string, string> blob)
+        public void ProcessMsalTelemetryBlob(IDictionary<string, string> blob)
         {
-            if (!blob.TryGetValue(AdalTelemetryBlobEventNames.AdalCorrelationIdConstStrKey, out string correlationId))
+            if (!blob.TryGetValue(MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey, out string correlationId))
             {
                 _errorStore.ReportError("No correlation ID found in telemetry blob", ErrorType.Action, ErrorSeverity.Warning);
                 return;
             }
 
-            var propertyBags = GetAdalPropertyBagsForCorrelationId(correlationId);
+            var propertyBags = GetMsalPropertyBagsForCorrelationId(correlationId);
             int numberOfPropertyBagsMatchingCorrelationId = propertyBags.Count;
 
             switch (numberOfPropertyBagsMatchingCorrelationId)
             {
             case 0:
                 //[vadugar] ToDo: Is this an error?
-                _errorStore.ReportError("No ADAL actions matched correlation ID", ErrorType.Action, ErrorSeverity.Warning);
+                _errorStore.ReportError("No MSAL actions matched correlation ID", ErrorType.Action, ErrorSeverity.Warning);
                 return;
             case 1:
                 break;
             default:
                 //[vadugar] ToDo: How should we handle this case?
-                _errorStore.ReportError("Multiple ADAL actions matched correlation ID", ErrorType.Action, ErrorSeverity.Warning);
+                _errorStore.ReportError("Multiple MSAL actions matched correlation ID", ErrorType.Action, ErrorSeverity.Warning);
                 return;
             }
 
-            var aggregatedProperties = GetAdalAggregatedProperties();
+            var aggregatedProperties = GetMsalAggregatedProperties();
             var propertyBag = propertyBags[0];
             foreach (var blobEntry in blob)
             {
-                if (string.Compare(blobEntry.Key, AdalTelemetryBlobEventNames.AdalCorrelationIdConstStrKey, StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(blobEntry.Key, MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     continue;
                 }
@@ -156,7 +144,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private List<ActionPropertyBag> GetAdalPropertyBagsForCorrelationId(string correlationId)
+        private List<ActionPropertyBag> GetMsalPropertyBagsForCorrelationId(string correlationId)
         {
             var retval = new List<ActionPropertyBag>();
             lock (_lockActionIdToPropertyBag)
@@ -170,7 +158,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
                     propertyBagCorrelationId = propertyBagCorrelationId.TrimCurlyBraces();
                     string correlationIdTrimmed = correlationId.TrimCurlyBraces();
 
-                    if (string.Compare(actionType, MatsConverter.AsString(ActionType.Adal), StringComparison.OrdinalIgnoreCase) == 0 &&
+                    if (string.Compare(actionType, MatsConverter.AsString(ActionType.Msal), StringComparison.OrdinalIgnoreCase) == 0 &&
                         string.Compare(propertyBagCorrelationId, correlationIdTrimmed, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         retval.Add(propertyBag);
@@ -206,42 +194,44 @@ namespace Microsoft.Identity.Client.Mats.Internal
             return name.Replace('.', '_');
         }
 
-        private HashSet<string> GetAdalAggregatedProperties()
+        private HashSet<string> GetMsalAggregatedProperties()
         {
             return new HashSet<string>
             {
-                AdalTelemetryBlobEventNames.CacheEventCountConstStrKey,
-                AdalTelemetryBlobEventNames.HttpEventCountTelemetryBatchKey,
-                AdalTelemetryBlobEventNames.ResponseTimeConstStrKey,
+                MsalTelemetryBlobEventNames.CacheEventCountConstStrKey,
+                MsalTelemetryBlobEventNames.HttpEventCountTelemetryBatchKey,
+                MsalTelemetryBlobEventNames.ResponseTimeConstStrKey,
             };
         }
 
-        public AdalAction StartAdalAction(Scenario scenario, string correlationId, string resource)
+        public MatsAction StartMsalAction(MatsScenario scenario, string correlationId, IEnumerable<string> scopes)
         {
-            var adalActionArtifacts = CreateGenericAction(scenario, correlationId, ActionType.Adal);
-            adalActionArtifacts.PropertyBag.Add(ActionPropertyNames.IdentityServiceConstStrKey, MatsConverter.AsString(IdentityService.AAD));
-            SetResourceProperty(adalActionArtifacts.PropertyBag, resource);
-            return adalActionArtifacts.Action;
+            var actionArtifacts = CreateGenericAction(scenario, correlationId, ActionType.Msal);
+            actionArtifacts.PropertyBag.Add(ActionPropertyNames.IdentityServiceConstStrKey, MatsConverter.AsString(IdentityService.AAD));
+            SetScopesProperty(actionArtifacts.PropertyBag, scopes);
+            return actionArtifacts.Action;
         }
 
-        private void SetResourceProperty(ActionPropertyBag propertyBag, string resource)
+        private void SetScopesProperty(ActionPropertyBag propertyBag, IEnumerable<string> scopes)
         {
-            if (_telemetryAllowedResources.Contains(resource))
+            // TODO(mats): how is this supposed to work?  Should we get multiple properties somehow, one per scope?  or do we send up all scopes in a space-delimited string (will make querying hard on the backend)
+            foreach (string scope in scopes)
             {
-                propertyBag.Add(ActionPropertyNames.ResourceConstStrKey, resource);
-            }
-            else if (!string.IsNullOrEmpty(resource))
-            {
-                propertyBag.Add(ActionPropertyNames.ResourceConstStrKey, "ResourceRedacted");
+                if (_telemetryAllowedScopes.Contains(scope))
+                {
+                    propertyBag.Add(ActionPropertyNames.ScopeConstStrKey, scope);
+                }
+                else if (!string.IsNullOrEmpty(scope))
+                {
+                    propertyBag.Add(ActionPropertyNames.ScopeConstStrKey, "ScopeRedacted");
+                }
             }
         }
 
-        // todo: what other action types would we get here?  does this need to be a generic function?
-        // private ActionArtifacts<T> CreateGenericAction<T>(Scenario scenario, string correlationId, ActionType actionType)
-        private ActionArtifacts<AdalAction> CreateGenericAction(Scenario scenario, string correlationId, ActionType actionType)
+        private ActionArtifacts CreateGenericAction(MatsScenario scenario, string correlationId, ActionType actionType)
         {
             string actionId = MatsId.Create();
-            AdalAction action = new AdalAction(actionId, scenario);
+            MatsAction action = new MatsAction(actionId, scenario);
 
             string corrIdTrim = correlationId.TrimCurlyBraces();
 
@@ -258,7 +248,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
                 _actionIdToPropertyBag[actionId] = propertyBag;
             }
 
-            return new ActionArtifacts<AdalAction>(action, propertyBag);
+            return new ActionArtifacts(action, propertyBag);
         }
 
         private void EndGenericAction(string actionId, string outcome, ErrorSource errorSource, string error, string errorDescription, string accountCid)

@@ -3,8 +3,9 @@
 
 namespace Microsoft.Identity.Client.Mats.Internal.Constants
 {
-    internal static class AdalTelemetryBlobEventValues
-    {
-        public const string IsSuccessfulConstStrValue = "Microsoft_ADAL_is_successful";
-    }
+    // TODO(mats): get rid of this since we aren't an ADAL library.
+    //internal static class AdalTelemetryBlobEventValues
+    //{
+    //    public const string IsSuccessfulConstStrValue = "Microsoft_ADAL_is_successful";
+    //}
 }

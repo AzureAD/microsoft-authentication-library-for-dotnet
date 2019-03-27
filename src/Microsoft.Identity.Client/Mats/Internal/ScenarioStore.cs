@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
 
 namespace Microsoft.Identity.Client.Mats.Internal
@@ -29,7 +28,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             _errorStore = errorStore;
         }
 
-        public Scenario CreateScenario()
+        public MatsScenario CreateScenario()
         {
             string scenarioId = MatsId.Create();
 
@@ -42,7 +41,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
                 _scenarioIdToPropertyBag[scenarioId] = new ScenarioHolder(propertyBag);
             }
 
-            return new Scenario(scenarioId, 0);
+            return new MatsScenario(scenarioId, 0);
         }
 
         public IEnumerable<IPropertyBag> GetEventsForUpload()

@@ -39,10 +39,5 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         public IEnumerable<string> AllowedScopes { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public IEnumerable<string> AllowedResources { get; set; }
     }
 }

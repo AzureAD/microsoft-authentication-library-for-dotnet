@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
 {
     internal interface IScenarioStore
     {
-        Scenario CreateScenario();
+        MatsScenario CreateScenario();
         IEnumerable<IPropertyBag> GetEventsForUpload();
         void ClearCompletedScenarios();
         void NotifyActionCompleted(string scenarioId);

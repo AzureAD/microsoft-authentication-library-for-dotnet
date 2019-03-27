@@ -11,15 +11,11 @@ namespace Microsoft.Identity.Client.Mats
 {
     internal class Mats : IMats
     {
-        private readonly bool _isTelemetryDisabled;
         private readonly IErrorStore _errorStore;
         private readonly IUploader _uploader;
-        private readonly IEventFilter _eventFilter;
         private readonly IActionStore _actionStore;
         private readonly IScenarioStore _scenarioStore;
         private readonly ContextStore _contextStore;
-        private readonly int _osPlatformCode;
-        private readonly ITelemetryDispatcher _telemetryDispatcher;
         private readonly bool _isScenarioUploadDisabled;
         private readonly object _lockObject = new object();
 
@@ -42,22 +38,13 @@ namespace Microsoft.Identity.Client.Mats
                     allowedScopes.Add(s);
                 }
             }
-            var allowedResources = new HashSet<string>();
-            if (matsConfig.AllowedResources != null)
-            {
-                foreach (string s in matsConfig.AllowedResources)
-                {
-                    allowedResources.Add(s);
-                }
-            }
 
             var actionStore = new ActionStore(
                 TimeConstants.ActionTimeoutMilliseconds,
                 TimeConstants.AggregationWindowMilliseconds,
                 errorStore,
                 eventFilter,
-                allowedScopes,
-                allowedResources);
+                allowedScopes);
 
             var contextStore = ContextStore.CreateContextStore(
                 matsConfig.AudienceType,
@@ -68,46 +55,38 @@ namespace Microsoft.Identity.Client.Mats
                 matsConfig.SessionId,
                 osPlatformCode);
 
-            var dispatcher = new TelemetryDispatcher(matsConfig.DispatchAction);
-            IUploader uploader = new TelemetryUploader(dispatcher, platformProxy, matsConfig.AppName);
+            IUploader uploader = new TelemetryUploader(matsConfig.DispatchAction, platformProxy, matsConfig.AppName);
 
             // it's this way in mats c++
             bool isScenarioUploadDisabled = true;
 
-            return new Mats(
-                !IsDeviceEnabled(matsConfig.AudienceType, dpti),
-                errorStore,
-                uploader,
-                eventFilter,
-                osPlatformCode,
-                actionStore,
-                scenarioStore,
-                contextStore,
-                dispatcher,
-                isScenarioUploadDisabled);
+            if (IsDeviceEnabled(matsConfig.AudienceType, dpti))
+            {
+                return new Mats(
+                    errorStore,
+                    uploader,
+                    actionStore,
+                    scenarioStore,
+                    contextStore,
+                    isScenarioUploadDisabled);
+            }
+
+            return null;
         }
 
         private Mats(
-            bool isTelemetryDisabled,
             IErrorStore errorStore,
             IUploader uploader,
-            IEventFilter eventFilter,
-            int osPlatformCode,
             IActionStore actionStore,
             IScenarioStore scenarioStore,
             ContextStore contextStore,
-            ITelemetryDispatcher telemetryDispatcher,
             bool isScenarioUploadDisabled)
         {
-            _isTelemetryDisabled = isTelemetryDisabled;
             _errorStore = errorStore;
             _uploader = uploader;
-            _eventFilter = eventFilter;
-            _osPlatformCode = osPlatformCode;
             _actionStore = actionStore;
             _scenarioStore = scenarioStore;
             _contextStore = contextStore;
-            _telemetryDispatcher = telemetryDispatcher;
             _isScenarioUploadDisabled = isScenarioUploadDisabled;
         }
 
@@ -121,24 +100,24 @@ namespace Microsoft.Identity.Client.Mats
             return SampleUtils.ShouldEnableDevice(dpti);
         }
 
-        public IScenarioHandle CreateScenario()
+        public MatsScenario CreateScenario()
         {
             var scenario = _scenarioStore.CreateScenario();
             _uploader.Upload(GetEventsForUpload());
             return scenario;
         }
 
-        public IActionHandle StartAction(IScenarioHandle scenario, string correlationId)
+        public MatsAction StartAction(MatsScenario scenario, string correlationId)
         {
-            return StartActionWithResource(scenario, correlationId, string.Empty);
+            return StartActionWithScopes(scenario, correlationId, null);
         }
 
-        public IActionHandle StartActionWithResource(IScenarioHandle scenario, string correlationId, string resource)
+        public MatsAction StartActionWithScopes(MatsScenario scenario, string correlationId, IEnumerable<string> scopes)
         {
-            return _actionStore.StartAdalAction((Scenario)scenario, correlationId, resource ?? string.Empty);
+            return _actionStore.StartMsalAction(scenario, correlationId, scopes ?? new List<string>());
         }
 
-        public void EndAction(IActionHandle action, AuthenticationResult authenticationResult)
+        public void EndAction(MatsAction action, AuthenticationResult authenticationResult)
         {
             // todo(mats): map contents of authentication result to appropriate telemetry values.
             AuthOutcome outcome = AuthOutcome.Succeeded;
@@ -149,13 +128,13 @@ namespace Microsoft.Identity.Client.Mats
             EndAction(action, outcome, errorSource, error, errorDescription);
         }
 
-        public void EndAction(IActionHandle action, AuthOutcome outcome, ErrorSource errorSource, string error, string errorDescription)
+        public void EndAction(MatsAction action, AuthOutcome outcome, ErrorSource errorSource, string error, string errorDescription)
         {
-            _actionStore.EndAdalAction((AdalAction)action, outcome, errorSource, error, errorDescription);
+            _actionStore.EndMsalAction(action, outcome, errorSource, error, errorDescription);
             _uploader.Upload(GetEventsForUpload());
         }
 
-        public void EndAction(IActionHandle action, Exception ex)
+        public void EndAction(MatsAction action, Exception ex)
         {
             AuthOutcome outcome = AuthOutcome.Failed;
             ErrorSource errorSource = ErrorSource.AuthSdk;
@@ -209,6 +188,14 @@ namespace Microsoft.Identity.Client.Mats
                 _disposedValue = true;
             }
         }
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+        }
+
+        #endregion
 
         private void UploadErrorEvents()
         {
@@ -275,29 +262,12 @@ namespace Microsoft.Identity.Client.Mats
 
         private void ReportError(string errorMessage, ErrorType errorType, ErrorSeverity errorSeverity)
         {
-            lock (_lockObject)
-            {
-                if (_isTelemetryDisabled)
-                {
-                    return;
-                }
-            }
-
             _errorStore.ReportError(errorMessage, errorType, errorSeverity);
         }
 
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-        }
-
-        #endregion
-
         public void ProcessTelemetryBlob(Dictionary<string, string> blob)
         {
-            _actionStore.ProcessAdalTelemetryBlob(blob);
+            _actionStore.ProcessMsalTelemetryBlob(blob);
         }
     }
 }

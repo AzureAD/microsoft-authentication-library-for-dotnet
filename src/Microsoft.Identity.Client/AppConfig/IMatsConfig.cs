@@ -54,10 +54,5 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         IEnumerable<string> AllowedScopes { get; }
-
-        /// <summary>
-        /// todo(mats): i don't think we'll need this for MSAL.
-        /// </summary>
-        IEnumerable<string> AllowedResources { get; }
     }
 }

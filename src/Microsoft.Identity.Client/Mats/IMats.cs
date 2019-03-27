@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Identity.Client.Mats.Internal;
 
 namespace Microsoft.Identity.Client.Mats
 {
@@ -46,27 +47,27 @@ namespace Microsoft.Identity.Client.Mats
     {
         void ProcessTelemetryBlob(Dictionary<string, string> blob);
 
-        IScenarioHandle CreateScenario();
+        MatsScenario CreateScenario();
 
-        IActionHandle StartAction(
-            IScenarioHandle scenario, 
+        MatsAction StartAction(
+            MatsScenario scenario, 
             string correlationId);
 
-        IActionHandle StartActionWithResource(
-            IScenarioHandle scenario, 
+        MatsAction StartActionWithScopes(
+            MatsScenario scenario, 
             string correlationId, 
-            string resource);
+            IEnumerable<string> scopes);
 
         void EndAction(
-            IActionHandle action,
+            MatsAction action,
             AuthenticationResult authenticationResult);
 
         void EndAction(
-            IActionHandle action,
+            MatsAction action,
             Exception ex);
 
         void EndAction(
-            IActionHandle action, 
+            MatsAction action, 
             AuthOutcome outcome, 
             ErrorSource errorSource, 
             string error, 

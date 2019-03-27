@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Collections.Concurrent;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
@@ -16,9 +14,9 @@ namespace Microsoft.Identity.Client.Mats.Internal
 
         public EventType EventType {get;}
 
-        public readonly Dictionary<string, string> StringProperties = new Dictionary<string, string>();
-        public readonly Dictionary<string, int> IntProperties = new Dictionary<string, int>();
-        public readonly Dictionary<string, long> Int64Properties = new Dictionary<string, long>();
-        public readonly Dictionary<string, bool> BoolProperties = new Dictionary<string, bool>();
+        public readonly ConcurrentDictionary<string, string> StringProperties = new ConcurrentDictionary<string, string>();
+        public readonly ConcurrentDictionary<string, int> IntProperties = new ConcurrentDictionary<string, int>();
+        public readonly ConcurrentDictionary<string, long> Int64Properties = new ConcurrentDictionary<string, long>();
+        public readonly ConcurrentDictionary<string, bool> BoolProperties = new ConcurrentDictionary<string, bool>();
     }
 }

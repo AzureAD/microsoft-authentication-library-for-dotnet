@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
 
@@ -29,11 +28,6 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
         protected HashSet<string> GetAllowedScopes()
         {
             return new HashSet<string> { "scope", "scope1", "scope2" };
-        }
-
-        protected HashSet<string> GetAllowedResources()
-        {
-            return new HashSet<string> { "resource", "resource1", "resource2" };
         }
 
         internal bool CheckError(List<PropertyBagContents> expectedErrors)

@@ -3,15 +3,15 @@
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
-    internal class ActionArtifacts<T>
+    internal class ActionArtifacts
     {
-        public ActionArtifacts(T action, ActionPropertyBag propertyBag)
+        public ActionArtifacts(MatsAction action, ActionPropertyBag propertyBag)
         {
             Action = action;
             PropertyBag = propertyBag;
         }
 
-        public T Action { get; }
+        public MatsAction Action { get; }
         public ActionPropertyBag PropertyBag { get; }
     }
 }

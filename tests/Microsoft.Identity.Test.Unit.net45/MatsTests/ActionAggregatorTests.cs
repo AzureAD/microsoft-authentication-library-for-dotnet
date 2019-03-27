@@ -30,9 +30,9 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
             long childDuration = 200;
 
             // cache event count properties and names
-            string cacheEventCountMaxPropertyName = AdalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.MaxConstStrSuffix;
-            string cacheEventCountMinPropertyName = AdalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.MinConstStrSuffix;
-            string cacheEventCountSumPropertyName = AdalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.SumConstStrSuffix;
+            string cacheEventCountMaxPropertyName = MsalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.MaxConstStrSuffix;
+            string cacheEventCountMinPropertyName = MsalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.MinConstStrSuffix;
+            string cacheEventCountSumPropertyName = MsalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.SumConstStrSuffix;
             int targetCacheEventCount = 100;
             int childCacheEventCount = 200;
 
@@ -82,9 +82,9 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
             long childDuration = 200;
 
             // cache event count properties and names
-            string cacheEventCountMaxPropertyName = AdalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.MaxConstStrSuffix;
-            string cacheEventCountMinPropertyName = AdalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.MinConstStrSuffix;
-            string cacheEventCountSumPropertyName = AdalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.SumConstStrSuffix;
+            string cacheEventCountMaxPropertyName = MsalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.MaxConstStrSuffix;
+            string cacheEventCountMinPropertyName = MsalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.MinConstStrSuffix;
+            string cacheEventCountSumPropertyName = MsalTelemetryBlobEventNames.CacheEventCountConstStrKey + ActionPropertyNames.SumConstStrSuffix;
             int childCacheEventCount = 200;
 
             int expectedCount = 2;

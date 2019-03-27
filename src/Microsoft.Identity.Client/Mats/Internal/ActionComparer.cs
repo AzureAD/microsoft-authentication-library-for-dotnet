@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
 
@@ -31,7 +32,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             return true;
         }
 
-        private static bool IsPropertyEquivalent(string propertyName, Dictionary<string, string> propertyMap1, Dictionary<string, string> propertyMap2)
+        private static bool IsPropertyEquivalent(string propertyName, ConcurrentDictionary<string, string> propertyMap1, ConcurrentDictionary<string, string> propertyMap2)
         {
             string value1 = string.Empty;
             string value2 = string.Empty;
@@ -47,11 +48,11 @@ namespace Microsoft.Identity.Client.Mats.Internal
             {
                 ActionPropertyNames.AccountIdConstStrKey,
                 ActionPropertyNames.ActionTypeConstStrKey,
-                AdalTelemetryBlobEventNames.BrokerAppConstStrKey,
-                AdalTelemetryBlobEventNames.TenantIdConstStrKey,
+                MsalTelemetryBlobEventNames.BrokerAppConstStrKey,
+                MsalTelemetryBlobEventNames.TenantIdConstStrKey,
                 ActionPropertyNames.IdentityConstStrKey,
                 ActionPropertyNames.IdentityServiceConstStrKey,
-                AdalTelemetryBlobEventNames.IdpConstStrKey,
+                MsalTelemetryBlobEventNames.IdpConstStrKey,
                 ActionPropertyNames.TenantIdConstStrKey,
                 ActionPropertyNames.ResourceConstStrKey,
                 ActionPropertyNames.ScopeConstStrKey

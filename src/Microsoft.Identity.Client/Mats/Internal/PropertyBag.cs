@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -246,7 +247,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private bool IsValidExistingName<T>(Dictionary<string, T> map, string key, out string errorMessage)
+        private bool IsValidExistingName<T>(ConcurrentDictionary<string, T> map, string key, out string errorMessage)
         {
             errorMessage = string.Empty;
 

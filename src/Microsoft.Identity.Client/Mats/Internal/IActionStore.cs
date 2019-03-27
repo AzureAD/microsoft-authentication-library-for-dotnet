@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
@@ -26,18 +24,15 @@ namespace Microsoft.Identity.Client.Mats.Internal
         CustomInteractive,
         MsaInteractive,
         MsaNonInteractive,
-        Wam
+        Wam,
+        Msal
     }
 
     internal interface IActionStore
     {
-        /** ADAL action */
-        AdalAction StartAdalAction(Scenario scenario, string correlationId, string resource);
-
-        void ProcessAdalTelemetryBlob(IDictionary<string, string> blob);
-
-        void EndAdalAction(AdalAction action, AuthOutcome outcome, ErrorSource errorSource, string error, string errorDescription);
-
+        MatsAction StartMsalAction(MatsScenario scenario, string correlationId, IEnumerable<string> scopes);
+        void ProcessMsalTelemetryBlob(IDictionary<string, string> blob);
+        void EndMsalAction(MatsAction action, AuthOutcome outcome, ErrorSource errorSource, string error, string errorDescription);
         IEnumerable<IPropertyBag> GetEventsForUpload();
     }
 }

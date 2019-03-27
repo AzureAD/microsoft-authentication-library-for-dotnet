@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
 
 namespace Microsoft.Identity.Client.Mats.Internal
@@ -32,7 +31,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private static void AggregateMax(string basePropertyName, ActionPropertyBag targetAction, Dictionary<string, int> childMap)
+        private static void AggregateMax(string basePropertyName, ActionPropertyBag targetAction, ConcurrentDictionary<string, int> childMap)
         {
             string fullPropertyname = basePropertyName + ActionPropertyNames.MaxConstStrSuffix;
 
@@ -42,7 +41,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private static void AggregateMin(string basePropertyName, ActionPropertyBag targetAction, Dictionary<string, int> childMap)
+        private static void AggregateMin(string basePropertyName, ActionPropertyBag targetAction, ConcurrentDictionary<string, int> childMap)
         {
             string fullPropertyname = basePropertyName + ActionPropertyNames.MinConstStrSuffix;
 
@@ -52,7 +51,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private static void AggregateSum(string basePropertyName, ActionPropertyBag targetAction, Dictionary<string, int> childMap)
+        private static void AggregateSum(string basePropertyName, ActionPropertyBag targetAction, ConcurrentDictionary<string, int> childMap)
         {
             string fullPropertyname = basePropertyName + ActionPropertyNames.SumConstStrSuffix;
 
@@ -62,7 +61,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private static void AggregateMax(string basePropertyName, ActionPropertyBag targetAction, Dictionary<string, long> childMap)
+        private static void AggregateMax(string basePropertyName, ActionPropertyBag targetAction, ConcurrentDictionary<string, long> childMap)
         {
             string fullPropertyname = basePropertyName + ActionPropertyNames.MaxConstStrSuffix;
 
@@ -72,7 +71,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private static void AggregateMin(string basePropertyName, ActionPropertyBag targetAction, Dictionary<string, long> childMap)
+        private static void AggregateMin(string basePropertyName, ActionPropertyBag targetAction, ConcurrentDictionary<string, long> childMap)
         {
             string fullPropertyname = basePropertyName + ActionPropertyNames.MinConstStrSuffix;
 
@@ -82,7 +81,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private static void AggregateSum(string basePropertyName, ActionPropertyBag targetAction, Dictionary<string, long> childMap)
+        private static void AggregateSum(string basePropertyName, ActionPropertyBag targetAction, ConcurrentDictionary<string, long> childMap)
         {
             string fullPropertyname = basePropertyName + ActionPropertyNames.SumConstStrSuffix;
 
@@ -92,7 +91,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private static bool ShouldAggregateProperty<T>(string propertyName, Dictionary<string, T> childMap, out T childValue)
+        private static bool ShouldAggregateProperty<T>(string propertyName, ConcurrentDictionary<string, T> childMap, out T childValue)
         {
             return childMap.TryGetValue(propertyName, out childValue);
         }
@@ -101,9 +100,9 @@ namespace Microsoft.Identity.Client.Mats.Internal
         {
             return new List<string>
             {
-                AdalTelemetryBlobEventNames.CacheEventCountConstStrKey, 
-                AdalTelemetryBlobEventNames.HttpEventCountTelemetryBatchKey, 
-                AdalTelemetryBlobEventNames.ResponseTimeConstStrKey 
+                MsalTelemetryBlobEventNames.CacheEventCountConstStrKey, 
+                MsalTelemetryBlobEventNames.HttpEventCountTelemetryBatchKey, 
+                MsalTelemetryBlobEventNames.ResponseTimeConstStrKey 
             };
         }
 

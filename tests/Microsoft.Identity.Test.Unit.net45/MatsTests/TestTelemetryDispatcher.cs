@@ -2,11 +2,10 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Mats.Internal;
 
 namespace Microsoft.Identity.Test.Unit.MatsTests
 {
-    internal class TestTelemetryDispatcher : ITelemetryDispatcher
+    internal class TestTelemetryDispatcher
     {
         public void DispatchEvent(IMatsTelemetryBatch batch)
         {

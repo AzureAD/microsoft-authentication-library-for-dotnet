@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client.Mats.Internal
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             return batch;
         }
 
-        private void SetBoolData(Dictionary<string, bool> data)
+        private void SetBoolData(ConcurrentDictionary<string, bool> data)
         {
             _boolData.Clear();
             foreach (var kvp in data)
@@ -32,7 +33,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private void SetInt64Data(Dictionary<string, long> data)
+        private void SetInt64Data(ConcurrentDictionary<string, long> data)
         {
             _int64Data.Clear();
             foreach (var kvp in data)
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private void SetIntData(Dictionary<string, int> data)
+        private void SetIntData(ConcurrentDictionary<string, int> data)
         {
             _intData.Clear();
             foreach (var kvp in data)
@@ -50,7 +51,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private void SetStringData(Dictionary<string, string> data)
+        private void SetStringData(ConcurrentDictionary<string, string> data)
         {
             _stringData.Clear();
             foreach (var kvp in data)

@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
 
 namespace Microsoft.Identity.Client.Mats.Internal
@@ -31,30 +31,30 @@ namespace Microsoft.Identity.Client.Mats.Internal
 
         private bool IsSuccessfulAction(PropertyBagContents contents)
         {
-            if (IsOfActionType(ActionType.Adal, contents.StringProperties))
+            if (IsOfActionType(ActionType.Msal, contents.StringProperties))
             {
-                return IsAdalActionSuccessful(contents);
+                return IsMsalActionSuccessful(contents);
             }
 
             return HasActionOutcome(AuthOutcome.Succeeded, contents.StringProperties);
         }
 
-        private bool IsAdalActionSuccessful(PropertyBagContents contents)
+        private bool IsMsalActionSuccessful(PropertyBagContents contents)
         {
-            if (contents.StringProperties.TryGetValue(AdalTelemetryBlobEventNames.IsSuccessfulConstStrKey, out string isSuccessful))
+            if (contents.StringProperties.TryGetValue(MsalTelemetryBlobEventNames.IsSuccessfulConstStrKey, out string isSuccessful))
             {
-                return isSuccessful.Equals(AdalTelemetryBlobEventValues.IsSuccessfulConstStrValue) && HasActionOutcome(AuthOutcome.Succeeded, contents.StringProperties);
+                return isSuccessful.Equals(MsalTelemetryBlobEventValues.IsSuccessfulConstStrValue) && HasActionOutcome(AuthOutcome.Succeeded, contents.StringProperties);
             }
 
-            // MatsPrivate::ReportError("Could not retrieve ADAL is_successful property.", ErrorType::OTHER, ErrorSeverity::LIBRARY_ERROR);
+            // MatsPrivate::ReportError("Could not retrieve MSAL is_successful property.", ErrorType::OTHER, ErrorSeverity::LIBRARY_ERROR);
             return false;
         }
 
         public bool IsSilentAction(PropertyBagContents contents)
         {
-            if (IsOfActionType(ActionType.Adal, contents.StringProperties))
+            if (IsOfActionType(ActionType.Msal, contents.StringProperties))
             {
-                return IsAdalActionSilent(contents);
+                return IsMsalActionSilent(contents);
             }
 
             if (contents.BoolProperties.TryGetValue(ActionPropertyNames.IsSilentConstStrKey, out bool isSilent))
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             return false;
         }
 
-        private bool IsOfActionType(ActionType actionType, Dictionary<string, string> properties)
+        private bool IsOfActionType(ActionType actionType, ConcurrentDictionary<string, string> properties)
         {
             if (properties.TryGetValue(ActionPropertyNames.ActionTypeConstStrKey, out string actionTypeStr))
             {
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             return false;
         }
 
-        private bool HasActionOutcome(AuthOutcome outcome, Dictionary<string, string> properties)
+        private bool HasActionOutcome(AuthOutcome outcome, ConcurrentDictionary<string, string> properties)
         {
             if (properties.TryGetValue(ActionPropertyNames.OutcomeConstStrKey, out string outcomeStr))
             {
@@ -84,12 +84,12 @@ namespace Microsoft.Identity.Client.Mats.Internal
             return false;
         }
 
-        private bool IsAdalActionSilent(PropertyBagContents contents)
+        private bool IsMsalActionSilent(PropertyBagContents contents)
         {
             string isSilentUi = string.Empty;
-            contents.StringProperties.TryGetValue(AdalTelemetryBlobEventNames.IsSilentTelemetryBatchKey, out isSilentUi);
+            contents.StringProperties.TryGetValue(MsalTelemetryBlobEventNames.IsSilentTelemetryBatchKey, out isSilentUi);
             string uiEventCount = string.Empty;
-            contents.StringProperties.TryGetValue(AdalTelemetryBlobEventNames.UiEventCountTelemetryBatchKey, out uiEventCount);
+            contents.StringProperties.TryGetValue(MsalTelemetryBlobEventNames.UiEventCountTelemetryBatchKey, out uiEventCount);
             bool isBlocking = false;
             contents.BoolProperties.TryGetValue(ActionPropertyNames.BlockingPromptConstStrKey, out isBlocking);
             bool askedForCredentials = false;

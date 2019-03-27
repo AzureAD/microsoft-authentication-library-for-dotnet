@@ -67,6 +67,9 @@ namespace Microsoft.Identity.Client.Mats.Internal
             case ActionType.Wam:
                 return "wam";
 
+            case ActionType.Msal:
+                return "msal";
+
             default:
                 return "unknown";
             }
