@@ -27,7 +27,6 @@
 
 using System;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Xamarin.Forms;
 
 namespace XForms

@@ -68,14 +68,17 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacCocoaApp", "tests\devapps\MacCocoaApp\MacCocoaApp.csproj", "{AF8E60B7-04C3-4EF8-AFA3-1202F9DC5638}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CacheCompat", "CacheCompat", "{58B95AA7-BE17-40F2-9C9A-FA27C282A10A}"
+	ProjectSection(SolutionItems) = preProject
+		tests\CacheCompat\CacheTest.props = tests\CacheCompat\CacheTest.props
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.AdalV3", "tests\CacheCompat\CommonCache.Test.AdalV3\CommonCache.Test.AdalV3.csproj", "{A8C2D397-BA21-4BD2-93AA-801B0E0804BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.AdalV3", "tests\CacheCompat\CommonCache.Test.AdalV3\CommonCache.Test.AdalV3.csproj", "{A8C2D397-BA21-4BD2-93AA-801B0E0804BC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.Common", "tests\CacheCompat\CommonCache.Test.Common\CommonCache.Test.Common.csproj", "{408DCC1C-E810-4F9F-94EE-8421715A3661}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.AdalV4", "tests\CacheCompat\CommonCache.Test.AdalV4\CommonCache.Test.AdalV4.csproj", "{70DFE67C-D2D1-4BE4-B785-F4445C6F652D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.AdalV4", "tests\CacheCompat\CommonCache.Test.AdalV4\CommonCache.Test.AdalV4.csproj", "{70DFE67C-D2D1-4BE4-B785-F4445C6F652D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.MsalV2", "tests\CacheCompat\CommonCache.Test.MsalV2\CommonCache.Test.MsalV2.csproj", "{8672FC71-00DE-491D-BCEB-101A2A7887E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.MsalV2", "tests\CacheCompat\CommonCache.Test.MsalV2\CommonCache.Test.MsalV2.csproj", "{8672FC71-00DE-491D-BCEB-101A2A7887E6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.Unit", "tests\CacheCompat\CommonCache.Test.Unit\CommonCache.Test.Unit.csproj", "{3C21354D-601A-4902-A728-419C70891338}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -92,13 +95,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Int
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetFxConsoleTestApp", "tests\devapps\NetFxConsoleTestApp\NetFxConsoleTestApp.csproj", "{24D2AF71-A01E-4450-8C3F-B9923A81134B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.AdalV5", "tests\CacheCompat\CommonCache.Test.AdalV5\CommonCache.Test.AdalV5.csproj", "{4DDB6B3A-F95A-4F34-B0AE-E3C909D68A11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.AdalV5", "tests\CacheCompat\CommonCache.Test.AdalV5\CommonCache.Test.AdalV5.csproj", "{4DDB6B3A-F95A-4F34-B0AE-E3C909D68A11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.MsalJava", "tests\CacheCompat\CommonCache.Test.MsalJava\CommonCache.Test.MsalJava.csproj", "{B6BE589B-1DBB-4C36-803F-6D425723FA74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.MsalJava", "tests\CacheCompat\CommonCache.Test.MsalJava\CommonCache.Test.MsalJava.csproj", "{B6BE589B-1DBB-4C36-803F-6D425723FA74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.MsalPython", "tests\CacheCompat\CommonCache.Test.MsalPython\CommonCache.Test.MsalPython.csproj", "{CA3F8F2E-7DF2-45A6-BC81-5DA5692FCC11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.MsalPython", "tests\CacheCompat\CommonCache.Test.MsalPython\CommonCache.Test.MsalPython.csproj", "{CA3F8F2E-7DF2-45A6-BC81-5DA5692FCC11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.MsalV3", "tests\CacheCompat\CommonCache.Test.MsalV3\CommonCache.Test.MsalV3.csproj", "{2EAA7878-3E2A-4355-9841-430BF45EA8BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.MsalV3", "tests\CacheCompat\CommonCache.Test.MsalV3\CommonCache.Test.MsalV3.csproj", "{2EAA7878-3E2A-4355-9841-430BF45EA8BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -257,11 +260,11 @@ Global
 		{8672FC71-00DE-491D-BCEB-101A2A7887E6} = {58B95AA7-BE17-40F2-9C9A-FA27C282A10A}
 		{3C21354D-601A-4902-A728-419C70891338} = {58B95AA7-BE17-40F2-9C9A-FA27C282A10A}
 		{C98AAC90-C9D4-4DAD-975F-A898A7F89B2D} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
+		{24D2AF71-A01E-4450-8C3F-B9923A81134B} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{4DDB6B3A-F95A-4F34-B0AE-E3C909D68A11} = {58B95AA7-BE17-40F2-9C9A-FA27C282A10A}
 		{B6BE589B-1DBB-4C36-803F-6D425723FA74} = {58B95AA7-BE17-40F2-9C9A-FA27C282A10A}
 		{CA3F8F2E-7DF2-45A6-BC81-5DA5692FCC11} = {58B95AA7-BE17-40F2-9C9A-FA27C282A10A}
 		{2EAA7878-3E2A-4355-9841-430BF45EA8BD} = {58B95AA7-BE17-40F2-9C9A-FA27C282A10A}
-		{24D2AF71-A01E-4450-8C3F-B9923A81134B} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}

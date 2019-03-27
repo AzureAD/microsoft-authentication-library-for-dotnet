@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;

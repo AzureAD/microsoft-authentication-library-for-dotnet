@@ -4,8 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Mats;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

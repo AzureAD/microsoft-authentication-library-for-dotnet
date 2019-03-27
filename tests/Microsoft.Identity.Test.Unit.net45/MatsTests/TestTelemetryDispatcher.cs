@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Mats.Internal;
 
 namespace Microsoft.Identity.Test.Unit.MatsTests

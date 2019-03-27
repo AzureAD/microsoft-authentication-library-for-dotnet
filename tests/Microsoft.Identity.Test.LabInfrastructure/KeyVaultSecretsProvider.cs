@@ -28,11 +28,11 @@
 using System;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private KeyVaultClient _keyVaultClient;
 
-        private readonly KeyVaultConfiguration _config;
+        private KeyVaultConfiguration _config;
 
         private const string KeyVaultConfidentialClientId = "ebe49c8f-61de-4357-9194-7a786f6402b4";
         private const string KeyVaultPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
@@ -137,48 +137,66 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             X509Certificate2 cert = null;
             switch (_config.AuthType)
             {
-                case KeyVaultAuthenticationType.ClientCertificate:
-                    cert = CertificateHelper.FindCertificateByThumbprint(_config.CertThumbprint);
-                    if (cert == null)
-                    {
-                        throw new InvalidOperationException(
-                            "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
-                    }
+            case KeyVaultAuthenticationType.ClientCertificate:
+                cert = CertificateHelper.FindCertificateByThumbprint(_config.CertThumbprint);
+                if (cert == null)
+                {
+                    throw new InvalidOperationException(
+                        "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
+                }
 
-                    confidentialApp = ConfidentialClientApplicationBuilder.Create(KeyVaultConfidentialClientId)
-                                              .WithAuthority(new Uri(authority), true)
-                                              .WithCertificate(cert)
-                                              .Build();
+                confidentialApp = ConfidentialClientApplicationBuilder
+                    .Create(KeyVaultConfidentialClientId)
+                    .WithAuthority(new Uri(authority), true)
+                    .WithCertificate(cert)
+                    .Build();
 
-                    authResult = await confidentialApp.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
-                    break;
-                case KeyVaultAuthenticationType.ClientSecret:
-                    confidentialApp = ConfidentialClientApplicationBuilder.Create(KeyVaultConfidentialClientId)
-                                              .WithAuthority(new Uri(authority), true)
-                                              .WithClientSecret(_config.KeyVaultSecret)
-                                              .Build();
-                    authResult = await confidentialApp.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
-                    break;
-                case KeyVaultAuthenticationType.UserCredential:
-                    publicApp = PublicClientApplicationBuilder.Create(KeyVaultPublicClientId)
-                                                .WithAuthority(new Uri(authority), true)
-                                                .Build();
-                    try
-                    {
-                        authResult = await publicApp.AcquireTokenByIntegratedWindowsAuthAsync(scopes).ConfigureAwait(false);
-                    }
-                    catch (MsalUiRequiredException ex)
-                    {
-                        publicApp = PublicClientApplicationBuilder.Create(KeyVaultPublicClientId)
-                                                .WithAuthority(new Uri(authority), true)
-                                                .Build();
+                authResult = await confidentialApp
+                    .AcquireTokenForClient(scopes)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+                break;
+            case KeyVaultAuthenticationType.ClientSecret:
+                confidentialApp = ConfidentialClientApplicationBuilder
+                    .Create(KeyVaultConfidentialClientId)
+                    .WithAuthority(new Uri(authority), true)
+                    .WithClientSecret(_config.KeyVaultSecret)
+                    .Build();
 
-                    authResult = await publicApp.AcquireTokenInteractive(scopes, null)
-                                            .WithClaims(ex.Claims).ExecuteAsync().ConfigureAwait(false);
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                authResult = await confidentialApp
+                    .AcquireTokenForClient(scopes)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+                break;
+            case KeyVaultAuthenticationType.UserCredential:
+                publicApp = PublicClientApplicationBuilder
+                    .Create(KeyVaultPublicClientId)
+                    .WithAuthority(new Uri(authority), true)
+                    .Build();
+
+                try
+                {
+                    authResult = await publicApp
+                        .AcquireTokenByIntegratedWindowsAuth(scopes)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
+                }
+                catch (MsalUiRequiredException ex)
+                {
+                    publicApp = PublicClientApplicationBuilder
+                        .Create(KeyVaultPublicClientId)
+                        .WithAuthority(new Uri(authority), true)
+                        .Build();
+
+                    authResult = await publicApp
+                        .AcquireTokenInteractive(scopes, null)
+                        .WithClaims(ex.Claims)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
             }
 
             _authResult = authResult;

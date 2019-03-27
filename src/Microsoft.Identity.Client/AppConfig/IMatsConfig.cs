@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>

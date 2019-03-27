@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {

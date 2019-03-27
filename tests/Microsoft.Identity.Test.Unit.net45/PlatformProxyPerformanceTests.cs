@@ -60,7 +60,9 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private const long AllowedMilliseconds = 5;
+        private const long AllowedMilliseconds = 10;
+        private const long DomainJoinedAllowedMilliseconds = 30;
+
 
         [TestMethod]
         public void ValidateGetDeviceModelPerformance()
@@ -89,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void ValidateIsDomainJoinedPerformance()
         {
-            ValidateMethodPerformance(AllowedMilliseconds, "IsDomainJoined", proxy => proxy.IsDomainJoined());
+            ValidateMethodPerformance(DomainJoinedAllowedMilliseconds, "IsDomainJoined", proxy => proxy.IsDomainJoined());
         }
 
         [TestMethod]

@@ -26,7 +26,6 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;

@@ -34,8 +34,6 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Cache;
@@ -48,6 +46,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using System.Threading;
 
 #if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -70,6 +69,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
         [Description("Tests the public interfaces can be mocked")]
+        [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
         public void MockConfidentialClientApplication_AcquireToken()
         {
             // Setup up a confidential client application that returns a dummy result
@@ -89,10 +89,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 });
 
             var mockApp = Substitute.For<IConfidentialClientApplication>();
-            mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Returns(mockResult);
+            mockApp.AcquireTokenByAuthorizationCode(null, "123").ExecuteAsync(CancellationToken.None).Returns(mockResult);
 
             // Now call the substitute with the args to get the substitute result
-            var actualResult = mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Result;
+            var actualResult = mockApp.AcquireTokenByAuthorizationCode(null, "123").ExecuteAsync(CancellationToken.None).Result;
             Assert.IsNotNull(actualResult);
             Assert.AreEqual("id token", mockResult.IdToken, "Mock result failed to return the expected id token");
             // Check the scope property
@@ -135,20 +135,20 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
         [Description("Tests the public application interfaces can be mocked to throw MSAL exceptions")]
+        [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
         public void MockConfidentialClientApplication_Exception()
         {
             // Setup up a confidential client application that returns throws
             var mockApp = Substitute.For<IConfidentialClientApplication>();
-            mockApp.WhenForAnyArgs(x => x.AcquireTokenForClientAsync(Arg.Any<string[]>())).Do(
-                x => throw new MsalServiceException("my error code", "my message", new HttpRequestException()));
+            mockApp
+                .WhenForAnyArgs(x => x.AcquireTokenForClient(Arg.Any<string[]>()).ExecuteAsync(CancellationToken.None))
+                .Do(x => throw new MsalServiceException("my error code", "my message", new HttpRequestException()));
 
             // Now call the substitute and check the exception is thrown
             var ex = AssertException.Throws<MsalServiceException>(
-                () => mockApp.AcquireTokenForClientAsync(
-                    new string[]
-                    {
-                        "scope1"
-                    }));
+                () => mockApp
+                    .AcquireTokenForClient(new string[] { "scope1" })
+                    .ExecuteAsync(CancellationToken.None));
             Assert.AreEqual("my error code", ex.ErrorCode);
             Assert.AreEqual("my message", ex.Message);
         }
@@ -157,17 +157,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("ConfidentialClientApplicationTests")]
         public void ConstructorsTest()
         {
-            var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                          .WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
-                                                          .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                                          .WithClientSecret(MsalTestConstants.ClientSecret)
-                                                          .BuildConcrete();
+            var app = ConfidentialClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
+                .WithRedirectUri(MsalTestConstants.RedirectUri)
+                .WithClientSecret(MsalTestConstants.ClientSecret)
+                .BuildConcrete();
 
             Assert.IsNotNull(app);
             Assert.IsNotNull(app.UserTokenCache);
             Assert.IsNotNull(app.AppTokenCache);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
-            Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
+            Assert.AreEqual(MsalTestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual(MsalTestConstants.RedirectUri, app.AppConfig.RedirectUri);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
             Assert.IsNotNull(app.ClientCredential);
@@ -176,10 +177,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNull(app.ClientCredential.Certificate);
             Assert.IsNull(app.ClientCredential.Assertion);
 
-            app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                      .WithAuthority(new Uri(MsalTestConstants.AuthorityGuestTenant), true)
-                                                      .WithRedirectUri(MsalTestConstants.RedirectUri).WithClientSecret("secret")
-                                                      .BuildConcrete();
+            app = ConfidentialClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithAuthority(new Uri(MsalTestConstants.AuthorityGuestTenant), true)
+                .WithRedirectUri(MsalTestConstants.RedirectUri).WithClientSecret("secret")
+                .BuildConcrete();
 
             Assert.AreEqual(MsalTestConstants.AuthorityGuestTenant, app.Authority);
         }
@@ -188,13 +190,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("ConfidentialClientApplicationTests")]
         public void TestConstructorWithNullRedirectUri()
         {
-            var app = new ConfidentialClientApplication(
-                MsalTestConstants.ClientId,
-                ClientApplicationBase.DefaultAuthority,
-                null,
-                new ClientCredential("the_secret"),
-                new TokenCache(),
-                new TokenCache());
+            var app = ConfidentialClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithAuthority(ClientApplicationBase.DefaultAuthority)
+                .WithRedirectUri(null)
+                .WithClientSecret("the_secret")
+                .BuildConcrete();
 
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, app.AppConfig.RedirectUri);
         }
@@ -217,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-                var result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()).ConfigureAwait(false);
+                var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
@@ -245,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-                var result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()).ConfigureAwait(false);
+                var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
@@ -259,7 +260,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
                 // call AcquireTokenForClientAsync again to get result back from the cache
-                result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()).ConfigureAwait(false);
+                result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
@@ -276,14 +277,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private ConfidentialClientApplication CreateConfidentialClient(
             MockHttpManager httpManager,
-            ClientCredential cc,
+            X509Certificate2 cert,
             int tokenResponses,
             TelemetryCallback telemetryCallback = null)
         {
             var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                           .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                           .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                                          .WithClientCredential(cc)
+                                                          .WithCertificate(cert)
                                                           .WithHttpManager(httpManager)
                                                           .WithTelemetry(telemetryCallback)
                                                           .BuildConcrete();
@@ -306,12 +307,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var cc = new ClientCredential(
-                    new ClientAssertionCertificate(
-                        new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"))));
-                var app = CreateConfidentialClient(httpManager, cc, 3);
+                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
+                var app = CreateConfidentialClient(httpManager, cert, 3);
 
-                var result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()).ConfigureAwait(false);
+                var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
@@ -325,24 +324,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
 
                 // assert client credential
-                Assert.IsNotNull(cc.Assertion);
-                Assert.AreNotEqual(0, cc.ValidTo);
+                
+                Assert.IsNotNull(app.ClientCredential.Assertion);
+                Assert.AreNotEqual(0, app.ClientCredential.ValidTo);
 
                 // save client assertion.
-                string cachedAssertion = cc.Assertion;
-                long cacheValidTo = cc.ValidTo;
+                string cachedAssertion = app.ClientCredential.Assertion;
+                long cacheValidTo = app.ClientCredential.ValidTo;
 
-                result = await app.AcquireTokenForClientAsync(MsalTestConstants.ScopeForAnotherResource.ToArray())
-                                  .ConfigureAwait(false);
+                result = await app
+                    .AcquireTokenForClient(MsalTestConstants.ScopeForAnotherResource.ToArray())
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
                 Assert.IsNotNull(result);
-                Assert.AreEqual(cacheValidTo, cc.ValidTo);
-                Assert.AreEqual(cachedAssertion, cc.Assertion);
+                Assert.AreEqual(cacheValidTo, app.ClientCredential.ValidTo);
+                Assert.AreEqual(cachedAssertion, app.ClientCredential.Assertion);
 
                 // validate the send x5c forces a refresh of the cached client assertion
-                await ((IConfidentialClientApplicationWithCertificate)app)
-                      .AcquireTokenForClientWithCertificateAsync(MsalTestConstants.Scope.ToArray(), true)
+                await app
+                      .AcquireTokenForClient(MsalTestConstants.Scope.ToArray())
+                      .WithSendX5C(true)
+                      .WithForceRefresh(true)
+                      .ExecuteAsync(CancellationToken.None)
                       .ConfigureAwait(false);
-                Assert.AreNotEqual(cachedAssertion, cc.Assertion);
+                Assert.AreNotEqual(cachedAssertion, app.ClientCredential.Assertion);
             }
         }
 
@@ -356,12 +362,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var cc = new ClientCredential(
-                    new ClientAssertionCertificate(
-                        new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"))));
-
-                var app = CreateConfidentialClient(httpManager, cc, 1, receiver.HandleTelemetryEvents);
-                var result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()).ConfigureAwait(false);
+                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
+                var app = CreateConfidentialClient(httpManager, cert, 1, receiver.HandleTelemetryEvents);
+                var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
@@ -397,10 +400,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
 
-                var uri = await app.GetAuthorizationRequestUrlAsync(
-                              MsalTestConstants.Scope,
-                              MsalTestConstants.DisplayableId,
-                              null).ConfigureAwait(false);
+                var uri = await app
+                    .GetAuthorizationRequestUrl(MsalTestConstants.Scope)
+                    .WithLoginHint(MsalTestConstants.DisplayableId)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
                 Assert.IsNotNull(uri);
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
                 ValidateCommonQueryParams(qp);
@@ -433,10 +438,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                 ResourceHelper.GetTestResourceRelativePath(@"OpenidConfiguration-QueryParams-B2C.json")))
                     });
 
-                var uri = await app.GetAuthorizationRequestUrlAsync(
-                              MsalTestConstants.Scope,
-                              MsalTestConstants.DisplayableId,
-                              null).ConfigureAwait(false);
+                var uri = await app
+                    .GetAuthorizationRequestUrl(MsalTestConstants.Scope)
+                    .WithLoginHint(MsalTestConstants.DisplayableId)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
                 Assert.IsNotNull(uri);
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
                 Assert.IsNotNull(qp);
@@ -466,10 +473,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 try
                 {
-                    var uri = await app.GetAuthorizationRequestUrlAsync(
-                                  MsalTestConstants.Scope,
-                                  MsalTestConstants.DisplayableId,
-                                  "login_hint=some@value.com").ConfigureAwait(false);
+                    var uri = await app
+                        .GetAuthorizationRequestUrl(MsalTestConstants.Scope)
+                        .WithLoginHint(MsalTestConstants.DisplayableId)
+                        .WithExtraQueryParameters("login_hint=some@value.com")
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
+
                     Assert.Fail("MSALException should be thrown here");
                 }
                 catch (MsalException exc)
@@ -502,13 +512,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityGuestTenant);
 
                 const string CustomRedirectUri = "custom://redirect-uri";
-                Task<Uri> task = app.GetAuthorizationRequestUrlAsync(
-                    MsalTestConstants.Scope,
-                    CustomRedirectUri,
-                    MsalTestConstants.DisplayableId,
-                    "extra=qp",
-                    MsalTestConstants.ScopeForAnotherResource,
-                    MsalTestConstants.AuthorityGuestTenant);
+                Task<Uri> task = app
+                    .GetAuthorizationRequestUrl(MsalTestConstants.Scope)
+                    .WithRedirectUri(CustomRedirectUri)
+                    .WithLoginHint(MsalTestConstants.DisplayableId)
+                    .WithExtraQueryParameters("extra=qp")
+                    .WithExtraScopesToConsent(MsalTestConstants.ScopeForAnotherResource)
+                    .WithAuthority(MsalTestConstants.AuthorityGuestTenant)
+                    .ExecuteAsync(CancellationToken.None);
+
                 var uri = task.Result;
                 Assert.IsNotNull(uri);
                 Assert.IsTrue(
@@ -561,7 +573,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddFailingRequest(new InvalidOperationException());
 
                 AssertException.TaskThrows<InvalidOperationException>(
-                    () => app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()));
+                    () => app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None));
             }
         }
 
@@ -573,12 +585,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
                 
-                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
-                                                              .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                                              .WithClientSecret(MsalTestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
-                                                              .BuildConcrete();
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithClientSecret(MsalTestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
                 
                 _tokenCacheHelper.PopulateCacheForClientCredential(app.AppTokenCacheInternal.Accessor);
 
@@ -591,7 +604,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // If there's a network call by mistake, then there won't be a proper number
                 // of mock web request/response objects in the queue and we'll fail.
 
-                var result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope, false).ConfigureAwait(false);
+                var result = await app
+                    .AcquireTokenForClient(MsalTestConstants.Scope)
+                    .WithForceRefresh(false)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
                 Assert.AreEqual(accessTokenInCache.Secret, result.AccessToken);
             }
@@ -607,13 +624,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
-                                                              .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                                              .WithClientSecret(MsalTestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
-                                                              .WithTelemetry(receiver.HandleTelemetryEvents)
-                                                              .BuildConcrete();
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithClientSecret(MsalTestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithTelemetry(receiver.HandleTelemetryEvents)
+                    .BuildConcrete();
 
                 _tokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
 
@@ -629,7 +647,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(TokenRetrievedFromNetCall)
                     });
 
-                var result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope, true).ConfigureAwait(false);
+                var result = await app
+                    .AcquireTokenForClient(MsalTestConstants.Scope)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
                 Assert.AreEqual(TokenRetrievedFromNetCall, result.AccessToken);
 
                 // make sure token in Cache was updated
@@ -655,12 +678,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .WithAuthority(new Uri("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy"), true)
-                                                              .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                                              .WithClientSecret("secret")
-                                                              .WithHttpManager(httpManager)
-                                                              .BuildConcrete();
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new Uri("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy"), true)
+                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithClientSecret("secret")
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
 
                 app.UserTokenCache.SetBeforeAccess(BeforeCacheAccess);
                 app.UserTokenCache.SetAfterAccess(AfterCacheAccess);
@@ -668,8 +692,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy/", "p=policy");
                 httpManager.AddSuccessTokenResponseMockHandlerForPost("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy/");
 
-                var result = await app.AcquireTokenByAuthorizationCodeAsync("some-code", MsalTestConstants.Scope)
-                                      .ConfigureAwait(false);
+                var result = await app
+                    .AcquireTokenByAuthorizationCode(MsalTestConstants.Scope, "some-code")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
                 Assert.IsNotNull(result);
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
@@ -699,14 +726,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
                 
-                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                          .WithAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), true)
-                                                          .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                                          .WithClientSecret(MsalTestConstants.ClientSecret)
-                                                          .WithHttpManager(httpManager)
-                                                          .BuildConcrete();
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), true)
+                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithClientSecret(MsalTestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
 
-                var result = await (app as IByRefreshToken).AcquireTokenByRefreshTokenAsync(null, "SomeRefreshToken").ConfigureAwait(false);
+                var result = await (app as IByRefreshToken)
+                    .AcquireTokenByRefreshToken(null, "SomeRefreshToken")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
@@ -715,7 +746,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 app.UserTokenCacheInternal.Clear();
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
-                result = await ((IByRefreshToken)app).AcquireTokenByRefreshTokenAsync(MsalTestConstants.Scope, "SomeRefreshToken").ConfigureAwait(false);
+                result = await ((IByRefreshToken)app)
+                    .AcquireTokenByRefreshToken(MsalTestConstants.Scope, "SomeRefreshToken")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
                 Assert.IsNotNull(result.AccessToken);

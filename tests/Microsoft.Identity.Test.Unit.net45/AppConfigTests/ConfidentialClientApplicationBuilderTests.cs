@@ -28,7 +28,6 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -42,12 +41,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor()
         {
             var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
-            Assert.AreEqual(MsalTestConstants.ClientId, cca.ClientId);
+            Assert.AreEqual(MsalTestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNotNull(cca.UserTokenCache);
 
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, cca.AppConfig.LogLevel);
-            Assert.IsNull(cca.AppConfig.ClientCredential);
             Assert.AreEqual(MsalTestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNull(cca.AppConfig.Component);
             Assert.AreEqual(false, cca.AppConfig.EnablePiiLogging);
@@ -64,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string ClientId = "9340c42a-f5de-4a80-aea0-874adc2ca325";
             var cca = ConfidentialClientApplicationBuilder.Create(ClientId).Build();
-            Assert.AreEqual(ClientId, cca.ClientId);
+            Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
         }
 
         [TestMethod]
@@ -72,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string ClientId = "73cc145e-798f-430c-8d6d-618f1a5802e9";
             var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithClientId(ClientId).Build();
-            Assert.AreEqual(ClientId, cca.ClientId);
+            Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
         }
 
         [TestMethod]
@@ -180,8 +178,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var cca = ConfidentialClientApplicationBuilder
                       .Create(MsalTestConstants.ClientId).WithClientSecret(ClientSecret).Build();
 
-            Assert.IsNotNull(cca.AppConfig.ClientCredential);
-            Assert.AreEqual(ClientSecret, cca.AppConfig.ClientCredential.Secret);
+            Assert.IsNotNull(cca.AppConfig.ClientSecret);
+            Assert.AreEqual(ClientSecret, cca.AppConfig.ClientSecret);
         }
 
         [TestMethod]
@@ -194,8 +192,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var cca = ConfidentialClientApplicationBuilder
                       .Create(MsalTestConstants.ClientId).WithCertificate(cert).Build();
 
-            Assert.IsNotNull(cca.AppConfig.ClientCredential);
-            Assert.IsNotNull(cca.AppConfig.ClientCredential.Certificate);
+            Assert.IsNotNull(cca.AppConfig.ClientCredentialCertificate);
         }
     }
 }

@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.OAuth2
             return new MsalTokenResponse
             {
                 Authority = responseDictionary.ContainsKey(BrokerResponseConst.Authority)
-                    ? AppConfig.AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.Authority]))
+                    ? AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.Authority]))
                     : null,
                 AccessToken = responseDictionary[BrokerResponseConst.AccessToken],
                 RefreshToken = responseDictionary.ContainsKey(BrokerResponseConst.RefreshToken)

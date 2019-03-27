@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters

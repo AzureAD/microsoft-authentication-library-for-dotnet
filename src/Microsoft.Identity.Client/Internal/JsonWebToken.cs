@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.Internal
             };
         }
 
-        public string Sign(ClientAssertionCertificate credential, bool sendCertificate)
+        public string Sign(ClientAssertionCertificateWrapper credential, bool sendCertificate)
         {
             // Base64Url encoded header and claims
             string token = Encode(credential, sendCertificate);
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client.Internal
             return Base64UrlHelpers.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(ClientAssertionCertificate credential, bool sendCertificate)
+        private static string EncodeHeaderToJson(ClientAssertionCertificateWrapper credential, bool sendCertificate)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential, sendCertificate);
             return JsonHelper.SerializeToJson(header);
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Internal
             return (long)diff.TotalSeconds;
         }
 
-        private string Encode(ClientAssertionCertificate credential, bool sendCertificate)
+        private string Encode(ClientAssertionCertificateWrapper credential, bool sendCertificate)
         {
             // Header segment
             string jsonHeader = EncodeHeaderToJson(credential, sendCertificate);
@@ -145,12 +145,12 @@ namespace Microsoft.Identity.Client.Internal
         [DataContract]
         internal class JWTHeader
         {
-            public JWTHeader(ClientAssertionCertificate credential)
+            public JWTHeader(ClientAssertionCertificateWrapper credential)
             {
                 Credential = credential;
             }
 
-            protected ClientAssertionCertificate Credential { get; }
+            protected ClientAssertionCertificateWrapper Credential { get; }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Client.Internal
         [DataContract]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(ClientAssertionCertificate credential, bool sendCertificate)
+            public JWTHeaderWithCertificate(ClientAssertionCertificateWrapper credential, bool sendCertificate)
                 : base(credential)
             {
                 X509CertificateThumbprint = Credential.Thumbprint;

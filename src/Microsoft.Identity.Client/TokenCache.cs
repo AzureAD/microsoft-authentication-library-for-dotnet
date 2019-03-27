@@ -91,13 +91,14 @@ namespace Microsoft.Identity.Client
 
         internal TokenCache(IServiceBundle serviceBundle) 
         {
-            SetServiceBundle(serviceBundle);
-
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             _accessor = proxy.CreateTokenCacheAccessor();
             _featureFlags = proxy.GetFeatureFlags();
             _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
+
+            // Must happen last, this code can access things like _accessor and such above.
+            SetServiceBundle(serviceBundle);
         }
 
         internal void SetServiceBundle(IServiceBundle serviceBundle)
@@ -298,7 +299,7 @@ namespace Microsoft.Identity.Client
 
                     // save RT in ADAL cache for public clients
                     // do not save RT in ADAL cache for MSAL B2C scenarios
-                    if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
+                    if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AuthorityType.B2C))
                     {
                         CacheFallbackOperations.WriteAdalRefreshToken(
                             _logger,
@@ -388,7 +389,7 @@ namespace Microsoft.Identity.Client
                 environmentAliases.UnionWith
                     (GetEnvironmentAliases(requestParams.AuthorityInfo.CanonicalAuthority, instanceDiscoveryMetadataEntry));
 
-                if (requestParams.AuthorityInfo.AuthorityType != AppConfig.AuthorityType.B2C)
+                if (requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
                 {
                     preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
                 }
@@ -736,7 +737,7 @@ namespace Microsoft.Identity.Client
         {
             Uri authorityHost = new Uri(authority);
             var authorityType = Authority.GetAuthorityType(authority);
-            if (authorityType == AppConfig.AuthorityType.Aad ||
+            if (authorityType == AuthorityType.Aad ||
                 authorityHost.Host.Equals(MicrosoftLogin, StringComparison.OrdinalIgnoreCase))
             {
                 var instanceDiscoveryMetadata = await ServiceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
@@ -757,7 +758,7 @@ namespace Microsoft.Identity.Client
 
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata = null;
             var authorityType = Authority.GetAuthorityType(authority);
-            if (authorityType == AppConfig.AuthorityType.Aad || authorityType == AppConfig.AuthorityType.B2C)
+            if (authorityType == AuthorityType.Aad || authorityType == AuthorityType.B2C)
             {
                 ServiceBundle.AadInstanceDiscovery.TryGetValue(new Uri(authority).Host, out instanceDiscoveryMetadata);
             }

@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         protected RequestContext CreateRequestContextAndLogVersionInfo(Guid telemetryCorrelationId)
         {
             var requestContext = new RequestContext(
-                _clientApplicationBase.ClientId,
+                _clientApplicationBase.AppConfig.ClientId,
                 MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config));
 
             requestContext.Logger.Info(

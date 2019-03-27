@@ -3,7 +3,6 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {

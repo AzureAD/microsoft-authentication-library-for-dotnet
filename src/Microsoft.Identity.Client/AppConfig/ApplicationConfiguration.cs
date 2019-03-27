@@ -31,8 +31,9 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IApplicationConfiguration
     {
@@ -63,9 +64,9 @@ namespace Microsoft.Identity.Client.AppConfig
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
-        public ClientCredential ClientCredential { get; internal set; }
+        public ClientCredentialWrapper ClientCredential { get; internal set; }
         public string ClientSecret { get; internal set; }
-        public X509Certificate2 Certificate { get; internal set; }
+        public X509Certificate2 ClientCredentialCertificate { get; internal set; }
 #endif 
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions

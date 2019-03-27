@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using System.Threading;
 
 namespace XForms
 {
@@ -176,8 +177,13 @@ namespace XForms
 
                 var authority = PassAuthoritySwitch.IsToggled ? App.Authority : null;
 
-                var res = await App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount())
-                    .WithAuthority(authority)
+                var builder = App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount());
+                if (PassAuthoritySwitch.IsToggled)
+                {
+                    builder = builder.WithAuthority(App.Authority);
+                }
+
+                var res = await builder
                     .WithForceRefresh(ForceRefreshSwitch.IsToggled)
                     .ExecuteAsync()
                     .ConfigureAwait(true);
@@ -235,18 +241,20 @@ namespace XForms
             try
             {
                 acquireResponseTitleLabel.Text = EmptyResult;
-                AuthenticationResult res =
-                        await App.MsalPublicClient.AcquireTokenWithDeviceCodeAsync(
-                            GetScopes(),
-                            GetExtraQueryParams(),
-                            dcr =>
+                AuthenticationResult res = await App.MsalPublicClient
+                    .AcquireTokenWithDeviceCode(
+                        GetScopes(),
+                        dcr =>
+                        {
+                            Device.BeginInvokeOnMainThread(() =>
                             {
-                                Device.BeginInvokeOnMainThread(() =>
-                                {
-                                    acquireResponseLabel.Text = dcr.Message;
-                                });
-                                return Task.FromResult(0);
-                            }).ConfigureAwait(true);
+                                acquireResponseLabel.Text = dcr.Message;
+                            });
+                            return Task.FromResult(0);
+                        })
+                        .WithExtraQueryParameters(GetExtraQueryParams())
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(true);
 
                 var resText = GetResultDescription(res);
 

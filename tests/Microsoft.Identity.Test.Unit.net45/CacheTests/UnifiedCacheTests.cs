@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Cache;
@@ -40,6 +39,7 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using System.Threading;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
-                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope, null).ExecuteAsync(CancellationToken.None).Result;
                 Assert.IsNotNull(result);
 
                 // make sure Msal stored RT in Adal cache
@@ -106,11 +106,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     });
 
                 // Using RT from Adal cache for silent call
-                AuthenticationResult result1 = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope,
-                    result.Account,
-                    MsalTestConstants.AuthorityCommonTenant,
-                    false).Result;
+                AuthenticationResult result1 = app
+                    .AcquireTokenSilent(MsalTestConstants.Scope, result.Account)
+                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
+                    .WithForceRefresh(false)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
 
                 Assert.IsNotNull(result1);
             }
@@ -149,7 +150,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
-                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
                 Assert.IsNotNull(result);
 
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccounts().Count());
@@ -179,7 +184,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
-                result = app1.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                result = app1
+                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
                 Assert.IsNotNull(result);
 
                 // make sure that only one account cache entity was created

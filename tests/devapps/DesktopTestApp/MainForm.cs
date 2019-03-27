@@ -173,8 +173,7 @@ namespace DesktopTestApp
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
                         SplitScopeString(scopes.Text),
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        new UIParent()).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();
@@ -195,10 +194,11 @@ namespace DesktopTestApp
 
                 try
                 {
-                    AuthenticationResult authenticationResult =
-                        await _publicClientHandler.PublicClientApplication.AcquireTokenByIntegratedWindowsAuthAsync(
-                            SplitScopeString(scopes.Text),
-                            username).ConfigureAwait(true);
+                    AuthenticationResult authenticationResult = await _publicClientHandler.PublicClientApplication
+                        .AcquireTokenByIntegratedWindowsAuth(SplitScopeString(scopes.Text))
+                        .WithUsername(username)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();
@@ -229,12 +229,18 @@ namespace DesktopTestApp
         {
             try
             {
-                _publicClientHandler.PublicClientApplication = new PublicClientApplication(PublicClientId, "https://login.microsoftonline.com/organizations");
+                _publicClientHandler.PublicClientApplication = PublicClientApplicationBuilder
+                    .Create(PublicClientId)
+                    .WithAuthority("https://login.microsoftonline.com/organizations")
+                    .BuildConcrete();
 
-                AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication.AcquireTokenByUsernamePasswordAsync(
-                    SplitScopeString(scopes.Text),
-                    username,
-                    password).ConfigureAwait(true);
+                AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication
+                    .AcquireTokenByUsernamePassword(
+                        SplitScopeString(scopes.Text),
+                        username,
+                        password)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(true);
 
                 SetResultPageInfo(authResult);
                 RefreshUserList();
@@ -306,7 +312,12 @@ namespace DesktopTestApp
 
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthorityAsync(SplitScopeString(scopes.Text), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent()).ConfigureAwait(true);
+                AuthenticationResult authenticationResult = await _publicClientHandler
+                    .AcquireTokenInteractiveWithAuthorityAsync(
+                        SplitScopeString(scopes.Text),
+                        GetUIBehavior(),
+                        _publicClientHandler.ExtraQueryParams,
+                        null).ConfigureAwait(true);
 
                 SetResultPageInfo(authenticationResult);
             }
@@ -482,15 +493,16 @@ namespace DesktopTestApp
             {
                 _cancellationTokenSource = new CancellationTokenSource();
 
-                AuthenticationResult authenticationResult =
-                    await _publicClientHandler.PublicClientApplication.AcquireTokenWithDeviceCodeAsync(
+                AuthenticationResult authenticationResult = await _publicClientHandler.PublicClientApplication
+                    .AcquireTokenWithDeviceCode(
                         SplitScopeString(scopes.Text),
                         dcr =>
                         {
                             BeginInvoke(new MethodInvoker(() => callResult.Text = dcr.Message));
                             return Task.FromResult(0);
-                        },
-                        _cancellationTokenSource.Token).ConfigureAwait(true);
+                        })
+                    .ExecuteAsync(_cancellationTokenSource.Token)
+                    .ConfigureAwait(true);
 
                 SetResultPageInfo(authenticationResult);
             }
@@ -532,8 +544,7 @@ namespace DesktopTestApp
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
                         _b2CScopes,
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        new UIParent()).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();
@@ -561,8 +572,7 @@ namespace DesktopTestApp
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
                         _b2CScopes,
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        new UIParent()).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();

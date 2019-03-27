@@ -8,6 +8,8 @@
 
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
+    <ApplicationIcon />
+    <StartupObject />
   </PropertyGroup>
 
   <!-- Set this env variable locally to enable Telemetry on developer applications-->

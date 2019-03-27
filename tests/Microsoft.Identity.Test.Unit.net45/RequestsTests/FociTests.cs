@@ -29,9 +29,9 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // remove B's RT
                 var art = _appB.UserTokenCacheInternal.Accessor.GetAllRefreshTokens()
-                    .Single(rt => _appB.ClientId == rt.ClientId && string.IsNullOrEmpty(rt.FamilyId));
+                    .Single(rt => _appB.AppConfig.ClientId == rt.ClientId && string.IsNullOrEmpty(rt.FamilyId));
                 _appB.UserTokenCacheInternal.Accessor.DeleteRefreshToken(art.GetKey());
 
                 // B can still use the FRT 
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             Assert.IsNotNull(
                 app.UserTokenCacheInternal.Accessor.GetAllAppMetadata()
-                   .Single(m => m.ClientId == app.ClientId &&
+                   .Single(m => m.ClientId == app.AppConfig.ClientId &&
                                 partOfFamily == !string.IsNullOrEmpty(m.FamilyId)));
         }
 
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 foci: serverTokenResponse == ServerTokenResponse.FociToken);
 
             // Acquire token interactively for A
-            AuthenticationResult result = await app.AcquireTokenAsync(MsalTestConstants.Scope).ConfigureAwait(false);
+            AuthenticationResult result = await app.AcquireTokenInteractive(MsalTestConstants.Scope, null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(result.Account);
             AssertAppMetadata(app, serverTokenResponse == ServerTokenResponse.FociToken);
 
@@ -310,7 +310,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private void AssertAppHasRT(PublicClientApplication app)
         {
             Assert.IsTrue(app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens()
-                .Any(rt => rt.ClientId == _appB.ClientId && string.IsNullOrEmpty(rt.FamilyId)),
+                .Any(rt => rt.ClientId == _appB.AppConfig.ClientId && string.IsNullOrEmpty(rt.FamilyId)),
                  "App B has a normal RT associated");
 
         }

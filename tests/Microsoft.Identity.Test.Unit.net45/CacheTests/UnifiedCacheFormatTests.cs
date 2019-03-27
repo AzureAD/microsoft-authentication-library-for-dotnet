@@ -31,8 +31,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private string _expectedAccountCacheValue;
         private string _expectedRtCacheValue;
 
-        private readonly RequestContext requestContext = RequestContext.CreateForTest();
+        private readonly RequestContext _requestContext = RequestContext.CreateForTest();
 
         private void IntitTestData(string fileName)
         {
@@ -215,7 +215,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     ResponseMessage = MockHelpers.CreateSuccessResponseMessage(_tokenResponse)
                 });
 
-                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
                 Assert.IsNotNull(result);
 
                 ValidateAt(app.UserTokenCacheInternal);

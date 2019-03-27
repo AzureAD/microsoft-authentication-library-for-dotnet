@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class SilentAuthTests
     {
-        private static readonly string[] _scopes = { "User.Read" };
+        private static readonly string[] s_scopes = { "User.Read" };
 
 
         [TestMethod]
@@ -48,13 +48,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var labResponse = LabUserHelper.GetDefaultUser();
             var user = labResponse.User;
 
-            var pca = new PublicClientApplication(labResponse.AppId, "https://login.microsoftonline.com/organizations");
+            var pca = PublicClientApplicationBuilder
+                .Create(labResponse.AppId).WithAuthority("https://login.microsoftonline.com/organizations")
+                .Build();
 
             Trace.WriteLine("Part 1 - Acquire a token with U/P");
             AuthenticationResult authResult = await pca
-                .AcquireTokenByUsernamePassword(_scopes, user.Upn, new NetworkCredential("", user.Password).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, new NetworkCredential("", user.Password).SecurePassword)
                 .ExecuteAsync(new CancellationTokenSource().Token)
                 .ConfigureAwait(false);
+
             MsalAssert.AssertAuthResult(authResult, user);
             var at1 = authResult.AccessToken;
             // If test fails with "user needs to consent to the application, do an interactive request" error - see UsernamePassword tests
@@ -62,7 +65,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Part 2 - Acquire a token silently, with forceRefresh = true");
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, authResult).ConfigureAwait(false);
 
-            authResult = await pca.AcquireTokenSilent(_scopes, account)
+            authResult = await pca.AcquireTokenSilent(s_scopes, account)
                 .WithForceRefresh(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -70,7 +73,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var at2 = authResult.AccessToken;
 
             Trace.WriteLine("Part 3 - Acquire a token silently with a login hint, with forceRefresh = true");
-            authResult = await pca.AcquireTokenSilent(_scopes, user.Upn)
+            authResult = await pca.AcquireTokenSilent(s_scopes, user.Upn)
                .WithForceRefresh(true)
                .ExecuteAsync()
                .ConfigureAwait(false);

@@ -25,7 +25,9 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.AppConfig
+using Microsoft.Identity.Client.Internal;
+
+namespace Microsoft.Identity.Client
 {
     internal interface IApplicationConfiguration : IAppConfig
     {
@@ -38,5 +40,11 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// </summary>
         AuthorityInfo AuthorityInfo { get; }
+
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+        /// <summary>
+        /// </summary>
+        ClientCredentialWrapper ClientCredential { get; }
+#endif
     }
 }

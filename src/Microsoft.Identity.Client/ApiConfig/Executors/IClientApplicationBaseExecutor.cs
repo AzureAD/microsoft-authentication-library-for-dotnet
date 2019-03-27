@@ -25,32 +25,23 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-    internal interface IPublicClientApplicationExecutor
+    internal interface IClientApplicationBaseExecutor
     {
         Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenInteractiveParameters interactiveParameters,
+            AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken);
 
         Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenWithDeviceCodeParameters withDeviceCodeParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
+            AcquireTokenByRefreshTokenParameters byRefreshTokenParameters,
             CancellationToken cancellationToken);
     }
 }

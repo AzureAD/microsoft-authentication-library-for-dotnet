@@ -35,13 +35,12 @@ using System.Linq;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 
 namespace Microsoft.Identity.Client
 {
@@ -72,16 +71,11 @@ namespace Microsoft.Identity.Client
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
         /// </Summary>
+        // TODO: obsolete this and move to IAppConfig?
         public string Authority => ServiceBundle.Config.AuthorityInfo.CanonicalAuthority;
 
-        /// <summary>
-        /// Gets the Client ID (also known as <i>Application ID</i>) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)
-        /// and as passed in the constructor of the application
-        /// </summary>
-        public string ClientId => AppConfig.ClientId;
-
         /// <Summary>
-        /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used 
+        /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
         /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
         /// or one of the overrides of <see cref="AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/>.
         /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
@@ -93,6 +87,20 @@ namespace Microsoft.Identity.Client
         public ITokenCache UserTokenCache => UserTokenCacheInternal;
 
         internal ITokenCacheInternal UserTokenCacheInternal { get; set; }
+
+        internal ClientApplicationBase(ApplicationConfiguration config)
+        {
+            ServiceBundle = Core.ServiceBundle.Create(config);
+
+            if (config.UserTokenLegacyCachePersistenceForTest != null)
+            {
+                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest);
+            }
+            else
+            {
+                UserTokenCacheInternal = new TokenCache(ServiceBundle);
+            }
+        }
 
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
@@ -174,64 +182,83 @@ namespace Microsoft.Identity.Client
         // For service calls, the request context should be created in the **Executor classes as part of request execution.
         private RequestContext CreateRequestContext(Guid telemetryCorrelationId)
         {
-            return new RequestContext(ClientId, MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config));
+            return new RequestContext(AppConfig.ClientId, MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config));
         }
 
         /// <summary>
-        /// [V2 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, with advanced parameters controlling network call.
+        /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
-        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured in the application constructor
-        /// narrows down the selection to a specific tenant. This does not change the configured value in the application. This is specific
-        /// to applications managing several accounts (like a mail client with several mailboxes)</param>
-        /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the cache and attempt to acquire new access token
-        /// using the refresh token for the account if this one is available. This can be useful in the case when the application developer wants to make
-        /// sure that conditional access policies are applied immediately, rather than after the expiration of the access token</param>
-        /// <returns>An <see cref="AuthenticationResult"/> containing the requested access token</returns>
-        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// <param name="account">Account for which the token is requested. This parameter is optional.
+        /// If nothing is passed and no Account or LoginHint are provided then if one and only
+        /// one account is in the cache, that account is used.  Otherwise, an exception will be thrown.  <see cref="IAccount"/></param>
+        /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
+        /// parameters</returns>
+        /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
         /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
-        /// or performs two factor authentication</exception>
+        /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
-        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
-        /// See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// See also the additional parameters that you can set chain:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
+        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
+        /// force refreshing the token, as well as
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
+        /// specify extra query parameters
+        ///
         /// </remarks>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account,
-            string authority, bool forceRefresh)
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {
-            var builder = AcquireTokenSilent(scopes, account)
-                .WithForceRefresh(forceRefresh);
-            if (!string.IsNullOrWhiteSpace(authority))
-            {
-                builder.WithAuthority(authority);
-            }
-
-            return await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return AcquireTokenSilentParameterBuilder.Create(
+                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                scopes,
+                account);
         }
 
         /// <summary>
-        /// [V2 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// [V3 API] Attempts to acquire an access token for the <see cref="IAccount"/>
+        /// having the <see cref="IAccount.Username" /> match the given <paramref name="loginHint"/>, from the user token cache.
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
-        /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
-        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
-        /// for instance so that the user consents, or re-signs-in (for instance if the password expired), or performs two factor authentication</exception>
+        /// <param name="loginHint">Typically the username, in UPN format, e.g. johnd@contoso.com </param>
+        /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
+        /// parameters</returns>
+        /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
-        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes.
-        /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or
-        /// close to expiration (within a 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        /// If multiple <see cref="IAccount"/> match the <paramref name="loginHint"/>, or if none do, an exception is thrown.
         ///
-        /// See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See also the additional parameters that you can set chain:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
+        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
+        /// force refreshing the token, as well as
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
+        /// specify extra query parameters
+        ///
         /// </remarks>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
         {
-            return await AcquireTokenSilent(scopes, account)
-                         .ExecuteAsync(CancellationToken.None)
-                         .ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(loginHint))
+            {
+                throw new ArgumentNullException(nameof(loginHint));
+            }
+
+            return AcquireTokenSilentParameterBuilder.Create(
+                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                scopes,
+                loginHint);
         }
     }
 }

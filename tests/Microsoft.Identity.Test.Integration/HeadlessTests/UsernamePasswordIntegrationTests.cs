@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,6 +27,7 @@
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
 using System.Net;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class UsernamePasswordIntegrationTests
     {
         private const string _authority = "https://login.microsoftonline.com/organizations/";
-        private static readonly string[] _scopes = { "User.Read" };
+        private static readonly string[] s_scopes = { "User.Read" };
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -110,13 +111,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, _authority);
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.AppId).WithAuthority(_authority).Build();
 
             try
             {
-                var result =
-                     await msalPublicClient.AcquireTokenByUsernamePasswordAsync(_scopes, user.Upn, incorrectSecurePassword)
-                     .ConfigureAwait(false);
+                var result = await msalPublicClient
+                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectSecurePassword)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
             }
             catch (MsalServiceException ex)
             {
@@ -149,10 +151,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, _authority);
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.AppId).WithAuthority(_authority).Build();
 
-            var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
-                 await msalPublicClient.AcquireTokenByUsernamePasswordAsync(_scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
+            var result = Assert.ThrowsExceptionAsync<MsalException>(async () => await msalPublicClient
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectSecurePassword)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false));
         }
 
         private async Task RunHappyPathTestAsync(LabResponse labResponse)
@@ -161,10 +165,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             SecureString securePassword = new NetworkCredential("", user.Password).SecurePassword;
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, _authority);
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.AppId).WithAuthority(_authority).Build();
 
             //AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
-            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(_scopes, user.Upn, securePassword).ConfigureAwait(false);
+            AuthenticationResult authResult = await msalPublicClient
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);

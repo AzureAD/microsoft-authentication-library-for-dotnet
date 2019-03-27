@@ -25,15 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using OpenQA.Selenium;
-using System;
-using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
-using System.Diagnostics;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Microsoft.Identity.Client;
 using System.Threading.Tasks;
 using System.Linq;
@@ -44,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
     {
         public static async Task<IAccount> AssertSingleAccountAsync(
             LabResponse labResponse,
-            PublicClientApplication pca,
+            IPublicClientApplication pca,
             AuthenticationResult result)
         {
             Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));

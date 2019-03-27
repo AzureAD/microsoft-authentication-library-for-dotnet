@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
@@ -98,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-        public ClientCredential ClientCredential { get; set; }
+        public ClientCredentialWrapper ClientCredential { get; set; }
 #endif
 
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.

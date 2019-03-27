@@ -27,9 +27,9 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
@@ -58,7 +58,10 @@ namespace Microsoft.Identity.Test.Unit
                                      .Create(ClientId).WithAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
                                      .WithClientSecret(_password).BuildConcrete();
 
-            var res = await confidentialClient.AcquireTokenForClientAsync(_msalScopes).ConfigureAwait(false);
+            var res = await confidentialClient
+                .AcquireTokenForClient(_msalScopes)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
 
             ITokenCacheInternal userCache = confidentialClient.UserTokenCacheInternal;
             ITokenCacheInternal appCache = confidentialClient.AppTokenCacheInternal;
@@ -87,12 +90,19 @@ namespace Microsoft.Identity.Test.Unit
 
             // passing empty password to make sure that AT returned from cache
             confidentialClient = ConfidentialClientApplicationBuilder
-                                 .Create(ClientId).WithAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
-                                 .WithClientSecret("wrong_password").BuildConcrete();
+                .Create(ClientId)
+                .WithAuthority(new Uri(Authority), true)
+                .WithRedirectUri(RedirectUri)
+                .WithClientSecret("wrong_password")
+                .BuildConcrete();
+
             confidentialClient.AppTokenCacheInternal.DeserializeMsalV3(appCache.SerializeMsalV3());
             confidentialClient.UserTokenCacheInternal.DeserializeMsalV3(userCache.SerializeMsalV3());
 
-            res = await confidentialClient.AcquireTokenForClientAsync(_msalScopes).ConfigureAwait(false);
+            res = await confidentialClient
+                .AcquireTokenForClient(_msalScopes)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
 
             Assert.IsNotNull(res);
             Assert.IsNotNull(res.AccessToken);
