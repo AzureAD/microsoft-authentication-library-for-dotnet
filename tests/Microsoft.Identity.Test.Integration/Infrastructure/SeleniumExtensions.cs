@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             options.AddArguments("headless");
 
             var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
+
             if (String.IsNullOrEmpty(env))
             {
                 driver = new ChromeDriver(options);
@@ -57,8 +58,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             {
                 driver = new ChromeDriver(env, options);
             }
-
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(ImplicitTimeoutSeconds);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
             return driver;
         }
