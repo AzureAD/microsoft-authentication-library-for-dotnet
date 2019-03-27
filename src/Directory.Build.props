@@ -1,4 +1,20 @@
-﻿<Project>
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
+
+  <PropertyGroup>
+    <TargetFrameworkNetDesktop>net45</TargetFrameworkNetDesktop>
+    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
+    <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
+    <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
+    <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
+    <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
+    <TargetFrameworkAndroid>MonoAndroid9.0</TargetFrameworkAndroid>
+
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid);$(TargetFrameworkMac)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid);$(TargetFrameworkMac)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
+  </PropertyGroup>
+
   <PropertyGroup>
     <!-- The MSAL.snk has both private and public keys -->
     <DelaySign>false</DelaySign>
@@ -210,4 +226,5 @@ MSAL.NET makes it easy to obtain tokens from the Microsoft identity platform for
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All"/>
   </ItemGroup>
+
 </Project>
