@@ -7,11 +7,8 @@
       <Method Name="ClientApplicationBase" Hidden="true" />
       <Method Name="CreateRequestContext" Hidden="true" />
       <Method Name="CreateRequestParameters" Hidden="true" />
-      <Method Name="GetAccountAsync" Hidden="true" />
-      <Method Name="GetAccountsAsync" Hidden="true" />
       <Method Name="GetAuthority" Hidden="true" />
       <Method Name="GetUser" Hidden="true" />
-      <Method Name="IClientApplicationBaseExecutor.ExecuteAsync" Hidden="true" />
       <Method Name="Remove" Hidden="true" />
       <Method Name="RemoveAsync" Hidden="true" />
       <Property Name="ServiceBundle" Hidden="true" />
@@ -19,7 +16,7 @@
       <Property Name="UserTokenCacheInternal" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAAFSCAAEAAAAIChBgQBAEAABBAAAAAECJAAEAAEEA=</HashCode>
+      <HashCode>AAAABSCAAEAAAAIChAgQBAEAABBAAAAAECJAAEAAEEA=</HashCode>
       <FileName>MigrationAid\MigrationAid.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -34,35 +31,24 @@
       <Method Name="AcquireTokenByIntegratedWindowsAuthAsync" Hidden="true" />
       <Method Name="AcquireTokenByUsernamePasswordAsync" Hidden="true" />
       <Method Name="AcquireTokenWithDeviceCodeAsync" Hidden="true" />
-      <Method Name="CreateWebAuthenticationDialog" Hidden="true" />
-      <Method Name="GetParentObjectFromUiParent" Hidden="true" />
-      <Method Name="GuardIWANetCore" Hidden="true" />
-      <Method Name="GuardMobilePlatforms" Hidden="true" />
-      <Method Name="GuardNetCore" Hidden="true" />
-      <Method Name="GuardNonWindowsFrameworks" Hidden="true" />
-      <Method Name="GuardOnMobilePlatforms" Hidden="true" />
-      <Method Name="GuardUIParentAndroid" Hidden="true" />
-      <Method Name="IByRefreshToken.AcquireTokenByRefreshToken" Hidden="true" />
       <Method Name="IByRefreshToken.AcquireTokenByRefreshTokenAsync" Hidden="true" />
-      <Method Name="IPublicClientApplicationExecutor.ExecuteAsync" Hidden="true" />
-      <Method Name="PublicClientApplication" Hidden="true" />
     </Members>
     <InheritanceLine Type="Microsoft.Identity.Client.ClientApplicationBase" FixedToPoint="true">
       <Path>
-        <Point X="5" Y="4.103" />
-        <Point X="5" Y="4.625" />
-        <Point X="2.938" Y="4.625" />
+        <Point X="5" Y="4.488" />
+        <Point X="5" Y="4.7" />
+        <Point X="2.938" Y="4.7" />
         <Point X="2.938" Y="5" />
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAEAEAQAAAAAAAQQyAAQCAAAAAAgBAAgCAEAAEA=</HashCode>
+      <HashCode>AAAAAAEAAAQAAAAAAAQASAAACAAAAAAgAAAgCAEAAAA=</HashCode>
       <FileName>MigrationAid\MigrationAid.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="Microsoft.Identity.Client.ConfidentialClientApplication">
-    <Position X="2.25" Y="7.5" Width="12.5" />
+    <Position X="2.25" Y="8.25" Width="12.5" />
     <Members>
       <Method Name="AcquireTokenByAuthorizationCodeAsync" Hidden="true" />
       <Method Name="AcquireTokenForClientAsync" Hidden="true" />
@@ -74,23 +60,20 @@
       <Method Name="GetAuthorizationRequestUrlAsync" Hidden="true" />
       <Method Name="GuardMobileFrameworks" Hidden="true" />
       <Method Name="IByRefreshToken.AcquireTokenByRefreshToken" Hidden="true" />
-      <Method Name="IByRefreshToken.AcquireTokenByRefreshTokenAsync" Hidden="true" />
-      <Method Name="IConfidentialClientApplicationExecutor.ExecuteAsync" Hidden="true" />
       <Method Name="IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync" Hidden="true" />
       <Method Name="IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync" Hidden="true" />
-      <Method Name="SetTokenCaches" Hidden="true" />
     </Members>
     <InheritanceLine Type="Microsoft.Identity.Client.ClientApplicationBase" FixedToPoint="true">
       <Path>
-        <Point X="5" Y="4.103" />
-        <Point X="5" Y="4.625" />
-        <Point X="11" Y="4.625" />
-        <Point X="11" Y="7.5" />
+        <Point X="5" Y="4.488" />
+        <Point X="5" Y="4.7" />
+        <Point X="11" Y="4.7" />
+        <Point X="11" Y="8.25" />
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAFAAFAEQQDAAAiCAACAFAAAAAAACAACAACAAABAA=</HashCode>
-      <FileName>ConfidentialClientApplication.cs</FileName>
+      <HashCode>AAAAFAAEAEQQDAAAiCAACAEAAAAAAACAACAACAAABAA=</HashCode>
+      <FileName>MigrationAid\MigrationAid.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="AppTokenCache" />
@@ -99,8 +82,14 @@
   </Class>
   <Interface Name="Microsoft.Identity.Client.ITokenCache">
     <Position X="11.5" Y="0.75" Width="3.75" />
+    <Members>
+      <Method Name="Deserialize" Hidden="true" />
+      <Method Name="DeserializeUnifiedAndAdalCache" Hidden="true" />
+      <Method Name="Serialize" Hidden="true" />
+      <Method Name="SerializeUnifiedAndAdalCache" Hidden="true" />
+    </Members>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAABAAAABAGBAIAABAAAAiAAAAAA=</HashCode>
+      <HashCode>AAAAAIAAAAAAAAAAAABABAAAAGFAAAABBCAAiAAAAAA=</HashCode>
       <FileName>ITokenCache.cs</FileName>
     </TypeIdentifier>
   </Interface>
