@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Mats
 {
@@ -19,9 +20,15 @@ namespace Microsoft.Identity.Client.Mats
         private readonly bool _isScenarioUploadDisabled;
         private readonly object _lockObject = new object();
 
-        public static IMats CreateMats(IPlatformProxy platformProxy, IMatsConfig matsConfig)
+        public static IMats CreateMats(IApplicationConfiguration applicationConfiguration, IPlatformProxy platformProxy, IMatsConfig matsConfig)
         {
             string dpti = platformProxy.GetDpti();
+
+            if (!IsDeviceEnabled(matsConfig.AudienceType, dpti))
+            {
+                return null;
+            }
+
             string deviceNetworkState = platformProxy.GetDeviceNetworkState();
             int osPlatformCode = platformProxy.GetMatsOsPlatformCode();
 
@@ -60,21 +67,20 @@ namespace Microsoft.Identity.Client.Mats
             // it's this way in mats c++
             bool isScenarioUploadDisabled = true;
 
-            if (IsDeviceEnabled(matsConfig.AudienceType, dpti))
-            {
-                return new Mats(
-                    errorStore,
-                    uploader,
-                    actionStore,
-                    scenarioStore,
-                    contextStore,
-                    isScenarioUploadDisabled);
-            }
-
-            return null;
+            return new Mats(
+                applicationConfiguration,
+                platformProxy,
+                errorStore,
+                uploader,
+                actionStore,
+                scenarioStore,
+                contextStore,
+                isScenarioUploadDisabled);
         }
 
         private Mats(
+            IApplicationConfiguration applicationConfiguration,
+            IPlatformProxy platformProxy,
             IErrorStore errorStore,
             IUploader uploader,
             IActionStore actionStore,
@@ -82,6 +88,8 @@ namespace Microsoft.Identity.Client.Mats
             ContextStore contextStore,
             bool isScenarioUploadDisabled)
         {
+            TelemetryManager = new TelemetryManager(applicationConfiguration, platformProxy, ProcessTelemetryCallback);
+
             _errorStore = errorStore;
             _uploader = uploader;
             _actionStore = actionStore;
@@ -89,6 +97,8 @@ namespace Microsoft.Identity.Client.Mats
             _contextStore = contextStore;
             _isScenarioUploadDisabled = isScenarioUploadDisabled;
         }
+
+        public ITelemetryManager TelemetryManager { get; }
 
         private static bool IsDeviceEnabled(MatsAudienceType audienceType, string dpti)
         {
@@ -130,6 +140,7 @@ namespace Microsoft.Identity.Client.Mats
 
         public void EndAction(MatsAction action, AuthOutcome outcome, ErrorSource errorSource, string error, string errorDescription)
         {
+            TelemetryManager.Flush(action.TelemetryCorrelationId);
             _actionStore.EndMsalAction(action, outcome, errorSource, error, errorDescription);
             _uploader.Upload(GetEventsForUpload());
         }

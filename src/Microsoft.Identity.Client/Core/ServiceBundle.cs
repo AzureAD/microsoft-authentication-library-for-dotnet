@@ -55,24 +55,21 @@ namespace Microsoft.Identity.Client.Core
 
             PlatformProxy = PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
-            AadInstanceDiscovery = new AadInstanceDiscovery(DefaultLogger, HttpManager, TelemetryManager, shouldClearCaches);
-            WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
-            AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
 
             if (config.MatsConfig != null)
             {
                 // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
-                Mats = Client.Mats.Mats.CreateMats(PlatformProxy, config.MatsConfig);
-                
-                if (Mats != null)
-                {
-                    TelemetryManager = new TelemetryManager(PlatformProxy, Mats.ProcessTelemetryCallback);
-                }
+                Mats = Client.Mats.Mats.CreateMats(Config, PlatformProxy, config.MatsConfig);
+                TelemetryManager = Mats?.TelemetryManager ?? new TelemetryManager(Config, PlatformProxy, config.TelemetryCallback);
             }
             else
             {
-                TelemetryManager = new TelemetryManager(PlatformProxy, config.TelemetryCallback);
+                TelemetryManager = new TelemetryManager(Config, PlatformProxy, config.TelemetryCallback);
             }
+
+            AadInstanceDiscovery = new AadInstanceDiscovery(DefaultLogger, HttpManager, TelemetryManager, shouldClearCaches);
+            WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
+            AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
         }
 
         public ICoreLogger DefaultLogger { get; }

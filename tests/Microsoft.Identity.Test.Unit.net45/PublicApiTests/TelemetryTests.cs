@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -68,6 +69,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private MyReceiver _myReceiver;
         private TelemetryManager _telemetryManager;
+        private IServiceBundle _serviceBundle;
         private IPlatformProxy _platformProxy;
         private ICoreLogger _logger;
         private ICryptographyManager _crypto;
@@ -77,11 +79,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             TestCommon.ResetStateAndInitMsal();
             _myReceiver = new MyReceiver();
-            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            _logger = serviceBundle.DefaultLogger;
-            _platformProxy = serviceBundle.PlatformProxy;
+            _serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
+            _logger = _serviceBundle.DefaultLogger;
+            _platformProxy = _serviceBundle.PlatformProxy;
             _crypto = _platformProxy.CryptographyManager;
-            _telemetryManager = new TelemetryManager(_platformProxy, _myReceiver.HandleTelemetryEvents);
+            _telemetryManager = new TelemetryManager(_serviceBundle.Config, _platformProxy, _myReceiver.HandleTelemetryEvents);
         }
 
         private const string TenantId = "1234";
@@ -91,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryInternalApiSample()
         {
-            var reqId = _telemetryManager.GenerateNewRequestId();
+            var reqId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
                 var e1 = new ApiEvent(_logger, _crypto) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
@@ -108,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(reqId, ClientId);
+                _telemetryManager.Flush(reqId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -117,55 +119,53 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetrySkipEventsIfApiEventWasSuccessful()
         {
-            _telemetryManager = new TelemetryManager(_platformProxy, _myReceiver.HandleTelemetryEvents, true);
+            _telemetryManager = new TelemetryManager(_serviceBundle.Config, _platformProxy, _myReceiver.HandleTelemetryEvents, true);
 
-            var telemetry = (ITelemetry)_telemetryManager;
-
-            var reqId = _telemetryManager.GenerateNewRequestId();
+            var reqId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
                 var e1 = new ApiEvent(_logger, _crypto) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
-                telemetry.StartEvent(reqId, e1);
+                _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
-                telemetry.StopEvent(reqId, e1);
+                _telemetryManager.StopEvent(reqId, e1);
 
                 var e2 = new UiEvent() { UserCancelled = false };
-                telemetry.StartEvent(reqId, e2);
-                telemetry.StopEvent(reqId, e2);
+                _telemetryManager.StartEvent(reqId, e2);
+                _telemetryManager.StopEvent(reqId, e2);
 
                 var e3 = new UiEvent() { AccessDenied = false };
-                telemetry.StartEvent(reqId, e3);
-                telemetry.StopEvent(reqId, e3);
+                _telemetryManager.StartEvent(reqId, e3);
+                _telemetryManager.StopEvent(reqId, e3);
             }
             finally
             {
-                telemetry.Flush(reqId, ClientId);
+                _telemetryManager.Flush(reqId);
             }
             Assert.AreEqual(0, _myReceiver.EventsReceived.Count);
 
-            _telemetryManager = new TelemetryManager(_platformProxy, _myReceiver.HandleTelemetryEvents);
+            _telemetryManager = new TelemetryManager(_serviceBundle.Config, _platformProxy, _myReceiver.HandleTelemetryEvents);
 
-            reqId = _telemetryManager.GenerateNewRequestId();
+            reqId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
                 var e1 = new ApiEvent(_logger, _crypto) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
-                telemetry.StartEvent(reqId, e1);
+                _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = false;  // mimic an unsuccessful event, so that this batch should be dispatched
-                telemetry.StopEvent(reqId, e1);
+                _telemetryManager.StopEvent(reqId, e1);
 
                 var e2 = new UiEvent() { UserCancelled = true };
-                telemetry.StartEvent(reqId, e2);
-                telemetry.StopEvent(reqId, e2);
+                _telemetryManager.StartEvent(reqId, e2);
+                _telemetryManager.StopEvent(reqId, e2);
 
                 var e3 = new UiEvent() { AccessDenied = true };
-                telemetry.StartEvent(reqId, e3);
-                telemetry.StopEvent(reqId, e3);
+                _telemetryManager.StartEvent(reqId, e3);
+                _telemetryManager.StopEvent(reqId, e3);
             }
             finally
             {
-                telemetry.Flush(reqId, ClientId);
+                _telemetryManager.Flush(reqId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryContainsDefaultEventAsFirstEvent()
         {
-            var reqId = _telemetryManager.GenerateNewRequestId();
+            var reqId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
                 var anEvent = new UiEvent();
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(reqId, ClientId);
+                _telemetryManager.Flush(reqId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived[0][EventBase.EventNameKey].EndsWith("default_event"));
             Assert.IsTrue(_myReceiver.EventsReceived[1][EventBase.EventNameKey].EndsWith("ui_event"));
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryStartAnEventWithoutStoppingItLater() // Such event(s) becomes an orphaned event
         {
-            var reqId = _telemetryManager.GenerateNewRequestId();
+            var reqId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
                 var apiEvent = new ApiEvent(_logger, _crypto) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 Assert.IsFalse(_telemetryManager.CompletedEvents.IsEmpty); // There are completed event(s) inside
                 Assert.IsFalse(_telemetryManager.EventsInProgress.IsEmpty); // There is an orphaned event inside
-                _telemetryManager.Flush(reqId, ClientId);
+                _telemetryManager.Flush(reqId);
                 Assert.IsTrue(_telemetryManager.CompletedEvents.IsEmpty); // Completed event(s) have been dispatched
                 Assert.IsTrue(_telemetryManager.EventsInProgress.IsEmpty); // The orphaned event is also dispatched, so there is no memory leak here.
             }
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryStopAnEventWithoutStartingItBeforehand()
         {
-            var reqId = _telemetryManager.GenerateNewRequestId();
+            var reqId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
                 var apiEvent = new ApiEvent(_logger, _crypto) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(reqId, ClientId);
+                _telemetryManager.Flush(reqId);
                 Assert.IsTrue(_telemetryManager.CompletedEvents.IsEmpty && _telemetryManager.EventsInProgress.IsEmpty); // No memory leak here
             }
             Assert.IsNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect NOT finding such an event
@@ -268,7 +268,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, enablePiiLogging: true);
             _logger = serviceBundle.DefaultLogger;
 
-            var reqId = _telemetryManager.GenerateNewRequestId();
+            var reqId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
                 var e1 = new ApiEvent(_logger, _crypto)
@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(reqId, ClientId);
+                _telemetryManager.Flush(reqId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -315,7 +315,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PiiLoggingEnabled set to false, TenantId & UserId set to null values")]
         public void PiiLoggingEnabledFalse_TenantIdUserIdSetToNullValueTest()
         {
-            var reqId = _telemetryManager.GenerateNewRequestId();
+            var reqId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
                 var e1 = new ApiEvent(_logger, _crypto)
@@ -350,7 +350,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(reqId, ClientId);
+                _telemetryManager.Flush(reqId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("Check untrusted host Authority is set as null")]
         public void AuthorityNotInTrustedHostList_AuthorityIsSetAsNullValueTest()
         {
-            var reqId = _telemetryManager.GenerateNewRequestId();
+            var reqId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
                 var e1 = new ApiEvent(_logger, _crypto) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
@@ -390,7 +390,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(reqId, ClientId);
+                _telemetryManager.Flush(reqId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -405,7 +405,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 for(int i=0; i < 5; i++)
                 {
-                    string reqId = _telemetryManager.GenerateNewRequestId();
+                    var reqId = Guid.NewGuid().AsMatsCorrelationId();
                     reqIdArray[i] = reqId;
                     Task task= new Task(() =>
                     {
@@ -446,7 +446,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 foreach (string reqId in reqIdArray)
                 {
-                    _telemetryManager.Flush(reqId, ClientId);
+                    _telemetryManager.Flush(reqId);
                 }
             }
             // Every task should have one default event with these counts

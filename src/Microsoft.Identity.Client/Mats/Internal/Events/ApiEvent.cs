@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
 {
     internal class ApiEvent : EventBase
     {
-        public const string ApiIdKey = EventNamePrefix + "api_id";
+        //public const string ApiIdKey = EventNamePrefix + "api_id";
         public const string AuthorityKey = EventNamePrefix + "authority";
         public const string AuthorityTypeKey = EventNamePrefix + "authority_type";
         public const string PromptKey = EventNamePrefix + "ui_behavior";
@@ -43,7 +43,6 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
         public const string UserIdKey = EventNamePrefix + "user_id";
         public const string WasSuccessfulKey = EventNamePrefix + "was_successful";
         // public const string CorrelationIdKey = EventNamePrefix + "correlation_id";
-        public const string RequestIdKey = EventNamePrefix + "request_id";
         public const string IsConfidentialClientKey = EventNamePrefix + "is_confidential_client";
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
         public const string LoginHintKey = EventNamePrefix + "login_hint";
@@ -127,14 +126,9 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
 
         }
 
-        public string CorrelationId
+        public string TelemetryCorrelationId
         {
             set => this[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey] = value;
-        }
-
-        public string RequestId
-        {
-            set => this[RequestIdKey] = value;
         }
 
         public bool IsConfidentialClient

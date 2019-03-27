@@ -46,7 +46,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         public void Setup()
         {
             _testReceiver = new _TestReceiver();
-            _telemetryManager = new TelemetryManager(TestCommon.CreateDefaultServiceBundle().PlatformProxy, _testReceiver.HandleTelemetryEvents);
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
+            _telemetryManager = new TelemetryManager(serviceBundle.Config, serviceBundle.PlatformProxy, _testReceiver.HandleTelemetryEvents);
             _trackingEvent = new _TestEvent("tracking event");
         }
 
@@ -72,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestCategory("TelemetryHelperTests")]
         public void TestTelemetryHelper()
         {
-            using (_telemetryManager.CreateTelemetryHelper(RequestId, ClientId, _trackingEvent))
+            using (_telemetryManager.CreateTelemetryHelper(RequestId, _trackingEvent))
             {
             }
 
@@ -83,9 +84,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestCategory("TelemetryHelperTests")]
         public void TestTelemetryHelperWithFlush()
         {
-            using (_telemetryManager.CreateTelemetryHelper(RequestId, ClientId, _trackingEvent, shouldFlush: true))
+            using (_telemetryManager.CreateTelemetryHelper(RequestId, _trackingEvent))
             {
             }
+
+            _telemetryManager.Flush(RequestId);
 
             ValidateResults(ClientId, true);
         }

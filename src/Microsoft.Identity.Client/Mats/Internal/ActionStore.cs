@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
         private ActionArtifacts CreateGenericAction(MatsScenario scenario, string correlationId, ActionType actionType)
         {
             string actionId = MatsId.Create();
-            MatsAction action = new MatsAction(actionId, scenario);
+            MatsAction action = new MatsAction(actionId, scenario, correlationId);
 
             string corrIdTrim = correlationId.TrimCurlyBraces();
 

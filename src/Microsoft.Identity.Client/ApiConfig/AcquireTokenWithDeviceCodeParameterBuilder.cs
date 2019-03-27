@@ -44,6 +44,8 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenWithDeviceCodeParameters Parameters { get; } = new AcquireTokenWithDeviceCodeParameters();
 
+        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenWithDeviceCode;
+
         /// <inheritdoc />
         internal AcquireTokenWithDeviceCodeParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
             : base(publicClientApplicationExecutor)

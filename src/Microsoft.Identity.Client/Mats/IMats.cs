@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Mats
 {
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Mats
 
     internal interface IMats : IDisposable
     {
-        void ProcessTelemetryCallback(List<Dictionary<string, string>> events);
+        ITelemetryManager TelemetryManager { get; }
 
         MatsScenario CreateScenario();
 

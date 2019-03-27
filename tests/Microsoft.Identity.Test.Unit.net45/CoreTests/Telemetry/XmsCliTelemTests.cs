@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         {
             // Methods in XmsCliTelemTests log errors when parsing response headers;
             _coreLogger = Substitute.For<ICoreLogger>();
-            _requestContext = new RequestContext(null, _coreLogger);
+            _requestContext = new RequestContext(null, _coreLogger, Guid.Empty);
         }
 
         [TestMethod]

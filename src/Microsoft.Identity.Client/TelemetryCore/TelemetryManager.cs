@@ -34,8 +34,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
-    internal class TelemetryManager : ITelemetryManager,
-                                      ITelemetry
+    internal class TelemetryManager : ITelemetryManager
     {
         private const string MsalCacheEventValuePrefix = "msal.token"; 
         private const string MsalCacheEventName = "msal.cache_event";
@@ -46,54 +45,33 @@ namespace Microsoft.Identity.Client.TelemetryCore
         internal readonly ConcurrentDictionary<EventKey, EventBase> EventsInProgress =
             new ConcurrentDictionary<EventKey, EventBase>();
 
-        internal ConcurrentDictionary<string, ConcurrentDictionary<string, int>> EventCount = 
+        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> EventCount = 
             new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
 
         private readonly bool _onlySendFailureTelemetry;
         private readonly IPlatformProxy _platformProxy;
+        private readonly IApplicationConfiguration _applicationConfiguration;
 
-        public TelemetryManager(IPlatformProxy platformProxy, TelemetryCallback telemetryCallback, bool onlySendFailureTelemetry = false)
+        public TelemetryManager(
+            IApplicationConfiguration applicationConfiguration,
+            IPlatformProxy platformProxy,
+            TelemetryCallback telemetryCallback,
+            bool onlySendFailureTelemetry = false)
         {
+            _applicationConfiguration = applicationConfiguration;
             _platformProxy = platformProxy;
             Callback = telemetryCallback;
             _onlySendFailureTelemetry = onlySendFailureTelemetry;
         }
 
-        void ITelemetry.StartEvent(string requestId, EventBase eventToStart)
-        {
-            StartEvent(requestId, eventToStart);
-        }
-
-        void ITelemetry.StopEvent(string requestId, EventBase eventToStop)
-        {
-            StopEvent(requestId, eventToStop);
-        }
-
-        void ITelemetry.Flush(string requestId, string clientId)
-        {
-            Flush(requestId, clientId);
-        }
-
         public TelemetryCallback Callback { get; }
 
-        /// <inheritdoc />
-        public string GenerateNewRequestId()
-        {
-            return Guid.NewGuid().ToString();
-        }
-
-        public TelemetryHelper CreateTelemetryHelper(
-            string requestId,
-            string clientId,
-            EventBase eventToStart,
-            bool shouldFlush = false)
+        public TelemetryHelper CreateTelemetryHelper(string requestId, EventBase eventToStart)
         {
             return new TelemetryHelper(
                 this,
                 requestId,
-                clientId,
-                eventToStart,
-                shouldFlush);
+                eventToStart);
         }
 
         private bool HasReceiver()
@@ -101,7 +79,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             return Callback != null;
         }
 
-        internal void StartEvent(string requestId, EventBase eventToStart)
+        public void StartEvent(string requestId, EventBase eventToStart)
         {
             if (!HasReceiver() || string.IsNullOrWhiteSpace(requestId))
             {
@@ -111,7 +89,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             EventsInProgress[new EventKey(requestId, eventToStart)] = eventToStart;
         }
 
-        internal void StopEvent(string requestId, EventBase eventToStop)
+        public void StopEvent(string requestId, EventBase eventToStop)
         {
             if (!HasReceiver() || string.IsNullOrWhiteSpace(requestId))
             {
@@ -164,7 +142,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             EventsInProgress.TryRemove(eventKey, out var dummy);
         }
 
-        internal void Flush(string requestId, string clientId)
+        public void Flush(string requestId)
         {
             if (!HasReceiver())
             {
@@ -194,11 +172,11 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
             if (eventCountToFlush != null)
             {
-                eventsToFlush.Insert(0, new DefaultEvent(_platformProxy, clientId, eventCountToFlush));
+                eventsToFlush.Insert(0, new DefaultEvent(_platformProxy, _applicationConfiguration.ClientId, eventCountToFlush));
             }
             else
             {
-                eventsToFlush.Insert(0, new DefaultEvent(_platformProxy, clientId, new ConcurrentDictionary<string, int>()));
+                eventsToFlush.Insert(0, new DefaultEvent(_platformProxy, _applicationConfiguration.ClientId, new ConcurrentDictionary<string, int>()));
             }
 
             Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());

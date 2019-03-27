@@ -568,7 +568,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             string familyId)
         {
-            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryCorrelationId,
                 new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
             {
                 if (requestParams.Authority == null)

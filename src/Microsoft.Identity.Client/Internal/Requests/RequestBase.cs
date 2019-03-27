@@ -30,6 +30,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using System;
@@ -134,10 +135,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ApiEvent apiEvent = InitializeApiEvent(accountId);
 
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
-                AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
-                AuthenticationRequestParameters.ClientId,
-                apiEvent,
-                shouldFlush: true))
+                AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId,
+                apiEvent))
             {
                 try
                 {
@@ -160,6 +159,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     throw;
                 }
+                finally
+                {
+                    ServiceBundle.TelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId);
+                }
             }
         }
 
@@ -170,13 +173,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private ApiEvent InitializeApiEvent(string accountId)
         {
-            AuthenticationRequestParameters.RequestContext.TelemetryRequestId = ServiceBundle.TelemetryManager.GenerateNewRequestId();
-            ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger, ServiceBundle.PlatformProxy.CryptographyManager)
+            ApiEvent apiEvent = new ApiEvent(
+                AuthenticationRequestParameters.RequestContext.Logger,
+                ServiceBundle.PlatformProxy.CryptographyManager)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
                 AccountId = accountId ?? "",
-                CorrelationId = AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString(),
-                RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
+                TelemetryCorrelationId = AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId,
                 WasSuccessful = false
             };
 

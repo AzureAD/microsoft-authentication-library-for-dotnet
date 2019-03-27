@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 QueryParams = endpointUri.Query
             };
 
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId, httpEvent))
+            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryCorrelationId, httpEvent))
             {
                 if (method == HttpMethod.Post)
                 {

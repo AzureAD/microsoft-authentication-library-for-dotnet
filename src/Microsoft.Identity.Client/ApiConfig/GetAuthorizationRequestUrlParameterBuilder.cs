@@ -48,6 +48,8 @@ namespace Microsoft.Identity.Client
     {
         private GetAuthorizationRequestUrlParameters Parameters { get; } = new GetAuthorizationRequestUrlParameters();
 
+        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.GetAuthorizationRequestUrl;
+
         internal GetAuthorizationRequestUrlParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationexecutor)
             : base(confidentialClientApplicationexecutor)
         {
@@ -67,6 +69,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public GetAuthorizationRequestUrlParameterBuilder WithRedirectUri(string redirectUri)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithRedirectUri);
             Parameters.RedirectUri = redirectUri;
             return this;
         }
@@ -77,6 +80,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public GetAuthorizationRequestUrlParameterBuilder WithLoginHint(string loginHint)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithLoginHint);
             Parameters.LoginHint = loginHint;
             return this;
         }
@@ -87,6 +91,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public GetAuthorizationRequestUrlParameterBuilder WithAccount(IAccount account)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAccount);
             Parameters.Account = account;
             return this;
         }
@@ -97,6 +102,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public GetAuthorizationRequestUrlParameterBuilder WithExtraScopesToConsent(IEnumerable<string> extraScopesToConsent)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithExtraScopesToConsent);
             Parameters.ExtraScopesToConsent = extraScopesToConsent;
             return this;
         }

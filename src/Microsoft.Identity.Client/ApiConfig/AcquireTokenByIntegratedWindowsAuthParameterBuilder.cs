@@ -42,6 +42,8 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenByIntegratedWindowsAuthParameters Parameters { get; } = new AcquireTokenByIntegratedWindowsAuthParameters();
 
+        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenByIntegratedWindowsAuth;
+
         /// <inheritdoc />
         internal AcquireTokenByIntegratedWindowsAuthParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
             : base(publicClientApplicationExecutor)
@@ -63,6 +65,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder WithUsername(string username)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithUsername);
             Parameters.Username = username;
             return this;
         }

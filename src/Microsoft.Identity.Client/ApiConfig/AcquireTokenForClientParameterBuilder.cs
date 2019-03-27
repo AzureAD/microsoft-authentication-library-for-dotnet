@@ -45,6 +45,8 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
 
+        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenForClient;
+
         /// <inheritdoc />
         internal AcquireTokenForClientParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)
@@ -68,6 +70,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithForceRefresh(bool forceRefresh)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithForceRefresh);
             Parameters.ForceRefresh = forceRefresh;
             return this;
         }
@@ -85,6 +88,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithSendX5C(bool withSendX5C)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
             Parameters.SendX5C = withSendX5C;
             return this;
         }

@@ -45,6 +45,8 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenOnBehalfOfParameters Parameters { get; } = new AcquireTokenOnBehalfOfParameters();
 
+        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenOnBehalfOf;
+
         /// <inheritdoc />
         internal AcquireTokenOnBehalfOfParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)
@@ -63,6 +65,7 @@ namespace Microsoft.Identity.Client
 
         private AcquireTokenOnBehalfOfParameterBuilder WithUserAssertion(UserAssertion userAssertion)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithUserAssertion);
             Parameters.UserAssertion = userAssertion;
             return this;
         }
@@ -80,6 +83,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenOnBehalfOfParameterBuilder WithSendX5C(bool withSendX5C)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
             Parameters.SendX5C = withSendX5C;
             return this;
         }
