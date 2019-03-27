@@ -48,8 +48,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 		src\Directory.Build.targets = src\Directory.Build.targets
-		src\MSAL.Common.props = src\MSAL.Common.props
-		src\MSAL.Frameworks.props = src\MSAL.Frameworks.props
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
