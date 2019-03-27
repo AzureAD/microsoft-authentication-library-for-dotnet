@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Mats
 
     internal interface IMats : IDisposable
     {
-        void ProcessTelemetryBlob(Dictionary<string, string> blob);
+        void ProcessTelemetryCallback(List<Dictionary<string, string>> events);
 
         MatsScenario CreateScenario();
 

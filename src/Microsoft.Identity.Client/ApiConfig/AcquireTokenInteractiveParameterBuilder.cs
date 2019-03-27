@@ -29,11 +29,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 #if iOS
 using UIKit;

@@ -47,6 +47,7 @@ using NSubstitute;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Threading;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 #if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Microsoft.Identity.Test.Unit.PublicApiTests

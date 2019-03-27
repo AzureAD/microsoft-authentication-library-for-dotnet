@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    public enum MatsAudienceType
+    internal enum MatsAudienceType
     {
         /// <summary>
         /// 
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
 
     /// <summary>
     /// </summary>
-    public interface IMatsConfig
+    internal interface IMatsConfig
     {
         /// <summary>
         /// 

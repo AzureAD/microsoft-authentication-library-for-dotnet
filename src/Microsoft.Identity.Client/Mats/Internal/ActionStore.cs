@@ -123,24 +123,24 @@ namespace Microsoft.Identity.Client.Mats.Internal
 
             var aggregatedProperties = GetMsalAggregatedProperties();
             var propertyBag = propertyBags[0];
-            foreach (var blobEntry in blob)
+            foreach (var kvp in blob)
             {
-                if (string.Compare(blobEntry.Key, MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey, StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(kvp.Key, MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     continue;
                 }
 
                 // if this is a property we want to aggregte, add min/max/sum properties instead
-                string normalizedPropertyName = NormalizeValidPropertyName(blobEntry.Key);
+                string normalizedPropertyName = NormalizeValidPropertyName(kvp.Key);
                 if (aggregatedProperties.Contains(normalizedPropertyName) &&
-                    int.TryParse(blobEntry.Value, out int blobIntValue))
+                    int.TryParse(kvp.Value, out int blobIntValue))
                 {
                     propertyBag.Add(normalizedPropertyName + ActionPropertyNames.MaxConstStrSuffix, blobIntValue);
                     propertyBag.Add(normalizedPropertyName + ActionPropertyNames.MinConstStrSuffix, blobIntValue);
                     propertyBag.Add(normalizedPropertyName + ActionPropertyNames.SumConstStrSuffix, blobIntValue);
                 }
 
-                propertyBag.Add(blobEntry.Key, blobEntry.Value);
+                propertyBag.Add(kvp.Key, kvp.Value);
             }
         }
 

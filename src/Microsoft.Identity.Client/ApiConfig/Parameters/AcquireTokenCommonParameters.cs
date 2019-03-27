@@ -27,7 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {

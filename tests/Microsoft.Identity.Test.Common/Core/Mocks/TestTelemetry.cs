@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks

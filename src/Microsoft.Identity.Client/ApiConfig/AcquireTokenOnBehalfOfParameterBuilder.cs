@@ -30,7 +30,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {

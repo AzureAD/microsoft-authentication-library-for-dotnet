@@ -265,9 +265,12 @@ namespace Microsoft.Identity.Client.Mats
             _errorStore.ReportError(errorMessage, errorType, errorSeverity);
         }
 
-        public void ProcessTelemetryBlob(Dictionary<string, string> blob)
+        public void ProcessTelemetryCallback(List<Dictionary<string, string>> events)
         {
-            _actionStore.ProcessMsalTelemetryBlob(blob);
+            foreach (var dict in events)
+            {
+                _actionStore.ProcessMsalTelemetryBlob(dict);
+            }
         }
     }
 }

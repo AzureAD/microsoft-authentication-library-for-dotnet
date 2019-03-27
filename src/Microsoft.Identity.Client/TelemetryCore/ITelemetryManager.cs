@@ -25,6 +25,8 @@
 // 
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Mats.Internal.Events;
+
 namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal interface ITelemetryManager

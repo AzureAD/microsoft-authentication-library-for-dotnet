@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Client.Core
 
             PlatformProxy = PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
-            TelemetryManager = new TelemetryManager(PlatformProxy, config.TelemetryCallback);
             AadInstanceDiscovery = new AadInstanceDiscovery(DefaultLogger, HttpManager, TelemetryManager, shouldClearCaches);
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
@@ -64,6 +63,15 @@ namespace Microsoft.Identity.Client.Core
             {
                 // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
                 Mats = Client.Mats.Mats.CreateMats(PlatformProxy, config.MatsConfig);
+                
+                if (Mats != null)
+                {
+                    TelemetryManager = new TelemetryManager(PlatformProxy, Mats.ProcessTelemetryCallback);
+                }
+            }
+            else
+            {
+                TelemetryManager = new TelemetryManager(PlatformProxy, config.TelemetryCallback);
             }
         }
 

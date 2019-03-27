@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -30,7 +30,7 @@ using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client.Mats.Internal.Events
 {
     internal class DefaultEvent : EventBase
     {

@@ -29,6 +29,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.TelemetryCore

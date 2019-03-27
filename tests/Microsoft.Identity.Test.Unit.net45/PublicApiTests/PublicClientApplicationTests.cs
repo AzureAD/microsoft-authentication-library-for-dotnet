@@ -28,8 +28,8 @@
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;

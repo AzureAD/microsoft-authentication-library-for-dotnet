@@ -29,12 +29,10 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Instance;
 using System.Globalization;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client.Mats.Internal.Events
 {
     internal abstract class EventBase : Dictionary<string, string>
     {

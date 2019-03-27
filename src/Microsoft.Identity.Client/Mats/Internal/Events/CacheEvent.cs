@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client.Mats.Internal.Events
 {
     internal class CacheEvent : EventBase
     {

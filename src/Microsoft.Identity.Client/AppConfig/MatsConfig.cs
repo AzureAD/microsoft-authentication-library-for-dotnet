@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    public class MatsConfig : IMatsConfig
+    internal class MatsConfig : IMatsConfig
     {
         /// <summary>
         /// 

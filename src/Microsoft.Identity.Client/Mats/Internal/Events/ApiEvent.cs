@@ -28,9 +28,10 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Mats.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client.Mats.Internal.Events
 {
     internal class ApiEvent : EventBase
     {
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string TenantIdKey = EventNamePrefix + "tenant_id";
         public const string UserIdKey = EventNamePrefix + "user_id";
         public const string WasSuccessfulKey = EventNamePrefix + "was_successful";
-        public const string CorrelationIdKey = EventNamePrefix + "correlation_id";
+        // public const string CorrelationIdKey = EventNamePrefix + "correlation_id";
         public const string RequestIdKey = EventNamePrefix + "request_id";
         public const string IsConfidentialClientKey = EventNamePrefix + "is_confidential_client";
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
@@ -83,7 +84,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public ApiIds ApiId
         {
-            set => this[ApiIdKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
+            set => this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
         }
 
         public Uri Authority
@@ -128,7 +129,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public string CorrelationId
         {
-            set => this[CorrelationIdKey] = value;
+            set => this[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey] = value;
         }
 
         public string RequestId
