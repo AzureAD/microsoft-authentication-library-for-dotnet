@@ -39,6 +39,8 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     public static class SeleniumExtensions
     {
+        private const int ImplicitTimeoutSeconds = 10;
+
         public static IWebDriver CreateDefaultWebDriver()
         {
             ChromeOptions options = new ChromeOptions();
@@ -58,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             {
                 driver = new ChromeDriver(env, options);
             }
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(ImplicitTimeoutSeconds);
 
             return driver;
         }
