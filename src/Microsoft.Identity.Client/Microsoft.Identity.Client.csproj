@@ -1,8 +1,5 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
-  <Import Project="../MSAL.Frameworks.props" />
 
-  <!-- Platform flags, NuGet metadata properties and versioning properties are in Directory.Build.props -->
-  <Import Project="../MSAL.Common.props" />
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <DefineConstants>$(DefineConstants);NET_CORE_RUNTIME</DefineConstants>
   </PropertyGroup>
