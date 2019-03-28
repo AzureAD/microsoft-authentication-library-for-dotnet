@@ -41,6 +41,7 @@ using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Win32;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -78,12 +79,17 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <returns>Upn or throws</returns>
         public override Task<string> GetUserPrincipalNameAsync()
         {
+            const int NameUserPrincipal = 8;
+            return Task.FromResult(GetUserPrincipalName(NameUserPrincipal));
+        }
+
+        private string GetUserPrincipalName(int nameFormat)
+        {
             // TODO: there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and
             // the rest of the platforms - returns ""
 
-            const int NameUserPrincipal = 8;
             uint userNameSize = 0;
-            WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+            WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
             if (userNameSize == 0)
             {
                 throw MsalExceptionFactory.GetClientException(
@@ -93,7 +99,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
 
             var sb = new StringBuilder((int)userNameSize);
-            if (!WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+            if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
             {
                 throw MsalExceptionFactory.GetClientException(
                     MsalError.GetUserNameFailed,
@@ -101,7 +107,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     new Win32Exception(Marshal.GetLastWin32Error()));
             }
 
-            return Task.FromResult(sb.ToString());
+            return sb.ToString();
         }
 
         public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
@@ -243,8 +249,33 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public override string GetDpti()
         {
-            // TODO(mats):
-            return string.Empty;
+            const int NameSamCompatible = 2;
+
+            var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\SQMClient");
+            object val = key.GetValue("MachineId");
+            string win32DeviceId = val.ToString();
+
+            string userName = GetUserPrincipalName(NameSamCompatible);
+
+            // NameSamCompatible might include an email address. remove the domain before hashing.
+            int atIdx = userName.IndexOf('@');
+            if (atIdx >= 0)
+            {
+                userName = userName.Substring(0, atIdx);
+            }
+
+            string unhashedDpti = win32DeviceId + userName;
+
+            var hashedBytes = InternalGetCryptographyManager().CreateSha256HashBytes(unhashedDpti);
+            var sb = new StringBuilder();
+
+            foreach (var b in hashedBytes)
+            {
+                sb.Append($"{b:x2}");
+            }
+
+            string dptiOutput = sb.ToString();
+            return dptiOutput;
         }
 
         public override string GetMatsOsPlatform()
