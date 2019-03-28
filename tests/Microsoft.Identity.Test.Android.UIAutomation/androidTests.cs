@@ -98,9 +98,9 @@ namespace Microsoft.Identity.Test.UIAutomation
 
                 // Ignored tests
                 //B2CGoogleMicrosoftAuthorityAcquireTokenTest,
-                B2CFacebookMicrosoftAuthorityAcquireTokenTest,
-                B2CFacebookB2CLoginAuthorityAcquireTokenTest,
-                B2CFacebookEditPolicyAcquireTokenTest
+                //B2CFacebookMicrosoftAuthorityAcquireTokenTest,
+                //B2CFacebookB2CLoginAuthorityAcquireTokenTest,
+                //B2CFacebookEditPolicyAcquireTokenTest
             };
 
             var hasFailed = false;
@@ -163,6 +163,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// with subsequent silent call
         /// </summary>
         [Test]
+        [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookB2CLoginAuthorityAcquireTokenTest()
         {
             _mobileTestHelper.B2CFacebookAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
@@ -174,6 +175,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// with subsequent silent call
         /// </summary>
         [Test]
+        [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookMicrosoftAuthorityAcquireTokenTest()
         {
             _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, false);
@@ -187,6 +189,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         ///  UIBehavior none
         /// </summary>
         [Test]
+        [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookEditPolicyAcquireTokenTest()
         {
             _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, true);
