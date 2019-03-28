@@ -58,6 +58,8 @@ namespace DesktopTestApp
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.publicClientTabPage = new System.Windows.Forms.TabPage();
+            this.b2cCustomDomain = new System.Windows.Forms.Button();
+            this.forceRefreshCheckBox = new System.Windows.Forms.CheckBox();
             this.b2cEditProfile = new System.Windows.Forms.Button();
             this.b2cSilentFlow = new System.Windows.Forms.Button();
             this.b2cLogin = new System.Windows.Forms.Button();
@@ -93,7 +95,7 @@ namespace DesktopTestApp
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.forceRefreshCheckBox = new System.Windows.Forms.CheckBox();
+            this.b2cSilentCustomDomain = new System.Windows.Forms.Button();
             this.logsTabPage.SuspendLayout();
             this.cacheTabPage.SuspendLayout();
             this.settingsTabPage.SuspendLayout();
@@ -106,9 +108,10 @@ namespace DesktopTestApp
             // 
             // publicClient
             // 
-            this.publicClient.Location = new System.Drawing.Point(1, 817);
+            this.publicClient.Location = new System.Drawing.Point(2, 1571);
+            this.publicClient.Margin = new System.Windows.Forms.Padding(6);
             this.publicClient.Name = "publicClient";
-            this.publicClient.Size = new System.Drawing.Size(116, 45);
+            this.publicClient.Size = new System.Drawing.Size(232, 87);
             this.publicClient.TabIndex = 1;
             this.publicClient.Text = "Public Client";
             this.publicClient.UseVisualStyleBackColor = true;
@@ -116,9 +119,10 @@ namespace DesktopTestApp
             // 
             // settings
             // 
-            this.settings.Location = new System.Drawing.Point(200, 817);
+            this.settings.Location = new System.Drawing.Point(400, 1571);
+            this.settings.Margin = new System.Windows.Forms.Padding(6);
             this.settings.Name = "settings";
-            this.settings.Size = new System.Drawing.Size(96, 45);
+            this.settings.Size = new System.Drawing.Size(192, 87);
             this.settings.TabIndex = 2;
             this.settings.Text = "Settings";
             this.settings.UseVisualStyleBackColor = true;
@@ -126,9 +130,10 @@ namespace DesktopTestApp
             // 
             // cache
             // 
-            this.cache.Location = new System.Drawing.Point(387, 817);
+            this.cache.Location = new System.Drawing.Point(774, 1571);
+            this.cache.Margin = new System.Windows.Forms.Padding(6);
             this.cache.Name = "cache";
-            this.cache.Size = new System.Drawing.Size(110, 45);
+            this.cache.Size = new System.Drawing.Size(220, 87);
             this.cache.TabIndex = 3;
             this.cache.Text = "Cache";
             this.cache.UseVisualStyleBackColor = true;
@@ -136,9 +141,10 @@ namespace DesktopTestApp
             // 
             // logs
             // 
-            this.logs.Location = new System.Drawing.Point(581, 817);
+            this.logs.Location = new System.Drawing.Point(1162, 1571);
+            this.logs.Margin = new System.Windows.Forms.Padding(6);
             this.logs.Name = "logs";
-            this.logs.Size = new System.Drawing.Size(92, 45);
+            this.logs.Size = new System.Drawing.Size(184, 87);
             this.logs.TabIndex = 4;
             this.logs.Text = "Logs";
             this.logs.UseVisualStyleBackColor = true;
@@ -151,19 +157,21 @@ namespace DesktopTestApp
             this.logsTabPage.Controls.Add(this.msalLogsTextBox);
             this.logsTabPage.Controls.Add(this.label2);
             this.logsTabPage.Controls.Add(this.label1);
-            this.logsTabPage.Location = new System.Drawing.Point(4, 22);
+            this.logsTabPage.Location = new System.Drawing.Point(8, 39);
+            this.logsTabPage.Margin = new System.Windows.Forms.Padding(6);
             this.logsTabPage.Name = "logsTabPage";
-            this.logsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.logsTabPage.Size = new System.Drawing.Size(668, 788);
+            this.logsTabPage.Padding = new System.Windows.Forms.Padding(6);
+            this.logsTabPage.Size = new System.Drawing.Size(1336, 1518);
             this.logsTabPage.TabIndex = 3;
             this.logsTabPage.Text = "logsTabPage";
             this.logsTabPage.UseVisualStyleBackColor = true;
             // 
             // clearLogsButton
             // 
-            this.clearLogsButton.Location = new System.Drawing.Point(223, 692);
+            this.clearLogsButton.Location = new System.Drawing.Point(446, 1331);
+            this.clearLogsButton.Margin = new System.Windows.Forms.Padding(6);
             this.clearLogsButton.Name = "clearLogsButton";
-            this.clearLogsButton.Size = new System.Drawing.Size(151, 43);
+            this.clearLogsButton.Size = new System.Drawing.Size(302, 83);
             this.clearLogsButton.TabIndex = 4;
             this.clearLogsButton.Text = "Clear Logs";
             this.clearLogsButton.UseVisualStyleBackColor = true;
@@ -171,39 +179,43 @@ namespace DesktopTestApp
             // 
             // msalPIILogsTextBox
             // 
-            this.msalPIILogsTextBox.Location = new System.Drawing.Point(7, 365);
+            this.msalPIILogsTextBox.Location = new System.Drawing.Point(14, 702);
+            this.msalPIILogsTextBox.Margin = new System.Windows.Forms.Padding(6);
             this.msalPIILogsTextBox.Multiline = true;
             this.msalPIILogsTextBox.Name = "msalPIILogsTextBox";
             this.msalPIILogsTextBox.ReadOnly = true;
             this.msalPIILogsTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.msalPIILogsTextBox.Size = new System.Drawing.Size(655, 304);
+            this.msalPIILogsTextBox.Size = new System.Drawing.Size(1306, 581);
             this.msalPIILogsTextBox.TabIndex = 3;
             // 
             // msalLogsTextBox
             // 
-            this.msalLogsTextBox.Location = new System.Drawing.Point(7, 21);
+            this.msalLogsTextBox.Location = new System.Drawing.Point(14, 40);
+            this.msalLogsTextBox.Margin = new System.Windows.Forms.Padding(6);
             this.msalLogsTextBox.Multiline = true;
             this.msalLogsTextBox.Name = "msalLogsTextBox";
             this.msalLogsTextBox.ReadOnly = true;
             this.msalLogsTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.msalLogsTextBox.Size = new System.Drawing.Size(655, 304);
+            this.msalLogsTextBox.Size = new System.Drawing.Size(1306, 581);
             this.msalLogsTextBox.TabIndex = 0;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(143, 5);
+            this.label2.Location = new System.Drawing.Point(286, 10);
+            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(336, 13);
+            this.label2.Size = new System.Drawing.Size(671, 25);
             this.label2.TabIndex = 2;
             this.label2.Text = "========================= Logs =========================";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(143, 349);
+            this.label1.Location = new System.Drawing.Point(286, 671);
+            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(352, 13);
+            this.label1.Size = new System.Drawing.Size(701, 25);
             this.label1.TabIndex = 1;
             this.label1.Text = "========================= PII Logs =========================";
             // 
@@ -211,10 +223,11 @@ namespace DesktopTestApp
             // 
             this.cacheTabPage.AutoScroll = true;
             this.cacheTabPage.Controls.Add(this.cachePageTableLayout);
-            this.cacheTabPage.Location = new System.Drawing.Point(4, 22);
+            this.cacheTabPage.Location = new System.Drawing.Point(8, 39);
+            this.cacheTabPage.Margin = new System.Windows.Forms.Padding(6);
             this.cacheTabPage.Name = "cacheTabPage";
-            this.cacheTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.cacheTabPage.Size = new System.Drawing.Size(668, 788);
+            this.cacheTabPage.Padding = new System.Windows.Forms.Padding(6);
+            this.cacheTabPage.Size = new System.Drawing.Size(1336, 1518);
             this.cacheTabPage.TabIndex = 2;
             this.cacheTabPage.Text = "cacheTabPage";
             this.cacheTabPage.UseVisualStyleBackColor = true;
@@ -224,13 +237,14 @@ namespace DesktopTestApp
             this.cachePageTableLayout.AutoSize = true;
             this.cachePageTableLayout.ColumnCount = 1;
             this.cachePageTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.cachePageTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.cachePageTableLayout.Location = new System.Drawing.Point(8, 7);
+            this.cachePageTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.cachePageTableLayout.Location = new System.Drawing.Point(16, 13);
+            this.cachePageTableLayout.Margin = new System.Windows.Forms.Padding(6);
             this.cachePageTableLayout.Name = "cachePageTableLayout";
             this.cachePageTableLayout.RowCount = 2;
             this.cachePageTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.cachePageTableLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.cachePageTableLayout.Size = new System.Drawing.Size(654, 100);
+            this.cachePageTableLayout.Size = new System.Drawing.Size(1308, 192);
             this.cachePageTableLayout.TabIndex = 0;
             // 
             // settingsTabPage
@@ -245,10 +259,11 @@ namespace DesktopTestApp
             this.settingsTabPage.Controls.Add(this.environmentQP);
             this.settingsTabPage.Controls.Add(this.label11);
             this.settingsTabPage.Controls.Add(this.label10);
-            this.settingsTabPage.Location = new System.Drawing.Point(4, 22);
+            this.settingsTabPage.Location = new System.Drawing.Point(8, 39);
+            this.settingsTabPage.Margin = new System.Windows.Forms.Padding(6);
             this.settingsTabPage.Name = "settingsTabPage";
-            this.settingsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.settingsTabPage.Size = new System.Drawing.Size(668, 788);
+            this.settingsTabPage.Padding = new System.Windows.Forms.Padding(6);
+            this.settingsTabPage.Size = new System.Drawing.Size(1336, 1518);
             this.settingsTabPage.TabIndex = 1;
             this.settingsTabPage.Text = "settingsTabPage";
             this.settingsTabPage.UseVisualStyleBackColor = true;
@@ -261,18 +276,20 @@ namespace DesktopTestApp
             "Warning",
             "Info",
             "Verbose"});
-            this.logLevel.Location = new System.Drawing.Point(253, 194);
+            this.logLevel.Location = new System.Drawing.Point(506, 373);
+            this.logLevel.Margin = new System.Windows.Forms.Padding(6);
             this.logLevel.Name = "logLevel";
-            this.logLevel.Size = new System.Drawing.Size(121, 21);
+            this.logLevel.Size = new System.Drawing.Size(238, 33);
             this.logLevel.TabIndex = 41;
             // 
             // label14
             // 
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label14.Location = new System.Drawing.Point(11, 194);
+            this.label14.Location = new System.Drawing.Point(22, 373);
+            this.label14.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(92, 24);
+            this.label14.Size = new System.Drawing.Size(184, 44);
             this.label14.TabIndex = 40;
             this.label14.Text = "Log Level";
             // 
@@ -280,18 +297,21 @@ namespace DesktopTestApp
             // 
             this.groupBox1.Controls.Add(this.validateAuthorityDisabled);
             this.groupBox1.Controls.Add(this.validateAuthorityEnabled);
-            this.groupBox1.Location = new System.Drawing.Point(259, 357);
+            this.groupBox1.Location = new System.Drawing.Point(518, 687);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(205, 51);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(6);
+            this.groupBox1.Size = new System.Drawing.Size(410, 98);
             this.groupBox1.TabIndex = 39;
             this.groupBox1.TabStop = false;
             // 
             // validateAuthorityDisabled
             // 
             this.validateAuthorityDisabled.AutoSize = true;
-            this.validateAuthorityDisabled.Location = new System.Drawing.Point(134, 18);
+            this.validateAuthorityDisabled.Location = new System.Drawing.Point(268, 35);
+            this.validateAuthorityDisabled.Margin = new System.Windows.Forms.Padding(6);
             this.validateAuthorityDisabled.Name = "validateAuthorityDisabled";
-            this.validateAuthorityDisabled.Size = new System.Drawing.Size(66, 17);
+            this.validateAuthorityDisabled.Size = new System.Drawing.Size(127, 29);
             this.validateAuthorityDisabled.TabIndex = 8;
             this.validateAuthorityDisabled.Text = "Disabled";
             this.validateAuthorityDisabled.UseVisualStyleBackColor = true;
@@ -300,9 +320,10 @@ namespace DesktopTestApp
             // 
             this.validateAuthorityEnabled.AutoSize = true;
             this.validateAuthorityEnabled.Checked = true;
-            this.validateAuthorityEnabled.Location = new System.Drawing.Point(6, 19);
+            this.validateAuthorityEnabled.Location = new System.Drawing.Point(12, 37);
+            this.validateAuthorityEnabled.Margin = new System.Windows.Forms.Padding(6);
             this.validateAuthorityEnabled.Name = "validateAuthorityEnabled";
-            this.validateAuthorityEnabled.Size = new System.Drawing.Size(64, 17);
+            this.validateAuthorityEnabled.Size = new System.Drawing.Size(122, 29);
             this.validateAuthorityEnabled.TabIndex = 7;
             this.validateAuthorityEnabled.TabStop = true;
             this.validateAuthorityEnabled.Text = "Enabled";
@@ -312,9 +333,10 @@ namespace DesktopTestApp
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(11, 375);
+            this.label5.Location = new System.Drawing.Point(22, 721);
+            this.label5.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(155, 24);
+            this.label5.Size = new System.Drawing.Size(319, 44);
             this.label5.TabIndex = 38;
             this.label5.Text = "Validate Authority";
             // 
@@ -322,9 +344,11 @@ namespace DesktopTestApp
             // 
             this.groupBox6.Controls.Add(this.PiiLoggingDisabled);
             this.groupBox6.Controls.Add(this.PiiLoggingEnabled);
-            this.groupBox6.Location = new System.Drawing.Point(253, 132);
+            this.groupBox6.Location = new System.Drawing.Point(506, 254);
+            this.groupBox6.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(189, 42);
+            this.groupBox6.Padding = new System.Windows.Forms.Padding(6);
+            this.groupBox6.Size = new System.Drawing.Size(378, 81);
             this.groupBox6.TabIndex = 37;
             this.groupBox6.TabStop = false;
             // 
@@ -332,9 +356,10 @@ namespace DesktopTestApp
             // 
             this.PiiLoggingDisabled.AutoSize = true;
             this.PiiLoggingDisabled.Checked = true;
-            this.PiiLoggingDisabled.Location = new System.Drawing.Point(109, 10);
+            this.PiiLoggingDisabled.Location = new System.Drawing.Point(218, 19);
+            this.PiiLoggingDisabled.Margin = new System.Windows.Forms.Padding(6);
             this.PiiLoggingDisabled.Name = "PiiLoggingDisabled";
-            this.PiiLoggingDisabled.Size = new System.Drawing.Size(66, 17);
+            this.PiiLoggingDisabled.Size = new System.Drawing.Size(127, 29);
             this.PiiLoggingDisabled.TabIndex = 31;
             this.PiiLoggingDisabled.TabStop = true;
             this.PiiLoggingDisabled.Text = "Disabled";
@@ -343,9 +368,10 @@ namespace DesktopTestApp
             // PiiLoggingEnabled
             // 
             this.PiiLoggingEnabled.AutoSize = true;
-            this.PiiLoggingEnabled.Location = new System.Drawing.Point(5, 10);
+            this.PiiLoggingEnabled.Location = new System.Drawing.Point(10, 19);
+            this.PiiLoggingEnabled.Margin = new System.Windows.Forms.Padding(6);
             this.PiiLoggingEnabled.Name = "PiiLoggingEnabled";
-            this.PiiLoggingEnabled.Size = new System.Drawing.Size(64, 17);
+            this.PiiLoggingEnabled.Size = new System.Drawing.Size(122, 29);
             this.PiiLoggingEnabled.TabIndex = 30;
             this.PiiLoggingEnabled.Text = "Enabled";
             this.PiiLoggingEnabled.UseVisualStyleBackColor = true;
@@ -354,35 +380,39 @@ namespace DesktopTestApp
             // 
             this.label12.AutoSize = true;
             this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.Location = new System.Drawing.Point(7, 142);
+            this.label12.Location = new System.Drawing.Point(14, 273);
+            this.label12.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(180, 24);
+            this.label12.Size = new System.Drawing.Size(357, 44);
             this.label12.TabIndex = 36;
             this.label12.Text = "Pii Logging Enabled";
             // 
             // extraQueryParams
             // 
             this.extraQueryParams.AccessibleName = "";
-            this.extraQueryParams.Location = new System.Drawing.Point(248, 90);
+            this.extraQueryParams.Location = new System.Drawing.Point(496, 173);
+            this.extraQueryParams.Margin = new System.Windows.Forms.Padding(6);
             this.extraQueryParams.Name = "extraQueryParams";
-            this.extraQueryParams.Size = new System.Drawing.Size(352, 20);
+            this.extraQueryParams.Size = new System.Drawing.Size(700, 31);
             this.extraQueryParams.TabIndex = 21;
             // 
             // environmentQP
             // 
             this.environmentQP.AccessibleName = "";
-            this.environmentQP.Location = new System.Drawing.Point(248, 32);
+            this.environmentQP.Location = new System.Drawing.Point(496, 62);
+            this.environmentQP.Margin = new System.Windows.Forms.Padding(6);
             this.environmentQP.Name = "environmentQP";
-            this.environmentQP.Size = new System.Drawing.Size(352, 20);
+            this.environmentQP.Size = new System.Drawing.Size(700, 31);
             this.environmentQP.TabIndex = 18;
             // 
             // label11
             // 
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label11.Location = new System.Drawing.Point(10, 78);
+            this.label11.Location = new System.Drawing.Point(20, 150);
+            this.label11.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(178, 24);
+            this.label11.Size = new System.Drawing.Size(365, 44);
             this.label11.TabIndex = 20;
             this.label11.Text = "Extra Query Params";
             // 
@@ -390,15 +420,18 @@ namespace DesktopTestApp
             // 
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(10, 20);
+            this.label10.Location = new System.Drawing.Point(20, 38);
+            this.label10.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(149, 24);
+            this.label10.Size = new System.Drawing.Size(300, 44);
             this.label10.TabIndex = 17;
             this.label10.Text = "Environment QP";
             // 
             // publicClientTabPage
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.publicClientTabPage.Controls.Add(this.b2cSilentCustomDomain);
+            this.publicClientTabPage.Controls.Add(this.b2cCustomDomain);
             this.publicClientTabPage.Controls.Add(this.forceRefreshCheckBox);
             this.publicClientTabPage.Controls.Add(this.b2cEditProfile);
             this.publicClientTabPage.Controls.Add(this.b2cSilentFlow);
@@ -429,18 +462,42 @@ namespace DesktopTestApp
             this.publicClientTabPage.Controls.Add(this.label6);
             this.publicClientTabPage.Controls.Add(this.label4);
             this.publicClientTabPage.Controls.Add(this.label3);
-            this.publicClientTabPage.Location = new System.Drawing.Point(4, 22);
+            this.publicClientTabPage.Location = new System.Drawing.Point(8, 39);
+            this.publicClientTabPage.Margin = new System.Windows.Forms.Padding(6);
             this.publicClientTabPage.Name = "publicClientTabPage";
-            this.publicClientTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.publicClientTabPage.Size = new System.Drawing.Size(668, 788);
+            this.publicClientTabPage.Padding = new System.Windows.Forms.Padding(6);
+            this.publicClientTabPage.Size = new System.Drawing.Size(1336, 1518);
             this.publicClientTabPage.TabIndex = 0;
             this.publicClientTabPage.Text = "publicClientTabPage";
             // 
+            // b2cCustomDomain
+            // 
+            this.b2cCustomDomain.Location = new System.Drawing.Point(307, 1256);
+            this.b2cCustomDomain.Margin = new System.Windows.Forms.Padding(6);
+            this.b2cCustomDomain.Name = "b2cCustomDomain";
+            this.b2cCustomDomain.Size = new System.Drawing.Size(252, 58);
+            this.b2cCustomDomain.TabIndex = 44;
+            this.b2cCustomDomain.Text = "B2C Custom Domain";
+            this.b2cCustomDomain.UseVisualStyleBackColor = true;
+            this.b2cCustomDomain.Click += new System.EventHandler(this.B2cCustomDomain_Click);
+            // 
+            // forceRefreshCheckBox
+            // 
+            this.forceRefreshCheckBox.AutoSize = true;
+            this.forceRefreshCheckBox.Location = new System.Drawing.Point(524, 163);
+            this.forceRefreshCheckBox.Margin = new System.Windows.Forms.Padding(6);
+            this.forceRefreshCheckBox.Name = "forceRefreshCheckBox";
+            this.forceRefreshCheckBox.Size = new System.Drawing.Size(180, 29);
+            this.forceRefreshCheckBox.TabIndex = 43;
+            this.forceRefreshCheckBox.Text = "Force Refresh";
+            this.forceRefreshCheckBox.UseVisualStyleBackColor = true;
+            // 
             // b2cEditProfile
             // 
-            this.b2cEditProfile.Location = new System.Drawing.Point(15, 723);
+            this.b2cEditProfile.Location = new System.Drawing.Point(30, 1390);
+            this.b2cEditProfile.Margin = new System.Windows.Forms.Padding(6);
             this.b2cEditProfile.Name = "b2cEditProfile";
-            this.b2cEditProfile.Size = new System.Drawing.Size(126, 30);
+            this.b2cEditProfile.Size = new System.Drawing.Size(252, 58);
             this.b2cEditProfile.TabIndex = 42;
             this.b2cEditProfile.Text = "B2C Edit Profile";
             this.b2cEditProfile.UseVisualStyleBackColor = true;
@@ -448,9 +505,10 @@ namespace DesktopTestApp
             // 
             // b2cSilentFlow
             // 
-            this.b2cSilentFlow.Location = new System.Drawing.Point(15, 689);
+            this.b2cSilentFlow.Location = new System.Drawing.Point(30, 1325);
+            this.b2cSilentFlow.Margin = new System.Windows.Forms.Padding(6);
             this.b2cSilentFlow.Name = "b2cSilentFlow";
-            this.b2cSilentFlow.Size = new System.Drawing.Size(126, 30);
+            this.b2cSilentFlow.Size = new System.Drawing.Size(252, 58);
             this.b2cSilentFlow.TabIndex = 41;
             this.b2cSilentFlow.Text = "B2C Silent AT";
             this.b2cSilentFlow.UseVisualStyleBackColor = true;
@@ -458,9 +516,10 @@ namespace DesktopTestApp
             // 
             // b2cLogin
             // 
-            this.b2cLogin.Location = new System.Drawing.Point(15, 653);
+            this.b2cLogin.Location = new System.Drawing.Point(30, 1256);
+            this.b2cLogin.Margin = new System.Windows.Forms.Padding(6);
             this.b2cLogin.Name = "b2cLogin";
-            this.b2cLogin.Size = new System.Drawing.Size(126, 30);
+            this.b2cLogin.Size = new System.Drawing.Size(252, 58);
             this.b2cLogin.TabIndex = 40;
             this.b2cLogin.Text = "B2C Acquire Token";
             this.b2cLogin.UseVisualStyleBackColor = true;
@@ -468,9 +527,10 @@ namespace DesktopTestApp
             // 
             // cancelOperationButton
             // 
-            this.cancelOperationButton.Location = new System.Drawing.Point(498, 724);
+            this.cancelOperationButton.Location = new System.Drawing.Point(996, 1392);
+            this.cancelOperationButton.Margin = new System.Windows.Forms.Padding(6);
             this.cancelOperationButton.Name = "cancelOperationButton";
-            this.cancelOperationButton.Size = new System.Drawing.Size(164, 29);
+            this.cancelOperationButton.Size = new System.Drawing.Size(328, 56);
             this.cancelOperationButton.TabIndex = 39;
             this.cancelOperationButton.Text = "Cancel Operation";
             this.cancelOperationButton.UseVisualStyleBackColor = true;
@@ -478,9 +538,10 @@ namespace DesktopTestApp
             // 
             // acquireTokenDeviceCode
             // 
-            this.acquireTokenDeviceCode.Location = new System.Drawing.Point(496, 582);
+            this.acquireTokenDeviceCode.Location = new System.Drawing.Point(992, 1119);
+            this.acquireTokenDeviceCode.Margin = new System.Windows.Forms.Padding(6);
             this.acquireTokenDeviceCode.Name = "acquireTokenDeviceCode";
-            this.acquireTokenDeviceCode.Size = new System.Drawing.Size(164, 29);
+            this.acquireTokenDeviceCode.Size = new System.Drawing.Size(328, 56);
             this.acquireTokenDeviceCode.TabIndex = 38;
             this.acquireTokenDeviceCode.Text = "Acquire Token By DeviceCode";
             this.acquireTokenDeviceCode.UseVisualStyleBackColor = true;
@@ -488,17 +549,19 @@ namespace DesktopTestApp
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(15, 759);
+            this.progressBar1.Location = new System.Drawing.Point(30, 1460);
+            this.progressBar1.Margin = new System.Windows.Forms.Padding(6);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(645, 23);
+            this.progressBar1.Size = new System.Drawing.Size(1290, 44);
             this.progressBar1.TabIndex = 37;
             // 
             // IgnoreUserCbx
             // 
             this.IgnoreUserCbx.AutoSize = true;
-            this.IgnoreUserCbx.Location = new System.Drawing.Point(505, 224);
+            this.IgnoreUserCbx.Location = new System.Drawing.Point(1010, 431);
+            this.IgnoreUserCbx.Margin = new System.Windows.Forms.Padding(6);
             this.IgnoreUserCbx.Name = "IgnoreUserCbx";
-            this.IgnoreUserCbx.Size = new System.Drawing.Size(56, 17);
+            this.IgnoreUserCbx.Size = new System.Drawing.Size(104, 29);
             this.IgnoreUserCbx.TabIndex = 36;
             this.IgnoreUserCbx.Text = "Ignore";
             this.IgnoreUserCbx.UseVisualStyleBackColor = true;
@@ -506,25 +569,28 @@ namespace DesktopTestApp
             // passwordLabel
             // 
             this.passwordLabel.AutoSize = true;
-            this.passwordLabel.Location = new System.Drawing.Point(8, 201);
+            this.passwordLabel.Location = new System.Drawing.Point(16, 387);
+            this.passwordLabel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.passwordLabel.Name = "passwordLabel";
-            this.passwordLabel.Size = new System.Drawing.Size(245, 13);
+            this.passwordLabel.Size = new System.Drawing.Size(497, 25);
             this.passwordLabel.TabIndex = 34;
             this.passwordLabel.Text = "Enter Password (for username/password flow only)";
             // 
             // userPasswordTextBox
             // 
-            this.userPasswordTextBox.Location = new System.Drawing.Point(257, 198);
+            this.userPasswordTextBox.Location = new System.Drawing.Point(514, 381);
+            this.userPasswordTextBox.Margin = new System.Windows.Forms.Padding(6);
             this.userPasswordTextBox.Name = "userPasswordTextBox";
             this.userPasswordTextBox.PasswordChar = '*';
-            this.userPasswordTextBox.Size = new System.Drawing.Size(241, 20);
+            this.userPasswordTextBox.Size = new System.Drawing.Size(478, 31);
             this.userPasswordTextBox.TabIndex = 33;
             // 
             // acquireTokenByUPButton
             // 
-            this.acquireTokenByUPButton.Location = new System.Drawing.Point(207, 582);
+            this.acquireTokenByUPButton.Location = new System.Drawing.Point(414, 1119);
+            this.acquireTokenByUPButton.Margin = new System.Windows.Forms.Padding(6);
             this.acquireTokenByUPButton.Name = "acquireTokenByUPButton";
-            this.acquireTokenByUPButton.Size = new System.Drawing.Size(240, 29);
+            this.acquireTokenByUPButton.Size = new System.Drawing.Size(480, 56);
             this.acquireTokenByUPButton.TabIndex = 32;
             this.acquireTokenByUPButton.Text = "Acquire Token By Username/Password";
             this.acquireTokenByUPButton.UseVisualStyleBackColor = true;
@@ -532,18 +598,20 @@ namespace DesktopTestApp
             // 
             // acquireTokenSilentAuthority
             // 
-            this.acquireTokenSilentAuthority.Location = new System.Drawing.Point(433, 617);
+            this.acquireTokenSilentAuthority.Location = new System.Drawing.Point(866, 1187);
+            this.acquireTokenSilentAuthority.Margin = new System.Windows.Forms.Padding(6);
             this.acquireTokenSilentAuthority.Name = "acquireTokenSilentAuthority";
-            this.acquireTokenSilentAuthority.Size = new System.Drawing.Size(227, 30);
+            this.acquireTokenSilentAuthority.Size = new System.Drawing.Size(454, 58);
             this.acquireTokenSilentAuthority.TabIndex = 31;
             this.acquireTokenSilentAuthority.Text = "Acquire Token Silent with Authority Override";
             this.acquireTokenSilentAuthority.UseVisualStyleBackColor = true;
             // 
             // acquireTokenInteractiveAuthority
             // 
-            this.acquireTokenInteractiveAuthority.Location = new System.Drawing.Point(15, 617);
+            this.acquireTokenInteractiveAuthority.Location = new System.Drawing.Point(30, 1187);
+            this.acquireTokenInteractiveAuthority.Margin = new System.Windows.Forms.Padding(6);
             this.acquireTokenInteractiveAuthority.Name = "acquireTokenInteractiveAuthority";
-            this.acquireTokenInteractiveAuthority.Size = new System.Drawing.Size(282, 30);
+            this.acquireTokenInteractiveAuthority.Size = new System.Drawing.Size(564, 58);
             this.acquireTokenInteractiveAuthority.TabIndex = 30;
             this.acquireTokenInteractiveAuthority.Text = "Acquire Token Interactive with Authority Override";
             this.acquireTokenInteractiveAuthority.UseVisualStyleBackColor = true;
@@ -552,52 +620,58 @@ namespace DesktopTestApp
             // PiiLoggingLabel
             // 
             this.PiiLoggingLabel.AutoSize = true;
-            this.PiiLoggingLabel.Location = new System.Drawing.Point(25, 611);
+            this.PiiLoggingLabel.Location = new System.Drawing.Point(50, 1175);
+            this.PiiLoggingLabel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.PiiLoggingLabel.Name = "PiiLoggingLabel";
-            this.PiiLoggingLabel.Size = new System.Drawing.Size(0, 13);
+            this.PiiLoggingLabel.Size = new System.Drawing.Size(0, 25);
             this.PiiLoggingLabel.TabIndex = 29;
             // 
             // authority
             // 
             this.authority.AccessibleName = "authority";
-            this.authority.Location = new System.Drawing.Point(256, 20);
+            this.authority.Location = new System.Drawing.Point(512, 38);
+            this.authority.Margin = new System.Windows.Forms.Padding(6);
             this.authority.Name = "authority";
-            this.authority.Size = new System.Drawing.Size(352, 20);
+            this.authority.Size = new System.Drawing.Size(700, 31);
             this.authority.TabIndex = 16;
             this.authority.Text = "https://login.microsoftonline.com/common";
             this.authority.Leave += new System.EventHandler(this.authority_FocusLeave);
             // 
             // scopes
             // 
-            this.scopes.Location = new System.Drawing.Point(256, 259);
+            this.scopes.Location = new System.Drawing.Point(512, 498);
+            this.scopes.Margin = new System.Windows.Forms.Padding(6);
             this.scopes.Name = "scopes";
-            this.scopes.Size = new System.Drawing.Size(352, 20);
+            this.scopes.Size = new System.Drawing.Size(700, 31);
             this.scopes.TabIndex = 15;
             this.scopes.Text = "user.read";
             // 
             // callResult
             // 
-            this.callResult.Location = new System.Drawing.Point(15, 298);
+            this.callResult.Location = new System.Drawing.Point(30, 573);
+            this.callResult.Margin = new System.Windows.Forms.Padding(6);
             this.callResult.Multiline = true;
             this.callResult.Name = "callResult";
             this.callResult.ReadOnly = true;
             this.callResult.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.callResult.Size = new System.Drawing.Size(645, 242);
+            this.callResult.Size = new System.Drawing.Size(1286, 462);
             this.callResult.TabIndex = 13;
             // 
             // loginHintTextBox
             // 
-            this.loginHintTextBox.Location = new System.Drawing.Point(257, 175);
+            this.loginHintTextBox.Location = new System.Drawing.Point(514, 337);
+            this.loginHintTextBox.Margin = new System.Windows.Forms.Padding(6);
             this.loginHintTextBox.Name = "loginHintTextBox";
-            this.loginHintTextBox.Size = new System.Drawing.Size(351, 20);
+            this.loginHintTextBox.Size = new System.Drawing.Size(698, 31);
             this.loginHintTextBox.TabIndex = 6;
             this.loginHintTextBox.TextChanged += new System.EventHandler(this.loginHint_TextChanged);
             // 
             // overriddenAuthority
             // 
-            this.overriddenAuthority.Location = new System.Drawing.Point(256, 59);
+            this.overriddenAuthority.Location = new System.Drawing.Point(512, 113);
+            this.overriddenAuthority.Margin = new System.Windows.Forms.Padding(6);
             this.overriddenAuthority.Name = "overriddenAuthority";
-            this.overriddenAuthority.Size = new System.Drawing.Size(352, 20);
+            this.overriddenAuthority.Size = new System.Drawing.Size(700, 31);
             this.overriddenAuthority.TabIndex = 3;
             this.overriddenAuthority.TextChanged += new System.EventHandler(this.overriddenAuthority_TextChanged);
             // 
@@ -605,9 +679,10 @@ namespace DesktopTestApp
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(8, 261);
+            this.label9.Location = new System.Drawing.Point(16, 502);
+            this.label9.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(43, 13);
+            this.label9.Size = new System.Drawing.Size(84, 25);
             this.label9.TabIndex = 14;
             this.label9.Text = "Scopes";
             // 
@@ -618,18 +693,21 @@ namespace DesktopTestApp
             this.groupBox2.Controls.Add(this.consent);
             this.groupBox2.Controls.Add(this.forceLogin);
             this.groupBox2.Controls.Add(this.selectAccount);
-            this.groupBox2.Location = new System.Drawing.Point(256, 103);
+            this.groupBox2.Location = new System.Drawing.Point(512, 198);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(342, 66);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(6);
+            this.groupBox2.Size = new System.Drawing.Size(684, 127);
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             // 
             // noPrompt
             // 
             this.noPrompt.AutoSize = true;
-            this.noPrompt.Location = new System.Drawing.Point(6, 43);
+            this.noPrompt.Location = new System.Drawing.Point(12, 83);
+            this.noPrompt.Margin = new System.Windows.Forms.Padding(6);
             this.noPrompt.Name = "noPrompt";
-            this.noPrompt.Size = new System.Drawing.Size(98, 17);
+            this.noPrompt.Size = new System.Drawing.Size(191, 29);
             this.noPrompt.TabIndex = 11;
             this.noPrompt.Text = "B2C No Prompt";
             this.noPrompt.UseVisualStyleBackColor = true;
@@ -637,9 +715,10 @@ namespace DesktopTestApp
             // never
             // 
             this.never.AutoSize = true;
-            this.never.Location = new System.Drawing.Point(267, 18);
+            this.never.Location = new System.Drawing.Point(534, 35);
+            this.never.Margin = new System.Windows.Forms.Padding(6);
             this.never.Name = "never";
-            this.never.Size = new System.Drawing.Size(54, 17);
+            this.never.Size = new System.Drawing.Size(100, 29);
             this.never.TabIndex = 10;
             this.never.Text = "Never";
             this.never.UseVisualStyleBackColor = true;
@@ -647,9 +726,10 @@ namespace DesktopTestApp
             // consent
             // 
             this.consent.AutoSize = true;
-            this.consent.Location = new System.Drawing.Point(197, 19);
+            this.consent.Location = new System.Drawing.Point(394, 37);
+            this.consent.Margin = new System.Windows.Forms.Padding(6);
             this.consent.Name = "consent";
-            this.consent.Size = new System.Drawing.Size(64, 17);
+            this.consent.Size = new System.Drawing.Size(123, 29);
             this.consent.TabIndex = 9;
             this.consent.Text = "Consent";
             this.consent.UseVisualStyleBackColor = true;
@@ -657,9 +737,10 @@ namespace DesktopTestApp
             // forceLogin
             // 
             this.forceLogin.AutoSize = true;
-            this.forceLogin.Location = new System.Drawing.Point(110, 19);
+            this.forceLogin.Location = new System.Drawing.Point(220, 37);
+            this.forceLogin.Margin = new System.Windows.Forms.Padding(6);
             this.forceLogin.Name = "forceLogin";
-            this.forceLogin.Size = new System.Drawing.Size(81, 17);
+            this.forceLogin.Size = new System.Drawing.Size(157, 29);
             this.forceLogin.TabIndex = 8;
             this.forceLogin.Text = "Force Login";
             this.forceLogin.UseVisualStyleBackColor = true;
@@ -668,9 +749,10 @@ namespace DesktopTestApp
             // 
             this.selectAccount.AutoSize = true;
             this.selectAccount.Checked = true;
-            this.selectAccount.Location = new System.Drawing.Point(6, 19);
+            this.selectAccount.Location = new System.Drawing.Point(12, 37);
+            this.selectAccount.Margin = new System.Windows.Forms.Padding(6);
             this.selectAccount.Name = "selectAccount";
-            this.selectAccount.Size = new System.Drawing.Size(98, 17);
+            this.selectAccount.Size = new System.Drawing.Size(187, 29);
             this.selectAccount.TabIndex = 7;
             this.selectAccount.TabStop = true;
             this.selectAccount.Text = "Select Account";
@@ -680,9 +762,10 @@ namespace DesktopTestApp
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(8, 121);
+            this.label8.Location = new System.Drawing.Point(16, 233);
+            this.label8.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(63, 13);
+            this.label8.Size = new System.Drawing.Size(123, 25);
             this.label8.TabIndex = 9;
             this.label8.Text = "UI Behavior";
             // 
@@ -691,9 +774,10 @@ namespace DesktopTestApp
             this.userList.AllowDrop = true;
             this.userList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.userList.FormattingEnabled = true;
-            this.userList.Location = new System.Drawing.Point(256, 224);
+            this.userList.Location = new System.Drawing.Point(512, 431);
+            this.userList.Margin = new System.Windows.Forms.Padding(6);
             this.userList.Name = "userList";
-            this.userList.Size = new System.Drawing.Size(242, 21);
+            this.userList.Size = new System.Drawing.Size(480, 33);
             this.userList.TabIndex = 12;
             this.userList.SelectedIndexChanged += new System.EventHandler(this.userList_SelectedIndexChanged);
             // 
@@ -701,17 +785,19 @@ namespace DesktopTestApp
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(7, 227);
+            this.label7.Location = new System.Drawing.Point(14, 437);
+            this.label7.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(29, 13);
+            this.label7.Size = new System.Drawing.Size(57, 25);
             this.label7.TabIndex = 11;
             this.label7.Text = "User";
             // 
             // acquireTokenSilent
             // 
-            this.acquireTokenSilent.Location = new System.Drawing.Point(496, 546);
+            this.acquireTokenSilent.Location = new System.Drawing.Point(992, 1050);
+            this.acquireTokenSilent.Margin = new System.Windows.Forms.Padding(6);
             this.acquireTokenSilent.Name = "acquireTokenSilent";
-            this.acquireTokenSilent.Size = new System.Drawing.Size(164, 30);
+            this.acquireTokenSilent.Size = new System.Drawing.Size(328, 58);
             this.acquireTokenSilent.TabIndex = 10;
             this.acquireTokenSilent.Text = "Acquire Token Silent";
             this.acquireTokenSilent.UseVisualStyleBackColor = true;
@@ -719,9 +805,10 @@ namespace DesktopTestApp
             // 
             // acquireTokenWIA
             // 
-            this.acquireTokenWIA.Location = new System.Drawing.Point(207, 546);
+            this.acquireTokenWIA.Location = new System.Drawing.Point(414, 1050);
+            this.acquireTokenWIA.Margin = new System.Windows.Forms.Padding(6);
             this.acquireTokenWIA.Name = "acquireTokenWIA";
-            this.acquireTokenWIA.Size = new System.Drawing.Size(240, 30);
+            this.acquireTokenWIA.Size = new System.Drawing.Size(480, 58);
             this.acquireTokenWIA.TabIndex = 9;
             this.acquireTokenWIA.Text = "Acquire Token By WindowsIntegratedAuth";
             this.acquireTokenWIA.UseVisualStyleBackColor = true;
@@ -729,9 +816,10 @@ namespace DesktopTestApp
             // 
             // acquireTokenInteractive
             // 
-            this.acquireTokenInteractive.Location = new System.Drawing.Point(15, 546);
+            this.acquireTokenInteractive.Location = new System.Drawing.Point(30, 1050);
+            this.acquireTokenInteractive.Margin = new System.Windows.Forms.Padding(6);
             this.acquireTokenInteractive.Name = "acquireTokenInteractive";
-            this.acquireTokenInteractive.Size = new System.Drawing.Size(148, 30);
+            this.acquireTokenInteractive.Size = new System.Drawing.Size(296, 58);
             this.acquireTokenInteractive.TabIndex = 9;
             this.acquireTokenInteractive.Text = "Acquire Token Interactive";
             this.acquireTokenInteractive.UseVisualStyleBackColor = true;
@@ -741,9 +829,10 @@ namespace DesktopTestApp
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(8, 177);
+            this.label6.Location = new System.Drawing.Point(16, 340);
+            this.label6.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(195, 13);
+            this.label6.Size = new System.Drawing.Size(386, 25);
             this.label6.TabIndex = 5;
             this.label6.Text = "Login Hint (Username for IWA and U/P)";
             // 
@@ -751,9 +840,10 @@ namespace DesktopTestApp
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(8, 58);
+            this.label4.Location = new System.Drawing.Point(16, 112);
+            this.label4.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(146, 13);
+            this.label4.Size = new System.Drawing.Size(297, 25);
             this.label4.TabIndex = 2;
             this.label4.Text = "Overridden Authority for 1 call";
             // 
@@ -761,9 +851,10 @@ namespace DesktopTestApp
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(8, 19);
+            this.label3.Location = new System.Drawing.Point(16, 37);
+            this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(48, 13);
+            this.label3.Size = new System.Drawing.Size(97, 25);
             this.label3.TabIndex = 0;
             this.label3.Text = "Authority";
             // 
@@ -773,34 +864,37 @@ namespace DesktopTestApp
             this.tabControl1.Controls.Add(this.settingsTabPage);
             this.tabControl1.Controls.Add(this.cacheTabPage);
             this.tabControl1.Controls.Add(this.logsTabPage);
-            this.tabControl1.Location = new System.Drawing.Point(1, -3);
+            this.tabControl1.Location = new System.Drawing.Point(2, -6);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(6);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.RightToLeftLayout = true;
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(676, 814);
+            this.tabControl1.Size = new System.Drawing.Size(1352, 1565);
             this.tabControl1.TabIndex = 0;
             // 
-            // forceRefreshCheckBox
+            // b2cSilentCustomDomain
             // 
-            this.forceRefreshCheckBox.AutoSize = true;
-            this.forceRefreshCheckBox.Location = new System.Drawing.Point(262, 85);
-            this.forceRefreshCheckBox.Name = "forceRefreshCheckBox";
-            this.forceRefreshCheckBox.Size = new System.Drawing.Size(93, 17);
-            this.forceRefreshCheckBox.TabIndex = 43;
-            this.forceRefreshCheckBox.Text = "Force Refresh";
-            this.forceRefreshCheckBox.UseVisualStyleBackColor = true;
+            this.b2cSilentCustomDomain.Location = new System.Drawing.Point(307, 1325);
+            this.b2cSilentCustomDomain.Margin = new System.Windows.Forms.Padding(6);
+            this.b2cSilentCustomDomain.Name = "b2cSilentCustomDomain";
+            this.b2cSilentCustomDomain.Size = new System.Drawing.Size(252, 58);
+            this.b2cSilentCustomDomain.TabIndex = 45;
+            this.b2cSilentCustomDomain.Text = "B2C Silent Custom Domain";
+            this.b2cSilentCustomDomain.UseVisualStyleBackColor = true;
+            this.b2cSilentCustomDomain.Click += new System.EventHandler(this.B2cSilentCustomDomain_Click);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(674, 801);
+            this.ClientSize = new System.Drawing.Size(1348, 1540);
             this.Controls.Add(this.logs);
             this.Controls.Add(this.cache);
             this.Controls.Add(this.settings);
             this.Controls.Add(this.publicClient);
             this.Controls.Add(this.tabControl1);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Dev Utility Test App";
@@ -888,6 +982,8 @@ namespace DesktopTestApp
         private Button b2cEditProfile;
         private RadioButton noPrompt;
         private CheckBox forceRefreshCheckBox;
+        private Button b2cCustomDomain;
+        private Button b2cSilentCustomDomain;
     }
 }
 
