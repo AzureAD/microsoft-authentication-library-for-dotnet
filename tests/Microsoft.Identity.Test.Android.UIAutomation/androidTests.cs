@@ -98,9 +98,9 @@ namespace Microsoft.Identity.Test.UIAutomation
 
                 // Ignored tests
                 //B2CGoogleMicrosoftAuthorityAcquireTokenTest,
-                B2CFacebookEditPolicyAcquireTokenTest,
                 B2CFacebookMicrosoftAuthorityAcquireTokenTest,
-                B2CFacebookB2CLoginAuthorityAcquireTokenTest
+                B2CFacebookB2CLoginAuthorityAcquireTokenTest,
+                B2CFacebookEditPolicyAcquireTokenTest
             };
 
             var hasFailed = false;
