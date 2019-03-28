@@ -95,8 +95,7 @@ namespace Microsoft.Identity.Test.UIAutomation
                 B2CFacebookMicrosoftAuthorityAcquireTokenTest,
                 //B2CGoogleB2CLoginAuthorityAcquireTokenTest,
                 //B2CGoogleMicrosoftAuthorityAcquireTokenTest,
-                B2CLocalAccountAcquireTokenTest,
-                B2CFacebookEditPolicyAcquireTokenTest
+                B2CLocalAccountAcquireTokenTest
             };
 
             var hasFailed = false;
