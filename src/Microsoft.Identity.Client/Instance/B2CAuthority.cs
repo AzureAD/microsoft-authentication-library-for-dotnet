@@ -42,23 +42,18 @@ namespace Microsoft.Identity.Client.Instance
         internal B2CAuthority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
             : base(serviceBundle, authorityInfo)
         {
+            string b2cAuthority = new Uri(AuthorityInfo.CanonicalAuthority).Host;
+
+            if (!IsB2CLoginHost(b2cAuthority))
+            {
+                B2CTrustedHosts.Add(b2cAuthority);
+            }
         }
 
         #pragma warning disable 
         internal override async Task UpdateCanonicalAuthorityAsync(
             RequestContext requestContext)
-        {
-            string b2cAuthority = new Uri(AuthorityInfo.CanonicalAuthority).Host;
-
-            if (IsB2CLoginHost(b2cAuthority))
-            {
-                return;
-            }
-            else
-            {
-                B2CTrustedHosts.Add(b2cAuthority);
-                return;
-            }
+        {            
         }
 
         internal static bool IsB2CLoginHost(string host)
