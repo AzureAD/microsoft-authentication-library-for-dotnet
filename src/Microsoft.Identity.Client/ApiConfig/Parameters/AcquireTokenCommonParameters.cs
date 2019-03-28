@@ -44,9 +44,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public AuthorityInfo AuthorityOverride { get; set; }
 
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
-        internal void AddApiTelemetryFeature(ApiTelemetryFeature feature)
+        public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
         {
             _apiTelemetry[MatsConverter.AsString(feature)] = "true";
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> GetApiTelemetryFeatures()
+        {
+            return _apiTelemetry;
         }
     }
 }

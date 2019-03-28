@@ -188,10 +188,9 @@ namespace Microsoft.Identity.Client
         internal override AuthenticationRequestParameters CreateRequestParameters(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
-            ITokenCacheInternal cache,
-            Authority customAuthority = null)
+            ITokenCacheInternal cache)
         {
-            AuthenticationRequestParameters requestParams = base.CreateRequestParameters(commonParameters, requestContext, cache, customAuthority);
+            AuthenticationRequestParameters requestParams = base.CreateRequestParameters(commonParameters, requestContext, cache);
             requestParams.ClientCredential = ServiceBundle.Config.ClientCredential;
             return requestParams;
         }

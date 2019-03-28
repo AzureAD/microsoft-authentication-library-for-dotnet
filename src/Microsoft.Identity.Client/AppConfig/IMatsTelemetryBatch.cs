@@ -34,5 +34,11 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         IReadOnlyDictionary<string, string> StringValues { get; }
+
+        /// <summary>
+        /// Used for debugging and testing.
+        /// </summary>
+        /// <returns></returns>
+        string ToJsonString();
     }
 }

@@ -39,6 +39,11 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
                     .ConfigureAwait(false);
             }
 
+            foreach (var batch in batches)
+            {
+                Console.WriteLine(batch.ToJsonString());
+            }
+
             Assert.AreEqual(1, batches.Count);
         }
     }

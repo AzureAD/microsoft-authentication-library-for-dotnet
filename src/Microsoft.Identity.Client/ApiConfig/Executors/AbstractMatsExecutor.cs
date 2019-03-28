@@ -22,17 +22,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenCommonParameters commonParameters,
             Func<Task<AuthenticationResult>> executorAction)
         {
-            var actionHandle = _mats.StartAction(_mats.CreateScenario(), commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
+            var action = _mats.StartAction(_mats.CreateScenario(), commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
 
             try
             {
                 var result = await executorAction().ConfigureAwait(false);
-                _mats.EndAction(actionHandle, result);
+                _mats.EndAction(action, result);
                 return result;
             }
             catch (Exception ex)
             {
-                _mats.EndAction(actionHandle, ex);
+                _mats.EndAction(action, ex);
                 throw;
             }
         }
@@ -41,17 +41,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenCommonParameters commonParameters,
             Func<Task<Uri>> executorAction)
         {
-            var actionHandle = _mats.StartAction(null, commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
+            var action = _mats.StartAction(null, commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
 
             try
             {
                 Uri result = await executorAction().ConfigureAwait(false);
-                _mats.EndAction(actionHandle, AuthOutcome.Succeeded, ErrorSource.None, string.Empty, string.Empty);
+                _mats.EndAction(action, AuthOutcome.Succeeded, ErrorSource.None, string.Empty, string.Empty);
                 return result;
             }
             catch (Exception ex)
             {
-                _mats.EndAction(actionHandle, ex);
+                _mats.EndAction(action, ex);
                 throw;
             }
         }

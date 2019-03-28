@@ -77,12 +77,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             return new AuthenticationRequestParameters(
                 ServiceBundle,
-                Authority.CreateAuthority(ServiceBundle, authority),
                 tokenCache,
                 commonParameters,
                 RequestContext.CreateForTest(ServiceBundle))
             {
-                Account = account
+                Account = account,
+                Authority = Authority.CreateAuthority(ServiceBundle, authority)
             };
         }
     }

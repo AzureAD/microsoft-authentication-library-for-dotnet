@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
@@ -22,6 +23,35 @@ namespace Microsoft.Identity.Client.Mats.Internal
             batch.SetBoolData(contents.BoolProperties);
 
             return batch;
+        }
+
+        public string ToJsonString()
+        {
+            JObject root = new JObject();
+            root["name"] = Name;
+
+            JObject data = new JObject();
+
+            foreach (var kvp in _boolData)
+            {
+                data[kvp.Key] = kvp.Value;
+            }
+            foreach (var kvp in _int64Data)
+            {
+                data[kvp.Key] = kvp.Value;
+            }
+            foreach (var kvp in _intData)
+            {
+                data[kvp.Key] = kvp.Value;
+            }
+            foreach (var kvp in _stringData)
+            {
+                data[kvp.Key] = kvp.Value;
+            }
+
+            root["data"] = data;
+
+            return root.ToString();
         }
 
         private void SetBoolData(ConcurrentDictionary<string, bool> data)

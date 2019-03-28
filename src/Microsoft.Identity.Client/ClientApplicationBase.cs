@@ -149,9 +149,9 @@ namespace Microsoft.Identity.Client
             return Task.FromResult(0);
         }
 
-        internal Authority GetAuthority(IAccount account)
+        internal static Authority GetAuthority(IServiceBundle serviceBundle, IAccount account)
         {
-            var authority = Instance.Authority.CreateAuthority(ServiceBundle);
+            var authority = Instance.Authority.CreateAuthority(serviceBundle);
             var tenantId = authority.GetTenantId();
 
             if (Instance.Authority.TenantlessTenantNames.Contains(tenantId)
@@ -166,12 +166,10 @@ namespace Microsoft.Identity.Client
         internal virtual AuthenticationRequestParameters CreateRequestParameters(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
-            ITokenCacheInternal cache,
-            Authority customAuthority = null)
+            ITokenCacheInternal cache)
         {
             return new AuthenticationRequestParameters(
                 ServiceBundle,
-                customAuthority,
                 cache,
                 commonParameters,
                 requestContext);

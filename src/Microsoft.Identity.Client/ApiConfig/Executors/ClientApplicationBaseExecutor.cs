@@ -30,21 +30,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            IAccount account = GetAccountFromParamsOrLoginHint(silentParameters);
-
-            var customAuthority = commonParameters.AuthorityOverride == null
-                                      ? _clientApplicationBase.GetAuthority(account)
-                                      : Instance.Authority.CreateAuthorityWithOverride(
-                                          ServiceBundle, 
-                                          commonParameters.AuthorityOverride);
-
             var requestParameters = _clientApplicationBase.CreateRequestParameters(
                 commonParameters,
                 requestContext,
-                _clientApplicationBase.UserTokenCacheInternal,
-                customAuthority);
-
-            requestParameters.Account = account;
+                _clientApplicationBase.UserTokenCacheInternal);
 
             var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
@@ -76,42 +65,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, refreshTokenParameters);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private IAccount GetSingleAccountForLoginHint(string loginHint)
-        {
-            var accounts = _clientApplicationBase.UserTokenCacheInternal.GetAccounts(_clientApplicationBase.Authority)
-                .Where(
-                    a => !string.IsNullOrWhiteSpace(a.Username) &&
-                    a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (!accounts.Any())
-            {
-                throw new MsalUiRequiredException(
-                    MsalUiRequiredException.NoAccountForLoginHint,
-                    MsalErrorMessage.NoAccountForLoginHint);
-            }
-
-            if (accounts.Count() > 1)
-            {
-                throw new MsalUiRequiredException(
-                    MsalUiRequiredException.MultipleAccountsForLoginHint,
-                    MsalErrorMessage.MultipleAccountsForLoginHint);
-            }
-
-            return accounts.First();
-        }
-
-
-        private IAccount GetAccountFromParamsOrLoginHint(AcquireTokenSilentParameters silentParameters)
-        {
-            if (silentParameters.Account != null)
-            {
-                return silentParameters.Account;
-            }
-
-            return GetSingleAccountForLoginHint(silentParameters.LoginHint);
         }
     }
 }

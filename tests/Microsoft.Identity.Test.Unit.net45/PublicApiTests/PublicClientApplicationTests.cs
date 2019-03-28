@@ -930,7 +930,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
-            var authoriy = app.GetAuthority(new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
+            var authoriy = ClientApplicationBase.GetAuthority(app.ServiceBundle, new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.AuthorityInfo.CanonicalAuthority);
         }
 
@@ -940,7 +940,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
-            var authority = app.GetAuthority(
+            var authority = ClientApplicationBase.GetAuthority(
+                app.ServiceBundle,
                 new Account(
                     "objectId." + MsalTestConstants.Utid,
                     MsalTestConstants.Name,

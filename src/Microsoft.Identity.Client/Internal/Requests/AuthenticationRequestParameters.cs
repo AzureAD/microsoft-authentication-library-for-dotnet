@@ -40,26 +40,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthenticationRequestParameters
     {
+        private readonly AcquireTokenCommonParameters _commonParameters;
+
         public AuthenticationRequestParameters(
             IServiceBundle serviceBundle,
-            Authority customAuthority,
             ITokenCacheInternal tokenCache,
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext)
         {
-            Authority authorityInstance = customAuthority ?? (commonParameters.AuthorityOverride == null
-                                                                  ? Authority.CreateAuthority(serviceBundle)
-                                                                  : Authority.CreateAuthorityWithOverride(
-                                                                      serviceBundle,
-                                                                      commonParameters.AuthorityOverride));
+            _commonParameters = commonParameters;
 
-            Authority = authorityInstance;
+            Authority = commonParameters.AuthorityOverride == null
+                ? Authority.CreateAuthority(serviceBundle)
+                : Authority.CreateAuthorityWithOverride(serviceBundle, commonParameters.AuthorityOverride);
+
             ClientId = serviceBundle.Config.ClientId;
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
             Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
-            ApiId = commonParameters.ApiId;
             IsBrokerEnabled = serviceBundle.Config.IsBrokerEnabled;
 
             // Set application wide query parameters.
@@ -73,23 +72,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     ExtraQueryParameters[kvp.Key] = kvp.Value;
                 }
             }
-
-            Claims = commonParameters.Claims;
         }
 
-        public ApiEvent.ApiIds ApiId { get; }
+        public ApiTelemetryId ApiTelemId => _commonParameters.ApiTelemId;
+
+        public IEnumerable<KeyValuePair<string, string>> GetApiTelemetryFeatures()
+        {
+            return _commonParameters.GetApiTelemetryFeatures();
+        }
+
+        public ApiEvent.ApiIds ApiId => _commonParameters.ApiId;
 
         public RequestContext RequestContext { get; }
-        public Authority Authority { get; }
+        public Authority Authority { get; set; }
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
         public string TenantUpdatedCanonicalAuthority { get; set; }
-        public ICacheSessionManager CacheSessionManager { get; set; }
-        public SortedSet<string> Scope { get; set; }
-        public string ClientId { get; set; }
+        public ICacheSessionManager CacheSessionManager { get; }
+        public SortedSet<string> Scope { get; }
+        public string ClientId { get; }
         public Uri RedirectUri { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; }
-        public string Claims { get; }
+        public string Claims => _commonParameters.Claims;
+
+        public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
         internal bool IsBrokerEnabled { get; set; }
 

@@ -69,7 +69,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
 
-            AuthenticationRequestParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
 
@@ -128,11 +127,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
+        internal virtual void PreRun()
+        {
+        }
+
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken)
         {
-            LogRequestStarted(AuthenticationRequestParameters);
-            string accountId = AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier;
-            ApiEvent apiEvent = InitializeApiEvent(accountId);
+            ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
 
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
                 AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId,
@@ -140,6 +141,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 try
                 {
+                    PreRun();
+                    AuthenticationRequestParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
+                    LogRequestStarted(AuthenticationRequestParameters);
+
                     AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     LogReturnedToken(authenticationResult);
 
@@ -178,10 +183,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 ServiceBundle.PlatformProxy.CryptographyManager)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
+                ApiTelemId = AuthenticationRequestParameters.ApiTelemId,
                 AccountId = accountId ?? "",
                 TelemetryCorrelationId = AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId,
                 WasSuccessful = false
             };
+
+            foreach (var kvp in AuthenticationRequestParameters.GetApiTelemetryFeatures())
+            {
+                apiEvent[kvp.Key] = kvp.Value;
+            }
 
             if (AuthenticationRequestParameters.AuthorityInfo != null)
             {

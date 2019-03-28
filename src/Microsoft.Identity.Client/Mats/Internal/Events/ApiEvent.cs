@@ -81,6 +81,11 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
             _cryptographyManager = cryptographyManager;
         }
 
+        public ApiTelemetryId ApiTelemId
+        {
+            set => this[MsalTelemetryBlobEventNames.ApiTelemIdConstStrKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
+        }
+
         public ApiIds ApiId
         {
             set => this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
