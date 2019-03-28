@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         private const long AllowedMilliseconds = 10;
-        private const long DomainJoinedAllowedMilliseconds = 30;
+        private const long DomainJoinedAllowedMilliseconds = 100;
 
         [TestMethod]
         public void ValidateGetDeviceModelPerformance()
@@ -88,7 +88,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Ignore("Times out when running on hosted agent even with extended timeout. needs to be investigated")]
         public void ValidateIsDomainJoinedPerformance()
         {
             ValidateMethodPerformance(DomainJoinedAllowedMilliseconds, "IsDomainJoined", proxy => proxy.IsDomainJoined());
