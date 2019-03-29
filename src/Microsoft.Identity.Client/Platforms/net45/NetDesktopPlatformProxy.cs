@@ -251,8 +251,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             const int NameSamCompatible = 2;
 
-            var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\SQMClient");
+            var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\SQMClient", false);
             object val = key.GetValue("MachineId");
+            if (val == null)
+            {
+                return string.Empty;
+            }
+
             string win32DeviceId = val.ToString();
 
             string userName = GetUserPrincipalName(NameSamCompatible);

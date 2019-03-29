@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
 
         public const string TokenTypeKey = EventNamePrefix + "token_type";
 
-        public CacheEvent(string eventName) : base(eventName)
+        public CacheEvent(string eventName, string telemetryCorrelationId) : base(eventName, telemetryCorrelationId)
         {
         }
 

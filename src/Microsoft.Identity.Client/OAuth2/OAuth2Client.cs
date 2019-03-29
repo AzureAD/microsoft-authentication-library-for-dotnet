@@ -93,13 +93,13 @@ namespace Microsoft.Identity.Client.OAuth2
 
             HttpResponse response = null;
             Uri endpointUri = CreateFullEndpointUri(endPoint);
-            var httpEvent = new HttpEvent()
+            var httpEvent = new HttpEvent(requestContext.TelemetryCorrelationId)
             {
                 HttpPath = endpointUri,
                 QueryParams = endpointUri.Query
             };
 
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryCorrelationId, httpEvent))
+            using (_telemetryManager.CreateTelemetryHelper(httpEvent))
             {
                 if (method == HttpMethod.Post)
                 {

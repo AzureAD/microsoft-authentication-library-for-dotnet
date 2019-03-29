@@ -135,9 +135,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
 
-            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
-                AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId,
-                apiEvent))
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(apiEvent))
             {
                 try
                 {
@@ -180,12 +178,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             ApiEvent apiEvent = new ApiEvent(
                 AuthenticationRequestParameters.RequestContext.Logger,
-                ServiceBundle.PlatformProxy.CryptographyManager)
+                ServiceBundle.PlatformProxy.CryptographyManager,
+                AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
                 ApiTelemId = AuthenticationRequestParameters.ApiTelemId,
                 AccountId = accountId ?? "",
-                TelemetryCorrelationId = AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId,
                 WasSuccessful = false
             };
 

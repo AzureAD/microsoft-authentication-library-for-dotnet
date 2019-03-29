@@ -75,7 +75,10 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
         private readonly ICryptographyManager _cryptographyManager;
         private readonly ICoreLogger _logger;
 
-        public ApiEvent(ICoreLogger logger, ICryptographyManager cryptographyManager) : base(EventNamePrefix + "api_event")
+        public ApiEvent(
+            ICoreLogger logger,
+            ICryptographyManager cryptographyManager,
+            string telemetryCorrelationId) : base(EventNamePrefix + "api_event", telemetryCorrelationId)
         {
             _logger = logger;
             _cryptographyManager = cryptographyManager;
@@ -129,11 +132,6 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
             get { return this[WasSuccessfulKey] == true.ToString().ToLowerInvariant(); }
 #pragma warning restore CA1305 // Specify IFormatProvider
 
-        }
-
-        public string TelemetryCorrelationId
-        {
-            set => this[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey] = value;
         }
 
         public bool IsConfidentialClient

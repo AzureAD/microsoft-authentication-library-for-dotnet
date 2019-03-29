@@ -568,8 +568,14 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             string familyId)
         {
-            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryCorrelationId,
-                new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
+            var cacheEvent = new CacheEvent(
+                CacheEvent.TokenCacheLookup,
+                requestParams.RequestContext.TelemetryCorrelationId)
+                {
+                    TokenType = CacheEvent.TokenTypes.RT
+                };
+
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(cacheEvent))
             {
                 if (requestParams.Authority == null)
                 {

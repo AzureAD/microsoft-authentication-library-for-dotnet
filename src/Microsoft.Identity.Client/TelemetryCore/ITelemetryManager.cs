@@ -33,10 +33,10 @@ namespace Microsoft.Identity.Client.TelemetryCore
     {
         TelemetryCallback Callback { get; }
 
-        TelemetryHelper CreateTelemetryHelper(string telemetryCorrelationId, EventBase eventBase);
+        TelemetryHelper CreateTelemetryHelper(EventBase eventBase);
 
-        void StartEvent(string requestId, EventBase eventToStart);
-        void StopEvent(string requestId, EventBase eventToStop);
-        void Flush(string requestId);
+        void StartEvent(EventBase eventToStart);
+        void StopEvent(EventBase eventToStop);
+        void Flush(string telemetryCorrelationId);
     }
 }

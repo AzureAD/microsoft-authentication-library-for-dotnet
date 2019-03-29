@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
         public const string ServerErrorCodeKey = EventNamePrefix + "server_error_code";
         public const string ServerSubErrorCodeKey = EventNamePrefix + "server_sub_error_code";
 
-        public HttpEvent() : base(EventNamePrefix + "http_event") {}
+        public HttpEvent(string telemetryCorrelationId) : base(EventNamePrefix + "http_event", telemetryCorrelationId) {}
 
         public Uri HttpPath
         {
