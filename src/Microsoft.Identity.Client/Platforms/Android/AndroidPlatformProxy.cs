@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return string.Empty;
         }
 
-        public override string GetDpti()
+        public override string GetDevicePlatformTelemetryId()
         {
             // TODO(mats):
             return string.Empty;

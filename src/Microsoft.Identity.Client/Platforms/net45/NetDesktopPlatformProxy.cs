@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return string.Empty;
         }
 
-        public override string GetDpti()
+        public override string GetDevicePlatformTelemetryId()
         {
             const int NameSamCompatible = 2;
 

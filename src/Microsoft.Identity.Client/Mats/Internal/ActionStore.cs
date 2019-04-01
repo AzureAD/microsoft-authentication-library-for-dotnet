@@ -76,9 +76,9 @@ namespace Microsoft.Identity.Client.Mats.Internal
                             propertyBag.Add(ActionPropertyNames.OutcomeConstStrKey, MatsConverter.AsString(AuthOutcome.Incomplete));
                             propertyBag.ReadyForUpload = true;
                         }
-
-                        if (!propertyBag.ReadyForUpload)
+                        else
                         {
+                            // not ready for upload...
                             continue;
                         }
                     }

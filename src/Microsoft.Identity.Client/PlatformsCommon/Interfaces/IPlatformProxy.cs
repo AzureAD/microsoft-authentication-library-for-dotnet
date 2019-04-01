@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         IWebUIFactory GetWebUiFactory();
 
         // MATS related data
-        string GetDpti();
+        string GetDevicePlatformTelemetryId();
         string GetDeviceNetworkState();
         int GetMatsOsPlatformCode();
         string GetMatsOsPlatform();

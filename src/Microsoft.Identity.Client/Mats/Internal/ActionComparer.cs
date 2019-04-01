@@ -10,6 +10,13 @@ namespace Microsoft.Identity.Client.Mats.Internal
 {
     internal static class ActionComparer
     {
+        /// <summary>
+        /// Returns true if the actions are the same, either are ready for upload, and either is not aggregable.
+        /// This is used to determine whether or not we should aggregate this particular property bag of event data.
+        /// </summary>
+        /// <param name="action1"></param>
+        /// <param name="action2"></param>
+        /// <returns></returns>
         public static bool IsEquivalentClass(ActionPropertyBag action1, ActionPropertyBag action2)
         {
             if (action1 == action2 || action1.ReadyForUpload || action2.ReadyForUpload || !action1.IsAggregable || !action2.IsAggregable)

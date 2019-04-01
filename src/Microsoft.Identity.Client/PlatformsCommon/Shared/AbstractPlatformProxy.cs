@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         // MATS properties
-        public abstract string GetDpti();
+        public abstract string GetDevicePlatformTelemetryId();
         public abstract string GetDeviceNetworkState();
         public abstract int GetMatsOsPlatformCode();
         public abstract string GetMatsOsPlatform();

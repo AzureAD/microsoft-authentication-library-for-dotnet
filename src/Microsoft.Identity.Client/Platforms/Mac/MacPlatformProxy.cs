@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             return string.Empty;
         }
 
-        public override string GetDpti()
+        public override string GetDevicePlatformTelemetryId()
         {
             // TODO(mats):
             return string.Empty;

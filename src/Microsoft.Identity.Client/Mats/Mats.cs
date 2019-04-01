@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Mats
 
         public static IMats CreateMats(IApplicationConfiguration applicationConfiguration, IPlatformProxy platformProxy, IMatsConfig matsConfig)
         {
-            string dpti = platformProxy.GetDpti();
+            string dpti = platformProxy.GetDevicePlatformTelemetryId();
 
             if (!IsDeviceEnabled(matsConfig.AudienceType, dpti))
             {

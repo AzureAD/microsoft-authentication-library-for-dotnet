@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             return string.Empty;
         }
 
-        public override string GetDpti()
+        public override string GetDevicePlatformTelemetryId()
         {
             // TODO(mats):
             return string.Empty;
