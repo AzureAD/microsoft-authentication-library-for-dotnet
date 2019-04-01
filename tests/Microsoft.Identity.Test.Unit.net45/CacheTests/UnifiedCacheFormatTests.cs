@@ -155,24 +155,35 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Description("Test unified token cache")]
         public void AAD_CacheFormatValidationTest()
         {
-            IntitTestData("AADTestData.txt");
-            RunCacheFormatValidation();
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                IntitTestData("AADTestData.txt");
+                TestInitialize(harness.HttpManager);
+                RunCacheFormatValidation(harness);
+            }
         }
 
         [TestMethod]
         [Description("Test unified token cache")]
         public void MSA_CacheFormatValidationTest()
         {
-            IntitTestData("MSATestData.txt");
-            RunCacheFormatValidation();
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                IntitTestData("MSATestData.txt");
+                TestInitialize(harness.HttpManager);
+                RunCacheFormatValidation(harness);
+            }
         }
 
         [TestMethod]
         [Description("Test unified token cache")]
         public void B2C_NoTenantId_CacheFormatValidationTest()
         {
-            IntitTestData("B2CNoTenantIdTestData.txt");
-            RunCacheFormatValidation();
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                IntitTestData("B2CNoTenantIdTestData.txt");
+                RunCacheFormatValidation(harness);
+            }
         }
 
         [TestMethod]
@@ -182,51 +193,49 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         // test data generated based on GUID, Msal uses tenantId from passed in authotiry
         public void B2C_WithTenantId_CacheFormatValidationTest()
         {
-            IntitTestData("B2CWithTenantIdTestData.txt");
-            RunCacheFormatValidation();
-        }
-
-        public void RunCacheFormatValidation()
-        {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                TestInitialize(harness.HttpManager);
-
-                PublicClientApplication app = PublicClientApplicationBuilder
-                                              .Create(_clientId)
-                                              .WithAuthority(new Uri(_requestAuthority), true)
-                                              .WithHttpManager(harness.HttpManager)
-                                              .BuildConcrete();
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success,
-                    app.AppConfig.RedirectUri + "?code=some-code"));
-
-                //add mock response for tenant endpoint discovery
-                harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityHomeTenant)
-                });
-                harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(_tokenResponse)
-                });
-
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-
-                Assert.IsNotNull(result);
-
-                ValidateAt(app.UserTokenCacheInternal);
-                ValidateRt(app.UserTokenCacheInternal);
-                ValidateIdToken(app.UserTokenCacheInternal);
-                ValidateAccount(app.UserTokenCacheInternal);
+                IntitTestData("B2CWithTenantIdTestData.txt");
+                RunCacheFormatValidation(harness);
             }
+        }
+
+        private void RunCacheFormatValidation(MockHttpAndServiceBundle harness)
+        {
+            PublicClientApplication app = PublicClientApplicationBuilder
+                                          .Create(_clientId)
+                                          .WithAuthority(new Uri(_requestAuthority), true)
+                                          .WithHttpManager(harness.HttpManager)
+                                          .BuildConcrete();
+
+            MsalMockHelpers.ConfigureMockWebUI(
+                app.ServiceBundle.PlatformProxy,
+                new AuthorizationResult(AuthorizationStatus.Success,
+                app.AppConfig.RedirectUri + "?code=some-code"));
+
+            //add mock response for tenant endpoint discovery
+            harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityHomeTenant)
+            });
+            harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(_tokenResponse)
+            });
+
+            AuthenticationResult result = app
+                .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                .ExecuteAsync(CancellationToken.None)
+                .Result;
+
+            Assert.IsNotNull(result);
+
+            ValidateAt(app.UserTokenCacheInternal);
+            ValidateRt(app.UserTokenCacheInternal);
+            ValidateIdToken(app.UserTokenCacheInternal);
+            ValidateAccount(app.UserTokenCacheInternal);
         }
 
         private void ValidateAt(ITokenCacheInternal cache)
@@ -283,7 +292,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(_expectedRtCacheKeyIosAccount, key.iOSAccount);
             Assert.AreEqual(_expectedRtCacheKeyIosGeneric, key.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, key.iOSType);
-
         }
 
         private void ValidateIdToken(ITokenCacheInternal cache)
@@ -301,7 +309,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(_expectedIdTokenCacheKeyIosAccount, key.iOSAccount);
             Assert.AreEqual(_expectedIdTokenCacheKeyIosGeneric, key.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.IdToken, key.iOSType);
-
         }
 
         private void ValidateAccount(ITokenCacheInternal cache)
@@ -319,7 +326,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(_expectedAccountCacheKeyIosAccount, key.iOSAccount);
             Assert.AreEqual(_expectedAccountCacheKeyIosGeneric, key.iOSGeneric);
             Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["MSSTS"], key.iOSType);
-
         }
 
         private void ValidateCacheEntityValue(string expectedEntityValue, ICollection<string> entities)

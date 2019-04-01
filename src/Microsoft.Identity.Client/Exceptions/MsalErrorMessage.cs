@@ -275,5 +275,7 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string MsalExceptionFailedToParse = "Attempted to deserialize an MsalException but the type was unknown.";
 
         public const string AkaMsmsalnet3BreakingChanges = "See https://aka.ms/msal-net-3-breaking-changes";
+
+        public const string B2CHostNotTrusted = "The B2C authority that was used is not in the trusted host list. ";
     }
 }
