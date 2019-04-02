@@ -108,6 +108,5 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         // Test Constants
         public const int ResultCheckPolliInterval = 1000;
         public const int MaximumResultCheckRetryAttempts = 20;
-
     }
 }
