@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Mats
 {
-    internal class Mats : IMats
+    internal class MatsTelemetryClient : IMatsTelemetryClient
     {
         private readonly IErrorStore _errorStore;
         private readonly IUploader _uploader;
@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Mats
         private readonly bool _isScenarioUploadDisabled;
         private readonly object _lockObject = new object();
 
-        public static IMats CreateMats(IApplicationConfiguration applicationConfiguration, IPlatformProxy platformProxy, IMatsConfig matsConfig)
+        public static IMatsTelemetryClient CreateMats(IApplicationConfiguration applicationConfiguration, IPlatformProxy platformProxy, IMatsConfig matsConfig)
         {
             string dpti = platformProxy.GetDevicePlatformTelemetryId();
 
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Mats
             // it's this way in mats c++
             bool isScenarioUploadDisabled = true;
 
-            return new Mats(
+            return new MatsTelemetryClient(
                 applicationConfiguration,
                 platformProxy,
                 errorStore,
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Mats
                 isScenarioUploadDisabled);
         }
 
-        private Mats(
+        private MatsTelemetryClient(
             IApplicationConfiguration applicationConfiguration,
             IPlatformProxy platformProxy,
             IErrorStore errorStore,

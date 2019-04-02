@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
     {
         private readonly IConfidentialClientApplicationExecutor _executor;
 
-        public MatsConfidentialClientExecutor(IConfidentialClientApplicationExecutor executor, IMats mats)
+        public MatsConfidentialClientExecutor(IConfidentialClientApplicationExecutor executor, IMatsTelemetryClient mats)
             : base(mats)
         {
             _executor = executor;

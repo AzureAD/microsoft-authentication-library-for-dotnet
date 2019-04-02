@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Core
             if (config.MatsConfig != null)
             {
                 // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
-                Mats = Client.Mats.Mats.CreateMats(Config, PlatformProxy, config.MatsConfig);
+                Mats = Client.Mats.MatsTelemetryClient.CreateMats(Config, PlatformProxy, config.MatsConfig);
                 TelemetryManager = Mats?.TelemetryManager ?? new TelemetryManager(Config, PlatformProxy, config.TelemetryCallback);
             }
             else
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Core
         public IApplicationConfiguration Config { get; }
 
         /// <inheritdoc />
-        public IMats Mats { get; }
+        public IMatsTelemetryClient Mats { get; }
 
         public static ServiceBundle Create(ApplicationConfiguration config)
         {

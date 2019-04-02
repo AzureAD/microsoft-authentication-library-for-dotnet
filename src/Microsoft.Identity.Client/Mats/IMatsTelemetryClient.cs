@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Mats
         OnPremUnspecified
     }
 
-    internal interface IMats : IDisposable
+    internal interface IMatsTelemetryClient : IDisposable
     {
         ITelemetryManager TelemetryManager { get; }
 

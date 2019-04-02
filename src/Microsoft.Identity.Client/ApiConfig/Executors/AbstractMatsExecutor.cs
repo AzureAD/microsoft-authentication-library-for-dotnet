@@ -11,9 +11,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
     internal abstract class AbstractMatsExecutor
     {
-        private readonly IMats _mats;
+        private readonly IMatsTelemetryClient _mats;
 
-        protected AbstractMatsExecutor(IMats mats)
+        protected AbstractMatsExecutor(IMatsTelemetryClient mats)
         {
             _mats = mats;
         }

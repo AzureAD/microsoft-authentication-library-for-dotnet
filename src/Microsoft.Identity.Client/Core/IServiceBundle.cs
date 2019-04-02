@@ -44,6 +44,6 @@ namespace Microsoft.Identity.Client.Core
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
-        IMats Mats { get; }
+        IMatsTelemetryClient Mats { get; }
     }
 }
