@@ -30,7 +30,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Client
         AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenByIntegratedWindowsAuthParameterBuilder>
     {
         private AcquireTokenByIntegratedWindowsAuthParameters Parameters { get; } = new AcquireTokenByIntegratedWindowsAuthParameters();
+
+        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenByIntegratedWindowsAuth;
 
         /// <inheritdoc />
         internal AcquireTokenByIntegratedWindowsAuthParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
@@ -63,6 +65,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder WithUsername(string username)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithUsername);
             Parameters.Username = username;
             return this;
         }

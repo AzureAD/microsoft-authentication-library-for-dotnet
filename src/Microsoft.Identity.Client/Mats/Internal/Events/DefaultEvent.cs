@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -28,14 +28,15 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Mats.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client.Mats.Internal.Events
 {
     internal class DefaultEvent : EventBase
     {
-        public DefaultEvent(IPlatformProxy platformProxy, string clientId, IDictionary<string, int> eventCount) 
-            : base(EventNamePrefix + "default_event")
+        public DefaultEvent(IPlatformProxy platformProxy, string telemetryCorrelationId, string clientId, IDictionary<string, int> eventCount) 
+            : base(EventNamePrefix + "default_event", telemetryCorrelationId)
         {
             this[EventNamePrefix + "client_id"] = clientId;
             this[EventNamePrefix + "sdk_platform"] = platformProxy.GetProductName()?.ToLowerInvariant();
@@ -43,9 +44,9 @@ namespace Microsoft.Identity.Client.TelemetryCore
             this[EventNamePrefix + "application_name"] = HashPersonalIdentifier(platformProxy.CryptographyManager, platformProxy.GetCallingApplicationName()?.ToLowerInvariant());
             this[EventNamePrefix + "application_version"] = HashPersonalIdentifier(platformProxy.CryptographyManager, platformProxy.GetCallingApplicationVersion()?.ToLowerInvariant());
             this[EventNamePrefix + "device_id"] = HashPersonalIdentifier(platformProxy.CryptographyManager, platformProxy.GetDeviceId()?.ToLowerInvariant());
-            this[EventNamePrefix + "ui_event_count"] = GetEventCount(EventNamePrefix + "ui_event", eventCount);
-            this[EventNamePrefix + "http_event_count"] = GetEventCount(EventNamePrefix + "http_event", eventCount);
-            this[EventNamePrefix + "cache_event_count"] = GetEventCount(EventNamePrefix + "cache_event", eventCount);
+            this[MsalTelemetryBlobEventNames.UiEventCountTelemetryBatchKey] = GetEventCount(EventNamePrefix + "ui_event", eventCount);
+            this[MsalTelemetryBlobEventNames.HttpEventCountTelemetryBatchKey] = GetEventCount(EventNamePrefix + "http_event", eventCount);
+            this[MsalTelemetryBlobEventNames.CacheEventCountConstStrKey] = GetEventCount(EventNamePrefix + "cache_event", eventCount);
         }
 
         private string GetEventCount(string eventName, IDictionary<string, int> eventCount)

@@ -29,11 +29,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 #if iOS
 using UIKit;
@@ -57,6 +57,8 @@ namespace Microsoft.Identity.Client
     {
         private object _ownerWindow;
         private AcquireTokenInteractiveParameters Parameters { get; } = new AcquireTokenInteractiveParameters();
+
+        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenInteractive;
 
         internal AcquireTokenInteractiveParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
             : base(publicClientApplicationExecutor)
@@ -82,6 +84,7 @@ namespace Microsoft.Identity.Client
 
         internal AcquireTokenInteractiveParameterBuilder WithCurrentSynchronizationContext()
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithCurrentSynchronizationContext);
             Parameters.UiParent.SynchronizationContext = SynchronizationContext.Current;
             return this;
         }
@@ -97,6 +100,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithEmbeddedWebView);
             Parameters.UseEmbeddedWebView = useEmbeddedWebView;
             return this;
         }
@@ -110,6 +114,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithLoginHint(string loginHint)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithLoginHint);
             Parameters.LoginHint = loginHint;
             return this;
         }
@@ -122,6 +127,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithAccount(IAccount account)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAccount);
             Parameters.Account = account;
             return this;
         }
@@ -133,6 +139,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithExtraScopesToConsent(IEnumerable<string> extraScopesToConsent)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithExtraScopesToConsent);
             Parameters.ExtraScopesToConsent = extraScopesToConsent;
             return this;
         }
@@ -145,12 +152,14 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithPrompt(Prompt prompt)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPrompt);
             Parameters.Prompt = prompt;
             return this;
         }
 
         private AcquireTokenInteractiveParameterBuilder WithParent(object parent)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithParent);
             _ownerWindow = parent;
             return this;
         }
