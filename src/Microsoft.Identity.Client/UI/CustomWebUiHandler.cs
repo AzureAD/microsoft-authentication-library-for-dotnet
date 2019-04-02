@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.UI
                 if (uri == null || String.IsNullOrWhiteSpace(uri.Query))
                 {
                     throw new MsalClientException(
-                        MsalError.CustomWebUiReturnedInvalidUri,
+                        MsalClientException.CustomWebUiReturnedInvalidUri,
                         MsalErrorMessage.CustomWebUiReturnedInvalidUri);
                 }
 
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.UI
                 }
 
                 throw new MsalClientException(
-                    MsalError.CustomWebUiRedirectUriMismatch,
+                    MsalClientException.CustomWebUiRedirectUriMismatch,
                     MsalErrorMessage.CustomWebUiRedirectUriMismatch(
                         uri.AbsolutePath,
                         redirectUri.AbsolutePath));

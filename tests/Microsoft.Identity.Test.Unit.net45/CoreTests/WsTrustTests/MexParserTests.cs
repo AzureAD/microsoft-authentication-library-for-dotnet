@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 }
                 catch (MsalException ex)
                 {
-                    Assert.AreEqual(MsalError.AccessingWsMetadataExchangeFailed, ex.ErrorCode);
+                    Assert.AreEqual(MsalServiceException.AccessingWsMetadataExchangeFailed, ex.ErrorCode);
                 }
             }
         }

@@ -50,6 +50,26 @@ namespace Microsoft.Identity.Client
         public const string UnknownError = "unknown_error";
 
         /// <summary>
+        /// Encoded token too long.
+        /// </summary>
+        public const string EncodedTokenTooLong = "encoded_token_too_long";
+
+        /// <summary>
+        /// Invalid owner window type.
+        /// </summary>
+        public const string InvalidOwnerWindowType = "invalid_owner_window_type";
+
+        /// <summary>
+        /// Authentication failed.
+        /// </summary>
+        public const string AuthenticationFailed = "authentication_failed";
+
+        /// <summary>
+        /// Access denied.
+        /// </summary>
+        public const string AccessDenied = "access_denied";
+
+        /// <summary>
         /// Initializes a new instance of the exception class.
         /// </summary>
         public MsalException()
@@ -181,7 +201,7 @@ namespace Microsoft.Identity.Client
                 return ex;
             }
 
-            throw new MsalClientException(MsalError.JsonParseError,  MsalErrorMessage.MsalExceptionFailedToParse);
+            throw new MsalClientException(MsalClientException.JsonParseError,  MsalErrorMessage.MsalExceptionFailedToParse);
         }
 
         #endregion // SERIALIZATION

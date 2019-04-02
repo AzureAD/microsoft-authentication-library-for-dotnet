@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                         Query = string.Format(
                             CultureInfo.InvariantCulture,
                             "error={0}&error_description={1}",
-                            MsalError.NonHttpsRedirectNotSupported,
+                            MsalClientException.NonHttpsRedirectNotSupported,
                             MsalErrorMessage.NonHttpsRedirectNotSupported)
                     };
                     Finish(Activity, errorUri.ToString());

@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     try
                     {
-                        httpEvent.OauthErrorCode = MsalError.UnknownError;
+                        httpEvent.OauthErrorCode = MsalException.UnknownError;
                         // In cases where the end-point is not found (404) response.body will be empty.
                         // CreateResponse handles throwing errors - in the case of HttpStatusCode <> and ErrorResponse will be created.
                         if (!string.IsNullOrWhiteSpace(response.Body))
@@ -192,20 +192,20 @@ namespace Microsoft.Identity.Client.OAuth2
             catch (SerializationException) // in the rare case we get an error response we cannot deserialize
             {
                 exceptionToThrow = MsalExceptionFactory.GetServiceException(
-                    MsalError.NonParsableOAuthError,
+                    MsalServiceException.NonParsableOAuthError,
                     MsalErrorMessage.NonParsableOAuthError,
                     response);
             }
             catch (Exception ex)
             {
-                exceptionToThrow = MsalExceptionFactory.GetServiceException(MsalError.UnknownError, response.Body, response, ex);
+                exceptionToThrow = MsalExceptionFactory.GetServiceException(MsalException.UnknownError, response.Body, response, ex);
             }
 
             if (exceptionToThrow == null)
             {
                 exceptionToThrow = response.StatusCode != HttpStatusCode.NotFound ?
-                    MsalExceptionFactory.GetServiceException(MsalError.HttpStatusCodeNotOk, httpErrorCodeMessage, response) :
-                    MsalExceptionFactory.GetServiceException(MsalError.HttpStatusNotFound, httpErrorCodeMessage, response);
+                    MsalExceptionFactory.GetServiceException(MsalServiceException.HttpStatusCodeNotOk, httpErrorCodeMessage, response) :
+                    MsalExceptionFactory.GetServiceException(MsalServiceException.HttpStatusNotFound, httpErrorCodeMessage, response);
             }
 
             if (shouldLogAsError)
@@ -237,10 +237,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 return null;
             }
             
-            if (MsalError.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
+            if (MsalUiRequiredException.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
             {
                 exceptionToThrow = MsalExceptionFactory.GetUiRequiredException(
-                    MsalError.InvalidGrantError,
+                    MsalUiRequiredException.InvalidGrantError,
                     msalTokenResponse.ErrorDescription,
                     response);
             }

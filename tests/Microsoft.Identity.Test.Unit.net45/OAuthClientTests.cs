@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(429, serverEx.StatusCode);
                     Assert.AreEqual(MockHelpers.TooManyRequestsContent, serverEx.ResponseBody);
                     Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
-                    Assert.AreEqual(MsalError.NonParsableOAuthError, serverEx.ErrorCode);
+                    Assert.AreEqual(MsalServiceException.NonParsableOAuthError, serverEx.ErrorCode);
                 });
         }
 
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.IsNotNull(serverEx);
                     Assert.AreEqual((int)HttpStatusCode.BadRequest, serverEx.StatusCode);
                     Assert.IsNotNull(serverEx.ResponseBody);
-                    Assert.AreEqual(MsalError.HttpStatusCodeNotOk, serverEx.ErrorCode);
+                    Assert.AreEqual(MsalServiceException.HttpStatusCodeNotOk, serverEx.ErrorCode);
                 });
         }
 
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.IsNotNull(serverEx);
                     Assert.AreEqual((int)HttpStatusCode.BadRequest, serverEx.StatusCode);
                     Assert.IsNull(serverEx.ResponseBody);
-                    Assert.AreEqual(MsalError.HttpStatusCodeNotOk, serverEx.ErrorCode);
+                    Assert.AreEqual(MsalServiceException.HttpStatusCodeNotOk, serverEx.ErrorCode);
                 });
         }
 
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.IsNotNull(serverEx);
                     Assert.AreEqual((int)HttpStatusCode.BadRequest, serverEx.StatusCode);
                     Assert.IsNotNull(serverEx.ResponseBody);
-                    Assert.AreEqual(MsalError.HttpStatusCodeNotOk, serverEx.ErrorCode);
+                    Assert.AreEqual(MsalServiceException.HttpStatusCodeNotOk, serverEx.ErrorCode);
                 });
         }
 
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.IsNotNull(serverEx);
                     Assert.AreEqual((int)HttpStatusCode.NotFound, serverEx.StatusCode);
                     Assert.IsNotNull(serverEx.ResponseBody);
-                    Assert.AreEqual(MsalError.HttpStatusNotFound, serverEx.ErrorCode);
+                    Assert.AreEqual(MsalServiceException.HttpStatusNotFound, serverEx.ErrorCode);
                 });
         }
 

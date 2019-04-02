@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
 
                     var ex = AssertException.TaskThrows<MsalClientException>(() => request.ExecuteAsync(CancellationToken.None));
-                    Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
+                    Assert.AreEqual(MsalClientException.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
 
                 });
         }
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     var ex = AssertException.TaskThrows<MsalClientException>(
                         () => request.ExecuteAsync(CancellationToken.None));
-                    Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
+                    Assert.AreEqual(MsalClientException.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
                 });
         }
 

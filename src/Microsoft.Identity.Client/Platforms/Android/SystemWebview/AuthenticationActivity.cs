@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             if (Intent == null)
             {
                 SendError(
-                    MsalError.UnresolvableIntentError,
+                    MsalClientException.UnresolvableIntentError,
                     "Received null data intent from caller");
                 return;
             }
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 catch (ActivityNotFoundException ex)
                 {
                     throw MsalExceptionFactory.GetClientException(
-                           MsalError.AndroidActivityNotFound,
+                           MsalClientException.AndroidActivityNotFound,
                            MsalErrorMessage.AndroidActivityNotFound, ex);
                 }
             }

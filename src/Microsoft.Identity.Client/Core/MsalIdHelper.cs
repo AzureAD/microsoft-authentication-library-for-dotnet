@@ -1,4 +1,4 @@
-// ------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 // 
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Core
             if (platformProxy == null)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.PlatformNotSupported,
+                    MsalClientException.PlatformNotSupported,
                     MsalErrorMessage.PlatformNotSupported);
             }
 

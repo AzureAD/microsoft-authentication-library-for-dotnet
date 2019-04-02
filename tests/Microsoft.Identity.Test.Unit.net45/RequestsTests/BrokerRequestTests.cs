@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     var exc = exception as MsalServiceException;
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.BrokerResponseReturnedError, exc.ErrorCode);
+                    Assert.AreEqual(MsalServiceException.BrokerResponseReturnedError, exc.ErrorCode);
                     Assert.AreEqual(MsalErrorMessage.BrokerResponseReturnedError, exc.Message);
                 });
         }

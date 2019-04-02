@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             catch (Exception ex)
             {
                 requestContext.Logger.ErrorPii(ex);
-                throw new MsalException(MsalClientException.AuthenticationUiFailedError, "WAB authentication failed",
+                throw new MsalException(MsalClientException.AuthenticationUiFailed, "WAB authentication failed",
                     ex);
             }
 

@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                throw MsalExceptionFactory.GetClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheDictionarySerializerFailedParse, ex);
+                throw MsalExceptionFactory.GetClientException(MsalClientException.JsonParseError, MsalErrorMessage.TokenCacheDictionarySerializerFailedParse, ex);
             }
 
             if (cacheDict == null || cacheDict.Count == 0)

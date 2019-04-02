@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             catch (Exception ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.AuthenticationUiFailed, 
+                    MsalClientException.AuthenticationUiFailed, 
                     "See inner exception for details", 
                     ex);
             }

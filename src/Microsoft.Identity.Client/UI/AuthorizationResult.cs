@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.UI
         {
             if (Status == AuthorizationStatus.UserCancel)
             {
-                Error = MsalError.AuthenticationCanceledError;
+                Error = MsalClientException.AuthenticationCanceledError;
                 #if ANDROID
                 ErrorDescription = MsalErrorMessage.AuthenticationCanceledAndroid;
                 #else
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.UI
             }
             else if (Status == AuthorizationStatus.UnknownError)
             {
-                Error = MsalError.UnknownError;
+                Error = MsalException.UnknownError;
                 ErrorDescription = MsalErrorMessage.Unknown;
             }
             else
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.UI
                 }
                 else
                 {
-                    Error = MsalError.AuthenticationFailed;
+                    Error = MsalClientException.AuthenticationFailed;
                     ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
                     Status = AuthorizationStatus.UnknownError;
                 }
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.UI
             }
             else
             {
-                Error = MsalError.AuthenticationFailed;
+                Error = MsalClientException.AuthenticationFailed;
                 ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
                 Status = AuthorizationStatus.UnknownError;
             }

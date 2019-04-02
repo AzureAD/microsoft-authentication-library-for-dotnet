@@ -1,4 +1,4 @@
-// ------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             catch (Exception ex)
             {
                 throw new MsalClientException(
-                    MsalError.AuthenticationUiFailed,
+                    MsalClientException.AuthenticationUiFailed,
                     "See inner exception for details",
                     ex);
             }

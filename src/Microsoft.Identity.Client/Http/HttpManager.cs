@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client.Http
                 if (timeoutException != null)
                 {
                     throw MsalExceptionFactory.GetServiceException(
-                        MsalError.RequestTimeout,
+                        MsalServiceException.RequestTimeout,
                         "Request to the endpoint timed out.",
                         null,
                         innerException: timeoutException); // no http response to add more details to this exception
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client.Http
                 }
 
                 throw MsalExceptionFactory.GetServiceException(
-                        MsalError.ServiceNotAvailable,
+                        MsalServiceException.ServiceNotAvailable,
                     "Service is unavailable to process the request",
                     response);
             }

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 !request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {
                 var result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
-                result.Error = MsalError.NonHttpsRedirectNotSupported;
+                result.Error = MsalClientException.NonHttpsRedirectNotSupported;
                 result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
                 _callbackMethod(result);
                 WebView.DecideIgnore(decisionToken);

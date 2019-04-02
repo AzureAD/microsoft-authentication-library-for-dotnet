@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Http
             if (redirectUri == null)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.NoRedirectUri,
+                    MsalClientException.NoRedirectUri,
                     MsalErrorMessage.NoRedirectUri);
 
             }
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Http
                 Constants.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.DefaultRedirectUriIsInvalid,
+                    MsalClientException.DefaultRedirectUriIsInvalid,
                     string.Format(
                         CultureInfo.InvariantCulture,
                         MsalErrorMessage.DefaultRedirectUriIsInvalid,

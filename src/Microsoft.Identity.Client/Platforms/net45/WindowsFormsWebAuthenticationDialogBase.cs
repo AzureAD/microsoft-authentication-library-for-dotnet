@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
             else
             {
-                throw new MsalException(MsalError.InvalidOwnerWindowType,
+                throw new MsalException(MsalException.InvalidOwnerWindowType,
                     "Invalid owner window type. Expected types are IWin32Window or IntPtr (for window handle).");
             }
 
@@ -399,12 +399,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
             {
                 string format = "The browser based authentication dialog failed to complete. Reason: {0}";
                 string message = string.Format(CultureInfo.InvariantCulture, format, NavigateErrorStatus.Messages[statusCode]);
-                return new MsalClientException(MsalClientException.AuthenticationUiFailedError, message);
+                return new MsalClientException(MsalClientException.AuthenticationUiFailed, message);
             }
 
             string formatUnknown = "The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}";
             string messageUnknown = string.Format(CultureInfo.InvariantCulture, formatUnknown, statusCode);
-            return new MsalClientException(MsalClientException.AuthenticationUiFailedError, messageUnknown);
+            return new MsalClientException(MsalClientException.AuthenticationUiFailed, messageUnknown);
         }
 
         private sealed class WindowsFormsWin32Window : IWin32Window

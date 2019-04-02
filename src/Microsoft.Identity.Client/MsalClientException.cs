@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         /// implementing chrome tabs is missing on the Android phone (that's only an example: this exception can apply to other
         /// platforms as well)
         /// </summary>
-        public const string AuthenticationUiFailedError = "authentication_ui_failed";
+        public const string AuthenticationUiFailed = "authentication_ui_failed";
 
         /// <summary>
         /// Authentication canceled.
@@ -133,6 +133,117 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         public const string BrokerResponseHashMismatch = "Unencrypted broker response hash did not match the expected hash";
+
+        /// <summary>
+        /// RedirectUri validation failed.
+        /// </summary>
+        public const string DefaultRedirectUriIsInvalid = "redirect_uri_validation_failed";
+
+        /// <summary>
+        /// No Redirect URI.
+        /// </summary>
+        public const string NoRedirectUri = "no_redirect_uri";
+
+        /// <summary>
+        /// No Redirect URI.
+        /// </summary>
+        public const string B2CHostNotTrusted = "B2C_host_not_trusted";
+
+        /// <summary>
+        /// Error code used when the CustomWebUI has returned an uri, but it does not match the Authroity and AbsolutePath of 
+        /// the configured redirect uri.
+        /// </summary>
+        public const string CustomWebUiRedirectUriMismatch = "custom_webui_invalid_mismatch";
+
+        /// <summary>
+        /// Error code used when the CustomWebUI has returned an uri, but it is invalid - it is either null or has no code.
+        /// Consider throwing an exception if you are unable to intercept the uri containing the code. 
+        /// </summary>
+        public const string CustomWebUiReturnedInvalidUri = "custom_webui_returned_invalid_uri";
+
+        /// <summary>
+        /// TODO: UPDATE DOCUMENTATION!
+        /// On Android, the UIParent constructor with an Activiy parameter must be used. See https://aka.ms/msal-interactive-android
+        /// </summary>
+        public const string ActivityRequired = "activity_required";
+
+        /// <summary>
+        /// Integrated Windows Auth is only supported for "federated" users
+        /// </summary>
+        public const string IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user";
+
+        /// <summary>
+        /// In the context of Device code flow (See https://aka.ms/msal-net-device-code-flow),
+        /// this error happens when the device code expired before the user signed-in on another device (this is usually after 15 mins).
+        /// 
+        /// Mitigation: None. Inform the user that they took too long to sign-in at the provided URL and enter the provided code.
+        /// </summary>
+        public const string CodeExpired = "code_expired";
+
+        /// <summary>
+        /// Cannot get the user from the OS (UWP)
+        /// </summary>
+        public const string UapCannotFindUpn = "uap_cannot_find_upn";
+
+        /// <summary>
+        /// Cannot access the user from the OS (UWP)
+        /// </summary>
+        public const string UapCannotFindDomainUser = "user_information_access_failed";
+
+        /// <summary>
+        /// Password is required for managed user.
+        /// </summary>
+        public const string PasswordRequiredForManagedUserError = "password_required_for_managed_user";
+
+        /// <summary>
+        /// Failed to get user name.
+        /// </summary>
+        public const string GetUserNameFailed = "get_user_name_failed";
+
+        /// <summary>
+        /// Unknown User.
+        /// </summary>
+        public const string UnknownUser = "unknown_user";
+
+        /// <summary>
+        /// Unknown User Type.
+        /// </summary>
+        public const string UnknownUserType = "unknown_user_type";
+
+        /// <summary>
+        /// Parsing WS-Trust Response Failed.
+        /// </summary>
+        public const string ParsingWsTrustResponseFailed = "parsing_wstrust_response_failed";
+
+        /// <summary>
+        /// WS-Trust Endpoint Not Found in Metadata Document.
+        /// </summary>
+        public const string WsTrustEndpointNotFoundInMetadataDocument = "wstrust_endpoint_not_found";
+
+        /// <summary>
+        /// Parsing WS Metadata Exchange Failed.
+        /// </summary>
+        public const string ParsingWsMetadataExchangeFailed = "parsing_ws_metadata_exchange_failed";
+
+        /// <summary>
+        /// User Realm Discovery Failed.
+        /// </summary>
+        public const string UserRealmDiscoveryFailed = "user_realm_discovery_failed";
+
+        /// <summary>
+        /// User Mismatch.
+        /// </summary>
+        public const string UserMismatch = "user_mismatch";
+
+        /// <summary>
+        /// Invalid authority type.
+        /// </summary>
+        public const string InvalidAuthorityType = "invalid_authority_type";
+
+        /// <summary>
+        /// Cannot Access User Information or User is Not Domain Joined.
+        /// </summary>
+        public const string CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed";
 
 #if iOS
         /// <summary>

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             catch (Exception ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.AuthenticationUiFailedError, 
+                    MsalClientException.AuthenticationUiFailed, 
                     "AuthenticationActivity failed to start", 
                     ex);
             }

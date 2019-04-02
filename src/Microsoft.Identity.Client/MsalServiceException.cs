@@ -80,6 +80,44 @@ namespace Microsoft.Identity.Client
         public const string InvalidAuthority = "invalid_authority";
 
         /// <summary>
+        /// Error code used when the http response returns HttpStatusCode.NotFound
+        /// </summary>
+        public const string HttpStatusNotFound = "not_found";
+
+        /// <summary>
+        /// ErrorCode used when the http response returns something different from 200 (OK)
+        /// </summary>
+        /// <remarks>
+        /// HttpStatusCode.NotFound have a specific error code. <see cref="MsalServiceException.HttpStatusNotFound"/>
+        /// </remarks>
+        public const string HttpStatusCodeNotOk = "http_status_not_200";
+
+        /// <summary>
+        /// Broker response returned an error
+        /// </summary>
+        public const string BrokerResponseReturnedError = "broker_response_returned_error";
+
+        /// <summary>
+        /// An error response was returned by the OAuth2 server and it could not be parsed
+        /// </summary>
+        public const string NonParsableOAuthError = "non_parsable_oauth_error";
+
+        /// <summary>
+        /// Federated service returned error.
+        /// </summary>
+        public const string FederatedServiceReturnedError = "federated_service_returned_error";
+
+        /// <summary>
+        /// Accessing WS Metadata Exchange Failed.
+        /// </summary>
+        public const string AccessingWsMetadataExchangeFailed = "accessing_ws_metadata_exchange_failed";
+
+        /// <summary>
+        /// Authority validation failed.
+        /// </summary>
+        public const string AuthorityValidationFailed = "authority_validation_failed";
+
+        /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code, error message and a reference to the inner exception that is the cause of
         /// this exception.

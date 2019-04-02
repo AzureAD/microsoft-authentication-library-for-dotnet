@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Instance
             if (authorityInfo.AuthorityType == AuthorityType.Adfs && string.IsNullOrEmpty(userPrincipalName))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.UpnRequired,
+                    MsalServiceException.UpnRequired,
                     MsalErrorMessage.UpnRequiredForAuthroityValidation);
             }
 
@@ -93,21 +93,21 @@ namespace Microsoft.Identity.Client.Instance
             if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.TenantDiscoveryFailedError,
+                    MsalClientException.TenantDiscoveryFailedError,
                     "Authorize endpoint was not found in the openid configuration");
             }
 
             if (string.IsNullOrEmpty(edr.TokenEndpoint))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.TenantDiscoveryFailedError,
+                    MsalClientException.TenantDiscoveryFailedError,
                     "Token endpoint was not found in the openid configuration");
             }
 
             if (string.IsNullOrEmpty(edr.Issuer))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.TenantDiscoveryFailedError,
+                    MsalClientException.TenantDiscoveryFailedError,
                     "Issuer was not found in the openid configuration");
             }
 

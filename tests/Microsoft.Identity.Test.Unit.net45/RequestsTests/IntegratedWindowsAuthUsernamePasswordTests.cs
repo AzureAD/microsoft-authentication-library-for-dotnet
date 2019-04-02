@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ConfigureAwait(false));
 
                 // Assert
-                Assert.AreEqual(MsalError.IntegratedWindowsAuthNotSupportedForManagedUser, exception.ErrorCode);
+                Assert.AreEqual(MsalClientException.IntegratedWindowsAuthNotSupportedForManagedUser, exception.ErrorCode);
             }
         }
 
@@ -268,7 +268,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ConfigureAwait(false));
 
                 // Assert
-                Assert.AreEqual(MsalError.UnknownUserType, exception.ErrorCode);
+                Assert.AreEqual(MsalClientException.UnknownUserType, exception.ErrorCode);
             }
         }
 
@@ -430,7 +430,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check exception message
-                Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, result.ErrorCode);
+                Assert.AreEqual(MsalClientException.ParsingWsTrustResponseFailed, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
@@ -503,7 +503,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         str).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check inner exception
-                Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, result.ErrorCode);
+                Assert.AreEqual(MsalClientException.ParsingWsTrustResponseFailed, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
@@ -668,7 +668,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         str).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check error code
-                Assert.AreEqual(MsalError.PasswordRequiredForManagedUserError, result.ErrorCode);
+                Assert.AreEqual(MsalClientException.PasswordRequiredForManagedUserError, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
@@ -714,7 +714,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         str).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check error code
-                Assert.AreEqual(MsalError.InvalidGrantError, result.ErrorCode);
+                Assert.AreEqual(MsalUiRequiredException.InvalidGrantError, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());

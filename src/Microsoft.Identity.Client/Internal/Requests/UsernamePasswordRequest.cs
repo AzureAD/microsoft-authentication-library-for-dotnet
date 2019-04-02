@@ -103,14 +103,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // handle grant flow
                 if (_usernamePasswordParameters.Password == null)
                 {
-                    throw new MsalClientException(MsalError.PasswordRequiredForManagedUserError);
+                    throw new MsalClientException(MsalClientException.PasswordRequiredForManagedUserError);
                 }
 
                 return null;
             }
 
             throw new MsalClientException(
-                MsalError.UnknownUserType,
+                MsalClientException.UnknownUserType,
                 string.Format(
                     CultureInfo.CurrentCulture,
                     MsalErrorMessage.UnsupportedUserType,

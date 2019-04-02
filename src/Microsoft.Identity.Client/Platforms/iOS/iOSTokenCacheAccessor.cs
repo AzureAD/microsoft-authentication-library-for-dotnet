@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
 
             throw MsalExceptionFactory.GetClientException(
-                MsalError.CannotAccessPublisherKeyChain,
+                MsalClientException.CannotAccessPublisherKeyChain,
                 MsalErrorMessage.CannotAccessPublisherKeyChain);
         }
 
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             if (secStatusCode == SecStatusCode.MissingEntitlement)
             {
                 throw MsalExceptionFactory.GetClientException(
-                MsalError.MissingEntitlements,
+                MsalClientException.MissingEntitlements,
                 string.Format(
                     CultureInfo.InvariantCulture,
                     MsalErrorMessage.MissingEntitlements,

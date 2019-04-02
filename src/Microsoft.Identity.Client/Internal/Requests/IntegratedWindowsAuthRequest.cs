@@ -101,12 +101,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (userRealmResponse.IsManaged)
             {
                 throw new MsalClientException(
-                    MsalError.IntegratedWindowsAuthNotSupportedForManagedUser, 
+                    MsalClientException.IntegratedWindowsAuthNotSupportedForManagedUser, 
                     MsalErrorMessage.IwaNotSupportedForManagedUser);
             }
 
             throw new MsalClientException(
-                MsalError.UnknownUserType,
+                MsalClientException.UnknownUserType,
                 string.Format(
                     CultureInfo.CurrentCulture,
                     MsalErrorMessage.UnsupportedUserType,

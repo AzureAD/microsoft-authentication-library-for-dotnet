@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.WsTrust
                         (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
                 throw MsalExceptionFactory.GetServiceException(
-                    MsalError.AccessingWsMetadataExchangeFailed,
+                    MsalServiceException.AccessingWsMetadataExchangeFailed,
                     message,
                     httpResponse,
                     innerException: null);
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.WsTrust
                         errorMessage);
 
                 throw MsalExceptionFactory.GetServiceException(
-                    MsalError.FederatedServiceReturnedError,
+                    MsalServiceException.FederatedServiceReturnedError,
                     message,
                     resp,
                     innerException: null);
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.WsTrust
             catch (System.Xml.XmlException ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.ParsingWsTrustResponseFailed, MsalError.ParsingWsTrustResponseFailed, ex);
+                    MsalClientException.ParsingWsTrustResponseFailed, MsalClientException.ParsingWsTrustResponseFailed, ex);
             }
         }
 

@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             if (users == null || !users.Any())
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
+                    MsalClientException.CannotAccessUserInformationOrUserNotDomainJoined,
                     MsalErrorMessage.UapCannotFindDomainUser);
             }
 
@@ -112,13 +112,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
             if (userDetails.Any(d => !string.IsNullOrWhiteSpace(d.Domain)))
             {
                 throw MsalExceptionFactory.GetClientException(
-                   MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
+                   MsalClientException.CannotAccessUserInformationOrUserNotDomainJoined,
                    MsalErrorMessage.UapCannotFindUpn);
             }
 
             // no domain, no upn -> missing User Info capability
             throw MsalExceptionFactory.GetClientException(
-                MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
+                MsalClientException.CannotAccessUserInformationOrUserNotDomainJoined,
                 MsalErrorMessage.UapCannotFindDomainUser);
 
         }

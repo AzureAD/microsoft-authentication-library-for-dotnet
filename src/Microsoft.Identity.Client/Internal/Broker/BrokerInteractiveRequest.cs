@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             else
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
-                throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
+                throw new MsalServiceException(MsalServiceException.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
             }
         }
     }

@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 _requestContext.Logger.Error("Could not find UPN for logged in user.");
 
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.UnknownUser,
+                    MsalClientException.UnknownUser,
                     MsalErrorMessage.UnknownUser);
             }
 
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.WsTrust
             if (userRealmResponse == null)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.UserRealmDiscoveryFailed,
+                    MsalClientException.UserRealmDiscoveryFailed,
                     MsalErrorMessage.UserRealmDiscoveryFailed);
             }
 
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.WsTrust
             catch (XmlException ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.ParsingWsMetadataExchangeFailed,
+                    MsalClientException.ParsingWsMetadataExchangeFailed,
                     MsalErrorMessage.ParsingMetadataDocumentFailed,
                     ex);
             }
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.WsTrust
             if (wsTrustEndpoint == null)
             {
                 throw MsalExceptionFactory.GetClientException(
-                  MsalError.WsTrustEndpointNotFoundInMetadataDocument,
+                  MsalClientException.WsTrustEndpointNotFoundInMetadataDocument,
                   MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument);
             }
 
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client.WsTrust
             catch (Exception ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.ParsingWsTrustResponseFailed,
+                    MsalClientException.ParsingWsTrustResponseFailed,
                     ex.Message,
                     ex);
             }

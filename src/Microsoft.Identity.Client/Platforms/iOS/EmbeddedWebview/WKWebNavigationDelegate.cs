@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             {
                 AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
-                    Error = MsalError.NonHttpsRedirectNotSupported,
+                    Error = MsalClientException.NonHttpsRedirectNotSupported,
                     ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported
                 };
                 AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.callbackMethod(result));

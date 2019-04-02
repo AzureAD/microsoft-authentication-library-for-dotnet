@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         public UIParent() // do not delete this ctor because it exists on NetStandard
         {
-            throw new MsalClientException(MsalError.ActivityRequired, MsalErrorMessage.ActivityRequired);
+            throw new MsalClientException(MsalClientException.ActivityRequired, MsalErrorMessage.ActivityRequired);
         }
 
         /// <summary>

@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             throw MsalExceptionFactory.GetClientException(
-                        MsalError.B2CHostNotTrusted,
+                        MsalClientException.B2CHostNotTrusted,
                         MsalErrorMessage.B2CHostNotTrusted);
         }
     }

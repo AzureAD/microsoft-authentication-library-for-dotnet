@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Core
             if (string.IsNullOrEmpty(clientInfo))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    MsalError.JsonParseError,
+                    MsalClientException.JsonParseError,
                     "client info is null");
             }
 
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Core
             catch (Exception exc)
             {
                 throw MsalExceptionFactory.GetClientException(
-                     MsalError.JsonParseError,
+                     MsalClientException.JsonParseError,
                      "Failed to parse the returned client info.",
                      exc);
             }

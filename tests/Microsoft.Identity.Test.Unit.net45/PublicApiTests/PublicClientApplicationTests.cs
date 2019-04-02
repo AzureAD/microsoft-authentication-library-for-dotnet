@@ -485,7 +485,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     MsalClientException exc = (MsalClientException)ex.InnerException;
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.UserMismatch, exc.ErrorCode);
+                    Assert.AreEqual(MsalClientException.UserMismatch, exc.ErrorCode);
                 }
 
                 Assert.IsNotNull(
@@ -760,7 +760,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     new MockWebUI()
                     {
                         ExceptionToThrow = new MsalClientException(
-                            MsalClientException.AuthenticationUiFailedError,
+                            MsalClientException.AuthenticationUiFailed,
                             "Failed to invoke webview",
                             new InvalidOperationException("some-inner-Exception"))
                     });
@@ -777,7 +777,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalClientException.AuthenticationUiFailedError, exc.ErrorCode);
+                    Assert.AreEqual(MsalClientException.AuthenticationUiFailed, exc.ErrorCode);
                     Assert.AreEqual("some-inner-Exception", exc.InnerException.Message);
                 }
             }

@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.Account.HomeAccountId.TenantId),
                 string.Empty);
 
-            throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
+            throw new MsalClientException(MsalClientException.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
         }
 
         internal async Task ResolveAuthorityEndpointsAsync()
