@@ -322,6 +322,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string NoRedirectUri = "no_redirect_uri";
 
+        /// <summary>
+        /// No Redirect URI.
+        /// </summary>
+        public const string B2CHostNotTrusted = "B2C_host_not_trusted";
+
 #if iOS
         /// <summary>
         /// Cannot Access Publisher KeyChain.

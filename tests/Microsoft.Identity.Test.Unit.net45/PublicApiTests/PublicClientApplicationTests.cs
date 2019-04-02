@@ -970,7 +970,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CLoginAcquireTokenTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -999,13 +999,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenTest()
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.B2CAuthority), true)
                                                                             .WithHttpManager(httpManager)
@@ -1029,7 +1027,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenWithValidateAuthorityTrueTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -1064,16 +1062,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenWithValidateAuthorityTrueAndRandomAuthorityTest()
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
-                    .WithAuthority(new Uri(MsalTestConstants.B2CRandomHost), true)
+                    .WithAuthority(new Uri(MsalTestConstants.B2CCustomDomain), true)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -1081,8 +1077,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CRandomHost);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CRandomHost);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CCustomDomain);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CCustomDomain);
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope, null)
@@ -1095,18 +1091,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenWithB2CLoginAuthorityTest()
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
-
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CAuthority);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthority);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityBlackforest);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityMoonCake);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityUsGov);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CCustomDomain);
             }
         }
 
