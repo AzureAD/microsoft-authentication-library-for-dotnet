@@ -65,9 +65,13 @@ namespace Microsoft.Identity.Client
         private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
         private readonly IFeatureFlags _featureFlags;
 
-        private TokenCacheCallback _userConfiguredBeforeAccess;
-        private TokenCacheCallback _userConfiguredAfterAccess;
-        private TokenCacheCallback _userConfiguredBeforeWrite;
+        private Func<TokenCacheNotificationArgs, Task> _asyncBeforeAccess;
+        private Func<TokenCacheNotificationArgs, Task> _asyncAfterAccess;
+        private Func<TokenCacheNotificationArgs, Task> _asyncBeforeWrite;
+
+        private TokenCacheCallback _syncBeforeAccess;
+        private TokenCacheCallback _syncAfterAccess;
+        private TokenCacheCallback _syncBeforeWrite;
 
         internal IServiceBundle ServiceBundle { get; private set; }
 
@@ -95,6 +99,12 @@ namespace Microsoft.Identity.Client
             _accessor = proxy.CreateTokenCacheAccessor();
             _featureFlags = proxy.GetFeatureFlags();
             _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
+            if (_defaultTokenCacheBlobStorage != null)
+            {
+                _syncBeforeAccess = _defaultTokenCacheBlobStorage.OnBeforeAccess;
+                _syncAfterAccess = _defaultTokenCacheBlobStorage.OnAfterAccess;
+                _syncBeforeWrite = _defaultTokenCacheBlobStorage.OnBeforeWrite;
+            }
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
             // Must happen last, this code can access things like _accessor and such above.
@@ -139,15 +149,63 @@ namespace Microsoft.Identity.Client
         internal string ClientId => ServiceBundle.Config.ClientId;
 
         #region Notifications
+
+        internal Func<TokenCacheNotificationArgs, Task> AsyncBeforeAccess
+        {
+            get => _asyncBeforeAccess;
+            set
+            {
+                if (_syncBeforeAccess != null)
+                {
+                    throw new InvalidOperationException("BeforeAccess was already set.  Can't set both BeforeAccess and AsyncBeforeAccess");
+                }
+
+                _asyncBeforeAccess = value;
+            }
+        }
+
+        internal Func<TokenCacheNotificationArgs, Task> AsyncAfterAccess
+        {
+            get => _asyncAfterAccess;
+            set
+            {
+                if (_syncAfterAccess != null)
+                {
+                    throw new InvalidOperationException("AfterAccess was already set.  Can't set both AfterAccess and AsyncAfterAccess");
+                }
+
+                _asyncAfterAccess = value;
+            }
+        }
+
+        internal Func<TokenCacheNotificationArgs, Task> AsyncBeforeWrite
+        {
+            get => _asyncBeforeWrite;
+            set
+            {
+                if (_syncBeforeWrite != null)
+                {
+                    throw new InvalidOperationException("BeforeWrite was already set.  Can't set both BeforeWrite and AsyncBeforeWrite");
+                }
+
+                _asyncBeforeWrite = value;
+            }
+        }
+
         /// <summary>
         /// Notification method called before any library method accesses the cache.
         /// </summary>
         internal TokenCacheCallback BeforeAccess
         {
-            get => UserHasConfiguredBlobSerialization() ?
-                    _userConfiguredBeforeAccess :
-                    _defaultTokenCacheBlobStorage.OnBeforeAccess;
-            set => _userConfiguredBeforeAccess = value;
+            get => _syncBeforeAccess;
+            set
+            {
+                if (_asyncBeforeAccess != null)
+                {
+                    throw new InvalidOperationException("BeforeAccess was already set.  Can't set both BeforeAccess and AsyncBeforeAccess");
+                }
+                _syncBeforeAccess = value;
+            }
         }
 
         /// <summary>
@@ -157,10 +215,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal TokenCacheCallback BeforeWrite
         {
-            get => UserHasConfiguredBlobSerialization() ?
-                    _userConfiguredBeforeWrite :
-                    _defaultTokenCacheBlobStorage.OnBeforeWrite;
-            set => _userConfiguredBeforeWrite = value;
+            get => _syncBeforeWrite;
+            set => _syncBeforeWrite = value;
         }
 
         /// <summary>
@@ -168,10 +224,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal TokenCacheCallback AfterAccess
         {
-            get => UserHasConfiguredBlobSerialization() ?
-                    _userConfiguredAfterAccess :
-                    _defaultTokenCacheBlobStorage.OnAfterAccess;
-            set => _userConfiguredAfterAccess = value;
+            get => _syncAfterAccess;
+            set => _syncAfterAccess = value;
         }
 
         /// <summary>
@@ -190,12 +244,26 @@ namespace Microsoft.Identity.Client
 
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
-            AfterAccess?.Invoke(args);
+            if (AfterAccess != null)
+            {
+                AfterAccess.Invoke(args);
+            }
+            else if (AsyncAfterAccess != null)
+            {
+                AsyncAfterAccess.Invoke(args).GetAwaiter().GetResult();
+            }
         }
 
         internal void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
-            BeforeAccess?.Invoke(args);
+            if (BeforeAccess != null)
+            {
+                BeforeAccess.Invoke(args);
+            }
+            else if (AsyncBeforeAccess != null)
+            {
+                AsyncBeforeAccess.Invoke(args).GetAwaiter().GetResult();
+            }
         }
 
         internal void OnBeforeWrite(TokenCacheNotificationArgs args)
@@ -204,7 +272,15 @@ namespace Microsoft.Identity.Client
             HasStateChanged = true;
 #pragma warning restore CS0618 // Type or member is obsolete
             args.HasStateChanged = true;
-            BeforeWrite?.Invoke(args);
+
+            if (BeforeWrite != null)
+            {
+                BeforeWrite.Invoke(args);
+            }
+            else if (AsyncBeforeWrite != null)
+            {
+                AsyncBeforeWrite.Invoke(args).GetAwaiter().GetResult();
+            }
         }
 
         #endregion
@@ -1057,14 +1133,37 @@ namespace Microsoft.Identity.Client
 
         #region Serialization
 
-        private bool UserHasConfiguredBlobSerialization()
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beforeAccess"></param>
+        public void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess)
         {
-            return _userConfiguredBeforeAccess != null ||
-                _userConfiguredBeforeAccess != null ||
-                _userConfiguredBeforeWrite != null;
+            GuardOnMobilePlatforms();
+            AsyncBeforeAccess = beforeAccess;
         }
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="afterAccess"></param>
+        public void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> afterAccess)
+        {
+            GuardOnMobilePlatforms();
+            AsyncAfterAccess = afterAccess;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beforeWrite"></param>
+        public void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeWrite)
+        {
+            GuardOnMobilePlatforms();
+            AsyncBeforeWrite = beforeWrite;
+        }
 
         /// <summary>
         /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the

@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client
@@ -47,23 +48,53 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public interface ITokenCache
     {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME 
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="beforeAccess"></param>
+        void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beforeAccess"></param>
+        void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beforeAccess"></param>
+        void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeAccess);
+
+        /// <summary>
+        /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
+        /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
+        /// </summary>
+        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>
+        /// <remarks>In the case where the delegate is used to deserialize the cache, it might
+        /// want to call <see cref="Deserialize(byte[])"/></remarks>
         void SetBeforeAccess(TokenCacheCallback beforeAccess);
 
         /// <summary>
-        /// 
+        /// Sets a delegate to be notified after any library method accesses the cache. This gives an option to the
+        /// delegate to serialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="afterAccess"></param>
+        /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
+        /// member of the cache is <c>true</c></param>
+        /// <remarks>In the case where the delegate is used to serialize the cache entierely (not just a row), it might
+        /// want to call <see cref="Serialize()"/></remarks>
         void SetAfterAccess(TokenCacheCallback afterAccess);
 
         /// <summary>
-        /// 
+        /// Sets a delegate called before any library method writes to the cache. This gives an option to the delegate
+        /// to reload the cache state from a row in database and lock that row. That database row can then be unlocked in the delegate
+        /// registered with <see cref="SetAfterAccess(TokenCacheCallback)"/>
         /// </summary>
-        /// <param name="beforeWrite"></param>
+        /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
         void SetBeforeWrite(TokenCacheCallback beforeWrite);
 
         /// <summary>

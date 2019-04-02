@@ -27,6 +27,7 @@
 
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
@@ -60,12 +61,12 @@ namespace CommonCache.Test.MsalV2
 
             if (tokenCache != null)
             {
-                tokenCache.SetBeforeAccess(BeforeAccessNotification);
-                tokenCache.SetAfterAccess(AfterAccessNotification);
+                tokenCache.SetAsyncBeforeAccess(BeforeAccessNotificationAsync);
+                tokenCache.SetAsyncAfterAccess(AfterAccessNotificationAsync);
             }
         }
 
-        public static void BeforeAccessNotification(TokenCacheNotificationArgs args)
+        public static Task BeforeAccessNotificationAsync(TokenCacheNotificationArgs args)
         {
             lock (s_fileLock)
             {
@@ -86,9 +87,11 @@ namespace CommonCache.Test.MsalV2
                     args.TokenCache.DeserializeMsalV3(msalv3State);
                 }
             }
+
+            return Task.CompletedTask;
         }
 
-        public static void AfterAccessNotification(TokenCacheNotificationArgs args)
+        public static Task AfterAccessNotificationAsync(TokenCacheNotificationArgs args)
         {
             // if the access operation resulted in a cache update
             if (args.HasStateChanged)
@@ -119,6 +122,8 @@ namespace CommonCache.Test.MsalV2
                     }
                 }
             }
+
+            return Task.CompletedTask;
         }
     }
 }
