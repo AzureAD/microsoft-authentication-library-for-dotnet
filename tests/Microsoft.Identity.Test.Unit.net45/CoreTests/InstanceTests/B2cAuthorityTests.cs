@@ -37,6 +37,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -118,6 +119,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         [TestCategory("B2CAuthorityTests")]
+        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1038
         public void B2CMicrosoftOnlineCreateAuthority()
         {
             using (var harness = new MockHttpAndServiceBundle())

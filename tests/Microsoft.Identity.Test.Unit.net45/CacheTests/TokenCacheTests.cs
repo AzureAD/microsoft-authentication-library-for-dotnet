@@ -327,7 +327,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
                 var rtItem = new MsalRefreshTokenCacheItem(
-                    MsalTestConstants.SovereignEnvironment,
+                    MsalTestConstants.SovereignNetworkEnvironment,
                     MsalTestConstants.ClientId,
                     "someRT",
                     MockHelpers.CreateClientInfo());

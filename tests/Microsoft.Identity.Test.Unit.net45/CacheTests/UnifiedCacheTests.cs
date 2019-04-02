@@ -40,6 +40,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using System.Threading;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -85,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
                 var requestContext = RequestContext.CreateForTest(app.ServiceBundle);
-                var accounts = app.UserTokenCacheInternal.GetAccounts(MsalTestConstants.AuthorityCommonTenant);
+                var accounts = app.UserTokenCacheInternal.GetAccountsAsync(MsalTestConstants.AuthorityCommonTenant).Result;
                 foreach (IAccount account in accounts)
                 {
                     app.UserTokenCacheInternal.RemoveMsalAccount(account, requestContext);
@@ -224,10 +225,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, MsalTestConstants.Scope.ToString());
 
                 var adalUsers =
-                    CacheFallbackOperations.GetAllAdalUsersForMsal(
+                    CacheFallbackOperations.GetAllAdalUsersForMsal(                        
                         harness.ServiceBundle.DefaultLogger,
                         app.UserTokenCacheInternal.LegacyPersistence,
-                        MsalTestConstants.ClientId);
+                        MsalTestConstants.ClientId,
+                        Authority.GetEnviroment(ClientApplicationBase.DefaultAuthority));
 
                 CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, "user.read");
 
@@ -235,7 +237,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
                         harness.ServiceBundle.DefaultLogger,
                         app.UserTokenCacheInternal.LegacyPersistence,
-                        MsalTestConstants.ClientId);
+                        MsalTestConstants.ClientId,
+                        Authority.GetEnviroment(ClientApplicationBase.DefaultAuthority));
 
                 Assert.AreEqual(adalUsers.ClientInfoUsers.Keys.First(), adalUsers2.ClientInfoUsers.Keys.First());
 

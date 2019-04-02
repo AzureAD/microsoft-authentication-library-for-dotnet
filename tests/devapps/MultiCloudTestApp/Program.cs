@@ -35,7 +35,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 
-namespace NetCoreTestApp
+namespace MultiCloudTestApp
 {
     public class Program
     {
@@ -43,7 +43,6 @@ namespace NetCoreTestApp
         // DO NOT CHECK THESE IN
         private const string FAMILY_MEMBER_1 = "";  // Office
         private const string FAMILY_MEMBER_2 = "";  // Teams
-
         private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
 
 
@@ -65,7 +64,6 @@ namespace NetCoreTestApp
 
             s_pcaFam2 = PublicClientApplicationBuilder
                .Create(FAMILY_MEMBER_2)
-               .WithRedirectUri("https://dev.local")
                .WithLogging(Log, LogLevel.Verbose, true)
                .Build();
 

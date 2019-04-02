@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             accessor.SaveIdToken(idTokenCacheItem);
 
             var accountCacheItem = new MsalAccountCacheItem(
-                MsalTestConstants.ProductionPrefNetworkEnvironment, 
+                MsalTestConstants.ProductionPrefCacheEnvironment, 
                 null, 
                 MockHelpers.CreateClientInfo(uid, utid), 
                 null, 
