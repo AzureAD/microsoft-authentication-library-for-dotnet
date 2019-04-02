@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -159,21 +159,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             controller.Tap(_acquirePageId);
         }
 
-        private void ValidateUiBehaviorString(string uiBehavior)
-        {
-            var okList = new[] {
-                CoreUiTestConstants.UiBehaviorConsent,
-                CoreUiTestConstants.UiBehaviorLogin,
-                CoreUiTestConstants.UiBehaviorSelectAccount };
-
-            bool isInList = okList.Any(item => string.Equals(item, uiBehavior, StringComparison.InvariantCulture));
-
-            if (!isInList)
-            {
-                throw new InvalidOperationException("Test Setup Error: invalid uiBehavior " + uiBehavior);
-            }
-        }
-
         /// <summary>
         /// Runs through the B2C acquire token flow with local account
         /// </summary>
@@ -181,7 +166,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Local, isB2CLoginAuthority);
         }
-
+               
         /// <summary>
         /// Runs through the B2C acquire token flow with Facebook Provider
         /// </summary>
@@ -196,7 +181,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// </summary>
         public void B2CFacebookEditPolicyAcquireTokenInteractiveTestHelper(ITestController controller)
         {
-            PerformB2CSignInEditProfileFlow(controller, B2CIdentityProvider.Facebook);
+            PerformB2CSignInEditProfileFlow(controller);
         }
 
         /// <summary>
@@ -350,18 +335,18 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             switch (b2CIdentityProvider)
             {
-                case B2CIdentityProvider.Local:
-                    PerformB2CLocalAccountSignInFlow(controller, user, userInformationFieldIds);
-                    break;
-                case B2CIdentityProvider.Google:
-                    PerformB2CGoogleProviderSignInFlow(controller, user, userInformationFieldIds);
-                    break;
+            case B2CIdentityProvider.Local:
+                PerformB2CLocalAccountSignInFlow(controller, user, userInformationFieldIds);
+                break;
+            case B2CIdentityProvider.Google:
+                PerformB2CGoogleProviderSignInFlow(controller, user, userInformationFieldIds);
+                break;
 
-                case B2CIdentityProvider.Facebook:
-                    PerformB2CFacebookProviderSignInFlow(controller, user, userInformationFieldIds);
-                    break;
-                default:
-                    throw new InvalidOperationException("B2CIdentityProvider unknown");
+            case B2CIdentityProvider.Facebook:
+                PerformB2CFacebookProviderSignInFlow(controller, user, userInformationFieldIds);
+                break;
+            default:
+                throw new InvalidOperationException("B2CIdentityProvider unknown");
             }
             VerifyResult(controller);
         }
@@ -377,16 +362,16 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             switch (b2CIdentityProvider)
             {
-                case B2CIdentityProvider.Facebook:
-                    controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
-                    break;
-                default:
-                    throw new InvalidOperationException("B2CIdentityProvider unknown");
+            case B2CIdentityProvider.Facebook:
+                controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
+                break;
+            default:
+                throw new InvalidOperationException("B2CIdentityProvider unknown");
             }
             VerifyResult(controller);
         }
 
-        public void PerformB2CSignInEditProfileFlow(ITestController controller, B2CIdentityProvider b2CIdentityProvider)
+        public void PerformB2CSignInEditProfileFlow(ITestController controller)
         {
             SetB2CInputDataForEditProfileAuthority(controller);
 
@@ -400,6 +385,19 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             controller.Tap(CoreUiTestConstants.B2CEditProfileContinueId, XamarinSelector.ByHtmlIdAttribute);
 
             controller.WaitForWebElementByCssId(CoreUiTestConstants.B2CEditProfileContinueId);
+
+            VerifyResult(controller);
+        }
+
+        public void PerformROPCFlow(ITestController controller, LabResponse labResponse)
+        {
+            controller.Tap(_acquirePageId);
+
+            controller.EnterText(CoreUiTestConstants.UsernameId, labResponse.User.HomeUPN, XamarinSelector.ByAutomationId);
+            controller.EnterText(CoreUiTestConstants.PasswordId, labResponse.User.Password, XamarinSelector.ByAutomationId);
+
+            //Acquire token flow
+            controller.Tap(CoreUiTestConstants.AcquireTokenROPCButtonId);
 
             VerifyResult(controller);
         }
@@ -503,14 +501,14 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
                     switch (ex.Error)
                     {
-                        case VerificationError.ResultIndicatesFailure:
-                            Assert.Fail("Test result indicates failure");
-                            break;
-                        case VerificationError.ResultNotFound:
-                            Task.Delay(CoreUiTestConstants.ResultCheckPolliInterval).Wait();
-                            break;
-                        default:
-                            throw;
+                    case VerificationError.ResultIndicatesFailure:
+                        Assert.Fail("Test result indicates failure");
+                        break;
+                    case VerificationError.ResultNotFound:
+                        Task.Delay(CoreUiTestConstants.ResultCheckPolliInterval).Wait();
+                        break;
+                    default:
+                        throw;
                     }
                 }
             } while (true);
@@ -520,16 +518,16 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             switch (platform)
             {
-                case Xamarin.UITest.Platform.Android:
-                    _cachePageId = CoreUiTestConstants.CachePageAndroidID;
-                    _acquirePageId = CoreUiTestConstants.AcquirePageAndroidId;
-                    _settingsPageId = CoreUiTestConstants.SettingsPageAndroidId;
-                    break;
-                case Xamarin.UITest.Platform.iOS:
-                    _cachePageId = CoreUiTestConstants.CachePageID;
-                    _acquirePageId = CoreUiTestConstants.AcquirePageId;
-                    _settingsPageId = CoreUiTestConstants.SettingsPageId;
-                    break;
+            case Xamarin.UITest.Platform.Android:
+                _cachePageId = CoreUiTestConstants.CachePageAndroidID;
+                _acquirePageId = CoreUiTestConstants.AcquirePageAndroidId;
+                _settingsPageId = CoreUiTestConstants.SettingsPageAndroidId;
+                break;
+            case Xamarin.UITest.Platform.iOS:
+                _cachePageId = CoreUiTestConstants.CachePageID;
+                _acquirePageId = CoreUiTestConstants.AcquirePageId;
+                _settingsPageId = CoreUiTestConstants.SettingsPageId;
+                break;
             }
         }
     }

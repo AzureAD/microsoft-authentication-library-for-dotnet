@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.Internal;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Threading;
+using System.Security;
 
 namespace XForms
 {
@@ -213,10 +214,35 @@ namespace XForms
                     .WithPrompt(GetPrompt())
                     .WithUseEmbeddedWebView(true)
                     .WithExtraQueryParameters(GetExtraQueryParams());
+                
+                var result = await request.ExecuteAsync().ConfigureAwait(true);
 
-                request = LoginHintSwitch.IsToggled ?
-                    request.WithLoginHint(LoginHintEntry.Text.Trim()) :
-                    request.WithAccount(GetSelectedAccount());
+                var resText = GetResultDescription(result);
+
+                if (resText.Contains("AccessToken"))
+                {
+                    acquireResponseTitleLabel.Text = SuccessfulResult;
+                }
+
+                acquireResponseLabel.Text = resText;
+                RefreshUsers();
+            }
+            catch (Exception exception)
+            {
+                CreateExceptionMessage(exception);
+            }
+        }
+
+        private async void OnAcquireByUsernamePasswordClickedAsync(object sender, EventArgs e)
+        {
+            try
+            {
+                acquireResponseTitleLabel.Text = EmptyResult;
+
+                var request = App.MsalPublicClient.AcquireTokenByUsernamePassword(
+                    App.Scopes,
+                    UserName.Text.Trim(),
+                    ConvertToSecureString(Password.Text.Trim()));
 
                 var result = await request.ExecuteAsync().ConfigureAwait(true);
 
@@ -234,6 +260,18 @@ namespace XForms
             {
                 CreateExceptionMessage(exception);
             }
+        }
+
+        private SecureString ConvertToSecureString(string password)
+        {
+            if (password.Length > 0)
+            {
+                SecureString securePassword = new SecureString();
+                password.ToCharArray().ToList().ForEach(p => securePassword.AppendChar(p));
+                securePassword.MakeReadOnly();
+                return securePassword;
+            }
+            return null;
         }
 
         private async void OnAcquireByDeviceCodeClickedAsync(object sender, EventArgs e)
