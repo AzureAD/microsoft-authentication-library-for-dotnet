@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         object LockObject { get; }
 
         void RemoveAccount(IAccount account, RequestContext requestContext);
-        IEnumerable<IAccount> GetAccounts(string authority);
+        Task<IEnumerable<IAccount>> GetAccountsAsync(string authority);
 
         /// <summary>
         /// Persists the AT and RT and updates app metadata (FOCI)

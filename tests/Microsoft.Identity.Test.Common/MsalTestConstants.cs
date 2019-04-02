@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
 
-        public const string SovereignEnvironment = "login.microsoftonline.de";
+        public const string SovereignNetworkEnvironment = "login.microsoftonline.de";
         public const string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/home/";
         public const string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";

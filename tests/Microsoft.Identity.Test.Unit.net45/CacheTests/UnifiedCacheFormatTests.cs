@@ -177,6 +177,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [Description("Test unified token cache")]
+        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1037
         public void B2C_NoTenantId_CacheFormatValidationTest()
         {
             using (var harness = new MockHttpAndServiceBundle())

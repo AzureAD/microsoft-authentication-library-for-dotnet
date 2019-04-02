@@ -1,0 +1,152 @@
+﻿{
+  "AccessToken": {
+    "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4-login.microsoftonline.de-accesstoken-872cd9fa-d31f-45e0-9eab-6e460a02d1f1-469fdeb4-d4fd-4fde-991e-308a78e4bea4-https://graph.cloudapi.de/62e90394-69f5-4237-9190-012177145e10 https://graph.cloudapi.de/.default": {
+      "home_account_id": "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4",
+      "environment": "login.microsoftonline.de",
+      "client_info": "eyJ1aWQiOiI2YWZjODMzZi00OWMwLTRmZDUtYjY4NS0yOTk4YTZjYzhkOGQiLCJ1dGlkIjoiNDY5ZmRlYjQtZDRmZC00ZmRlLTk5MWUtMzA4YTc4ZTRiZWE0In0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "AccessToken",
+      "realm": "469fdeb4-d4fd-4fde-991e-308a78e4bea4",
+      "target": "https://graph.cloudapi.de/62e90394-69f5-4237-9190-012177145e10 https://graph.cloudapi.de/.default",
+      "user_assertion_hash": null,
+      "cached_at": "1553819803",
+      "expires_on": "1553823402",
+      "extended_expires_on": "1553823402",
+      "ext_expires_on": "1553823402"
+    },
+    "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486-login.partner.microsoftonline.cn-accesstoken-872cd9fa-d31f-45e0-9eab-6e460a02d1f1-9e5e17b6-6e3d-4515-8895-0e7756474486-profile openid email https://microsoftgraph.chinacloudapi.cn/user_impersonation https://microsoftgraph.chinacloudapi.cn/.default": {
+      "home_account_id": "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486",
+      "environment": "login.partner.microsoftonline.cn",
+      "client_info": "eyJ1aWQiOiI4ZDZhYzY0Mi0xN2Y2LTRkZDgtODFlMi1iZjViZGI5YTYwZDciLCJ1dGlkIjoiOWU1ZTE3YjYtNmUzZC00NTE1LTg4OTUtMGU3NzU2NDc0NDg2In0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "AccessToken",
+      "realm": "9e5e17b6-6e3d-4515-8895-0e7756474486",
+      "target": "profile openid email https://microsoftgraph.chinacloudapi.cn/user_impersonation https://microsoftgraph.chinacloudapi.cn/.default",
+      "user_assertion_hash": null,
+      "cached_at": "1553820501",
+      "expires_on": "1553824101",
+      "extended_expires_on": "1553824101",
+      "ext_expires_on": "1553824101"
+    },
+    "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-accesstoken-0615b6ca-88d4-4884-8729-b178178f7c27-49f548d0-12b7-4169-a390-bb5304d24462-calendars.read calendars.read.shared files.read.all files.readwrite.appfolder openid profile user.read email": {
+      "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "AccessToken",
+      "realm": "49f548d0-12b7-4169-a390-bb5304d24462",
+      "target": "Calendars.Read Calendars.Read.Shared Files.Read.All Files.ReadWrite.AppFolder openid profile User.Read email",
+      "user_assertion_hash": null,
+      "cached_at": "1554220062",
+      "expires_on": "1554223662",
+      "extended_expires_on": "1554223662",
+      "ext_expires_on": "1554223662"
+    }
+  },
+  "RefreshToken": {
+    "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4-login.microsoftonline.de-refreshtoken-872cd9fa-d31f-45e0-9eab-6e460a02d1f1--": {
+      "home_account_id": "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4",
+      "environment": "login.microsoftonline.de",
+      "client_info": "eyJ1aWQiOiI2YWZjODMzZi00OWMwLTRmZDUtYjY4NS0yOTk4YTZjYzhkOGQiLCJ1dGlkIjoiNDY5ZmRlYjQtZDRmZC00ZmRlLTk5MWUtMzA4YTc4ZTRiZWE0In0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "RefreshToken",
+      "family_id": ""
+    },
+    "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486-login.partner.microsoftonline.cn-refreshtoken-872cd9fa-d31f-45e0-9eab-6e460a02d1f1--": {
+      "home_account_id": "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486",
+      "environment": "login.partner.microsoftonline.cn",
+      "client_info": "eyJ1aWQiOiI4ZDZhYzY0Mi0xN2Y2LTRkZDgtODFlMi1iZjViZGI5YTYwZDciLCJ1dGlkIjoiOWU1ZTE3YjYtNmUzZC00NTE1LTg4OTUtMGU3NzU2NDc0NDg2In0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "RefreshToken",
+      "family_id": ""
+    },
+    "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-refreshtoken-0615b6ca-88d4-4884-8729-b178178f7c27--": {
+      "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "RefreshToken",
+      "family_id": null
+    }
+  },
+  "IdToken": {
+    "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486-login.partner.microsoftonline.cn-idtoken-872cd9fa-d31f-45e0-9eab-6e460a02d1f1-9e5e17b6-6e3d-4515-8895-0e7756474486-": {
+      "home_account_id": "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486",
+      "environment": "login.partner.microsoftonline.cn",
+      "client_info": "eyJ1aWQiOiI4ZDZhYzY0Mi0xN2Y2LTRkZDgtODFlMi1iZjViZGI5YTYwZDciLCJ1dGlkIjoiOWU1ZTE3YjYtNmUzZC00NTE1LTg4OTUtMGU3NzU2NDc0NDg2In0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "IdToken",
+      "realm": "9e5e17b6-6e3d-4515-8895-0e7756474486"
+    },
+    "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4-login.microsoftonline.de-idtoken-872cd9fa-d31f-45e0-9eab-6e460a02d1f1-469fdeb4-d4fd-4fde-991e-308a78e4bea4-": {
+      "home_account_id": "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4",
+      "environment": "login.microsoftonline.de",
+      "client_info": "eyJ1aWQiOiI2YWZjODMzZi00OWMwLTRmZDUtYjY4NS0yOTk4YTZjYzhkOGQiLCJ1dGlkIjoiNDY5ZmRlYjQtZDRmZC00ZmRlLTk5MWUtMzA4YTc4ZTRiZWE0In0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "IdToken",
+      "realm": "469fdeb4-d4fd-4fde-991e-308a78e4bea4"
+    },
+    "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-idtoken-0615b6ca-88d4-4884-8729-b178178f7c27-49f548d0-12b7-4169-a390-bb5304d24462-": {
+      "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "IdToken",
+      "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
+    }
+  },
+  "Account": {
+    "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486-login.partner.microsoftonline.cn-9e5e17b6-6e3d-4515-8895-0e7756474486": {
+      "home_account_id": "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7.9e5e17b6-6e3d-4515-8895-0e7756474486",
+      "environment": "login.partner.microsoftonline.cn",
+      "client_info": "eyJ1aWQiOiI4ZDZhYzY0Mi0xN2Y2LTRkZDgtODFlMi1iZjViZGI5YTYwZDciLCJ1dGlkIjoiOWU1ZTE3YjYtNmUzZC00NTE1LTg4OTUtMGU3NzU2NDc0NDg2In0",
+      "username": "usercn@cloudcn.partner.onmschina.cn",
+      "name": "CN Cloud User",
+      "given_name": null,
+      "family_name": null,
+      "local_account_id": "8d6ac642-17f6-4dd8-81e2-bf5bdb9a60d7",
+      "authority_type": "MSSTS",
+      "realm": "9e5e17b6-6e3d-4515-8895-0e7756474486"
+    },
+    "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4-login.microsoftonline.de-469fdeb4-d4fd-4fde-991e-308a78e4bea4": {
+      "home_account_id": "6afc833f-49c0-4fd5-b685-2998a6cc8d8d.469fdeb4-d4fd-4fde-991e-308a78e4bea4",
+      "environment": "login.microsoftonline.de",
+      "client_info": "eyJ1aWQiOiI2YWZjODMzZi00OWMwLTRmZDUtYjY4NS0yOTk4YTZjYzhkOGQiLCJ1dGlkIjoiNDY5ZmRlYjQtZDRmZC00ZmRlLTk5MWUtMzA4YTc4ZTRiZWE0In0",
+      "username": "userde@cloudde.onmicrosoft.de",
+      "name": "DE Cloud User",
+      "given_name": null,
+      "family_name": null,
+      "local_account_id": "6afc833f-49c0-4fd5-b685-2998a6cc8d8d",
+      "authority_type": "MSSTS",
+      "realm": "469fdeb4-d4fd-4fde-991e-308a78e4bea4"
+    },
+    "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-49f548d0-12b7-4169-a390-bb5304d24462": {
+      "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+      "username": "user@cloud.onmicrosoft.com",
+      "name": "Azure Cloud User",
+      "given_name": null,
+      "family_name": null,
+      "local_account_id": "ae821e4d-f408-451a-af82-882691148603",
+      "authority_type": "MSSTS",
+      "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
+    }
+  },
+  "AppMetadata": {
+    "appmetadata-login.windows.net-0615b6ca-88d4-4884-8729-b178178f7c27": {
+      "environment": "login.windows.net",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "family_id": null
+    }
+  }
+}

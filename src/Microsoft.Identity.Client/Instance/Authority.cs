@@ -93,7 +93,12 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static string GetFirstPathSegment(string authority)
         {
-            return new Uri(authority).Segments[1].TrimEnd('/');
+            var uri = new Uri(authority);
+            if (uri.Segments.Length > 1)
+            {
+                return uri.Segments[1].TrimEnd('/');
+            }
+            return string.Empty;
         }
 
         internal static AuthorityType GetAuthorityType(string authority)
@@ -125,6 +130,11 @@ namespace Microsoft.Identity.Client.Instance
             };
 
             return uriBuilder.Uri.AbsoluteUri;
+        }
+
+        internal static string GetEnviroment(string authority)
+        {
+            return new Uri(authority).Host;
         }
     }
 }

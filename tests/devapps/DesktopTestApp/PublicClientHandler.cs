@@ -48,7 +48,7 @@ namespace DesktopTestApp
 #endif
                 .BuildConcrete();
 
-           
+
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
         }
 
@@ -130,12 +130,16 @@ namespace DesktopTestApp
 
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, bool forceRefresh)
         {
-            return await PublicClientApplication
+            var builder = PublicClientApplication
                 .AcquireTokenSilent(scopes, CurrentUser)
-                .WithAuthority(AuthorityOverride)
-                .WithForceRefresh(forceRefresh)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
+                .WithForceRefresh(forceRefresh);
+
+            if (!string.IsNullOrWhiteSpace(AuthorityOverride))
+            {
+                builder = builder.WithAuthority(AuthorityOverride);
+            }
+
+            return await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveWithB2CAuthorityAsync(

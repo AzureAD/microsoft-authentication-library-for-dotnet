@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{24D2AF71-A01E-4450-8C3F-B9923A81134B}</ProjectGuid>
+    <ProjectGuid>{959A47D9-07E7-4BF3-A0F7-6D9CD42A2C46}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>NetFxConsoleTestApp</RootNamespace>
     <AssemblyName>NetFxConsoleTestApp</AssemblyName>

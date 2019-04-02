@@ -25,7 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+using System.IO;
 using System.Linq;
+using System.Text;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -46,6 +49,15 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(expectedIdtCount, accessor.GetAllIdTokens().Count());
             Assert.AreEqual(expectedAccountCount, accessor.GetAllAccounts().Count());
             Assert.AreEqual(expectedAppMetadataCount, accessor.GetAllAppMetadata().Count());
+        }
+
+        public static void InitializeTokenCacheFromFile(this IPublicClientApplication pca, string resourceFile)
+        {
+            string tokenCacheAsString = File.ReadAllText(resourceFile);
+            byte[] tokenCacheBlob = new UTF8Encoding().GetBytes(tokenCacheAsString);
+
+            pca.UserTokenCache.DeserializeMsalV3(tokenCacheBlob);
+            
         }
 
     }
