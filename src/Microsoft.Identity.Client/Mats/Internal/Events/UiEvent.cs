@@ -25,46 +25,28 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client.Mats.Internal.Events
 {
-    internal class CacheEvent : EventBase
+    internal class UiEvent : EventBase
     {
-        public const string TokenCacheLookup = EventNamePrefix + "token_cache_lookup";
-        public const string TokenCacheWrite = EventNamePrefix + "token_cache_write";
-        public const string TokenCacheBeforeAccess = EventNamePrefix + "token_cache_before_access";
-        public const string TokenCacheAfterAccess = EventNamePrefix + "token_cache_after_access";
-        public const string TokenCacheBeforeWrite = EventNamePrefix + "token_cache_before_write";
-        public const string TokenCacheDelete = EventNamePrefix + "token_cache_delete";
+        public const string UserCancelledKey = EventNamePrefix + "user_cancelled";
 
-        public const string TokenTypeKey = EventNamePrefix + "token_type";
+        public const string AccessDeniedKey = EventNamePrefix + "access_denied";
 
-        public CacheEvent(string eventName) : base(eventName)
+        public UiEvent(string telemetryCorrelationId) : base(EventNamePrefix + "ui_event", telemetryCorrelationId) { }
+
+        public bool UserCancelled
         {
+#pragma warning disable CA1305 // .net standard does not have an overload for this
+            set { this[UserCancelledKey] = value.ToString().ToLowerInvariant(); }
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
 
-        public enum TokenTypes
+        public bool AccessDenied
         {
-            AT,
-            RT,
-            ID,
-            ACCOUNT
-        };
-
-        public TokenTypes TokenType
-        {
-            set
-            {
-                var types = new Dictionary<TokenTypes, string>()
-                {
-                    {TokenTypes.AT, "at"},
-                    {TokenTypes.RT, "rt"},
-                    {TokenTypes.ID, "id"},
-                    {TokenTypes.ACCOUNT, "account"}
-                };
-                this[TokenTypeKey] = types[value];
-            }
+#pragma warning disable CA1305 // .net standard does not have an overload for this
+            set { this[AccessDeniedKey] = value.ToString().ToLowerInvariant(); }
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
     }
 }

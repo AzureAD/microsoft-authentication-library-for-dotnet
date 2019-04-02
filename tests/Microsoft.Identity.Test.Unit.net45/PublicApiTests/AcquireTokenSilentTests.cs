@@ -28,7 +28,8 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Keys;
-using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Mats.Internal.Constants;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(
                 receiver.EventsReceived.Find(
                     anEvent => // Expect finding such an event
-                        anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.ApiIdKey] == "30" &&
+                        anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "30" &&
                         anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                         anEvent[ApiEvent.ApiErrorCodeKey] == "no_tokens_found"));
         }
@@ -257,7 +258,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
                 Assert.IsNotNull(receiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                     anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "true"
-                    && anEvent[ApiEvent.ApiIdKey] == "31"));
+                    && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "31"));
             }
         }
 

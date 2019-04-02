@@ -29,6 +29,7 @@ using System;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Mats;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -54,7 +55,18 @@ namespace Microsoft.Identity.Client.Core
 
             PlatformProxy = PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
-            TelemetryManager = new TelemetryManager(PlatformProxy, config.TelemetryCallback);
+
+            if (config.MatsConfig != null)
+            {
+                // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
+                Mats = Client.Mats.MatsTelemetryClient.CreateMats(Config, PlatformProxy, config.MatsConfig);
+                TelemetryManager = Mats?.TelemetryManager ?? new TelemetryManager(Config, PlatformProxy, config.TelemetryCallback);
+            }
+            else
+            {
+                TelemetryManager = new TelemetryManager(Config, PlatformProxy, config.TelemetryCallback);
+            }
+
             AadInstanceDiscovery = new AadInstanceDiscovery(DefaultLogger, HttpManager, TelemetryManager, shouldClearCaches);
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
@@ -82,6 +94,9 @@ namespace Microsoft.Identity.Client.Core
 
         /// <inheritdoc />
         public IApplicationConfiguration Config { get; }
+
+        /// <inheritdoc />
+        public IMatsTelemetryClient Mats { get; }
 
         public static ServiceBundle Create(ApplicationConfiguration config)
         {
