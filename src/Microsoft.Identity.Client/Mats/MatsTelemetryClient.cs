@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Mats
         {
             AuthOutcome outcome = AuthOutcome.Failed;
             ErrorSource errorSource = ErrorSource.AuthSdk;
-            string error = ex.Message;
+            string error = ex.GetType().Name;
             string errorDescription = ex.Message;
 
             switch (ex)
