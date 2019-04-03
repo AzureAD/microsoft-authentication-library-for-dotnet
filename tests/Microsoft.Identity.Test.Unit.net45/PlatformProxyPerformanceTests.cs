@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void ValidateGetPlatformProxyPerformance()
         {
-            using (new PerformanceValidator(50, "GetPlatformProxy"))
+            using (new PerformanceValidator(200, "GetPlatformProxy"))
             {
                 PlatformProxyFactory.CreatePlatformProxy(null);
             }
