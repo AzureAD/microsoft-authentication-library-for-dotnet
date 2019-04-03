@@ -51,22 +51,33 @@ namespace Microsoft.Identity.Client
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME
 
         /// <summary>
-        /// 
+        /// Sets a function to be notified before any library method accesses the cache. This gives an option to the
+        /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="beforeAccess"></param>
+        /// <param name="beforeAccess">Function set in order to handle the cache deserialiation</param>
+        /// <remarks>In the case where the function is used to deserialize the cache, it might
+        /// want to call <see cref="Deserialize(byte[])"/></remarks>
         void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess);
 
         /// <summary>
-        /// 
+        /// Sets a Function to be notified after any library method accesses the cache. This gives an option to the
+        /// delegate to serialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="beforeAccess"></param>
-        void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess);
+        /// <param name="afterAccess">Function set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
+        /// member of the cache is <c>true</c></param>
+        /// <remarks>In the case where the function is used to serialize the cache entierely (not just a row), it might
+        /// want to call <see cref="Serialize()"/></remarks>
+        void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> afterAccess);
 
         /// <summary>
-        /// 
+        /// Sets a function called before any library method writes to the cache. This gives an option to the delegate
+        /// to reload the cache state from a row in database and lock that row. That database row can then be unlocked in the delegate
+        /// registered with <see cref="SetAfterAccess(TokenCacheCallback)"/>
         /// </summary>
-        /// <param name="beforeAccess"></param>
-        void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeAccess);
+        /// <param name="beforeWrite">Function set in order to prepare the cache serialization</param>
+        void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeWrite);
 
         /// <summary>
         /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the

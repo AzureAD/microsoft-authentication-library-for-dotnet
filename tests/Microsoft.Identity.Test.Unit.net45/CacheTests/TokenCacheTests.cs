@@ -525,7 +525,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     MsalTestConstants.Scope);
                 authParams.UserAssertion = new UserAssertion(atKey);
 
-                ((TokenCache)cache).AfterAccess = AfterAccessNoChangeNotification;
+                ((TokenCache)cache).SetAfterAccess(AfterAccessNoChangeNotification);
                 var item = cache.FindAccessTokenAsync(authParams).Result;
 
                 Assert.IsNotNull(item);
@@ -792,10 +792,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void CanDeserializeTokenCacheInNet462()
         {
-            var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle())
-            {
-                AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
-            };
+            var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle());
+            tokenCache.SetAfterAccess(args => { Assert.IsFalse(args.HasStateChanged); });
             tokenCache.DeserializeMsalV3(null);
 #pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");

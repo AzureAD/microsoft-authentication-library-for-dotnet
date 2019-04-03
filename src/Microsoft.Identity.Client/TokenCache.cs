@@ -69,10 +69,6 @@ namespace Microsoft.Identity.Client
         private Func<TokenCacheNotificationArgs, Task> _asyncAfterAccess;
         private Func<TokenCacheNotificationArgs, Task> _asyncBeforeWrite;
 
-        private TokenCacheCallback _syncBeforeAccess;
-        private TokenCacheCallback _syncAfterAccess;
-        private TokenCacheCallback _syncBeforeWrite;
-
         internal IServiceBundle ServiceBundle { get; private set; }
 
         private const int DefaultExpirationBufferInMinutes = 5;
@@ -101,9 +97,9 @@ namespace Microsoft.Identity.Client
             _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
             if (_defaultTokenCacheBlobStorage != null)
             {
-                _syncBeforeAccess = _defaultTokenCacheBlobStorage.OnBeforeAccess;
-                _syncAfterAccess = _defaultTokenCacheBlobStorage.OnAfterAccess;
-                _syncBeforeWrite = _defaultTokenCacheBlobStorage.OnBeforeWrite;
+                _asyncBeforeAccess = CreateAsyncTokenCacheCallback(_defaultTokenCacheBlobStorage.OnBeforeAccess);
+                _asyncAfterAccess = CreateAsyncTokenCacheCallback(_defaultTokenCacheBlobStorage.OnAfterAccess);
+                _asyncBeforeWrite = CreateAsyncTokenCacheCallback(_defaultTokenCacheBlobStorage.OnBeforeWrite);
             }
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
@@ -150,84 +146,6 @@ namespace Microsoft.Identity.Client
 
         #region Notifications
 
-        internal Func<TokenCacheNotificationArgs, Task> AsyncBeforeAccess
-        {
-            get => _asyncBeforeAccess;
-            set
-            {
-                if (_syncBeforeAccess != null)
-                {
-                    throw new InvalidOperationException("BeforeAccess was already set.  Can't set both BeforeAccess and AsyncBeforeAccess");
-                }
-
-                _asyncBeforeAccess = value;
-            }
-        }
-
-        internal Func<TokenCacheNotificationArgs, Task> AsyncAfterAccess
-        {
-            get => _asyncAfterAccess;
-            set
-            {
-                if (_syncAfterAccess != null)
-                {
-                    throw new InvalidOperationException("AfterAccess was already set.  Can't set both AfterAccess and AsyncAfterAccess");
-                }
-
-                _asyncAfterAccess = value;
-            }
-        }
-
-        internal Func<TokenCacheNotificationArgs, Task> AsyncBeforeWrite
-        {
-            get => _asyncBeforeWrite;
-            set
-            {
-                if (_syncBeforeWrite != null)
-                {
-                    throw new InvalidOperationException("BeforeWrite was already set.  Can't set both BeforeWrite and AsyncBeforeWrite");
-                }
-
-                _asyncBeforeWrite = value;
-            }
-        }
-
-        /// <summary>
-        /// Notification method called before any library method accesses the cache.
-        /// </summary>
-        internal TokenCacheCallback BeforeAccess
-        {
-            get => _syncBeforeAccess;
-            set
-            {
-                if (_asyncBeforeAccess != null)
-                {
-                    throw new InvalidOperationException("BeforeAccess was already set.  Can't set both BeforeAccess and AsyncBeforeAccess");
-                }
-                _syncBeforeAccess = value;
-            }
-        }
-
-        /// <summary>
-        /// Notification method called before any library method writes to the cache. This notification can be used to reload
-        /// the cache state from a row in database and lock that row. That database row can then be unlocked in the
-        /// <see cref="AfterAccess"/>notification.
-        /// </summary>
-        internal TokenCacheCallback BeforeWrite
-        {
-            get => _syncBeforeWrite;
-            set => _syncBeforeWrite = value;
-        }
-
-        /// <summary>
-        /// Notification method called after any library method accesses the cache.
-        /// </summary>
-        internal TokenCacheCallback AfterAccess
-        {
-            get => _syncAfterAccess;
-            set => _syncAfterAccess = value;
-        }
-
         /// <summary>
         /// Gets or sets the flag indicating whether the state of the cache has changed.
         /// MSAL methods set this flag after any change.
@@ -244,26 +162,12 @@ namespace Microsoft.Identity.Client
 
         internal void OnAfterAccess(TokenCacheNotificationArgs args)
         {
-            if (AfterAccess != null)
-            {
-                AfterAccess.Invoke(args);
-            }
-            else if (AsyncAfterAccess != null)
-            {
-                AsyncAfterAccess.Invoke(args).GetAwaiter().GetResult();
-            }
+            _asyncAfterAccess?.Invoke(args).GetAwaiter().GetResult();
         }
 
         internal void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
-            if (BeforeAccess != null)
-            {
-                BeforeAccess.Invoke(args);
-            }
-            else if (AsyncBeforeAccess != null)
-            {
-                AsyncBeforeAccess.Invoke(args).GetAwaiter().GetResult();
-            }
+            _asyncBeforeAccess?.Invoke(args).GetAwaiter().GetResult();
         }
 
         internal void OnBeforeWrite(TokenCacheNotificationArgs args)
@@ -273,14 +177,7 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS0618 // Type or member is obsolete
             args.HasStateChanged = true;
 
-            if (BeforeWrite != null)
-            {
-                BeforeWrite.Invoke(args);
-            }
-            else if (AsyncBeforeWrite != null)
-            {
-                AsyncBeforeWrite.Invoke(args).GetAwaiter().GetResult();
-            }
+            _asyncBeforeWrite?.Invoke(args).GetAwaiter().GetResult();
         }
 
         #endregion
@@ -1133,6 +1030,16 @@ namespace Microsoft.Identity.Client
 
         #region Serialization
 
+        private Func<TokenCacheNotificationArgs, Task> CreateAsyncTokenCacheCallback(TokenCacheCallback callback)
+        {
+            if (callback == null)
+            {
+                return null;
+            }
+
+            return new Func<TokenCacheNotificationArgs, Task>(x => { callback.Invoke(x); return Task.FromResult(0); });
+        }
+
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME
 
         /// <summary>
@@ -1142,7 +1049,7 @@ namespace Microsoft.Identity.Client
         public void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess)
         {
             GuardOnMobilePlatforms();
-            AsyncBeforeAccess = beforeAccess;
+            _asyncBeforeAccess = beforeAccess;
         }
 
         /// <summary>
@@ -1152,7 +1059,7 @@ namespace Microsoft.Identity.Client
         public void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> afterAccess)
         {
             GuardOnMobilePlatforms();
-            AsyncAfterAccess = afterAccess;
+            _asyncAfterAccess = afterAccess;
         }
 
         /// <summary>
@@ -1162,7 +1069,7 @@ namespace Microsoft.Identity.Client
         public void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeWrite)
         {
             GuardOnMobilePlatforms();
-            AsyncBeforeWrite = beforeWrite;
+            _asyncBeforeWrite = beforeWrite;
         }
 
         /// <summary>
@@ -1176,7 +1083,7 @@ namespace Microsoft.Identity.Client
         public void SetBeforeAccess(TokenCacheCallback beforeAccess)
         {
             GuardOnMobilePlatforms();
-            BeforeAccess = beforeAccess;
+            _asyncBeforeAccess = CreateAsyncTokenCacheCallback(beforeAccess);
         }
 
         /// <summary>
@@ -1191,7 +1098,7 @@ namespace Microsoft.Identity.Client
         public void SetAfterAccess(TokenCacheCallback afterAccess)
         {
             GuardOnMobilePlatforms();
-            AfterAccess = afterAccess;
+            _asyncAfterAccess = CreateAsyncTokenCacheCallback(afterAccess);
         }
 
         /// <summary>
@@ -1203,7 +1110,7 @@ namespace Microsoft.Identity.Client
         public void SetBeforeWrite(TokenCacheCallback beforeWrite)
         {
             GuardOnMobilePlatforms();
-            BeforeWrite = beforeWrite;
+            _asyncBeforeWrite = CreateAsyncTokenCacheCallback(beforeWrite);
         }
 
         /// <summary>

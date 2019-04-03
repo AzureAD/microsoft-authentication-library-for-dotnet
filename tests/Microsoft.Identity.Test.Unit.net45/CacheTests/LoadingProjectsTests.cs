@@ -18,10 +18,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void CanDeserializeTokenCache()
         {
-            TokenCache tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle())
-            {
-                AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
-            };
+            TokenCache tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle());
+            tokenCache.SetAfterAccess(args => { Assert.IsFalse(args.HasStateChanged); });
 
             tokenCache.DeserializeMsalV3(null);
 #pragma warning disable CS0618 // Type or member is obsolete
