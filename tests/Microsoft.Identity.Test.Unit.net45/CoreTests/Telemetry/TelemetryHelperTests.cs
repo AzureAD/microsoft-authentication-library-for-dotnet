@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -35,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
     [TestClass]
     public class TelemetryHelperTests
     {
-        private const string RequestId = "therequestid";
+        private const string TelemetryCorrelationId = "thetelemetrycorrelationid";
         private const string ClientId = "theclientid";
         private _TestEvent _trackingEvent;
         private TelemetryManager _telemetryManager;
@@ -45,8 +46,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         public void Setup()
         {
             _testReceiver = new _TestReceiver();
-            _telemetryManager = new TelemetryManager(TestCommon.CreateDefaultServiceBundle().PlatformProxy, _testReceiver.HandleTelemetryEvents);
-            _trackingEvent = new _TestEvent("tracking event");
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
+            _telemetryManager = new TelemetryManager(serviceBundle.Config, serviceBundle.PlatformProxy, _testReceiver.HandleTelemetryEvents);
+            _trackingEvent = new _TestEvent("tracking event", TelemetryCorrelationId);
         }
 
         private class _TestReceiver : ITelemetryReceiver
@@ -62,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
 
         private class _TestEvent : EventBase
         {
-            public _TestEvent(string eventName) : base(eventName)
+            public _TestEvent(string eventName, string telemetryCorrelationId) : base(eventName, telemetryCorrelationId)
             {
             }
         }
@@ -71,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestCategory("TelemetryHelperTests")]
         public void TestTelemetryHelper()
         {
-            using (_telemetryManager.CreateTelemetryHelper(RequestId, ClientId, _trackingEvent))
+            using (_telemetryManager.CreateTelemetryHelper(_trackingEvent))
             {
             }
 
@@ -82,9 +84,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestCategory("TelemetryHelperTests")]
         public void TestTelemetryHelperWithFlush()
         {
-            using (_telemetryManager.CreateTelemetryHelper(RequestId, ClientId, _trackingEvent, shouldFlush: true))
+            using (_telemetryManager.CreateTelemetryHelper(_trackingEvent))
             {
             }
+
+            _telemetryManager.Flush(TelemetryCorrelationId);
 
             ValidateResults(ClientId, true);
         }
@@ -98,13 +102,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
                 Assert.AreEqual(2, _testReceiver.ReceivedEvents.Count);
 
                 var first = _testReceiver.ReceivedEvents[0];
-                Assert.AreEqual(12, first.Count);
+                Assert.AreEqual(13, first.Count);
                 Assert.IsTrue(first.ContainsKey(EventBase.EventNameKey));
                 Assert.AreEqual("msal.default_event", first[EventBase.EventNameKey]);
                 Assert.AreEqual(expectedClientId, first["msal.client_id"]);
 
                 var second = _testReceiver.ReceivedEvents[1];
-                Assert.AreEqual(3, second.Count);
+                Assert.AreEqual(4, second.Count);
                 Assert.IsTrue(second.ContainsKey(EventBase.EventNameKey));
                 Assert.AreEqual("tracking event", second[EventBase.EventNameKey]);
             }

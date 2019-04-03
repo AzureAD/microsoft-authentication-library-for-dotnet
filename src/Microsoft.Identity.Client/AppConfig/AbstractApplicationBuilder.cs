@@ -266,6 +266,17 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+        /// <summary>
+        /// Generate MATS telemetry aggregation events.
+        /// TODO(mats): make this public when we're ready to turn it on.
+        /// </summary>
+        /// <param name="matsConfig"></param>
+        /// <returns></returns>
+        internal T WithMatsTelemetry(MatsConfig matsConfig)
+        {
+            Config.MatsConfig = matsConfig;
+            return (T)this;
+        }
 
         internal virtual void Validate()
         {
@@ -285,6 +296,11 @@ namespace Microsoft.Identity.Client
             if (Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
             {
                 throw new InvalidOperationException(MsalErrorMessage.AdfsNotCurrentlySupportedAuthorityType);
+            }
+
+            if (Config.TelemetryCallback != null && Config.MatsConfig != null)
+            {
+                throw new InvalidOperationException(MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously);
             }
         }
 

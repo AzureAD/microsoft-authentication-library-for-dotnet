@@ -29,6 +29,7 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -40,10 +41,17 @@ namespace Microsoft.Identity.Client.Instance
             string userPrincipalName,
             RequestContext requestContext)
         {
-            string defaultEndpoint = string.Format(
-                CultureInfo.InvariantCulture,
-                new Uri(authorityInfo.CanonicalAuthority).AbsoluteUri + Constants.OpenIdConfigurationEndpoint);
-            return Task.FromResult(defaultEndpoint);
+            if (B2CAuthority.IsB2CLoginHost(authorityInfo.Host))
+            {
+                string defaultEndpoint = string.Format(
+                    CultureInfo.InvariantCulture,
+                    new Uri(authorityInfo.CanonicalAuthority).AbsoluteUri + Constants.OpenIdConfigurationEndpoint);
+                return Task.FromResult(defaultEndpoint);
+            }
+
+            throw MsalExceptionFactory.GetClientException(
+                        MsalError.B2CHostNotTrusted,
+                        MsalErrorMessage.B2CHostNotTrusted);
         }
     }
 }

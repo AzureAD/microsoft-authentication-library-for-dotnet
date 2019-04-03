@@ -33,35 +33,35 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public static class LabUserHelper
     {
-        static LabServiceApi _labService;
-        static KeyVaultSecretsProvider _keyVaultSecretsProvider;
-        private static readonly IDictionary<UserQuery, LabResponse> _userCache =
+        private static readonly LabServiceApi s_labService;
+        private static readonly KeyVaultSecretsProvider s_keyVaultSecretsProvider;
+        private static readonly IDictionary<UserQuery, LabResponse> s_userCache =
             new Dictionary<UserQuery, LabResponse>();
 
 
         static LabUserHelper()
         {
-            _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
-            _labService = new LabServiceApi(_keyVaultSecretsProvider);
+            s_keyVaultSecretsProvider = new KeyVaultSecretsProvider();
+            s_labService = new LabServiceApi(s_keyVaultSecretsProvider);
         }
 
 
         public static LabResponse GetLabUserData(UserQuery query)
         {
-            if (_userCache.ContainsKey(query))
+            if (s_userCache.ContainsKey(query))
             {
                 Debug.WriteLine("User cache hit");
-                return _userCache[query];
+                return s_userCache[query];
             }
 
-            var user = _labService.GetLabResponse(query);
+            var user = s_labService.GetLabResponse(query);
             if (user == null)
             {
                 throw new LabUserNotFoundException(query, "Found no users for the given query.");
             }
 
             Debug.WriteLine("User cache miss");
-            _userCache.Add(query, user);
+            s_userCache.Add(query, user);
 
             return user;
         }
@@ -102,14 +102,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
             }
 
-            if (_keyVaultSecretsProvider == null)
+            if (s_keyVaultSecretsProvider == null)
             {
                 throw new InvalidOperationException("Error: Keyvault secrets provider is not set");
             }
 
             try
             {
-                var secret = _keyVaultSecretsProvider.GetSecret(user.CredentialUrl);
+                var secret = s_keyVaultSecretsProvider.GetSecret(user.CredentialUrl);
                 return secret.Value;
             }
             catch (Exception e)

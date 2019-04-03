@@ -30,8 +30,13 @@ using System.Net.Http;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Http Client Factory
+    /// Factory responsible for creating HttpClient
+    /// .Net recommends to use a single instance of HttpClient
     /// </summary>
+    /// <remarks>
+    /// Implementations must be thread safe. Consider creating and configuring an HttpClient in the constructor
+    /// of the factory, and returning the same object in <see cref="GetHttpClient"/>
+    /// </remarks>
     public interface IMsalHttpClientFactory
     {
         /// <summary>

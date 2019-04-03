@@ -98,9 +98,9 @@ namespace Microsoft.Identity.Test.UIAutomation
 
                 // Ignored tests
                 //B2CGoogleMicrosoftAuthorityAcquireTokenTest,
-                //B2CFacebookEditPolicyAcquireTokenTest,
-                //B2CFacebookMicrosoftAuthorityAcquireTokenTest
-                //B2CFacebookB2CLoginAuthorityAcquireTokenTest
+                //B2CFacebookMicrosoftAuthorityAcquireTokenTest,
+                //B2CFacebookB2CLoginAuthorityAcquireTokenTest,
+                //B2CFacebookEditPolicyAcquireTokenTest
             };
 
             var hasFailed = false;
@@ -162,8 +162,8 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// b2clogin.com authority
         /// with subsequent silent call
         /// </summary>
-        [Ignore("Facebook updated to Graph v3 and app center tests are failing. Ignoring for the moment.")]
         [Test]
+        [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookB2CLoginAuthorityAcquireTokenTest()
         {
             _mobileTestHelper.B2CFacebookAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
@@ -174,8 +174,8 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// login.microsoftonline.com authority
         /// with subsequent silent call
         /// </summary>
-        [Ignore("Facebook updated to Graph v3 and app center tests are failing. Ignoring for the moment.")]
         [Test]
+        [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookMicrosoftAuthorityAcquireTokenTest()
         {
             _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, false);
@@ -188,8 +188,8 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// call to edit profile authority with
         ///  UIBehavior none
         /// </summary>
-        [Ignore("Facebook updated to Graph v3 and app center tests are failing. Ignoring for the moment.")]
         [Test]
+        [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookEditPolicyAcquireTokenTest()
         {
             _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, true);

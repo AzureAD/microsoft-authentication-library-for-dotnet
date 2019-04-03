@@ -2,11 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
@@ -25,21 +21,24 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         protected IServiceBundle ServiceBundle { get; }
 
-        protected void LogVersionInfo()
+        protected RequestContext CreateRequestContextAndLogVersionInfo(Guid telemetryCorrelationId)
         {
-            CreateRequestContext().Logger.Info(
+            var requestContext = new RequestContext(
+                _clientApplicationBase.AppConfig.ClientId,
+                MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config),
+                telemetryCorrelationId);
+
+            requestContext.Logger.Info(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}'",
+                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}'. TelemetryCorrelationId({4})",
                     ServiceBundle.PlatformProxy.GetProductName(),
                     MsalIdHelper.GetMsalVersion(),
                     AssemblyUtils.GetAssemblyFileVersionAttribute(),
-                    AssemblyUtils.GetAssemblyInformationalVersion()));
-        }
+                    AssemblyUtils.GetAssemblyInformationalVersion(),
+                    requestContext.TelemetryCorrelationId));
 
-        protected RequestContext CreateRequestContext()
-        {
-            return new RequestContext(_clientApplicationBase.AppConfig.ClientId, MsalLogger.Create(Guid.NewGuid(), ServiceBundle.Config));
+            return requestContext;
         }
     }
 }

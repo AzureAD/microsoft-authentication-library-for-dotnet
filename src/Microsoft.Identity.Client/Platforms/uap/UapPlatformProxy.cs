@@ -44,11 +44,12 @@ using String = System.String;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Windows.Foundation.Collections;
+using Microsoft.Identity.Client.Mats.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
     /// <summary>
-    /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here. 
+    /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
     internal class UapPlatformProxy : AbstractPlatformProxy
     {
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// Get the user logged in to Windows or throws
         /// </summary>
         /// <remarks>
-        /// Win10 allows several identities to be logged in at once; 
+        /// Win10 allows several identities to be logged in at once;
         /// select the first principal name that can be used
         /// </remarks>
         /// <returns>The username or throws</returns>
@@ -146,7 +147,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         protected override string InternalGetOperatingSystem()
         {
-            // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check 
+            // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check
             // for existence of specific features which does not help in this case, so we do not emit OS in WinRT.
             return null;
         }
@@ -175,7 +176,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
         protected override string InternalGetCallingApplicationName()
@@ -184,7 +185,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
         protected override string InternalGetCallingApplicationVersion()
@@ -193,7 +194,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <summary>
-        /// Considered PII. Please ensure that it is hashed. 
+        /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
         protected override string InternalGetDeviceId()
@@ -211,6 +212,27 @@ namespace Microsoft.Identity.Client.Platforms.uap
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
+        public override string GetDeviceNetworkState()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetDevicePlatformTelemetryId()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetMatsOsPlatform()
+        {
+            return MatsConverter.AsString(OsPlatform.Win32);
+        }
+
+        public override int GetMatsOsPlatformCode()
+        {
+            return MatsConverter.AsInt(OsPlatform.Win32);
+        }
         protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
     }
 }

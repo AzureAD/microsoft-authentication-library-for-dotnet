@@ -916,11 +916,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
 
             return new AuthenticationRequestParameters(
-                serviceBundle,
-                authority ?? Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant),
+                serviceBundle,                
                 null,
                 commonParameters,
-                requestContext ?? RequestContext.CreateForTest(serviceBundle));
+                requestContext ?? RequestContext.CreateForTest(serviceBundle))
+            {
+                Authority = authority ?? Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant)
+            };
         }
 
         [TestMethod]

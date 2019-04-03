@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
         public string Authority => ServiceBundle.Config.AuthorityInfo.CanonicalAuthority;
 
         /// <Summary>
-        /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used 
+        /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
         /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
         /// or one of the overrides of <see cref="AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/>.
         /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            RequestContext requestContext = CreateRequestContext();
+            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
             if (UserTokenCache == null)
             {
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public Task RemoveAsync(IAccount account)
         {
-            RequestContext requestContext = CreateRequestContext();
+            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             if (account != null)
             {
                 UserTokenCacheInternal?.RemoveAccount(account, requestContext);
@@ -149,9 +149,9 @@ namespace Microsoft.Identity.Client
             return Task.FromResult(0);
         }
 
-        internal Authority GetAuthority(IAccount account)
+        internal static Authority GetAuthority(IServiceBundle serviceBundle, IAccount account)
         {
-            var authority = Instance.Authority.CreateAuthority(ServiceBundle);
+            var authority = Instance.Authority.CreateAuthority(serviceBundle);
             var tenantId = authority.GetTenantId();
 
             if (Instance.Authority.TenantlessTenantNames.Contains(tenantId)
@@ -165,20 +165,22 @@ namespace Microsoft.Identity.Client
 
         internal virtual AuthenticationRequestParameters CreateRequestParameters(
             AcquireTokenCommonParameters commonParameters,
-            ITokenCacheInternal cache,
-            Authority customAuthority = null)
+            RequestContext requestContext,
+            ITokenCacheInternal cache)
         {
             return new AuthenticationRequestParameters(
                 ServiceBundle,
-                customAuthority,
                 cache,
                 commonParameters,
-                CreateRequestContext());
+                requestContext);
         }
 
-        private RequestContext CreateRequestContext()
+        // This implementation should ONLY be called for cases where we aren't participating in
+        // MATS telemetry but still need a requestcontext/logger, such as "GetAccounts()".
+        // For service calls, the request context should be created in the **Executor classes as part of request execution.
+        private RequestContext CreateRequestContext(Guid telemetryCorrelationId)
         {
-            return new RequestContext(AppConfig.ClientId, MsalLogger.Create(Guid.NewGuid(), ServiceBundle.Config));
+            return new RequestContext(AppConfig.ClientId, MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config), telemetryCorrelationId);
         }
 
         /// <summary>
@@ -196,7 +198,7 @@ namespace Microsoft.Identity.Client
         /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
-        /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window - 
+        /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// See also the additional parameters that you can set chain:
@@ -206,7 +208,7 @@ namespace Microsoft.Identity.Client
         /// force refreshing the token, as well as
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
         /// specify extra query parameters
-        /// 
+        ///
         /// </remarks>
         public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {
@@ -217,7 +219,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// [V3 API] Attempts to acquire an access token for the <see cref="IAccount"/> 
+        /// [V3 API] Attempts to acquire an access token for the <see cref="IAccount"/>
         /// having the <see cref="IAccount.Username" /> match the given <paramref name="loginHint"/>, from the user token cache.
         /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
@@ -229,8 +231,8 @@ namespace Microsoft.Identity.Client
         /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
         /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
-        /// If multiple <see cref="IAccount"/> match the <paramref name="loginHint"/>, or if none do, an exception is thrown. 
-        /// 
+        /// If multiple <see cref="IAccount"/> match the <paramref name="loginHint"/>, or if none do, an exception is thrown.
+        ///
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
         /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
@@ -242,7 +244,7 @@ namespace Microsoft.Identity.Client
         /// force refreshing the token, as well as
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
         /// specify extra query parameters
-        /// 
+        ///
         /// </remarks>
         public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
         {

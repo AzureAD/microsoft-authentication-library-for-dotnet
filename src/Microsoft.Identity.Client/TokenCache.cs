@@ -32,10 +32,10 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using System;
@@ -572,8 +572,14 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             string familyId)
         {
-            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
+            var cacheEvent = new CacheEvent(
+                CacheEvent.TokenCacheLookup,
+                requestParams.RequestContext.TelemetryCorrelationId)
+                {
+                    TokenType = CacheEvent.TokenTypes.RT
+                };
+
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(cacheEvent))
             {
                 if (requestParams.Authority == null)
                 {

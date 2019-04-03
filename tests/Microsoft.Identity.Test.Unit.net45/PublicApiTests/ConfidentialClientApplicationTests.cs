@@ -47,6 +47,8 @@ using NSubstitute;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Threading;
+using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.Mats.Internal.Constants;
 
 #if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -379,7 +381,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[ApiEvent.ApiIdKey] == "726"));
+                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "726"));
             }
         }
 
@@ -666,7 +668,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[ApiEvent.ApiIdKey] == "727"));
+                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "727"));
             }
         }
 
@@ -676,8 +678,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 var app = ConfidentialClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy"), true)

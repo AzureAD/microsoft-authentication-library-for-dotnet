@@ -28,8 +28,9 @@
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Mats.Internal.Constants;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -202,7 +203,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.ApiIdKey] == "170" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "170" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "state_mismatch"));
             }
         }
@@ -491,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.ApiIdKey] == "176" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "176" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "user_mismatch"));
 
                 var users = app.GetAccountsAsync().Result;
@@ -929,7 +930,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
-            var authoriy = app.GetAuthority(new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
+            var authoriy = ClientApplicationBase.GetAuthority(app.ServiceBundle, new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.AuthorityInfo.CanonicalAuthority);
         }
 
@@ -939,7 +940,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
-            var authority = app.GetAuthority(
+            var authority = ClientApplicationBase.GetAuthority(
+                app.ServiceBundle,
                 new Account(
                     "objectId." + MsalTestConstants.Utid,
                     MsalTestConstants.Name,
@@ -968,7 +970,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CLoginAcquireTokenTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -997,13 +999,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenTest()
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.B2CAuthority), true)
                                                                             .WithHttpManager(httpManager)
@@ -1027,7 +1027,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenWithValidateAuthorityTrueTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -1062,16 +1062,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenWithValidateAuthorityTrueAndRandomAuthorityTest()
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
-                    .WithAuthority(new Uri(MsalTestConstants.B2CRandomHost), true)
+                    .WithAuthority(new Uri(MsalTestConstants.B2CCustomDomain), true)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -1079,8 +1077,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CRandomHost);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CRandomHost);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CCustomDomain);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CCustomDomain);
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope, null)
@@ -1093,18 +1091,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenWithB2CLoginAuthorityTest()
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
-
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CAuthority);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthority);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityBlackforest);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityMoonCake);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityUsGov);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CCustomDomain);
             }
         }
 
