@@ -26,31 +26,19 @@
 //------------------------------------------------------------------------------
 
 using System.IO;
-using System.Security.Cryptography;
 using Microsoft.Identity.Client;
 
 namespace DesktopTestApp
 {
     static class TokenCacheHelper
     {
-        public static readonly TokenCache UserTokenCache = new TokenCache()
-        {
-            BeforeAccess = BeforeAccessNotification,
-            AfterAccess = AfterAccessNotification
-        };
-
-        public static TokenCache GetUserCache()
-        {
-            return UserTokenCache;
-        }
-
         public static string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + "msalcache.txt";
 
-        private static readonly object FileLock = new object();
+        private static readonly object s_fileLock = new object();
 
         public static void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            lock (FileLock)
+            lock (s_fileLock)
             {
                 args.TokenCache.DeserializeMsalV3(File.Exists(CacheFilePath)
                     ? File.ReadAllBytes(CacheFilePath)
@@ -63,7 +51,7 @@ namespace DesktopTestApp
             // if the access operation resulted in a cache update
             if (args.HasStateChanged)
             {
-                lock (FileLock)
+                lock (s_fileLock)
                 {
                     // reflect changesgs in the persistent store
                     File.WriteAllBytes(CacheFilePath, args.TokenCache.SerializeMsalV3());
