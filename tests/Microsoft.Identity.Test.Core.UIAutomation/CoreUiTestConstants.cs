@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string AcquireTokenButtonId = "acquireToken_button";
         public const string AcquireTokenWithPromptBehaviorAlwaysId = "acquireTokenPromptBehaviorAlways";
         public const string AcquireTokenSilentButtonId = "acquireTokenSilent_button";
-        public const string AcquireTokenROPCButtonId = "acquireTokenByUsernamePassword";
         public const string ClientIdEntryId = "clientIdEntry";
         public const string ResourceEntryId = "resourceEntry";
         public const string PromptBehaviorEntryId = "promptBehaviorEntry";
@@ -87,7 +86,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string MicrosoftOnlineAuthority = "login.microsoftonline.com";
         public const string NonB2CAuthority = "non-b2c authority";
         public const string B2CEditProfileAuthority = "Edit profile policy authority";
-        public const string B2CROPCAuthority = "ROPC";
         public const string FacebookAccountId = "FacebookExchange";
         public const string WebUpnB2CFacebookInputId = "m_login_email";
         public const string B2CWebPasswordFacebookId = "m_login_password";
@@ -108,8 +106,5 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         // Test Constants
         public const int ResultCheckPolliInterval = 1000;
         public const int MaximumResultCheckRetryAttempts = 20;
-
-        public const string UsernameId = "usernameId";
-        public const string PasswordId = "passwordId";
     }
 }

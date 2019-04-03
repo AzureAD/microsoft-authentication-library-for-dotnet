@@ -389,19 +389,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             VerifyResult(controller);
         }
 
-        public void PerformROPCFlow(ITestController controller, LabResponse labResponse)
-        {
-            controller.Tap(_acquirePageId);
-
-            controller.EnterText(CoreUiTestConstants.UsernameId, labResponse.User.HomeUPN, XamarinSelector.ByAutomationId);
-            controller.EnterText(CoreUiTestConstants.PasswordId, labResponse.User.Password, XamarinSelector.ByAutomationId);
-
-            //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenROPCButtonId);
-
-            VerifyResult(controller);
-        }
-
         public void PromptBehaviorTestHelperWithConsent(ITestController controller, LabResponse labResponse)
         {
             // 1. Acquire token with uiBehavior set to consent
