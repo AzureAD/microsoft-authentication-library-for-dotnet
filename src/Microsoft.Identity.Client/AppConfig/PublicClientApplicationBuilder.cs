@@ -27,7 +27,6 @@
 
 using System;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client

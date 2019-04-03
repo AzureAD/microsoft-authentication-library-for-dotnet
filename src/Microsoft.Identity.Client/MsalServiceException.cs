@@ -28,6 +28,8 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
@@ -40,46 +42,6 @@ namespace Microsoft.Identity.Client
     public class MsalServiceException : MsalException
     {
         /// <summary>
-        /// Service is unavailable and returned HTTP error code within the range of 500-599
-        /// <para>Mitigation</para> you can retry after a delay. Note that the retry-after header is not yet
-        /// surfaced in MSAL.NET (on the backlog)
-        /// </summary>
-        public const string ServiceNotAvailable = "service_not_available";
-
-        /// <summary>
-        /// The Http Request to the STS timed out.
-        /// <para>Mitigation</para> you can retry after a delay.
-        /// </summary>
-        public const string RequestTimeout = "request_timeout";
-
-        /// <summary>
-        /// Upn required
-        /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:PublicClientApplication"/> which
-        /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c> 
-        /// expected by the service
-        /// <para>Remediation</para> Make sure in your code that you enforce <c>loginHint</c> to be a UPN
-        /// </summary>
-        public const string UpnRequired = "upn_required";
-
-        /// <summary>
-        /// No passive auth endpoint was found in the OIDC configuration of the authority
-        /// <para>What happens?</para> When the libraries go to the authority and get its open id connect configuration
-        /// it expects to find a Passive Auth Endpoint entry, and could not find it.
-        /// <para>remediation</para> Check that the authority configured for the application, or passed on some overrides of token acquisition tokens
-        /// supporting authority override is correct
-        /// </summary>
-        public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
-
-        /// <summary>
-        /// Invalid authority
-        /// <para>What happens</para> When the library attempts to discover the authority and get the endpoints it needs to
-        /// acquire a token, it got an un-authorize HTTP code or an unexpected response
-        /// <para>remediation</para> Check that the authority configured for the application, or passed on some overrides of token acquisition tokens
-        /// supporting authority override is correct
-        /// </summary>
-        public const string InvalidAuthority = "invalid_authority";
-
-        /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code, error message and a reference to the inner exception that is the cause of
         /// this exception.
@@ -90,8 +52,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         public MsalServiceException(string errorCode, string errorMessage) 
-            : base(
-                errorCode, errorMessage)
+            : base(errorCode, errorMessage)
         {
         }
 
@@ -128,8 +89,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         public MsalServiceException(string errorCode, string errorMessage,
             Exception innerException)
-            : base(
-                errorCode, errorMessage, innerException)
+            : base(errorCode, errorMessage, innerException)
         {
         }
 
@@ -156,7 +116,6 @@ namespace Microsoft.Identity.Client
             StatusCode = statusCode;
         }
 
-
         /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code, error message and a reference to the inner exception that is the cause of
@@ -173,12 +132,45 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.
         /// </param>
-        public MsalServiceException(string errorCode, string errorMessage, int statusCode, string claims,
+        public MsalServiceException(
+            string errorCode,
+            string errorMessage,
+            int statusCode,
+            string claims,
             Exception innerException)
-            : this(
-                errorCode, errorMessage, statusCode, innerException)
+            : this(errorCode, errorMessage, statusCode, innerException)
         {
             Claims = claims;
+        }
+
+        private HttpResponse _httpResponse;
+
+        internal HttpResponse HttpResponse
+        {
+            get => _httpResponse;
+            set
+            {
+                _httpResponse = value;
+                ResponseBody = _httpResponse?.Body;
+                StatusCode = _httpResponse != null ? (int)_httpResponse.StatusCode : 0;
+                Headers = _httpResponse?.Headers;
+
+                // In most cases we can deserialize the body to get more details such as the suberror
+                OAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(_httpResponse?.Body);
+            }
+        }
+
+        private OAuth2ResponseBase _oauth2ResponseBase;
+
+        internal OAuth2ResponseBase OAuth2Response
+        {
+            get => _oauth2ResponseBase;
+            set
+            {
+                _oauth2ResponseBase = value;
+                Claims = _oauth2ResponseBase?.Claims;
+                CorrelationId = _oauth2ResponseBase?.CorrelationId;
+            }
         }
 
         /// <summary>

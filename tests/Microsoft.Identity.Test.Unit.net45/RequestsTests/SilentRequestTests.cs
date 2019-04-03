@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     var exc = ae.InnerException as MsalUiRequiredException;
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalUiRequiredException.TokenCacheNullError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.TokenCacheNullError, exc.ErrorCode);
                 }
             }
         }
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     var exc = ae.InnerException as MsalUiRequiredException;
                     Assert.IsNotNull(exc, "Actual exception type is " + ae.InnerException.GetType());
-                    Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.NoTokensFoundError, exc.ErrorCode);
                 }
             }
         }

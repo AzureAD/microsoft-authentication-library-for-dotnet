@@ -26,7 +26,6 @@
 // ------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Mats.Internal.Events;
@@ -191,21 +190,30 @@ namespace Microsoft.Identity.Client.OAuth2
             }
             catch (SerializationException) // in the rare case we get an error response we cannot deserialize
             {
-                exceptionToThrow = MsalExceptionFactory.GetServiceException(
+                exceptionToThrow = new MsalServiceException(
                     MsalError.NonParsableOAuthError,
-                    MsalErrorMessage.NonParsableOAuthError,
-                    response);
+                    MsalErrorMessage.NonParsableOAuthError)
+                {
+                    HttpResponse = response
+                };
             }
             catch (Exception ex)
             {
-                exceptionToThrow = MsalExceptionFactory.GetServiceException(MsalError.UnknownError, response.Body, response, ex);
+                exceptionToThrow = new MsalServiceException(MsalError.UnknownError, response.Body, ex)
+                {
+                    HttpResponse = response
+                };
             }
 
             if (exceptionToThrow == null)
             {
-                exceptionToThrow = response.StatusCode != HttpStatusCode.NotFound ?
-                    MsalExceptionFactory.GetServiceException(MsalError.HttpStatusCodeNotOk, httpErrorCodeMessage, response) :
-                    MsalExceptionFactory.GetServiceException(MsalError.HttpStatusNotFound, httpErrorCodeMessage, response);
+                exceptionToThrow = new MsalServiceException(
+                    response.StatusCode == HttpStatusCode.NotFound
+                        ? MsalError.HttpStatusNotFound
+                        : MsalError.HttpStatusCodeNotOk, httpErrorCodeMessage)
+                {
+                    HttpResponse = response
+                };
             }
 
             if (shouldLogAsError)
@@ -239,17 +247,21 @@ namespace Microsoft.Identity.Client.OAuth2
             
             if (MsalError.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
             {
-                exceptionToThrow = MsalExceptionFactory.GetUiRequiredException(
+                exceptionToThrow = new MsalUiRequiredException(
                     MsalError.InvalidGrantError,
-                    msalTokenResponse.ErrorDescription,
-                    response);
+                    msalTokenResponse.ErrorDescription)
+                {
+                    HttpResponse = response
+                };
             }
             else
             {
-                exceptionToThrow = MsalExceptionFactory.GetServiceException(
+                exceptionToThrow = new MsalServiceException(
                     msalTokenResponse.Error,
-                    msalTokenResponse.ErrorDescription,
-                    response);
+                    msalTokenResponse.ErrorDescription)
+                {
+                    HttpResponse = response
+                };
             }
 
             // For device code flow, AuthorizationPending can occur a lot while waiting

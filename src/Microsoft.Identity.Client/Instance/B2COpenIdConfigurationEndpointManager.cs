@@ -29,7 +29,6 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -49,7 +48,7 @@ namespace Microsoft.Identity.Client.Instance
                 return Task.FromResult(defaultEndpoint);
             }
 
-            throw MsalExceptionFactory.GetClientException(
+            throw new MsalClientException(
                         MsalError.B2CHostNotTrusted,
                         MsalErrorMessage.B2CHostNotTrusted);
         }

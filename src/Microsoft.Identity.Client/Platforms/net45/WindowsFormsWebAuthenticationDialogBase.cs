@@ -33,7 +33,6 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
@@ -231,7 +230,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     "Redirection to non-HTTPS scheme ({0}) found! Webview will fail...", url.Scheme));
                 Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
-                    Error = MsalClientException.NonHttpsRedirectNotSupported,
+                    Error = MsalError.NonHttpsRedirectNotSupported,
                     ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported
                 };
                 readyToClose = true;
@@ -399,12 +398,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
             {
                 string format = "The browser based authentication dialog failed to complete. Reason: {0}";
                 string message = string.Format(CultureInfo.InvariantCulture, format, NavigateErrorStatus.Messages[statusCode]);
-                return new MsalClientException(MsalClientException.AuthenticationUiFailedError, message);
+                return new MsalClientException(MsalError.AuthenticationUiFailedError, message);
             }
 
             string formatUnknown = "The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}";
             string messageUnknown = string.Format(CultureInfo.InvariantCulture, formatUnknown, statusCode);
-            return new MsalClientException(MsalClientException.AuthenticationUiFailedError, messageUnknown);
+            return new MsalClientException(MsalError.AuthenticationUiFailedError, messageUnknown);
         }
 
         private sealed class WindowsFormsWin32Window : IWin32Window

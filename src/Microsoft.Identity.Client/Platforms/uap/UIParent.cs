@@ -27,7 +27,6 @@
 
 using System;
 using System.ComponentModel;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client
 {

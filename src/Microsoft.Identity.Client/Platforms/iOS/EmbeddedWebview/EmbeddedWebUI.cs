@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -29,7 +29,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 using UIKit;
@@ -86,7 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             }
             catch (Exception ex)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.AuthenticationUiFailed, 
                     "See inner exception for details", 
                     ex);

@@ -35,7 +35,6 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Support.CustomTabs;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Uri = Android.Net.Uri;
@@ -139,7 +138,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 }
                 catch (ActivityNotFoundException ex)
                 {
-                    throw MsalExceptionFactory.GetClientException(
+                    throw new MsalClientException(
                            MsalError.AndroidActivityNotFound,
                            MsalErrorMessage.AndroidActivityNotFound, ex);
                 }

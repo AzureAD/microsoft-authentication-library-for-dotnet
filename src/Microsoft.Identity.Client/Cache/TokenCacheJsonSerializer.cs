@@ -27,7 +27,6 @@
 
 using System;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
@@ -88,7 +87,7 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                throw MsalExceptionFactory.GetClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheJsonSerializerFailedParse, ex);
+                throw new MsalClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheJsonSerializerFailedParse, ex);
             }
 
             if (cache.AccessTokens != null)

@@ -7,7 +7,6 @@ using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -18,6 +17,14 @@ using Microsoft.Identity.Client.Platforms.iOS;
 
 namespace Microsoft.Identity.Client
 {
+    internal static class MigrationHelper
+    {
+        public static NotImplementedException CreateMsalNet3BreakingChangesException()
+        {
+            return new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+        }
+    }
+
     /// <summary>
     /// In MSAL.NET 1.x, was representing a User. From MSAL 2.x use <see cref="IAccount"/> which represents an account
     /// (a user has several accounts). See https://aka.ms/msal-net-2-released for more details.
@@ -323,7 +330,7 @@ namespace Microsoft.Identity.Client
             IAccount account,
             string authority, bool forceRefresh)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -344,7 +351,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenSilent instead." + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
         #endregion MSAL3X deprecations
     }
@@ -847,7 +854,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use PublicClientApplicationBuilder instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -874,7 +881,7 @@ namespace Microsoft.Identity.Client
                 .WithAuthority(new Uri(authority), true)
                 .BuildConfiguration())
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         // netcoreapp does not support UI at the moment and all the Acquire* methods use UI;
@@ -894,7 +901,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenInteractive instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -907,7 +914,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenInteractive instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -922,7 +929,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             IAccount account)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -942,7 +949,7 @@ namespace Microsoft.Identity.Client
             Prompt prompt,
             string extraQueryParameters)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -962,7 +969,7 @@ namespace Microsoft.Identity.Client
             Prompt prompt,
             string extraQueryParameters)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -988,7 +995,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> extraScopesToConsent,
             string authority)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1014,7 +1021,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> extraScopesToConsent,
             string authority)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 #endif
 
@@ -1030,7 +1037,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenInteractive instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1045,7 +1052,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenInteractive instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint, UIParent parent)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1061,7 +1068,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             IAccount account, UIParent parent)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1083,7 +1090,7 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             UIParent parent)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1105,7 +1112,7 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             UIParent parent)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1133,7 +1140,7 @@ namespace Microsoft.Identity.Client
             string authority,
             UIParent parent)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1161,7 +1168,7 @@ namespace Microsoft.Identity.Client
             string authority,
             UIParent parent)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         // endif for !NET_CORE
@@ -1180,7 +1187,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenByUsernamePassword instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, SecureString securePassword)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 #endif
 
@@ -1204,7 +1211,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1231,7 +1238,7 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1256,7 +1263,7 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback,
             CancellationToken cancellationToken)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1285,7 +1292,7 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback,
             CancellationToken cancellationToken)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1301,7 +1308,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenByRefreshToken instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME
@@ -1321,7 +1328,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 #endif
 
@@ -1339,7 +1346,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string username)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 #endif
 
@@ -1357,7 +1364,7 @@ namespace Microsoft.Identity.Client
                    .WithAuthority(new Uri(authority), true)
                    .BuildConfiguration())
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 #endif
 
@@ -1583,7 +1590,7 @@ namespace Microsoft.Identity.Client
                 .Create(clientId)
                 .BuildConfiguration())
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1626,7 +1633,7 @@ namespace Microsoft.Identity.Client
                 .Create(clientId)
                 .BuildConfiguration())
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1644,7 +1651,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenOnBehalfOf instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1666,7 +1673,7 @@ namespace Microsoft.Identity.Client
             UserAssertion userAssertion,
             string authority)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1684,7 +1691,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenOnBehalfOf instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1704,7 +1711,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion,
             string authority)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1721,7 +1728,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenByAuthorizationCode instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, IEnumerable<string> scopes)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1736,7 +1743,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenForClient instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1754,7 +1761,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenForClient instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes, bool forceRefresh)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1771,7 +1778,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenForClient instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1790,7 +1797,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenForClient instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes, bool forceRefresh)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1806,7 +1813,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use AcquireTokenByRefreshToken instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1827,7 +1834,7 @@ namespace Microsoft.Identity.Client
             string loginHint,
             string extraQueryParameters)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -1856,7 +1863,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> extraScopesToConsent,
             string authority)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
     }
 #endif
@@ -2003,7 +2010,7 @@ namespace Microsoft.Identity.Client
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         public ClientAssertionCertificate(X509Certificate2 certificate)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         /// <summary>
@@ -2014,15 +2021,15 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the X509 certificate used as credentials to prove the identity of the application to Azure AD.
         /// </summary>
-        public X509Certificate2 Certificate => throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+        public X509Certificate2 Certificate => throw MigrationHelper.CreateMsalNet3BreakingChangesException();
 
         internal byte[] Sign(ICryptographyManager cryptographyManager, string message)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
         // Thumbprint should be url encoded
-        internal string Thumbprint => throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+        internal string Thumbprint => throw MigrationHelper.CreateMsalNet3BreakingChangesException();
     }
 #endif
 
@@ -2046,32 +2053,32 @@ namespace Microsoft.Identity.Client
         /// registration to prove the identity of the application (the client) requesting the tokens.</param>
         public ClientCredential(ClientAssertionCertificate certificate)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
-        internal ClientAssertionCertificate Certificate => throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+        internal ClientAssertionCertificate Certificate => throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         internal string Assertion
         {
-            get { throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException(); }
-            set { throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException(); }
+            get { throw MigrationHelper.CreateMsalNet3BreakingChangesException(); }
+            set { throw MigrationHelper.CreateMsalNet3BreakingChangesException(); }
         }
 
         internal long ValidTo
         {
-            get { throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException(); }
-            set { throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException(); }
+            get { throw MigrationHelper.CreateMsalNet3BreakingChangesException(); }
+            set { throw MigrationHelper.CreateMsalNet3BreakingChangesException(); }
         }
 
         internal bool ContainsX5C
         {
-            get { throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException(); }
-            set { throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException(); }
+            get { throw MigrationHelper.CreateMsalNet3BreakingChangesException(); }
+            set { throw MigrationHelper.CreateMsalNet3BreakingChangesException(); }
         }
 
         internal string Audience
         {
-            get { throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException(); }
-            set { throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException(); }
+            get { throw MigrationHelper.CreateMsalNet3BreakingChangesException(); }
+            set { throw MigrationHelper.CreateMsalNet3BreakingChangesException(); }
         }
 
         /// <summary>
@@ -2081,10 +2088,10 @@ namespace Microsoft.Identity.Client
         /// of the application (the client) requesting the tokens.</param>
         public ClientCredential(string secret)
         {
-            throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+            throw MigrationHelper.CreateMsalNet3BreakingChangesException();
         }
 
-        internal string Secret => throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
+        internal string Secret => throw MigrationHelper.CreateMsalNet3BreakingChangesException();
     }
 #endif
 }

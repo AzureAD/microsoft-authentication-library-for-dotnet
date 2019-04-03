@@ -30,7 +30,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Mats.Internal.Events;
 
 namespace Microsoft.Identity.Client
@@ -126,7 +125,7 @@ namespace Microsoft.Identity.Client
             base.Validate();
             if (Parameters.Account == null && string.IsNullOrWhiteSpace(Parameters.LoginHint))
             {
-                throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
+                throw new MsalUiRequiredException(MsalError.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
             }
         }
     }

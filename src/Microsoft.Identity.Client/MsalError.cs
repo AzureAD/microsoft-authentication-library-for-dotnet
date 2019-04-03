@@ -33,6 +33,116 @@ namespace Microsoft.Identity.Client
     public static class MsalError
     {
         /// <summary>
+        /// Standard OAuth2 protocol error code. It indicates to the libray that the application needs to expose the UI to the user  
+        /// so that the user does an interactive action in order to get a new token.
+        /// <para>Mitigation:</para> If your application is a <see cref="T:PublicClientApplication"/> call one of the <c>AcquireTokenAsync</c> overrides to 
+        /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
+        /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation
+        /// </summary>
+        public const string InvalidGrantError = "invalid_grant";
+
+#if !DESKTOP && !NET_CORE
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
+        /// <summary>
+        /// <para>Mitigation:</para> If your application is a <see cref="PublicClientApplication"/> call one of the <c>AcquireTokenAsync</c> overrides so
+        /// that the user of your application signs-in and accepts consent. If your application is a <see cref="T:ConfidentialClientApplication"/>. If it's a Web App
+        /// you should have previously called <see cref="ConfidentialClientApplication.AcquireTokenByAuthorizationCodeAsync(string, System.Collections.Generic.IEnumerable{string})"/>
+        /// as described in https://aka.ms/msal-net-authorization-code. This error should not happen in Web APIs.
+        /// </summary>
+        public const string NoTokensFoundError = "no_tokens_found";
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
+
+        /// <summary>
+        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is 
+        /// passed as the <c>account</c> parameter.
+        /// </summary>
+        public const string UserNullError = "user_null";
+
+        /// <summary>
+        /// This error code denotes that no account was found having the given login hint.
+        /// </summary>
+        public const string NoAccountForLoginHint = "no_account_for_login_hint";
+
+        /// <summary>
+        /// This error code denotes that multiple accounts were found having the same login hint and MSAL 
+        /// cannot chose one. Please use the overload of AcquireTokenSilent where you pass an account.
+        /// </summary>
+        public const string MultipleAccountsForLoginHint = "multiple_accounts_for_login_hint";
+
+        /// <summary>
+        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when 
+        /// the user cache had not been set in the application constructor.
+        /// </summary>
+        public const string TokenCacheNullError = "token_cache_null";
+
+        // TODO(migration):  Prompt.Never no longer exists.  Validate removing this error message.
+        /// <summary>
+        /// One of two conditions was encountered:
+        /// <list type="bullet">
+        /// <item><description>The <c>Prompt.Never</c> UI behavior was passed in an interactive token call, but the constraint could not be honored because user interaction is required,
+        /// for instance because the user needs to re-sign-in, give consent for more scopes, or perform multiple factor authentication.
+        /// </description></item>
+        /// <item><description>
+        /// An error occurred during a silent web authentication that prevented the authentication flow from completing in a short enough time frame.
+        /// </description></item>
+        /// </list>
+        /// <para>Remediation:</para>call one of the <c>AcquireTokenAsync</c> overrides so that the user of your application signs-in and accepts consent. 
+        /// </summary>
+        public const string NoPromptFailedError = "no_prompt_failed";
+
+        /// <summary>
+        /// Service is unavailable and returned HTTP error code within the range of 500-599
+        /// <para>Mitigation</para> you can retry after a delay. Note that the retry-after header is not yet
+        /// surfaced in MSAL.NET (on the backlog)
+        /// </summary>
+        public const string ServiceNotAvailable = "service_not_available";
+
+        /// <summary>
+        /// The Http Request to the STS timed out.
+        /// <para>Mitigation</para> you can retry after a delay.
+        /// </summary>
+        public const string RequestTimeout = "request_timeout";
+
+        /// <summary>
+        /// Upn required
+        /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:PublicClientApplication"/> which
+        /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c> 
+        /// expected by the service
+        /// <para>Remediation</para> Make sure in your code that you enforce <c>loginHint</c> to be a UPN
+        /// </summary>
+        public const string UpnRequired = "upn_required";
+
+        /// <summary>
+        /// No passive auth endpoint was found in the OIDC configuration of the authority
+        /// <para>What happens?</para> When the libraries go to the authority and get its open id connect configuration
+        /// it expects to find a Passive Auth Endpoint entry, and could not find it.
+        /// <para>remediation</para> Check that the authority configured for the application, or passed on some overrides of token acquisition tokens
+        /// supporting authority override is correct
+        /// </summary>
+        public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
+
+        /// <summary>
+        /// Invalid authority
+        /// <para>What happens</para> When the library attempts to discover the authority and get the endpoints it needs to
+        /// acquire a token, it got an un-authorize HTTP code or an unexpected response
+        /// <para>remediation</para> Check that the authority configured for the application, or passed on some overrides of token acquisition tokens
+        /// supporting authority override is correct
+        /// </summary>
+        public const string InvalidAuthority = "invalid_authority";
+
+        /// <summary>
+        /// Invalid authority type.
+        /// </summary>
+        public const string InvalidAuthorityType = "invalid_authority_type";
+
+        /// <summary>
+        /// Unknown Error occured.
+        /// <para>Mitigation</para> None. You might want to inform the end user.
+        /// </summary>
+        public const string UnknownError = "unknown_error";
+
+        /// <summary>
         /// Authentication failed.
         /// </summary>
         public const string AuthenticationFailed = "authentication_failed";
@@ -46,11 +156,6 @@ namespace Microsoft.Identity.Client
         /// Invalid owner window type.
         /// </summary>
         public const string InvalidOwnerWindowType = "invalid_owner_window_type";
-
-        /// <summary>
-        /// Invalid authority type.
-        /// </summary>
-        public const string InvalidAuthorityType = "invalid_authority_type";
 
         /// <summary>
         /// Invalid service URL.
@@ -91,11 +196,6 @@ namespace Microsoft.Identity.Client
         /// The request could not be preformed because of an unknown failure in the UI flow.
         /// </summary>
         public const string AuthenticationUiFailed = "authentication_ui_failed";
-
-        /// <summary>
-        /// Non https redirect failed
-        /// </summary>
-        public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
         /// <summary>
         /// Internal error
@@ -243,71 +343,6 @@ namespace Microsoft.Identity.Client
         public const string AccessDenied = "access_denied";
 
         /// <summary>
-        /// JSON Parse error.
-        /// </summary>
-        public const string JsonParseError = "json_parse_failed";
-
-        /// <summary>
-        /// Request Timeout.
-        /// </summary>
-        public const string RequestTimeout = "request_timeout";
-
-        /// <summary>
-        /// Service not available.
-        /// </summary>
-        public const string ServiceNotAvailable = "service_not_available";
-
-        /// <summary>
-        /// Invalid JWT.
-        /// </summary>
-        public const string InvalidJwtError = "invalid_jwt";
-
-        /// <summary>
-        /// Tenant Discovery Failed.
-        /// </summary>
-        public const string TenantDiscoveryFailedError = "tenant_discovery_failed";
-
-        /// <summary>
-        /// Authentication UI Failed.
-        /// </summary>
-        public const string AuthenticationUiFailedError = "authentication_ui_failed";
-
-        /// <summary>
-        /// Invalid Grant.
-        /// </summary>
-        public const string InvalidGrantError = "invalid_grant";
-
-        /// <summary>
-        /// Unknown Error.
-        /// </summary>
-        public const string UnknownError = "unknown_error";
-
-        /// <summary>
-        /// Authentication Canceled.
-        /// </summary>
-        public const string AuthenticationCanceledError = "authentication_canceled";
-
-        /// <summary>
-        /// UPN Required.
-        /// </summary>
-        public const string UpnRequired = "upn_required";
-
-        /// <summary>
-        /// Missing Passive Auth Endpoint.
-        /// </summary>
-        public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
-
-        /// <summary>
-        /// Invalid Authority.
-        /// </summary>
-        public const string InvalidAuthority = "invalid_authority";
-
-        /// <summary>
-        /// Platform is Not Supported.
-        /// </summary>
-        public const string PlatformNotSupported = "platform_not_supported";
-
-        /// <summary>
         /// Cannot Access User Information or User is Not Domain Joined.
         /// </summary>
         public const string CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed";
@@ -327,33 +362,148 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string B2CHostNotTrusted = "B2C_host_not_trusted";
 
+        /// <summary>
+        /// Multiple Tokens were matched. 
+        /// <para>What happens?</para>This exception happens in the case of applications managing several identitities, 
+        /// when calling <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// or one of its overrides and the user token cache contains multiple tokens for this client application and the the specified Account, but from different authorities.
+        /// <para>Mitigation [App Development]</para>specify the authority to use in the acquire token operation
+        /// </summary>
+        public const string MultipleTokensMatchedError = "multiple_matching_tokens_detected";
+
+        /// <summary>
+        /// Non HTTPS redirects are not supported
+        /// <para>What happens?</para>This error happens when you have registered a non-https redirect URI for the 
+        /// public client application other than <c>urn:ietf:wg:oauth:2.0:oob</c>
+        /// <para>Mitigation [App registration and development]</para>Register in the application a Reply URL starting with "https://"
+        /// </summary>
+        public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
+
+        /// <summary>
+        /// The request could not be preformed because the network is down.
+        /// <para>Mitigation [App development]</para> In the application you could either inform the user that there are network issues
+        /// or retry later
+        /// </summary>
+        public const string NetworkNotAvailableError = "network_not_available";
+
+#if !DESKTOP && !NET_CORE
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
+        /// <summary>
+        /// Duplicate query parameter was found in extraQueryParameters.
+        /// <para>What happens?</para> You have used <c>extraQueryParameter</c> of overrides
+        /// of token acquisition operations in public client and confidential client application and are passing a parameter which is already present in the
+        /// URL (either because you had it in another way, or the library added it).
+        /// <para>Mitigation [App Development]</para> RemoveAccount the duplicate parameter from the token acquisition override.
+        /// </summary>
+        /// <seealso cref="ConfidentialClientApplication.GetAuthorizationRequestUrlAsync(System.Collections.Generic.IEnumerable{string}, string, string, string, System.Collections.Generic.IEnumerable{string}, string)"/>
+        public const string DuplicateQueryParameterError = "duplicate_query_parameter";
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
+
+        /// <summary>
+        /// The request could not be performed because of a failure in the UI flow.
+        /// <para>What happens?</para>The library failed to invoke the Web View required to perform interactive authentication.
+        /// The exception might include the reason
+        /// <para>Mitigation</para>If the exception includes the reason, you could inform the user. This might be, for instance, a browser
+        /// implementing chrome tabs is missing on the Android phone (that's only an example: this exception can apply to other
+        /// platforms as well)
+        /// </summary>
+        public const string AuthenticationUiFailedError = "authentication_ui_failed";
+
+        /// <summary>
+        /// Authentication canceled.
+        /// <para>What happens?</para>The user had canceled the authentication, for instance by closing the authentication dialog
+        /// <para>Mitigation</para>None, you cannot get a token to call the protected API. You might want to inform the user
+        /// </summary>
+        public const string AuthenticationCanceledError = "authentication_canceled";
+
+        /// <summary>
+        /// JSON parsing failed.
+        /// <para>What happens?</para>A Json blob read from the token cache or received from the STS was not parseable. 
+        /// This can happen when reading the token cache, or receiving an IDToken from the STS.
+        /// <para>Mitigation</para>Make sure that the token cache was not tampered
+        /// </summary>
+        public const string JsonParseError = "json_parse_failed";
+
+        /// <summary>
+        /// JWT was invalid.
+        /// <para>What happens?</para>The library expected a JWT (for instance a token from the cache, or received from the STS), but
+        /// the format is invalid
+        /// <para>Mitigation</para>Make sure that the token cache was not tampered
+        /// </summary>
+        public const string InvalidJwtError = "invalid_jwt";
+
+        /// <summary>
+        /// State returned from the STS was different from the one sent by the library
+        /// <para>What happens?</para>The library sends to the STS a state associated to a request, and expects the reply to be consistent. 
+        /// This errors indicates that the reply is not associated with the request. This could indicate an attempt to replay a response
+        /// <para>Mitigation</para> None
+        /// </summary>
+        public const string StateMismatchError = "state_mismatch";
+
+        /// <summary>
+        /// Tenant discovery failed.
+        /// <para>What happens?</para>While reading the openid configuration associated with the authority, the Authorize endpoint,
+        /// or Token endpoint, or the Issuer was not found
+        /// <para>Mitigation</para>This indicates and authority which is not Open ID Connect compliant. Specify a different authority
+        /// in the constructor of the application, or the token acquisition override
+        /// /// </summary>
+        public const string TenantDiscoveryFailedError = "tenant_discovery_failed";
+
+        /// <summary>
+        /// The library is loaded on a platform which is not supported.
+        /// </summary>
+        public const string PlatformNotSupported = "platform_not_supported";
+
 #if iOS
         /// <summary>
-        /// Cannot Access Publisher KeyChain.
+        /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
+        /// From MSAL 2.x and ADAL 4.x, the keychain for the publisher needs to be accessed in order to provide 
+        /// Single Sign On between applications of the same publisher.
+        /// <para>Mitigation</para> In order to access the keychain on iOS, you will need to ensure the Entitlements.plist
+        /// file is configured and included under &amp;lt;CodesignEntitlements&amp;gt;Entitlements.plist&amp;lt;/CodesignEntitlements&amp;gt;
+        /// in the csproj file of the iOS app.
+        /// <para>For more details</para> See https://aka.ms/msal-net-enable-keychain-access
         /// </summary>
         public const string CannotAccessPublisherKeyChain = "cannot_access_publisher_keychain";
 
         /// <summary>
-        /// Missing Entitlements.
+        /// Xamarin.iOS specific. This error indicates that saving a token to the keychain failed. 
+        /// <para>Mitigation</para> In order to access the keychain on iOS, you will need to set the
+        /// keychain access groups in the Entitlements.plist for the application.
+        /// <para>For more details</para> See https://aka.ms/msal-net-enable-keychain-groups 
         /// </summary>
         public const string MissingEntitlements = "missing_entitlements";
 #endif
 
 #if ANDROID
-        /// <summary>
-        /// Failed To Create Shared Preference.
-        /// </summary>
-        public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
 
         /// <summary>
-        /// Android Activity Not Found.
+        /// Xamarin.Android specific. This error indicates that a system browser was not installed on the user's device, and authentication
+        /// using system browser could not be attempted because there was no available Android activity to handle the intent.
+        /// <para>Mitigation</para>If you want to use the System web browser (for instance to get SSO with the browser), notify the end 
+        /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. For a list of supported browsers with 
+        /// custom tab support, please see https://aka.ms/msal-net-system-browsers.
+        /// Otherwise you can use <see cref="UIParent.IsSystemWebviewAvailable"/> to check if a browser with custom tabs is available on the device
+        /// and require the library to use the embedded web view if there is no such browser available by setting the boolean to <c>true</c> in the following
+        /// constructor: <see cref="UIParent.UIParent(Android.App.Activity, bool)"/>
+        /// <para>For more details</para> See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
         public const string AndroidActivityNotFound = "android_activity_not_found";
 
         /// <summary>
-        /// Unresolvable Intent.
+        /// The intent to launch AuthenticationActivity is not resolvable by the OS or the intent.
         /// </summary>
         public const string UnresolvableIntentError = "unresolvable_intent";
+
+        /// <summary>
+        /// Failed to create shared preferences on the Android platform. 
+        /// <para>What happens?</para> The library uses Android shared preferences to store the token cache
+        /// <para>Mitigation</para> Make sure the application is configured to use this platform feature (See also
+        /// the AndroidManifest.xml file, and https://aka.ms/msal-net-android-specificities
+        /// </summary>
+        public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
+
 #endif
     }
 }

@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

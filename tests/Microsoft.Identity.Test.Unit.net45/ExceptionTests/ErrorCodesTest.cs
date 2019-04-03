@@ -32,7 +32,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.ExceptionTests

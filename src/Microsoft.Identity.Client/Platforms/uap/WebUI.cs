@@ -32,7 +32,6 @@ using Windows.ApplicationModel.Core;
 using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 using System.Threading;
@@ -98,7 +97,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             catch (Exception ex)
             {
                 requestContext.Logger.ErrorPii(ex);
-                throw new MsalException(MsalClientException.AuthenticationUiFailedError, "WAB authentication failed",
+                throw new MsalException(MsalError.AuthenticationUiFailedError, "WAB authentication failed",
                     ex);
             }
 
@@ -115,7 +114,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
                                NetworkConnectivityLevel.InternetAccess);
             if (!isConnected)
             {
-                throw new MsalClientException(MsalClientException.NetworkNotAvailableError, MsalErrorMessage.NetworkNotAvailable);
+                throw new MsalClientException(MsalError.NetworkNotAvailableError, MsalErrorMessage.NetworkNotAvailable);
             }
         }
 

@@ -39,7 +39,6 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client
 {

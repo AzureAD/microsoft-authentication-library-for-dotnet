@@ -27,7 +27,7 @@
 
 using System.Globalization;
 
-namespace Microsoft.Identity.Client.Exceptions
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// The active directory authentication error message.
@@ -235,7 +235,9 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string NoRefreshTokenProvided = "A refresh token must be provided.";
 
         public const string NullTokenCacheError = "Token cache is set to null. Acquire by refresh token requests cannot be executed.";
+        public const string NullTokenCacheForSilentError = "Token cache is set to null. Silent requests cannot be executed.";
 
+        public const string NoTokensFoundError = "No Refresh Token found in the cache";
         public const string NoRefreshTokenInResponse = "Acquire by refresh token request completed, but no refresh token was found";
 
         public const string ConfidentialClientDoesntImplementIConfidentialClientApplicationExecutor =

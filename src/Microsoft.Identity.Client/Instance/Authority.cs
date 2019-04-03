@@ -27,12 +27,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -61,7 +57,7 @@ namespace Microsoft.Identity.Client.Instance
             switch (serviceBundle.Config.AuthorityInfo.AuthorityType)
             {
             case AuthorityType.Adfs:
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.InvalidAuthorityType,
                     "ADFS is not a supported authority");
 
@@ -72,7 +68,7 @@ namespace Microsoft.Identity.Client.Instance
                 return new AadAuthority(serviceBundle, authorityInfo);
 
             default:
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.InvalidAuthorityType,
                     "Unsupported authority type");
             }

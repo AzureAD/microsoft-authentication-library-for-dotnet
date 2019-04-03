@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -35,7 +35,6 @@ using WebKit;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Platforms.AppleShared;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {

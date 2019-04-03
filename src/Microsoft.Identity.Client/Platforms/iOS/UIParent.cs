@@ -28,7 +28,6 @@
 using System;
 using System.ComponentModel;
 using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using UIKit;

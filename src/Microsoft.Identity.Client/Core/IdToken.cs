@@ -29,7 +29,6 @@ using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
 
@@ -94,7 +93,7 @@ namespace Microsoft.Identity.Client.Core
 
             if (idTokenSegments.Length < 2)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.InvalidJwtError,
                     MsalErrorMessage.IDTokenMustHaveTwoParts);
             }
@@ -110,7 +109,7 @@ namespace Microsoft.Identity.Client.Core
             }
             catch (Exception exc)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.JsonParseError,
                     MsalErrorMessage.FailedToParseIDToken, 
                     exc);

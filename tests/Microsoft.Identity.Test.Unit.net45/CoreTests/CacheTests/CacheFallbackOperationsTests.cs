@@ -37,7 +37,6 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 {

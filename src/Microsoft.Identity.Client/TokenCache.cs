@@ -29,7 +29,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Mats.Internal.Events;
@@ -499,7 +498,8 @@ namespace Microsoft.Identity.Client
                 {
                     requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
 
-                    throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
+                    throw new MsalClientException(
+                        MsalError.MultipleTokensMatchedError,
                         MsalErrorMessage.MultipleTokensMatched);
                 }
 

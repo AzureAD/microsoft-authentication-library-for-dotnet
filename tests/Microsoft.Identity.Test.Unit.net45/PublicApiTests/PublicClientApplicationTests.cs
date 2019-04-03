@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalClientException.StateMismatchError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.StateMismatchError, exc.ErrorCode);
                 }
 
                 Assert.IsNotNull(
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalClientException.StateMismatchError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.StateMismatchError, exc.ErrorCode);
                 }
             }
         }
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalClientException.JsonParseError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.JsonParseError, exc.ErrorCode);
                     Assert.AreEqual("client info is null", exc.Message);
                 }
             }
@@ -760,7 +760,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     new MockWebUI()
                     {
                         ExceptionToThrow = new MsalClientException(
-                            MsalClientException.AuthenticationUiFailedError,
+                            MsalError.AuthenticationUiFailedError,
                             "Failed to invoke webview",
                             new InvalidOperationException("some-inner-Exception"))
                     });
@@ -777,7 +777,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalClientException.AuthenticationUiFailedError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.AuthenticationUiFailedError, exc.ErrorCode);
                     Assert.AreEqual("some-inner-Exception", exc.InnerException.Message);
                 }
             }
@@ -965,7 +965,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             catch (MsalUiRequiredException exc)
             {
                 Assert.IsNotNull(exc);
-                Assert.AreEqual("user_null", MsalUiRequiredException.UserNullError);
+                Assert.AreEqual("user_null", MsalError.UserNullError);
             }
         }
 

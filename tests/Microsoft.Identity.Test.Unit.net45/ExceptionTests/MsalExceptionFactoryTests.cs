@@ -30,8 +30,8 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -59,21 +59,21 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         [TestMethod]
         public void ParamValidation()
         {
-            AssertException.Throws<ArgumentNullException>(() => MsalExceptionFactory.GetClientException(null, ExMessage));
-            AssertException.Throws<ArgumentNullException>(() => MsalExceptionFactory.GetClientException("", ExMessage));
+            AssertException.Throws<ArgumentNullException>(() => new MsalClientException(null, ExMessage));
+            AssertException.Throws<ArgumentNullException>(() => new MsalClientException(string.Empty, ExMessage));
 
             AssertException.Throws<ArgumentNullException>(
-                () => MsalExceptionFactory.GetServiceException(ExCode, ""));
+                () => new MsalServiceException(ExCode, string.Empty));
 
             AssertException.Throws<ArgumentNullException>(
-                () => MsalExceptionFactory.GetServiceException(ExCode, null));
+                () => new MsalServiceException(ExCode, null));
         }
 
         [TestMethod]
         public void MsalClientException_FromCoreException()
         {
             // Act
-            var msalException = MsalExceptionFactory.GetClientException(ExCode, ExMessage);
+            var msalException = new MsalClientException(ExCode, ExMessage);
 
             // Assert
             var msalClientException = msalException as MsalClientException;
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsNull(msalClientException.InnerException);
 
             // Act
-            string piiMessage = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(msalException);
+            string piiMessage = MsalLogger.GetPiiScrubbedExceptionDetails(msalException);
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
@@ -107,7 +107,10 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
               JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
 
             // Act
-            var msalException = MsalExceptionFactory.GetServiceException(ExCode, ExMessage, oAuth2Response);
+            var msalException = new MsalServiceException(ExCode, ExMessage)
+            {
+                OAuth2Response = oAuth2Response
+            };
 
             // Assert
             var msalServiceException = msalException as MsalServiceException;
@@ -132,11 +135,10 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             };
 
             // Act
-            var msalException = MsalExceptionFactory.GetServiceException(
-                ExCode,
-                ExMessage,
-                httpResponse,
-                innerException);
+            var msalException = new MsalServiceException(ExCode, ExMessage, innerException)
+            {
+                HttpResponse = httpResponse
+            };
 
             // Assert
             var msalServiceException = msalException as MsalServiceException;
@@ -150,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
 
             // Act
-            string piiMessage = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(msalException);
+            string piiMessage = MsalLogger.GetPiiScrubbedExceptionDetails(msalException);
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
@@ -176,12 +178,10 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var innerException = new NotImplementedException(innerExMsg);
 
             // Act
-            var msalException = MsalExceptionFactory.GetServiceException(
+            var msalException = new MsalUiRequiredException(
                 ExCode, 
                 ExMessage, 
-                null, 
-                innerException: innerException, 
-                true);
+                innerException);
 
             // Assert
             var msalServiceException = msalException as MsalUiRequiredException;
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(0, msalServiceException.StatusCode);
 
             // Act
-            string piiMessage = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(msalException);
+            string piiMessage = MsalLogger.GetPiiScrubbedExceptionDetails(msalException);
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
@@ -225,7 +225,10 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             HttpResponse msalhttpResponse = HttpManager.CreateResponseAsync(httpResponse).Result;
 
             // Act
-            var msalException = MsalExceptionFactory.GetServiceException(ExCode, ExMessage, msalhttpResponse);
+            var msalException = new MsalServiceException(ExCode, ExMessage)
+            {
+                HttpResponse = msalhttpResponse
+            };
 
             // Assert
             var msalServiceException = msalException as MsalServiceException;

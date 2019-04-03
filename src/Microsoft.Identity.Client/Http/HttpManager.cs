@@ -33,7 +33,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -180,11 +179,10 @@ namespace Microsoft.Identity.Client.Http
                 requestContext.Logger.Error("Request retry failed.");
                 if (timeoutException != null)
                 {
-                    throw MsalExceptionFactory.GetServiceException(
+                    throw new MsalServiceException(
                         MsalError.RequestTimeout,
                         "Request to the endpoint timed out.",
-                        null,
-                        innerException: timeoutException); // no http response to add more details to this exception
+                        timeoutException);
                 }
 
                 if (doNotThrow)
@@ -192,10 +190,10 @@ namespace Microsoft.Identity.Client.Http
                     return response;
                 }
 
-                throw MsalExceptionFactory.GetServiceException(
-                        MsalError.ServiceNotAvailable,
-                    "Service is unavailable to process the request",
-                    response);
+                throw new MsalServiceException(MsalError.ServiceNotAvailable, "Service is unavailable to process the request")
+                {
+                    HttpResponse = response
+                };
             }
 
             return response;
