@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Instance
 
         public static Authority CreateAuthorityWithOverride(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
         {
-            switch (serviceBundle.Config.AuthorityInfo.AuthorityType)
+            switch (authorityInfo.AuthorityType)
             {
             case AuthorityType.Adfs:
                 throw new MsalClientException(
