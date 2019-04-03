@@ -27,9 +27,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
             CancellationToken cancellationToken)
         {
-            LogVersionInfo();
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            var requestParams = _confidentialClientApplication.CreateRequestParameters(commonParameters, _confidentialClientApplication.UserTokenCacheInternal);
+            var requestParams = _confidentialClientApplication.CreateRequestParameters(
+                commonParameters,
+                requestContext,
+                _confidentialClientApplication.UserTokenCacheInternal);
+
             var handler = new AuthorizationCodeRequest(
                 ServiceBundle,
                 requestParams,
@@ -42,9 +46,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
-            LogVersionInfo();
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            var requestParams = _confidentialClientApplication.CreateRequestParameters(commonParameters, _confidentialClientApplication.AppTokenCacheInternal);
+            var requestParams = _confidentialClientApplication.CreateRequestParameters(
+                commonParameters,
+                requestContext,
+                _confidentialClientApplication.AppTokenCacheInternal);
+
             requestParams.SendX5C = clientParameters.SendX5C;
             requestParams.IsClientCredentialRequest = true;
 
@@ -61,9 +69,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken)
         {
-            LogVersionInfo();
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            var requestParams = _confidentialClientApplication.CreateRequestParameters(commonParameters, _confidentialClientApplication.UserTokenCacheInternal);
+            var requestParams = _confidentialClientApplication.CreateRequestParameters(
+                commonParameters,
+                requestContext,
+                _confidentialClientApplication.UserTokenCacheInternal);
+
             requestParams.SendX5C = onBehalfOfParameters.SendX5C;
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
 
@@ -80,9 +92,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
             CancellationToken cancellationToken)
         {
-            LogVersionInfo();
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            var requestParameters = _confidentialClientApplication.CreateRequestParameters(commonParameters, _confidentialClientApplication.UserTokenCacheInternal);
+            var requestParameters = _confidentialClientApplication.CreateRequestParameters(
+                commonParameters,
+                requestContext,
+                _confidentialClientApplication.UserTokenCacheInternal);
+
             requestParameters.Account = authorizationRequestUrlParameters.Account;
             requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;
 

@@ -26,30 +26,22 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal sealed class TelemetryHelper : IDisposable
     {
         private readonly EventBase _eventToEnd;
-        private readonly string _requestId;
-        private readonly string _clientId;
-        private readonly bool _shouldFlush;
-        private readonly ITelemetry _telemetry;
+        private readonly ITelemetryManager _telemetryManager;
 
         public TelemetryHelper(
-            ITelemetry telemetry,
-            string requestId,
-            string clientId,
-            EventBase eventBase,
-            bool shouldFlush)
+            ITelemetryManager telemetryManager,
+            EventBase eventBase)
         {
-            _telemetry = telemetry;
-            _requestId = requestId;
-            _clientId = clientId;
+            _telemetryManager = telemetryManager;
             _eventToEnd = eventBase;
-            _shouldFlush = shouldFlush;
-            _telemetry?.StartEvent(_requestId, eventBase);
+            _telemetryManager?.StartEvent(eventBase);
         }
 
         #region IDisposable Support
@@ -62,11 +54,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             {
                 if (disposing)
                 {
-                    _telemetry?.StopEvent(_requestId, _eventToEnd);
-                    if (_shouldFlush)
-                    {
-                        _telemetry?.Flush(_requestId, _clientId);
-                    }
+                    _telemetryManager?.StopEvent(_eventToEnd);
                 }
 
                 _disposedValue = true;

@@ -25,7 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -45,6 +45,7 @@ namespace Microsoft.Identity.Client.Extensibility
             this AcquireTokenInteractiveParameterBuilder builder,
             ICustomWebUi customWebUi)
         {
+            builder.CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithCustomWebUi);
             builder.SetCustomWebUi(customWebUi);
             return builder;
         }

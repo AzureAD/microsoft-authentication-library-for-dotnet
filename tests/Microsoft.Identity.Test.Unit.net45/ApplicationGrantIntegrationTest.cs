@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Authority = "";
         public const string ClientId = "";
         public const string RedirectUri = "http://localhost";
-        public string[] _msalScopes = { "https://graph.microsoft.com/.default" };
+        private readonly string[] _msalScopes = { "https://graph.microsoft.com/.default" };
         private readonly string _password = "";
 
         static ApplicationGrantIntegrationTest()

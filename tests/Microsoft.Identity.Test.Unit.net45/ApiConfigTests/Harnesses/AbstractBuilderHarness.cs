@@ -28,7 +28,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
