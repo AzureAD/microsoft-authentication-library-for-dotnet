@@ -106,16 +106,6 @@
 <Ext Check="1" UseCustomParser="0" DllPath="" ClassName="">.xlt</Ext>
 </Extensions>
 </Type>
-<Type ID="8" Check="0">
-<Name>Pure Binary Files</Name>
-<Extensions>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.com</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.bin</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.tlb</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.drv</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.fon</Ext>
-</Extensions>
-</Type>
 <Type ID="9" Check="1">
 <Name>LocStudio resource databases</Name>
 <Extensions>
@@ -276,21 +266,6 @@
 <Ext Check="1" UseCustomParser="0" DllPath="" ClassName="">.accdb</Ext>
 <Ext Check="1" UseCustomParser="0" DllPath="" ClassName="">.accde</Ext>
 <Ext Check="1" UseCustomParser="0" DllPath="" ClassName="">.accdr</Ext>
-</Extensions>
-</Type>
-<Type ID="29" Check="0">
-<Name>Win32/64-based executable (image) Files</Name>
-<Extensions>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.exe</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.dll</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.ocx</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.scr</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.acm</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.rll</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.cpl</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.mui</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.ax</Ext>
-<Ext Check="0" UseCustomParser="0" DllPath="" ClassName="">.ime</Ext>
 </Extensions>
 </Type>
 <Type ID="30" Check="1">
