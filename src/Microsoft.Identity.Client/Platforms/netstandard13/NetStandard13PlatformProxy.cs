@@ -46,6 +46,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         {
         }
 
+        public override bool IsSystemWebViewAvailable => false;
+
         /// <summary>
         /// Get the user logged in
         /// </summary>

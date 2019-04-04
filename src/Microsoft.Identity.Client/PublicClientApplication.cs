@@ -58,6 +58,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public bool IsSystemWebViewAvailable
+        {
+            get => ServiceBundle.PlatformProxy.IsSystemWebViewAvailable;
+        }
+
+        /// <summary>
         /// Interactive request to acquire token for the specified scopes. The interactive window will be parented to the specified
         /// window. The user will be required to select an account
         /// </summary>

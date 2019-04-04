@@ -28,7 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
+using Android.App;
+using Android.Content;
+using Android.Content.PM;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Mats.Internal;
@@ -45,6 +49,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
     internal class AndroidPlatformProxy : AbstractPlatformProxy
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
+        private const string ChromePackage = "com.android.chrome";
+        private const string CustomTabService = "android.support.customtabs.action.CustomTabsService";
 
         public AndroidPlatformProxy(ICoreLogger logger) : base(logger)
         {
@@ -189,5 +195,41 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return MatsConverter.AsInt(OsPlatform.Android);
         }
         protected override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();
+
+        public override bool IsSystemWebViewAvailable
+        {
+            get
+            {
+                bool isBrowserWithCustomTabSupportAvailable = IsBrowserWithCustomTabSupportAvailable();
+                return (isBrowserWithCustomTabSupportAvailable || IsChromeEnabled()) &&
+                       isBrowserWithCustomTabSupportAvailable;
+            }
+        }
+
+        private static bool IsBrowserWithCustomTabSupportAvailable()
+        {
+            Intent customTabServiceIntent = new Intent(CustomTabService);
+
+            IEnumerable<ResolveInfo> resolveInfoListWithCustomTabs =
+                Application.Context.PackageManager.QueryIntentServices(
+                    customTabServiceIntent, PackageInfoFlags.MatchAll);
+
+            // queryIntentServices could return null or an empty list if no matching service existed.
+            if (resolveInfoListWithCustomTabs == null || !resolveInfoListWithCustomTabs.Any())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsChromeEnabled()
+        {
+            ApplicationInfo applicationInfo = Application.Context.PackageManager.GetApplicationInfo(ChromePackage, 0);
+
+            // Chrome is difficult to uninstall on an Android device. Most users will disable it, but the package will still
+            // show up, therefore need to check application.Enabled is false
+            return string.IsNullOrEmpty(ChromePackage) || applicationInfo.Enabled;
+        }
     }
 }

@@ -16,6 +16,10 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Platforms.iOS;
 #endif
 
+#if ANDROID
+using Android.App;
+#endif
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -2087,4 +2091,75 @@ namespace Microsoft.Identity.Client
         internal string Secret => throw MsalExceptionFactory.CreateMsalNet3BreakingChangesException();
     }
 #endif
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Obsolete("TODO: document this. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+    public sealed class UIParent
+    {
+        /// <summary>
+        /// </summary>
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public UIParent() // do not delete this ctor because it exists on NetStandard
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+
+        /// <summary>
+        /// </summary>
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public UIParent(object parent, bool useEmbeddedWebView) 
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+
+        /// <summary>
+        /// Checks Android device for chrome packages.
+        /// Returns true if chrome package for launching system webview is enabled on device.
+        /// Returns false if chrome package is not found.
+        /// </summary>
+        /// <example>
+        /// The following code decides, in a Xamarin.Forms app, which browser to use based on the presence of the
+        /// required packages.
+        /// <code>
+        /// bool useSystemBrowser = UIParent.IsSystemWebviewAvailable();
+        /// App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity, !useSystemBrowser);
+        /// </code>
+        /// </example>
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static bool IsSystemWebviewAvailable()
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+
+#if ANDROID
+        /// <summary>
+        /// Initializes an instance for a provided activity.
+        /// </summary>
+        /// <param name="activity">parent activity for the call. REQUIRED.</param>
+        [CLSCompliant(false)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public UIParent(Activity activity)
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+
+        /// <summary>
+        /// Initializes an instance for a provided activity with flag directing the application
+        /// to use the embedded webview instead of the system browser. See https://aka.ms/msal-net-uses-web-browser
+        /// </summary>
+        [CLSCompliant(false)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public UIParent(Activity activity, bool useEmbeddedWebview) : this(activity)
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+#endif
+    }
 }

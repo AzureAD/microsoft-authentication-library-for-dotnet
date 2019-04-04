@@ -26,9 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -39,7 +37,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void UIParent_IsSystemAvailable()
         {
-             Assert.IsFalse(UIParent.IsSystemWebviewAvailable());
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            Assert.IsFalse(pca.IsSystemWebViewAvailable);
         }
 #endif
 
@@ -47,7 +46,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void IsSystemWebview()
         {
-            Assert.IsFalse(UIParent.IsSystemWebviewAvailable());
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            Assert.IsFalse(pca.IsSystemWebViewAvailable);
         }
 #endif
     }
