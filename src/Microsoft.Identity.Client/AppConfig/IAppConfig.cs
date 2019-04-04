@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 
@@ -93,6 +94,7 @@ namespace Microsoft.Identity.Client
         /// Name of the component using MSAL.NET. See <see cref="ApplicationOptions.Component"/>
         /// and <see cref="AbstractApplicationBuilder{T}.WithComponent(string)"/>
         /// </summary>
+        [Obsolete("Should use ClientName and ClientVersion properties instead of Component", true)]
         string Component { get; }
 
         /// <summary>
@@ -104,6 +106,16 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// </summary>
         bool IsBrokerEnabled { get; }
+
+        /// <summary>
+        /// The name of the calling application for telemetry purposes. 
+        /// </summary>
+        string ClientName { get; }
+
+        /// <summary>
+        /// The version of the calling application for telemetry purposes. 
+        /// </summary>
+        string ClientVersion { get; }
 
         ///// <summary>
         ///// </summary>

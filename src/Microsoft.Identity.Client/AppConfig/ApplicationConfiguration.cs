@@ -29,7 +29,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 
@@ -37,6 +36,12 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IApplicationConfiguration
     {
+        // For telemetry, the ClientName of the application.
+        public string ClientName { get; internal set; }
+
+        // For telemetry, the ClientVersion of the application.
+        public string ClientVersion { get; internal set; }
+
         public bool UseCorporateNetwork { get; internal set; }
         public string IosKeychainSecurityGroup { get; internal set; }
 

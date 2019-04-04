@@ -25,6 +25,8 @@
 //
 // ------------------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -123,6 +125,17 @@ namespace Microsoft.Identity.Client
         /// Identifier of the component (libraries/SDK) consuming MSAL.NET.
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
+        [Obsolete("Should use ClientName and ClientVersion properties instead of Component", true)]
         public string Component { get; set; }
+
+        /// <summary>
+        /// The name of the calling application for telemetry purposes.
+        /// </summary>
+        public string ClientName { get; set; }
+
+        /// <summary>
+        /// The version of the calling application for telemetry purposes.
+        /// </summary>
+        public string ClientVersion { get; set; }
     }
 }

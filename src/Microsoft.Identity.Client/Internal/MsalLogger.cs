@@ -40,11 +40,12 @@ namespace Microsoft.Identity.Client.Internal
         private readonly LogCallback _loggingCallback;
         private readonly LogLevel _logLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
-        private static readonly Lazy<ICoreLogger> _nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
+        private static readonly Lazy<ICoreLogger> s_nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
 
         internal MsalLogger(
             Guid correlationId,
-            string component,
+            string clientName,
+            string clientVersion,
             LogLevel logLevel,
             bool enablePiiLogging,
             bool isDefaultPlatformLoggingEnabled,
@@ -57,11 +58,21 @@ namespace Microsoft.Identity.Client.Internal
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
             _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
-            Component = string.Empty;
-            if (!string.IsNullOrEmpty(component))
+            ClientName = clientName ?? string.Empty;
+            ClientVersion = clientVersion ?? string.Empty;
+
+            ClientInformation = string.Empty;
+            if (!string.IsNullOrEmpty(clientName))
             {
-                //space is intentional for formatting of the message
-                Component = string.Format(CultureInfo.InvariantCulture, " ({0})", component);
+                // space is intentional for formatting of the message
+                if (string.IsNullOrEmpty(clientVersion))
+                {
+                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0}: {1})", clientName, clientVersion);
+                }
+                else
+                {
+                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0})", clientName);
+                }
             }
         }
 
@@ -72,20 +83,24 @@ namespace Microsoft.Identity.Client.Internal
         {
             return new MsalLogger(
                 correlationId,
-                config?.Component ?? string.Empty,
+                config?.ClientName ?? string.Empty,
+                config?.ClientVersion ?? string.Empty,
                 config?.LogLevel ?? LogLevel.Verbose,
                 config?.EnablePiiLogging ?? false,
                 config?.IsDefaultPlatformLoggingEnabled ?? isDefaultPlatformLoggingEnabled,
                 config?.LoggingCallback ?? null);
         }
 
-        public static ICoreLogger NullLogger => _nullLogger.Value;
+        public static ICoreLogger NullLogger => s_nullLogger.Value;
 
         public Guid CorrelationId { get; }
 
         public bool PiiLoggingEnabled { get; }
 
-        internal string Component { get; }
+        public string ClientName { get; }
+        public string ClientVersion { get; }
+
+        internal string ClientInformation { get; }
 
         public void Info(string messageScrubbed)
         {
@@ -185,7 +200,7 @@ namespace Microsoft.Identity.Client.Internal
                 isLoggingPii ? "(True)" : "(False)",
                 MsalIdHelper.GetMsalVersion(),
                 msalIdParameters[MsalIdParameter.Product],
-                os, DateTime.UtcNow, correlationId, Component, messageToLog);
+                os, DateTime.UtcNow, correlationId, ClientInformation, messageToLog);
 
             if (_isDefaultPlatformLoggingEnabled)
             {

@@ -49,7 +49,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, pca.AppConfig.LogLevel);
             Assert.AreEqual(MsalTestConstants.ClientId, pca.AppConfig.ClientId);
-            Assert.IsNull(pca.AppConfig.Component);
+            Assert.IsNull(pca.AppConfig.ClientName);
+            Assert.IsNull(pca.AppConfig.ClientVersion);
             Assert.IsFalse(pca.AppConfig.EnablePiiLogging);
             Assert.IsNull(pca.AppConfig.HttpClientFactory);
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
@@ -80,13 +81,16 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithComponent()
+        public void TestConstructor_WithClientNameAndVersion()
         {
-            const string Component = "my component name";
+            const string ClientName = "my client name";
+            const string ClientVersion = "1.2.3.4-prerelease";
             var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithComponent(Component)
+                                                    .WithClientName(ClientName)
+                                                    .WithClientVersion(ClientVersion)
                                                     .Build();
-            Assert.AreEqual(Component, pca.AppConfig.Component);
+            Assert.AreEqual(ClientName, pca.AppConfig.ClientName);
+            Assert.AreEqual(ClientName, pca.AppConfig.ClientVersion);
         }
 
         [TestMethod]
@@ -454,8 +458,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var matsConfig = new MatsConfig
             {
-                AppName = "some app name",
-                AppVer = "some app version",
                 SessionId = "some session id"
             };
 
@@ -466,8 +468,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // todo(mats):
             //Assert.IsNotNull(app.AppConfig.MatsConfig);
 
-            //Assert.AreEqual<string>(matsConfig.AppName, app.AppConfig.MatsConfig.AppName);
-            //Assert.AreEqual<string>(matsConfig.AppVer, app.AppConfig.MatsConfig.AppVer);
             //Assert.AreEqual<string>(matsConfig.SessionId, app.AppConfig.MatsConfig.SessionId);
         }
     }

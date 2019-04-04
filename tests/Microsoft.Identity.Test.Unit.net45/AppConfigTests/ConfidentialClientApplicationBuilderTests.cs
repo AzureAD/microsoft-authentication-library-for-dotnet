@@ -47,7 +47,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, cca.AppConfig.LogLevel);
             Assert.AreEqual(MsalTestConstants.ClientId, cca.AppConfig.ClientId);
-            Assert.IsNull(cca.AppConfig.Component);
+            Assert.IsNull(cca.AppConfig.ClientName);
+            Assert.IsNull(cca.AppConfig.ClientVersion);
             Assert.AreEqual(false, cca.AppConfig.EnablePiiLogging);
             Assert.IsNull(cca.AppConfig.HttpClientFactory);
             Assert.AreEqual(false, cca.AppConfig.IsDefaultPlatformLoggingEnabled);
@@ -74,12 +75,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithComponent()
+        public void TestConstructor_WithClientNameAndVersion()
         {
-            const string Component = "my component name";
+            const string ClientName = "my client name";
+            const string ClientVersion = "1.2.3.4-prerelease";
             var cca =
-                ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithComponent(Component).Build();
-            Assert.AreEqual(Component, cca.AppConfig.Component);
+                ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithClientName(ClientName).WithClientVersion(ClientVersion).Build();
+            Assert.AreEqual(ClientName, cca.AppConfig.ClientName);
+            Assert.AreEqual(ClientVersion, cca.AppConfig.ClientVersion);
         }
 
         [TestMethod]

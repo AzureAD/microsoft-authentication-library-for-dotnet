@@ -32,78 +32,64 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal class NullLogger : ICoreLogger
     {
-        /// <inheritdoc />
-        public Guid CorrelationId { get; } = Guid.Empty;
+        public string ClientName { get; } = string.Empty;
+        public string ClientVersion { get; } = string.Empty;
 
-        /// <inheritdoc />
+        public Guid CorrelationId { get; } = Guid.Empty;
         public bool PiiLoggingEnabled { get; } = false;
 
-        /// <inheritdoc />
         public void Error(string messageScrubbed)
         {
         }
 
-        /// <inheritdoc />
         public void ErrorPii(string messageWithPii, string messageScrubbed)
         {
         }
 
-        /// <inheritdoc />
         public void ErrorPii(Exception exWithPii)
         {
         }
 
-        /// <inheritdoc />
         public void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
         {
         }
 
-        /// <inheritdoc />
         public void Warning(string messageScrubbed)
         {
         }
 
-        /// <inheritdoc />
         public void WarningPii(string messageWithPii, string messageScrubbed)
         {
         }
 
-        /// <inheritdoc />
         public void WarningPii(Exception exWithPii)
         {
         }
 
-        /// <inheritdoc />
         public void WarningPiiWithPrefix(Exception exWithPii, string prefix)
         {
         }
 
-        /// <inheritdoc />
         public void Info(string messageScrubbed)
         {
         }
 
-        /// <inheritdoc />
         public void InfoPii(string messageWithPii, string messageScrubbed)
         {
         }
 
-        /// <inheritdoc />
         public void InfoPii(Exception exWithPii)
         {
         }
 
-        /// <inheritdoc />
         public void InfoPiiWithPrefix(Exception exWithPii, string prefix)
         {
         }
 
-        /// <inheritdoc />
         public void Verbose(string messageScrubbed)
         {
         }
 
-        /// <inheritdoc />
         public void VerbosePii(string messageWithPii, string messageScrubbed)
         {
         }

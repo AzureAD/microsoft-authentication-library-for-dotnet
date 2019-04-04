@@ -47,7 +47,8 @@ namespace Microsoft.Identity.Client.Core
 
             DefaultLogger = new MsalLogger(
                 Guid.Empty,
-                null,
+                config.ClientName,
+                config.ClientVersion,
                 config.LogLevel,
                 config.EnablePiiLogging,
                 config.IsDefaultPlatformLoggingEnabled,
@@ -59,12 +60,12 @@ namespace Microsoft.Identity.Client.Core
             if (config.MatsConfig != null)
             {
                 // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
-                Mats = Client.Mats.MatsTelemetryClient.CreateMats(Config, PlatformProxy, config.MatsConfig);
-                TelemetryManager = Mats?.TelemetryManager ?? new TelemetryManager(Config, PlatformProxy, config.TelemetryCallback);
+                Mats = MatsTelemetryClient.CreateMats(config, PlatformProxy, config.MatsConfig);
+                TelemetryManager = Mats?.TelemetryManager ?? new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
             }
             else
             {
-                TelemetryManager = new TelemetryManager(Config, PlatformProxy, config.TelemetryCallback);
+                TelemetryManager = new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
             }
 
             AadInstanceDiscovery = new AadInstanceDiscovery(DefaultLogger, HttpManager, TelemetryManager, shouldClearCaches);

@@ -26,10 +26,10 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
                 var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(harness.HttpManager)
+                    .WithClientName(AppName)
+                    .WithClientVersion(AppVersion)
                     .WithMatsTelemetry(new MatsConfig
                     {
-                        AppName = AppName,
-                        AppVer = AppVersion,
                         DispatchAction = batch => { batches.Add(batch); }
                     })
                     .Build();

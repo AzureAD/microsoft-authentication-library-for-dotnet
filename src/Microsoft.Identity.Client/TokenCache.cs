@@ -74,14 +74,16 @@ namespace Microsoft.Identity.Client
 
         private readonly ITokenCacheAccessor _accessor;
 
+        // This variable isn't referenced on all platforms.
+#pragma warning disable 0169
         // Unkown token cache data support for forwards compatibility.
         IDictionary<string, JToken> _unknownNodes;
+#pragma warning restore 0169
 
         internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
-
 
         /// <summary>
         /// Constructor of a token cache. This constructor is left for compatibility with MSAL 2.x.
