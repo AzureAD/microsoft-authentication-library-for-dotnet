@@ -60,8 +60,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             TestCommon.ResetStateAndInitMsal();
 
             httpManager.AddMockHandler(
-                MockHelpers.CreateInstanceDiscoveryMockHandler(
-                    MsalTestConstants.GetDiscoveryEndpoint(MsalTestConstants.AuthorityCommonTenant)));
+            MockHelpers.CreateInstanceDiscoveryMockHandler(
+                MsalTestConstants.GetDiscoveryEndpoint(MsalTestConstants.AuthorityCommonTenant)));
         }
 
         private string _clientId;
@@ -182,6 +182,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
+                TestCommon.ResetStateAndInitMsal();
                 IntitTestData("B2CNoTenantIdTestData.txt");
                 RunCacheFormatValidation(harness);
             }

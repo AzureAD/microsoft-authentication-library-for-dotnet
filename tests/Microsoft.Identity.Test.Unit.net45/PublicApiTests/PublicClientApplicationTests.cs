@@ -1092,6 +1092,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
+        public void B2CAcquireTokenAuthorityHostMisMatchErrorTest()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+                try
+                {
+                    AuthenticationResult result = app
+                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .WithB2CAuthority(MsalTestConstants.B2CLoginAuthorityWrongHost)
+                        .ExecuteAsync(CancellationToken.None)
+                        .Result;
+                }
+                catch (Exception exc)
+                {
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalErrorMessage.B2CAuthorityHostMisMatch, exc.InnerException.Message);
+                    return;
+                }
+            }
+
+            Assert.Fail("Should not reach here. Exception was not thrown.");
+        }
+
+        [TestMethod]
+        [TestCategory("B2C")]
         public void B2CAcquireTokenWithB2CLoginAuthorityTest()
         {
             using (var harness = new MockHttpAndServiceBundle())

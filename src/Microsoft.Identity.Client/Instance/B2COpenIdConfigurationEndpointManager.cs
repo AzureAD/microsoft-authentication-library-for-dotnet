@@ -40,17 +40,10 @@ namespace Microsoft.Identity.Client.Instance
             string userPrincipalName,
             RequestContext requestContext)
         {
-            if (B2CAuthority.IsB2CLoginHost(authorityInfo.Host))
-            {
                 string defaultEndpoint = string.Format(
                     CultureInfo.InvariantCulture,
                     new Uri(authorityInfo.CanonicalAuthority).AbsoluteUri + Constants.OpenIdConfigurationEndpoint);
                 return Task.FromResult(defaultEndpoint);
-            }
-
-            throw new MsalClientException(
-                        MsalError.B2CHostNotTrusted,
-                        MsalErrorMessage.B2CHostNotTrusted);
         }
     }
 }
