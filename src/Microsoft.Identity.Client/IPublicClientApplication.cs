@@ -40,7 +40,9 @@ namespace Microsoft.Identity.Client
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
         /// <summary>
-        /// 
+        /// Tells if the application can the system web browser, therefore getting single-sign-on with web applications.
+        /// Today, this is the case on Xamarin.Android, Xamarin.iOS, and the system web view is used by default.
+        /// See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
         bool IsSystemWebViewAvailable { get; }
 
