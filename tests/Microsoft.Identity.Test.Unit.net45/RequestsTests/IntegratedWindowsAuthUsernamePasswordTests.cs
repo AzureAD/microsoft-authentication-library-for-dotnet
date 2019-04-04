@@ -26,7 +26,6 @@
 // ------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;

@@ -30,7 +30,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Foundation;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 using SafariServices;
@@ -144,7 +143,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             catch (Exception ex)
             {
                 requestContext.Logger.ErrorPii(ex);
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.AuthenticationUiFailedError,
                     "Failed to invoke SFSafariViewController",
                     ex);

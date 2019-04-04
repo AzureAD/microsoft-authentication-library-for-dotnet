@@ -28,7 +28,6 @@
 using System;
 using System.Globalization;
 using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Core
@@ -46,7 +45,7 @@ namespace Microsoft.Identity.Client.Core
         {
             if (string.IsNullOrEmpty(clientInfo))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.JsonParseError,
                     "client info is null");
             }
@@ -57,7 +56,7 @@ namespace Microsoft.Identity.Client.Core
             }
             catch (Exception exc)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                      MsalError.JsonParseError,
                      "Failed to parse the returned client info.",
                      exc);

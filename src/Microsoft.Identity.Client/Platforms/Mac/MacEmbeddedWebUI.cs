@@ -1,4 +1,4 @@
-// ------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,7 +26,6 @@
 // ------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 using System;

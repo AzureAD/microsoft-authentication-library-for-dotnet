@@ -33,7 +33,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Mats.Internal.Events;
-using Microsoft.Identity.Client.Exceptions;
 using System.Linq;
 using System;
 
@@ -64,14 +63,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!accounts.Any())
             {
                 throw new MsalUiRequiredException(
-                    MsalUiRequiredException.NoAccountForLoginHint,
+                    MsalError.NoAccountForLoginHint,
                     MsalErrorMessage.NoAccountForLoginHint);
             }
 
             if (accounts.Count() > 1)
             {
                 throw new MsalUiRequiredException(
-                    MsalUiRequiredException.MultipleAccountsForLoginHint,
+                    MsalError.MultipleAccountsForLoginHint,
                     MsalErrorMessage.MultipleAccountsForLoginHint);
             }
 
@@ -105,8 +104,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!CacheManager.HasCache)
             {
                 throw new MsalUiRequiredException(
-                    MsalUiRequiredException.TokenCacheNullError,
-                    "Token cache is set to null. Silent requests cannot be executed.");
+                    MsalError.TokenCacheNullError,
+                    MsalErrorMessage.NullTokenCacheForSilentError);
             }
 
             // Look for access token
@@ -211,8 +210,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
 
                 throw new MsalUiRequiredException(
-                    MsalUiRequiredException.NoTokensFoundError,
-                    "No Refresh Token found in the cache");
+                    MsalError.NoTokensFoundError,
+                    MsalErrorMessage.NoTokensFoundError);
             }
 
             return msalRefreshTokenItem;

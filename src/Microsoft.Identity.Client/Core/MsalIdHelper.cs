@@ -1,4 +1,4 @@
-// ------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 // 
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
@@ -94,7 +93,7 @@ namespace Microsoft.Identity.Client.Core
             var platformProxy = PlatformProxyFactory.CreatePlatformProxy(logger);
             if (platformProxy == null)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.PlatformNotSupported,
                     MsalErrorMessage.PlatformNotSupported);
             }

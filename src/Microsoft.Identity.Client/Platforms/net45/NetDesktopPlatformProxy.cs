@@ -36,7 +36,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -94,7 +93,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
             if (userNameSize == 0)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.GetUserNameFailed,
                     MsalErrorMessage.GetUserNameFailed,
                     new Win32Exception(Marshal.GetLastWin32Error()));
@@ -103,7 +102,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             var sb = new StringBuilder((int)userNameSize);
             if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.GetUserNameFailed,
                     MsalErrorMessage.GetUserNameFailed,
                     new Win32Exception(Marshal.GetLastWin32Error()));

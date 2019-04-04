@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var ex = AssertException.TaskThrows<MsalUiRequiredException>(
               () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (IAccount)null).ExecuteAsync());
-            Assert.AreEqual(MsalUiRequiredException.UserNullError, ex.ErrorCode);
+            Assert.AreEqual(MsalError.UserNullError, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             catch (MsalUiRequiredException exc)
             {
-                Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
+                Assert.AreEqual(MsalError.NoTokensFoundError, exc.ErrorCode);
             }
 
             Assert.IsNotNull(
@@ -305,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(app.Authority, false)
                     .ExecuteAsync());
 
-                Assert.AreEqual(MsalUiRequiredException.NoAccountForLoginHint, exception.ErrorCode);
+                Assert.AreEqual(MsalError.NoAccountForLoginHint, exception.ErrorCode);
             }
         }
 
@@ -330,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(app.Authority, false)
                     .ExecuteAsync());
 
-                Assert.AreEqual(MsalUiRequiredException.MultipleAccountsForLoginHint, exception.ErrorCode);
+                Assert.AreEqual(MsalError.MultipleAccountsForLoginHint, exception.ErrorCode);
             }
         }
 
@@ -657,7 +657,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNotNull(ex.InnerException);
                     Assert.IsTrue(ex.InnerException is MsalUiRequiredException);
                     var msalExc = (MsalUiRequiredException)ex.InnerException;
-                    Assert.AreEqual(msalExc.ErrorCode, MsalUiRequiredException.InvalidGrantError);
+                    Assert.AreEqual(msalExc.ErrorCode, MsalError.InvalidGrantError);
                 }
             }
         }

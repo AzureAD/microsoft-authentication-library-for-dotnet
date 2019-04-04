@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
@@ -100,7 +99,7 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                throw MsalExceptionFactory.GetClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheDictionarySerializerFailedParse, ex);
+                throw new MsalClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheDictionarySerializerFailedParse, ex);
             }
 
             if (cacheDict == null || cacheDict.Count == 0)

@@ -37,7 +37,7 @@ using Windows.Storage;
 using Windows.System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             IReadOnlyList<User> users = await User.FindAllAsync();
             if (users == null || !users.Any())
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
                     MsalErrorMessage.UapCannotFindDomainUser);
             }
@@ -110,13 +110,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
             // user has domain name, but no upn -> missing Enterprise Auth capability
             if (userDetails.Any(d => !string.IsNullOrWhiteSpace(d.Domain)))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                    MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
                    MsalErrorMessage.UapCannotFindUpn);
             }
 
             // no domain, no upn -> missing User Info capability
-            throw MsalExceptionFactory.GetClientException(
+            throw new MsalClientException(
                 MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
                 MsalErrorMessage.UapCannotFindDomainUser);
 

@@ -30,7 +30,6 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 
@@ -125,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
             {
-                throw new MsalClientException(MsalClientException.NetworkNotAvailableError, MsalErrorMessage.NetworkNotAvailable);
+                throw new MsalClientException(MsalError.NetworkNotAvailableError, MsalErrorMessage.NetworkNotAvailable);
             }
         }
 

@@ -31,7 +31,6 @@ using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Cache.Keys;
 
 namespace Microsoft.Identity.Client.Platforms.Android
@@ -64,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             if (_accessTokenSharedPreference == null || _refreshTokenSharedPreference == null
                 || _idTokenSharedPreference == null || _accountSharedPreference == null)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.FailedToCreateSharedPreference,
                     "Fail to create SharedPreference");
             }
