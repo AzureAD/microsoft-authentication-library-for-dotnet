@@ -319,8 +319,7 @@ namespace DesktopTestApp
                     .AcquireTokenInteractiveWithAuthorityAsync(
                         SplitScopeString(scopes.Text),
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        null).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                 SetResultPageInfo(authenticationResult);
             }
@@ -625,7 +624,6 @@ namespace DesktopTestApp
                         await _publicClientHandler.AcquireTokenInteractiveWithB2CAuthorityAsync(
                             B2cCustomDomainScopes,
                             Prompt.SelectAccount,
-                            null,
                             null,
                             B2CCustomDomainAuthority).ConfigureAwait(true);
 

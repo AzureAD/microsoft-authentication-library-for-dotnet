@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
         private readonly ITokenCacheAccessor _accessor;
 
         // Unkown token cache data support for forwards compatibility.
-        IDictionary<string, JToken> _unkownNodes;
+        IDictionary<string, JToken> _unknownNodes;
 
         internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
 
@@ -1245,7 +1245,7 @@ namespace Microsoft.Identity.Client
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             lock (LockObject)
             {
-                return new TokenCacheDictionarySerializer(_accessor).Serialize(_unkownNodes);
+                return new TokenCacheDictionarySerializer(_accessor).Serialize(_unknownNodes);
             }
         }
 
@@ -1273,7 +1273,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                _unkownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
+                _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
             }
         }
 
@@ -1293,7 +1293,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                return new TokenCacheJsonSerializer(_accessor).Serialize(_unkownNodes);
+                return new TokenCacheJsonSerializer(_accessor).Serialize(_unknownNodes);
             }
         }
 
@@ -1321,7 +1321,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                _unkownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
+                _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
             }
         }
 

@@ -38,6 +38,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
     /// </summary>
     internal interface IPlatformProxy
     {
+        bool IsSystemWebViewAvailable { get; }
+
         /// <summary>
         /// Gets the device model. On some TFMs this is not returned for security reasonons.
         /// </summary>

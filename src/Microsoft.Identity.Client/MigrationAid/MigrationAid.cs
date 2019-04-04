@@ -15,6 +15,10 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Platforms.iOS;
 #endif
 
+#if ANDROID
+using Android.App;
+#endif
+
 namespace Microsoft.Identity.Client
 {
     internal static class MigrationHelper
@@ -43,7 +47,7 @@ namespace Microsoft.Identity.Client
         string DisplayableId { get; }
 
         /// <summary>
-        /// In MSAL.NET 1.x was the name of the user (which was not very useful as the concatenation of 
+        /// In MSAL.NET 1.x was the name of the user (which was not very useful as the concatenation of
         /// some claims). From MSAL 2.x rather use <see cref="IAccount.Username"/>. See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -73,7 +77,7 @@ namespace Microsoft.Identity.Client
     }
 
     /// <Summary>
-    /// Interface defining common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/> 
+    /// Interface defining common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
     public partial interface IClientApplicationBase
@@ -107,7 +111,7 @@ namespace Microsoft.Identity.Client
         void Remove(IUser user);
 
         /// <summary>
-        /// Identifier of the component (libraries/SDK) consuming MSAL.NET. 
+        /// Identifier of the component (libraries/SDK) consuming MSAL.NET.
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -125,7 +129,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Gets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default
-        /// value is <c>true</c>. It should currently be set to <c>false</c> for Azure AD B2C authorities as those are customer specific 
+        /// value is <c>true</c>. It should currently be set to <c>false</c> for Azure AD B2C authorities as those are customer specific
         /// (a list of known B2C authorities cannot be maintained by MSAL.NET)
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -136,7 +140,7 @@ namespace Microsoft.Identity.Client
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
         /// <summary>
-        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens. 
+        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens.
         /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
         /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
         /// <list type="bullet">
@@ -148,7 +152,7 @@ namespace Microsoft.Identity.Client
         /// These default URIs could change in the future.
         /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
         /// </summary>
-        /// <remarks>This is especially important when you deploy an application that you have initially tested locally; 
+        /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
         /// you then need to add the reply URL of the deployed application in the application registration portal.
         /// </remarks>
         [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-3-breaking-changes or https://aka.ms/msal-net-application-configuration", true)]
@@ -157,16 +161,16 @@ namespace Microsoft.Identity.Client
 
         #region MSAL3X deprecations
         /// <summary>
-        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache. 
-        /// </summary> 
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
         /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
-        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application, 
+        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
         /// for instance so that the user consents, or re-signs-in (for instance if the password expirred), or performs two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes.
-        /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or 
+        /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or
         /// close to expiration (within 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         /// See https://aka.ms/msal-net-acuiretokensilent for more details
         /// </remarks>
@@ -182,16 +186,16 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured in the application constructor
         /// narrows down the selection of tenants for which to get a tenant, but does not change the configured value</param>
-        /// <param name="forceRefresh">If <c>true</c>, the will ignore the access token in the cache and attempt to acquire new access token 
+        /// <param name="forceRefresh">If <c>true</c>, the will ignore the access token in the cache and attempt to acquire new access token
         /// using the refresh token for the account if this one is available. This can be useful in the case when the application developer wants to make
         /// sure that conditional access policies are applies immediately, rather than after the expiration of the access token</param>
         /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
-        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application, 
-        /// for instance, if no refresh token was in the cache, or the user needs to consents, or re-sign-in (for instance if the password expirred), 
+        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache, or the user needs to consents, or re-sign-in (for instance if the password expirred),
         /// or performs two factor authentication</exception>
         /// <remarks>
-        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than 
-        /// requested could be returned as well. If the access token is expired or close to expiration (within 5 minute window), 
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned as well. If the access token is expired or close to expiration (within 5 minute window),
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </remarks>
@@ -213,7 +217,7 @@ namespace Microsoft.Identity.Client
     }
 
     /// <Summary>
-    /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/> 
+    /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
     public partial class ClientApplicationBase
@@ -247,7 +251,7 @@ namespace Microsoft.Identity.Client
         public void Remove(IUser user) { throw new NotImplementedException(); }
 
         /// <summary>
-        /// Identifier of the component (libraries/SDK) consuming MSAL.NET. 
+        /// Identifier of the component (libraries/SDK) consuming MSAL.NET.
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -395,7 +399,7 @@ namespace Microsoft.Identity.Client
         #region MSAL3X deprecations
 
 #if !NET_CORE_BUILDTIME
-        // expose the interactive API without UIParent only for platforms that 
+        // expose the interactive API without UIParent only for platforms that
         // do not need it to operate like desktop, UWP, iOS.
 #if !ANDROID_BUILDTIME
         /// <summary>
@@ -438,7 +442,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="prompt">Designed interactive experience for the user.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
@@ -455,7 +459,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <param name="prompt">Designed interactive experience for the user.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
@@ -473,7 +477,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="prompt">Designed interactive experience for the user.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="extraScopesToConsent">scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
@@ -495,7 +499,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <param name="prompt">Designed interactive experience for the user.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
@@ -558,7 +562,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="prompt">Designed interactive experience for the user.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
@@ -576,7 +580,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <param name="prompt">Designed interactive experience for the user.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
@@ -595,7 +599,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="prompt">Designed interactive experience for the user.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
@@ -618,7 +622,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <param name="prompt">Designed interactive experience for the user.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
@@ -654,7 +658,7 @@ namespace Microsoft.Identity.Client
 #endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTME
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -675,7 +679,7 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback);
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device, with possiblity of passing extra parameters. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -687,7 +691,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-device-code-flow.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
@@ -700,7 +704,7 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback);
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device, with possiblity of cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -722,7 +726,7 @@ namespace Microsoft.Identity.Client
             CancellationToken cancellationToken);
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device, with possiblity of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -734,7 +738,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-device-code-flow.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
@@ -772,7 +776,7 @@ namespace Microsoft.Identity.Client
         /// The account used in this overrides is pulled from the operating system as the current user principal name
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
+        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication.
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
         [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
@@ -785,7 +789,7 @@ namespace Microsoft.Identity.Client
     }
 
     /// <Summary>
-    /// Abstract class containing common API methods and properties. 
+    /// Abstract class containing common API methods and properties.
     /// For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
     public partial class PublicClientApplication
@@ -803,10 +807,10 @@ namespace Microsoft.Identity.Client
 #if DESKTOP || NET_CORE
 #pragma warning disable 1998
         /// <summary>
-        /// In ADAL.NET, acquires security token from the authority, using the username/password authentication, 
-        /// with the password sent in clear. 
+        /// In ADAL.NET, acquires security token from the authority, using the username/password authentication,
+        /// with the password sent in clear.
         /// In MSAL 2.x, only the method that accepts a SecureString parameter is supported.
-        /// 
+        ///
         /// See https://aka.ms/msal-net-up for more details.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
@@ -823,11 +827,11 @@ namespace Microsoft.Identity.Client
 #endif
 
 #if iOS
-        /// <summary> 
-        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group. 
-        /// If you use this property, you MUST add the capability to your Application Entitlement. 
-        /// When using this property, the value must contain the TeamId prefix, which is why this is now obsolete. 
-        /// </summary> 
+        /// <summary>
+        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group.
+        /// If you use this property, you MUST add the capability to your Application Entitlement.
+        /// When using this property, the value must contain the TeamId prefix, which is why this is now obsolete.
+        /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", true)]
@@ -1192,7 +1196,7 @@ namespace Microsoft.Identity.Client
 #endif
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -1215,7 +1219,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device, with possiblity of passing extra parameters. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -1227,7 +1231,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-device-code-flow.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
@@ -1242,7 +1246,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device, with possiblity of cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -1267,7 +1271,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device, with possiblity of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -1279,7 +1283,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-device-code-flow.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
@@ -1338,7 +1342,7 @@ namespace Microsoft.Identity.Client
         /// The account used in this overrides is pulled from the operating system as the current user principal name
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
+        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication.
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
         [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
@@ -1371,18 +1375,18 @@ namespace Microsoft.Identity.Client
         #endregion MSAL3X deprecations
     }
 
-    /// <Summary> 
-    /// Interface defining common API methods and properties. 
-    /// For details see https://aka.ms/msal-net-client-applications 
-    /// </Summary> 
+    /// <Summary>
+    /// Interface defining common API methods and properties.
+    /// For details see https://aka.ms/msal-net-client-applications
+    /// </Summary>
     public partial interface IPublicClientApplication
     {
 #if iOS
-        /// <summary> 
-        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group. 
-        /// If you use this property, you MUST add the capability to your Application Entitlement. 
-        /// When using this property, the value must contain the TeamId prefix, which is why this is now obsolete. 
-        /// </summary> 
+        /// <summary>
+        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group.
+        /// If you use this property, you MUST add the capability to your Application Entitlement.
+        /// When using this property, the value must contain the TeamId prefix, which is why this is now obsolete.
+        /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", true)]
@@ -1577,7 +1581,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// See https://aka.ms/msal-net-client-applications for a description of confidential client applications (and public client applications)
         /// Client credential grants are overrides of <see cref="ConfidentialClientApplication.AcquireTokenForClientAsync(IEnumerable{string})"/>
-        /// 
+        ///
         /// See also <see cref="T:ConfidentialClientApplicationBuilder"/> for the V3 API way of building a confidential client application
         /// with a builder pattern. It offers building the application from configuration options, and a more fluid way of providing parameters.
         /// </remarks>
@@ -1620,7 +1624,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// See https://aka.ms/msal-net-client-applications for a description of confidential client applications (and public client applications)
         /// Client credential grants are overrides of <see cref="ConfidentialClientApplication.AcquireTokenForClientAsync(IEnumerable{string})"/>
-        /// 
+        ///
         /// See also <see cref="T:ConfidentialClientApplicationBuilder"/> for the V3 API way of building a confidential client application
         /// with a builder pattern. It offers building the application from configuration options, and a more fluid way of providing parameters.
         /// </remarks>
@@ -1871,10 +1875,10 @@ namespace Microsoft.Identity.Client
     public partial interface IByRefreshToken
     {
         /// <summary>
-        /// Acquires an access token from an existing refresh token and stores it and the refresh token into 
+        /// Acquires an access token from an existing refresh token and stores it and the refresh token into
         /// the user token cache, where it will be available for further AcquireTokenSilentAsync calls.
-        /// This method can be used in migration to MSAL from ADAL v2 and in various integration 
-        /// scenarios where you have a RefreshToken available. 
+        /// This method can be used in migration to MSAL from ADAL v2 and in various integration
+        /// scenarios where you have a RefreshToken available.
         /// (see https://aka.ms/msal-net-migration-adal2-msal2)
         /// </summary>
         /// <param name="scopes">Scope to request from the token endpoint.
@@ -1885,8 +1889,8 @@ namespace Microsoft.Identity.Client
     }
 
     /// <summary>
-    /// Structure containing static members that you can use to specify how the interactive overrides 
-    /// of AcquireTokenAsync in <see cref="PublicClientApplication"/> should prompt the user. 
+    /// Structure containing static members that you can use to specify how the interactive overrides
+    /// of AcquireTokenAsync in <see cref="PublicClientApplication"/> should prompt the user.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("UIBehavior struct is now obsolete.  Please use Prompt struct instead." + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
@@ -1994,10 +1998,10 @@ namespace Microsoft.Identity.Client
 
     /// <summary>
     /// Certificate for a client assertion. This class is used in one of the constructors of <see cref="ClientCredential"/>. ClientCredential
-    /// is itself used in the constructor of <see cref="ConfidentialClientApplication"/> to pass to Azure AD a shared secret (registered in the 
+    /// is itself used in the constructor of <see cref="ConfidentialClientApplication"/> to pass to Azure AD a shared secret (registered in the
     /// Azure AD application)
     /// </summary>
-    /// <seealso cref="ClientCredential"/> for the constructor of <seealso cref="ClientCredential"/> 
+    /// <seealso cref="ClientCredential"/> for the constructor of <seealso cref="ClientCredential"/>
     /// with a certificate, and <seealso cref="ConfidentialClientApplication"/>
     /// <remarks>To understand the difference between public client applications and confidential client applications, see https://aka.ms/msal-net-client-applications</remarks>
     [Obsolete("Use ConfidentialClientApplicationBuilder.WithCertificate instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
@@ -2036,10 +2040,10 @@ namespace Microsoft.Identity.Client
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
     /// <summary>
-    /// Meant to be used in confidential client applications, an instance of <c>ClientCredential</c> is passed 
+    /// Meant to be used in confidential client applications, an instance of <c>ClientCredential</c> is passed
     /// to the constructors of (<see cref="ConfidentialClientApplication"/>)
     /// as credentials proving that the application (the client) is what it claims it is. These credentials can be
-    /// either a client secret (an application password) or a certificate. 
+    /// either a client secret (an application password) or a certificate.
     /// This class has one constructor for each case.
     /// These credentials are added in the application registration portal (in the secret section).
     /// </summary>
@@ -2094,4 +2098,75 @@ namespace Microsoft.Identity.Client
         internal string Secret => throw MigrationHelper.CreateMsalNet3BreakingChangesException();
     }
 #endif
+
+    /// <summary>
+    ///
+    /// </summary>
+    [Obsolete("In MSAL.NET 3.x, you should directly pass the Activity (on Xamarin.Android), or Window (on .NET Framework and UWP) as second parameter of AcquireTokenInteractive()" + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+    public sealed class UIParent
+    {
+        /// <summary>
+        /// </summary>
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public UIParent() // do not delete this ctor because it exists on NetStandard
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+
+        /// <summary>
+        /// </summary>
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public UIParent(object parent, bool useEmbeddedWebView)
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+
+        /// <summary>
+        /// Checks Android device for chrome packages.
+        /// Returns true if chrome package for launching system webview is enabled on device.
+        /// Returns false if chrome package is not found.
+        /// </summary>
+        /// <example>
+        /// The following code decides, in a Xamarin.Forms app, which browser to use based on the presence of the
+        /// required packages.
+        /// <code>
+        /// bool useSystemBrowser = UIParent.IsSystemWebviewAvailable();
+        /// App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity, !useSystemBrowser);
+        /// </code>
+        /// </example>
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static bool IsSystemWebviewAvailable()
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+
+#if ANDROID
+        /// <summary>
+        /// Initializes an instance for a provided activity.
+        /// </summary>
+        /// <param name="activity">parent activity for the call. REQUIRED.</param>
+        [CLSCompliant(false)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public UIParent(Activity activity)
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+
+        /// <summary>
+        /// Initializes an instance for a provided activity with flag directing the application
+        /// to use the embedded webview instead of the system browser. See https://aka.ms/msal-net-uses-web-browser
+        /// </summary>
+        [CLSCompliant(false)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public UIParent(Activity activity, bool useEmbeddedWebview) : this(activity)
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+#endif
+    }
 }

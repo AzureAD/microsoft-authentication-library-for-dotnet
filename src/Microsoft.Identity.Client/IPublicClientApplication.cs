@@ -27,11 +27,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Security;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -42,6 +39,13 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
+        /// <summary>
+        /// Tells if the application can use the system web browser, therefore getting single-sign-on with web applications.
+        /// By default, MSAL will try to use a system browser on the mobile platforms if it is available.
+        /// See https://aka.ms/msal-net-uses-web-browser
+        /// </summary>
+        bool IsSystemWebViewAvailable { get; }
+
         /// <summary>
         /// Interactive request to acquire token for the specified scopes. The interactive window will be parented to the specified
         /// window. The user will be required to select an account

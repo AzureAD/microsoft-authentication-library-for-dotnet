@@ -48,6 +48,8 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
         }
 
+        public override bool IsSystemWebViewAvailable => false;
+
         /// <summary>
         /// Get the user logged in
         /// </summary>

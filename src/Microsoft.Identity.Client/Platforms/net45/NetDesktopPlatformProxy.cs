@@ -72,6 +72,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
+        public override bool IsSystemWebViewAvailable => false;
+
         /// <summary>
         ///     Get the user logged in to Windows or throws
         /// </summary>
