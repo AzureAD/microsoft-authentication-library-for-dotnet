@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{959A47D9-07E7-4BF3-A0F7-6D9CD42A2C46}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>NetFxConsoleTestApp</RootNamespace>
-    <AssemblyName>NetFxConsoleTestApp</AssemblyName>
+    <RootNamespace>MultiCloudTestApp</RootNamespace>
+    <AssemblyName>MultiCloudTestApp</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

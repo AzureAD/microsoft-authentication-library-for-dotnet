@@ -37,45 +37,52 @@ using Microsoft.Identity.Client;
 
 namespace MultiCloudTestApp
 {
+    /// <summary>
+    /// This test app simulates the VS user scenario which supports
+    /// logging in from multiple accounts across multiple clouds.
+    /// VS is registered with the same app id in each cloud.
+    /// </summary>
     public class Program
     {
-        // TODO: replace with FOCI family members IDs
-        // DO NOT CHECK THESE IN
-        private const string FAMILY_MEMBER_1 = "";  // Office
-        private const string FAMILY_MEMBER_2 = "";  // Teams
-        private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        // TODO: replace with an app that lives in multiple clouds, e.g. VS
+        private const string APP_LIVING_IN_MULTIPLE_CLOUDS = "";
 
 
-        private static readonly string[] s_scopes = new[] { "https://graph.microsoft.com/.default" };
+        private static readonly string[] s_scopesPublicCloud = new[] { "https://graph.microsoft.com/.default" };
+        private static readonly string[] s_scopesDeCloud = new[] { "https://graph.cloudapi.de/.default" };
+        private static readonly string[] s_scopesCnCloud = new[] { "https://microsoftgraph.chinacloudapi.cn/.default" };
 
         private static readonly string s_cacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.json";
 
         // These 2 apps share the cache
-        private static IPublicClientApplication s_pcaFam1;
-        private static IPublicClientApplication s_pcaFam2;
-        private static IPublicClientApplication s_pcaNonFam;
+        private static IPublicClientApplication s_publicCloudApp;
+        private static IPublicClientApplication s_deCloudApp;
+        private static IPublicClientApplication s_cnCloudApp;
 
         public static void Main(string[] args)
         {
-            s_pcaFam1 = PublicClientApplicationBuilder
-                .Create(FAMILY_MEMBER_1)
+            s_publicCloudApp = PublicClientApplicationBuilder
+                .Create(APP_LIVING_IN_MULTIPLE_CLOUDS)
+                .WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
                 .WithLogging(Log, LogLevel.Verbose, true)
                 .Build();
 
-            s_pcaFam2 = PublicClientApplicationBuilder
-               .Create(FAMILY_MEMBER_2)
+            s_deCloudApp = PublicClientApplicationBuilder
+               .Create(APP_LIVING_IN_MULTIPLE_CLOUDS)
+               .WithAuthority(AzureCloudInstance.AzureGermany, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
                .WithLogging(Log, LogLevel.Verbose, true)
                .Build();
 
-            s_pcaNonFam = PublicClientApplicationBuilder
-             .Create(NON_FAMILY_MEMBER)
+            s_cnCloudApp = PublicClientApplicationBuilder
+             .Create(APP_LIVING_IN_MULTIPLE_CLOUDS)
+             .WithAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
              .WithLogging(Log, LogLevel.Verbose, true)
              .Build();
 
 
-            SetCacheSerializationToFile(s_pcaFam1);
-            SetCacheSerializationToFile(s_pcaFam2);
-            SetCacheSerializationToFile(s_pcaNonFam);
+            SetCacheSerializationToFile(s_publicCloudApp);
+            SetCacheSerializationToFile(s_deCloudApp);
+            SetCacheSerializationToFile(s_cnCloudApp);
 
             RunConsoleAppLogicAsync().Wait();
         }
@@ -105,16 +112,16 @@ namespace MultiCloudTestApp
             {
                 Console.Clear();
 
-                await DisplayAccountsAsync(s_pcaFam1).ConfigureAwait(false);
+                await DisplayAllAccountsAsync().ConfigureAwait(false);
 
                 // display menu
                 Console.WriteLine(@"
-                        1. Acquire Token App1 (family member)
-                        2. Acquire Token App2 (family member)
-                        3. Acquire Token App3 (non-family member)
-                        4. Acquire Token Silent App1 (family member)
-                        5. Acquire Token Silent App2 (family member)
-                        6. Acquire Token Silent App3 (non-family member)
+                        1. Acquire Token App1 (public cloud)
+                        2. Acquire Token App2 (Germany cloud)
+                        3. Acquire Token App3 (China cloud)
+                        4. Acquire Token Silent App1 (public cloud)
+                        5. Acquire Token Silent App2 (Germany cloud)
+                        6. Acquire Token Silent App3 (China cloud)
                         
 
                         7. Clear cache
@@ -129,39 +136,52 @@ namespace MultiCloudTestApp
                     switch (selection)
                     {
                     case 1:
-                        authTask = GetInteractiveAuthTaskAsync(s_pcaFam1);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        FetchTokenAsync(
+                            s_publicCloudApp,
+                            s_publicCloudApp.AcquireTokenInteractive(s_scopesPublicCloud, null).ExecuteAsync())
+                            .GetAwaiter().GetResult();
                         break;
                     case 2:
-                        authTask = GetInteractiveAuthTaskAsync(s_pcaFam2);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        FetchTokenAsync(
+                            s_deCloudApp,
+                            s_deCloudApp.AcquireTokenInteractive(s_scopesDeCloud, null).ExecuteAsync())
+                            .GetAwaiter().GetResult();
                         break;
                     case 3:
-                        authTask = GetInteractiveAuthTaskAsync(s_pcaNonFam);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        FetchTokenAsync(
+                           s_cnCloudApp,
+                            s_cnCloudApp.AcquireTokenInteractive(s_scopesCnCloud, null).ExecuteAsync())
+                           .GetAwaiter().GetResult();
                         break;
                     case 4:
-                        authTask = GetSilentAuthTaskAsync(s_pcaFam1);
-                        FetchTokenAsync(s_pcaFam1, authTask).GetAwaiter().GetResult();
+                        authTask = GetSilentAuthTaskAsync(s_publicCloudApp, s_scopesPublicCloud);
+                        FetchTokenAsync(s_publicCloudApp, authTask).GetAwaiter().GetResult();
                         break;
                     case 5:
-                        authTask = GetSilentAuthTaskAsync(s_pcaFam2);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        authTask = GetSilentAuthTaskAsync(s_deCloudApp, s_scopesDeCloud);
+                        FetchTokenAsync(s_cnCloudApp, authTask).GetAwaiter().GetResult();
                         break;
                     case 6:
-                        authTask = GetSilentAuthTaskAsync(s_pcaNonFam);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        authTask = GetSilentAuthTaskAsync(s_cnCloudApp, s_scopesCnCloud);
+                        FetchTokenAsync(s_cnCloudApp, authTask).GetAwaiter().GetResult();
                         break;
 
                     case 7:
-                        var accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
-                        var accounts2 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
-                        var accounts3 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
+                        var accountsPublic = await s_publicCloudApp.GetAccountsAsync().ConfigureAwait(false);
+                        var accountsDe = await s_deCloudApp.GetAccountsAsync().ConfigureAwait(false);
+                        var accountsCn = await s_cnCloudApp.GetAccountsAsync().ConfigureAwait(false);
 
-
-                        foreach (var acc in accounts1)
+                        foreach (var acc in accountsPublic)
                         {
-                            await s_pcaFam1.RemoveAsync(acc).ConfigureAwait(false);
+                            await s_publicCloudApp.RemoveAsync(acc).ConfigureAwait(false);
+                        }
+                        foreach (var acc in accountsDe)
+                        {
+                            await s_deCloudApp.RemoveAsync(acc).ConfigureAwait(false);
+                        }
+                        foreach (var acc in accountsCn)
+                        {
+                            await s_cnCloudApp.RemoveAsync(acc).ConfigureAwait(false);
                         }
 
                         break;
@@ -183,20 +203,20 @@ namespace MultiCloudTestApp
             }
         }
 
-        private static Task<AuthenticationResult> GetInteractiveAuthTaskAsync(IPublicClientApplication pca)
+        private static async Task DisplayAllAccountsAsync()
         {
-            return pca.AcquireTokenInteractive(s_scopes, null).ExecuteAsync();
+            Console.WriteLine("=== Public Cloud ====");
+            await DisplayAccountsAsync(s_publicCloudApp).ConfigureAwait(false);
+
+            Console.WriteLine("=== DE Cloud ====");
+            await DisplayAccountsAsync(s_deCloudApp).ConfigureAwait(false);
+
+            Console.WriteLine("=== CN Cloud ====");
+            await DisplayAccountsAsync(s_cnCloudApp).ConfigureAwait(false);
         }
 
-        private static Task<AuthenticationResult> GetSilentAuthTaskAsync(IPublicClientApplication pca)
+        private static Task<AuthenticationResult> GetSilentAuthTaskAsync(IPublicClientApplication pca, string[] scopes)
         {
-            // get all serialized accounts
-            // get all RTs WHERE rt.client == app.client OR app is part of family or unkown
-            // JOIN acounts and RTs ON homeAccountID
-
-            // A -> interactive auth -> account, RT1
-            // B -> GetAccounts -> NULL
-
             var accounts = pca.GetAccountsAsync().GetAwaiter().GetResult();
             if (accounts.Count() > 1)
             {
@@ -204,10 +224,12 @@ namespace MultiCloudTestApp
                 return null;
             }
 
-            return pca.AcquireTokenSilent(s_scopes, accounts.FirstOrDefault()).ExecuteAsync();
+            return pca.AcquireTokenSilent(scopes, accounts.FirstOrDefault()).ExecuteAsync();
         }
 
-        private static async Task FetchTokenAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
+        private static async Task FetchTokenAsync(
+            IPublicClientApplication pca,
+            Task<AuthenticationResult> authTask)
         {
             if (authTask == null)
             {
@@ -222,7 +244,8 @@ namespace MultiCloudTestApp
 
 
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
-            await DisplayAccountsAsync(pca).ConfigureAwait(false);
+            await DisplayAllAccountsAsync().ConfigureAwait(false);
+
 
             Console.ResetColor();
         }
@@ -233,7 +256,7 @@ namespace MultiCloudTestApp
         {
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
-            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "For the public client, the tokenCache contains {0} token(s)", accounts.Count()));
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "For this cloud, the tokenCache contains {0} token(s)", accounts.Count()));
 
             foreach (var account in accounts)
             {
