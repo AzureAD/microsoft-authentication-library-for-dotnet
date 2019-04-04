@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client
         /// close to expiration (within 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         /// See https://aka.ms/msal-net-acuiretokensilent for more details
         /// </remarks>
-        [Obsolete("Use AcquireTokenInteractive instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [Obsolete("Use AcquireTokenSilent instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         Task<AuthenticationResult> AcquireTokenSilentAsync(
             IEnumerable<string> scopes,
             IAccount account);
