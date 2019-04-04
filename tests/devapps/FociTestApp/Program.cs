@@ -131,27 +131,27 @@ namespace FociTestApp
                     switch (selection)
                     {
                     case 1:
-                        authTask = GetInteractiveAuthTaskAsync(s_pcaFam1);
+                        authTask = StartInteractiveAuthAsync(s_pcaFam1);
                         FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                         break;
                     case 2:
-                        authTask = GetInteractiveAuthTaskAsync(s_pcaFam2);
+                        authTask = StartInteractiveAuthAsync(s_pcaFam2);
                         FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                         break;
                     case 3:
-                        authTask = GetInteractiveAuthTaskAsync(s_pcaNonFam);
+                        authTask = StartInteractiveAuthAsync(s_pcaNonFam);
                         FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                         break;
                     case 4:
-                        authTask = GetSilentAuthTaskAsync(s_pcaFam1);
+                        authTask = StartSilentAuthAsync(s_pcaFam1);
                         FetchTokenAsync(s_pcaFam1, authTask).GetAwaiter().GetResult();
                         break;
                     case 5:
-                        authTask = GetSilentAuthTaskAsync(s_pcaFam2);
+                        authTask = StartSilentAuthAsync(s_pcaFam2);
                         FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                         break;
                     case 6:
-                        authTask = GetSilentAuthTaskAsync(s_pcaNonFam);
+                        authTask = StartSilentAuthAsync(s_pcaNonFam);
                         FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                         break;
 
@@ -185,12 +185,12 @@ namespace FociTestApp
             }
         }
 
-        private static Task<AuthenticationResult> GetInteractiveAuthTaskAsync(IPublicClientApplication pca)
+        private static Task<AuthenticationResult> StartInteractiveAuthAsync(IPublicClientApplication pca)
         {
             return pca.AcquireTokenInteractive(s_scopes, null).ExecuteAsync();
         }
 
-        private static Task<AuthenticationResult> GetSilentAuthTaskAsync(IPublicClientApplication pca)
+        private static Task<AuthenticationResult> StartSilentAuthAsync(IPublicClientApplication pca)
         {
             // get all serialized accounts
             // get all RTs WHERE rt.client == app.client OR app is part of family or unkown
