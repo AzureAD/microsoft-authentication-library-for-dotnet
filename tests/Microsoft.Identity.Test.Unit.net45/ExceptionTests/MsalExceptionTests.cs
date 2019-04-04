@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         [TestMethod]
         public void ExceptionsArePubliclyCreatable_MsalSilentTokenAcquisitionException()
         {
-            var ex = new MsalUiRequiredException(null, null);
+            var ex = new MsalUiRequiredException("code", "message");
 
             Assert.IsNull(ex.InnerException);
         }
