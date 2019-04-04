@@ -96,8 +96,7 @@ namespace DesktopTestApp
         public async Task<AuthenticationResult> AcquireTokenInteractiveWithAuthorityAsync(
             IEnumerable<string> scopes,
             Prompt uiBehavior,
-            string extraQueryParams,
-            UIParent uiParent)
+            string extraQueryParams)
         {
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
 
@@ -105,7 +104,7 @@ namespace DesktopTestApp
             if (CurrentUser != null)
             {
                 result = await PublicClientApplication
-                    .AcquireTokenInteractive(scopes, uiParent)
+                    .AcquireTokenInteractive(scopes, null)
                     .WithAccount(CurrentUser)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
@@ -116,7 +115,7 @@ namespace DesktopTestApp
             else
             {
                 result = await PublicClientApplication
-                    .AcquireTokenInteractive(scopes, uiParent)
+                    .AcquireTokenInteractive(scopes, null)
                     .WithLoginHint(LoginHint)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
@@ -143,13 +142,12 @@ namespace DesktopTestApp
           IEnumerable<string> scopes,
           Prompt uiBehavior,
           string extraQueryParams,
-          UIParent uiParent,
           string b2cAuthority)
         {
             CreateOrUpdatePublicClientApp(b2cAuthority, ApplicationId);
             AuthenticationResult result;
             result = await PublicClientApplication
-                   .AcquireTokenInteractive(scopes, uiParent)
+                   .AcquireTokenInteractive(scopes, null)
                    .WithAccount(CurrentUser)
                    .WithPrompt(uiBehavior)
                    .WithExtraQueryParameters(extraQueryParams)
