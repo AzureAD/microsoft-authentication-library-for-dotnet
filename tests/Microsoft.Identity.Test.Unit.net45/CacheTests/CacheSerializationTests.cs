@@ -150,8 +150,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 accessor.SaveAccount(item);
             }
 
-            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_1",  "1"));
-            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_2",  ""));
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_1", "1"));
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_2", ""));
             accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId2, "env_1", "another_family"));
 
             return accessor;
@@ -397,9 +397,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertContainsKeys(asJObject, new[] { "unsupported_field_name" });
         }
 
-       
+
         #endregion // APP METADATA TESTS
-      
 
         #region DICTIONARY SERIALIZATION TESTS
 
@@ -409,7 +408,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var accessor = CreateTokenCacheAccessor();
 
             var s1 = new TokenCacheDictionarySerializer(accessor);
-            byte[] bytes = s1.Serialize();
+            byte[] bytes = s1.Serialize(null);
             string json = new UTF8Encoding().GetString(bytes);
 
             // TODO(cache): assert json value?  or look at JObject?
@@ -426,6 +425,42 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         #region JSON SERIALIZATION TESTS
 
         [TestMethod]
+        [DeploymentItem(@"Resources\CacheFromTheFuture.json")]
+        public void UnkownNodesTest()
+        {
+
+            string jsonFilePath = ResourceHelper.GetTestResourceRelativePath("CacheFromTheFuture.json");
+            string jsonContent = File.ReadAllText(jsonFilePath);
+            byte[] cache = Encoding.UTF8.GetBytes(jsonContent);
+
+            var tokenCache = new TokenCache();
+            tokenCache.SetBeforeAccess(notificationArgs =>
+            {
+                notificationArgs.TokenCache.DeserializeMsalV3(cache);
+            });
+            tokenCache.SetAfterAccess(notificationArgs =>
+            {
+                cache = notificationArgs.TokenCache.SerializeMsalV3();
+            });
+
+            var notification = new TokenCacheNotificationArgs() { TokenCache = tokenCache };
+            tokenCache.OnBeforeAccess(notification);
+            tokenCache.OnAfterAccess(notification);
+            (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
+
+            tokenCache.OnBeforeAccess(notification);
+            (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
+
+            tokenCache.OnAfterAccess(notification);
+            (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
+
+            var finalJson = JObject.Parse(Encoding.UTF8.GetString(cache));
+
+            var originalJson = JObject.Parse(jsonContent);
+            Assert.IsTrue(JToken.DeepEquals(originalJson, finalJson));
+        }
+
+        [TestMethod]
         [DeploymentItem(@"Resources\ExpectedTokenCache.json")]
         public void TestJsonSerialization()
         {
@@ -433,7 +468,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var accessor = CreateTokenCacheAccessor();
 
             var s1 = new TokenCacheJsonSerializer(accessor);
-            byte[] bytes = s1.Serialize();
+            byte[] bytes = s1.Serialize(null);
             string actualJson = new UTF8Encoding().GetString(bytes);
 
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
@@ -445,7 +480,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertAccessorsAreEqual(accessor, otherAccessor);
 
             // serialize again to detect errors that come from deserialization
-            byte[] bytes2 = s2.Serialize();
+            byte[] bytes2 = s2.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
         }
@@ -562,13 +597,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void AddBaseJObjectFields(List<string> fields)
         {
-            fields.AddRange(new List<string> {"home_account_id", "environment", "client_info" });
+            fields.AddRange(new List<string> { "home_account_id", "environment", "client_info" });
         }
 
         private void AddBaseCredentialJObjectFields(List<string> fields)
         {
             AddBaseJObjectFields(fields);
-            fields.AddRange(new List<string> {"client_id", "secret", "credential_type" });
+            fields.AddRange(new List<string> { "client_id", "secret", "credential_type" });
         }
 
         private void AssertAccessTokenHasJObjectFields(JObject j, IEnumerable<string> additionalKeys = null)
@@ -678,7 +713,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.AreEqual(expected.FamilyId, actual.FamilyId);
             }
 
-            
+
         }
 
         private void AssertIdTokenCacheItemsAreEqual(MsalIdTokenCacheItem expected, MsalIdTokenCacheItem actual)
