@@ -34,7 +34,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Security;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
@@ -93,7 +92,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return match.AccessGroup.Split('.')[0];
             }
 
-            throw MsalExceptionFactory.GetClientException(
+            throw new MsalClientException(
                 MsalError.CannotAccessPublisherKeyChain,
                 MsalErrorMessage.CannotAccessPublisherKeyChain);
         }
@@ -241,7 +240,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (secStatusCode == SecStatusCode.MissingEntitlement)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                 MsalError.MissingEntitlements,
                 string.Format(
                     CultureInfo.InvariantCulture,

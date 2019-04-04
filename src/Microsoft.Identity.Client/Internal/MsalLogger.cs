@@ -27,8 +27,8 @@
 
 using System;
 using System.Globalization;
+using System.Text;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
@@ -42,7 +42,13 @@ namespace Microsoft.Identity.Client.Internal
         private readonly bool _isDefaultPlatformLoggingEnabled;
         private static readonly Lazy<ICoreLogger> _nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
 
-        internal MsalLogger(Guid correlationId, string component, LogLevel logLevel, bool enablePiiLogging, bool isDefaultPlatformLoggingEnabled, LogCallback loggingCallback)
+        internal MsalLogger(
+            Guid correlationId,
+            string component,
+            LogLevel logLevel,
+            bool enablePiiLogging,
+            bool isDefaultPlatformLoggingEnabled,
+            LogCallback loggingCallback)
         {
             CorrelationId = correlationId;
             PiiLoggingEnabled = enablePiiLogging;
@@ -59,7 +65,10 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        public static ICoreLogger Create(Guid correlationId, IApplicationConfiguration config, bool isDefaultPlatformLoggingEnabled = false)
+        public static ICoreLogger Create(
+            Guid correlationId,
+            IApplicationConfiguration config,
+            bool isDefaultPlatformLoggingEnabled = false)
         {
             return new MsalLogger(
                 correlationId,
@@ -90,12 +99,12 @@ namespace Microsoft.Identity.Client.Internal
 
         public void InfoPii(Exception exWithPii)
         {
-            Log(LogLevel.Info, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Info, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void InfoPiiWithPrefix(Exception exWithPii, string prefix)
         {
-            Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void Verbose(string messageScrubbed)
@@ -120,12 +129,12 @@ namespace Microsoft.Identity.Client.Internal
 
         public void WarningPii(Exception exWithPii)
         {
-            Log(LogLevel.Warning, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Warning, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void WarningPiiWithPrefix(Exception exWithPii, string prefix)
         {
-            Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void Error(string messageScrubbed)
@@ -135,12 +144,12 @@ namespace Microsoft.Identity.Client.Internal
 
         public void ErrorPii(Exception exWithPii)
         {
-            Log(LogLevel.Error, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Error, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
         {
-            Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void ErrorPii(string messageWithPii, string messageScrubbed)
@@ -198,6 +207,40 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             _loggingCallback.Invoke(msalLogLevel, log, isLoggingPii);
+        }
+
+        internal static string GetPiiScrubbedExceptionDetails(Exception ex)
+        {
+            var sb = new StringBuilder();
+            if (ex != null)
+            {
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Exception type: {0}", ex.GetType()));
+
+                if (ex is MsalException msalException)
+                {
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, ", ErrorCode: {0}", msalException.ErrorCode));
+                }
+
+                if (ex is MsalServiceException msalServiceException)
+                {
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
+                }
+
+                if (ex.InnerException != null)
+                {
+                    sb.AppendLine("---> Inner Exception Details");
+                    sb.AppendLine(GetPiiScrubbedExceptionDetails(ex.InnerException));
+                    sb.AppendLine("=== End of inner exception stack trace ===");
+                }
+
+                if (ex.StackTrace != null)
+                {
+                    sb.Append(Environment.NewLine + ex.StackTrace);
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

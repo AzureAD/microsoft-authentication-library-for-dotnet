@@ -28,9 +28,14 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
+using Android.App;
+using Android.Content;
+using Android.Content.PM;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
@@ -38,19 +43,21 @@ using Microsoft.Identity.Client.UI;
 namespace Microsoft.Identity.Client.Platforms.Android
 {
     /// <summary>
-    /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
+    /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
     [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class AndroidPlatformProxy : AbstractPlatformProxy
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
+        private const string ChromePackage = "com.android.chrome";
+        private const string CustomTabService = "android.support.customtabs.action.CustomTabsService";
 
         public AndroidPlatformProxy(ICoreLogger logger) : base(logger)
         {
         }
 
         /// <summary>
-        /// Get the user logged in 
+        /// Get the user logged in
         /// </summary>
         /// <returns>The username or throws</returns>
         public override Task<string> GetUserPrincipalNameAsync()
@@ -117,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
         protected override  string InternalGetCallingApplicationName()
@@ -126,7 +133,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
         protected override  string InternalGetCallingApplicationVersion()
@@ -135,7 +142,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         /// <summary>
-        /// Considered PII. Please ensure that it is hashed. 
+        /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
         protected override  string InternalGetDeviceId()
@@ -166,6 +173,63 @@ namespace Microsoft.Identity.Client.Platforms.Android
         protected override ICryptographyManager InternalGetCryptographyManager() => new AndroidCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new AndroidPlatformLogger();
 
+        public override string GetDeviceNetworkState()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetDevicePlatformTelemetryId()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetMatsOsPlatform()
+        {
+            return MatsConverter.AsString(OsPlatform.Android);
+        }
+
+        public override int GetMatsOsPlatformCode()
+        {
+            return MatsConverter.AsInt(OsPlatform.Android);
+        }
         protected override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();
+
+        public override bool IsSystemWebViewAvailable
+        {
+            get
+            {
+                bool isBrowserWithCustomTabSupportAvailable = IsBrowserWithCustomTabSupportAvailable();
+                return (isBrowserWithCustomTabSupportAvailable || IsChromeEnabled()) &&
+                       isBrowserWithCustomTabSupportAvailable;
+            }
+        }
+
+        private static bool IsBrowserWithCustomTabSupportAvailable()
+        {
+            Intent customTabServiceIntent = new Intent(CustomTabService);
+
+            IEnumerable<ResolveInfo> resolveInfoListWithCustomTabs =
+                Application.Context.PackageManager.QueryIntentServices(
+                    customTabServiceIntent, PackageInfoFlags.MatchAll);
+
+            // queryIntentServices could return null or an empty list if no matching service existed.
+            if (resolveInfoListWithCustomTabs == null || !resolveInfoListWithCustomTabs.Any())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsChromeEnabled()
+        {
+            ApplicationInfo applicationInfo = Application.Context.PackageManager.GetApplicationInfo(ChromePackage, 0);
+
+            // Chrome is difficult to uninstall on an Android device. Most users will disable it, but the package will still
+            // show up, therefore need to check application.Enabled is false
+            return string.IsNullOrEmpty(ChromePackage) || applicationInfo.Enabled;
+        }
     }
 }

@@ -31,7 +31,6 @@ using System.Security;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.WsTrust
 {
@@ -58,7 +57,7 @@ namespace Microsoft.Identity.Client.WsTrust
             {
                 _requestContext.Logger.Error("Could not find UPN for logged in user.");
 
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.UnknownUser,
                     MsalErrorMessage.UnknownUser);
             }
@@ -76,7 +75,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
             if (userRealmResponse == null)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.UserRealmDiscoveryFailed,
                     MsalErrorMessage.UserRealmDiscoveryFailed);
             }
@@ -100,7 +99,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (XmlException ex)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.ParsingWsMetadataExchangeFailed,
                     MsalErrorMessage.ParsingMetadataDocumentFailed,
                     ex);
@@ -112,7 +111,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
             if (wsTrustEndpoint == null)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                   MsalError.WsTrustEndpointNotFoundInMetadataDocument,
                   MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument);
             }
@@ -157,7 +156,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (Exception ex)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.ParsingWsTrustResponseFailed,
                     ex.Message,
                     ex);

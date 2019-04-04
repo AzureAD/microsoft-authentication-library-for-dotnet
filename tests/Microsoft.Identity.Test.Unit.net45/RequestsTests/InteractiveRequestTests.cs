@@ -34,10 +34,9 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -284,7 +283,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     Assert.IsTrue(exc.InnerException is MsalUiRequiredException);
                     Assert.AreEqual(
-                        MsalUiRequiredException.NoPromptFailedError,
+                        MsalError.NoPromptFailedError,
                         ((MsalUiRequiredException)exc.InnerException).ErrorCode);
                 }
 
@@ -352,7 +351,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     Assert.IsTrue(exc.InnerException is MsalException);
                     Assert.AreEqual(
-                        MsalClientException.DuplicateQueryParameterError,
+                        MsalError.DuplicateQueryParameterError,
                         ((MsalException)exc.InnerException).ErrorCode);
                 }
             }

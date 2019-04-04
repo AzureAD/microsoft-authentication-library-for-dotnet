@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using CoreFoundation;
 using Foundation;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Platforms.AppleShared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;

@@ -28,7 +28,6 @@
 using System;
 using System.Net;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -51,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         [TestMethod]
         public void ExceptionsArePubliclyCreatable_MsalSilentTokenAcquisitionException()
         {
-            var ex = new MsalUiRequiredException(null, null);
+            var ex = new MsalUiRequiredException("code", "message");
 
             Assert.IsNull(ex.InnerException);
         }
@@ -87,11 +86,13 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             };
 
             // Act
-            var ex = MsalExceptionFactory.GetServiceException(
+            var ex = new MsalServiceException(
                 "errCode",
                 "errMessage",
-                httpResponse,
-                innerException);
+                innerException)
+            {
+                HttpResponse = httpResponse
+            };
 
             // Assert
             Assert.IsTrue(ex.ToString().Contains("errCode"));

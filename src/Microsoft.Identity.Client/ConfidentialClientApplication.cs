@@ -39,7 +39,6 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client
 {
@@ -187,10 +186,10 @@ namespace Microsoft.Identity.Client
 
         internal override AuthenticationRequestParameters CreateRequestParameters(
             AcquireTokenCommonParameters commonParameters,
-            ITokenCacheInternal cache,
-            Authority customAuthority = null)
+            RequestContext requestContext,
+            ITokenCacheInternal cache)
         {
-            AuthenticationRequestParameters requestParams = base.CreateRequestParameters(commonParameters, cache, customAuthority);
+            AuthenticationRequestParameters requestParams = base.CreateRequestParameters(commonParameters, requestContext, cache);
             requestParams.ClientCredential = ServiceBundle.Config.ClientCredential;
             return requestParams;
         }

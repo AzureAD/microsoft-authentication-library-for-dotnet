@@ -1,4 +1,4 @@
-// ------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 // 
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -92,8 +92,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     harness.Cache,
                     null,
                     MsalTestConstants.ExtraQueryParams,
-                    MsalTestConstants.Claims);
-                var silentParameters = new AcquireTokenSilentParameters();
+                    MsalTestConstants.Claims,
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(MsalTestConstants.AuthorityHomeTenant, false));
+
+                var silentParameters = new AcquireTokenSilentParameters()
+                {
+                    Account = new Account(MsalTestConstants.HomeAccountId, MsalTestConstants.DisplayableId, MsalTestConstants.ProductionPrefCacheEnvironment),
+                };
 
                 // set access tokens as expired
                 foreach (var accessItem in harness.Cache.GetAllAccessTokens(true))
@@ -137,9 +142,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         {
                             "some-scope1",
                             "some-scope2"
-                        }));
+                        }),
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(MsalTestConstants.AuthorityHomeTenant, false));
 
-                var silentParameters = new AcquireTokenSilentParameters();
+                var silentParameters = new AcquireTokenSilentParameters()
+                {
+                    Account = new Account(MsalTestConstants.HomeAccountId, MsalTestConstants.DisplayableId, MsalTestConstants.ProductionPrefCacheEnvironment),
+                };
 
                 try
                 {
@@ -152,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     var exc = ae.InnerException as MsalUiRequiredException;
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalUiRequiredException.TokenCacheNullError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.TokenCacheNullError, exc.ErrorCode);
                 }
             }
         }
@@ -171,8 +180,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         {
                             "some-scope1",
                             "some-scope2"
-                        }));
-                var silentParameters = new AcquireTokenSilentParameters();
+                        }),
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(MsalTestConstants.AuthorityHomeTenant, false));
+
+                var silentParameters = new AcquireTokenSilentParameters()
+                {
+                    Account = new Account(MsalTestConstants.HomeAccountId, MsalTestConstants.DisplayableId, MsalTestConstants.ProductionPrefCacheEnvironment),
+                };
 
                 try
                 {
@@ -185,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     var exc = ae.InnerException as MsalUiRequiredException;
                     Assert.IsNotNull(exc, "Actual exception type is " + ae.InnerException.GetType());
-                    Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.NoTokensFoundError, exc.ErrorCode);
                 }
             }
         }
@@ -216,24 +230,24 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ITokenCacheInternal cache,
                 SortedSet<string> scopes,
                 IDictionary<string, string> extraQueryParams = null,
-                string claims = null)
+                string claims = null,
+                AuthorityInfo authorityOverride = null)
             {
                 var commonParameters = new AcquireTokenCommonParameters
                 {
                     Scopes = scopes ?? MsalTestConstants.Scope,
                     ExtraQueryParameters = extraQueryParams,
-                    Claims = claims
+                    Claims = claims,
+                    AuthorityOverride = authorityOverride
                 };
 
                 var parameters = new AuthenticationRequestParameters(
                     ServiceBundle,
-                    Authority,
                     cache,
                     commonParameters,
                     RequestContext.CreateForTest(ServiceBundle))
                 {
                     Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-
                 };
                 return parameters;
             }

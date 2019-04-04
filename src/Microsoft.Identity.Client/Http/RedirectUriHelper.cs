@@ -28,7 +28,6 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -43,7 +42,7 @@ namespace Microsoft.Identity.Client.Http
         {
             if (redirectUri == null)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.NoRedirectUri,
                     MsalErrorMessage.NoRedirectUri);
 
@@ -59,7 +58,7 @@ namespace Microsoft.Identity.Client.Http
             if (usesSystemBrowser &&
                 Constants.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.DefaultRedirectUriIsInvalid,
                     string.Format(
                         CultureInfo.InvariantCulture,

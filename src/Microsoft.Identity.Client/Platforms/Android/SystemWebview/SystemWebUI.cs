@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -30,7 +30,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 using Uri = System.Uri;
@@ -68,7 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             catch (Exception ex)
             {
                 requestContext.Logger.ErrorPii(ex);
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.AuthenticationUiFailedError, 
                     "AuthenticationActivity failed to start", 
                     ex);

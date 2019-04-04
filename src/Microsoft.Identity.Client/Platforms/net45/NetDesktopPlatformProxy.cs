@@ -1,20 +1,20 @@
 ﻿// ------------------------------------------------------------------------------
-// 
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-// 
+//
 // This code is licensed under the MIT License.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // ------------------------------------------------------------------------------
 
 using System;
@@ -36,10 +36,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Win32;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -71,36 +72,43 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
+        public override bool IsSystemWebViewAvailable => false;
+
         /// <summary>
         ///     Get the user logged in to Windows or throws
         /// </summary>
         /// <returns>Upn or throws</returns>
         public override Task<string> GetUserPrincipalNameAsync()
         {
-            // TODO: there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and 
-            // the rest of the platforms - returns "" 
-
             const int NameUserPrincipal = 8;
+            return Task.FromResult(GetUserPrincipalName(NameUserPrincipal));
+        }
+
+        private string GetUserPrincipalName(int nameFormat)
+        {
+            // TODO: there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and
+            // the rest of the platforms - returns ""
+
             uint userNameSize = 0;
-            WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+            WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
             if (userNameSize == 0)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.GetUserNameFailed,
                     MsalErrorMessage.GetUserNameFailed,
                     new Win32Exception(Marshal.GetLastWin32Error()));
             }
 
             var sb = new StringBuilder((int)userNameSize);
-            if (!WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+            if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.GetUserNameFailed,
                     MsalErrorMessage.GetUserNameFailed,
                     new Win32Exception(Marshal.GetLastWin32Error()));
             }
 
-            return Task.FromResult(sb.ToString());
+            return sb.ToString();
         }
 
         public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
@@ -234,7 +242,57 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager();
 
-        /// <inheritdoc />
+        public override string GetDeviceNetworkState()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetDevicePlatformTelemetryId()
+        {
+            const int NameSamCompatible = 2;
+
+            var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\SQMClient", false);
+            object val = key.GetValue("MachineId");
+            if (val == null)
+            {
+                return string.Empty;
+            }
+
+            string win32DeviceId = val.ToString();
+
+            string userName = GetUserPrincipalName(NameSamCompatible);
+
+            // NameSamCompatible might include an email address. remove the domain before hashing.
+            int atIdx = userName.IndexOf('@');
+            if (atIdx >= 0)
+            {
+                userName = userName.Substring(0, atIdx);
+            }
+
+            string unhashedDpti = win32DeviceId + userName;
+
+            var hashedBytes = InternalGetCryptographyManager().CreateSha256HashBytes(unhashedDpti);
+            var sb = new StringBuilder();
+
+            foreach (var b in hashedBytes)
+            {
+                sb.Append($"{b:x2}");
+            }
+
+            string dptiOutput = sb.ToString();
+            return dptiOutput;
+        }
+
+        public override string GetMatsOsPlatform()
+        {
+            return MatsConverter.AsString(OsPlatform.Win32);
+        }
+
+        public override int GetMatsOsPlatformCode()
+        {
+            return MatsConverter.AsInt(OsPlatform.Win32);
+        }
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
         protected override IFeatureFlags CreateFeatureFlags() => new NetDesktopFeatureFlags();

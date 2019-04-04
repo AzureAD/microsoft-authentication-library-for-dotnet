@@ -32,7 +32,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Instance
@@ -58,10 +57,12 @@ namespace Microsoft.Identity.Client.Instance
 
                 if (drsResponse.IdentityProviderService?.PassiveAuthEndpoint == null)
                 {
-                    throw MsalExceptionFactory.GetServiceException(
+                    throw new MsalServiceException(
                         MsalError.MissingPassiveAuthEndpoint,
-                        MsalErrorMessage.CannotFindTheAuthEndpont,
-                        drsResponse);
+                        MsalErrorMessage.CannotFindTheAuthEndpont)
+                    {
+                        OAuth2Response = drsResponse
+                    };
                 }
 
                 string resource = string.Format(CultureInfo.InvariantCulture, authorityInfo.CanonicalAuthority);
@@ -74,10 +75,12 @@ namespace Microsoft.Identity.Client.Instance
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    throw MsalExceptionFactory.GetServiceException(
+                    throw new MsalServiceException(
                         MsalError.InvalidAuthority,
-                        MsalErrorMessage.AuthorityValidationFailed,
-                        httpResponse);
+                        MsalErrorMessage.AuthorityValidationFailed)
+                    {
+                        HttpResponse = httpResponse
+                    };
                 }
 
                 var wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext, false);
@@ -85,7 +88,7 @@ namespace Microsoft.Identity.Client.Instance
                         a => a.Rel.Equals(Constants.DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase)) == null)
                 {
-                    throw MsalExceptionFactory.GetClientException(
+                    throw new MsalClientException(
                         MsalError.InvalidAuthority,
                         MsalErrorMessage.InvalidAuthorityOpenId);
                 }

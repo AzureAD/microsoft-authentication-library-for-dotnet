@@ -29,14 +29,14 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
+        private const int DefaultExpirationBufferInMinutes = 5;
         private const string MicrosoftLogin = "login.microsoftonline.com";
 
         private ICoreLogger _logger => ServiceBundle.DefaultLogger;
@@ -71,9 +72,11 @@ namespace Microsoft.Identity.Client
 
         internal IServiceBundle ServiceBundle { get; private set; }
 
-        private const int DefaultExpirationBufferInMinutes = 5;
-
         private readonly ITokenCacheAccessor _accessor;
+
+        // Unkown token cache data support for forwards compatibility.
+        IDictionary<string, JToken> _unknownNodes;
+
         internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
@@ -499,7 +502,8 @@ namespace Microsoft.Identity.Client
                 {
                     requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
 
-                    throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
+                    throw new MsalClientException(
+                        MsalError.MultipleTokensMatchedError,
                         MsalErrorMessage.MultipleTokensMatched);
                 }
 
@@ -568,8 +572,14 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             string familyId)
         {
-            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
+            var cacheEvent = new CacheEvent(
+                CacheEvent.TokenCacheLookup,
+                requestParams.RequestContext.TelemetryCorrelationId)
+                {
+                    TokenType = CacheEvent.TokenTypes.RT
+                };
+
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(cacheEvent))
             {
                 if (requestParams.Authority == null)
                 {
@@ -995,7 +1005,7 @@ namespace Microsoft.Identity.Client
            
         }
 
-        internal void RemoveAdalUser(IAccount account)
+        private void RemoveAdalUser(IAccount account)
         {
             CacheFallbackOperations.RemoveAdalUser(
                 _logger,
@@ -1235,7 +1245,7 @@ namespace Microsoft.Identity.Client
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             lock (LockObject)
             {
-                return new TokenCacheDictionarySerializer(_accessor).Serialize();
+                return new TokenCacheDictionarySerializer(_accessor).Serialize(_unknownNodes);
             }
         }
 
@@ -1263,7 +1273,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
+                _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
             }
         }
 
@@ -1283,7 +1293,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                return new TokenCacheJsonSerializer(_accessor).Serialize();
+                return new TokenCacheJsonSerializer(_accessor).Serialize(_unknownNodes);
             }
         }
 
@@ -1311,7 +1321,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
+                _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
             }
         }
 

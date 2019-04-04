@@ -25,18 +25,18 @@
 // 
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Mats.Internal.Events;
+
 namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal interface ITelemetryManager
     {
         TelemetryCallback Callback { get; }
 
-        string GenerateNewRequestId();
+        TelemetryHelper CreateTelemetryHelper(EventBase eventBase);
 
-        TelemetryHelper CreateTelemetryHelper(
-            string requestId,
-            string clientId,
-            EventBase eventBase,
-            bool shouldFlush = false);
+        void StartEvent(EventBase eventToStart);
+        void StopEvent(EventBase eventToStop);
+        void Flush(string telemetryCorrelationId);
     }
 }

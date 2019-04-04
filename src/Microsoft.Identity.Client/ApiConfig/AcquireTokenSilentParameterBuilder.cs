@@ -30,8 +30,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
@@ -69,12 +68,14 @@ namespace Microsoft.Identity.Client
 
         private AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAccount);
             Parameters.Account = account;
             return this;
         }
 
         private AcquireTokenSilentParameterBuilder WithLoginHint(string loginHint)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithLoginHint);
             Parameters.LoginHint = loginHint;
             return this;
         }
@@ -95,6 +96,7 @@ namespace Microsoft.Identity.Client
         /// avoid negatively affecting the performance of your application</remarks>
         public AcquireTokenSilentParameterBuilder WithForceRefresh(bool forceRefresh)
         {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithRedirectUri);
             Parameters.ForceRefresh = forceRefresh;
             return this;
         }
@@ -113,15 +115,17 @@ namespace Microsoft.Identity.Client
                 : ApiEvent.ApiIds.AcquireTokenSilentWithAuthority;
         }
 
+        internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenSilent;
+
         /// <summary>
         /// 
         /// </summary>
         protected override void Validate()
         {
             base.Validate();
-            if (Parameters.Account == null && string.IsNullOrWhiteSpace(Parameters.LoginHint) )
+            if (Parameters.Account == null && string.IsNullOrWhiteSpace(Parameters.LoginHint))
             {
-                throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
+                throw new MsalUiRequiredException(MsalError.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
             }
         }
     }

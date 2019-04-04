@@ -33,11 +33,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
@@ -117,11 +116,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var authorizationUri = CreateAuthorizationUri(true);
 
-            var uiEvent = new UiEvent();
-            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
-                AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
-                AuthenticationRequestParameters.ClientId,
-                uiEvent))
+            var uiEvent = new UiEvent(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId);
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(uiEvent))
             {
                 _authorizationResult = await _webUi.AcquireAuthorizationAsync(
                                            authorizationUri,
@@ -207,7 +203,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (requestParameters.ContainsKey(kvp.Key))
                 {
                     throw new MsalClientException(
-                        MsalClientException.DuplicateQueryParameterError,
+                        MsalError.DuplicateQueryParameterError,
                         string.Format(
                             CultureInfo.InvariantCulture,
                             MsalErrorMessage.DuplicateQueryParameterTemplate,
@@ -263,7 +259,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     StringComparison.OrdinalIgnoreCase))
             {
                 throw new MsalClientException(
-                    MsalClientException.StateMismatchError,
+                    MsalError.StateMismatchError,
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "Returned state({0}) from authorize endpoint is not the same as the one sent({1})",
@@ -274,7 +270,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (_authorizationResult.Error == OAuth2Error.LoginRequired)
             {
                 throw new MsalUiRequiredException(
-                    MsalUiRequiredException.NoPromptFailedError,
+                    MsalError.NoPromptFailedError,
                     MsalErrorMessage.NoPromptFailedErrorMessage);
             }
 

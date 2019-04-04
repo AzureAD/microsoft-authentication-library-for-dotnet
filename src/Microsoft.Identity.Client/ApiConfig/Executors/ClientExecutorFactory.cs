@@ -5,16 +5,22 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
     internal static class ClientExecutorFactory
     {
+        private static bool IsMatsEnabled(ClientApplicationBase clientApplicationBase)
+        {
+            return clientApplicationBase.ServiceBundle.Mats != null;
+        }
+
         public static IPublicClientApplicationExecutor CreatePublicClientExecutor(
             PublicClientApplication publicClientApplication)
         {
-            var executor = new PublicClientExecutor(publicClientApplication.ServiceBundle, publicClientApplication);
+            IPublicClientApplicationExecutor executor = new PublicClientExecutor(
+                publicClientApplication.ServiceBundle,
+                publicClientApplication);
 
-            // TODO: wrap in proxy object to handle mats actions
-            //if (publicClientApplication.AppConfig.IsMatsEnabled)
-            //{
-            //    executor = new MatsPublicClientExecutor(executor, publicClientApplication.Mats);
-            //}
+            if (IsMatsEnabled(publicClientApplication))
+            {
+                executor = new MatsPublicClientExecutor(executor, publicClientApplication.ServiceBundle.Mats);
+            }
 
             return executor;
         }
@@ -23,13 +29,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         public static IConfidentialClientApplicationExecutor CreateConfidentialClientExecutor(
             ConfidentialClientApplication confidentialClientApplication)
         {
-            var executor = new ConfidentialClientExecutor(confidentialClientApplication.ServiceBundle, confidentialClientApplication);
+            IConfidentialClientApplicationExecutor executor = new ConfidentialClientExecutor(
+                confidentialClientApplication.ServiceBundle,
+                confidentialClientApplication);
 
-            // TODO: wrap in proxy object to handle mats actions
-            //if (publicClientApplication.AppConfig.IsMatsEnabled)
-            //{
-            //    executor = new MatsPublicClientExecutor(executor, publicClientApplication.Mats);
-            //}
+            if (IsMatsEnabled(confidentialClientApplication))
+            {
+                executor = new MatsConfidentialClientExecutor(executor, confidentialClientApplication.ServiceBundle.Mats);
+            }
 
             return executor;
         }
@@ -38,13 +45,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         public static IClientApplicationBaseExecutor CreateClientApplicationBaseExecutor(
             ClientApplicationBase clientApplicationBase)
         {
-            var executor = new ClientApplicationBaseExecutor(clientApplicationBase.ServiceBundle, clientApplicationBase);
+            IClientApplicationBaseExecutor executor = new ClientApplicationBaseExecutor(
+                clientApplicationBase.ServiceBundle,
+                clientApplicationBase);
 
-            // TODO: wrap in proxy object to handle mats actions
-            //if (publicClientApplication.AppConfig.IsMatsEnabled)
-            //{
-            //    executor = new MatsPublicClientExecutor(executor, publicClientApplication.Mats);
-            //}
+            if (IsMatsEnabled(clientApplicationBase))
+            {
+                executor = new MatsClientApplicationBaseExecutor(executor, clientApplicationBase.ServiceBundle.Mats);
+            }
 
             return executor;
         }

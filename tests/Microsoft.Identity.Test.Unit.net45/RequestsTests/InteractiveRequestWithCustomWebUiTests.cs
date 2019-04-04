@@ -33,7 +33,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
@@ -197,7 +196,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     var ex = AssertException.TaskThrows<MsalClientException>(
                       () => request.ExecuteAsync(CancellationToken.None));
-                    Assert.AreEqual(MsalClientException.StateMismatchError, ex.ErrorCode);
+                    Assert.AreEqual(MsalError.StateMismatchError, ex.ErrorCode);
                 });
         }
     }

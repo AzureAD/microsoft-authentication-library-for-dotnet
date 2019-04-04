@@ -31,7 +31,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Instance
@@ -59,7 +58,7 @@ namespace Microsoft.Identity.Client.Instance
         {
             if (authorityInfo.AuthorityType == AuthorityType.Adfs && string.IsNullOrEmpty(userPrincipalName))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.UpnRequired,
                     MsalErrorMessage.UpnRequiredForAuthroityValidation);
             }
@@ -92,21 +91,21 @@ namespace Microsoft.Identity.Client.Instance
 
             if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.TenantDiscoveryFailedError,
                     "Authorize endpoint was not found in the openid configuration");
             }
 
             if (string.IsNullOrEmpty(edr.TokenEndpoint))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.TenantDiscoveryFailedError,
                     "Token endpoint was not found in the openid configuration");
             }
 
             if (string.IsNullOrEmpty(edr.Issuer))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.TenantDiscoveryFailedError,
                     "Issuer was not found in the openid configuration");
             }

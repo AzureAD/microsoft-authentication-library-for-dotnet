@@ -32,8 +32,8 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Mats.Internal.Events;
+using System.Linq;
 using System;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -52,13 +52,60 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _silentParameters = silentParameters;
         }
 
+        private IAccount GetSingleAccountForLoginHint(string loginHint)
+        {
+            var accounts = CacheManager.TokenCacheInternal.GetAccounts(ServiceBundle.Config.AuthorityInfo.CanonicalAuthority)
+                .Where(
+                    a => !string.IsNullOrWhiteSpace(a.Username) &&
+                    a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (!accounts.Any())
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.NoAccountForLoginHint,
+                    MsalErrorMessage.NoAccountForLoginHint);
+            }
+
+            if (accounts.Count() > 1)
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.MultipleAccountsForLoginHint,
+                    MsalErrorMessage.MultipleAccountsForLoginHint);
+            }
+
+            return accounts.First();
+        }
+
+        private IAccount GetAccountFromParamsOrLoginHint(AcquireTokenSilentParameters silentParameters)
+        {
+            if (silentParameters.Account != null)
+            {
+                return silentParameters.Account;
+            }
+
+            return GetSingleAccountForLoginHint(silentParameters.LoginHint);
+        }
+
+        internal override void PreRun()
+        {
+            IAccount account = GetAccountFromParamsOrLoginHint(_silentParameters);
+            AuthenticationRequestParameters.Account = account;
+
+            AuthenticationRequestParameters.Authority = AuthenticationRequestParameters.AuthorityOverride == null
+                ? ClientApplicationBase.GetAuthority(ServiceBundle, account)
+                : Instance.Authority.CreateAuthorityWithOverride(
+                    ServiceBundle,
+                    AuthenticationRequestParameters.AuthorityOverride);
+        }
+
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             if (!CacheManager.HasCache)
             {
                 throw new MsalUiRequiredException(
-                    MsalUiRequiredException.TokenCacheNullError,
-                    "Token cache is set to null. Silent requests cannot be executed.");
+                    MsalError.TokenCacheNullError,
+                    MsalErrorMessage.NullTokenCacheForSilentError);
             }
 
             // Look for access token
@@ -163,8 +210,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
 
                 throw new MsalUiRequiredException(
-                    MsalUiRequiredException.NoTokensFoundError,
-                    "No Refresh Token found in the cache");
+                    MsalError.NoTokensFoundError,
+                    MsalErrorMessage.NoTokensFoundError);
             }
 
             return msalRefreshTokenItem;

@@ -33,7 +33,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
 
@@ -59,11 +58,10 @@ namespace Microsoft.Identity.Client.WsTrust
                         MsalErrorMessage.HttpRequestUnsuccessful,
                         (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
-                throw MsalExceptionFactory.GetServiceException(
-                    MsalError.AccessingWsMetadataExchangeFailed,
-                    message,
-                    httpResponse,
-                    innerException: null);
+                throw new MsalServiceException(MsalError.AccessingWsMetadataExchangeFailed, message)
+                {
+                    HttpResponse = httpResponse
+                };
             }
 
             var mexDoc = new MexDocument(httpResponse.Body);
@@ -111,11 +109,10 @@ namespace Microsoft.Identity.Client.WsTrust
                         wsTrustEndpoint.Uri,
                         errorMessage);
 
-                throw MsalExceptionFactory.GetServiceException(
-                    MsalError.FederatedServiceReturnedError,
-                    message,
-                    resp,
-                    innerException: null);
+                throw new MsalServiceException(MsalError.FederatedServiceReturnedError, message)
+                {
+                    HttpResponse = resp
+                };
             }
 
             try
@@ -124,7 +121,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (System.Xml.XmlException ex)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.ParsingWsTrustResponseFailed, MsalError.ParsingWsTrustResponseFailed, ex);
             }
         }

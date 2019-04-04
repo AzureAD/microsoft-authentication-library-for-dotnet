@@ -28,8 +28,9 @@
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Mats.Internal.Constants;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -195,14 +196,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalClientException.StateMismatchError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.StateMismatchError, exc.ErrorCode);
                 }
 
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.ApiIdKey] == "170" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "170" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "state_mismatch"));
             }
         }
@@ -246,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalClientException.StateMismatchError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.StateMismatchError, exc.ErrorCode);
                 }
             }
         }
@@ -290,7 +291,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalClientException.JsonParseError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.JsonParseError, exc.ErrorCode);
                     Assert.AreEqual("client info is null", exc.Message);
                 }
             }
@@ -491,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.ApiIdKey] == "176" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "176" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "user_mismatch"));
 
                 var users = app.GetAccountsAsync().Result;
@@ -759,7 +760,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     new MockWebUI()
                     {
                         ExceptionToThrow = new MsalClientException(
-                            MsalClientException.AuthenticationUiFailedError,
+                            MsalError.AuthenticationUiFailedError,
                             "Failed to invoke webview",
                             new InvalidOperationException("some-inner-Exception"))
                     });
@@ -776,7 +777,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalClientException.AuthenticationUiFailedError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.AuthenticationUiFailedError, exc.ErrorCode);
                     Assert.AreEqual("some-inner-Exception", exc.InnerException.Message);
                 }
             }
@@ -929,7 +930,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
-            var authoriy = app.GetAuthority(new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
+            var authoriy = ClientApplicationBase.GetAuthority(app.ServiceBundle, new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.AuthorityInfo.CanonicalAuthority);
         }
 
@@ -939,7 +940,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
-            var authority = app.GetAuthority(
+            var authority = ClientApplicationBase.GetAuthority(
+                app.ServiceBundle,
                 new Account(
                     "objectId." + MsalTestConstants.Utid,
                     MsalTestConstants.Name,
@@ -963,7 +965,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             catch (MsalUiRequiredException exc)
             {
                 Assert.IsNotNull(exc);
-                Assert.AreEqual("user_null", MsalUiRequiredException.UserNullError);
+                Assert.AreEqual("user_null", MsalError.UserNullError);
             }
         }
 

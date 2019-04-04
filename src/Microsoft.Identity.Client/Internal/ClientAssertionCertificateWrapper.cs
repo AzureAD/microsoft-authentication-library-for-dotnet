@@ -28,7 +28,6 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 

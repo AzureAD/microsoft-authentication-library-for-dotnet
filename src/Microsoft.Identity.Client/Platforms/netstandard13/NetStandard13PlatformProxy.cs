@@ -29,6 +29,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
@@ -36,7 +37,7 @@ using Microsoft.Identity.Client.UI;
 namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
     /// <summary>
-    /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
+    /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
     internal class Netstandard13PlatformProxy : AbstractPlatformProxy
     {
@@ -44,6 +45,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             : base(logger)
         {
         }
+
+        public override bool IsSystemWebViewAvailable => false;
 
         /// <summary>
         /// Get the user logged in
@@ -107,7 +110,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
         protected override string InternalGetCallingApplicationName()
@@ -116,7 +119,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
         protected override string InternalGetCallingApplicationVersion()
@@ -125,7 +128,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
 
         /// <summary>
-        /// Considered PII. Please ensure that it is hashed. 
+        /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
         protected override string InternalGetDeviceId()
@@ -147,6 +150,29 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetStandard13CryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
+        public override string GetDeviceNetworkState()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetDevicePlatformTelemetryId()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetMatsOsPlatform()
+        {
+            // TODO(mats): need to detect operating system and switch on it to determine proper enum
+            return MatsConverter.AsString(OsPlatform.Win32);
+        }
+
+        public override int GetMatsOsPlatformCode()
+        {
+            // TODO(mats): need to detect operating system and switch on it to determine proper enum
+            return MatsConverter.AsInt(OsPlatform.Win32);
+        }
         protected override IFeatureFlags CreateFeatureFlags() => new NetStandardFeatureFlags();
     }
 }

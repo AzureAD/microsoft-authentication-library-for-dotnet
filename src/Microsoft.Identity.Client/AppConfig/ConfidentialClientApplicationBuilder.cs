@@ -28,7 +28,6 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client

@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
@@ -55,7 +56,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             if (Marshal.GetExceptionCode() == 0)
 #pragma warning restore CS0618 // Type or member is obsolete
             {
-                Assert.AreEqual(0, _httpMessageHandlerQueue.Count, "All mocks should have been consumed");
+                string remainingMocks = string.Join(" ",
+                    _httpMessageHandlerQueue.Select(m => (m as MockHttpMessageHandler)?.ExpectedUrl));
+                Assert.AreEqual(0, _httpMessageHandlerQueue.Count,
+                    "All mocks should have been consumed. Remaining mocks are for: " + remainingMocks);
             }
         }
 
