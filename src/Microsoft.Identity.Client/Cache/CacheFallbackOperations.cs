@@ -27,14 +27,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -135,7 +131,7 @@ namespace Microsoft.Identity.Client.Cache
                 // TODO - authority check needs to be updated for alias check
                 var listToProcess = dictionary.Where(p =>
                         p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
-                        Authority.GetEnviroment(p.Key.Authority).Equals(enviroment, StringComparison.OrdinalIgnoreCase));                        
+                        Authority.GetEnviroment(p.Key.Authority).Equals(enviroment, StringComparison.OrdinalIgnoreCase));
 
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
                 {

@@ -52,12 +52,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _silentParameters = silentParameters;
         }
 
-        private IAccount GetSingleAccountForLoginHint(string loginHint)
+        private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint)
         {
-            var accounts = CacheManager.TokenCacheInternal.GetAccounts(ServiceBundle.Config.AuthorityInfo.CanonicalAuthority)
-                .Where(
-                    a => !string.IsNullOrWhiteSpace(a.Username) &&
-                    a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
+            var accounts = await CacheManager.TokenCacheInternal.GetAccountsAsync(
+                ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
+                AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+
+            accounts = accounts
+                .Where(a => !string.IsNullOrWhiteSpace(a.Username) &&
+                       a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             if (!accounts.Any())
@@ -77,19 +80,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return accounts.First();
         }
 
-        private IAccount GetAccountFromParamsOrLoginHint(AcquireTokenSilentParameters silentParameters)
+        private async Task<IAccount>  GetAccountFromParamsOrLoginHintAsync(AcquireTokenSilentParameters silentParameters)
         {
             if (silentParameters.Account != null)
             {
                 return silentParameters.Account;
             }
 
-            return GetSingleAccountForLoginHint(silentParameters.LoginHint);
+            return await GetSingleAccountForLoginHintAsync(silentParameters.LoginHint).ConfigureAwait(false);
         }
 
-        internal override void PreRun()
+        internal async override Task PreRunAsync()
         {
-            IAccount account = GetAccountFromParamsOrLoginHint(_silentParameters);
+            IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
 
             AuthenticationRequestParameters.Authority = AuthenticationRequestParameters.AuthorityOverride == null

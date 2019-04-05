@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                accounts = await UserTokenCacheInternal.GetAccountsAsync(Authority).ConfigureAwait(false);
+                accounts = await UserTokenCacheInternal.GetAccountsAsync(Authority, requestContext).ConfigureAwait(false);
             }
 
             return accounts;

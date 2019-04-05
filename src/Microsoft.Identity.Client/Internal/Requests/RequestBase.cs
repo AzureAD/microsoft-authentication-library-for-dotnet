@@ -126,8 +126,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
-        internal virtual void PreRun()
+        internal virtual Task PreRunAsync()
         {
+            return Task.FromResult(0);
         }
 
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken)
@@ -138,7 +139,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 try
                 {
-                    PreRun();
+                    await PreRunAsync().ConfigureAwait(false);
                     AuthenticationRequestParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
                     LogRequestStarted(AuthenticationRequestParameters);
 

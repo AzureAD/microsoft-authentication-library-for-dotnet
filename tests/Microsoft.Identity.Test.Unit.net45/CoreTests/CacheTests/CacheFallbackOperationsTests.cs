@@ -28,10 +28,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             adalUsers = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 _logger,
                 _legacyCachePersistence,
-                MsalTestConstants.ClientId ,
+                MsalTestConstants.ClientId,
                 MsalTestConstants.ProductionPrefNetworkEnvironment);
 
             AssertByUsername(

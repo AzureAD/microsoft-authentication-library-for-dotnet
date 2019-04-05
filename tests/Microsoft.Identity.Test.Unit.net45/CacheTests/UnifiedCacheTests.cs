@@ -86,7 +86,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
                 var requestContext = RequestContext.CreateForTest(app.ServiceBundle);
-                var accounts = app.UserTokenCacheInternal.GetAccountsAsync(MsalTestConstants.AuthorityCommonTenant).Result;
+                var accounts = app.UserTokenCacheInternal.GetAccountsAsync(
+                    MsalTestConstants.AuthorityCommonTenant, requestContext).Result;
                 foreach (IAccount account in accounts)
                 {
                     app.UserTokenCacheInternal.RemoveMsalAccount(account, requestContext);
