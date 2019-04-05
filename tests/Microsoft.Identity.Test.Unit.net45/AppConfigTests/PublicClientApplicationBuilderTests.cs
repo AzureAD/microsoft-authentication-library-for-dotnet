@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                     .WithClientVersion(ClientVersion)
                                                     .Build();
             Assert.AreEqual(ClientName, pca.AppConfig.ClientName);
-            Assert.AreEqual(ClientName, pca.AppConfig.ClientVersion);
+            Assert.AreEqual(ClientVersion, pca.AppConfig.ClientVersion);
         }
 
         [TestMethod]
