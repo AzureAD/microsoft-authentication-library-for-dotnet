@@ -75,11 +75,7 @@ namespace Microsoft.Identity.Client
 
         private readonly ITokenCacheAccessor _accessor;
 
-        // This variable isn't referenced on all platforms.
-#pragma warning disable 0169
-        // Unkown token cache data support for forwards compatibility.
-        IDictionary<string, JToken> _unknownNodes;
-#pragma warning restore 0169
+       
 
         internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
 
@@ -822,7 +818,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// Get accounts should not make a network call, if possible.
         /// </remarks>
-        async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(string authority)
+        async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(string authority, RequestContext requestContext)
         {
             var environment = Authority.GetEnviroment(authority);
 
@@ -834,7 +830,7 @@ namespace Microsoft.Identity.Client
 
             // Multi-cloud support - must filter by env.
             // Use all env aliases to filter, in case PreferredCacheEnv changes in the future
-            var aliases = await GetEnvAliasesTryAvoidNetworkCallAsync(authority, accountCacheItems).ConfigureAwait(false);
+            var aliases = await GetEnvAliasesTryAvoidNetworkCallAsync(authority, accountCacheItems, requestContext).ConfigureAwait(false);
 
             rtCacheItems = rtCacheItems.Where(rt => aliases.ContainsOrdinalIgnoreCase(rt.Environment));
             accountCacheItems = accountCacheItems.Where(acc => aliases.ContainsOrdinalIgnoreCase(acc.Environment));
@@ -903,7 +899,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         private async Task<IEnumerable<string>> GetEnvAliasesTryAvoidNetworkCallAsync(
             string authority,
-            IEnumerable<MsalAccountCacheItem> accountCacheItems)
+            IEnumerable<MsalAccountCacheItem> accountCacheItems,
+            RequestContext requestContext)
         {
             var knownAadAliases = new List<HashSet<string>>()
             {
@@ -926,11 +923,7 @@ namespace Microsoft.Identity.Client
             {
                 return await Task.FromResult(aliases).ConfigureAwait(false);
             }
-
-            var requestContext = new RequestContext(
-                ServiceBundle.Config.ClientId,
-                MsalLogger.Create(Guid.NewGuid(), ServiceBundle.Config));
-
+          
             var instanceDiscoveryResult = await GetCachedOrDiscoverAuthorityMetaDataAsync(authority, requestContext)
                 .ConfigureAwait(false);
 
@@ -1165,6 +1158,9 @@ namespace Microsoft.Identity.Client
         }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+
+        // Unkown token cache data support for forwards compatibility.
+        private IDictionary<string, JToken> _unknownNodes;
 
         /// <summary>
         /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
