@@ -91,13 +91,6 @@ namespace Microsoft.Identity.Client
         TelemetryCallback TelemetryCallback { get; }
 
         /// <summary>
-        /// Name of the component using MSAL.NET. See <see cref="ApplicationOptions.Component"/>
-        /// and <see cref="AbstractApplicationBuilder{T}.WithComponent(string)"/>
-        /// </summary>
-        [Obsolete("Should use ClientName and ClientVersion properties instead of Component", true)]
-        string Component { get; }
-
-        /// <summary>
         /// Extra query parameters that will be applied to every acquire token operation.
         /// See <see cref="AbstractApplicationBuilder{T}.WithExtraQueryParameters(IDictionary{string, string})"/>
         /// </summary>

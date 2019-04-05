@@ -246,20 +246,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the identifier of the software component (libraries/SDK) consuming MSAL.NET.
-        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage
-        /// by component libraries. You can, for instance set it to the name of your application.
-        /// This is used in telemetry.
-        /// </summary>
-        /// <param name="component">identifier of the software component (libraries/SDK) consuming MSAL.NET</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        [Obsolete("Should use ClientName and ClientVersion properties instead of Component", true)]
-        public T WithComponent(string component)
-        {
-            throw new NotImplementedException("Should use ClientName and ClientVersion properties instead of Component");
-        }
-
-        /// <summary>
         /// Sets Extra Query Parameters for the query string in the HTTP authentication request
         /// </summary>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority

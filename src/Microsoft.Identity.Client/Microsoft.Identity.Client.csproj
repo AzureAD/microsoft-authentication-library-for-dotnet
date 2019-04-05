@@ -19,11 +19,6 @@
     <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Remove="Exceptions\**" />
-    <None Remove="Exceptions\**" />
-    <_SettingsFiles Remove="Exceptions\**" />
-  </ItemGroup>
-  <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
   </ItemGroup>
 </Project>
