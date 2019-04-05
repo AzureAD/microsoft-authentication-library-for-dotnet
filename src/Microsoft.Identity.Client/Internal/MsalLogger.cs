@@ -67,11 +67,11 @@ namespace Microsoft.Identity.Client.Internal
                 // space is intentional for formatting of the message
                 if (string.IsNullOrEmpty(clientVersion))
                 {
-                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0}: {1})", clientName, clientVersion);
+                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0})", clientName);
                 }
                 else
                 {
-                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0})", clientName);
+                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0}: {1})", clientName, clientVersion);
                 }
             }
         }
