@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -93,6 +93,8 @@ namespace Microsoft.Identity.Client.OAuth2
     {
         public const string CorrelationId = "client-request-id";
         public const string RequestCorrelationIdInResponse = "return-client-request-id";
+        public const string AppName = "x-app-name";
+        public const string AppVer = "x-app-ver";
     }
 
     /// <summary>

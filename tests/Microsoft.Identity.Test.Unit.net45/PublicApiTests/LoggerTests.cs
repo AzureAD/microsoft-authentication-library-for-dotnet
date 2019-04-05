@@ -49,17 +49,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private MsalLogger CreateLogger(LogLevel logLevel = LogLevel.Verbose, bool enablePiiLogging = false)
         {
-            return new MsalLogger(Guid.Empty, null, logLevel, enablePiiLogging, true, _callback);
+            return new MsalLogger(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
         }
 
         [TestMethod()]
         [TestCategory("LoggerTests")]
         public void ConstructorComponentTest()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Verbose, false, true, null);
-            Assert.AreEqual(string.Empty, logger.Component);
-            logger = new MsalLogger(Guid.Empty, "comp1", LogLevel.Verbose, false, true, null);
-            Assert.AreEqual(" (comp1)", logger.Component);
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, null, LogLevel.Verbose, false, true, null);
+            Assert.AreEqual(string.Empty, logger.ClientName);
+            Assert.AreEqual(string.Empty, logger.ClientVersion);
+            Assert.AreEqual(string.Empty, logger.ClientInformation);
+            logger = new MsalLogger(Guid.Empty, "comp1", null, LogLevel.Verbose, false, true, null);
+            Assert.AreEqual(" (comp1)", logger.ClientInformation);
+            logger = new MsalLogger(Guid.Empty, "comp1", "version1", LogLevel.Verbose, false, true, null);
+            Assert.AreEqual(" (comp1: version1)", logger.ClientInformation);
         }
 
         [TestMethod()]

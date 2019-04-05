@@ -35,13 +35,13 @@ namespace DesktopTestApp
 {
     class PublicClientHandler
     {
-        private readonly string _component = "DesktopTestApp";
+        private readonly string _clientName = "DesktopTestApp";
 
         public PublicClientHandler(string clientId, LogCallback logCallback)
         {
             ApplicationId = clientId;
             PublicClientApplication = PublicClientApplicationBuilder.Create(ApplicationId)
-                .WithComponent(_component)
+                .WithClientName(_clientName)
                 .WithLogging(logCallback, LogLevel.Verbose, true)
 #if ARIA_TELEMETRY_ENABLED
                 .WithTelemetry((new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
@@ -163,7 +163,7 @@ namespace DesktopTestApp
         {
             var builder = PublicClientApplicationBuilder
                 .Create(ApplicationId)
-                .WithComponent(_component);
+                .WithClientName(_clientName);
 
             if (!string.IsNullOrWhiteSpace(interactiveAuthority))
             {

@@ -33,16 +33,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        string AppName { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        string AppVer { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         string SessionId { get; }
 
         /// <summary>

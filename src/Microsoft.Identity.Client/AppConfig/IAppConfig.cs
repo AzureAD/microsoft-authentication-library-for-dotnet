@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 
@@ -90,12 +91,6 @@ namespace Microsoft.Identity.Client
         TelemetryCallback TelemetryCallback { get; }
 
         /// <summary>
-        /// Name of the component using MSAL.NET. See <see cref="ApplicationOptions.Component"/>
-        /// and <see cref="AbstractApplicationBuilder{T}.WithComponent(string)"/>
-        /// </summary>
-        string Component { get; }
-
-        /// <summary>
         /// Extra query parameters that will be applied to every acquire token operation.
         /// See <see cref="AbstractApplicationBuilder{T}.WithExtraQueryParameters(IDictionary{string, string})"/>
         /// </summary>
@@ -104,6 +99,16 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// </summary>
         bool IsBrokerEnabled { get; }
+
+        /// <summary>
+        /// The name of the calling application for telemetry purposes. 
+        /// </summary>
+        string ClientName { get; }
+
+        /// <summary>
+        /// The version of the calling application for telemetry purposes. 
+        /// </summary>
+        string ClientVersion { get; }
 
         ///// <summary>
         ///// </summary>

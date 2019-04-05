@@ -18,16 +18,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        public string AppName { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string AppVer { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public string SessionId { get; set; }
 
         /// <summary>

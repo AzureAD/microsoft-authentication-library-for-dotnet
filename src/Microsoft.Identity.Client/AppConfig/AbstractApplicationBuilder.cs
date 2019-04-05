@@ -197,6 +197,28 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Sets the name of the calling application for telemetry purposes.
+        /// </summary>
+        /// <param name="clientName">The name of the application for telemetry purposes.</param>
+        /// <returns></returns>
+        public T WithClientName(string clientName)
+        {
+            Config.ClientName = GetValueIfNotEmpty(Config.ClientName, clientName);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Sets the version of the calling application for telemetry purposes.
+        /// </summary>
+        /// <param name="clientVersion">The version of the calling application for telemetry purposes.</param>
+        /// <returns></returns>
+        public T WithClientVersion(string clientVersion)
+        {
+            Config.ClientVersion = GetValueIfNotEmpty(Config.ClientVersion, clientVersion);
+            return (T)this;
+        }
+
+        /// <summary>
         /// Sets application options, which can, for instance have been read from configuration files.
         /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
@@ -207,7 +229,8 @@ namespace Microsoft.Identity.Client
             WithClientId(applicationOptions.ClientId);
             WithRedirectUri(applicationOptions.RedirectUri);
             WithTenantId(applicationOptions.TenantId);
-            WithComponent(applicationOptions.Component);
+            WithClientName(applicationOptions.ClientName);
+            WithClientVersion(applicationOptions.ClientVersion);
 
             WithLogging(
                 null,
@@ -219,20 +242,6 @@ namespace Microsoft.Identity.Client
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
             Config.AzureCloudInstance = applicationOptions.AzureCloudInstance;
 
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Sets the identifier of the software component (libraries/SDK) consuming MSAL.NET.
-        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage
-        /// by component libraries. You can, for instance set it to the name of your application.
-        /// This is used in telemetry.
-        /// </summary>
-        /// <param name="component">identifier of the software component (libraries/SDK) consuming MSAL.NET</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithComponent(string component)
-        {
-            Config.Component = GetValueIfNotEmpty(Config.Component, component);
             return (T)this;
         }
 

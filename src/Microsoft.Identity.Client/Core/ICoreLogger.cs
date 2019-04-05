@@ -32,6 +32,8 @@ namespace Microsoft.Identity.Client.Core
     internal interface ICoreLogger
     {
         Guid CorrelationId { get; }
+        string ClientName { get; }
+        string ClientVersion { get; }
         bool PiiLoggingEnabled { get; }
         void Error(string messageScrubbed);
         void ErrorPii(string messageWithPii, string messageScrubbed);

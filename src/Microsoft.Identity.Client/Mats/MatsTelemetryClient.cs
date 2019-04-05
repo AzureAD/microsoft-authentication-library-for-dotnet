@@ -55,14 +55,14 @@ namespace Microsoft.Identity.Client.Mats
 
             var contextStore = ContextStore.CreateContextStore(
                 matsConfig.AudienceType,
-                matsConfig.AppName,
-                matsConfig.AppVer,
+                applicationConfiguration.ClientName,
+                applicationConfiguration.ClientVersion,
                 dpti,
                 deviceNetworkState,
                 matsConfig.SessionId,
                 osPlatformCode);
 
-            IUploader uploader = new TelemetryUploader(matsConfig.DispatchAction, platformProxy, matsConfig.AppName);
+            IUploader uploader = new TelemetryUploader(matsConfig.DispatchAction, platformProxy, applicationConfiguration.ClientName);
 
             // it's this way in mats c++
             bool isScenarioUploadDisabled = true;

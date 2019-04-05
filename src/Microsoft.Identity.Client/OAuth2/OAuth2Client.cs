@@ -82,12 +82,21 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext)
         {
-            bool addCorrelationId =
-                requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
+            bool addCorrelationId = requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
             if (addCorrelationId)
             {
                 _headers.Add(OAuth2Header.CorrelationId, requestContext.Logger.CorrelationId.ToString());
                 _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
+            }
+
+            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName))
+            {
+                _headers.Add(OAuth2Header.AppName, requestContext.Logger.ClientName);
+            }
+
+            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
+            {
+                _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
             }
 
             HttpResponse response = null;
