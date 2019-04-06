@@ -25,25 +25,23 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Collections.Generic;
+using System;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal class AdalUsersForMsalResult
+    internal class AdalUserForMsalEntry
     {
-        public AdalUsersForMsalResult()
+        public AdalUserForMsalEntry(string clientId, string authority, string clientInfo, AdalUserInfo userInfo)
         {
-            ClientInfoUsers = new Dictionary<string, AdalUserInfo>();
-            UsersWithoutClientInfo = new List<AdalUserInfo>();
+            ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
+            Authority = authority;
+            ClientInfo = clientInfo;
+            UserInfo = userInfo ?? throw new ArgumentNullException(nameof(userInfo));
         }
 
-        public AdalUsersForMsalResult(Dictionary<string, AdalUserInfo> clientInfoUsers, List<AdalUserInfo> usersWithoutClientInfo)
-        {
-            ClientInfoUsers = clientInfoUsers;
-            UsersWithoutClientInfo = usersWithoutClientInfo;
-        }
-
-        public Dictionary<string, AdalUserInfo> ClientInfoUsers { get; }
-        public List<AdalUserInfo> UsersWithoutClientInfo { get; }
+        public string ClientId { get; }
+        public string Authority { get; }
+        public string ClientInfo { get; } // optional, ADAL v3 doesn't have this
+        public AdalUserInfo UserInfo { get; }
     }
 }

@@ -66,15 +66,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
                 CacheFallbackOperations.GetAllAdalUsersForMsal(
                     _logger,
                     _legacyCachePersistence,
-                    MsalTestConstants.ClientId,
-                    MsalTestConstants.ProductionPrefNetworkEnvironment);
+                    MsalTestConstants.ClientId);
 
             AssertByUsername(
                 adalUsers,
+                new[] {
+                    MsalTestConstants.ProductionPrefNetworkEnvironment,
+                    MsalTestConstants.SovereignNetworkEnvironment },
                 new[]
                 {
                     "user1",
                     "user2",
+                    "sovereign_user5"
                 },
                 new[]
                 {
@@ -82,16 +85,26 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
                     "no_client_info_user4"
                 });
 
+            AssertByUsername(
+              adalUsers,
+              new[] {
+                    MsalTestConstants.SovereignNetworkEnvironment },
+              new[]
+              {
+                    "sovereign_user5"
+              },
+              Enumerable.Empty<string>());
+
             // Act - query users for different clientId and env
             adalUsers = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 _logger,
                 _legacyCachePersistence,
-                "other_client_id",
-                MsalTestConstants.SovereignNetworkEnvironment);
+                "other_client_id");
 
             // Assert
             AssertByUsername(
                 adalUsers,
+                null,
                 new[]
                 {
                     "user6"
@@ -134,11 +147,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
                 CacheFallbackOperations.GetAllAdalUsersForMsal(
                     _logger,
                     _legacyCachePersistence,
-                    MsalTestConstants.ClientId,
-                    MsalTestConstants.ProductionPrefNetworkEnvironment);
+                    MsalTestConstants.ClientId);
 
             AssertByUsername(
                 adalUsers,
+                new[] { MsalTestConstants.ProductionPrefNetworkEnvironment},
                 new[]
                 {
                     "user2",
@@ -178,11 +191,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
                 CacheFallbackOperations.GetAllAdalUsersForMsal(
                     _logger,
                     _legacyCachePersistence,
-                    MsalTestConstants.ClientId,
-                    MsalTestConstants.ProductionPrefNetworkEnvironment);
+                    MsalTestConstants.ClientId);
 
             AssertByUsername(
                 adalUsers,
+                new[] { MsalTestConstants.ProductionPrefNetworkEnvironment },
                 new[]
                 {
                     "user2",
@@ -208,11 +221,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             adalUsers = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 _logger,
                 _legacyCachePersistence,
-                MsalTestConstants.ClientId,
-                MsalTestConstants.ProductionPrefNetworkEnvironment);
+                MsalTestConstants.ClientId);
 
             AssertByUsername(
                 adalUsers,
+                new[] { MsalTestConstants.ProductionPrefNetworkEnvironment },
                 new[]
                 {
                     "user2",
@@ -473,13 +486,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         }
 
         private static void AssertByUsername(
-            AdalUsersForMsalResult adalUsers,
+            AdalUsersForMsal adalUsers,
+            IEnumerable<string> enviroments,
             IEnumerable<string> expectedUsersWithClientInfo,
             IEnumerable<string> expectedUsersWithoutClientInfo)
         {
             // Assert
-            var usersWithClientInfo = adalUsers.ClientInfoUsers.Values;
-            List<AdalUserInfo> usersWithoutClientInfo = adalUsers.UsersWithoutClientInfo;
+            var usersWithClientInfo = adalUsers.GetUsersWithClientInfo(enviroments).Select(x => x.Value);
+            IEnumerable<AdalUserInfo> usersWithoutClientInfo = adalUsers.GetUsersWithoutClientInfo(enviroments);
 
             AssertUsersByDisplayName(
                 expectedUsersWithClientInfo,

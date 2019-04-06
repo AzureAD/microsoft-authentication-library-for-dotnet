@@ -823,14 +823,22 @@ namespace Microsoft.Identity.Client
             var environment = Authority.GetEnviroment(authority);
 
             FetchAllAccountItemsFromCache(
-                environment,
                 out IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems,
                 out IEnumerable<MsalAccountCacheItem> accountCacheItems,
-                out AdalUsersForMsalResult adalUsersResult);
+                out AdalUsersForMsal adalUsersResult);
 
             // Multi-cloud support - must filter by env.
             // Use all env aliases to filter, in case PreferredCacheEnv changes in the future
-            var aliases = await GetEnvAliasesTryAvoidNetworkCallAsync(authority, accountCacheItems, requestContext).ConfigureAwait(false);
+            ISet<string> existingEnvs = new HashSet<string>(
+                accountCacheItems.Select(aci => aci.Environment),
+                StringComparer.OrdinalIgnoreCase);
+
+            var aliases = await GetEnvAliasesTryAvoidNetworkCallAsync(
+                authority,
+                adalUsersResult.GetAdalUserEnviroments(),
+                existingEnvs,
+                requestContext)
+                .ConfigureAwait(false);
 
             rtCacheItems = rtCacheItems.Where(rt => aliases.ContainsOrdinalIgnoreCase(rt.Environment));
             accountCacheItems = accountCacheItems.Where(acc => aliases.ContainsOrdinalIgnoreCase(acc.Environment));
@@ -852,15 +860,19 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            List<IAccount> accounts = UpdateWithAdalAccounts(environment, adalUsersResult, clientInfoToAccountMap);
+            List<IAccount> accounts = UpdateWithAdalAccounts(
+                environment,
+                aliases,
+                adalUsersResult,
+                clientInfoToAccountMap);
+
             return accounts;
         }
 
         private void FetchAllAccountItemsFromCache(
-            string environment,
             out IEnumerable<MsalRefreshTokenCacheItem> tokenCacheItems,
             out IEnumerable<MsalAccountCacheItem> accountCacheItems,
-            out AdalUsersForMsalResult adalUsersResult)
+            out AdalUsersForMsal adalUsersResult)
         {
             lock (LockObject)
             {
@@ -877,12 +889,10 @@ namespace Microsoft.Identity.Client
                     tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(false);
                     accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
 
-                    // Known Issue: will ignore env aliases, which we cannot get without an instance discovery
                     adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
                         _logger,
                         LegacyCachePersistence,
-                        ClientId,
-                        environment);
+                        ClientId);
                 }
                 finally
                 {
@@ -899,7 +909,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         private async Task<IEnumerable<string>> GetEnvAliasesTryAvoidNetworkCallAsync(
             string authority,
-            IEnumerable<MsalAccountCacheItem> accountCacheItems,
+            ISet<string> msalEnvs,
+            ISet<string> adalEnvs,
             RequestContext requestContext)
         {
             var knownAadAliases = new List<HashSet<string>>()
@@ -917,7 +928,8 @@ namespace Microsoft.Identity.Client
 
             bool canAvoidInstanceDiscovery =
                  aliases != null &&
-                 accountCacheItems.All(acc => aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+                 (msalEnvs?.All(env => aliases.ContainsOrdinalIgnoreCase(env)) ?? true) &&
+                 (adalEnvs?.All(env => aliases.ContainsOrdinalIgnoreCase(env)) ?? true);
 
             if (canAvoidInstanceDiscovery)
             {
@@ -930,16 +942,17 @@ namespace Microsoft.Identity.Client
             return instanceDiscoveryResult?.Aliases ?? new[] { envFromRequest };
         }
 
-        private static List<IAccount> UpdateWithAdalAccounts(string envFromRequest, AdalUsersForMsalResult adalUsersResult, IDictionary<string, Account> clientInfoToAccountMap)
+        private static List<IAccount> UpdateWithAdalAccounts(
+            string envFromRequest,
+            IEnumerable<string> envAliases,
+            AdalUsersForMsal adalUsers,
+            IDictionary<string, Account> clientInfoToAccountMap)
         {
             var accounts = new List<IAccount>();
 
-            Dictionary<string, AdalUserInfo> clientInfoToAdalUserMap = adalUsersResult.ClientInfoUsers;
-            List<AdalUserInfo> adalUsersWithoutClientInfo = adalUsersResult.UsersWithoutClientInfo;
-
-            foreach (KeyValuePair<string, AdalUserInfo> pair in clientInfoToAdalUserMap)
+            foreach (KeyValuePair<string, AdalUserInfo> pair in adalUsers.GetUsersWithClientInfo(envAliases))
             {
-                ClientInfo clientInfo = ClientInfo.CreateFromJson(pair.Key);
+                var clientInfo = ClientInfo.CreateFromJson(pair.Key);
                 string accountIdentifier = clientInfo.ToAccountIdentifier();
 
                 if (!clientInfoToAccountMap.ContainsKey(accountIdentifier))
@@ -952,7 +965,7 @@ namespace Microsoft.Identity.Client
             accounts.AddRange(clientInfoToAccountMap.Values);
             var uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
 
-            foreach (AdalUserInfo user in adalUsersWithoutClientInfo)
+            foreach (AdalUserInfo user in adalUsers.GetUsersWithoutClientInfo(envAliases))
             {
                 if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
                 {
@@ -963,7 +976,6 @@ namespace Microsoft.Identity.Client
 
             return accounts;
         }
-
 
 
         IEnumerable<MsalRefreshTokenCacheItem> ITokenCacheInternal.GetAllRefreshTokens(bool filterByClientId)
