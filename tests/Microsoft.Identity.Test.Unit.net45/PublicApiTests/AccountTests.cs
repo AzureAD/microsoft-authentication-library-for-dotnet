@@ -153,7 +153,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("login.microsoftonline.de", accountsDe.Single().Environment);
         }
 
-
         private PublicClientApplication InitPcaForCloud(AzureCloudInstance cloud, HttpManager httpManager, string tokenCacheFile)
         {
             PublicClientApplication pca = PublicClientApplicationBuilder

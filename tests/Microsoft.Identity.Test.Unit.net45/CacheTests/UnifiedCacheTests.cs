@@ -229,8 +229,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     CacheFallbackOperations.GetAllAdalUsersForMsal(                        
                         harness.ServiceBundle.DefaultLogger,
                         app.UserTokenCacheInternal.LegacyPersistence,
-                        MsalTestConstants.ClientId,
-                        Authority.GetEnviroment(ClientApplicationBase.DefaultAuthority));
+                        MsalTestConstants.ClientId);
 
                 CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, "user.read");
 
@@ -238,10 +237,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
                         harness.ServiceBundle.DefaultLogger,
                         app.UserTokenCacheInternal.LegacyPersistence,
-                        MsalTestConstants.ClientId,
-                        Authority.GetEnviroment(ClientApplicationBase.DefaultAuthority));
+                        MsalTestConstants.ClientId);
 
-                Assert.AreEqual(adalUsers.ClientInfoUsers.Keys.First(), adalUsers2.ClientInfoUsers.Keys.First());
+                Assert.AreEqual(
+                    adalUsers.GetUsersWithClientInfo(null).Single().Key,
+                    adalUsers2.GetUsersWithClientInfo(null).Single().Key);
 
                 app.UserTokenCacheInternal.Accessor.ClearAccessTokens();
                 app.UserTokenCacheInternal.Accessor.ClearRefreshTokens();

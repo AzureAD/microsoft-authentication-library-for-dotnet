@@ -27,10 +27,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -115,44 +117,38 @@ namespace Microsoft.Identity.Client.Cache
         /// Item1 is a map of ClientInfo -> AdalUserInfo for those users that have ClientInfo 
         /// Item2 is a list of AdalUserInfo for those users that do not have ClientInfo
         /// </summary>
-        public static AdalUsersForMsalResult GetAllAdalUsersForMsal(
+        public static AdalUsersForMsal GetAllAdalUsersForMsal(
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
-            string clientId,
-            string enviroment)
+            string clientId)
         {
-            var clientInfoToAdalUserMap = new Dictionary<string, AdalUserInfo>();
-            var adalUsersWithoutClientInfo = new List<AdalUserInfo>();
+            var userEntries = new List<AdalUserForMsalEntry>();
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                     AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
-                // filter by client id and environment first
-                // TODO - authority check needs to be updated for alias check
-                var listToProcess = dictionary.Where(p =>
-                        p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
-                        Authority.GetEnviroment(p.Key.Authority).Equals(enviroment, StringComparison.OrdinalIgnoreCase));
 
-                foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
-                {
-                    if (!string.IsNullOrEmpty(pair.Value.RawClientInfo))
-                    {
-                        clientInfoToAdalUserMap[pair.Value.RawClientInfo] = pair.Value.Result.UserInfo;
-                    }
-                    else
-                    {
-                        adalUsersWithoutClientInfo.Add(pair.Value.Result.UserInfo);
-                    }
-                }
+                // filter by client id 
+                dictionary.Where(p =>
+                        p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
+                        !string.IsNullOrEmpty(p.Key.Authority))
+                        .ToList()
+                        .ForEach(kvp =>
+                            {
+                                userEntries.Add(new AdalUserForMsalEntry(
+                                    authority: kvp.Key.Authority,
+                                    clientId: clientId,
+                                    clientInfo: kvp.Value.RawClientInfo, // optional, missing in ADAL v3
+                                    userInfo: kvp.Value.Result.UserInfo));
+                            });
             }
             catch (Exception ex)
             {
                 logger.WarningPiiWithPrefix(ex, "An error occurred while reading accounts in ADAL format from the cache for MSAL. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
-
-                return new AdalUsersForMsalResult();
             }
-            return new AdalUsersForMsalResult(clientInfoToAdalUserMap, adalUsersWithoutClientInfo);
+
+            return new AdalUsersForMsal(userEntries);
         }
 
         /// <summary>
