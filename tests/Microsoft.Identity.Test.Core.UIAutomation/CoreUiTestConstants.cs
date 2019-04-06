@@ -71,6 +71,8 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string UserMissingFromResponse = "Missing from the token response";
         public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
         public const string RedirectUriEntryId = "redirectUriEntry";
+        public const string PasswordInput = "password";
+        public const string AlternativePasswordInput = "Passwd";
 
         // ADFSv2 fields
         public const string AdfsV2WebUsernameInputId = "ContentPlaceHolder1_UsernameTextBox";
