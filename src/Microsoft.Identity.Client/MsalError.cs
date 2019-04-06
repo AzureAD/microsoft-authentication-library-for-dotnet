@@ -382,7 +382,7 @@ namespace Microsoft.Identity.Client
         public const string NetworkNotAvailableError = "network_not_available";
 
         /// <summary>
-        /// The B2C authority host is not the same as the one used in the config object.
+        /// The B2C authority host is not the same as the one used when creating the client application.
         /// </summary>
         public const string B2CAuthorityHostMismatch = "B2C_authority_host_mismatch";
 
