@@ -358,11 +358,6 @@ namespace Microsoft.Identity.Client
         public const string NoRedirectUri = "no_redirect_uri";
 
         /// <summary>
-        /// No Redirect URI.
-        /// </summary>
-        public const string B2CHostNotTrusted = "B2C_host_not_trusted";
-
-        /// <summary>
         /// Multiple Tokens were matched. 
         /// <para>What happens?</para>This exception happens in the case of applications managing several identitities, 
         /// when calling <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
@@ -385,6 +380,11 @@ namespace Microsoft.Identity.Client
         /// or retry later
         /// </summary>
         public const string NetworkNotAvailableError = "network_not_available";
+
+        /// <summary>
+        /// The B2C authority host is not the same as the one used when creating the client application.
+        /// </summary>
+        public const string B2CAuthorityHostMismatch = "B2C_authority_host_mismatch";
 
 #if !DESKTOP && !NET_CORE
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved

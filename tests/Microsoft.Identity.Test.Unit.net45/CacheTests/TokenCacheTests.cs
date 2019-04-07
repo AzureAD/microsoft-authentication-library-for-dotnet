@@ -388,7 +388,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void DoNotSaveRefreshTokenInAdalCacheForMsalB2CAuthorityTest()
         {
-            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
+            var appConfig = new ApplicationConfiguration()
+            {
+                ClientId = MsalTestConstants.ClientId,
+                RedirectUri = MsalTestConstants.RedirectUri,
+                AuthorityInfo = AuthorityInfo.FromAuthorityUri(MsalTestConstants.B2CAuthority, false)
+            };
+
+            var serviceBundle = ServiceBundle.Create(appConfig);
             ITokenCacheInternal cache = new TokenCache(serviceBundle);
 
             MsalTokenResponse response = MsalTestConstants.CreateMsalTokenResponse();

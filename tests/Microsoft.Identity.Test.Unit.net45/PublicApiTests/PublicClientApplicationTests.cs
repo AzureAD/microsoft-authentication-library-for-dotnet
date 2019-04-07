@@ -308,7 +308,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .BuildConcrete();             
+                                                                            .BuildConcrete();
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
@@ -654,7 +654,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task TestAccountAcrossMultipleClientIdsAsync()
         {
             // Arrange
-          
+
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
             // Populate with tokens tied to ClientId2
@@ -677,7 +677,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // Populate for clientid2
             _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId);
-          
+
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                 expectedAtCount: 4,
                 expectedRtCount: 2,
@@ -692,7 +692,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                expectedAtCount: 0,
                expectedRtCount: 0,
-               expectedAccountCount: 0, 
+               expectedAccountCount: 0,
                expectedIdtCount: 0,
                expectedAppMetadataCount: 2); // app metadata is never deleted
 
@@ -1067,11 +1067,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId)
-                    .WithAuthority(new Uri(MsalTestConstants.B2CCustomDomain), true)
-                    .WithHttpManager(httpManager)
-                    .BuildConcrete();
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CCustomDomain), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
@@ -1088,6 +1087,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
             }
+        }
+
+        [TestMethod]
+        [TestCategory("B2C")]
+        public void B2CAcquireTokenAuthorityHostMisMatchErrorTest()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+                try
+                {
+                    AuthenticationResult result = app
+                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .WithB2CAuthority(MsalTestConstants.B2CLoginAuthorityWrongHost)
+                        .ExecuteAsync(CancellationToken.None)
+                        .Result;
+                }
+                catch (Exception exc)
+                {
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalErrorMessage.B2CAuthorityHostMisMatch, exc.InnerException.Message);
+                    return;
+                }
+            }
+
+            Assert.Fail("Should not reach here. Exception was not thrown.");
         }
 
         [TestMethod]

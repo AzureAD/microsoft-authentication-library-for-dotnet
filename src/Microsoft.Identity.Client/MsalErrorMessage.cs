@@ -279,6 +279,7 @@ namespace Microsoft.Identity.Client
         public const string MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously = "MATS cannot be configured at the same time as a TelemetryCallback is provided. These are mututally exclusive.";
         public const string AkaMsmsalnet3BreakingChanges = "See https://aka.ms/msal-net-3-breaking-changes";
 
-        public const string B2CHostNotTrusted = "The B2C authority that was used is not in the trusted host list. ";
+        public const string B2CAuthorityHostMisMatch = "The B2C authority host that was used when creating the client application is not the same authority host used in the AcquireToken call. " +
+           "See https://aka.ms/msal-net-b2c for details. ";
     }
 }
