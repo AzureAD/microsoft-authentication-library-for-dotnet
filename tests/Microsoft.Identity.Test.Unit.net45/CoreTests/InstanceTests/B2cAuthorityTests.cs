@@ -54,31 +54,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         [TestCategory("B2CAuthorityTests")]
-        public void NotEnoughPathSegmentsTest()
-        {
-            try
-            {
-                var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-                var instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/tfp/");
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
-
-                var resolver = new AuthorityEndpointResolutionManager(serviceBundle);
-                var endpoints = resolver.ResolveEndpointsAsync(
-                    instance.AuthorityInfo,
-                    null,
-                    RequestContext.CreateForTest(serviceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
-                Assert.Fail("test should have failed");
-            }
-            catch (Exception exc)
-            {
-                Assert.IsInstanceOfType(exc, typeof(ArgumentException));
-                Assert.AreEqual(MsalErrorMessage.B2cAuthorityUriInvalidPath, exc.Message);
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("B2CAuthorityTests")]
         public void B2CLoginAuthorityCreateAuthority()
         {
             using (var httpManager = new MockHttpManager())
@@ -165,28 +140,44 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("B2CAuthorityTests")]
         public void CanonicalAuthorityInitTest()
         {
-            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-
             const string UriNoPort = MsalTestConstants.B2CAuthority;
             const string UriNoPortTailSlash = MsalTestConstants.B2CAuthority;
 
-            const string UriDefaultPort = "https://login.microsoftonline.in:443/tfp/tenant/policy";
+            const string UriDefaultPort = "https://login.microsoftonline.in:443/tfp/sometenantid/policy";
 
-            const string UriCustomPort = "https://login.microsoftonline.in:444/tfp/tenant/policy";
-            const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/policy/";
+            const string UriCustomPort = "https://login.microsoftonline.in:444/tfp/sometenantid/policy";
             const string UriVanityPort = MsalTestConstants.B2CLoginAuthority;
-
-            var authority = new B2CAuthority(serviceBundle, new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));
+            
+            var authority = new B2CAuthority(
+                UpdateServiceBundleWithNewAuthority(MsalTestConstants.B2CAuthority),
+                new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));
             Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
 
-            authority = new B2CAuthority(serviceBundle, new AuthorityInfo(AuthorityType.B2C, UriDefaultPort, true));
-            Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
+            authority = new B2CAuthority(
+                UpdateServiceBundleWithNewAuthority(UriDefaultPort),
+                new AuthorityInfo(AuthorityType.B2C, UriDefaultPort, true));
+            Assert.AreEqual(UriDefaultPort, authority.AuthorityInfo.CanonicalAuthority);
 
-            authority = new B2CAuthority(serviceBundle, new AuthorityInfo(AuthorityType.B2C, UriCustomPort, true));
-            Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
+            authority = new B2CAuthority(
+                UpdateServiceBundleWithNewAuthority(UriCustomPort),
+                new AuthorityInfo(AuthorityType.B2C, UriCustomPort, true));
+            Assert.AreEqual(UriCustomPort, authority.AuthorityInfo.CanonicalAuthority);
 
-            authority = new B2CAuthority(serviceBundle, new AuthorityInfo(AuthorityType.B2C, UriVanityPort, true));
+            authority = new B2CAuthority(
+                UpdateServiceBundleWithNewAuthority(UriVanityPort),
+                new AuthorityInfo(AuthorityType.B2C, UriVanityPort, true));
             Assert.AreEqual(UriVanityPort, authority.AuthorityInfo.CanonicalAuthority);
+        }
+
+        private IServiceBundle UpdateServiceBundleWithNewAuthority(string authority)
+        {
+            var appConfig = new ApplicationConfiguration()
+            {
+                ClientId = MsalTestConstants.ClientId,
+                AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, false)
+            };
+
+            return ServiceBundle.Create(appConfig);
         }
     }
 }

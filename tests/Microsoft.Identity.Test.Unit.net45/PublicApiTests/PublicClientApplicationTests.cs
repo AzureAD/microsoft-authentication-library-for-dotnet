@@ -971,7 +971,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
-        public void NoIEFPolicyFailTest()
+        public void NoB2CPolicyFailTest()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -996,7 +996,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }
                 catch(Exception ex)
                 {
-                    Assert.AreEqual(MsalErrorMessage.IEFPolicyIsMissing, ex.InnerException.Message);
+                    Assert.AreEqual(MsalErrorMessage.B2CPolicyIsMissing, ex.InnerException.Message);
                 }
             }
         }
@@ -1023,7 +1023,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                    .WithIEFPolicy(MsalTestConstants.IEFPolicy)
+                    .WithB2CPolicy(MsalTestConstants.B2CPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1061,7 +1061,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                    .WithIEFPolicy(MsalTestConstants.IEFPolicy)
+                    .WithB2CPolicy(MsalTestConstants.B2CPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1092,7 +1092,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                    .WithIEFPolicy(MsalTestConstants.IEFPolicy)
+                    .WithB2CPolicy(MsalTestConstants.B2CPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1194,7 +1194,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var result = app
                 .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                .WithIEFPolicy(MsalTestConstants.IEFPolicy)
+                .WithB2CPolicy(MsalTestConstants.B2CPolicy)
                 .ExecuteAsync(CancellationToken.None)
                 .Result;
 

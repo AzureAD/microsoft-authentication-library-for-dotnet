@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client
             return new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
         }
 
-        internal static AuthorityInfo FromB2CAuthority(string authorityHost, string tenantId)
+        internal static AuthorityInfo CreateB2CAuthority(string authorityHost, string tenantId)
         {
             string authorityUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/tfp/{1}/", authorityHost, tenantId);
             return new AuthorityInfo(AuthorityType.B2C, authorityUrl, false);

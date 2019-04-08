@@ -390,7 +390,7 @@ namespace Microsoft.Identity.Client
         /// The IEF Policy for B2C has not been specified in the AcquireToken call.
         /// See https://aka.ms/msal-net-b2c for details
         /// </summary>
-        public const string IEFPolicyIsMissing = "IEF_policy_is_missing";
+        public const string B2CPolicyIsMissing = "IEF_policy_is_missing";
 
 #if !DESKTOP && !NET_CORE
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved

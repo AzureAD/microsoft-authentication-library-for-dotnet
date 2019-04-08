@@ -567,7 +567,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithB2CAuthorityHostInfo(string authorityHost, string tenantId)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromB2CAuthority(authorityHost, tenantId);
+            Config.AuthorityInfo = AuthorityInfo.CreateB2CAuthority(authorityHost, tenantId);
             return (T)this;
         }
 

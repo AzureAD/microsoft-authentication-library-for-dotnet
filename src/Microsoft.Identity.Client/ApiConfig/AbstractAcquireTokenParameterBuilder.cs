@@ -129,15 +129,15 @@ namespace Microsoft.Identity.Client
         /// <param name="policy">/>
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithIEFPolicy(string policy)
+        public T WithB2CPolicy(string policy)
         {
             if(string.IsNullOrEmpty(policy))
             {
                 throw new ArgumentNullException(nameof(policy));
             }
 
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithIEFPolicy);
-            CommonParameters.IEFPolicy = policy;
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithB2CPolicy);
+            CommonParameters.B2CPolicy = policy;
             return (T)this;
         }
 
