@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit
 #if !NET_CORE
         [TestMethod]
         [Description("Test authority migration")]
-        public async Task AuthorityMigration_IntegrationTestAsync()
+        public async Task AuthorityMigrationTestAsync()
         {
             // make sure that for all network calls "preferred_cache" environment is used
             // (it is taken from metadata in instance discovery response),

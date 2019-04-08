@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Instance
         }
 
         /// <inheritdoc />
-        public async Task<string> GetOpenIdConfigurationEndpointAsync(
+        public async Task<string> ValidateAuthorityAndGetOpenIdDiscoveryEndpointAsync(
             AuthorityInfo authorityInfo,
             string userPrincipalName,
             RequestContext requestContext)
@@ -49,11 +49,9 @@ namespace Microsoft.Identity.Client.Instance
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
             if (authorityInfo.ValidateAuthority && !AadAuthority.IsInTrustedHostList(authorityUri.Host))
             {
-                var discoveryResponse = await _serviceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
+               await _serviceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
                                             authorityUri,
                                             requestContext).ConfigureAwait(false);
-
-                return discoveryResponse.TenantDiscoveryEndpoint;
             }
 
             return authorityInfo.CanonicalAuthority + Constants.OpenIdConfigurationEndpoint;

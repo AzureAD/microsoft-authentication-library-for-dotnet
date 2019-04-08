@@ -36,10 +36,7 @@ namespace Microsoft.Identity.Client.Instance
         public string PreferredNetwork { get; set; }
 
         [DataMember(Name = "preferred_cache")]
-        public string PreferredCache { get; set; }
-
-        [DataMember(Name = "tenant_discovery_endpoint", IsRequired = false)]
-        public string TenantDiscoveryEndpoint { get; set; }
+        public string PreferredCache { get; set; }      
 
         [DataMember(Name = "aliases")]
         public string[] Aliases { get; set; }

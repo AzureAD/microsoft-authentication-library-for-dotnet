@@ -48,6 +48,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields.json")]
     public class AadAuthorityTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            TestCommon.ResetStateAndInitMsal();
+        }
+
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void SuccessfulValidationTest()
@@ -77,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration",
+                        ExpectedUrl = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
@@ -290,23 +296,5 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             authority = Authority.CreateAuthority(serviceBundle, UriCustomPort);
             Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
         }
-
-        /*
-        [TestMethod]
-        [TestCategory("AadAuthorityTests")]
-        public void DeprecatedAuthorityTest()
-        {
-            const string uriNoPort = "https://login.windows.net/mytenant.com";
-            const string uriCustomPort = "https://login.windows.net:444/mytenant.com/";
-            var authority = Authority.CreateAuthority(uriNoPort, false);
-            Assert.AreEqual("https://login.microsoftonline.com/mytenant.com/", authority.CanonicalAuthority);
-            authority = Authority.CreateAuthority(uriCustomPort, false);
-            Assert.AreEqual("https://login.microsoftonline.com:444/mytenant.com/", authority.CanonicalAuthority);
-            authority = Authority.CreateAuthority("https://login.windows.net/tfp/tenant/policy", false);
-            Assert.AreEqual("https://login.microsoftonline.com/tfp/tenant/policy/", authority.CanonicalAuthority);
-            authority = Authority.CreateAuthority("https://login.windows.net:444/tfp/tenant/policy", false);
-            Assert.AreEqual("https://login.microsoftonline.com:444/tfp/tenant/policy/", authority.CanonicalAuthority);
-        }
-        */
     }
 }

@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Instance
             _serviceBundle = serviceBundle;
         }
 
-        public async Task<string> GetOpenIdConfigurationEndpointAsync(
+        public async Task<string> ValidateAuthorityAndGetOpenIdDiscoveryEndpointAsync(
             AuthorityInfo authorityInfo,
             string userPrincipalName,
             RequestContext requestContext)
