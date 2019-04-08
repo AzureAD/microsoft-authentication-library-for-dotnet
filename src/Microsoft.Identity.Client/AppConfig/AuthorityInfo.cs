@@ -49,25 +49,7 @@ namespace Microsoft.Identity.Client
 
             if (AuthorityType == AuthorityType.B2C)
             {
-                var authorityUri = new Uri(authority);
-                string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(
-                    new[]
-                    {
-                        '/'
-                    },
-                    StringSplitOptions.RemoveEmptyEntries);
-                if (pathSegments.Length < 3)
-                {
-                    throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
-                }
-
-                CanonicalAuthority = string.Format(
-                    CultureInfo.InvariantCulture,
-                    "https://{0}/{1}/{2}/{3}/",
-                    authorityUri.Authority,
-                    pathSegments[0],
-                    pathSegments[1],
-                    pathSegments[2]);
+                CanonicalAuthority = authority;
             }
             else
             {
@@ -171,6 +153,12 @@ namespace Microsoft.Identity.Client
         internal static AuthorityInfo FromB2CAuthority(string authorityUri)
         {
             return new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
+        }
+
+        internal static AuthorityInfo FromB2CAuthority(string authorityHost, string tenantId)
+        {
+            string authorityUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/tfp/{1}/", authorityHost, tenantId);
+            return new AuthorityInfo(AuthorityType.B2C, authorityUrl, false);
         }
 
         internal static string GetCloudUrl(AzureCloudInstance azureCloudInstance)

@@ -64,13 +64,27 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityGuidTenant = "https://" + ProductionPrefNetworkEnvironment + "/12345679/";
         public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/987654321/";
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
-        public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
+
+        public const string B2CAuthorityHost = "login.microsoftonline.in";
+        public const string B2CLoginHost = "sometenantid.b2clogin.com";
+        public const string B2CLoginWrongHost = "anothertenantid.b2clogin.com";
+        public const string B2CCustomDomainHost = "catsareamazing.com";
+        public const string B2CCustomDomainTenantId = "catsareamazing";
+        public const string B2CUSGovHost = "sometenantid.b2clogin.us";
+        public const string B2CMoonCakeHost = "sometenantid.b2clogin.cn";
+        public const string B2CBlackforestHost = "sometenantid.b2clogin.de";
+
+        public const string B2CTenantId = "sometenantid";
+        public const string IEFPolicy = "policy";
+
+        public const string B2CAuthority = "https://login.microsoftonline.in/tfp/sometenantid/policy/";
         public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";
         public const string B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/sometenantid/policy/";
         public const string B2CCustomDomain = "https://catsareamazing.com/tfp/catsareamazing/policy/";
         public const string B2CLoginAuthorityUsGov = "https://sometenantid.b2clogin.us/tfp/sometenantid/policy/";
         public const string B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/policy/";
         public const string B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/policy/";
+
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public const string ClientId2 = "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3";
         public const string FamilyId = "1";

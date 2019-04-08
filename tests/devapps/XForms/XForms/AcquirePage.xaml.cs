@@ -236,6 +236,39 @@ namespace XForms
             }
         }
 
+        private async void OnB2CClickedAsync(object sender, EventArgs e)
+        {
+            try
+            {
+                acquireResponseTitleLabel.Text = EmptyResult;
+
+                var publicClient = PublicClientApplicationBuilder.Create(App.B2cClientId)
+                    .WithB2CAuthorityHostInfo(App.B2CAuthorityHost, App.B2CTenantId)
+                    .BuildConcrete();                                        
+
+                var request = publicClient.AcquireTokenInteractive(App.B2cScopes, App.AndroidActivity)
+                    .WithUseEmbeddedWebView(true)
+                    .WithExtraQueryParameters(GetExtraQueryParams())
+                    .WithIEFPolicy(App.IEFPolicy);
+
+                var result = await request.ExecuteAsync().ConfigureAwait(true);
+
+                var resText = GetResultDescription(result);
+
+                if (resText.Contains("AccessToken"))
+                {
+                    acquireResponseTitleLabel.Text = SuccessfulResult;
+                }
+
+                acquireResponseLabel.Text = resText;
+                RefreshUsers();
+            }
+            catch (Exception exception)
+            {
+                CreateExceptionMessage(exception);
+            }
+        }
+
         private async void OnAcquireByDeviceCodeClickedAsync(object sender, EventArgs e)
         {
             try
