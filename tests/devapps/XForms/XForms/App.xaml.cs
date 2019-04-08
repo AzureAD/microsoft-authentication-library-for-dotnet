@@ -63,7 +63,7 @@ namespace XForms
 
         public const string B2CAuthorityHost = "msidlabb2c.b2clogin.com";
         public const string B2CTenantId = "msidlabb2c.onmicrosoft.com";
-        public const string IEFPolicy = "B2C_1_SISOPolicy";
+        public const string B2CPolicy = "B2C_1_SISOPolicy";
 
         public static string[] DefaultScopes = { "User.Read" };
         public static string[] B2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };

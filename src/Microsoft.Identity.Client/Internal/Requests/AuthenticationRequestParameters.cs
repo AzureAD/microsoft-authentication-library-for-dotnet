@@ -75,9 +75,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
             {
-                if (string.IsNullOrEmpty(_commonParameters.IEFPolicy))
+                if (string.IsNullOrEmpty(_commonParameters.B2CPolicy))
                 {
-                    throw new MsalClientException(MsalError.IEFPolicyIsMissing, MsalErrorMessage.IEFPolicyIsMissing);
+                    throw new MsalClientException(MsalError.B2CPolicyIsMissing, MsalErrorMessage.B2CPolicyIsMissing);
                 }
 
                 ConstructB2CAuthorityUrl(serviceBundle);
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void ConstructB2CAuthorityUrl(IServiceBundle serviceBundle)
         {
-            Authority.AuthorityInfo.CanonicalAuthority = serviceBundle.Config.AuthorityInfo.CanonicalAuthority + _commonParameters.IEFPolicy + "/";
+            Authority.AuthorityInfo.CanonicalAuthority = serviceBundle.Config.AuthorityInfo.CanonicalAuthority + _commonParameters.B2CPolicy + "/";
         }
     }
 }

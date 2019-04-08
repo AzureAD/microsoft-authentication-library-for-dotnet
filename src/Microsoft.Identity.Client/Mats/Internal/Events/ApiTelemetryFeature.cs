@@ -24,6 +24,6 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
         WithAdfsAuthority,
         WithB2CAuthority,
         WithCustomWebUi,
-        WithIEFPolicy
+        WithB2CPolicy
     }
 }

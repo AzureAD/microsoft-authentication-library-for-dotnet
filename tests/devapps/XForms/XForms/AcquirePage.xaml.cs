@@ -250,7 +250,7 @@ namespace XForms
                 var request = publicClient.AcquireTokenInteractive(App.B2cScopes, App.AndroidActivity)
                     .WithUseEmbeddedWebView(true)
                     .WithExtraQueryParameters(GetExtraQueryParams())
-                    .WithIEFPolicy(App.IEFPolicy);
+                    .WithB2CPolicy(App.B2CPolicy);
 
                 var result = await request.ExecuteAsync().ConfigureAwait(true);
 

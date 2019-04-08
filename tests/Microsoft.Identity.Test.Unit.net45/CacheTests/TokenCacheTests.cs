@@ -920,6 +920,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var commonParameters = new AcquireTokenCommonParameters
             {
                 Scopes = scopes ?? MsalTestConstants.Scope,
+                B2CPolicy = MsalTestConstants.B2CPolicy
             };
 
             return new AuthenticationRequestParameters(
