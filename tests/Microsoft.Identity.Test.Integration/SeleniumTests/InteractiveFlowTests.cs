@@ -179,6 +179,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             result = await pca
                 .AcquireTokenInteractive(s_scopes, null)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, true))
+                .WithPrompt(Prompt.ForceLogin)
                 .WithLoginHint(labResponse.User.HomeUPN)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
