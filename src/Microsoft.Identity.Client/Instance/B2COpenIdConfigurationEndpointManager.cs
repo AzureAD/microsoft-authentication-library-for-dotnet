@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Instance
     internal class B2COpenIdConfigurationEndpointManager : IOpenIdConfigurationEndpointManager
     {
         /// <inheritdoc />
-        public Task<string> GetOpenIdConfigurationEndpointAsync(
+        public Task<string> ValidateAuthorityAndGetOpenIdDiscoveryEndpointAsync(
             AuthorityInfo authorityInfo,
             string userPrincipalName,
             RequestContext requestContext)

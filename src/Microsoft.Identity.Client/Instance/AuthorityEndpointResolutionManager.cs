@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Instance
 
             var endpointManager = OpenIdConfigurationEndpointManagerFactory.Create(authorityInfo, _serviceBundle);
 
-            string openIdConfigurationEndpoint = await endpointManager.GetOpenIdConfigurationEndpointAsync(
+            string openIdConfigurationEndpoint = await endpointManager.ValidateAuthorityAndGetOpenIdDiscoveryEndpointAsync(
                                                      authorityInfo,
                                                      userPrincipalName,
                                                      requestContext).ConfigureAwait(false);

@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Client.Instance
         internal static readonly HashSet<string> TrustedHostList = new HashSet<string>()
         {
             "login.windows.net", // Microsoft Azure Worldwide - Used in validation scenarios where host is not this list
-            "login.chinacloudapi.cn", // Microsoft Azure China
+            "login.partner.microsoftonline.cn", // Microsoft Azure China
+            "login.chinacloudapi.cn", // Microsoft Azure China alias
             "login.microsoftonline.de", // Microsoft Azure Blackforest
             "login-us.microsoftonline.com", // Microsoft Azure US Government - Legacy
             "login.microsoftonline.us", // Microsoft Azure US Government
