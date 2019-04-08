@@ -31,33 +31,30 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance
 {
     internal class AadAuthority : Authority
     {
-        internal static readonly HashSet<string> TrustedHostList = new HashSet<string>()
+        public const string DefaultTrustedHost = "login.microsoftonline.com";
+        public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
+
+        private static readonly HashSet<string> s_trustedHostList = new HashSet<string>()
         {
             "login.partner.microsoftonline.cn", // Microsoft Azure China
             "login.chinacloudapi.cn",
             "login.microsoftonline.de", // Microsoft Azure Blackforest
             "login-us.microsoftonline.com", // Microsoft Azure US Government - Legacy
             "login.microsoftonline.us", // Microsoft Azure US Government
-            "login.usgovcloudapi.net",
-            "login.microsoftonline.com", // Microsoft Azure Worldwide
-            "login.microsoft.com",
-            "sts.windows.net",
+             DefaultTrustedHost, // Microsoft Azure Worldwide
             "login.windows.net"            
         };
 
         internal static bool IsInTrustedHostList(string host)
         {
-            return !string.IsNullOrEmpty(
-                TrustedHostList.FirstOrDefault(a => string.Compare(host, a, StringComparison.OrdinalIgnoreCase) == 0));
+            return s_trustedHostList.ContainsOrdinalIgnoreCase(host);
         }
-
-        public const string DefaultTrustedHost = "login.microsoftonline.com";
-        public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
 
         internal AadAuthority(
             IServiceBundle serviceBundle,
