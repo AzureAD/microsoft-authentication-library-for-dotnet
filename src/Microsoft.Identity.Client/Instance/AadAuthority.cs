@@ -38,14 +38,16 @@ namespace Microsoft.Identity.Client.Instance
     {
         internal static readonly HashSet<string> TrustedHostList = new HashSet<string>()
         {
-            "login.windows.net", // Microsoft Azure Worldwide - Used in validation scenarios where host is not this list
             "login.partner.microsoftonline.cn", // Microsoft Azure China
-            "login.chinacloudapi.cn", // Microsoft Azure China alias
+            "login.chinacloudapi.cn",
             "login.microsoftonline.de", // Microsoft Azure Blackforest
             "login-us.microsoftonline.com", // Microsoft Azure US Government - Legacy
             "login.microsoftonline.us", // Microsoft Azure US Government
+            "login.usgovcloudapi.net",
             "login.microsoftonline.com", // Microsoft Azure Worldwide
-            "login.cloudgovapi.us" // Microsoft Azure US Government
+            "login.microsoft.com",
+            "sts.windows.net",
+            "login.windows.net"            
         };
 
         internal static bool IsInTrustedHostList(string host)
