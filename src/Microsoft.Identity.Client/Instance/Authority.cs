@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Instance
 
         public static Authority CreateAuthorityWithOverride(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
         {
-            switch (serviceBundle.Config.AuthorityInfo.AuthorityType)
+            switch (authorityInfo.AuthorityType)
             {
             case AuthorityType.Adfs:
                 throw new MsalClientException(
@@ -62,6 +62,7 @@ namespace Microsoft.Identity.Client.Instance
                     "ADFS is not a supported authority");
 
             case AuthorityType.B2C:
+                CheckB2CAuthorityHost(serviceBundle, authorityInfo);
                 return new B2CAuthority(serviceBundle, authorityInfo);
 
             case AuthorityType.Aad:
@@ -93,7 +94,12 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static string GetFirstPathSegment(string authority)
         {
-            return new Uri(authority).Segments[1].TrimEnd('/');
+            var uri = new Uri(authority);
+            if (uri.Segments.Length > 1)
+            {
+                return uri.Segments[1].TrimEnd('/');
+            }
+            return string.Empty;
         }
 
         internal static AuthorityType GetAuthorityType(string authority)
@@ -125,6 +131,19 @@ namespace Microsoft.Identity.Client.Instance
             };
 
             return uriBuilder.Uri.AbsoluteUri;
+        }
+
+        private static void CheckB2CAuthorityHost(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
+        {
+            if (serviceBundle.Config.AuthorityInfo.Host != authorityInfo.Host)
+            {
+                throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
+            }
+        }
+
+        internal static string GetEnviroment(string authority)
+        {
+            return new Uri(authority).Host;
         }
     }
 }

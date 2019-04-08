@@ -28,13 +28,10 @@
 using System;
 using System.IO;
 using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -84,40 +81,50 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("B2CAuthorityTests")]
         public void B2CLoginAuthorityCreateAuthority()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var httpManager = new MockHttpManager())
             {
+                var appConfig = new ApplicationConfiguration()
+                {
+                    HttpManager = httpManager,
+                    AuthorityInfo = AuthorityInfo.FromAuthorityUri(MsalTestConstants.B2CLoginAuthority, false)
+                };
+
+                var serviceBundle = ServiceBundle.Create(appConfig);
+
                 // add mock response for tenant endpoint discovery
-                harness.HttpManager.AddMockHandler(
+                httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://mytenant.com.b2clogin.com/tfp/mytenant.com/my-policy/v2.0/.well-known/openid-configuration",
+                        ExpectedUrl = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/v2.0/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-B2CLogin.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle,
-                    "https://mytenant.com.b2clogin.com/tfp/mytenant.com/my-policy/");
+                Authority instance = Authority.CreateAuthority(
+                    serviceBundle,
+                    MsalTestConstants.B2CLoginAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
-                var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
+                var resolver = new AuthorityEndpointResolutionManager(serviceBundle);
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    RequestContext.CreateForTest(serviceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
-                    "https://mytenant.com.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/authorize",
+                    "https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/authorize",
                     endpoints.AuthorizationEndpoint);
                 Assert.AreEqual(
-                    "https://mytenant.com.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/token",
+                    "https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/token",
                     endpoints.TokenEndpoint);
-                Assert.AreEqual("https://mytenant.com.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/v2.0/", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/v2.0/", endpoints.SelfSignedJwtAudience);
             }
         }
 
         [TestMethod]
         [TestCategory("B2CAuthorityTests")]
+        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1038
         public void B2CMicrosoftOnlineCreateAuthority()
         {
             using (var harness = new MockHttpAndServiceBundle())
@@ -133,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
 
                 Authority instance = Authority.CreateAuthority(
-                    harness.ServiceBundle, 
+                    harness.ServiceBundle,
                     "https://login.microsoftonline.com/tfp/mytenant.com/my-policy/");
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);

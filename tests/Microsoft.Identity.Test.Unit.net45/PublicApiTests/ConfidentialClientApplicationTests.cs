@@ -674,6 +674,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
+        [Ignore] // This B2C scenario needs some rethinking
         public async Task AuthorizationCodeRequestTestAsync()
         {
             using (var httpManager = new MockHttpManager())

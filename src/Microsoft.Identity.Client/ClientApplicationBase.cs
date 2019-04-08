@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
-        public Task<IEnumerable<IAccount>> GetAccountsAsync()
+        public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
@@ -114,10 +114,10 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                accounts = UserTokenCacheInternal.GetAccounts(Authority);
+                accounts = await UserTokenCacheInternal.GetAccountsAsync(Authority, requestContext).ConfigureAwait(false);
             }
 
-            return Task.FromResult(accounts);
+            return accounts;
         }
 
         /// <summary>

@@ -37,33 +37,16 @@ namespace Microsoft.Identity.Client.Instance
     {
         public const string Prefix = "tfp"; // The http path of B2C authority looks like "/tfp/<your_tenant_name>/..."
         public const string B2CCanonicalAuthorityTemplate = "https://{0}/{1}/{2}/{3}/";
-        private static List<string> B2CTrustedHosts { get; set; } = new List<string> { "b2clogin.com", "b2clogin.cn", "b2clogin.de", "b2clogin.us" };
 
         internal B2CAuthority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
             : base(serviceBundle, authorityInfo)
         {
-            string b2cAuthority = new Uri(AuthorityInfo.CanonicalAuthority).Host;
-
-            if (!IsB2CLoginHost(b2cAuthority))
-            {
-                B2CTrustedHosts.Add(b2cAuthority);
-            }
         }
 
         #pragma warning disable 
         internal override async Task UpdateCanonicalAuthorityAsync(
             RequestContext requestContext)
         {            
-        }
-
-        internal static bool IsB2CLoginHost(string host)
-        {
-            var isB2CLogin = false;
-            foreach (var b2CTrustedHost in B2CTrustedHosts)
-            {
-                isB2CLogin |= host.EndsWith(b2CTrustedHost, StringComparison.OrdinalIgnoreCase);
-            }
-            return isB2CLogin;
         }
 
         internal override string GetTenantId()

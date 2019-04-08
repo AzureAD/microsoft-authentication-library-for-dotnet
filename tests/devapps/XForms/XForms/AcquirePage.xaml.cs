@@ -280,11 +280,11 @@ namespace XForms
 
         private async Task OnClearCacheClickedAsync(object sender, EventArgs e)
         {
-            var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
-            var users = tokenCache.GetAccounts(App.Authority);
-            foreach (var user in users)
+            var accounts = await App.MsalPublicClient.GetAccountsAsync().ConfigureAwait(true);
+
+            foreach (var account in accounts)
             {
-                await App.MsalPublicClient.RemoveAsync(user).ConfigureAwait(true);
+                await App.MsalPublicClient.RemoveAsync(account).ConfigureAwait(true);
             }
 
             acquireResponseLabel.Text = "";

@@ -28,12 +28,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -72,17 +70,30 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertByUsername(
                 adalUsers,
+                new[] {
+                    MsalTestConstants.ProductionPrefNetworkEnvironment,
+                    MsalTestConstants.SovereignNetworkEnvironment },
                 new[]
                 {
                     "user1",
                     "user2",
-                    "sovereign_user5"  // this user has different environment but same client id
+                    "sovereign_user5"
                 },
                 new[]
                 {
                     "no_client_info_user3",
                     "no_client_info_user4"
                 });
+
+            AssertByUsername(
+              adalUsers,
+              new[] {
+                    MsalTestConstants.SovereignNetworkEnvironment },
+              new[]
+              {
+                    "sovereign_user5"
+              },
+              Enumerable.Empty<string>());
 
             // Act - query users for different clientId and env
             adalUsers = CacheFallbackOperations.GetAllAdalUsersForMsal(
@@ -93,6 +104,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             // Assert
             AssertByUsername(
                 adalUsers,
+                null,
                 new[]
                 {
                     "user6"
@@ -139,10 +151,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertByUsername(
                 adalUsers,
+                new[] { MsalTestConstants.ProductionPrefNetworkEnvironment},
                 new[]
                 {
                     "user2",
-                    "sovereign_user5"  // this user has different environment but same client id
                 },
                 new[]
                 {
@@ -183,15 +195,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertByUsername(
                 adalUsers,
+                new[] { MsalTestConstants.ProductionPrefNetworkEnvironment },
                 new[]
                 {
                     "user2",
                     "user1",
-                    "sovereign_user5"  // this user has different environment but same client id
                 },
                 new[]
                 {
-                    "no_client_info_user3",
                     "no_client_info_user3",
                     "no_client_info_user4"
                 });
@@ -214,11 +225,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertByUsername(
                 adalUsers,
+                new[] { MsalTestConstants.ProductionPrefNetworkEnvironment },
                 new[]
                 {
                     "user2",
                     "user1",
-                    "sovereign_user5"  // this user has different environment but same client id
                 },
                 new[]
                 {
@@ -401,7 +412,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
                 MsalTestConstants.ClientId,
-                MsalTestConstants.SovereignEnvironment, // different env
+                MsalTestConstants.SovereignNetworkEnvironment, // different env
                 "uid4",
                 "tenantId4",
                 "sovereign_user5");
@@ -409,7 +420,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
                 "other_client_id", // different client id
-                MsalTestConstants.SovereignEnvironment,
+                MsalTestConstants.SovereignNetworkEnvironment,
                 "uid5",
                 "tenantId5",
                 "user6");
@@ -475,13 +486,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         }
 
         private static void AssertByUsername(
-            AdalUsersForMsalResult adalUsers,
+            AdalUsersForMsal adalUsers,
+            IEnumerable<string> enviroments,
             IEnumerable<string> expectedUsersWithClientInfo,
             IEnumerable<string> expectedUsersWithoutClientInfo)
         {
             // Assert
-            var usersWithClientInfo = adalUsers.ClientInfoUsers.Values;
-            List<AdalUserInfo> usersWithoutClientInfo = adalUsers.UsersWithoutClientInfo;
+            var usersWithClientInfo = adalUsers.GetUsersWithClientInfo(enviroments).Select(x => x.Value);
+            IEnumerable<AdalUserInfo> usersWithoutClientInfo = adalUsers.GetUsersWithoutClientInfo(enviroments);
 
             AssertUsersByDisplayName(
                 expectedUsersWithClientInfo,

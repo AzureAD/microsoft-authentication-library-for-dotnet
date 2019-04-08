@@ -46,5 +46,10 @@ namespace Microsoft.Identity.Client.Utils
 
             return string.Join(" ", input);
         }
+
+        internal static bool ContainsOrdinalIgnoreCase(this IEnumerable<string> set, string toLookFor)
+        {
+            return set.Any(el => el.Equals(toLookFor, System.StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

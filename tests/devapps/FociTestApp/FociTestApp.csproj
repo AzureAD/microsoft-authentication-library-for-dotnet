@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{24D2AF71-A01E-4450-8C3F-B9923A81134B}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>NetFxConsoleTestApp</RootNamespace>
-    <AssemblyName>NetFxConsoleTestApp</AssemblyName>
+    <RootNamespace>FociTestApp</RootNamespace>
+    <AssemblyName>FociTestApp</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -308,7 +308,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .BuildConcrete();             
+                                                                            .BuildConcrete();
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
@@ -578,16 +578,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
-                IEnumerable<IAccount> users = app.GetAccountsAsync().Result;
-                Assert.IsNotNull(users);
-                Assert.IsFalse(users.Any());
+                IEnumerable<IAccount> accounts = app.GetAccountsAsync().Result;
+                Assert.IsNotNull(accounts);
+                Assert.IsFalse(accounts.Any());
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
-                users = app.GetAccountsAsync().Result;
-                Assert.IsNotNull(users);
-                Assert.AreEqual(1, users.Count());
+                accounts = app.GetAccountsAsync().Result;
+                Assert.IsNotNull(accounts);
+                Assert.AreEqual(1, accounts.Count());
 
                 var atItem = new MsalAccessTokenCacheItem(
-                    MsalTestConstants.ProductionPrefNetworkEnvironment,
+                    MsalTestConstants.ProductionPrefCacheEnvironment,
                     MsalTestConstants.ClientId,
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
@@ -602,7 +602,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // another cache entry for different uid. user count should be 2.
 
                 MsalRefreshTokenCacheItem rtItem = new MsalRefreshTokenCacheItem(
-                    MsalTestConstants.ProductionPrefNetworkEnvironment,
+                    MsalTestConstants.ProductionPrefCacheEnvironment,
                     MsalTestConstants.ClientId,
                     "someRT",
                     MockHelpers.CreateClientInfo("uId1", "uTId1"));
@@ -610,7 +610,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
 
                 MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
-                    MsalTestConstants.ProductionPrefNetworkEnvironment,
+                    MsalTestConstants.ProductionPrefCacheEnvironment,
                     MsalTestConstants.ClientId,
                     MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
                     MockHelpers.CreateClientInfo("uId1", "uTId1"),
@@ -619,7 +619,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.UserTokenCacheInternal.Accessor.SaveIdToken(idTokenCacheItem);
 
                 MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem(
-                    MsalTestConstants.ProductionPrefNetworkEnvironment,
+                    MsalTestConstants.ProductionPrefCacheEnvironment,
                     null,
                     MockHelpers.CreateClientInfo("uId1", "uTId1"),
                     null,
@@ -631,22 +631,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.UserTokenCacheInternal.Accessor.SaveAccount(accountCacheItem);
 
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-                users = app.GetAccountsAsync().Result;
-                Assert.IsNotNull(users);
-                Assert.AreEqual(2, users.Count());
+                accounts = app.GetAccountsAsync().Result;
+                Assert.IsNotNull(accounts);
+                Assert.AreEqual(2, accounts.Count()); // scoped by env
 
                 // another cache entry for different environment. user count should still be 2. Sovereign cloud user must not be returned
                 rtItem = new MsalRefreshTokenCacheItem(
-                    MsalTestConstants.SovereignEnvironment,
+                    MsalTestConstants.SovereignNetworkEnvironment,
                     MsalTestConstants.ClientId,
                     "someRT",
                     MockHelpers.CreateClientInfo(MsalTestConstants.Uid + "more1", MsalTestConstants.Utid));
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
                 Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-                users = app.GetAccountsAsync().Result;
-                Assert.IsNotNull(users);
-                Assert.AreEqual(2, users.Count());
+                accounts = app.GetAccountsAsync().Result;
+                Assert.IsNotNull(accounts);
+                Assert.AreEqual(2, accounts.Count());
             }
         }
 
@@ -654,7 +654,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task TestAccountAcrossMultipleClientIdsAsync()
         {
             // Arrange
-          
+
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
             // Populate with tokens tied to ClientId2
@@ -677,7 +677,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // Populate for clientid2
             _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId);
-          
+
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                 expectedAtCount: 4,
                 expectedRtCount: 2,
@@ -692,7 +692,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                expectedAtCount: 0,
                expectedRtCount: 0,
-               expectedAccountCount: 0, 
+               expectedAccountCount: 0,
                expectedIdtCount: 0,
                expectedAppMetadataCount: 2); // app metadata is never deleted
 
@@ -1067,11 +1067,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId)
-                    .WithAuthority(new Uri(MsalTestConstants.B2CCustomDomain), true)
-                    .WithHttpManager(httpManager)
-                    .BuildConcrete();
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CCustomDomain), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
@@ -1088,6 +1087,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
             }
+        }
+
+        [TestMethod]
+        [TestCategory("B2C")]
+        public void B2CAcquireTokenAuthorityHostMisMatchErrorTest()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+                try
+                {
+                    AuthenticationResult result = app
+                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .WithB2CAuthority(MsalTestConstants.B2CLoginAuthorityWrongHost)
+                        .ExecuteAsync(CancellationToken.None)
+                        .Result;
+                }
+                catch (Exception exc)
+                {
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalErrorMessage.B2CAuthorityHostMisMatch, exc.InnerException.Message);
+                    return;
+                }
+            }
+
+            Assert.Fail("Should not reach here. Exception was not thrown.");
         }
 
         [TestMethod]
