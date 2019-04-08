@@ -1,3 +1,22 @@
+3.0.3-preview
+=============
+New Features:
+- **MSAL now supports custom B2C domains**. [MSAL issue #1025](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1025)
+- **MSAL now initializes an HttpClient with NSUrlSessionHnadler()** for iOS 7+. [MSAL issue #1019](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1019)
+
+Breaking Changes in 3.0.3-preview
+- **The ClientCredential class is obsolete**. There is no longer a need for the ClientCredential class to be public. This class has been marked as obsolete. [MSAL issue #1007](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1007)
+- **The ApiConfig and AppConfig namespaces have been changed** to the Microsoft.Identity.Client namespace for discoverability. This provides a better user experience when updating from MSALv2 to MSALv3.0.3x. [MSAL issue #1006](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1006)]
+- **Deprecate UIParent** and move static classes to a more appropriate class (eg `IsSystemWebviewAvailable()`). [MSAL issue #1005](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1005)
+- **Move all error codes to `MSAL.Error`**. [MSAL issue #1004](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1004)
+- **Deprecate the MSALv2 api**. Move v2 api methods/properties to the migration aid and remove functionality. [MSAL issue #1001](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1001)
+- **The `Component` property is obsolete**. MSAL now transmits client app name and version to authorization and token requests. [MSAL issue #978](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/978)
+
+Bug Fixes:
+- **Interactive login from multiple clouds was failing** due to instance discovery, as was GetAccounts. This is now fixed. [MSAL issue 1048](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1048) and [1030](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1030)
+- **MSAL was calling `DefaultRequestHeaders`** which is not thread safe and could result in AcquireTokenSilent being called from multiple places at the same time. [MSAL issue #1014](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1014)
+- **SourceLink is available again** [MSAL issue #953](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/953)
+
 3.0.2-preview
 =============
 bug fixes:
