@@ -145,13 +145,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             app = PublicClientApplicationBuilder
                 .Create(MsalTestConstants.ClientId)
-                .WithAuthority(new Uri("https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/B2C_1_B2C_Signup_Signin_Policy/oauth2/v2.0"))
+                .WithB2CAuthorityHostInfo(MsalTestConstants.B2CAuthorityHost, MsalTestConstants.B2CTenantId)
                 .BuildConcrete();
 
             Assert.IsNotNull(app);
             Assert.AreEqual(
-                "https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/b2c_1_b2c_signup_signin_policy/",
-                app.Authority);
+                "https://login.microsoftonline.in/tfp/sometenantid/",
+                app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
         }
@@ -971,13 +971,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
-        public void B2CLoginAcquireTokenTest()
+        public void NoIEFPolicyFailTest()
         {
             using (var httpManager = new MockHttpManager())
             {
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
+                                                                             .WithB2CAuthorityHostInfo(
+                                                                                MsalTestConstants.B2CAuthorityHost,
+                                                                                MsalTestConstants.B2CTenantId)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -985,16 +987,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CLoginAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
-
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
+                try
+                {
+                    AuthenticationResult result = app
+                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .ExecuteAsync(CancellationToken.None)
+                        .Result;
+                }
+                catch(Exception ex)
+                {
+                    Assert.AreEqual(MsalErrorMessage.IEFPolicyIsMissing, ex.InnerException.Message);
+                }
             }
         }
 
@@ -1005,7 +1008,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CAuthority), true)
+                                                                            .WithB2CAuthorityHostInfo(
+                                                                                MsalTestConstants.B2CAuthorityHost,
+                                                                                MsalTestConstants.B2CTenantId)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1017,7 +1022,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CAuthority);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .WithIEFPolicy(MsalTestConstants.IEFPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1028,12 +1034,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
-        public void B2CAcquireTokenWithValidateAuthorityTrueTest()
+        public void B2CLoginAcquireTokenTest()
         {
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
+                                                                            .WithB2CAuthorityHostInfo(
+                                                                                MsalTestConstants.B2CLoginHost,
+                                                                                MsalTestConstants.B2CTenantId)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1052,7 +1060,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .WithIEFPolicy(MsalTestConstants.IEFPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1063,12 +1072,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
-        public void B2CAcquireTokenWithValidateAuthorityTrueAndRandomAuthorityTest()
+        public void B2CAcquireTokenWithCustomDomainTest()
         {
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CCustomDomain), true)
+                                                                             .WithB2CAuthorityHostInfo(
+                                                                                MsalTestConstants.B2CCustomDomainHost,
+                                                                                MsalTestConstants.B2CCustomDomainTenantId)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1080,7 +1091,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CCustomDomain);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .WithIEFPolicy(MsalTestConstants.IEFPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1124,28 +1136,56 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CAuthority);
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthority);
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityBlackforest);
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityMoonCake);
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityUsGov);
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CCustomDomain);
+                ValidateB2CLoginAuthority(
+                    harness,
+                    MsalTestConstants.B2CAuthorityHost,
+                    MsalTestConstants.B2CTenantId,
+                    MsalTestConstants.B2CAuthority);
+                ValidateB2CLoginAuthority(
+                    harness,
+                    MsalTestConstants.B2CLoginHost,
+                    MsalTestConstants.B2CTenantId,
+                    MsalTestConstants.B2CLoginAuthority);
+                ValidateB2CLoginAuthority(
+                    harness,
+                    MsalTestConstants.B2CBlackforestHost,
+                    MsalTestConstants.B2CTenantId,
+                    MsalTestConstants.B2CLoginAuthorityBlackforest);
+                ValidateB2CLoginAuthority(
+                    harness,
+                    MsalTestConstants.B2CMoonCakeHost,
+                    MsalTestConstants.B2CTenantId,
+                    MsalTestConstants.B2CLoginAuthorityMoonCake);
+                ValidateB2CLoginAuthority(
+                    harness,
+                    MsalTestConstants.B2CUSGovHost,
+                    MsalTestConstants.B2CTenantId,
+                    MsalTestConstants.B2CLoginAuthorityUsGov);
+                ValidateB2CLoginAuthority(
+                    harness,
+                    MsalTestConstants.B2CCustomDomainHost,
+                    MsalTestConstants.B2CCustomDomainTenantId,
+                    MsalTestConstants.B2CCustomDomain);
             }
         }
 
-        private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority)
+        private static void ValidateB2CLoginAuthority(
+            MockHttpAndServiceBundle harness,
+            string authorityHost,
+            string tenantId,
+            string authority)
         {
             var app = PublicClientApplicationBuilder
                 .Create(MsalTestConstants.ClientId)
-                .WithB2CAuthority(authority)
+                .WithB2CAuthorityHostInfo(authorityHost, tenantId)
                 .WithHttpManager(harness.HttpManager)
                 .BuildConcrete();
 
             var ui = new MockWebUI()
             {
                 MockResult = new AuthorizationResult(
-                    AuthorizationStatus.Success,
-                    authority + "?code=some-code")
+                  AuthorizationStatus.Success,
+                 authority + "?code=some-code")
             };
 
             MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
@@ -1153,7 +1193,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority);
 
             var result = app
-                .AcquireTokenInteractive(MsalTestConstants.Scope)
+                .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                .WithIEFPolicy(MsalTestConstants.IEFPolicy)
                 .ExecuteAsync(CancellationToken.None)
                 .Result;
 

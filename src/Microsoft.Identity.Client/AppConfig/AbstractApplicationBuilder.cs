@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
@@ -548,9 +549,25 @@ namespace Microsoft.Identity.Client
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
         /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
         /// <returns>The builder to chain the .With methods</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use .WithB2CAuthorityHostInfo instead (See https://aka.ms/msal-net-b2c)", true)]
         public T WithB2CAuthority(string authorityUri)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
+        }
+
+        /// <summary>
+        /// Adds a known authority host corresponding to an Azure AD B2C tenant
+        /// See https://aka.ms/msal-net-b2c-specificities
+        /// </summary>
+        /// <param name="authorityHost">Azure AD B2C authority host, (for instance
+        /// <c>"fabrikamb2c.b2clogin.com"</c></param>)
+        ///  /// <param name="tenantId">Azure AD B2C tenantId, (for instance
+        /// <c>"fabrikamb2c.onmicrosoft.com"</c></param>)
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithB2CAuthorityHostInfo(string authorityHost, string tenantId)
+        {
+            Config.AuthorityInfo = AuthorityInfo.FromB2CAuthority(authorityHost, tenantId);
             return (T)this;
         }
 

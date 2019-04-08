@@ -124,6 +124,24 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Specifies the IEF specific policy for B2C scenarios
+        /// </summary>
+        /// <param name="policy">/>
+        /// </param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithIEFPolicy(string policy)
+        {
+            if(string.IsNullOrEmpty(policy))
+            {
+                throw new ArgumentNullException(nameof(policy));
+            }
+
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithIEFPolicy);
+            CommonParameters.IEFPolicy = policy;
+            return (T)this;
+        }
+
+        /// <summary>
         /// Specific authority for which the token is requested. Passing a different value than configured
         /// at the application constructor narrows down the selection to a specific tenant.
         /// This does not change the configured value in the application. This is specific
