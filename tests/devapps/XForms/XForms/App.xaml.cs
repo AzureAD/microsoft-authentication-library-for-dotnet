@@ -34,6 +34,7 @@ namespace XForms
     public partial class App : Application
     {
         public static PublicClientApplication MsalPublicClient;
+        public static IPublicClientApplication pca;
 
         public static object AndroidActivity { get; set; }
 
@@ -63,7 +64,8 @@ namespace XForms
 
         public const string B2CAuthorityHost = "msidlabb2c.b2clogin.com";
         public const string B2CTenantId = "msidlabb2c.onmicrosoft.com";
-        public const string B2CPolicy = "B2C_1_SISOPolicy";
+        public const string B2CSiSuPolicy = "B2C_1_SISOPolicy";
+        public const string B2CEditProfilePolicy = "B2C_1_ProfileEditPolicy";
 
         public static string[] DefaultScopes = { "User.Read" };
         public static string[] B2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
