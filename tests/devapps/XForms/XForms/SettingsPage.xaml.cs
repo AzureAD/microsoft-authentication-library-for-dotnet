@@ -28,6 +28,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Identity.Client;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -108,10 +109,11 @@ namespace XForms
                     App.Authority = App.B2cAuthority;
                     CreateB2CAppSettings();
                     break;
-
                 case 1:
-                    App.Authority = App.B2CLoginAuthority;
-                    CreateB2CAppSettings();
+                    App.pca = PublicClientApplicationBuilder.Create(App.B2cClientId)
+                        .WithB2CAuthorityHostInfo(App.B2CAuthorityHost, App.B2CTenantId)
+                        .WithRedirectUri(App.RedirectUriB2C)
+                        .BuildConcrete();
                     break;
                 case 2:
                     App.Authority = App.B2CEditProfilePolicyAuthority;

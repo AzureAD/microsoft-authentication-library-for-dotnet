@@ -237,20 +237,53 @@ namespace XForms
             }
         }
 
-        private async void OnB2CClickedAsync(object sender, EventArgs e)
+        private async void OnB2CSiSuPolicyClickedAsync(object sender, EventArgs e)
         {
             try
             {
                 acquireResponseTitleLabel.Text = EmptyResult;
 
-                var publicClient = PublicClientApplicationBuilder.Create(App.B2cClientId)
-                    .WithB2CAuthorityHostInfo(App.B2CAuthorityHost, App.B2CTenantId)
-                    .BuildConcrete();                                        
+                //var publicClient = PublicClientApplicationBuilder.Create(App.B2cClientId)
+                //    .WithB2CAuthorityHostInfo(App.B2CAuthorityHost, App.B2CTenantId)
+                //    .BuildConcrete();                                        
 
-                var request = publicClient.AcquireTokenInteractive(App.B2cScopes, App.AndroidActivity)
+                var request = App.pca.AcquireTokenInteractive(App.B2cScopes, App.AndroidActivity)
                     .WithUseEmbeddedWebView(true)
                     .WithExtraQueryParameters(GetExtraQueryParams())
-                    .WithB2CPolicy(App.B2CPolicy);
+                    .WithB2CPolicy(App.B2CSiSuPolicy);
+
+                var result = await request.ExecuteAsync().ConfigureAwait(true);
+
+                var resText = GetResultDescription(result);
+
+                if (resText.Contains("AccessToken"))
+                {
+                    acquireResponseTitleLabel.Text = SuccessfulResult;
+                }
+
+                acquireResponseLabel.Text = resText;
+                RefreshUsers();
+            }
+            catch (Exception exception)
+            {
+                CreateExceptionMessage(exception);
+            }
+        }
+
+        private async void OnB2CEditProfilePolicyClickedAsync(object sender, EventArgs e)
+        {
+            try
+            {
+                acquireResponseTitleLabel.Text = EmptyResult;
+
+                //var publicClient = PublicClientApplicationBuilder.Create(App.B2cClientId)
+                //    .WithB2CAuthorityHostInfo(App.B2CAuthorityHost, App.B2CTenantId)
+                //    .BuildConcrete();
+
+                var request = App.pca.AcquireTokenInteractive(App.B2cScopes, App.AndroidActivity)
+                    .WithUseEmbeddedWebView(true)
+                    .WithExtraQueryParameters(GetExtraQueryParams())
+                    .WithB2CPolicy(App.B2CEditProfilePolicy);
 
                 var result = await request.ExecuteAsync().ConfigureAwait(true);
 

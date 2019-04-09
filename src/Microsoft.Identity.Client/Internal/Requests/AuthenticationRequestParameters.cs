@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -151,6 +152,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void ConstructB2CAuthorityUrl(IServiceBundle serviceBundle)
         {
+            var authorityUri = new Uri(serviceBundle.Config.AuthorityInfo.CanonicalAuthority);
+            string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(
+                new[]
+                {
+                    '/'
+                },
+                StringSplitOptions.RemoveEmptyEntries);
+            if(pathSegments.Length > 2)
+            {
+                serviceBundle.Config.AuthorityInfo.CanonicalAuthority = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "https://{0}/{1}/{2}/",
+                    authorityUri.Authority,
+                    pathSegments[0],
+                    pathSegments[1]);
+            }
+
             Authority.AuthorityInfo.CanonicalAuthority = serviceBundle.Config.AuthorityInfo.CanonicalAuthority + _commonParameters.B2CPolicy + "/";
         }
     }
