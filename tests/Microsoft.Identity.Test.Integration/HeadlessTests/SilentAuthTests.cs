@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Part 1 - Acquire a token with U/P");
             AuthenticationResult authResult = await pca
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, new NetworkCredential("", user.Password).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
                 .ExecuteAsync(new CancellationTokenSource().Token)
                 .ConfigureAwait(false);
 

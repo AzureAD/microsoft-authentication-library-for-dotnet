@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult = await pca.AcquireTokenByUsernamePassword(
                _scopes,
                 user.Upn,
-                new NetworkCredential("", user.Password).SecurePassword)
+                new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
                 .WithAuthority("https://sts.windows.net/" + user.CurrentTenantId + "/")
                 .ExecuteAsync()
                 .ConfigureAwait(false);

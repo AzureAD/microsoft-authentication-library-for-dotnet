@@ -66,7 +66,7 @@ namespace CommonCache.Test.Unit.Utils
             CommonCacheTestUtils.DeleteAllTestCaches();
             CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
-            var api = new LabServiceApi(new KeyVaultSecretsProvider());
+            var api = new LabServiceApi();
             var labUser = api.GetLabResponse(
                 new UserQuery
                 {
@@ -79,8 +79,8 @@ namespace CommonCache.Test.Unit.Utils
             var cacheProgramFirst = CacheProgramFactory.CreateCacheProgram(_firstProgram, _cacheStorageType);
             var cacheProgramSecond = CacheProgramFactory.CreateCacheProgram(_secondProgram, _cacheStorageType);
 
-            var firstResults = await cacheProgramFirst.ExecuteAsync(labUser.Upn, labUser.Password, cancellationToken).ConfigureAwait(false);
-            var secondResults = await cacheProgramSecond.ExecuteAsync(labUser.Upn, labUser.Password, cancellationToken).ConfigureAwait(false);
+            var firstResults = await cacheProgramFirst.ExecuteAsync(labUser.Upn, labUser.GetOrFetchPassword(), cancellationToken).ConfigureAwait(false);
+            var secondResults = await cacheProgramSecond.ExecuteAsync(labUser.Upn, labUser.GetOrFetchPassword(), cancellationToken).ConfigureAwait(false);
 
             Console.WriteLine();
             Console.WriteLine("------------------------------------");

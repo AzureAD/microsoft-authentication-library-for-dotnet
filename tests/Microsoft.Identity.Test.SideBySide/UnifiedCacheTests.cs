@@ -68,8 +68,7 @@ namespace Microsoft.Identity.Test.SideBySide
             {
                 _user = LabUserHelper.GetDefaultUser().User;
 
-                string stringPassword = LabUserHelper.GetUserPassword(_user);
-                _securePassword = new NetworkCredential("", stringPassword).SecurePassword;
+                _securePassword = new NetworkCredential("", _user.GetOrFetchPassword()).SecurePassword;
                 _authority = string.Format(
                     CultureInfo.InvariantCulture, 
                     AuthorityTemplate, 
