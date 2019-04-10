@@ -81,13 +81,12 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         //MSAL B2C
         public const string AuthorityPickerId = "b2cAuthorityPicker";
+        public const string PolicyPickerId = "b2cPolicyPicker";
         public const string WebUpnB2CLocalInputId = "logonIdentifier";
         public const string B2CWebSubmitId = "next";
         public const string B2CWebPasswordId = "password";
-        public const string B2CLoginAuthority = "b2clogin.com";
+        public const string B2CLoginAuthority = "msidlabb2c.b2clogin.com";
         public const string MicrosoftOnlineAuthority = "login.microsoftonline.com";
-        public const string NonB2CAuthority = "non-b2c authority";
-        public const string B2CEditProfileAuthority = "Edit profile policy authority";
         public const string FacebookAccountId = "FacebookExchange";
         public const string WebUpnB2CFacebookInputId = "m_login_email";
         public const string B2CWebPasswordFacebookId = "m_login_password";
@@ -98,6 +97,9 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string B2CGoogleNextId = "next";
         public const string B2CGoogleSignInId = "signIn";
         public const string B2CEditProfileContinueId = "continue";
+        public const string B2CSiSuPolicy = "B2C_1_SISOPolicy";
+        public const string B2CEditProfilePolicy = "B2C_1_ProfileEditPolicy";
+        public const string B2CLocalAccountEditProfileId = "SignInWithLogonNameExchange";
 
         // these should match the product enum values
         public const string UiBehaviorConsent = "consent";

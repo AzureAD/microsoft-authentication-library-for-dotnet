@@ -147,6 +147,11 @@ namespace XForms
 
         private string[] GetScopes()
         {
+            if(App.UseB2CAuthorityHost)
+            {
+                return App.B2cScopes;
+            }
+
             return ScopesEntry.Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
@@ -219,71 +224,10 @@ namespace XForms
                     request.WithLoginHint(LoginHintEntry.Text.Trim()) :
                     request.WithAccount(GetSelectedAccount());
 
-                var result = await request.ExecuteAsync().ConfigureAwait(true);
-
-                var resText = GetResultDescription(result);
-
-                if (resText.Contains("AccessToken"))
+                if(App.UseB2CAuthorityHost)
                 {
-                    acquireResponseTitleLabel.Text = SuccessfulResult;
+                    request.WithB2CPolicy(App.B2CPolicy);
                 }
-
-                acquireResponseLabel.Text = resText;
-                RefreshUsers();
-            }
-            catch (Exception exception)
-            {
-                CreateExceptionMessage(exception);
-            }
-        }
-
-        private async void OnB2CSiSuPolicyClickedAsync(object sender, EventArgs e)
-        {
-            try
-            {
-                acquireResponseTitleLabel.Text = EmptyResult;
-
-                //var publicClient = PublicClientApplicationBuilder.Create(App.B2cClientId)
-                //    .WithB2CAuthorityHostInfo(App.B2CAuthorityHost, App.B2CTenantId)
-                //    .BuildConcrete();                                        
-
-                var request = App.pca.AcquireTokenInteractive(App.B2cScopes, App.AndroidActivity)
-                    .WithUseEmbeddedWebView(true)
-                    .WithExtraQueryParameters(GetExtraQueryParams())
-                    .WithB2CPolicy(App.B2CSiSuPolicy);
-
-                var result = await request.ExecuteAsync().ConfigureAwait(true);
-
-                var resText = GetResultDescription(result);
-
-                if (resText.Contains("AccessToken"))
-                {
-                    acquireResponseTitleLabel.Text = SuccessfulResult;
-                }
-
-                acquireResponseLabel.Text = resText;
-                RefreshUsers();
-            }
-            catch (Exception exception)
-            {
-                CreateExceptionMessage(exception);
-            }
-        }
-
-        private async void OnB2CEditProfilePolicyClickedAsync(object sender, EventArgs e)
-        {
-            try
-            {
-                acquireResponseTitleLabel.Text = EmptyResult;
-
-                //var publicClient = PublicClientApplicationBuilder.Create(App.B2cClientId)
-                //    .WithB2CAuthorityHostInfo(App.B2CAuthorityHost, App.B2CTenantId)
-                //    .BuildConcrete();
-
-                var request = App.pca.AcquireTokenInteractive(App.B2cScopes, App.AndroidActivity)
-                    .WithUseEmbeddedWebView(true)
-                    .WithExtraQueryParameters(GetExtraQueryParams())
-                    .WithB2CPolicy(App.B2CEditProfilePolicy);
 
                 var result = await request.ExecuteAsync().ConfigureAwait(true);
 

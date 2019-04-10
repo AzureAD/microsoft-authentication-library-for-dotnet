@@ -44,8 +44,6 @@
                 <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                     <Button  Text="Acquire" Clicked="OnAcquireClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireToken_button"/>
                     <Button  Text="DeviceCode" Clicked="OnAcquireByDeviceCodeClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenByDeviceCode"/>
-                    <Button  Text="B2C SiSu Policy" Clicked="OnB2CSiSuPolicyClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="b2CSiSuPolicy"/>
-                    <Button  Text="B2C Edit Profile Policy" Clicked="OnB2CEditProfilePolicyClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="b2CEditProfilePolicy"/>
                 </StackLayout>
             </StackLayout>
         </Frame>

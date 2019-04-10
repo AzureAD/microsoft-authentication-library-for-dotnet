@@ -65,7 +65,7 @@ namespace XForms
         {
             App.Authority = authority.Text;
             App.ClientId = clientIdEntry.Text;
-            App.InitPublicClient();
+            App.InitPublicClient(null, App.ClientId);
         }
 
         private void OnClearAllCache(object sender, EventArgs e)
@@ -89,13 +89,7 @@ namespace XForms
         private void OnValidateAuthorityToggled(object sender, ToggledEventArgs args)
         {
             App.ValidateAuthority = args.Value;
-            App.InitPublicClient();
-        }
-
-        private void InitPublicClientAndRefreshView()
-        {
-            App.InitPublicClient();
-            RefreshView();
+            App.InitPublicClient(null, App.ClientId);
         }
 
         private void OnPickerSelectedIndexChanged(object sender, EventArgs args)
@@ -105,42 +99,39 @@ namespace XForms
 
             switch (selectedIndex)
             {
-                case 0:
-                    App.Authority = App.B2cAuthority;
-                    CreateB2CAppSettings();
-                    break;
-                case 1:
-                    App.pca = PublicClientApplicationBuilder.Create(App.B2cClientId)
-                        .WithB2CAuthorityHostInfo(App.B2CAuthorityHost, App.B2CTenantId)
-                        .WithRedirectUri(App.RedirectUriB2C)
-                        .BuildConcrete();
-                    break;
-                case 2:
-                    App.Authority = App.B2CEditProfilePolicyAuthority;
-                    CreateB2CAppSettings();
-                    break;
-                default:
-                    App.Authority = App.DefaultAuthority;
-                    App.Scopes = App.DefaultScopes;
-                    App.ClientId = App.DefaultClientId;
-                    break;
+            case 0:
+                App.UseB2CAuthorityHost = true;
+                App.InitPublicClient(App.B2CMicrosoftLoginAuthorityHost, App.B2cClientId);               
+                RefreshView();
+                break;
+            case 1:
+                App.UseB2CAuthorityHost = true;
+                App.InitPublicClient(App.B2CAuthorityHost, App.B2cClientId);
+                RefreshView();
+                break;
             }
-
-            InitPublicClientAndRefreshView();
         }
 
-        private void CreateB2CAppSettings()
+        private void OnPolicyPickerSelectedIndexChanged(object sender, EventArgs args)
         {
-            App.Scopes = App.B2cScopes;
-            App.ClientId = App.B2cClientId;
-            App.RedirectUriOnAndroid = App.RedirectUriB2C;
-            App.RedirectUriOnIos = App.RedirectUriB2C;
+            var selectedB2CPolicy = (Picker)sender;
+            int selectedIndex = selectedB2CPolicy.SelectedIndex;
+
+            switch (selectedIndex)
+            {
+            case 0:
+                App.B2CPolicy = App.B2CSiSuPolicy;
+                break;
+            case 1:
+                App.B2CPolicy = App.B2CEditProfilePolicy;
+                break;
+            }
         }
 
         private void OnAcquireTokenWithBrokerToggled(object sender, ToggledEventArgs args)
         {
             App.UseBroker = args.Value;
-            App.InitPublicClient();
+            App.InitPublicClient(null, App.ClientId);
         }
     }
 }
