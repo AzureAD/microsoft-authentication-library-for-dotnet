@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
-                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope, null).ExecuteAsync(CancellationToken.None).Result;
+                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).Result;
                 Assert.IsNotNull(result);
 
                 // make sure Msal stored RT in Adal cache
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 result = app1
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 

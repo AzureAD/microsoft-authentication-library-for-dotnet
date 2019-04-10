@@ -40,7 +40,7 @@ using System.Threading;
 
 namespace Microsoft.Identity.Client.UI
 {
-    internal class CoreUIParent //TODO bogavril: break this class up into platform specific classes or merge with UIParent (probably merge!)
+    internal class CoreUIParent 
     {
         public CoreUIParent()
         {

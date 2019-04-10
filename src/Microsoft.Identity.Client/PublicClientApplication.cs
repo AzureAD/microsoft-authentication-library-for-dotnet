@@ -70,7 +70,6 @@ namespace Microsoft.Identity.Client
         /// window. The user will be required to select an account
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>The user will be signed-in interactively if needed,
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.
@@ -81,6 +80,8 @@ namespace Microsoft.Identity.Client
         /// if you want to use the embedded web browser or the system default browser,
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
         /// to prevent the select account dialog from appearing in the case you want to sign-in a specific account,
+        /// WithParentActivityOrWindow to optimize how the browser is shown, e.g.
+        /// for centering the browser window on the app window. Required on Xamarin.Android
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
         /// user pre-consent to additional scopes (which won't be returned in the access token),
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
@@ -90,8 +91,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
-            IEnumerable<string> scopes,
-            object parent)
+            IEnumerable<string> scopes)
         {
 #if NET_CORE
             throw new PlatformNotSupportedException("On .NET Core, interactive authentication is not supported. " + 
@@ -99,8 +99,7 @@ namespace Microsoft.Identity.Client
 #else
             return AcquireTokenInteractiveParameterBuilder.Create(
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
-                scopes,
-                parent);
+                scopes);
 #endif
         }
 

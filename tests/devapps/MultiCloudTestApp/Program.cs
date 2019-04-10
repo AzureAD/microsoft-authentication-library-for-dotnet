@@ -138,19 +138,19 @@ namespace MultiCloudTestApp
                     case 1:
                         FetchTokenAsync(
                             s_publicCloudApp,
-                            s_publicCloudApp.AcquireTokenInteractive(s_scopesPublicCloud, null).ExecuteAsync())
+                            s_publicCloudApp.AcquireTokenInteractive(s_scopesPublicCloud).ExecuteAsync())
                             .GetAwaiter().GetResult();
                         break;
                     case 2:
                         FetchTokenAsync(
                             s_deCloudApp,
-                            s_deCloudApp.AcquireTokenInteractive(s_scopesDeCloud, null).ExecuteAsync())
+                            s_deCloudApp.AcquireTokenInteractive(s_scopesDeCloud).ExecuteAsync())
                             .GetAwaiter().GetResult();
                         break;
                     case 3:
                         FetchTokenAsync(
                            s_cnCloudApp,
-                            s_cnCloudApp.AcquireTokenInteractive(s_scopesCnCloud, null).ExecuteAsync())
+                            s_cnCloudApp.AcquireTokenInteractive(s_scopesCnCloud).ExecuteAsync())
                            .GetAwaiter().GetResult();
                         break;
                     case 4:

@@ -48,7 +48,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private readonly static TokenCache s_keyVaultTokenCache = new TokenCache();
 
         private KeyVaultClient _keyVaultClient;
-        private KeyVaultConfiguration _config;
+
+        private readonly KeyVaultConfiguration _config;
 
         private const string KeyVaultConfidentialClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string KeyVaultPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
@@ -186,7 +187,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                         .Build();
 
                     authResult = await publicApp
-                        .AcquireTokenInteractive(scopes, null)
+                        .AcquireTokenInteractive(scopes)
                         .WithClaims(ex.Claims)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
