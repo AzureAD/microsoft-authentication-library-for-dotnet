@@ -47,9 +47,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// default cache).</remarks>
         private readonly static TokenCache s_keyVaultTokenCache = new TokenCache();
 
-        private KeyVaultClient _keyVaultClient;
-        private KeyVaultConfiguration _config;
-
         private const string KeyVaultConfidentialClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string KeyVaultPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
         private const string KeyVaultThumbPrint = "79FBCBEB5CD28994E50DAFF8035BACF764B14306";
