@@ -58,11 +58,7 @@ namespace DesktopTestApp
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.publicClientTabPage = new System.Windows.Forms.TabPage();
-            this.b2cCustomDomain = new System.Windows.Forms.Button();
             this.forceRefreshCheckBox = new System.Windows.Forms.CheckBox();
-            this.b2cEditProfile = new System.Windows.Forms.Button();
-            this.b2cSilentFlow = new System.Windows.Forms.Button();
-            this.b2cLogin = new System.Windows.Forms.Button();
             this.cancelOperationButton = new System.Windows.Forms.Button();
             this.acquireTokenDeviceCode = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
@@ -95,7 +91,18 @@ namespace DesktopTestApp
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.b2cSilentCustomDomain = new System.Windows.Forms.Button();
+            this.b2cScopesRadioButton = new System.Windows.Forms.RadioButton();
+            this.customDomainScopesRadioButton = new System.Windows.Forms.RadioButton();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.signInSignUpRadioButton = new System.Windows.Forms.RadioButton();
+            this.editProfileRadioButton = new System.Windows.Forms.RadioButton();
+            this.ROPCRadioButton = new System.Windows.Forms.RadioButton();
+            this.customDomainPolicyRadioButton = new System.Windows.Forms.RadioButton();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.setB2CAuthorityHostRadioButton = new System.Windows.Forms.RadioButton();
+            this.setCustomDomainRadioButton = new System.Windows.Forms.RadioButton();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.logsTabPage.SuspendLayout();
             this.cacheTabPage.SuspendLayout();
             this.settingsTabPage.SuspendLayout();
@@ -104,6 +111,9 @@ namespace DesktopTestApp
             this.publicClientTabPage.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.tabControl1.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // publicClient
@@ -430,12 +440,10 @@ namespace DesktopTestApp
             // publicClientTabPage
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
-            this.publicClientTabPage.Controls.Add(this.b2cSilentCustomDomain);
-            this.publicClientTabPage.Controls.Add(this.b2cCustomDomain);
+            this.publicClientTabPage.Controls.Add(this.groupBox5);
+            this.publicClientTabPage.Controls.Add(this.groupBox4);
+            this.publicClientTabPage.Controls.Add(this.groupBox3);
             this.publicClientTabPage.Controls.Add(this.forceRefreshCheckBox);
-            this.publicClientTabPage.Controls.Add(this.b2cEditProfile);
-            this.publicClientTabPage.Controls.Add(this.b2cSilentFlow);
-            this.publicClientTabPage.Controls.Add(this.b2cLogin);
             this.publicClientTabPage.Controls.Add(this.cancelOperationButton);
             this.publicClientTabPage.Controls.Add(this.acquireTokenDeviceCode);
             this.publicClientTabPage.Controls.Add(this.progressBar1);
@@ -470,17 +478,6 @@ namespace DesktopTestApp
             this.publicClientTabPage.TabIndex = 0;
             this.publicClientTabPage.Text = "publicClientTabPage";
             // 
-            // b2cCustomDomain
-            // 
-            this.b2cCustomDomain.Location = new System.Drawing.Point(307, 1256);
-            this.b2cCustomDomain.Margin = new System.Windows.Forms.Padding(6);
-            this.b2cCustomDomain.Name = "b2cCustomDomain";
-            this.b2cCustomDomain.Size = new System.Drawing.Size(252, 58);
-            this.b2cCustomDomain.TabIndex = 44;
-            this.b2cCustomDomain.Text = "B2C Custom Domain";
-            this.b2cCustomDomain.UseVisualStyleBackColor = true;
-            this.b2cCustomDomain.Click += new System.EventHandler(this.B2cCustomDomain_Click);
-            // 
             // forceRefreshCheckBox
             // 
             this.forceRefreshCheckBox.AutoSize = true;
@@ -492,45 +489,12 @@ namespace DesktopTestApp
             this.forceRefreshCheckBox.Text = "Force Refresh";
             this.forceRefreshCheckBox.UseVisualStyleBackColor = true;
             // 
-            // b2cEditProfile
-            // 
-            this.b2cEditProfile.Location = new System.Drawing.Point(30, 1390);
-            this.b2cEditProfile.Margin = new System.Windows.Forms.Padding(6);
-            this.b2cEditProfile.Name = "b2cEditProfile";
-            this.b2cEditProfile.Size = new System.Drawing.Size(252, 58);
-            this.b2cEditProfile.TabIndex = 42;
-            this.b2cEditProfile.Text = "B2C Edit Profile";
-            this.b2cEditProfile.UseVisualStyleBackColor = true;
-            this.b2cEditProfile.Click += new System.EventHandler(this.b2cEditProfile_Click);
-            // 
-            // b2cSilentFlow
-            // 
-            this.b2cSilentFlow.Location = new System.Drawing.Point(30, 1325);
-            this.b2cSilentFlow.Margin = new System.Windows.Forms.Padding(6);
-            this.b2cSilentFlow.Name = "b2cSilentFlow";
-            this.b2cSilentFlow.Size = new System.Drawing.Size(252, 58);
-            this.b2cSilentFlow.TabIndex = 41;
-            this.b2cSilentFlow.Text = "B2C Silent AT";
-            this.b2cSilentFlow.UseVisualStyleBackColor = true;
-            this.b2cSilentFlow.Click += new System.EventHandler(this.b2cSilentFlow_Click);
-            // 
-            // b2cLogin
-            // 
-            this.b2cLogin.Location = new System.Drawing.Point(30, 1256);
-            this.b2cLogin.Margin = new System.Windows.Forms.Padding(6);
-            this.b2cLogin.Name = "b2cLogin";
-            this.b2cLogin.Size = new System.Drawing.Size(252, 58);
-            this.b2cLogin.TabIndex = 40;
-            this.b2cLogin.Text = "B2C Acquire Token";
-            this.b2cLogin.UseVisualStyleBackColor = true;
-            this.b2cLogin.Click += new System.EventHandler(this.b2cLogin_Click);
-            // 
             // cancelOperationButton
             // 
-            this.cancelOperationButton.Location = new System.Drawing.Point(996, 1392);
+            this.cancelOperationButton.Location = new System.Drawing.Point(1106, 1392);
             this.cancelOperationButton.Margin = new System.Windows.Forms.Padding(6);
             this.cancelOperationButton.Name = "cancelOperationButton";
-            this.cancelOperationButton.Size = new System.Drawing.Size(328, 56);
+            this.cancelOperationButton.Size = new System.Drawing.Size(218, 56);
             this.cancelOperationButton.TabIndex = 39;
             this.cancelOperationButton.Text = "Cancel Operation";
             this.cancelOperationButton.UseVisualStyleBackColor = true;
@@ -872,16 +836,140 @@ namespace DesktopTestApp
             this.tabControl1.Size = new System.Drawing.Size(1352, 1565);
             this.tabControl1.TabIndex = 0;
             // 
-            // b2cSilentCustomDomain
+            // b2cScopesRadioButton
             // 
-            this.b2cSilentCustomDomain.Location = new System.Drawing.Point(307, 1325);
-            this.b2cSilentCustomDomain.Margin = new System.Windows.Forms.Padding(6);
-            this.b2cSilentCustomDomain.Name = "b2cSilentCustomDomain";
-            this.b2cSilentCustomDomain.Size = new System.Drawing.Size(252, 58);
-            this.b2cSilentCustomDomain.TabIndex = 45;
-            this.b2cSilentCustomDomain.Text = "B2C Silent Custom Domain";
-            this.b2cSilentCustomDomain.UseVisualStyleBackColor = true;
-            this.b2cSilentCustomDomain.Click += new System.EventHandler(this.B2cSilentCustomDomain_Click);
+            this.b2cScopesRadioButton.AutoSize = true;
+            this.b2cScopesRadioButton.Location = new System.Drawing.Point(11, 33);
+            this.b2cScopesRadioButton.Margin = new System.Windows.Forms.Padding(6);
+            this.b2cScopesRadioButton.Name = "b2cScopesRadioButton";
+            this.b2cScopesRadioButton.Size = new System.Drawing.Size(115, 29);
+            this.b2cScopesRadioButton.TabIndex = 54;
+            this.b2cScopesRadioButton.Text = "Scopes";
+            this.b2cScopesRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // customDomainScopesRadioButton
+            // 
+            this.customDomainScopesRadioButton.AutoSize = true;
+            this.customDomainScopesRadioButton.Location = new System.Drawing.Point(9, 150);
+            this.customDomainScopesRadioButton.Margin = new System.Windows.Forms.Padding(6);
+            this.customDomainScopesRadioButton.Name = "customDomainScopesRadioButton";
+            this.customDomainScopesRadioButton.Size = new System.Drawing.Size(267, 29);
+            this.customDomainScopesRadioButton.TabIndex = 55;
+            this.customDomainScopesRadioButton.Text = "Custom domain scopes";
+            this.customDomainScopesRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.b2cScopesRadioButton);
+            this.groupBox4.Controls.Add(this.customDomainScopesRadioButton);
+            this.groupBox4.Location = new System.Drawing.Point(761, 1258);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(271, 190);
+            this.groupBox4.TabIndex = 56;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "B2C Scopes";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.Location = new System.Drawing.Point(5, 1);
+            this.label13.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(137, 25);
+            this.label13.TabIndex = 48;
+            this.label13.Text = "B2C Settings";
+            // 
+            // signInSignUpRadioButton
+            // 
+            this.signInSignUpRadioButton.AutoSize = true;
+            this.signInSignUpRadioButton.Location = new System.Drawing.Point(11, 35);
+            this.signInSignUpRadioButton.Margin = new System.Windows.Forms.Padding(6);
+            this.signInSignUpRadioButton.Name = "signInSignUpRadioButton";
+            this.signInSignUpRadioButton.Size = new System.Drawing.Size(243, 29);
+            this.signInSignUpRadioButton.TabIndex = 49;
+            this.signInSignUpRadioButton.Text = "SignIn/SignUp Policy";
+            this.signInSignUpRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // editProfileRadioButton
+            // 
+            this.editProfileRadioButton.AutoSize = true;
+            this.editProfileRadioButton.Location = new System.Drawing.Point(11, 76);
+            this.editProfileRadioButton.Margin = new System.Windows.Forms.Padding(6);
+            this.editProfileRadioButton.Name = "editProfileRadioButton";
+            this.editProfileRadioButton.Size = new System.Drawing.Size(211, 29);
+            this.editProfileRadioButton.TabIndex = 50;
+            this.editProfileRadioButton.Text = "Edit Profile Policy";
+            this.editProfileRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // ROPCRadioButton
+            // 
+            this.ROPCRadioButton.AutoSize = true;
+            this.ROPCRadioButton.Location = new System.Drawing.Point(276, 33);
+            this.ROPCRadioButton.Margin = new System.Windows.Forms.Padding(6);
+            this.ROPCRadioButton.Name = "ROPCRadioButton";
+            this.ROPCRadioButton.Size = new System.Drawing.Size(167, 29);
+            this.ROPCRadioButton.TabIndex = 51;
+            this.ROPCRadioButton.Text = "ROPC Policy";
+            this.ROPCRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // customDomainPolicyRadioButton
+            // 
+            this.customDomainPolicyRadioButton.AutoSize = true;
+            this.customDomainPolicyRadioButton.Location = new System.Drawing.Point(11, 152);
+            this.customDomainPolicyRadioButton.Margin = new System.Windows.Forms.Padding(6);
+            this.customDomainPolicyRadioButton.Name = "customDomainPolicyRadioButton";
+            this.customDomainPolicyRadioButton.Size = new System.Drawing.Size(256, 29);
+            this.customDomainPolicyRadioButton.TabIndex = 53;
+            this.customDomainPolicyRadioButton.Text = "Custom domain Policy";
+            this.customDomainPolicyRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.customDomainPolicyRadioButton);
+            this.groupBox3.Controls.Add(this.ROPCRadioButton);
+            this.groupBox3.Controls.Add(this.editProfileRadioButton);
+            this.groupBox3.Controls.Add(this.signInSignUpRadioButton);
+            this.groupBox3.Controls.Add(this.label13);
+            this.groupBox3.Location = new System.Drawing.Point(309, 1254);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(443, 194);
+            this.groupBox3.TabIndex = 54;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "B2C Policies";
+            // 
+            // setB2CAuthorityHostRadioButton
+            // 
+            this.setB2CAuthorityHostRadioButton.AutoSize = true;
+            this.setB2CAuthorityHostRadioButton.Location = new System.Drawing.Point(7, 34);
+            this.setB2CAuthorityHostRadioButton.Margin = new System.Windows.Forms.Padding(6);
+            this.setB2CAuthorityHostRadioButton.Name = "setB2CAuthorityHostRadioButton";
+            this.setB2CAuthorityHostRadioButton.Size = new System.Drawing.Size(257, 29);
+            this.setB2CAuthorityHostRadioButton.TabIndex = 57;
+            this.setB2CAuthorityHostRadioButton.Text = "Set B2C AuthorityHost";
+            this.setB2CAuthorityHostRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // setCustomDomainRadioButton
+            // 
+            this.setCustomDomainRadioButton.AutoSize = true;
+            this.setCustomDomainRadioButton.Location = new System.Drawing.Point(7, 151);
+            this.setCustomDomainRadioButton.Margin = new System.Windows.Forms.Padding(6);
+            this.setCustomDomainRadioButton.Name = "setCustomDomainRadioButton";
+            this.setCustomDomainRadioButton.Size = new System.Drawing.Size(274, 29);
+            this.setCustomDomainRadioButton.TabIndex = 58;
+            this.setCustomDomainRadioButton.Text = "Set B2C CustomDomain";
+            this.setCustomDomainRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.setB2CAuthorityHostRadioButton);
+            this.groupBox5.Controls.Add(this.setCustomDomainRadioButton);
+            this.groupBox5.Location = new System.Drawing.Point(12, 1255);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(291, 191);
+            this.groupBox5.TabIndex = 59;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "B2C AuthorityHosts";
             // 
             // MainForm
             // 
@@ -913,6 +1001,12 @@ namespace DesktopTestApp
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.tabControl1.ResumeLayout(false);
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -977,13 +1071,20 @@ namespace DesktopTestApp
         private ProgressBar progressBar1;
         private Button acquireTokenDeviceCode;
         private Button cancelOperationButton;
-        private Button b2cLogin;
-        private Button b2cSilentFlow;
-        private Button b2cEditProfile;
         private RadioButton noPrompt;
         private CheckBox forceRefreshCheckBox;
-        private Button b2cCustomDomain;
-        private Button b2cSilentCustomDomain;
+        private RadioButton b2cScopesRadioButton;
+        private RadioButton customDomainScopesRadioButton;
+        private GroupBox groupBox4;
+        private GroupBox groupBox3;
+        private RadioButton customDomainPolicyRadioButton;
+        private RadioButton ROPCRadioButton;
+        private RadioButton editProfileRadioButton;
+        private RadioButton signInSignUpRadioButton;
+        private Label label13;
+        private RadioButton setB2CAuthorityHostRadioButton;
+        private RadioButton setCustomDomainRadioButton;
+        private GroupBox groupBox5;
     }
 }
 
