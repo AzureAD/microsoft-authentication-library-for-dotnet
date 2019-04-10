@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
 
             Trace.WriteLine("Logging in ... Entering password");
-            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.PasswordInputId)).SendKeys(user.Password);
+            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.PasswordInputId)).SendKeys(user.GetOrFetchPassword());
 
             Trace.WriteLine("Logging in ... Clicking next after password");
             driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.PasswordSignInButtonId)).Click();

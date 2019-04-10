@@ -47,14 +47,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// default cache).</remarks>
         private readonly static TokenCache s_keyVaultTokenCache = new TokenCache();
 
-        private KeyVaultClient _keyVaultClient;
-        private KeyVaultConfiguration _config;
-
         private const string KeyVaultConfidentialClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string KeyVaultPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
         private const string KeyVaultThumbPrint = "79FBCBEB5CD28994E50DAFF8035BACF764B14306";
         private const string DataFileName = "data.txt";
 
+        private KeyVaultClient _keyVaultClient;
+        private readonly KeyVaultConfiguration _config;
         private AuthenticationResult _authResult;
 
         /// <summary>Initialize the secrets provider with the "keyVault" configuration section.</summary>
@@ -130,8 +129,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
-            IPublicClientApplication publicApp;
-            X509Certificate2 cert = null;
+            X509Certificate2 cert;
+
             switch (_config.AuthType)
             {
             case KeyVaultAuthenticationType.ClientCertificate:
@@ -166,31 +165,16 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     .ConfigureAwait(false);
                 break;
             case KeyVaultAuthenticationType.UserCredential:
-                publicApp = PublicClientApplicationBuilder
+                var publicApp = PublicClientApplicationBuilder
                     .Create(KeyVaultPublicClientId)
                     .WithAuthority(new Uri(authority), true)
                     .Build();
 
-                try
-                {
-                    authResult = await publicApp
-                        .AcquireTokenByIntegratedWindowsAuth(scopes)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
-                }
-                catch (MsalUiRequiredException ex)
-                {
-                    publicApp = PublicClientApplicationBuilder
-                        .Create(KeyVaultPublicClientId)
-                        .WithAuthority(new Uri(authority), true)
-                        .Build();
+                authResult = await publicApp
+                    .AcquireTokenByIntegratedWindowsAuth(scopes)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
-                    authResult = await publicApp
-                        .AcquireTokenInteractive(scopes, null)
-                        .WithClaims(ex.Claims)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
-                }
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

@@ -82,17 +82,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private string _password = null;
 
-        public string Password
+        public string GetOrFetchPassword()
         {
-            get
+            if (_password == null)
             {
-                if (_password == null)
-                {
-                    _password = LabUserHelper.GetUserPassword(this);
-                }
-
-                return _password;
+                _password = LabUserHelper.FetchUserPassword(CredentialUrl);
             }
+
+            return _password;
         }
 
         public void InitializeHomeUser()

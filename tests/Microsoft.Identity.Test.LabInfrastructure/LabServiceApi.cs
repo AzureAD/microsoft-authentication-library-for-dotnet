@@ -36,19 +36,42 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     /// <summary>
     /// Wrapper for new lab service API
     /// </summary>
-    public class LabServiceApi : ILabService
+    public class LabServiceApi : ILabService, IDisposable
     {
-        private readonly KeyVaultSecretsProvider _keyVault;
+        private readonly HttpClient _httpClient;
 
-        public LabServiceApi(KeyVaultSecretsProvider keyVault)
+        public LabServiceApi()
         {
-            _keyVault = keyVault;
+            _httpClient = new HttpClient();
+        }
+
+        /// <summary>
+        /// Returns a test user account for use in testing.
+        /// </summary>
+        /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
+        /// <returns>Users that match the given query parameters.</returns>
+        public LabResponse GetLabResponse(UserQuery query)
+        {
+            var response = GetLabResponseFromApi(query);
+            var user = response.User;
+
+            if (!Uri.IsWellFormedUriString(user.CredentialUrl, UriKind.Absolute))
+            {
+                Console.WriteLine($"User '{user.Upn}' has invalid Credential URL: '{user.CredentialUrl}'");
+            }
+
+            if (user.IsExternal && user.HomeUser == null)
+            {
+                Console.WriteLine($"User '{user.Upn}' has no matching home user.");
+            }
+
+            return response;
         }
 
         private LabResponse GetLabResponseFromApi(UserQuery query)
         {
             //Fetch user
-            string result = CreateLabQuery(query);
+            string result = RunQuery(query);
 
             if (string.IsNullOrWhiteSpace(result))
             {
@@ -56,10 +79,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
 
             LabResponse response = JsonConvert.DeserializeObject<LabResponse>(result);
-
-            LabUser user = response.User;
-
-            user = JsonConvert.DeserializeObject<LabUser>(result);
+            LabUser user = JsonConvert.DeserializeObject<LabUser>(result);
 
             if (!string.IsNullOrEmpty(user.HomeTenantId) && !string.IsNullOrEmpty(user.HomeUPN))
             {
@@ -69,9 +89,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        private string CreateLabQuery(UserQuery query)
+        private string RunQuery(UserQuery query)
         {
-            HttpClient webClient = new HttpClient();
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
             UriBuilder uriBuilder = new UriBuilder(LabApiConstants.LabEndpoint);
 
@@ -118,31 +137,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
 
             uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
-            string result = webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+            string result = _httpClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+
             return result;
         }
 
-        /// <summary>
-        /// Returns a test user account for use in testing.
-        /// </summary>
-        /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
-        /// <returns>Users that match the given query parameters.</returns>
-        public LabResponse GetLabResponse(UserQuery query)
+        public void Dispose()
         {
-            var response = GetLabResponseFromApi(query);
-            var user = response.User;
-
-            if (!Uri.IsWellFormedUriString(user.CredentialUrl, UriKind.Absolute))
-            {
-                Console.WriteLine($"User '{user.Upn}' has invalid Credential URL: '{user.CredentialUrl}'");
-            }
-
-            if (user.IsExternal && user.HomeUser == null)
-            {
-                Console.WriteLine($"User '{user.Upn}' has no matching home user.");
-            }
-
-            return response;
+            _httpClient.Dispose();
         }
     }
 }

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -302,7 +302,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             controller.EnterText(CoreUiTestConstants.WebUpnB2CLocalInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.EnterText(userInformationFieldIds.PasswordInputId, user.Password, XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(userInformationFieldIds.PasswordInputId, user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
 
             controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
@@ -317,7 +317,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             controller.EnterText(CoreUiTestConstants.WebUpnB2CFacebookInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.EnterText(userInformationFieldIds.PasswordInputId, user.Password, XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(userInformationFieldIds.PasswordInputId, user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
 
             controller.WaitForWebElementByCssId(userInformationFieldIds.PasswordSignInButtonId);
 
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             controller.Tap(CoreUiTestConstants.B2CGoogleNextId, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.EnterText(userInformationFieldIds.PasswordInputId, user.Password, XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(userInformationFieldIds.PasswordInputId, user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
 
             controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
@@ -438,7 +438,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                 //idSIButton9 = Sign in button
                 controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
                 //i0118 = password text field
-                controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
+                controller.EnterText(userInformationFieldIds.PasswordInputId, user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
                 controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
             }
             catch

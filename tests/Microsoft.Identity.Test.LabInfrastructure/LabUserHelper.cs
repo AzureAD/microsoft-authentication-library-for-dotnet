@@ -42,9 +42,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         static LabUserHelper()
         {
             s_keyVaultSecretsProvider = new KeyVaultSecretsProvider();
-            s_labService = new LabServiceApi(s_keyVaultSecretsProvider);
+            s_labService = new LabServiceApi();
         }
-
 
         public static LabResponse GetLabUserData(UserQuery query)
         {
@@ -95,9 +94,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserData(query);
         }
 
-        public static string GetUserPassword(LabUser user)
+        public static string FetchUserPassword(string passwordUri)
         {
-            if (string.IsNullOrWhiteSpace(user.CredentialUrl))
+            if (string.IsNullOrWhiteSpace(passwordUri))
             {
                 throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
             }
@@ -109,7 +108,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             try
             {
-                var secret = s_keyVaultSecretsProvider.GetSecret(user.CredentialUrl);
+                var secret = s_keyVaultSecretsProvider.GetSecret(passwordUri);
                 return secret.Value;
             }
             catch (Exception e)
