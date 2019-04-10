@@ -31,16 +31,12 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.LabInfrastructure;
 
 namespace DesktopTestApp
@@ -49,15 +45,17 @@ namespace DesktopTestApp
     {
         private const string PublicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private string _b2CClientId = null;
-        public const string B2CCustomDomainClientId = "64a88201-6bbd-49f5-ab46-9153798493fd ";
 
         private PublicClientHandler _publicClientHandler;
         private CancellationTokenSource _cancellationTokenSource;
+
         private readonly string[] _b2CScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
-        public static string[] B2cCustomDomainScopes = { "https://public.msidlabb2c/b2cwebapp/read" };
-        private const string B2CAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
-        private const string B2CEditProfileAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
-        public const string B2CCustomDomainAuthority = "https://public.msidlabb2c.com/tfp/public.msidlabb2c.com/B2C_1_signupsignin_userflow/";
+        private readonly string[] _b2cCustomDomainScopes = { "https://public.msidlabb2c/b2cwebapp/read" };
+
+        public const string SignInSignUpPolicy = "B2C_1_SISOPolicy";
+        public const string EditProfilePolicy = "B2C_1_ProfileEditPolicy";
+        public const string CustomDomainSignInSignUpPolicy = "B2C_1_signupsignin_userflow";
+        public const string ROPCPolicy = "B2C_1_ROPC_Auth";
 
         private bool IsForceRefreshEnabled => forceRefreshCheckBox.Checked;
 
@@ -157,6 +155,8 @@ namespace DesktopTestApp
             using (new UIProgressScope(this))
             {
                 ClearResultPageInfo();
+                GetB2CAuthorityHost();
+                GetB2CPolicy();
                 _publicClientHandler.ApplicationId = PublicClientId;
                 _publicClientHandler.LoginHint = loginHintTextBox.Text;
                 _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
@@ -174,7 +174,7 @@ namespace DesktopTestApp
                 try
                 {
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
-                        SplitScopeString(scopes.Text),
+                        GetScopes(),
                         GetUIBehavior(),
                         _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
@@ -242,6 +242,7 @@ namespace DesktopTestApp
                         SplitScopeString(scopes.Text),
                         username,
                         password)
+                        .WithB2CPolicy("B2C_1_signupsignin_userflow")
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(true);
 
@@ -286,7 +287,7 @@ namespace DesktopTestApp
                 try
                 {
                     AuthenticationResult authenticationResult =
-                        await _publicClientHandler.AcquireTokenSilentAsync(SplitScopeString(scopes.Text), IsForceRefreshEnabled).ConfigureAwait(true);
+                        await _publicClientHandler.AcquireTokenSilentAsync(GetScopes(), IsForceRefreshEnabled).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                 }
@@ -300,6 +301,7 @@ namespace DesktopTestApp
         private async void acquireTokenInteractiveAuthority_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
+
             _publicClientHandler.LoginHint = loginHintTextBox.Text;
             _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
             _publicClientHandler.InteractiveAuthority = authority.Text;
@@ -383,6 +385,55 @@ namespace DesktopTestApp
             }
 
             return behavior;
+        }
+
+        private void GetB2CPolicy()
+        {
+            if (signInSignUpRadioButton.Checked)
+            {
+                _publicClientHandler.B2CPolicy = SignInSignUpPolicy;
+            }
+
+            if (editProfileRadioButton.Checked)
+            {
+                _publicClientHandler.B2CPolicy = EditProfilePolicy;
+            }
+
+            if (ROPCRadioButton.Checked)
+            {
+                _publicClientHandler.B2CPolicy = ROPCPolicy;
+            }
+
+            if (customDomainPolicyRadioButton.Checked)
+            {
+                _publicClientHandler.B2CPolicy = CustomDomainSignInSignUpPolicy;
+            }
+        }
+
+        private void GetB2CAuthorityHost()
+        {
+            if (setB2CAuthorityHostRadioButton.Checked)
+            {
+                _publicClientHandler.UseB2CAuthorityHost = true;
+            }
+            if (setCustomDomainRadioButton.Checked)
+            {
+                _publicClientHandler.UseB2CCustomDomain = true;
+            }
+        }
+
+        private IEnumerable<string> GetScopes()
+        {
+            IEnumerable<string> scopesRequested = SplitScopeString(scopes.Text);
+            if (b2cScopesRadioButton.Checked)
+            {
+                scopesRequested = _b2CScopes;
+            }
+            if (customDomainScopesRadioButton.Checked)
+            {
+                scopesRequested = _b2cCustomDomainScopes;
+            }
+            return scopesRequested;
         }
 
         #region App logic
@@ -530,137 +581,6 @@ namespace DesktopTestApp
             return scopes.Split(new[] { " " }, StringSplitOptions.None);
         }
 
-        private async void b2cLogin_Click(object sender, EventArgs e)
-        {
-            using (new UIProgressScope(this))
-            {
-                GetB2CClientIdFromLab();
-
-                ClearResultPageInfo();
-
-                _publicClientHandler.InteractiveAuthority = B2CAuthority;
-                _publicClientHandler.ApplicationId = _b2CClientId;
-
-                try
-                {
-                    AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
-                        _b2CScopes,
-                        GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
-
-                    SetResultPageInfo(authenticationResult);
-                    RefreshUserList();
-                }
-                catch (Exception exc)
-                {
-                    CreateException(exc);
-                }
-            }
-        }
-
-        private async void b2cEditProfile_Click(object sender, EventArgs e)
-        {
-            using (new UIProgressScope(this))
-            {
-                GetB2CClientIdFromLab();
-
-                ClearResultPageInfo();
-
-                _publicClientHandler.InteractiveAuthority = B2CEditProfileAuthority;
-                _publicClientHandler.ApplicationId = _b2CClientId;
-
-                try
-                {
-                    AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
-                        _b2CScopes,
-                        GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
-
-                    SetResultPageInfo(authenticationResult);
-                    RefreshUserList();
-                }
-                catch (Exception exc)
-                {
-                    CreateException(exc);
-                }
-            }
-        }
-
-        private async void b2cSilentFlow_Click(object sender, EventArgs e)
-        {
-            using (new UIProgressScope(this))
-            {
-                ClearResultPageInfo();
-
-                _publicClientHandler.InteractiveAuthority = B2CAuthority;
-                _publicClientHandler.ApplicationId = _b2CClientId;
-
-                try
-                {
-                    AuthenticationResult authenticationResult =
-                        await _publicClientHandler.AcquireTokenSilentAsync(_b2CScopes, IsForceRefreshEnabled).ConfigureAwait(true);
-
-                    SetResultPageInfo(authenticationResult);
-                }
-                catch (Exception exc)
-                {
-                    CreateException(exc);
-                }
-            }
-        }
-
-        private async void B2cCustomDomain_Click(object sender, EventArgs e)
-        {
-            using (new UIProgressScope(this))
-            {
-                ClearResultPageInfo();
-
-                _publicClientHandler.InteractiveAuthority = B2CCustomDomainAuthority;
-                _publicClientHandler.ApplicationId = B2CCustomDomainClientId;
-
-                try
-                {
-                    AuthenticationResult authenticationResult =
-                        await _publicClientHandler.AcquireTokenInteractiveWithB2CAuthorityAsync(
-                            B2cCustomDomainScopes,
-                            Prompt.SelectAccount,
-                            null,
-                            B2CCustomDomainAuthority).ConfigureAwait(true);
-
-                    SetResultPageInfo(authenticationResult);
-                }
-                catch (Exception exc)
-                {
-                    CreateException(exc);
-                }
-            }
-        }
-
-        private async void B2cSilentCustomDomain_Click(object sender, EventArgs e)
-        {
-            using (new UIProgressScope(this))
-            {
-                ClearResultPageInfo();
-
-                _publicClientHandler.InteractiveAuthority = B2CCustomDomainAuthority;
-                _publicClientHandler.ApplicationId = B2CCustomDomainClientId;
-
-                try
-                {
-                    AuthenticationResult authenticationResult =
-                        await _publicClientHandler.AcquireTokenSilentAsync(
-                            B2cCustomDomainScopes,
-                            IsForceRefreshEnabled).ConfigureAwait(true);
-
-                    SetResultPageInfo(authenticationResult);
-                }
-                catch (Exception exc)
-                {
-                    CreateException(exc);
-                }
-            }
-        }
-
         private void GetB2CClientIdFromLab()
         {
             if (_b2CClientId != null)
@@ -668,7 +588,22 @@ namespace DesktopTestApp
                 return;
             }
             LabResponse labResponse = LabUserHelper.GetB2CLocalAccount();
-            _b2CClientId = labResponse.AppId;
+            _b2CClientId = labResponse.AppId; // TODO: lab not returning correct ClientId at the moment
+        }
+
+        private void SignInSignUpButton_Click(object sender, EventArgs e)
+        {
+            _publicClientHandler.B2CPolicy = SignInSignUpPolicy;
+        }
+
+        private void B2cAuthorityHostButton_Click(object sender, EventArgs e)
+        {
+            _publicClientHandler.UseB2CAuthorityHost = true;
+        }
+
+        private void CustomDomainButton_Click(object sender, EventArgs e)
+        {
+            _publicClientHandler.UseB2CCustomDomain = true;
         }
     }
 }

@@ -37,11 +37,21 @@ namespace DesktopTestApp
     {
         private readonly string _clientName = "DesktopTestApp";
 
+        private readonly string _b2cAuthorityHost = "msidlabb2c.b2clogin.com";
+        private readonly string _b2cTenantId = "msidlabb2c.onmicrosoft.com";
+        private readonly string _b2CClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
+
+        private readonly string _customDomainAuthorityHost = "public.msidlabb2c.com";
+        private readonly string _customDomainTenantId = "public.msidlabb2c.com";
+        private readonly string _b2CCustomDomainClientId = "64a88201-6bbd-49f5-ab46-9153798493fd ";
+
+        public bool UseB2CAuthorityHost { get; set; } = false;
+        public bool UseB2CCustomDomain { get; set; } = false;
+
         public PublicClientHandler(string clientId, LogCallback logCallback)
         {
             ApplicationId = clientId;
             PublicClientApplication = PublicClientApplicationBuilder.Create(ApplicationId)
-                .WithClientName(_clientName)
                 .WithLogging(logCallback, LogLevel.Verbose, true)
 #if ARIA_TELEMETRY_ENABLED
                 .WithTelemetry((new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
@@ -59,6 +69,7 @@ namespace DesktopTestApp
         public string LoginHint { get; set; }
         public IAccount CurrentUser { get; set; }
         public PublicClientApplication PublicClientApplication { get; set; }
+        public string B2CPolicy { get; set; }
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveAsync(
             IEnumerable<string> scopes,
@@ -67,24 +78,38 @@ namespace DesktopTestApp
         {
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
 
+            AcquireTokenInteractiveParameterBuilder request;
             AuthenticationResult result;
             if (CurrentUser != null)
             {
-                result = await PublicClientApplication
+                request = PublicClientApplication
                     .AcquireTokenInteractive(scopes, null)
                     .WithAccount(CurrentUser)
                     .WithPrompt(uiBehavior)
-                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithExtraQueryParameters(extraQueryParams);
+
+                if (UseB2CAuthorityHost || UseB2CCustomDomain)
+                {
+                    request.WithB2CPolicy(B2CPolicy);
+                }
+                result = await request
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
             else
             {
-                result = await PublicClientApplication
+                request = PublicClientApplication
                     .AcquireTokenInteractive(scopes, null)
                     .WithLoginHint(LoginHint)
                     .WithPrompt(uiBehavior)
-                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithExtraQueryParameters(extraQueryParams);
+
+                if (UseB2CAuthorityHost || UseB2CCustomDomain)
+                {
+                    request.WithB2CPolicy(B2CPolicy);
+                }
+
+                result = await request
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -155,7 +180,7 @@ namespace DesktopTestApp
                    .WithAccount(CurrentUser)
                    .WithPrompt(uiBehavior)
                    .WithExtraQueryParameters(extraQueryParams)
-                   .WithB2CAuthority(b2cAuthority)
+                   .WithB2CPolicy(B2CPolicy)
                    .ExecuteAsync(CancellationToken.None)
                    .ConfigureAwait(false);
 
@@ -165,20 +190,51 @@ namespace DesktopTestApp
 
         public void CreateOrUpdatePublicClientApp(string interactiveAuthority, string applicationId)
         {
-            var builder = PublicClientApplicationBuilder
+            if (UseB2CAuthorityHost || UseB2CCustomDomain)
+            {
+                CreateB2CClientApp();
+            }
+            else
+            {
+                var builder = PublicClientApplicationBuilder
                 .Create(ApplicationId)
                 .WithClientName(_clientName);
 
-            if (!string.IsNullOrWhiteSpace(interactiveAuthority))
-            {
-                // Use the override authority provided
-                builder = builder.WithAuthority(new Uri(interactiveAuthority), true);
+                if (!string.IsNullOrWhiteSpace(interactiveAuthority))
+                {
+                    // Use the override authority provided
+                    builder.WithAuthority(new Uri(interactiveAuthority), true);
+                }
+                PublicClientApplication = builder.BuildConcrete();
             }
-
-            PublicClientApplication = builder.BuildConcrete();
 
             PublicClientApplication.UserTokenCache.SetBeforeAccess(TokenCacheHelper.BeforeAccessNotification);
             PublicClientApplication.UserTokenCache.SetAfterAccess(TokenCacheHelper.AfterAccessNotification);
+        }
+
+        private void CreateB2CClientApp()
+        {
+            var builder = PublicClientApplicationBuilder
+                .Create(DetermineClientIdForB2C())
+                .WithClientName(_clientName);
+            if (UseB2CCustomDomain)
+            {
+                builder.WithB2CHost(_customDomainAuthorityHost, _customDomainTenantId);
+            }
+            else
+            {
+                builder.WithB2CHost(_b2cAuthorityHost, _b2cTenantId);
+            }
+            PublicClientApplication = builder.BuildConcrete();
+        }
+
+        private string DetermineClientIdForB2C()
+        {
+            if (UseB2CCustomDomain)
+            {
+                return _b2CCustomDomainClientId;
+            }
+            return _b2CClientId;
         }
     }
 }
