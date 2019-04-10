@@ -120,6 +120,11 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal static MsalAccountCacheItem FromJsonString(string json)
         {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return null;
+            }
+
             return FromJObject(JObject.Parse(json));
         }
 
