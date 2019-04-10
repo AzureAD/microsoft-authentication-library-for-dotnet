@@ -86,6 +86,11 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal static MsalIdTokenCacheItem FromJsonString(string json)
         {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return null;
+            }
+
             return FromJObject(JObject.Parse(json));
         }
 
