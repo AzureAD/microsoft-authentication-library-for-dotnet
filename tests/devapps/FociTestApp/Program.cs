@@ -187,7 +187,7 @@ namespace FociTestApp
 
         private static Task<AuthenticationResult> StartInteractiveAuthAsync(IPublicClientApplication pca)
         {
-            return pca.AcquireTokenInteractive(s_scopes, null).ExecuteAsync();
+            return pca.AcquireTokenInteractive(s_scopes).ExecuteAsync();
         }
 
         private static Task<AuthenticationResult> StartSilentAuthAsync(IPublicClientApplication pca)

@@ -46,6 +46,10 @@ using Android.App;
 using System.Windows.Forms;
 #endif
 
+#if MAC
+using AppKit;
+#endif
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -54,7 +58,6 @@ namespace Microsoft.Identity.Client
     public sealed class AcquireTokenInteractiveParameterBuilder :
         AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder>
     {
-        private object _ownerWindow;
         private AcquireTokenInteractiveParameters Parameters { get; } = new AcquireTokenInteractiveParameters();
 
         internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenInteractive;
@@ -72,13 +75,11 @@ namespace Microsoft.Identity.Client
 
         internal static AcquireTokenInteractiveParameterBuilder Create(
             IPublicClientApplicationExecutor publicClientApplicationExecutor,
-            IEnumerable<string> scopes,
-            object parent)
+            IEnumerable<string> scopes)
         {
             return new AcquireTokenInteractiveParameterBuilder(publicClientApplicationExecutor)
                 .WithCurrentSynchronizationContext()
-                .WithScopes(scopes)
-                .WithParent(parent);
+                .WithScopes(scopes);
         }
 
         internal AcquireTokenInteractiveParameterBuilder WithCurrentSynchronizationContext()
@@ -156,53 +157,172 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        private AcquireTokenInteractiveParameterBuilder WithParent(object parent)
+        #region WithParentActivityOrWindow
+
+        /*
+         * .WithParentActivityOrWindow is platform specific but we need a solution for
+         * projects like XForms where code is shared from a netstandard assembly. So expose
+         * a variant of .WithParentActivityOrWindow that allows users to inject the parent as an object,
+         * since Activity, ViewController etc. do not exist in NetStandard.
+         */
+
+#if RUNTIME || NETSTANDARD_BUILDTIME 
+        /// <summary>
+        ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
+        ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
+        /// </summary>
+        /// <remarks>Mandatory only on Android. Can also be set via the PublicClientApplcation builder.</remarks>
+        /// <param name="parent">The parent as an object, so that it can be used from shared NetStandard assemblies</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(object parent)
+        {
+            return WithParentObject(parent);
+        }
+#endif
+
+        private AcquireTokenInteractiveParameterBuilder WithParentObject(object parent)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithParent);
-            _ownerWindow = parent;
-            return this;
-        }
-
-        /// <inheritdoc />
-        protected override void Validate()
-        {
-            base.Validate();
 #if ANDROID
-            if (_ownerWindow is Activity activity)
+            if (parent is Activity activity)
             {
                 Parameters.UiParent.Activity = activity;
                 Parameters.UiParent.CallerActivity = activity;
-            }
-            else
-            {
-                throw new InvalidOperationException(MsalErrorMessage.ActivityRequiredForParentObjectAndroid);
-            }
+            }           
 #elif iOS
-            if(_ownerWindow is UIViewController uiViewController)
+            if(parent is UIViewController uiViewController)
             {
                 Parameters.UiParent.CallerViewController = uiViewController;
             }
+#elif MAC
+            if (parent is NSWindow nsWindow)
+            {
+                Parameters.UiParent.CallerWindow = nsWindow;
+            }
 
 #elif DESKTOP
-            if (_ownerWindow is IWin32Window win32Window)
+            if (parent is IWin32Window win32Window)
             {
                 Parameters.UiParent.OwnerWindow = win32Window;
             }
-            else if (_ownerWindow is IntPtr intPtrWindow)
+            else if (parent is IntPtr intPtrWindow)
             {
                 Parameters.UiParent.OwnerWindow = intPtrWindow;
             }
             // It's ok on Windows Desktop to not have an owner window, the system will just center on the display
             // instead of a parent.
 #endif
+            return this;
+        }
 
+#if ANDROID
+        /// <summary>
+        /// Sets a reference to the current Activity that triggers the browser to be shown. Required
+        /// for MSAL to be able to show the browser when using Xamarin.Android
+        /// </summary>
+        /// <param name="activity">The current Activity</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(Activity activity)
+        {
+            if (activity == null)
+            {
+                throw new ArgumentNullException(nameof(activity));
+            }
+
+            return WithParentObject((object)activity);
+        }
+#endif
+
+#if iOS
+        /// <summary>
+        /// Sets a reference to the current ViewController that triggers the browser to be shown. 
+        /// </summary>
+        /// <param name="viewController">The current ViewController</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(UIViewController viewController)
+        {
+            if (viewController == null)
+            {
+                throw new ArgumentNullException(nameof(viewController));
+            }
+
+            return WithParentObject((object)viewController);
+        }
+#endif
+
+#if DESKTOP
+        /// <summary>
+        /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
+        /// Used to center the browser that pop-up onto this window.
+        /// </summary>
+        /// <param name="window">The current window</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(IWin32Window window)
+        {
+            if (window == null)
+            {
+                throw new ArgumentNullException(nameof(window));
+            }
+
+            return WithParentObject((object)window);
+        }
+
+        /// <summary>
+        /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
+        /// Used to center the browser that pop-up onto this window.
+        /// </summary>
+        /// <param name="window">The current window</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(IntPtr window)
+        {
+            if (window == null)
+            {
+                throw new ArgumentNullException(nameof(window));
+            }
+
+            return WithParentObject((object)window);
+        }
+#endif
+
+#if MAC
+        /// <summary>
+        /// Sets a reference to the current NSWindow. The browser pop-up will be centered on it. If ommited,
+        /// it will be centered on the screen.
+        /// </summary>
+        /// <param name="nsWindow">The current NSWindow</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(NSWindow nsWindow)
+        {
+            if (nsWindow == null)
+            {
+                throw new ArgumentNullException(nameof(nsWindow));
+            }
+
+            return WithParentObject((object)nsWindow);
+        }
+#endif
+
+        #endregion
+
+        /// <inheritdoc />
+        protected override void Validate()
+        {
+            base.Validate();
+
+#if ANDROID
+            if (Parameters.UiParent.Activity==null)
+            {
+                throw new InvalidOperationException(MsalErrorMessage.ActivityRequiredForParentObjectAndroid);
+            }
+#endif
             Parameters.LoginHint = string.IsNullOrWhiteSpace(Parameters.LoginHint)
                                           ? Parameters.Account?.Username
                                           : Parameters.LoginHint;
-
-#if NET_CORE_BUILDTIME
-            Parameters.Prompt = Prompt.SelectAccount;  // TODO(migration): fix this so we don't need the ifdef and make sure it's correct.
-#endif
         }
 
         /// <inheritdoc />

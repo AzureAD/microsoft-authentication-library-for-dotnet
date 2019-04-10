@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
-                .AcquireTokenInteractive(s_scopes, null)
+                .AcquireTokenInteractive(s_scopes)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, false))
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
-                .AcquireTokenInteractive(s_scopes, null)
+                .AcquireTokenInteractive(s_scopes)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, true))
                 .WithPrompt(Prompt.ForceLogin)
                 .WithLoginHint(labResponse.User.HomeUPN)

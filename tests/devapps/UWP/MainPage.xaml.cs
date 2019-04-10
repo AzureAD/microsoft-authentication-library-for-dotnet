@@ -145,7 +145,7 @@ namespace UWP
                 IEnumerable<IAccount> users = await _pca.GetAccountsAsync().ConfigureAwait(false);
                 IAccount user = users.FirstOrDefault();
 
-                result = await _pca.AcquireTokenInteractive(s_scopes, null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                result = await _pca.AcquireTokenInteractive(s_scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

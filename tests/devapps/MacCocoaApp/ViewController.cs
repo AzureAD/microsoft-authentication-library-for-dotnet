@@ -121,7 +121,7 @@ namespace MacCocoaApp
                 if (result == null)
                 {
                     result = await _pca
-                        .AcquireTokenInteractive(_scopes, null)
+                        .AcquireTokenInteractive(_scopes)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }

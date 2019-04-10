@@ -175,6 +175,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
+                    authResult = await publicApp
+                        .AcquireTokenInteractive(scopes, null)
+                        .WithClaims(ex.Claims)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+                }
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

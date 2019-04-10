@@ -209,8 +209,9 @@ namespace XForms
             {
                 acquireResponseTitleLabel.Text = EmptyResult;
 
-                var request = App.MsalPublicClient.AcquireTokenInteractive(GetScopes(), App.AndroidActivity)
+                var request = App.MsalPublicClient.AcquireTokenInteractive(GetScopes())
                     .WithPrompt(GetPrompt())
+                    .WithParentActivityOrWindow(App.AndroidActivity)
                     .WithUseEmbeddedWebView(true)
                     .WithExtraQueryParameters(GetExtraQueryParams());
 

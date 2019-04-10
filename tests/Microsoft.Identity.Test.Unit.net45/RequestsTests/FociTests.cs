@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 foci: serverTokenResponse == ServerTokenResponse.FociToken);
 
             // Acquire token interactively for A
-            AuthenticationResult result = await app.AcquireTokenInteractive(MsalTestConstants.Scope, null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            AuthenticationResult result = await app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(result.Account);
             AssertAppMetadata(app, serverTokenResponse == ServerTokenResponse.FociToken);
 

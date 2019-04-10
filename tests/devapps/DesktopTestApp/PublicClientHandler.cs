@@ -71,7 +71,7 @@ namespace DesktopTestApp
             if (CurrentUser != null)
             {
                 result = await PublicClientApplication
-                    .AcquireTokenInteractive(scopes, null)
+                    .AcquireTokenInteractive(scopes)
                     .WithAccount(CurrentUser)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
@@ -81,7 +81,7 @@ namespace DesktopTestApp
             else
             {
                 result = await PublicClientApplication
-                    .AcquireTokenInteractive(scopes, null)
+                    .AcquireTokenInteractive(scopes)
                     .WithLoginHint(LoginHint)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
@@ -104,7 +104,7 @@ namespace DesktopTestApp
             if (CurrentUser != null)
             {
                 result = await PublicClientApplication
-                    .AcquireTokenInteractive(scopes, null)
+                    .AcquireTokenInteractive(scopes)
                     .WithAccount(CurrentUser)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
@@ -115,7 +115,7 @@ namespace DesktopTestApp
             else
             {
                 result = await PublicClientApplication
-                    .AcquireTokenInteractive(scopes, null)
+                    .AcquireTokenInteractive(scopes)
                     .WithLoginHint(LoginHint)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
@@ -151,7 +151,7 @@ namespace DesktopTestApp
             CreateOrUpdatePublicClientApp(b2cAuthority, ApplicationId);
             AuthenticationResult result;
             result = await PublicClientApplication
-                   .AcquireTokenInteractive(scopes, null)
+                   .AcquireTokenInteractive(scopes)
                    .WithAccount(CurrentUser)
                    .WithPrompt(uiBehavior)
                    .WithExtraQueryParameters(extraQueryParams)

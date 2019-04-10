@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     AuthenticationResult result = await app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
 
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     AuthenticationResult result = await app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
 
@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     AuthenticationResult result = await app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }
@@ -317,7 +317,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
                 result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -368,7 +368,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -398,7 +398,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -436,7 +436,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -473,7 +473,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     result = app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
                         .WithAccount(result.Account)
                         .WithPrompt(Prompt.SelectAccount)
                         .ExecuteAsync(CancellationToken.None)
@@ -522,7 +522,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -549,7 +549,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .WithPrompt(Prompt.SelectAccount)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
@@ -735,7 +735,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AssertException.TaskThrows<InvalidOperationException>(
                     () => app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope.ToArray(), null).ExecuteAsync(CancellationToken.None));
+                        .AcquireTokenInteractive(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None));
             }
         }
 
@@ -768,7 +768,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     AuthenticationResult result = await app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
 
@@ -853,7 +853,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     AuthenticationResult result = await app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }
@@ -904,7 +904,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     AuthenticationResult result = await app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }
@@ -989,7 +989,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1017,7 +1017,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CAuthority);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1052,7 +1052,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1080,7 +1080,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CCustomDomain);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1102,7 +1102,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     AuthenticationResult result = app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
                         .WithB2CAuthority(MsalTestConstants.B2CLoginAuthorityWrongHost)
                         .ExecuteAsync(CancellationToken.None)
                         .Result;
@@ -1153,7 +1153,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority);
 
             var result = app
-                .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                .AcquireTokenInteractive(MsalTestConstants.Scope)
                 .ExecuteAsync(CancellationToken.None)
                 .Result;
 
@@ -1170,7 +1170,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // This test is to ensure that the methods we want/need on the IPublicClientApplication exist and compile.  This isn't testing functionality, that's done elsewhere.
             // It's solely to ensure we know that the methods we want/need are available where we expect them since we tend to do most testing on the concrete types.
 
-            var interactiveBuilder = app.AcquireTokenInteractive(MsalTestConstants.Scope, null)
+            var interactiveBuilder = app.AcquireTokenInteractive(MsalTestConstants.Scope)
                .WithAccount(MsalTestConstants.User)
                .WithExtraScopesToConsent(MsalTestConstants.Scope)
                .WithLoginHint("loginhint")
@@ -1217,12 +1217,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             IEnumerable<Func<Task<AuthenticationResult>>> acquireTokenInteractiveMethods = new List<Func<Task<AuthenticationResult>>>
             {
                 // without UI Parent
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope, null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope, null).WithLoginHint("login hint").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope, null).WithAccount(account).ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope, null).WithLoginHint("login hint").WithPrompt(Prompt.Consent).WithExtraQueryParameters("extra_query_params").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope, null).WithAccount(account).WithPrompt(Prompt.Consent).WithExtraQueryParameters("extra_query_params").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
+                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithLoginHint("login hint").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
+                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithAccount(account).ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
+                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithLoginHint("login hint").WithPrompt(Prompt.Consent).WithExtraQueryParameters("extra_query_params").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
+                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithAccount(account).WithPrompt(Prompt.Consent).WithExtraQueryParameters("extra_query_params").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
+                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope)
                     .WithLoginHint("login hint")
                     .WithPrompt(Prompt.Consent)
                     .WithExtraQueryParameters("extra_query_params")
@@ -1231,7 +1231,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false),
 
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope)
                     .WithAccount(account)
                     .WithPrompt(Prompt.Consent)
                     .WithExtraQueryParameters("extra_query_params")

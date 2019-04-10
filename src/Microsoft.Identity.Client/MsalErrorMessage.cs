@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Client
         public const string ClientApplicationBaseExecutorNotImplemented =
             "ClientApplicationBase implementation does not implement IClientApplicationBaseExecutor.";
 
-        public const string ActivityRequiredForParentObjectAndroid = "Activity is required for parent object on Android.";
+        public const string ActivityRequiredForParentObjectAndroid = "On Xamarin.Android, you have to specify the current Activity from which the browser pop-up will be displayed using the WithParentActivityOrWindow method.";
 
         public const string LoggingCallbackAlreadySet = "LoggingCallback has already been set";
         public const string TelemetryCallbackAlreadySet = "TelemetryCallback has already been set";

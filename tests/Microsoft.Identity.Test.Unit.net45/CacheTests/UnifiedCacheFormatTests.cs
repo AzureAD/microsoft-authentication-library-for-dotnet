@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             });
 
             AuthenticationResult result = app
-                .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                .AcquireTokenInteractive(MsalTestConstants.Scope)
                 .ExecuteAsync(CancellationToken.None)
                 .Result;
 

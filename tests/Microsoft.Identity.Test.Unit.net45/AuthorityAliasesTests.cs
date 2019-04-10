@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 });
 
-                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope, null).ExecuteAsync(CancellationToken.None).Result;
+                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).Result;
 
                 // make sure that all cache entities are stored with "preferred_cache" environment
                 // (it is taken from metadata in instance discovery response)

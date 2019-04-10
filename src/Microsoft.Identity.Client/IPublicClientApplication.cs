@@ -51,7 +51,6 @@ namespace Microsoft.Identity.Client
         /// window. The user will be required to select an account
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>The user will be signed-in interactively if needed,
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.
@@ -69,7 +68,7 @@ namespace Microsoft.Identity.Client
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction
         /// </remarks>
-        AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(IEnumerable<string> scopes, object parent);
+        AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(IEnumerable<string> scopes);
 
         /// <summary>
         /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
