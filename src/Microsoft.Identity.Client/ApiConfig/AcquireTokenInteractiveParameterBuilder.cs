@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Client
          * since Activity, ViewController etc. do not exist in NetStandard.
          */
 
-#if RUNTIME || NETSTADARD_BUILDTIME 
+#if RUNTIME || NETSTANDARD_BUILDTIME 
         /// <summary>
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
