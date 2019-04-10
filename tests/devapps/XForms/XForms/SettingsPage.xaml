@@ -35,13 +35,20 @@
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <x:String>login.microsoftonline.com</x:String>
-                            <x:String>b2clogin.com</x:String>
-                            <x:String>Edit profile policy authority</x:String>
-                            <x:String>non-b2c authority</x:String>
+                            <x:String>msidlabb2c.b2clogin.com</x:String>
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
                 <Label Text="{Binding Source={x:Reference b2cAuthorityPicker}, Path=SelectedItem}" />
+                <Picker x:Name="b2cPolicyPicker" Title="Select a B2C Policy" SelectedIndexChanged="OnPolicyPickerSelectedIndexChanged" AutomationId="b2cPolicyPicker">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>B2C_1_SISOPolicy</x:String>
+                            <x:String>B2C_1_ProfileEditPolicy</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+                <Label Text="{Binding Source={x:Reference b2cPolicyPicker}, Path=SelectedItem}" />
             </StackLayout>
 
             <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">

@@ -92,6 +92,7 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenADFSV4InteractiveNonFederatedTest,
 
                 B2CLocalAccountAcquireTokenTest,
+                B2CLocalAccountEditProfileAcquireTokenTest,
                 // Google Auth does not support embedded webview from b2clogin.com authority.
                 // App Center cannot run system browser tests yet, so this test can only be run in system browser locally.
                 //B2CGoogleB2CLoginAuthorityAcquireTokenTest,
@@ -159,47 +160,49 @@ namespace Microsoft.Identity.Test.UIAutomation
 
         /// <summary>
         /// B2C acquire token with Facebook provider
-        /// b2clogin.com authority
+        /// b2clogin.com authority and sign-in sign-up policy
         /// with subsequent silent call
         /// </summary>
         [Test]
         [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookB2CLoginAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CFacebookAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
+            _mobileTestHelper.IsB2CLoginAuthority = true;
+            _mobileTestHelper.B2CFacebookAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount());
         }
 
         /// <summary>
         /// B2C acquire token with Facebook provider 
-        /// login.microsoftonline.com authority
+        /// login.microsoftonline.com authority and sign-in sign-up policy
         /// with subsequent silent call
         /// </summary>
         [Test]
         [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookMicrosoftAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, false);
+            _mobileTestHelper.IsB2CLoginAuthority = false;
+            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, B2CIdentityProvider.Facebook);
             _mobileTestHelper.B2CSilentFlowHelper(xamarinController);
         }
 
         /// <summary>
         /// B2C acquire token with Facebook provider
-        /// b2clogin.com authority
-        /// call to edit profile authority with
-        ///  UIBehavior none
+        /// b2clogin.com authority and edit profile policy
+        /// PromptBehavior.None
         /// </summary>
         [Test]
         [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookEditPolicyAcquireTokenTest()
         {
-            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, true);
+            _mobileTestHelper.IsB2CLoginAuthority = true;
+            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, B2CIdentityProvider.Facebook);
             _mobileTestHelper.B2CSilentFlowHelper(xamarinController);
-            _mobileTestHelper.B2CFacebookEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
+            _mobileTestHelper.B2CEditPolicyAcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetB2CFacebookAccount());
         }
 
         /// <summary>
         /// B2C acquire token with Google provider
-        /// b2clogin.com authority
+        /// b2clogin.com authority and sign-in sign-up policy
         /// with subsequent silent call
         /// </summary>
         [Ignore("Google Auth does not support embedded webview from b2clogin.com authority. " +
@@ -208,30 +211,48 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CGoogleB2CLoginAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CGoogleAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), true);
+            _mobileTestHelper.IsB2CLoginAuthority = true;
+            _mobileTestHelper.B2CGoogleAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount());
         }
 
         /// <summary>
         /// B2C acquire token with Google provider 
-        /// login.microsoftonline.com authority
+        /// login.microsoftonline.com authority and sign-in sign-up policy
         /// with subsequent silent call
         /// </summary>
         [Ignore("UI is different in AppCenter compared w/local.")]
         [Test]
         public void B2CGoogleMicrosoftAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CGoogleAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), false);
+            _mobileTestHelper.IsB2CLoginAuthority = false;
+            _mobileTestHelper.B2CGoogleAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount());
         }
 
         /// <summary>
         /// B2C acquire token with local account 
-        /// b2clogin.com authority
+        /// b2clogin.com authority and sign-in sign-up policy
         /// and subsequent silent call
         /// </summary>
         [Test]
         public void B2CLocalAccountAcquireTokenTest()
         {
-            _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
+            _mobileTestHelper.IsB2CLoginAuthority = true;
+            _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount());
+        }
+
+        /// <summary>
+        /// B2C acquire token with local account 
+        /// b2clogin.com authority and edit profile policy
+        /// and subsequent silent call
+        /// PromptBehavior.None
+        /// </summary>
+        [Test]
+        public void B2CLocalAccountEditProfileAcquireTokenTest()
+        {
+            _mobileTestHelper.IsB2CLoginAuthority = true;
+            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, B2CIdentityProvider.Local);
+            _mobileTestHelper.B2CSilentFlowHelper(xamarinController);
+            _mobileTestHelper.B2CEditPolicyAcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetB2CLocalAccount());
         }
 
         /// <summary>

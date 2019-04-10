@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Mats.Internal.Events;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
@@ -355,6 +356,8 @@ namespace Microsoft.Identity.Client
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
         /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
         /// <returns>The builder to chain the .With methods</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use .WithB2CHost and .WithB2CPolicy instead (See https://aka.ms/msal-net-b2c)", true)]
         public T WithB2CAuthority(string authorityUri)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithB2CAuthority);

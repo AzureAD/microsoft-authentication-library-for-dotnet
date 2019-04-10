@@ -33,8 +33,7 @@ namespace XForms
 {
     public partial class App : Application
     {
-        public static PublicClientApplication MsalPublicClient;
-        public static IPublicClientApplication pca;
+        public static PublicClientApplication MsalPublicClient { get; set; }
 
         public static object AndroidActivity { get; set; }
 
@@ -58,10 +57,8 @@ namespace XForms
         public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
 
         public const string DefaultAuthority = "https://login.microsoftonline.com/common";
-        public const string B2cAuthority = "https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
-        public const string B2CLoginAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
-        public const string B2CEditProfilePolicyAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
 
+        public const string B2CMicrosoftLoginAuthorityHost = "login.microsoftonline.com";
         public const string B2CAuthorityHost = "msidlabb2c.b2clogin.com";
         public const string B2CTenantId = "msidlabb2c.onmicrosoft.com";
         public const string B2CSiSuPolicy = "B2C_1_SISOPolicy";
@@ -78,20 +75,21 @@ namespace XForms
         public static string ClientId = DefaultClientId;
 
         public static string[] Scopes = DefaultScopes;
+        public static string B2CPolicy;
         public static bool UseBroker;
+        public static bool UseB2CAuthorityHost = false;
 
         public App()
         {
             MainPage = new NavigationPage(new XForms.MainPage());
 
-            InitPublicClient();
+            InitPublicClient(null, ClientId);
         }
 
-        public static void InitPublicClient()
+        public static void InitPublicClient(string b2cAuthorityHost, string clientId)
         {
             var builder = PublicClientApplicationBuilder
-                .Create(ClientId)
-                .WithAuthority(new Uri(Authority), ValidateAuthority)
+                .Create(clientId)
                 .WithLogging((level, message, pii) =>
                 {
                     Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
@@ -118,6 +116,45 @@ namespace XForms
                         builder.WithRedirectUri(RedirectUriOnAndroid);
                         break;
                 }
+
+#if IS_APPCENTER_BUILD
+            builder.WithIosKeychainSecurityGroup("*");
+#endif
+            }
+            if (UseB2CAuthorityHost)
+            {
+                builder.WithB2CHost(b2cAuthorityHost, B2CTenantId);
+                builder.WithRedirectUri(RedirectUriB2C);
+            }
+            else
+            {
+                builder.WithAuthority(new Uri(Authority), ValidateAuthority);
+            }
+
+            MsalPublicClient = builder.BuildConcrete();
+        }
+
+        public static void InitB2CPublicClient(string b2cAuthorityHost)
+        {
+            var builder = PublicClientApplicationBuilder
+                .Create(B2cClientId)
+                .WithB2CHost(b2cAuthorityHost, B2CTenantId)
+                .WithLogging((level, message, pii) =>
+                {
+                    Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
+                },
+                LogLevel.Verbose,
+                true)
+                .WithRedirectUri(RedirectUriB2C);
+
+            if (UseBroker)
+            {
+                //builder.WithBroker(true);
+                builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
+                builder.WithRedirectUri(BrokerRedirectUriOnIos);
+            }
+            else
+            { 
 
 #if IS_APPCENTER_BUILD
             builder.WithIosKeychainSecurityGroup("*");

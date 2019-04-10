@@ -565,7 +565,7 @@ namespace Microsoft.Identity.Client
         ///  /// <param name="tenantId">Azure AD B2C tenantId, (for instance
         /// <c>"fabrikamb2c.onmicrosoft.com"</c></param>)
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithB2CAuthorityHostInfo(string authorityHost, string tenantId)
+        public T WithB2CHost(string authorityHost, string tenantId)
         {
             Config.AuthorityInfo = AuthorityInfo.CreateB2CAuthority(authorityHost, tenantId);
             return (T)this;
