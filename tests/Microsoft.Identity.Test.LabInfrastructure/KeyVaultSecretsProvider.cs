@@ -173,14 +173,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 authResult = await publicApp
                     .AcquireTokenByIntegratedWindowsAuth(scopes)
                     .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                    authResult = await publicApp
-                        .AcquireTokenInteractive(scopes, null)
-                        .WithClaims(ex.Claims)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
-                }
+                    .ConfigureAwait(false);                  
+                
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
