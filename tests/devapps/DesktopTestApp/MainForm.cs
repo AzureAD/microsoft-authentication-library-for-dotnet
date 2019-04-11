@@ -242,7 +242,7 @@ namespace DesktopTestApp
                         SplitScopeString(scopes.Text),
                         username,
                         password)
-                        .WithB2CPolicy("B2C_1_signupsignin_userflow")
+                        .WithTrustFameworkPolicy("B2C_1_signupsignin_userflow")
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(true);
 

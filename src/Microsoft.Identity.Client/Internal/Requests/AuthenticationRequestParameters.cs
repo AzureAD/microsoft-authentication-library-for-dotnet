@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     if (string.IsNullOrEmpty(_commonParameters.B2CPolicy))
                     {
-                        throw new MsalClientException(MsalError.B2CPolicyIsMissing, MsalErrorMessage.B2CPolicyIsMissing);
+                        throw new MsalClientException(MsalError.TrustFrameworkPolicyIsMissing, MsalErrorMessage.TrustFrameworkPolicyIsMissing);
                     }
 
                     ConstructB2CAuthorityUrl(serviceBundle);

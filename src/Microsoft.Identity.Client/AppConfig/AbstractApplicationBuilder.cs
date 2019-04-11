@@ -543,20 +543,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Adds a known authority corresponding to an Azure AD B2C policy.
-        /// See https://aka.ms/msal-net-b2c-specificities
-        /// </summary>
-        /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
-        /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
-        /// <returns>The builder to chain the .With methods</returns>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use .WithB2CAuthorityHostInfo instead (See https://aka.ms/msal-net-b2c)", true)]
-        public T WithB2CAuthority(string authorityUri)
-        {
-            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
-        }
-
-        /// <summary>
         /// Adds a known authority host corresponding to an Azure AD B2C tenant
         /// See https://aka.ms/msal-net-b2c-specificities
         /// </summary>
@@ -565,10 +551,24 @@ namespace Microsoft.Identity.Client
         ///  /// <param name="tenantId">Azure AD B2C tenantId, (for instance
         /// <c>"fabrikamb2c.onmicrosoft.com"</c></param>)
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithB2CHost(string authorityHost, string tenantId)
+        public T WithB2CAuthority(string authorityHost, string tenantId)
         {
             Config.AuthorityInfo = AuthorityInfo.CreateB2CAuthority(authorityHost, tenantId);
             return (T)this;
+        }
+
+        /// <summary>
+        /// Adds a known authority corresponding to an Azure AD B2C policy.
+        /// See https://aka.ms/msal-net-b2c-specificities
+        /// </summary>
+        /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
+        /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
+        /// <returns>The builder to chain the .With methods</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use .WithB2CAuthority(string authorityHost, string tenantId) instead (See https://aka.ms/msal-net-b2c)", true)]
+        public T WithB2CAuthority(string authorityUri)
+        {
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
         private static string GetValueIfNotEmpty(string original, string value)

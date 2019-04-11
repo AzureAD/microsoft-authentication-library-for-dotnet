@@ -125,19 +125,19 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Specifies the IEF specific policy for B2C scenarios
+        /// Specifies the TrustFramework specific policy for B2C scenarios
         /// </summary>
         /// <param name="policy">/>
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithB2CPolicy(string policy)
+        public T WithTrustFameworkPolicy(string policy)
         {
             if(string.IsNullOrEmpty(policy))
             {
                 throw new ArgumentNullException(nameof(policy));
             }
 
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithB2CPolicy);
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithTrustFrameworkPolicy);
             CommonParameters.B2CPolicy = policy;
             return (T)this;
         }
@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Client
         /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
         /// <returns>The builder to chain the .With methods</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use .WithB2CHost and .WithB2CPolicy instead (See https://aka.ms/msal-net-b2c)", true)]
+        [Obsolete("Use .WithB2CAuthority(string authorityHost, string tenantId) and .WithTrustFrameworkPolicy instead (See https://aka.ms/msal-net-b2c)", true)]
         public T WithB2CAuthority(string authorityUri)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithB2CAuthority);
