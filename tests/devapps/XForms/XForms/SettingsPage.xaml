@@ -39,7 +39,6 @@
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
-                <Label Text="{Binding Source={x:Reference b2cAuthorityPicker}, Path=SelectedItem}" />
                 <Picker x:Name="b2cPolicyPicker" Title="Select a B2C Policy" SelectedIndexChanged="OnPolicyPickerSelectedIndexChanged" AutomationId="b2cPolicyPicker">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
@@ -48,7 +47,6 @@
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
-                <Label Text="{Binding Source={x:Reference b2cPolicyPicker}, Path=SelectedItem}" />
             </StackLayout>
 
             <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
