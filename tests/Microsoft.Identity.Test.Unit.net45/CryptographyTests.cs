@@ -39,6 +39,12 @@ namespace Microsoft.Identity.Test.Unit
     [DeploymentItem(@"Resources\testCert.crtfile")]
     public class CryptographyTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [TestMethod]
         [TestCategory("CryptographyTests")]
         public void SignWithCertificate()

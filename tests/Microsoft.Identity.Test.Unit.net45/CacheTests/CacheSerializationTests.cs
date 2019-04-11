@@ -35,6 +35,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
@@ -42,6 +43,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     [TestClass]
     public class CacheSerializationTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         private static readonly IEnumerable<string> s_appMetadataKeys = new[] {
             StorageJsonKeys.ClientId ,
             StorageJsonKeys.Environment,

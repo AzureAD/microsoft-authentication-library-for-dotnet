@@ -32,6 +32,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.CacheV2.Impl.InMemory;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -48,6 +49,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetInternalStaticCaches();
             _io = new InMemoryCachePathStorage();
             _data = RandomDataUtils.GetRandomData(1024);
         }

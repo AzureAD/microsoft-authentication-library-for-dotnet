@@ -45,6 +45,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestInitialize]
         public void Setup()
         {
+            TestCommon.ResetInternalStaticCaches();
             _testReceiver = new _TestReceiver();
             var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
             _telemetryManager = new TelemetryManager(serviceBundle.Config, serviceBundle.PlatformProxy, _testReceiver.HandleTelemetryEvents);

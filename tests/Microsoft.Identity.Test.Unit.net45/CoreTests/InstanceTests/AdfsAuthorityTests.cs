@@ -39,9 +39,11 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Guid = System.Guid;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
+
     [TestClass]
     [DeploymentItem("Resources\\drs-response-missing-field.json")]
     [DeploymentItem("Resources\\drs-response.json")]
@@ -53,6 +55,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetInternalStaticCaches();
         }
 
         [TestCleanup]

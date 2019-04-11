@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Common
 {
     internal static class TestCommon
     {
-        public static void ResetStateAndInitMsal()
+        public static void ResetInternalStaticCaches()
         {
             // This initializes the classes so that the statics inside them are fully initialized, and clears any cached content in them.
             new AadInstanceDiscovery(null, null, null, true);

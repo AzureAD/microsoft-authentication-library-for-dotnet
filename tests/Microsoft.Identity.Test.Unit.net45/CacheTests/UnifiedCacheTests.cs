@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
 #if !NET_CORE

@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -35,6 +36,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
     [TestClass]
     public class MsalTokenCacheKeysTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [TestMethod]
         public void ArgNull()
         {

@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
             _tokenCacheHelper = new TokenCacheHelper();
         }
 

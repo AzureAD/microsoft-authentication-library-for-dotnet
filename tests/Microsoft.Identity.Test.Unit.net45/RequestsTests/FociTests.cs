@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestInitialize]
         public void Init()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
             _inMemoryCache = "{}";
             _instanceAndEndpointRequestPerformed = false;
         }
