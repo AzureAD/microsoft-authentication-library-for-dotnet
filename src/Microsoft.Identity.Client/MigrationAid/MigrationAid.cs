@@ -2102,7 +2102,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     ///
     /// </summary>
-    [Obsolete("In MSAL.NET 3.x, you should directly pass the Activity (on Xamarin.Android), or Window (on .NET Framework and UWP) as second parameter of AcquireTokenInteractive()" + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+    [Obsolete("In MSAL.NET 3.x, you should directly pass the Activity (on Xamarin.Android), or Window (on .NET Framework and UWP) using AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow" + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
     public sealed class UIParent
     {
         /// <summary>
