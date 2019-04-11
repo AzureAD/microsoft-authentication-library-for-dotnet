@@ -1511,6 +1511,8 @@ namespace Microsoft.Identity.Client
     /// This component supports Subject Name + Issuer authentication in order to help, in the future,
     /// Azure AD certificates rollover
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("Use IConfidentialClient.AcquireTokenForClient instead: " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
     public interface IConfidentialClientApplicationWithCertificate
     {
         /// <summary>
