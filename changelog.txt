@@ -1,3 +1,12 @@
+3.0.4-preview
+=============
+
+Bug Fixes:
+- ** AcquireTokenInteractive parent param is not intuitive** https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/918
+
+Breaking Changes in 3.0.4-preview
+- **AcquireTokenInteractive** now takes a single paramter - the scopes. A new builder method WithParentActivityOrWindow was introduced for passing in a reference to the parent object. 
+
 3.0.3-preview
 =============
 New Features:
