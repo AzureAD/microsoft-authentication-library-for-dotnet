@@ -83,7 +83,7 @@ namespace DesktopTestApp
             if (CurrentUser != null)
             {
                 request = PublicClientApplication
-                    .AcquireTokenInteractive(scopes, null)
+                    .AcquireTokenInteractive(scopes)
                     .WithAccount(CurrentUser)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams);
@@ -99,7 +99,7 @@ namespace DesktopTestApp
             else
             {
                 request = PublicClientApplication
-                    .AcquireTokenInteractive(scopes, null)
+                    .AcquireTokenInteractive(scopes)
                     .WithLoginHint(LoginHint)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams);

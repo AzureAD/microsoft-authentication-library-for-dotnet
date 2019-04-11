@@ -1119,7 +1119,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     AuthenticationResult result = app
                         .AcquireTokenInteractive(MsalTestConstants.Scope)
-                        .WithB2CAuthority(MsalTestConstants.B2CLoginAuthorityWrongHost)
                         .ExecuteAsync(CancellationToken.None)
                         .Result;
                 }
