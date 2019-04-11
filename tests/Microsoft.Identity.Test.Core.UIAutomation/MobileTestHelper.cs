@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             {
                 controller.Tap(CoreUiTestConstants.PolicyPickerId);
                 controller.Tap(CoreUiTestConstants.B2CEditProfilePolicy);
-                SetUiBehavior(controller, "none");
+                SetUiBehavior(controller, CoreUiTestConstants.UiBehaviorNoPrompt);
             }
         }
 
