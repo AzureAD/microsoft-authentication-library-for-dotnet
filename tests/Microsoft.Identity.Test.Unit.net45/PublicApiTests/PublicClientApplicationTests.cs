@@ -990,7 +990,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     AuthenticationResult result = app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
                         .ExecuteAsync(CancellationToken.None)
                         .Result;
                 }
@@ -1022,7 +1022,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CAuthority);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
@@ -1060,7 +1060,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
@@ -1091,7 +1091,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CCustomDomain);
 
                 AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
                     .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
@@ -1103,7 +1103,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
-        public void B2CAcquireTokenIncorrectAuthorityBuilderUsedErrorTest()
+        public void B2CAcquireTokenWithAuthorityBuilderAndNoPolicyUsedErrorTest()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -1111,23 +1111,54 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+
                 try
                 {
                     AuthenticationResult result = app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                        .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
+                        .AcquireTokenInteractive(MsalTestConstants.Scope)
+                        //.WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                         .ExecuteAsync(CancellationToken.None)
                         .Result;
                 }
                 catch (Exception exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalErrorMessage.B2CAuthorityHostMisMatch, exc.InnerException.Message);
+                    Assert.AreEqual(MsalErrorMessage.TrustFrameworkPolicyIsMissing, exc.InnerException.Message);
                     return;
                 }
             }
 
             Assert.Fail("Should not reach here. Exception was not thrown.");
+        }
+
+        [TestMethod]
+        [TestCategory("B2C")]
+        public void B2CAcquireTokenWithAuthorityBuilderAndPolicyTest()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CLoginAuthority);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
+
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+            }
         }
 
         [TestMethod]
@@ -1193,7 +1224,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority);
 
             var result = app
-                .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                .AcquireTokenInteractive(MsalTestConstants.Scope)
                 .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                 .ExecuteAsync(CancellationToken.None)
                 .Result;
