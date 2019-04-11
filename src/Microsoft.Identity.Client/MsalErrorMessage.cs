@@ -282,7 +282,7 @@ namespace Microsoft.Identity.Client
         public const string B2CAuthorityHostMisMatch = "The B2C authority host that was used when creating the client application is not the same authority host used in the AcquireToken call. " +
            "See https://aka.ms/msal-net-b2c for details. ";
 
-        public const string B2CPolicyIsMissing = "The IEF Policy for B2C has not been specificed in the AcquireToken call. " +
+        public const string TrustFrameworkPolicyIsMissing = "The TrustFramework Policy for B2C has not been specificed in the AcquireToken call. " +
             "See https://aka.ms/msal-net-b2c for details";
     }
 }

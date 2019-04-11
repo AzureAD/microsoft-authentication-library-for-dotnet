@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             app = PublicClientApplicationBuilder
                 .Create(MsalTestConstants.ClientId)
-                .WithB2CHost(MsalTestConstants.B2CAuthorityHost, MsalTestConstants.B2CTenantId)
+                .WithB2CAuthority(MsalTestConstants.B2CAuthorityHost, MsalTestConstants.B2CTenantId)
                 .BuildConcrete();
 
             Assert.IsNotNull(app);
@@ -977,7 +977,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                             .WithB2CHost(
+                                                                             .WithB2CAuthority(
                                                                                 MsalTestConstants.B2CAuthorityHost,
                                                                                 MsalTestConstants.B2CTenantId)
                                                                             .WithHttpManager(httpManager)
@@ -996,7 +996,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }
                 catch(Exception ex)
                 {
-                    Assert.AreEqual(MsalErrorMessage.B2CPolicyIsMissing, ex.InnerException.Message);
+                    Assert.AreEqual(MsalErrorMessage.TrustFrameworkPolicyIsMissing, ex.InnerException.Message);
                 }
             }
         }
@@ -1008,7 +1008,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithB2CHost(
+                                                                            .WithB2CAuthority(
                                                                                 MsalTestConstants.B2CAuthorityHost,
                                                                                 MsalTestConstants.B2CTenantId)
                                                                             .WithHttpManager(httpManager)
@@ -1023,7 +1023,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                    .WithB2CPolicy(MsalTestConstants.B2CPolicy)
+                    .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1039,7 +1039,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithB2CHost(
+                                                                            .WithB2CAuthority(
                                                                                 MsalTestConstants.B2CLoginHost,
                                                                                 MsalTestConstants.B2CTenantId)
                                                                             .WithHttpManager(httpManager)
@@ -1061,7 +1061,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                    .WithB2CPolicy(MsalTestConstants.B2CPolicy)
+                    .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1077,7 +1077,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                             .WithB2CHost(
+                                                                             .WithB2CAuthority(
                                                                                 MsalTestConstants.B2CCustomDomainHost,
                                                                                 MsalTestConstants.B2CCustomDomainTenantId)
                                                                             .WithHttpManager(httpManager)
@@ -1092,7 +1092,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                    .WithB2CPolicy(MsalTestConstants.B2CPolicy)
+                    .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1115,7 +1115,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     AuthenticationResult result = app
                         .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                        .WithB2CPolicy(MsalTestConstants.B2CPolicy)
+                        .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                         .ExecuteAsync(CancellationToken.None)
                         .Result;
                 }
@@ -1177,7 +1177,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var app = PublicClientApplicationBuilder
                 .Create(MsalTestConstants.ClientId)
-                .WithB2CHost(authorityHost, tenantId)
+                .WithB2CAuthority(authorityHost, tenantId)
                 .WithHttpManager(harness.HttpManager)
                 .BuildConcrete();
 
@@ -1194,7 +1194,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var result = app
                 .AcquireTokenInteractive(MsalTestConstants.Scope, null)
-                .WithB2CPolicy(MsalTestConstants.B2CPolicy)
+                .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
                 .ExecuteAsync(CancellationToken.None)
                 .Result;
 

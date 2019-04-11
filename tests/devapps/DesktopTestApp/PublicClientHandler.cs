@@ -90,7 +90,7 @@ namespace DesktopTestApp
 
                 if (UseB2CAuthorityHost || UseB2CCustomDomain)
                 {
-                    request.WithB2CPolicy(B2CPolicy);
+                    request.WithTrustFameworkPolicy(B2CPolicy);
                 }
                 result = await request
                     .ExecuteAsync(CancellationToken.None)
@@ -106,7 +106,7 @@ namespace DesktopTestApp
 
                 if (UseB2CAuthorityHost || UseB2CCustomDomain)
                 {
-                    request.WithB2CPolicy(B2CPolicy);
+                    request.WithTrustFameworkPolicy(B2CPolicy);
                 }
 
                 result = await request
@@ -180,7 +180,7 @@ namespace DesktopTestApp
                    .WithAccount(CurrentUser)
                    .WithPrompt(uiBehavior)
                    .WithExtraQueryParameters(extraQueryParams)
-                   .WithB2CPolicy(B2CPolicy)
+                   .WithTrustFameworkPolicy(B2CPolicy)
                    .ExecuteAsync(CancellationToken.None)
                    .ConfigureAwait(false);
 
@@ -219,11 +219,11 @@ namespace DesktopTestApp
                 .WithClientName(_clientName);
             if (UseB2CCustomDomain)
             {
-                builder.WithB2CHost(_customDomainAuthorityHost, _customDomainTenantId);
+                builder.WithB2CAuthority(_customDomainAuthorityHost, _customDomainTenantId);
             }
             else
             {
-                builder.WithB2CHost(_b2cAuthorityHost, _b2cTenantId);
+                builder.WithB2CAuthority(_b2cAuthorityHost, _b2cTenantId);
             }
             PublicClientApplication = builder.BuildConcrete();
         }

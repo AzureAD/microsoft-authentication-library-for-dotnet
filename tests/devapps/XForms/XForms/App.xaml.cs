@@ -123,7 +123,7 @@ namespace XForms
             }
             if (UseB2CAuthorityHost)
             {
-                builder.WithB2CHost(b2cAuthorityHost, B2CTenantId);
+                builder.WithB2CAuthority(b2cAuthorityHost, B2CTenantId);
                 builder.WithRedirectUri(RedirectUriB2C);
             }
             else
@@ -138,7 +138,7 @@ namespace XForms
         {
             var builder = PublicClientApplicationBuilder
                 .Create(B2cClientId)
-                .WithB2CHost(b2cAuthorityHost, B2CTenantId)
+                .WithB2CAuthority(b2cAuthorityHost, B2CTenantId)
                 .WithLogging((level, message, pii) =>
                 {
                     Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
