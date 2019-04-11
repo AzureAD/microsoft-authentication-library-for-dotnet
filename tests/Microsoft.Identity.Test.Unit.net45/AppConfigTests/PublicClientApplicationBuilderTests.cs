@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithHttpClientFactory()
         {
-            var httpClientFactory = new MyHttpClientFactory();
+            var httpClientFactory = NSubstitute.Substitute.For<IMsalHttpClientFactory>();
             var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                     .WithHttpClientFactory(httpClientFactory)
                                                     .Build();

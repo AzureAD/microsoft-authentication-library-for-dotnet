@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
         #endregion

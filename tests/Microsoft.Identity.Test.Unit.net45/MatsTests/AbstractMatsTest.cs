@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.Mats.Internal.Constants;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.MatsTests
 {
@@ -15,6 +16,7 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
 
         public virtual void Setup()
         {
+            TestCommon.ResetInternalStaticCaches();
             _errorStore = new ErrorStore();
             _dispatcher = new TestTelemetryDispatcher();
         }

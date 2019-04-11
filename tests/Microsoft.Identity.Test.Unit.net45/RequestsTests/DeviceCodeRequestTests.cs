@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
         private HttpResponseMessage CreateDeviceCodeResponseSuccessMessage()

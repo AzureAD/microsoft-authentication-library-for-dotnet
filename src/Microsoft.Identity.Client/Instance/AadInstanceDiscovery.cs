@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Instance
         // in the case where a ConfidentialClientApplication is created per-request, for example.
         // So moving this back to static to keep the existing behavior but the rest of the code
         // won't know this is static.
-        private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> _cache =
+        private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> s_cache =
             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
         private readonly ICoreLogger _logger;
@@ -58,13 +58,13 @@ namespace Microsoft.Identity.Client.Instance
             _telemetryManager = telemetryManager;
             if (shouldClearCache)
             {
-                _cache.Clear();
+                s_cache.Clear();
             }
         }
 
         public bool TryGetValue(string host, out InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry)
         {
-            return _cache.TryGetValue(host, out instanceDiscoveryMetadataEntry);
+            return s_cache.TryGetValue(host, out instanceDiscoveryMetadataEntry);
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Instance
 
         public bool TryAddValue(string host, InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry)
         {
-            return _cache.TryAdd(host, instanceDiscoveryMetadataEntry);
+            return s_cache.TryAdd(host, instanceDiscoveryMetadataEntry);
         }
 
         public static string BuildAuthorizeEndpoint(string host, string tenant)

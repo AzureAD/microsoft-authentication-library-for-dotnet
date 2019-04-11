@@ -30,12 +30,19 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
     public class RedirectUriHelperTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [TestMethod]
         public void ValidateRedirectUri_Throws()
         {

@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetInternalStaticCaches();
             _serviceBundle = TestCommon.CreateDefaultServiceBundle();
         }
 

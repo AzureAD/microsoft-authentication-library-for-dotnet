@@ -36,6 +36,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Platforms.net45.CacheV2;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -56,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         {
             TestCleanup();
             _io = new WindowsFileSystemCacheKeyStorage(Path.Combine(AssemblyUtilsEx.GetExecutingAssemblyDirectory(), TestFolder));
-            _data = RandomDataUtils.GetRandomData(1024);
+            _data = RandomDataUtils.GetRandomData(1024);            
         }
 
         [TestCleanup]
@@ -71,6 +72,8 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             {
                 File.Delete(TestFolderBase);
             }
+
+            TestCommon.ResetInternalStaticCaches();
         }
 
         [TestMethod]

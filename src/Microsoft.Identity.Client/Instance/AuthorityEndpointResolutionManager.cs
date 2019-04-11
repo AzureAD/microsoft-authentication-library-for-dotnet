@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class AuthorityEndpointResolutionManager : IAuthorityEndpointResolutionManager
     {
-        private static readonly ConcurrentDictionary<string, AuthorityEndpointCacheEntry> EndpointCacheEntries =
+        private static readonly ConcurrentDictionary<string, AuthorityEndpointCacheEntry> s_endpointCacheEntries =
             new ConcurrentDictionary<string, AuthorityEndpointCacheEntry>();
 
         private readonly IServiceBundle _serviceBundle;
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Instance
             _serviceBundle = serviceBundle;
             if (shouldClearCache)
             {
-                EndpointCacheEntries.Clear();
+                s_endpointCacheEntries.Clear();
             }
         }
 
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.Instance
         {
             endpoints = null;
 
-            if (!EndpointCacheEntries.TryGetValue(authorityInfo.CanonicalAuthority, out var cacheEntry))
+            if (!s_endpointCacheEntries.TryGetValue(authorityInfo.CanonicalAuthority, out var cacheEntry))
             {
                 return false;
             }
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Instance
             {
                 // Since we're here, we've made a call to the backend.  We want to ensure we're caching
                 // the latest values from the server.
-                if (EndpointCacheEntries.TryGetValue(authorityInfo.CanonicalAuthority, out var cacheEntry))
+                if (s_endpointCacheEntries.TryGetValue(authorityInfo.CanonicalAuthority, out var cacheEntry))
                 {
                     foreach (string s in cacheEntry.ValidForDomainsList)
                     {
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.Instance
                 updatedCacheEntry.ValidForDomainsList.Add(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName));
             }
 
-            EndpointCacheEntries.TryAdd(authorityInfo.CanonicalAuthority, updatedCacheEntry);
+            s_endpointCacheEntries.TryAdd(authorityInfo.CanonicalAuthority, updatedCacheEntry);
         }
 
         private async Task<TenantDiscoveryResponse> DiscoverEndpointsAsync(

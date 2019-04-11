@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
@@ -33,6 +34,12 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class DeviceCodeResponseTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         private const string VerificationUrl = "http://verification.url";
         private const string VerificationUri = "http://verification.uri";
 

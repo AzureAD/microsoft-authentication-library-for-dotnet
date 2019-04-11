@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestInitialize]
         public void Init()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
         [TestMethod]

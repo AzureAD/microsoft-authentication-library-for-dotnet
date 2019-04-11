@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.WsTrust;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -36,6 +37,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
     [TestClass]
     public class WsTrustEndpointTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         private readonly Uri _uri = new Uri("https://windowsorusernamepasswordendpointurl");
         private readonly string _cloudAudienceUri = "https://cloudAudienceUrn";
 

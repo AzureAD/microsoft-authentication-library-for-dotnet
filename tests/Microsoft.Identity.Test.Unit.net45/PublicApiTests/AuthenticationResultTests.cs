@@ -29,6 +29,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -36,6 +37,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class AuthenticationResultTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [TestMethod]
         public void PublicTestConstructorCoversAllProperties()
         {

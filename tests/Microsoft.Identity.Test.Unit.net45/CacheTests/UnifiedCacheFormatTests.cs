@@ -55,10 +55,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     [DeploymentItem(@"Resources\B2CWithTenantIdTestData.txt")]
     public class UnifiedCacheFormatTests
     {
-        private void TestInitialize(MockHttpManager httpManager)
+        [TestInitialize]
+        public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
+        }
 
+        private void Init(MockHttpManager httpManager)
+        {
             httpManager.AddMockHandler(
             MockHelpers.CreateInstanceDiscoveryMockHandler(
                 MsalTestConstants.GetDiscoveryEndpoint(MsalTestConstants.AuthorityCommonTenant)));
@@ -158,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = new MockHttpAndServiceBundle())
             {
                 IntitTestData("AADTestData.txt");
-                TestInitialize(harness.HttpManager);
+                Init(harness.HttpManager);
                 RunCacheFormatValidation(harness);
             }
         }
@@ -170,7 +174,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = new MockHttpAndServiceBundle())
             {
                 IntitTestData("MSATestData.txt");
-                TestInitialize(harness.HttpManager);
+                Init(harness.HttpManager);
                 RunCacheFormatValidation(harness);
             }
         }
@@ -182,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                TestCommon.ResetStateAndInitMsal();
+                TestCommon.ResetInternalStaticCaches();
                 IntitTestData("B2CNoTenantIdTestData.txt");
                 RunCacheFormatValidation(harness);
             }
