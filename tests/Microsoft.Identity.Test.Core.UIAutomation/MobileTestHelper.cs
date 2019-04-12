@@ -196,9 +196,9 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// Runs through the B2C acquire token flow with Facebook Provider
         /// and Edit Policy authority
         /// </summary>
-        public void B2CEditPolicyAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse)
+        public void B2CEditPolicyAcquireTokenInteractiveTestHelper(ITestController controller)
         {
-            PerformB2CSignInFlow(controller, labResponse.User, labResponse.User.B2CIdentityProvider, false);
+            PerformB2CSignInEditProfileFlow(controller);
         }
 
         /// <summary>

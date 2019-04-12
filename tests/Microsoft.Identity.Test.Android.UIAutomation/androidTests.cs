@@ -194,10 +194,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookEditPolicyAcquireTokenTest()
         {
-            _mobileTestHelper.IsB2CLoginAuthority = true;
-            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, B2CIdentityProvider.Facebook);
-            _mobileTestHelper.B2CSilentFlowHelper(xamarinController);
-            _mobileTestHelper.B2CEditPolicyAcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetB2CFacebookAccount());
+            _mobileTestHelper.B2CEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
         }
 
         /// <summary>
@@ -249,7 +246,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CLocalAccountEditProfileAcquireTokenTest()
         {
-            _mobileTestHelper.B2CEditPolicyAcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetB2CLocalAccount());
+            _mobileTestHelper.B2CEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
         }
 
         /// <summary>
