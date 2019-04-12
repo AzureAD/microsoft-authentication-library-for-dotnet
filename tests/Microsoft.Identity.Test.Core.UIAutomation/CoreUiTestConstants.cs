@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         //MSAL B2C
         public const string AuthorityPickerId = "b2cAuthorityPicker";
-        public const string PolicyPickerId = "b2cPolicyPicker";
+        public const string PolicyPickerId = "trustFrameworkPolicyPicker";
         public const string WebUpnB2CLocalInputId = "logonIdentifier";
         public const string B2CWebSubmitId = "next";
         public const string B2CWebPasswordId = "password";

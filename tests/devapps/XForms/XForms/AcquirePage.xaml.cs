@@ -226,7 +226,7 @@ namespace XForms
 
                 if(App.UseB2CAuthorityHost)
                 {
-                    request.WithTrustFameworkPolicy(App.B2CPolicy);
+                    request.WithTrustFameworkPolicy(App.TrustFrameworkPolicy);
                 }
 
                 var result = await request.ExecuteAsync().ConfigureAwait(true);

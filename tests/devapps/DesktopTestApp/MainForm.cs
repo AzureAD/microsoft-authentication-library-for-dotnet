@@ -156,7 +156,7 @@ namespace DesktopTestApp
             {
                 ClearResultPageInfo();
                 GetB2CAuthorityHost();
-                GetB2CPolicy();
+                GetTrustFrameworkPolicy();
                 _publicClientHandler.ApplicationId = PublicClientId;
                 _publicClientHandler.LoginHint = loginHintTextBox.Text;
                 _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
@@ -387,26 +387,26 @@ namespace DesktopTestApp
             return behavior;
         }
 
-        private void GetB2CPolicy()
+        private void GetTrustFrameworkPolicy()
         {
             if (signInSignUpRadioButton.Checked)
             {
-                _publicClientHandler.B2CPolicy = SignInSignUpPolicy;
+                _publicClientHandler.TrustFrameworkPolicy = SignInSignUpPolicy;
             }
 
             if (editProfileRadioButton.Checked)
             {
-                _publicClientHandler.B2CPolicy = EditProfilePolicy;
+                _publicClientHandler.TrustFrameworkPolicy = EditProfilePolicy;
             }
 
             if (ROPCRadioButton.Checked)
             {
-                _publicClientHandler.B2CPolicy = ROPCPolicy;
+                _publicClientHandler.TrustFrameworkPolicy = ROPCPolicy;
             }
 
             if (customDomainPolicyRadioButton.Checked)
             {
-                _publicClientHandler.B2CPolicy = CustomDomainSignInSignUpPolicy;
+                _publicClientHandler.TrustFrameworkPolicy = CustomDomainSignInSignUpPolicy;
             }
         }
 
@@ -593,7 +593,7 @@ namespace DesktopTestApp
 
         private void SignInSignUpButton_Click(object sender, EventArgs e)
         {
-            _publicClientHandler.B2CPolicy = SignInSignUpPolicy;
+            _publicClientHandler.TrustFrameworkPolicy = SignInSignUpPolicy;
         }
 
         private void B2cAuthorityHostButton_Click(object sender, EventArgs e)

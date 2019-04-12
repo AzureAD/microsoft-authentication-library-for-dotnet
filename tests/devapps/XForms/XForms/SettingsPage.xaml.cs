@@ -114,16 +114,16 @@ namespace XForms
 
         private void OnPolicyPickerSelectedIndexChanged(object sender, EventArgs args)
         {
-            var selectedB2CPolicy = (Picker)sender;
-            int selectedIndex = selectedB2CPolicy.SelectedIndex;
+            var selectedTrustFrameworkPolicy = (Picker)sender;
+            int selectedIndex = selectedTrustFrameworkPolicy.SelectedIndex;
 
             switch (selectedIndex)
             {
             case 0:
-                App.B2CPolicy = App.B2CSiSuPolicy;
+                App.TrustFrameworkPolicy = App.B2CSiSuPolicy;
                 break;
             case 1:
-                App.B2CPolicy = App.B2CEditProfilePolicy;
+                App.TrustFrameworkPolicy = App.B2CEditProfilePolicy;
                 break;
             }
         }

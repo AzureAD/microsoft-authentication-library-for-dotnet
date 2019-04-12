@@ -971,7 +971,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("B2C")]
-        public void NoB2CPolicyFailTest()
+        public void NoTrustFrameworkPolicyFailTest()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -1023,7 +1023,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
+                    .WithTrustFameworkPolicy(MsalTestConstants.TrustFrameworkPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1061,7 +1061,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
+                    .WithTrustFameworkPolicy(MsalTestConstants.TrustFrameworkPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1092,7 +1092,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
+                    .WithTrustFameworkPolicy(MsalTestConstants.TrustFrameworkPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1151,7 +1151,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
+                    .WithTrustFameworkPolicy(MsalTestConstants.TrustFrameworkPolicy)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -1224,7 +1224,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var result = app
                 .AcquireTokenInteractive(MsalTestConstants.Scope)
-                .WithTrustFameworkPolicy(MsalTestConstants.B2CPolicy)
+                .WithTrustFameworkPolicy(MsalTestConstants.TrustFrameworkPolicy)
                 .ExecuteAsync(CancellationToken.None)
                 .Result;
 

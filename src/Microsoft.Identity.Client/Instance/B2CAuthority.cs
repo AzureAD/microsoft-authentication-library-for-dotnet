@@ -59,10 +59,10 @@ namespace Microsoft.Identity.Client.Instance
             var segments = authorityUri.Segments;
 
             var b2cPrefix = segments[1].TrimEnd('/');
-            var b2cPolicy = segments[3].TrimEnd('/');
+            var trustFrameworkPolicy = segments[3].TrimEnd('/');
 
             AuthorityInfo.CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, B2CCanonicalAuthorityTemplate,
-                                                             authorityUri.Authority, b2cPrefix, tenantId, b2cPolicy);
+                                                             authorityUri.Authority, b2cPrefix, tenantId, trustFrameworkPolicy);
         }
     }
 }

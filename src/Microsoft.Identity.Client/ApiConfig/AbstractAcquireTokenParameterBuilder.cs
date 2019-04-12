@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
             }
 
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithTrustFrameworkPolicy);
-            CommonParameters.B2CPolicy = policy;
+            CommonParameters.TrustFrameworkPolicy = policy;
             return (T)this;
         }
 

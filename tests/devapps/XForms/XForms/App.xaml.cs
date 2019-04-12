@@ -75,7 +75,7 @@ namespace XForms
         public static string ClientId = DefaultClientId;
 
         public static string[] Scopes = DefaultScopes;
-        public static string B2CPolicy;
+        public static string TrustFrameworkPolicy;
         public static bool UseBroker;
         public static bool UseB2CAuthorityHost = false;
 

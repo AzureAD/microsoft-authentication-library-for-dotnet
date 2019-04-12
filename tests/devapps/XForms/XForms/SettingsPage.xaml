@@ -39,7 +39,7 @@
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
-                <Picker x:Name="b2cPolicyPicker" Title="Select a B2C Policy" SelectedIndexChanged="OnPolicyPickerSelectedIndexChanged" AutomationId="b2cPolicyPicker">
+                <Picker x:Name="trustFrameworkPolicyPicker" Title="Select a TrustFramework Policy" SelectedIndexChanged="OnPolicyPickerSelectedIndexChanged" AutomationId="trustFrameworkPolicyPicker">
                     <Picker.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <x:String>B2C_1_SISOPolicy</x:String>

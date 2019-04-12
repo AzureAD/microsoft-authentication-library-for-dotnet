@@ -69,7 +69,7 @@ namespace DesktopTestApp
         public string LoginHint { get; set; }
         public IAccount CurrentUser { get; set; }
         public PublicClientApplication PublicClientApplication { get; set; }
-        public string B2CPolicy { get; set; }
+        public string TrustFrameworkPolicy { get; set; }
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveAsync(
             IEnumerable<string> scopes,
@@ -90,7 +90,7 @@ namespace DesktopTestApp
 
                 if (UseB2CAuthorityHost || UseB2CCustomDomain)
                 {
-                    request.WithTrustFameworkPolicy(B2CPolicy);
+                    request.WithTrustFameworkPolicy(TrustFrameworkPolicy);
                 }
                 result = await request
                     .ExecuteAsync(CancellationToken.None)
@@ -106,7 +106,7 @@ namespace DesktopTestApp
 
                 if (UseB2CAuthorityHost || UseB2CCustomDomain)
                 {
-                    request.WithTrustFameworkPolicy(B2CPolicy);
+                    request.WithTrustFameworkPolicy(TrustFrameworkPolicy);
                 }
 
                 result = await request
@@ -180,7 +180,7 @@ namespace DesktopTestApp
                    .WithAccount(CurrentUser)
                    .WithPrompt(uiBehavior)
                    .WithExtraQueryParameters(extraQueryParams)
-                   .WithTrustFameworkPolicy(B2CPolicy)
+                   .WithTrustFameworkPolicy(TrustFrameworkPolicy)
                    .ExecuteAsync(CancellationToken.None)
                    .ConfigureAwait(false);
 

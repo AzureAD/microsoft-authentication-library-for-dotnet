@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             SetB2CAuthority(controller);
 
-            SetB2CPolicy(controller);
+            SetTrustFrameworkPolicy(controller);
 
             UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
@@ -362,7 +362,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             }
         }
 
-        private void SetB2CPolicy(ITestController controller)
+        private void SetTrustFrameworkPolicy(ITestController controller)
         {
             controller.Tap(CoreUiTestConstants.PolicyPickerId);
             controller.Tap(CoreUiTestConstants.B2CSiSuPolicy);

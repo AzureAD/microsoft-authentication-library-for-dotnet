@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string B2CBlackforestHost = "sometenantid.b2clogin.de";
 
         public const string B2CTenantId = "sometenantid";
-        public const string B2CPolicy = "policy";
+        public const string TrustFrameworkPolicy = "policy";
 
         public const string B2CAuthority = "https://login.microsoftonline.in/tfp/sometenantid/policy/";
         public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";

@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
                 {
-                    if (string.IsNullOrEmpty(_commonParameters.B2CPolicy))
+                    if (string.IsNullOrEmpty(_commonParameters.TrustFrameworkPolicy))
                     {
                         throw new MsalClientException(MsalError.TrustFrameworkPolicyIsMissing, MsalErrorMessage.TrustFrameworkPolicyIsMissing);
                     }
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     pathSegments[1]);
             }
 
-            Authority.AuthorityInfo.CanonicalAuthority = serviceBundle.Config.AuthorityInfo.CanonicalAuthority + _commonParameters.B2CPolicy + "/";
+            Authority.AuthorityInfo.CanonicalAuthority = serviceBundle.Config.AuthorityInfo.CanonicalAuthority + _commonParameters.TrustFrameworkPolicy + "/";
         }
     }
 }
