@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestInitialize]
         public void Initialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
             _myReceiver = new MyReceiver();
             _serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
             _logger = _serviceBundle.DefaultLogger;

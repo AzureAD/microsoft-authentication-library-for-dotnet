@@ -31,6 +31,7 @@ using Microsoft.Identity.Client.CacheV2.Impl.Utils;
 using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
@@ -38,6 +39,12 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
     [TestClass]
     public class CacheManagerTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         private IdToken GetIdToken(
             string oid,
             string subject,

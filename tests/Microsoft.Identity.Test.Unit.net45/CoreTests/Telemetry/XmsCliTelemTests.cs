@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -44,6 +45,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetInternalStaticCaches();
+
             // Methods in XmsCliTelemTests log errors when parsing response headers;
             _coreLogger = Substitute.For<ICoreLogger>();
             _requestContext = new RequestContext(null, _coreLogger, Guid.Empty);

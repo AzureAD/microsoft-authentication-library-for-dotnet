@@ -25,6 +25,7 @@
 //
 // ------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -35,24 +36,18 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.Identity.Test.Unit.RequestsTests.InteractiveRequestTests;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
     public class BrokerRequestTests
     {
-        BrokerInteractiveRequest _brokerInteractiveRequest;
+        private BrokerInteractiveRequest _brokerInteractiveRequest;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
         [TestMethod]

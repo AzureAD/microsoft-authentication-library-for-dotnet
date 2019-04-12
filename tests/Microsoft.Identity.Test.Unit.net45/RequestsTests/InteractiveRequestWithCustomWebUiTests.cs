@@ -26,7 +26,6 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -53,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
         private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
@@ -63,8 +62,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         private static void ExecuteTest(
-            bool withTokenRequest, 
-            Action<ICustomWebUi> customizeWebUiBehavior, 
+            bool withTokenRequest,
+            Action<ICustomWebUi> customizeWebUiBehavior,
             Action<InteractiveRequest> executionBehavior)
         {
             var customWebUi = Substitute.For<ICustomWebUi>();
@@ -120,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                          // Capture the state from the authorizationUri and add it to the result uri
                          var authorizationUri = x[0] as Uri;
                          var state = CoreHelpers.ParseKeyValueList(authorizationUri.Query, '&', true, false, null)["state"];
-                         Assert.IsTrue(!String.IsNullOrEmpty(state));
+                         Assert.IsTrue(!string.IsNullOrEmpty(state));
 
                          return Task.FromResult(new Uri(ExpectedRedirectUri + "?code=some-code&state=" + state));
                      });
@@ -179,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 });
         }
 
-      
+
 
         [TestMethod]
         public void TestInteractiveWithCustomWebUi_IncorrectState()

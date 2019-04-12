@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
         internal void SetupMocks(MockHttpManager httpManager)

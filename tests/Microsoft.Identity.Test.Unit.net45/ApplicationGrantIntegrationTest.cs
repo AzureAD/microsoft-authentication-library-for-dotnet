@@ -30,6 +30,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
@@ -42,6 +43,12 @@ namespace Microsoft.Identity.Test.Unit
         public const string RedirectUri = "http://localhost";
         private readonly string[] _msalScopes = { "https://graph.microsoft.com/.default" };
         private readonly string _password = "";
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
 
         static ApplicationGrantIntegrationTest()
         {

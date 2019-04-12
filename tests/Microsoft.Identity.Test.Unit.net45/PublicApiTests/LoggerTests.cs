@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestInitialize]
         public void TestInit()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
 
             _callback = Substitute.For<LogCallback>();
         }

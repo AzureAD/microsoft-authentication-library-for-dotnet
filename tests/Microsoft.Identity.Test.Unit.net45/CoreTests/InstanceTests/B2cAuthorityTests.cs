@@ -45,6 +45,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetInternalStaticCaches();
         }
 
         [TestCleanup]

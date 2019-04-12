@@ -35,12 +35,19 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 {
     [TestClass]
     public class TokenResponseTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [TestMethod]
         [TestCategory("TokenResponseTests")]
         public void ExpirationTimeTest()

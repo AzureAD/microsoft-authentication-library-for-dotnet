@@ -22,9 +22,8 @@ namespace UWP
         private readonly IPublicClientApplication _pca;
         private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
         private static readonly string s_authority = "https://login.microsoftonline.com/common/";
-        private static readonly IEnumerable<string> s_scopes = new[] { "https://graph.windows.net/.default" };
-        private const string Resource = "https://graph.windows.net";
-
+        private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
+        private const string CacheFileName = "msal_user_cache.json";
 
         public MainPage()
         {
@@ -39,7 +38,7 @@ namespace UWP
                 if (tokenCacheNotifcation.HasStateChanged)
                 {
                     StorageFile cacheFile = ApplicationData.Current.LocalFolder.CreateFileAsync(
-                        "msal_user_cache.bin",
+                        CacheFileName,
                         CreationCollisionOption.ReplaceExisting).AsTask().GetAwaiter().GetResult();
 
                     byte[] blob = tokenCacheNotifcation.TokenCache.SerializeMsalV3();
@@ -51,7 +50,7 @@ namespace UWP
 
             _pca.UserTokenCache.SetBeforeAccess((tokenCacheNotifcation) =>
             {
-                IStorageFile cacheFile = (ApplicationData.Current.LocalFolder.TryGetItemAsync("msal_user_cache.bin")
+                IStorageFile cacheFile = (ApplicationData.Current.LocalFolder.TryGetItemAsync(CacheFileName)
                     .AsTask().ConfigureAwait(false).GetAwaiter().GetResult()) as IStorageFile;
 
                 if (cacheFile != null)
@@ -145,7 +144,9 @@ namespace UWP
                 IEnumerable<IAccount> users = await _pca.GetAccountsAsync().ConfigureAwait(false);
                 IAccount user = users.FirstOrDefault();
 
-                result = await _pca.AcquireTokenInteractive(s_scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                result = await _pca.AcquireTokenInteractive(s_scopes)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {

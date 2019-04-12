@@ -29,6 +29,7 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
@@ -37,6 +38,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
     [TestCategory("BuilderTests")]
     public class ConfidentialClientApplicationBuilderTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [TestMethod]
         public void TestConstructor()
         {
@@ -95,7 +102,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithHttpClientFactory()
         {
-            var httpClientFactory = new MyHttpClientFactory();  
+            var httpClientFactory = NSubstitute.Substitute.For<IMsalHttpClientFactory>();
             var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithHttpClientFactory(httpClientFactory).Build();
             Assert.AreEqual(httpClientFactory, cca.AppConfig.HttpClientFactory);
         }

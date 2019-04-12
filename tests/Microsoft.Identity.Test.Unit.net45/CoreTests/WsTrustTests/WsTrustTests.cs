@@ -35,6 +35,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
@@ -42,6 +43,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
     [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
     public class WsTrustTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [TestMethod]
         [Description("WS-Trust Request Test")]
         public async Task WsTrustRequestTestAsync()

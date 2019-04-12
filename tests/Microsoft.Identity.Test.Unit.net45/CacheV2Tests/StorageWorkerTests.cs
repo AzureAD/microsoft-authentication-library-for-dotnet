@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetInternalStaticCaches();
             _credentialPathManager =
                 new FileSystemCredentialPathManager(TestCommon.CreateDefaultServiceBundle().PlatformProxy.CryptographyManager);
             _mockFileIO = new MockFileIO();

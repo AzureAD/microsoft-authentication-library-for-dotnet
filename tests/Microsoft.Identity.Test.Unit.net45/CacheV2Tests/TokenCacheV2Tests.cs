@@ -55,6 +55,8 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetInternalStaticCaches();
+
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             _cachePathStorage = new InMemoryCachePathStorage();
             _credentialPathManager = new FileSystemCredentialPathManager(serviceBundle.PlatformProxy.CryptographyManager);
