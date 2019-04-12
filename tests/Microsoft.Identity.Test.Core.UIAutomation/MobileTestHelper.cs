@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// </summary>
         public void B2CLocalAccountAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse)
         {
-            PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Local, true);
+            PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Local);
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// </summary>
         public void B2CFacebookAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse)
         {
-            PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Facebook, true);
+            PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Facebook);
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// </summary>
         public void B2CGoogleAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse)
         {
-            PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Google, true);
+            PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Google);
         }
 
         /// <summary>
@@ -317,11 +317,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
 
-        public void PerformB2CSignInFlow(ITestController controller, LabUser user, B2CIdentityProvider b2CIdentityProvider, bool useSiSuPolicy)
+        public void PerformB2CSignInFlow(ITestController controller, LabUser user, B2CIdentityProvider b2CIdentityProvider)
         {
             SetB2CAuthority(controller);
 
-            SetB2CPolicy(controller, useSiSuPolicy);
+            SetB2CPolicy(controller);
 
             UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
@@ -362,19 +362,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             }
         }
 
-        private void SetB2CPolicy(ITestController controller, bool useSiSuPolicy)
+        private void SetB2CPolicy(ITestController controller)
         {
-            if (useSiSuPolicy)
-            {
-                controller.Tap(CoreUiTestConstants.PolicyPickerId);
-                controller.Tap(CoreUiTestConstants.B2CSiSuPolicy);
-            }
-            else
-            {
-                controller.Tap(CoreUiTestConstants.PolicyPickerId);
-                controller.Tap(CoreUiTestConstants.B2CEditProfilePolicy);
-                SetUiBehavior(controller, CoreUiTestConstants.UiBehaviorNoPrompt);
-            }
+            controller.Tap(CoreUiTestConstants.PolicyPickerId);
+            controller.Tap(CoreUiTestConstants.B2CSiSuPolicy);
         }
 
         public void PerformB2CSelectProviderOnlyFlow(ITestController controller, B2CIdentityProvider b2CIdentityProvider)
@@ -403,6 +394,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         public void PerformB2CSignInEditProfileFlow(ITestController controller)
         {
+            controller.Tap(_settingsPageId);
+
+            controller.Tap(CoreUiTestConstants.PolicyPickerId);
+            controller.Tap(CoreUiTestConstants.B2CEditProfilePolicy);
+
             controller.Tap(_acquirePageId);
 
             SetUiBehavior(controller, CoreUiTestConstants.UiBehaviorNoPrompt);
