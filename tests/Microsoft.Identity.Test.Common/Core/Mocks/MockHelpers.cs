@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 foci ? FociTokenResponse : DefaultTokenResponse);
         }
 
-        public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage()
+        public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage(string subError = null)
         {
             return CreateFailureMessage(HttpStatusCode.BadRequest,
                 "{\"error\":\"invalid_grant\",\"error_description\":\"AADSTS70002: Error " +
@@ -148,7 +148,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "or revoked.Trace ID: f7ec686c-9196-4220-a754-cd9197de44e9Correlation ID: " +
                 "04bb0cae-580b-49ac-9a10-b6c3316b1eaaTimestamp: 2015-09-16 07:24:55Z\"," +
                 "\"error_codes\":[70002,70008],\"timestamp\":\"2015-09-16 07:24:55Z\"," +
-                "\"trace_id\":\"f7ec686c-9196-4220-a754-cd9197de44e9\",\"correlation_id\":" +
+                "\"trace_id\":\"f7ec686c-9196-4220-a754-cd9197de44e9\"," +
+                (subError != null ? ("\"suberror\":" + "\"" + subError + "\",") : "") +
+                "\"correlation_id\":" +
                 "\"04bb0cae-580b-49ac-9a10-b6c3316b1eaa\"}");
         }
 

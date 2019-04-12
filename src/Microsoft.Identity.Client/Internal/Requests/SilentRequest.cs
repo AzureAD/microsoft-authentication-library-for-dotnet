@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
         private const string TheOnlyFamilyId = "1";
+        private const string FociClientMismatchSubError = "client_mismatch";
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -173,13 +174,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     MsalTokenResponse frtTokenResponse = await RefreshAccessTokenAsync(familyRefreshToken, cancellationToken)
                         .ConfigureAwait(false);
 
-                    logger.Verbose("[FOCI] FRT exchanged succeeded");
+                    logger.Verbose("[FOCI] FRT refresh succeeded");
                     return frtTokenResponse;
                 }
-                catch (MsalServiceException)
+                catch (MsalServiceException ex)
                 {
-                    logger.Error("[FOCI] FRT exchanged failed " + (familyRefreshToken != null));
+
+                    // Hack: STS does not yet send back the suberror on these platforms because they are not in an allowed list,
+                    // so the best thing we can do is to consider all errors as client_mismatch.
+#if NETSTANDARD || UAP || MAC
                     return null;
+#endif
+                    if (MsalError.InvalidGrantError.Equals(ex?.ErrorCode, StringComparison.OrdinalIgnoreCase) &&
+                        FociClientMismatchSubError.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
+                    {
+                        logger.Error("[FOCI] FRT refresh failed - client mismatch");
+                        return null;
+                    }
+
+                    // Rethrow failures to refresh the FRT, other than client_mismatch, because 
+                    // apps need to handle them in the same way they handle exceptions from refreshing the RT.
+                    // For example, some apps have special handling for MFA errors.
+                    logger.Error("[FOCI] FRT refresh failed - other error");
+                    throw;
                 }
             }
 
