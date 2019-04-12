@@ -45,11 +45,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UWP", "tests\devapps\UWP\UWP.csproj", "{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572-BBD7-424E-81D5-E59E6884EB3A}"
-	ProjectSection(SolutionItems) = preProject
-		Directory.Build.props = Directory.Build.props
-		src\Directory.Build.targets = src\Directory.Build.targets
-		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Unit.net45", "tests\Microsoft.Identity.Test.Unit.net45\Microsoft.Identity.Test.Unit.net45.csproj", "{EC3F88FE-D7DE-433F-B300-1A44FF7AEB23}"
 EndProject
@@ -102,6 +97,19 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FociTestApp", "tests\devapps\FociTestApp\FociTestApp.csproj", "{24D2AF71-A01E-4450-8C3F-B9923A81134B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiCloudTestApp", "tests\devapps\MultiCloudTestApp\MultiCloudTestApp.csproj", "{959A47D9-07E7-4BF3-A0F7-6D9CD42A2C46}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9B-427F-AC02-642BDF8D936B}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		src\Directory.Build.targets = src\Directory.Build.targets
+		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "product", "product", "{4667ADF0-37FA-4306-BD2A-F55D6360143E}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+		src\Directory.Build.targets = src\Directory.Build.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -270,6 +278,8 @@ Global
 		{2EAA7878-3E2A-4355-9841-430BF45EA8BD} = {58B95AA7-BE17-40F2-9C9A-FA27C282A10A}
 		{24D2AF71-A01E-4450-8C3F-B9923A81134B} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{959A47D9-07E7-4BF3-A0F7-6D9CD42A2C46} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
+		{C44AADC0-1E9B-427F-AC02-642BDF8D936B} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
+		{4667ADF0-37FA-4306-BD2A-F55D6360143E} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}
