@@ -104,24 +104,24 @@ namespace XForms
 
             switch (selectedIndex)
             {
-                case 0:
-                    App.Authority = App.B2cAuthority;
-                    CreateB2CAppSettings();
-                    break;
+            case 0:
+                App.Authority = App.B2cAuthority;
+                CreateB2CAppSettings();
+                break;
 
-                case 1:
-                    App.Authority = App.B2CLoginAuthority;
-                    CreateB2CAppSettings();
-                    break;
-                case 2:
-                    App.Authority = App.B2CEditProfilePolicyAuthority;
-                    CreateB2CAppSettings();
-                    break;
-                default:
-                    App.Authority = App.DefaultAuthority;
-                    App.Scopes = App.DefaultScopes;
-                    App.ClientId = App.DefaultClientId;
-                    break;
+            case 1:
+                App.Authority = App.B2CLoginAuthority;
+                CreateB2CAppSettings();
+                break;
+            case 2:
+                App.Authority = App.B2CEditProfilePolicyAuthority;
+                CreateB2CAppSettings();
+                break;
+            default:
+                App.Authority = App.DefaultAuthority;
+                App.Scopes = App.DefaultScopes;
+                App.ClientId = App.DefaultClientId;
+                break;
             }
 
             InitPublicClientAndRefreshView();
