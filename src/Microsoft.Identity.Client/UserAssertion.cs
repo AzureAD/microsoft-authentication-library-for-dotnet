@@ -41,8 +41,7 @@ namespace Microsoft.Identity.Client
     /// See https://aka.ms/msal-net-on-behalf-of 
     /// </summary>
 #if DESKTOP || NET_CORE || NETSTANDARD1_3
-    /// <seealso cref="ConfidentialClientApplication.AcquireTokenOnBehalfOfAsync(System.Collections.Generic.IEnumerable{string}, UserAssertion)"/>
-    /// and <see cref="ConfidentialClientApplication.AcquireTokenOnBehalfOfAsync(System.Collections.Generic.IEnumerable{string}, UserAssertion, string)"/>
+    /// <seealso cref="IConfidentialClientApplication.AcquireTokenOnBehalfOf(System.Collections.Generic.IEnumerable{string}, UserAssertion)"/>
 #endif
     public sealed class UserAssertion
 #pragma warning restore CS1587 // XML comment is not placed on a valid language element

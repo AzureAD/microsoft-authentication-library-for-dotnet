@@ -41,8 +41,7 @@ namespace Microsoft.Identity.Client
     {
         /// <Summary>
         /// Application token cache. This case holds access tokens and refresh tokens for the application. It's maintained 
-        /// and updated silently if needed when <see cref="AcquireTokenForClient(IEnumerable{string})"/> or one
-        /// of the overrides of <see cref="AcquireTokenForClientAsync(IEnumerable{string})"/>
+        /// and updated silently if needed when <see cref="AcquireTokenForClient(IEnumerable{string})"/>
         /// </Summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
         /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms
@@ -56,7 +55,7 @@ namespace Microsoft.Identity.Client
         /// It's usually used in Web Apps (for instance ASP.NET / ASP.NET Core Web apps) which sign-in users,
         /// and can request an authorization code.
         /// This method does not lookup the token cache, but stores the result in it, so it can be looked up
-        /// using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/>.
+        /// using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="authorizationCode">The authorization code received from the service authorization endpoint.</param>
