@@ -147,8 +147,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Invalid authority type.
-        /// MSAL.NET does not know how to interact with the authority specified when the application was built (for instance MSAL.NET
-        /// does not support ADFS 2016 and earlier).
+        /// MSAL.NET does not know how to interact with the authority specified when the application was built.
         /// <para>Mitigation</para>
         /// Use a different authority
         /// </summary>
@@ -184,12 +183,13 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Invalid owner window type.
         /// <para>What happens?</para>
-        /// You used <see cref="AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)"/>
+        /// You used <c>"AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)</c>
         /// but the parameter you passed is invalid.
         /// <para>Remediation</para>
         /// On .NET Standard, the expected object is an <c>Activity</c> on Android, a <c>UIViewController</c> on iOS,
         /// a <c>NSWindow</c> on MAC, and a <c>IWin32Window</c> or <c>IntPr</c> on Windows.
-        /// If you are in a WPF application, you can use <c>ew WindowInteropHelper(wpfControl).Handle</c>
+        /// If you are in a WPF application, you can use <c>WindowInteropHelper(wpfControl).Handle</c> to get the window
+        /// handle associated with a WPF control
         /// </summary>
         public const string InvalidOwnerWindowType = "invalid_owner_window_type";
 
@@ -327,7 +327,7 @@ namespace Microsoft.Identity.Client
         /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
         /// The user is not known by the IdP
         /// <para>Mitigation</para>
-        /// Inform the user. the login that the user provided might be incorrect (for instance empty)
+        /// Inform the user. The login that the user provided might be incorrect (for instance empty)
         /// </summary>
         public const string UnknownUser = "unknown_user";
 
@@ -399,7 +399,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// TODO: UPDATE DOCUMENTATION!
-        /// On Android, you need to call <see cref="AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)"/> passing
+        /// On Android, you need to call <c>AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)</c> passing
         /// the activity. See https://aka.ms/msal-interactive-android
         /// </summary>
         public const string ActivityRequired = "activity_required";
