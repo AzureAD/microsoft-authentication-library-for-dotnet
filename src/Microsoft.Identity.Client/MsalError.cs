@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Standard OAuth2 protocol error code. It indicates to the libray that the application needs to expose the UI to the user  
         /// so that the user does an interactive action in order to get a new token.
-        /// <para>Mitigation:</para> If your application is a <see cref="T:PublicClientApplication"/> call one of the <c>AcquireTokenAsync</c> overrides to 
+        /// <para>Mitigation:</para> If your application is a <see cref="T:IPublicClientApplication"/> call one of the <c>AcquireTokenInteractive</c> overrides to 
         /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
         /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation
         /// </summary>
@@ -45,16 +45,16 @@ namespace Microsoft.Identity.Client
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
         /// <summary>
-        /// <para>Mitigation:</para> If your application is a <see cref="PublicClientApplication"/> call one of the <c>AcquireTokenAsync</c> overrides so
+        /// <para>Mitigation:</para> If your application is a <see cref="IPublicClientApplication"/> call one of the <c>AcquireTokenInteractive</c> overrides so
         /// that the user of your application signs-in and accepts consent. If your application is a <see cref="T:ConfidentialClientApplication"/>. If it's a Web App
-        /// you should have previously called <see cref="ConfidentialClientApplication.AcquireTokenByAuthorizationCodeAsync(string, System.Collections.Generic.IEnumerable{string})"/>
+        /// you should have previously called <see cref="IConfidentialClientApplication.AcquireTokenByAuthorizationCode(System.Collections.Generic.IEnumerable{string}, string)"/>
         /// as described in https://aka.ms/msal-net-authorization-code. This error should not happen in Web APIs.
         /// </summary>
         public const string NoTokensFoundError = "no_tokens_found";
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
-        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is 
+        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is 
         /// passed as the <c>account</c> parameter.
         /// </summary>
         public const string UserNullError = "user_null";
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
         public const string MultipleAccountsForLoginHint = "multiple_accounts_for_login_hint";
 
         /// <summary>
-        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when 
+        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when 
         /// the user cache had not been set in the application constructor.
         /// </summary>
         public const string TokenCacheNullError = "token_cache_null";
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// An error occurred during a silent web authentication that prevented the authentication flow from completing in a short enough time frame.
         /// </description></item>
         /// </list>
-        /// <para>Remediation:</para>call one of the <c>AcquireTokenAsync</c> overrides so that the user of your application signs-in and accepts consent. 
+        /// <para>Remediation:</para>call one of the <c>AcquireTokenInteractive</c> overrides so that the user of your application signs-in and accepts consent. 
         /// </summary>
         public const string NoPromptFailedError = "no_prompt_failed";
 
@@ -360,7 +360,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Multiple Tokens were matched. 
         /// <para>What happens?</para>This exception happens in the case of applications managing several identitities, 
-        /// when calling <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// when calling <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
         /// or one of its overrides and the user token cache contains multiple tokens for this client application and the the specified Account, but from different authorities.
         /// <para>Mitigation [App Development]</para>specify the authority to use in the acquire token operation
         /// </summary>
