@@ -174,12 +174,13 @@ namespace Microsoft.Identity.Client
                 _oauth2ResponseBase = value;
                 Claims = _oauth2ResponseBase?.Claims;
                 CorrelationId = _oauth2ResponseBase?.CorrelationId;
+                SubError = _oauth2ResponseBase?.SubError;
             }
         }
 
         /// <summary>
         /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c> in the inner
-        /// <see cref="T:System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
+        /// <see cref="System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
         /// http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
         /// You can use this code for purposes such as implementing retry logic or error investigation.
         /// </summary>
@@ -208,6 +209,12 @@ namespace Microsoft.Identity.Client
         /// Raw response body received from the server.
         /// </summary>
         public string ResponseBody { get; internal set; }
+
+        /// <remarks>
+        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
+        /// first.
+        /// </remarks>
+        internal string SubError { get; set; }
 
         /// <summary>
         /// Contains the http headers from the server response that indicated an error. 
@@ -240,6 +247,7 @@ namespace Microsoft.Identity.Client
         private const string ClaimsKey = "claims";
         private const string ResponseBodyKey = "response_body";
         private const string CorrelationIdKey = "correlation_id";
+        private const string SubErrorKey = "sub_error";
 
         internal override void PopulateJson(JObject jobj)
         {
@@ -248,6 +256,7 @@ namespace Microsoft.Identity.Client
             jobj[ClaimsKey] = Claims;
             jobj[ResponseBodyKey] = ResponseBody;
             jobj[CorrelationIdKey] = CorrelationId;
+            jobj[SubErrorKey] = SubError;
         }
 
         internal override void PopulateObjectFromJson(JObject jobj)
@@ -257,6 +266,7 @@ namespace Microsoft.Identity.Client
             Claims = JsonUtils.GetExistingOrEmptyString(jobj, ClaimsKey);
             ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
             CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
+            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
         }
     }
 }

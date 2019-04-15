@@ -49,7 +49,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             NonFociToken,
             FociToken,
-            Error
+            ErrorClientMismatch,
+            OtherError
         }
 
         private string _inMemoryCache;
@@ -105,7 +106,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B cannot acquire a token interactivelty, but will try to use FRT
-                AssertException.TaskThrows<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.Error));
+                var ex = AssertException.TaskThrows<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch));
+                Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
 
                 // B can resume acquiring tokens silently via the normal RT, after a non
                 await InteractiveAsync(_appB, ServerTokenResponse.NonFociToken).ConfigureAwait(false);
@@ -114,6 +116,37 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert
                 await AssertAccountsAsync().ConfigureAwait(false);
                 AssertAppHasRT(_appB);
+                AssertFRTExists();
+            }
+        }
+
+        /// <summary>
+        /// A and B are in the family. When B tries to refresh the FRT, an error occurs (e.g. MFA required).
+        /// This error has to be surfaced. This is a different scenario than receiving "client_mismatch" error
+        /// </summary>
+        [TestMethod]
+        [WorkItem(1067)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1067
+        public async Task FociDoesNotHideRTRefreshErrorsAsync()
+        {
+            using (_harness = new MockHttpAndServiceBundle())
+            {
+                InitApps();
+
+                // Act
+                await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
+
+                // B cannot acquire a token interactivelty, but will try to use FRT
+                var ex = AssertException.TaskThrows<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.OtherError));
+                Assert.AreEqual(MsalError.InvalidGrantError, ex.ErrorCode);
+                Assert.IsTrue(!String.IsNullOrEmpty(ex.CorrelationId));
+
+                // B performs interactive auth and everything goes back to normal - both A and B can silently sing in
+                await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
+                await SilentAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
+                await SilentAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
+
+                // Assert
+                await AssertAccountsAsync().ConfigureAwait(false);
                 AssertFRTExists();
 
             }
@@ -165,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await SilentAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B leaves the family -> STS will not refresh its token based on the FRT
-                AssertException.TaskThrows<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.Error));
+                AssertException.TaskThrows<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch));
 
                 // B can resume acquiring tokens silently via the normal RT, after an interactive flow
                 await InteractiveAsync(_appB, ServerTokenResponse.NonFociToken).ConfigureAwait(false);
@@ -208,8 +241,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     ExpectedMethod = HttpMethod.Post,
                     ResponseMessage =
-                    (serverTokenResponse == ServerTokenResponse.Error) ?
-                        MockHelpers.CreateInvalidGrantTokenResponseMessage() :
+                    IsError(serverTokenResponse) ?
+                        MockHelpers.CreateInvalidGrantTokenResponseMessage(GetSubError(serverTokenResponse)) :
                         MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -227,9 +260,30 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         }
 
+        private static string GetSubError(ServerTokenResponse response)
+        {
+            if (response == ServerTokenResponse.ErrorClientMismatch)
+            {
+                return "client_mismatch";
+            }
+
+            if (response == ServerTokenResponse.OtherError)
+            {
+                return null;
+            }
+
+            throw new InvalidOperationException("Test error: response type is not an error");
+        }
+
+        private static bool IsError(ServerTokenResponse response)
+        {
+            return response == ServerTokenResponse.ErrorClientMismatch ||
+                response == ServerTokenResponse.OtherError;
+        }
+
         private async Task InteractiveAsync(PublicClientApplication app, ServerTokenResponse serverTokenResponse)
         {
-            if (serverTokenResponse == ServerTokenResponse.Error)
+            if (serverTokenResponse == ServerTokenResponse.ErrorClientMismatch)
             {
                 throw new NotImplementedException("test error");
             }

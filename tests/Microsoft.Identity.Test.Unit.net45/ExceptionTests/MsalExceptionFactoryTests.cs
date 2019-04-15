@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         private const string ExCode = "exCode";
         private const string ExMessage = "exMessage";
 
-        private const string jsonError = @"{ ""error"":""invalid_tenant"", ""suberror"":""suberror"",
+        private const string jsonError = @"{ ""error"":""invalid_tenant"", ""suberror"":""some_suberror"",
             ""claims"":""some_claims"",
             ""error_description"":""AADSTS90002: Tenant 'x' not found. "", ""error_codes"":[90002],""timestamp"":""2019-01-28 14:16:04Z"",
             ""trace_id"":""43f14373-8d7d-466e-a5f1-6e3889291e00"",
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         }
 
         [TestMethod]
-        public void MsalClientException_FromCoreException()
+        public void MsalClientException_FromMessageAndCode()
         {
             // Act
             var msalException = new MsalClientException(ExCode, ExMessage);
@@ -118,6 +118,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(ExMessage, msalServiceException.Message);
             Assert.AreEqual("some_claims", msalServiceException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
+            Assert.AreEqual("some_suberror", msalServiceException.SubError);
         }
 
         [TestMethod]
@@ -150,6 +151,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             Assert.AreEqual("some_claims", msalServiceException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
+            Assert.AreEqual("some_suberror", msalServiceException.SubError);
 
             // Act
             string piiMessage = MsalLogger.GetPiiScrubbedExceptionDetails(msalException);
@@ -236,6 +238,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(responseBody, msalServiceException.ResponseBody);
             Assert.AreEqual(ExMessage, msalServiceException.Message);
             Assert.AreEqual((int)statusCode, msalServiceException.StatusCode);
+            Assert.AreEqual("some_suberror", msalServiceException.SubError);
 
             Assert.AreEqual(retryAfterSpan, msalServiceException.Headers.RetryAfter.Delta);
         }
