@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// Acquires an access token from an existing refresh token and stores it and the refresh token into 
-        /// the user token cache, where it will be available for further AcquireTokenSilentAsync calls.
+        /// the user token cache, where it will be available for further AcquireTokenSilent calls.
         /// This method can be used in migration to MSAL from ADAL v2 and in various integration 
         /// scenarios where you have a RefreshToken available. 
         /// (see https://aka.ms/msal-net-migration-adal2-msal2)

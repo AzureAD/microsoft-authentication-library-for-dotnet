@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     ///     Structure containing static members that you can use to specify how the interactive overrides
-    ///     of AcquireTokenAsync in <see cref="PublicClientApplication" /> should prompt the user.
+    ///     of AcquireTokenAsync in <see cref="IPublicClientApplication" /> should prompt the user.
     /// </summary>
     /// <remarks><c>Prompt</c> is the result of renaming, in MSAL 3.0.0, the <c>UIBehavior</c> structure
     /// which was in MSAL 2.x</remarks>

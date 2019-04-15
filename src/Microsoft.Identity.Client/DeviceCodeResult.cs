@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
     /// to be entered on that device.
     /// See https://aka.ms/msal-device-code-flow.
     /// </summary>
-    /// <seealso cref="PublicClientApplication.AcquireTokenWithDeviceCodeAsync(IEnumerable{string}, Func{DeviceCodeResult, System.Threading.Tasks.Task})"> and
+    /// <seealso cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, System.Threading.Tasks.Task})"> and
     /// the other overrides
     /// </seealso>
     public class DeviceCodeResult

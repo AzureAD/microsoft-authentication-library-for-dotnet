@@ -33,9 +33,9 @@ namespace Microsoft.Identity.Client
     public static class MsalError
     {
         /// <summary>
-        /// Standard OAuth2 protocol error code. It indicates to the libray that the application needs to expose the UI to the user  
+        /// Standard OAuth2 protocol error code. It indicates that the application needs to expose the UI to the user  
         /// so that the user does an interactive action in order to get a new token.
-        /// <para>Mitigation:</para> If your application is a <see cref="T:PublicClientApplication"/> call one of the <c>AcquireTokenAsync</c> overrides to 
+        /// <para>Mitigation:</para> If your application is a <see cref="T:IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
         /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
         /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation
         /// </summary>
@@ -45,56 +45,70 @@ namespace Microsoft.Identity.Client
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
         /// <summary>
-        /// <para>Mitigation:</para> If your application is a <see cref="PublicClientApplication"/> call one of the <c>AcquireTokenAsync</c> overrides so
-        /// that the user of your application signs-in and accepts consent. If your application is a <see cref="T:ConfidentialClientApplication"/>. If it's a Web App
-        /// you should have previously called <see cref="ConfidentialClientApplication.AcquireTokenByAuthorizationCodeAsync(string, System.Collections.Generic.IEnumerable{string})"/>
-        /// as described in https://aka.ms/msal-net-authorization-code. This error should not happen in Web APIs.
+        /// No token was found in the token cache.
+        /// <para>Mitigation:</para> If your application is a <see cref="IPublicClientApplication"/> call <c>AcquireTokenInteractive</c> so
+        /// that the user of your application signs-in and accepts consent. If your application is a <see cref="T:ConfidentialClientApplication"/>.:
+        /// <list type="bullet">
+        /// <item>
+        /// If it's a Web App you should have previously called <see cref="IConfidentialClientApplication.AcquireTokenByAuthorizationCode(System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// as described in https://aka.ms/msal-net-authorization-code. You need to make sure that you have requested the right scopes. For details
+        /// See https://github.com/Azure-Samples/ms-identity-aspnetcore-webapp-tutorial
+        /// </item>
+        /// <item>This error should not happen in Web APIs</item>
+        /// </list>
         /// </summary>
         public const string NoTokensFoundError = "no_tokens_found";
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
-        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is 
-        /// passed as the <c>account</c> parameter.
+        /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is 
+        /// passed as the <c>account</c> parameter. This can be because you have called AcquireTokenSilent with an <c>account</c> parameter
+        /// set to <c>accounts.FirstOrDefault()</c> but <c>accounts</c> is empty.
+        /// <para>Mitigation</para>
+        /// Pass a different account, or otherwise call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
         /// </summary>
         public const string UserNullError = "user_null";
 
         /// <summary>
         /// This error code denotes that no account was found having the given login hint.
+        /// <para>What happens?</para>
+        /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
+        /// was called with a <c>loginHint</c> parameter which does not match any account in <see cref="IClientApplicationBase.GetAccountsAsync"/>
+        /// <para>Mitigation</para>
+        /// If you are certain about the loginHint, call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
         /// </summary>
         public const string NoAccountForLoginHint = "no_account_for_login_hint";
 
         /// <summary>
         /// This error code denotes that multiple accounts were found having the same login hint and MSAL 
-        /// cannot chose one. Please use the overload of AcquireTokenSilent where you pass an account.
+        /// cannot chose one. Please use <see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> to specify the account
         /// </summary>
         public const string MultipleAccountsForLoginHint = "multiple_accounts_for_login_hint";
 
         /// <summary>
-        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when 
-        /// the user cache had not been set in the application constructor.
+        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when 
+        /// the user cache had not been set in the application constructor. This should never happen in MSAL.NET 3.x as the cache is created by the applicaiton
         /// </summary>
         public const string TokenCacheNullError = "token_cache_null";
 
-        // TODO(migration):  Prompt.Never no longer exists.  Validate removing this error message.
         /// <summary>
         /// One of two conditions was encountered:
         /// <list type="bullet">
-        /// <item><description>The <c>Prompt.Never</c> UI behavior was passed in an interactive token call, but the constraint could not be honored because user interaction is required,
+        /// <item><description>The <c>Prompt.NoPrompt</c> was passed in an interactive token call, but the constraint could not be honored because user interaction is required,
         /// for instance because the user needs to re-sign-in, give consent for more scopes, or perform multiple factor authentication.
         /// </description></item>
         /// <item><description>
         /// An error occurred during a silent web authentication that prevented the authentication flow from completing in a short enough time frame.
         /// </description></item>
         /// </list>
-        /// <para>Remediation:</para>call one of the <c>AcquireTokenAsync</c> overrides so that the user of your application signs-in and accepts consent. 
+        /// <para>Remediation:</para>call <c>AcquireTokenInteractive</c> so that the user of your application signs-in and accepts consent. 
         /// </summary>
         public const string NoPromptFailedError = "no_prompt_failed";
 
         /// <summary>
         /// Service is unavailable and returned HTTP error code within the range of 500-599
-        /// <para>Mitigation</para> you can retry after a delay. Note that the retry-after header is not yet
-        /// surfaced in MSAL.NET (on the backlog)
+        /// <para>Mitigation</para> you can retry after a delay.
         /// </summary>
         public const string ServiceNotAvailable = "service_not_available";
 
@@ -105,8 +119,8 @@ namespace Microsoft.Identity.Client
         public const string RequestTimeout = "request_timeout";
 
         /// <summary>
-        /// Upn required
-        /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:PublicClientApplication"/> which
+        /// loginHint should be a Upn
+        /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:IPublicClientApplication"/> which
         /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c> 
         /// expected by the service
         /// <para>Remediation</para> Make sure in your code that you enforce <c>loginHint</c> to be a UPN
@@ -133,6 +147,9 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Invalid authority type.
+        /// MSAL.NET does not know how to interact with the authority specified when the application was built.
+        /// <para>Mitigation</para>
+        /// Use a different authority
         /// </summary>
         public const string InvalidAuthorityType = "invalid_authority_type";
 
@@ -144,18 +161,39 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Authentication failed.
+        /// <para>What happens?</para>
+        /// The authentication failed. For instance the user did not enter the right password
+        /// <para>Mitigation</para>
+        /// Inform the user to retry.
         /// </summary>
         public const string AuthenticationFailed = "authentication_failed";
 
         /// <summary>
         /// Authority validation failed.
+        /// <para>What happens?</para>
+        /// The validation of the authority failed. This might be because the authority is not
+        /// compliant with the OIDC standard, or there might be a security issue
+        /// <para>Mitigation</para>
+        /// Use a different authority. If you are absolutely sure that you can trust the authority
+        /// you can use the <see cref="AbstractApplicationBuilder{T}.WithAuthority(AadAuthorityAudience, bool)"/> passing
+        /// the <c>validateAuthority</c> parameter to <c>false</c> (not recommended)
         /// </summary>
         public const string AuthorityValidationFailed = "authority_validation_failed";
 
         /// <summary>
         /// Invalid owner window type.
+        /// <para>What happens?</para>
+        /// You used <c>"AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)</c>
+        /// but the parameter you passed is invalid.
+        /// <para>Remediation</para>
+        /// On .NET Standard, the expected object is an <c>Activity</c> on Android, a <c>UIViewController</c> on iOS,
+        /// a <c>NSWindow</c> on MAC, and a <c>IWin32Window</c> or <c>IntPr</c> on Windows.
+        /// If you are in a WPF application, you can use <c>WindowInteropHelper(wpfControl).Handle</c> to get the window
+        /// handle associated with a WPF control
         /// </summary>
         public const string InvalidOwnerWindowType = "invalid_owner_window_type";
+
+        // TODO: InvalidServiceUrl does not seem to be used anywhere?
 
         /// <summary>
         /// Invalid service URL.
@@ -164,8 +202,13 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Encoded token too long.
+        /// <para>What happens</para>
+        /// In a confidential client application call, the client assertion built by MSAL is longer than
+        /// the max possible length for a JWT token.
         /// </summary>
         public const string EncodedTokenTooLong = "encoded_token_too_long";
+
+        // TODO: does not seem to be used in MSAL.NET
 
         /// <summary>
         /// No data from STS.
@@ -179,21 +222,41 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Failed to refresh token.
+        /// <para>What happens?</para>
+        /// The token could not be refreshed. This can be because the user has not used the application for a long time.
+        /// and therefore the refresh token maintained in the token cache has expired
+        /// <para>Mitigation</para>
+        /// If you are in a public client application, that supports interactivity, send an interactive request
+        /// <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>. Otherwise,
+        /// use a different method to acquire tokens.
         /// </summary>
         public const string FailedToRefreshToken = "failed_to_refresh_token";
                
         /// <summary>
         /// Failed to acquire token silently. Used in broker scenarios.
+        /// <para>What happens</para>
+        /// you called <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// or <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, string)"/> and your
+        /// mobile (Xamarin) application leverages the broker (Microsoft Authenticator or Microsoft Company Portal), but the broker
+        /// was not able to acquire the token silently.
+        /// <para>Mitigation</para>
+        /// Call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
         /// </summary>
         public const string FailedToAcquireTokenSilentlyFromBroker = "failed_to_acquire_token_silently_from_broker";
 
         /// <summary>
         /// RedirectUri validation failed.
+        /// <para>What happens?</para>
+        /// The redirect URI / reply URI is invalid
+        /// <para>How to fix</para>
+        /// Pass a valid redirect URI.
         /// </summary>
         public const string RedirectUriValidationFailed = "redirect_uri_validation_failed";
 
         /// <summary>
-        /// The request could not be preformed because of an unknown failure in the UI flow.
+        /// The request could not be preformed because of an unknown failure in the UI flow.*
+        /// <para>Mitigation</para>
+        /// Inform the user.
         /// </summary>
         public const string AuthenticationUiFailed = "authentication_ui_failed";
 
@@ -204,11 +267,20 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Accessing WS Metadata Exchange Failed.
+        /// <para>What happens?</para>
+        /// You tried to use <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// and the account is a federated account.
+        /// <para>Mitigation</para>
+        /// None. The WS metadata was not found or does not correspond to what was expected.
         /// </summary>
         public const string AccessingWsMetadataExchangeFailed = "accessing_ws_metadata_exchange_failed";
 
         /// <summary>
         /// Federated service returned error.
+        /// <para>Mitigation</para>
+        /// None. The federated service returned an error. You can try to look at the
+        /// Body of the exception for a better understanding of the error and choose
+        /// the mitigation
         /// </summary>
         public const string FederatedServiceReturnedError = "federated_service_returned_error";
 
@@ -233,17 +305,29 @@ namespace Microsoft.Identity.Client
         public const string WsTrustEndpointNotFoundInMetadataDocument = "wstrust_endpoint_not_found";
 
         /// <summary>
-        /// Parsing WS-Trust Response Failed.
+        /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// In the case of a Federated user (that is owned by a federated IdP, as opposed to a managed user owned in an Azure AD tenant) 
+        /// ID3242: The security token could not be authenticated or authorized.
+        /// The user does not exist or has entered the wrong password
         /// </summary>
         public const string ParsingWsTrustResponseFailed = "parsing_wstrust_response_failed";
 
         /// <summary>
-        /// Unknown User Type.
+        /// <para>What happens</para>
+        /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// The user is not recognized as a managed user, or a federated user. Azure AD was not
+        /// able to identify the IdP that needs to process the user
+        /// <para>Mitigation</para>
+        /// Inform the user. the login that the user provided might be incorrect.
         /// </summary>
         public const string UnknownUserType = "unknown_user_type";
 
         /// <summary>
-        /// Unknown User.
+        /// <para>What happens</para>
+        /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// The user is not known by the IdP
+        /// <para>Mitigation</para>
+        /// Inform the user. The login that the user provided might be incorrect (for instance empty)
         /// </summary>
         public const string UnknownUser = "unknown_user";
 
@@ -254,21 +338,43 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Password is required for managed user.
+        /// <para>What happens?</para>
+        /// If can got this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// and you (or the user) did not provide a password.
         /// </summary>
         public const string PasswordRequiredForManagedUserError = "password_required_for_managed_user";
 
         /// <summary>
         /// Request is invalid.
+        /// <para>What happens?</para>
+        /// This can happen because you are using a token acquisition method which is not compatible with the authority. For instance:
+        /// you called <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// but you used an authority ending with '/common' or '/consumers' as this requires a tenanted authority or '/organizations'.
+        /// <para>Mitigation</para>
+        /// Adjust the authority to the AcquireTokenXX method you use (don't use 'common' or 'consumers' with <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
+        /// <see cref="IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable{string})"/>
         /// </summary>
         public const string InvalidRequest = "invalid_request";
 
         /// <summary>
         /// Cannot access the user from the OS (UWP)
+        /// <para>What happens</para>
+        /// You called <see cref="IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable{string})"/>, but the domain user
+        /// name could not be found.
+        ///<para>Mitigation</para>
+        /// This might be because you need to add more capabilities to your UWP application in the Package.appxmanifest.
+        /// See https://aka.ms/msal-net-uwp 
         /// </summary>
         public const string UapCannotFindDomainUser = "user_information_access_failed";
 
         /// <summary>
         /// Cannot get the user from the OS (UWP)
+        /// <para>What happens</para>
+        /// You called <see cref="IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable{string})"/>, but the domain user
+        /// name could not be found.
+        ///<para>Mitigation</para>
+        /// This might be because you need to add more capabilities to your UWP application in the Package.appxmanifest.
+        /// See https://aka.ms/msal-net-uwp 
         /// </summary>
         public const string UapCannotFindUpn = "uap_cannot_find_upn";
 
@@ -278,10 +384,11 @@ namespace Microsoft.Identity.Client
         public const string NonParsableOAuthError = "non_parsable_oauth_error";
 
         /// <summary>
+        /// <para>What happens?</para>
         /// In the context of Device code flow (See https://aka.ms/msal-net-device-code-flow),
         /// this error happens when the device code expired before the user signed-in on another device (this is usually after 15 mins).
-        /// 
-        /// Mitigation: None. Inform the user that they took too long to sign-in at the provided URL and enter the provided code.
+        /// <para>Mitigation</para>
+        /// None. Inform the user that they took too long to sign-in at the provided URL and enter the provided code.
         /// </summary>
         public const string CodeExpired = "code_expired";
 
@@ -292,7 +399,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// TODO: UPDATE DOCUMENTATION!
-        /// On Android, the UIParent constructor with an Activiy parameter must be used. See https://aka.ms/msal-interactive-android
+        /// On Android, you need to call <c>AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)</c> passing
+        /// the activity. See https://aka.ms/msal-interactive-android
         /// </summary>
         public const string ActivityRequired = "activity_required";
 
@@ -326,7 +434,7 @@ namespace Microsoft.Identity.Client
         public const string HttpStatusCodeNotOk = "http_status_not_200";
 
         /// <summary>
-        /// Error code used when the CustomWebUI has returned an uri, but it is invalid - it is either null or has no code.
+        /// Error code used when the <see cref="Extensibility.ICustomWebUi"/> has returned an uri, but it is invalid - it is either null or has no code.
         /// Consider throwing an exception if you are unable to intercept the uri containing the code. 
         /// </summary>
         public const string CustomWebUiReturnedInvalidUri = "custom_webui_returned_invalid_uri";
@@ -337,13 +445,18 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string CustomWebUiRedirectUriMismatch = "custom_webui_invalid_mismatch";
 
+        // TODO: does not seem to be used?
+
         /// <summary>
         /// Access denied.
         /// </summary>
         public const string AccessDenied = "access_denied";
 
         /// <summary>
-        /// Cannot Access User Information or User is Not Domain Joined.
+        /// Cannot Access User Information or the user is not a user domain.
+        /// <para>What happens?</para>
+        /// You tried to use <see cref="IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable{string})"/>
+        /// but the user is not a domain user (the machine is not domain or AAD joined)
         /// </summary>
         public const string CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed";
 
@@ -354,13 +467,15 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// No Redirect URI.
+        /// <para>What happens?</para>
+        /// You need to provide a Reply URI / Redirect URI, but have not called <see cref="AbstractApplicationBuilder{T}.WithRedirectUri(string)"/>
         /// </summary>
         public const string NoRedirectUri = "no_redirect_uri";
 
         /// <summary>
         /// Multiple Tokens were matched. 
         /// <para>What happens?</para>This exception happens in the case of applications managing several identitities, 
-        /// when calling <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// when calling <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
         /// or one of its overrides and the user token cache contains multiple tokens for this client application and the the specified Account, but from different authorities.
         /// <para>Mitigation [App Development]</para>specify the authority to use in the acquire token operation
         /// </summary>

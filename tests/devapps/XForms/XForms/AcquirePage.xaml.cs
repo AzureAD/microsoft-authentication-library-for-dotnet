@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.Internal;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Threading;
+using System.Security;
 
 namespace XForms
 {
@@ -215,10 +216,6 @@ namespace XForms
                     .WithUseEmbeddedWebView(true)
                     .WithExtraQueryParameters(GetExtraQueryParams());
 
-                request = LoginHintSwitch.IsToggled ?
-                    request.WithLoginHint(LoginHintEntry.Text.Trim()) :
-                    request.WithAccount(GetSelectedAccount());
-
                 var result = await request.ExecuteAsync().ConfigureAwait(true);
 
                 var resText = GetResultDescription(result);
@@ -308,4 +305,3 @@ namespace XForms
         }
     }
 }
-
