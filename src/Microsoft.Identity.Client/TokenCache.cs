@@ -47,13 +47,11 @@ namespace Microsoft.Identity.Client
         private TokenCacheCallback _userConfiguredAfterAccess;
         private TokenCacheCallback _userConfiguredBeforeWrite;
 
-        internal IServiceBundle ServiceBundle { get; private set; }
+        internal IServiceBundle ServiceBundle { get; }
 
         private readonly ITokenCacheAccessor _accessor;
 
-
-
-        internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
+        internal ILegacyCachePersistence LegacyCachePersistence { get; }
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
@@ -75,16 +73,12 @@ namespace Microsoft.Identity.Client
             _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
-            // Must happen last, this code can access things like _accessor and such above.
-            SetServiceBundle(serviceBundle);
-        }
-
-        internal void SetServiceBundle(IServiceBundle serviceBundle)
-        {
-            ServiceBundle = serviceBundle;
 #if iOS
             SetIosKeychainSecurityGroup(ServiceBundle.Config.IosKeychainSecurityGroup);
 #endif // iOS
+
+            // Must happen last, this code can access things like _accessor and such above.
+            ServiceBundle = serviceBundle;
         }
 
         /// <summary>
@@ -95,10 +89,8 @@ namespace Microsoft.Identity.Client
         internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest)
             : this(serviceBundle)
         {
-            SetServiceBundle(serviceBundle);
-
             LegacyCachePersistence = legacyCachePersistenceForTest;
-        }
+        }        
 
         /// <summary>
         /// Notification for certain token cache interactions during token acquisition. This delegate is
@@ -356,7 +348,7 @@ namespace Microsoft.Identity.Client
         }
 
         async Task<MsalAccessTokenCacheItem> ITokenCacheInternal.FindAccessTokenAsync(AuthenticationRequestParameters requestParams)
-        {
+        {          
             ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             string preferredEnvironmentAlias = null;
 
@@ -850,6 +842,8 @@ namespace Microsoft.Identity.Client
             out IEnumerable<MsalAccountCacheItem> accountCacheItems,
             out AdalUsersForMsal adalUsersResult)
         {
+            bool filterByClientId = !_featureFlags.IsFociEnabled;
+
             lock (LockObject)
             {
                 var args = new TokenCacheNotificationArgs
@@ -862,7 +856,7 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args);
                 try
                 {
-                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(false);
+                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(filterByClientId);
                     accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
 
                     adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
@@ -1043,8 +1037,10 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
+            bool filterByClientId = !_featureFlags.IsFociEnabled;
+
             // Delete ALL refresh tokens associated with this account
-            var allRefreshTokens = ((ITokenCacheInternal)this).GetAllRefreshTokens(false)
+            var allRefreshTokens = ((ITokenCacheInternal)this).GetAllRefreshTokens(filterByClientId)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
@@ -1054,7 +1050,7 @@ namespace Microsoft.Identity.Client
             }
 
             requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
-            IList<MsalAccessTokenCacheItem> allAccessTokens = ((ITokenCacheInternal)this).GetAllAccessTokens(false)
+            IList<MsalAccessTokenCacheItem> allAccessTokens = ((ITokenCacheInternal)this).GetAllAccessTokens(filterByClientId)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
@@ -1064,7 +1060,7 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
 
-            var allIdTokens = ((ITokenCacheInternal)this).GetAllIdTokens(false)
+            var allIdTokens = ((ITokenCacheInternal)this).GetAllIdTokens(filterByClientId)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)

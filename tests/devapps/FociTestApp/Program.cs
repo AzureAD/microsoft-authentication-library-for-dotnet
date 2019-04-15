@@ -17,8 +17,9 @@ namespace FociTestApp
     {
         // TODO: replace with FOCI family members IDs
         // DO NOT CHECK THESE IN
-        private const string FAMILY_MEMBER_1 = "";  // Office
-        private const string FAMILY_MEMBER_2 = "";  // Teams
+        private const string FAMILY_MEMBER_1 = "d3590ed6-52b3-4102-aeff-aad2292ab01c";  // Office
+        private const string FAMILY_MEMBER_2 = "1fec8e78-bce4-4aaf-ab1b-5451cc387264";  // Teams
+
 
         private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
 
@@ -95,7 +96,8 @@ namespace FociTestApp
                         6. Acquire Token Silent App3 (non-family member)
 
 
-                        7. Clear cache
+                        7. Clear cache via App1
+                        8. Clear cache via App2
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -133,13 +135,25 @@ namespace FociTestApp
 
                     case 7:
                         var accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
-                        var accounts2 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
-                        var accounts3 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
-
+                        var accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
+                        var accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
+                         
 
                         foreach (var acc in accounts1)
                         {
                             await s_pcaFam1.RemoveAsync(acc).ConfigureAwait(false);
+                        }
+
+                        break;
+                    case 8:
+                       accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
+                       accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
+                       accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
+
+
+                        foreach (var acc in accounts2)
+                        {
+                            await s_pcaFam2.RemoveAsync(acc).ConfigureAwait(false);
                         }
 
                         break;
