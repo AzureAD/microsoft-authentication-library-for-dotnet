@@ -191,7 +191,7 @@ namespace DesktopTestApp
             }
         }
 
-        private void acquireTokenByUPButton_Click(object sender, EventArgs e)
+        private async void acquireTokenByUPButton_Click(object sender, EventArgs e)
         {
             try
             {
@@ -200,7 +200,7 @@ namespace DesktopTestApp
                     .WithAuthority("https://login.microsoftonline.com/organizations")
                     .BuildConcrete();
 
-                GetUserDataForUserNamePasswordFlow();
+                await AcquireTokenByUsernamePasswordAsync().ConfigureAwait(true);
             }
             catch (Exception exc)
             {
@@ -208,15 +208,21 @@ namespace DesktopTestApp
             }
         }
 
-        private async Task AcquireTokenByUsernamePasswordAsync(string username, SecureString password)
+        private async Task AcquireTokenByUsernamePasswordAsync()
         {
             try
             {
+                ClearResultPageInfo();
+                userPasswordTextBox.PasswordChar = '*';
+
+                string username = loginHintTextBox.Text; //Can be blank for U/P
+                SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
+
                 AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication
                     .AcquireTokenByUsernamePassword(
                         SplitScopeString(scopes.Text),
                         username,
-                        password)
+                        securePassword)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(true);
 
@@ -636,7 +642,7 @@ namespace DesktopTestApp
             }
         }
 
-        private void RopcB2CAT_Click(object sender, EventArgs e)
+        private async void RopcB2CAT_Click(object sender, EventArgs e)
         {
             try
             {
@@ -644,28 +650,14 @@ namespace DesktopTestApp
                    .Create(_b2CClientId)
                    .WithB2CAuthority(B2CROPCAuthority)
                    .BuildConcrete();
-                GetUserDataForUserNamePasswordFlow();
+                await AcquireTokenByUsernamePasswordAsync().ConfigureAwait(true);
             }
             catch (Exception exc)
             {
                 CreateException(exc);
             }
         }
-
-        private async void GetUserDataForUserNamePasswordFlow()
-        {
-            using (new UIProgressScope(this))
-            {
-                ClearResultPageInfo();
-                userPasswordTextBox.PasswordChar = '*';
-
-                string username = loginHintTextBox.Text; //Can be blank for U/P
-                SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
-
-                await AcquireTokenByUsernamePasswordAsync(username, securePassword).ConfigureAwait(true);
-            }
-        }
-
+        
         private void GetB2CClientIdFromLab()
         {
             if (_b2CClientId != null)
