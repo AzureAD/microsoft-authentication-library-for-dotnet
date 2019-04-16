@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.ComponentModel;
@@ -63,13 +39,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// </summary>
         protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
         {
-            // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx): 
-            // The net session count tracks the number of instances of the web browser control. 
-            // When a web browser control is created, the net session count is incremented. When the control 
-            // is destroyed, the net session count is decremented. When the net session count reaches zero, 
-            // the session cookies for the process are cleared. SetQueryNetSessionCount can be used to prevent 
-            // the session cookies from being cleared for applications where web browser controls are being created 
-            // and destroyed throughout the lifetime of the application. (Because the application lives longer than 
+            // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx):
+            // The net session count tracks the number of instances of the web browser control.
+            // When a web browser control is created, the net session count is incremented. When the control
+            // is destroyed, the net session count is decremented. When the net session count reaches zero,
+            // the session cookies for the process are cleared. SetQueryNetSessionCount can be used to prevent
+            // the session cookies from being cleared for applications where web browser controls are being created
+            // and destroyed throughout the lifetime of the application. (Because the application lives longer than
             // a given instance, session cookies must be retained for a longer periods of time.
             int sessionCount = NativeMethods.SetQueryNetSessionCount(NativeMethods.SessionOp.SESSION_QUERY);
             if (sessionCount == 0)
@@ -369,7 +345,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 MaximizeBox = false;
                 MinimizeBox = false;
 
-                // If we don't have an owner we need to make sure that the pop up browser 
+                // If we don't have an owner we need to make sure that the pop up browser
                 // window is in the task bar so that it can be selected with the mouse.
                 ShowInTaskbar = null == ownerWindow;
 

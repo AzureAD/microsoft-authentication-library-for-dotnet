@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Threading;
@@ -46,17 +22,17 @@ namespace Microsoft.Identity.Client.Extensibility
         /// navigate to the STS authorization endpoint in order to sign-in the user and have them consent
         /// </param>
         /// <param name="redirectUri">The redirect Uri that was configured. The auth code will be appended to this redirect uri and the browser
-        /// will redirect to it. 
+        /// will redirect to it.
         /// </param>
-        /// <param name="cancellationToken">The cancellation token to which you should respond to. 
+        /// <param name="cancellationToken">The cancellation token to which you should respond to.
         /// See https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-cancellation for details.
         /// </param>
         /// <returns> The URI returned back from the STS authorization endpoint. This URI contains a code=CODE
         /// parameters that MSAL.NET will extract and redeem.
         /// </returns>
         /// <remarks>
-        /// The <paramref name="authorizationUri">authorizationUri</paramref>"/> is crafted to 
-        /// leverage PKCE in order to protect the token from a man in the middle attack. 
+        /// The <paramref name="authorizationUri">authorizationUri</paramref>"/> is crafted to
+        /// leverage PKCE in order to protect the token from a man in the middle attack.
         /// Only MSAL.NET can redeem the code.
         ///
         /// In the event of cancellation, the implementer should return OperationCanceledException.

@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -37,12 +13,12 @@ using Microsoft.Identity.Client.Core;
 namespace Microsoft.Identity.Client.Http
 {
     /// <remarks>
-    /// We invoke this class from different threads and they all use the same HttpClient. 
+    /// We invoke this class from different threads and they all use the same HttpClient.
     /// To prevent race conditions, make sure you do not get / set anything on HttpClient itself,
     /// instead rely on HttpRequest objects which are thread specific.
     ///
     /// In particular, do not change any properties on HttpClient such as BaseAddress, buffer sizes and Timeout. You should
-    /// also not access DefaultRequestHeaders because the getters are not thread safe (use HttpRequestMessage.Headers instead). 
+    /// also not access DefaultRequestHeaders because the getters are not thread safe (use HttpRequestMessage.Headers instead).
     /// </remarks>
     internal class HttpManager : IHttpManager
     {
@@ -251,11 +227,11 @@ namespace Microsoft.Identity.Client.Http
             }
 
 #if WINDOWS_APP
-            // WORKAROUND 
+            // WORKAROUND
             // On UWP there is a bug in the Http stack that causes an exception to be thrown when moving around a stream.
             // https://stackoverflow.com/questions/31774058/postasync-throwing-irandomaccessstream-error-when-targeting-windows-10-uwp
             // LoadIntoBufferAsync is necessary to buffer content for multiple reads - see https://stackoverflow.com/questions/26942514/multiple-calls-to-httpcontent-readasasync
-            // Documentation is sparse, but it looks like loading the buffer into memory avoids the bug, without 
+            // Documentation is sparse, but it looks like loading the buffer into memory avoids the bug, without
             // replacing the System.Net.HttpClient with Windows.Web.Http.HttpClient, which is not exactly a drop in replacement
             await clone.LoadIntoBufferAsync().ConfigureAwait(false);
 #endif
