@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         // not required
         public const string CorrelationId = "correlation_id";
-        public const string ExtraQp = "extra_qp";
+        public const string ExtraQp = "extra_query_param";
         public const string HomeAccountId = "home_account_id";
         public const string Username = "username";
         public const string LoginHint = "login_hint";
