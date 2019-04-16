@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Runtime.InteropServices;
 
@@ -68,13 +44,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 // TODO: Navigating event from public class could be called for internal object.
                 //       Current implementation of System.Windows.Forms.WebBrowser doesn't allow you to track who issues this event this control or IFrame,
                 //       internal IFrame will have different pDisp, so we need filter events from internal IFrames by analyzing this field:
-                //       
+                //
                 //       if ( this.webBrowser.ActiveXInstance != e.WebBrowserActiveXInstance )
                 //       {
                 //           // this event came from internal frame, ignore this.
                 //           return;
                 //       }
-                //      
+                //
                 //       See WindowsFormsWebAuthenticationDialogBase.WebBrowserNavigateErrorHandler( object sender, WebBrowserNavigateErrorEventArgs e )
                 //       Thus, before making any decision it will be safe to check if Navigating event comes from right object.
                 //       This not a P0 bug, as it final URL with auth code could came only in main frame, however it could give issue with more complicated logic.

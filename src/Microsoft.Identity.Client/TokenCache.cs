@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -75,7 +51,7 @@ namespace Microsoft.Identity.Client
 
         private readonly ITokenCacheAccessor _accessor;
 
-       
+
 
         internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
 
@@ -215,7 +191,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
-           // TODO: ensure that instance metadata has occured, otherwise we will use 
+           // TODO: ensure that instance metadata has occured, otherwise we will use
 
             // todo: could we look into modifying this to take tenantId to reduce the dependency on IValidatedAuthoritiesCache?
             var tenantId = Authority.CreateAuthority(ServiceBundle, requestParams.TenantUpdatedCanonicalAuthority)
@@ -766,7 +742,7 @@ namespace Microsoft.Identity.Client
                 // TODO: Not all discovery logic checks for this condition, this is a bug simialar to
                 // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1037
                 (authorityType == AuthorityType.B2C &&
-                    Authority.GetEnviroment(authority).Equals(AzurePublicEnv)); 
+                    Authority.GetEnviroment(authority).Equals(AzurePublicEnv));
         }
 
         private InstanceDiscoveryMetadataEntry GetCachedAuthorityMetaData(string authority)
@@ -935,7 +911,7 @@ namespace Microsoft.Identity.Client
             {
                 return await Task.FromResult(aliases).ConfigureAwait(false);
             }
-          
+
             var instanceDiscoveryResult = await GetCachedOrDiscoverAuthorityMetaDataAsync(authority, requestContext)
                 .ConfigureAwait(false);
 
@@ -1261,7 +1237,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Serializes using the <see cref="SerializeMsalV2"/> serializer.
         /// Obsolete: Please use specialized Serialization methods.
-        /// <see cref="SerializeMsalV2"/> replaces <see cref="Serialize"/>. 
+        /// <see cref="SerializeMsalV2"/> replaces <see cref="Serialize"/>.
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> Is our recommended way of serializing/deserializing.
         /// <see cref="SerializeAdalV3"/> For interoperability with ADAL.NET v3.
         /// </summary>
@@ -1278,7 +1254,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Deserializes the token cache from a serialization blob in the unified cache format
         /// Obsolete: Please use specialized Deserialization methods.
-        /// <see cref="DeserializeMsalV2"/> replaces <see cref="Deserialize"/> 
+        /// <see cref="DeserializeMsalV2"/> replaces <see cref="Deserialize"/>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> Is our recommended way of serializing/deserializing.
         /// <see cref="DeserializeAdalV3"/> For interoperability with ADAL.NET v3
         /// </summary>
@@ -1296,8 +1272,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Serializes the token cache to the ADAL.NET 3.x cache format.
         /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
-        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
-        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>,
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <returns>array of bytes containing the serialized ADAL.NET V3 cache data</returns>
         /// <remarks>
@@ -1316,8 +1292,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Deserializes the token cache to the ADAL.NET 3.x cache format.
         /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
-        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
-        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>,
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <param name="adalV3State">Array of bytes containing serialized Adal.NET V3 cache data</param>
         /// <remarks>
@@ -1336,8 +1312,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Serializes the token cache to the MSAL.NET 2.x unified cache format, which is compatible with ADAL.NET v4 and other MSAL.NET v2 applications.
         /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
-        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
-        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>,
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <returns>array of bytes containing the serialized MsalV2 cache</returns>
         /// <remarks>
@@ -1356,8 +1332,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Deserializes the token cache to the MSAL.NET 2.x unified cache format, which is compatible with ADAL.NET v4 and other MSAL.NET v2 applications.
         /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
-        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
-        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>,
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <param name="msalV2State">Array of bytes containing serialized MsalV2 cache data</param>
         /// <remarks>
@@ -1384,8 +1360,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Serializes the token cache, in the MSAL.NET V3 cache format.
         /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
-        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
-        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>,
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <returns>Byte stream representation of the cache</returns>
         /// <remarks>
@@ -1404,8 +1380,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// De-serializes from the MSAL.NET V3 cache format.
         /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
-        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
-        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>,
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <param name="msalV3State">Byte stream representation of the cache</param>
         /// <remarks>

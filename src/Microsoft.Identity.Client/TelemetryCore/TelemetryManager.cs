@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Concurrent;
@@ -36,7 +12,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal class TelemetryManager : ITelemetryManager
     {
-        private const string MsalCacheEventValuePrefix = "msal.token"; 
+        private const string MsalCacheEventValuePrefix = "msal.token";
         private const string MsalCacheEventName = "msal.cache_event";
 
         internal readonly ConcurrentDictionary<string, List<EventBase>> CompletedEvents =
@@ -45,7 +21,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         internal readonly ConcurrentDictionary<EventKey, EventBase> EventsInProgress =
             new ConcurrentDictionary<EventKey, EventBase>();
 
-        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> EventCount = 
+        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> EventCount =
             new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
 
         private readonly bool _onlySendFailureTelemetry;
@@ -180,28 +156,28 @@ namespace Microsoft.Identity.Client.TelemetryCore
             return orphanedEvents;
         }
 
-        private void IncrementEventCount(EventBase eventToIncrement) 
-        { 
-            string eventName; 
-            if (eventToIncrement[EventBase.EventNameKey].Substring(0,10) == MsalCacheEventValuePrefix) 
-            { 
-                eventName = MsalCacheEventName; 
-            } 
-            else 
-            { 
-                eventName = eventToIncrement[EventBase.EventNameKey]; 
-            } 
+        private void IncrementEventCount(EventBase eventToIncrement)
+        {
+            string eventName;
+            if (eventToIncrement[EventBase.EventNameKey].Substring(0,10) == MsalCacheEventValuePrefix)
+            {
+                eventName = MsalCacheEventName;
+            }
+            else
+            {
+                eventName = eventToIncrement[EventBase.EventNameKey];
+            }
 
-            if (!EventCount.ContainsKey(eventToIncrement.TelemetryCorrelationId)) 
-            { 
-                EventCount[eventToIncrement.TelemetryCorrelationId] = new ConcurrentDictionary<string, int>(); 
-                EventCount[eventToIncrement.TelemetryCorrelationId].TryAdd(eventName, 1); 
-            } 
-            else 
-            { 
-                EventCount[eventToIncrement.TelemetryCorrelationId].AddOrUpdate(eventName, 1, (key, count) => count + 1); 
-            } 
-        } 
+            if (!EventCount.ContainsKey(eventToIncrement.TelemetryCorrelationId))
+            {
+                EventCount[eventToIncrement.TelemetryCorrelationId] = new ConcurrentDictionary<string, int>();
+                EventCount[eventToIncrement.TelemetryCorrelationId].TryAdd(eventName, 1);
+            }
+            else
+            {
+                EventCount[eventToIncrement.TelemetryCorrelationId].AddOrUpdate(eventName, 1, (key, count) => count + 1);
+            }
+        }
 
         internal class EventKey : IEquatable<EventKey>
         {
@@ -229,8 +205,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
                     return true;
                 }
 
-                return string.Equals(TelemetryCorrelationId, other.TelemetryCorrelationId, StringComparison.OrdinalIgnoreCase) && 
-                       string.Equals(EventId, other.EventId, StringComparison.OrdinalIgnoreCase) && 
+                return string.Equals(TelemetryCorrelationId, other.TelemetryCorrelationId, StringComparison.OrdinalIgnoreCase) &&
+                       string.Equals(EventId, other.EventId, StringComparison.OrdinalIgnoreCase) &&
                        string.Equals(EventName, other.EventName, StringComparison.OrdinalIgnoreCase);
             }
 
