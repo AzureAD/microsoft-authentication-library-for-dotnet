@@ -1,13 +1,11 @@
-3.0.4-preview
+3.0.5-preview
 =============
 
 Bug Fixes: 
 
 - **Exception: Failure to parse missing json on first login** [MSAL issue #1052](https://github.com/AzureAD/microsoft-authentication-
 library-for-dotnet/issues/1052)
-
 - **B2C ROPC support** [MSAL issue #926](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/926)
-
 - **FOCI is hiding the true cause of refresh token failures** [MSAL issue #1067](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1067)
 
 
