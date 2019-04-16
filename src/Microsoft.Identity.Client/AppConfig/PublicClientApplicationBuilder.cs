@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
         ///         .Build();
         /// </code>
         /// </example>
-        public static Uri DefaultInteractiveDesktopRedirectUri = new Uri("https://login.microsoftonline.com/common/oauth2/nativeclient");
+        public static string DefaultInteractiveDesktopRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
 
         internal PublicClientApplicationBuilder WithUserTokenLegacyCachePersistenceForTest(ILegacyCachePersistence legacyCachePersistence)
         {
