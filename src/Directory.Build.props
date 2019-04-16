@@ -33,7 +33,7 @@
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation</Company>
     <Authors>Microsoft</Authors>
-    <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>
