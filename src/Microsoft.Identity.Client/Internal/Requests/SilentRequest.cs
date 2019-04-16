@@ -179,12 +179,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 catch (MsalServiceException ex)
                 {
-
                     // Hack: STS does not yet send back the suberror on these platforms because they are not in an allowed list,
                     // so the best thing we can do is to consider all errors as client_mismatch.
 #if NETSTANDARD || UAP || MAC
+                    ex?.GetType();  // avoid the "variable 'ex' is declared but never used" in this code path.
                     return null;
-#endif
+#else
                     if (MsalError.InvalidGrantError.Equals(ex?.ErrorCode, StringComparison.OrdinalIgnoreCase) &&
                         FociClientMismatchSubError.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
                     {
@@ -197,6 +197,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     // For example, some apps have special handling for MFA errors.
                     logger.Error("[FOCI] FRT refresh failed - other error");
                     throw;
+#endif
                 }
             }
 
