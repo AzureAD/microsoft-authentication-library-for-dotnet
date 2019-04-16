@@ -68,6 +68,23 @@ namespace Microsoft.Identity.Client
             return new PublicClientApplicationBuilder(config).WithClientId(clientId);
         }
 
+        /// <summary>
+        /// Default redirect URI for desktop interactive public client applications. 
+        /// </summary>
+        /// <example>
+        /// If your application uses AcquireTokenInteractive, you want to register the
+        /// <c>https://login.microsoftonline.com/common/oauth2/nativeclient</c> redirect URI
+        /// and build your application using
+        /// <c>.WithRedirectUri(PublicClientApplicationBuilder.DefaultInteractiveDesktopRedirectUri)</c>
+        /// <code>
+        /// IPublicClientApplication app;
+        /// app = PublicClientApplicationBuilder.Create(clientId)
+        ///         .WithRedirectUri(PublicClientApplicationBuilder.DefaultInteractiveDesktopRedirectUri)
+        ///         .Build();
+        /// </code>
+        /// </example>
+        public static Uri DefaultInteractiveDesktopRedirectUri = new Uri("https://login.microsoftonline.com/common/oauth2/nativeclient");
+
         internal PublicClientApplicationBuilder WithUserTokenLegacyCachePersistenceForTest(ILegacyCachePersistence legacyCachePersistence)
         {
             Config.UserTokenLegacyCachePersistenceForTest = legacyCachePersistence;
