@@ -34,6 +34,7 @@ namespace DesktopTestApp
         private const string B2CAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
         private const string B2CEditProfileAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
         public const string B2CCustomDomainAuthority = "https://public.msidlabb2c.com/tfp/public.msidlabb2c.com/B2C_1_signupsignin_userflow/";
+        public const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
 
         private bool IsForceRefreshEnabled => forceRefreshCheckBox.Checked;
 
@@ -192,20 +193,6 @@ namespace DesktopTestApp
 
         private async void acquireTokenByUPButton_Click(object sender, EventArgs e)
         {
-            using (new UIProgressScope(this))
-            {
-                ClearResultPageInfo();
-                userPasswordTextBox.PasswordChar = '*';
-
-                string username = loginHintTextBox.Text; //Can be blank for U/P
-                SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
-
-                await AcquireTokenByUsernamePasswordAsync(username, securePassword).ConfigureAwait(true);
-            }
-        }
-
-        private async Task AcquireTokenByUsernamePasswordAsync(string username, SecureString password)
-        {
             try
             {
                 _publicClientHandler.PublicClientApplication = PublicClientApplicationBuilder
@@ -213,11 +200,29 @@ namespace DesktopTestApp
                     .WithAuthority("https://login.microsoftonline.com/organizations")
                     .BuildConcrete();
 
+                await AcquireTokenByUsernamePasswordAsync().ConfigureAwait(true);
+            }
+            catch (Exception exc)
+            {
+                CreateException(exc);
+            }
+        }
+
+        private async Task AcquireTokenByUsernamePasswordAsync()
+        {
+            try
+            {
+                ClearResultPageInfo();
+                userPasswordTextBox.PasswordChar = '*';
+
+                string username = loginHintTextBox.Text; //Can be blank for U/P
+                SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
+
                 AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication
                     .AcquireTokenByUsernamePassword(
                         SplitScopeString(scopes.Text),
                         username,
-                        password)
+                        securePassword)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(true);
 
@@ -637,6 +642,22 @@ namespace DesktopTestApp
             }
         }
 
+        private async void RopcB2CAT_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _publicClientHandler.PublicClientApplication = PublicClientApplicationBuilder
+                   .Create(_b2CClientId)
+                   .WithB2CAuthority(B2CROPCAuthority)
+                   .BuildConcrete();
+                await AcquireTokenByUsernamePasswordAsync().ConfigureAwait(true);
+            }
+            catch (Exception exc)
+            {
+                CreateException(exc);
+            }
+        }
+        
         private void GetB2CClientIdFromLab()
         {
             if (_b2CClientId != null)

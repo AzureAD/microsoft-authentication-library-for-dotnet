@@ -58,6 +58,7 @@ namespace DesktopTestApp
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.publicClientTabPage = new System.Windows.Forms.TabPage();
+            this.b2cSilentCustomDomain = new System.Windows.Forms.Button();
             this.b2cCustomDomain = new System.Windows.Forms.Button();
             this.forceRefreshCheckBox = new System.Windows.Forms.CheckBox();
             this.b2cEditProfile = new System.Windows.Forms.Button();
@@ -95,7 +96,7 @@ namespace DesktopTestApp
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.b2cSilentCustomDomain = new System.Windows.Forms.Button();
+            this.ropcB2CAT = new System.Windows.Forms.Button();
             this.logsTabPage.SuspendLayout();
             this.cacheTabPage.SuspendLayout();
             this.settingsTabPage.SuspendLayout();
@@ -430,6 +431,7 @@ namespace DesktopTestApp
             // publicClientTabPage
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.publicClientTabPage.Controls.Add(this.ropcB2CAT);
             this.publicClientTabPage.Controls.Add(this.b2cSilentCustomDomain);
             this.publicClientTabPage.Controls.Add(this.b2cCustomDomain);
             this.publicClientTabPage.Controls.Add(this.forceRefreshCheckBox);
@@ -469,6 +471,17 @@ namespace DesktopTestApp
             this.publicClientTabPage.Size = new System.Drawing.Size(1336, 1518);
             this.publicClientTabPage.TabIndex = 0;
             this.publicClientTabPage.Text = "publicClientTabPage";
+            // 
+            // b2cSilentCustomDomain
+            // 
+            this.b2cSilentCustomDomain.Location = new System.Drawing.Point(307, 1325);
+            this.b2cSilentCustomDomain.Margin = new System.Windows.Forms.Padding(6);
+            this.b2cSilentCustomDomain.Name = "b2cSilentCustomDomain";
+            this.b2cSilentCustomDomain.Size = new System.Drawing.Size(252, 58);
+            this.b2cSilentCustomDomain.TabIndex = 45;
+            this.b2cSilentCustomDomain.Text = "B2C Silent Custom Domain";
+            this.b2cSilentCustomDomain.UseVisualStyleBackColor = true;
+            this.b2cSilentCustomDomain.Click += new System.EventHandler(this.B2cSilentCustomDomain_Click);
             // 
             // b2cCustomDomain
             // 
@@ -872,16 +885,16 @@ namespace DesktopTestApp
             this.tabControl1.Size = new System.Drawing.Size(1352, 1565);
             this.tabControl1.TabIndex = 0;
             // 
-            // b2cSilentCustomDomain
+            // ropcB2CAT
             // 
-            this.b2cSilentCustomDomain.Location = new System.Drawing.Point(307, 1325);
-            this.b2cSilentCustomDomain.Margin = new System.Windows.Forms.Padding(6);
-            this.b2cSilentCustomDomain.Name = "b2cSilentCustomDomain";
-            this.b2cSilentCustomDomain.Size = new System.Drawing.Size(252, 58);
-            this.b2cSilentCustomDomain.TabIndex = 45;
-            this.b2cSilentCustomDomain.Text = "B2C Silent Custom Domain";
-            this.b2cSilentCustomDomain.UseVisualStyleBackColor = true;
-            this.b2cSilentCustomDomain.Click += new System.EventHandler(this.B2cSilentCustomDomain_Click);
+            this.ropcB2CAT.Location = new System.Drawing.Point(307, 1390);
+            this.ropcB2CAT.Margin = new System.Windows.Forms.Padding(6);
+            this.ropcB2CAT.Name = "ropcB2CAT";
+            this.ropcB2CAT.Size = new System.Drawing.Size(252, 58);
+            this.ropcB2CAT.TabIndex = 46;
+            this.ropcB2CAT.Text = "B2C ROPC";
+            this.ropcB2CAT.UseVisualStyleBackColor = true;
+            this.ropcB2CAT.Click += new System.EventHandler(this.RopcB2CAT_Click);
             // 
             // MainForm
             // 
@@ -984,6 +997,7 @@ namespace DesktopTestApp
         private CheckBox forceRefreshCheckBox;
         private Button b2cCustomDomain;
         private Button b2cSilentCustomDomain;
+        private Button ropcB2CAT;
     }
 }
 
