@@ -192,9 +192,9 @@
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "family_id": ""
     },
-    "appmetadata-env_1-d3adb33f-c1de-ed1c-c1de-deadb33fc1d3": {
+    "appmetadata-env_1-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa": {
       "environment": "env_1",
-      "client_id": "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3",
+      "client_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
       "family_id": "another_family"
     }
   }

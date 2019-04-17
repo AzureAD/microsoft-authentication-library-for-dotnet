@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/policy/";
         public const string B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/policy/";
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
-        public const string ClientId2 = "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3";
+        public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
         public const string FamilyId = "1";
         public const string UniqueId = "unique_id";
         public const string IdentityProvider = "my-idp";
