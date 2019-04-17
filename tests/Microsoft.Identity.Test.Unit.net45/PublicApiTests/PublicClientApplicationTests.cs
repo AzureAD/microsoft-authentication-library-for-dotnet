@@ -613,42 +613,40 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public void GetUserTest()
+        public void GetAccountTests()
         {
             var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
-            var users = app.GetAccountsAsync().Result;
-            Assert.IsNotNull(users);
-            // no users in the cache
-            Assert.AreEqual(0, users.Count());
+            var accounts = app.GetAccountsAsync().Result;
+            Assert.IsTrue(!accounts.Any());
 
-            var fetchedUser = app.GetAccountAsync(null).Result;
-            Assert.IsNull(fetchedUser);
+            var acc = app.GetAccountAsync(null).Result;
+            Assert.IsNull(acc);
 
-            fetchedUser = app.GetAccountAsync("").Result;
-            Assert.IsNull(fetchedUser);
+            acc = app.GetAccountAsync("").Result;
+            Assert.IsNull(acc);
 
             TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCacheInternal.Accessor, MsalTestConstants.Uid,
-                MsalTestConstants.Utid, MsalTestConstants.Name);
+                MsalTestConstants.Utid, MsalTestConstants.ClientId);
             TokenCacheHelper.AddAccountToCache(app.UserTokenCacheInternal.Accessor, MsalTestConstants.Uid,
                 MsalTestConstants.Utid);
 
             TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCacheInternal.Accessor, MsalTestConstants.Uid + "1",
-                MsalTestConstants.Utid, MsalTestConstants.Name + "1");
+                MsalTestConstants.Utid, MsalTestConstants.ClientId);
             TokenCacheHelper.AddAccountToCache(app.UserTokenCacheInternal.Accessor, MsalTestConstants.Uid + "1",
                 MsalTestConstants.Utid);
 
-            users = app.GetAccountsAsync().Result;
-            Assert.IsNotNull(users);
+            accounts = app.GetAccountsAsync().Result;
+            Assert.IsNotNull(accounts);
             // two users in the cache
-            Assert.AreEqual(2, users.Count());
+            Assert.AreEqual(2, accounts.Count());
 
-            var userToFind = users.First();
+            var userToFind = accounts.First();
 
-            fetchedUser = app.GetAccountAsync(userToFind.HomeAccountId.Identifier).Result;
+            acc = app.GetAccountAsync(userToFind.HomeAccountId.Identifier).Result;
 
-            Assert.AreEqual(userToFind.Username, fetchedUser.Username);
-            Assert.AreEqual(userToFind.HomeAccountId, fetchedUser.HomeAccountId);
-            Assert.AreEqual(userToFind.Environment, fetchedUser.Environment);
+            Assert.AreEqual(userToFind.Username, acc.Username);
+            Assert.AreEqual(userToFind.HomeAccountId, acc.HomeAccountId);
+            Assert.AreEqual(userToFind.Environment, acc.Environment);
         }
 
         [TestMethod]

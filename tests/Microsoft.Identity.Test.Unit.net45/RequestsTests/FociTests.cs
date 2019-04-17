@@ -227,6 +227,33 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        [TestMethod]
+        public async Task TestGetAndRemoveAccountsFociEnabledAsync()
+        {
+            using (_harness = new MockHttpAndServiceBundle())
+            {
+                InitApps();
+
+                // A is part of the family, and MSAL supports FOCI (e.g. ADAL.iOS)
+                await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
+
+                // B is part of the family
+                await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
+
+                var accA = await _appA.GetAccountsAsync().ConfigureAwait(false);
+                var accB = await _appB.GetAccountsAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(1, accA.Count());
+                Assert.AreEqual(1, accB.Count());
+
+                // Remove account from app B
+                await _appB.RemoveAsync(accB.Single()).ConfigureAwait(false);
+
+                Assert.IsTrue(!_appB.UserTokenCacheInternal.GetAllRefreshTokens(true).Any());
+                Assert.IsTrue(!_appB.UserTokenCacheInternal.GetAllAccounts().Any());
+            }
+        }
+
         private void AssertAppMetadata(PublicClientApplication app, bool partOfFamily)
         {
             if (app.ServiceBundle.PlatformProxy.GetFeatureFlags().IsFociEnabled)

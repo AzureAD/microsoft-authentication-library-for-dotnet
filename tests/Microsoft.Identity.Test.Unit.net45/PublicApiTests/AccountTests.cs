@@ -239,8 +239,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Act
             var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
 
-            // Assert - an account is returned even if app is scoped to ClientId1
-            Assert.AreEqual(1, accounts.Count());
+            // Assert 
+            Assert.IsTrue(!accounts.Any(), "No accounts should be returned because the existing account to a different client");
 
             // Arrange
 
@@ -255,14 +255,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 expectedAppMetadataCount: 2);
 
             // Act
+            accounts = await app.GetAccountsAsync().ConfigureAwait(false);
             await app.RemoveAsync(accounts.Single()).ConfigureAwait(false);
 
             // Assert
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
-               expectedAtCount: 0,
-               expectedRtCount: 0,
+               expectedAtCount: 2,
+               expectedRtCount: 1,
                expectedAccountCount: 0,
-               expectedIdtCount: 0,
+               expectedIdtCount: 1,
                expectedAppMetadataCount: 2); // app metadata is never deleted
 
         }
