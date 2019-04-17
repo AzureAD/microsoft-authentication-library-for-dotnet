@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Globalization;
@@ -51,7 +27,7 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        public MsalServiceException(string errorCode, string errorMessage) 
+        public MsalServiceException(string errorCode, string errorMessage)
             : base(errorCode, errorMessage)
         {
             if (string.IsNullOrWhiteSpace(errorMessage))
@@ -71,7 +47,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="statusCode">Status code of the resposne received from the service.</param>
-        public MsalServiceException(string errorCode, string errorMessage, int statusCode) 
+        public MsalServiceException(string errorCode, string errorMessage, int statusCode)
             : this(errorCode, errorMessage)
         {
             StatusCode = statusCode;
@@ -190,21 +166,21 @@ namespace Microsoft.Identity.Client
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
         /// <summary>
-        /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to 
+        /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to
         /// provide additional claims, such as doing two factor authentication. The are two cases:
         /// <list type="bullent">
         /// <item><description>
         /// If your application is a <see cref="IPublicClientApplication"/>, you should just call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
         /// and add the <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims(string)"/> modifier.
         /// </description></item>
-        /// <item>><description>If your application is a <see cref="IConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize 
+        /// <item>><description>If your application is a <see cref="IConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize
         /// exception with a message containing the claims</description></item>
         /// </list>
         /// For more details see https://aka.ms/msal-net-claim-challenge
         /// </summary>
         public string Claims { get; internal set; }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
-        
+
         /// <summary>
         /// Raw response body received from the server.
         /// </summary>
@@ -217,11 +193,11 @@ namespace Microsoft.Identity.Client
         internal string SubError { get; set; }
 
         /// <summary>
-        /// Contains the http headers from the server response that indicated an error. 
+        /// Contains the http headers from the server response that indicated an error.
         /// </summary>
         /// <remarks>
-        /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the 
-        /// time specified in the Retry-After header to avoid a retry storm. 
+        /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the
+        /// time specified in the Retry-After header to avoid a retry storm.
         /// </remarks>
         public HttpResponseHeaders Headers { get; internal set; }
 
@@ -238,9 +214,9 @@ namespace Microsoft.Identity.Client
         {
             return base.ToString() + string.Format(
                 CultureInfo.InvariantCulture,
-                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}", 
-                StatusCode, 
-                ResponseBody, 
+                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}",
+                StatusCode,
+                ResponseBody,
                 Headers);
         }
 

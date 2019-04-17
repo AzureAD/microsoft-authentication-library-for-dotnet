@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
 using System.Threading;
@@ -129,7 +105,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalTokenResponse msalTokenResponse = await TryGetTokenUsingFociAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            // Normal, non-FOCI flow 
+            // Normal, non-FOCI flow
             if (msalTokenResponse == null)
             {
                 // Look for a refresh token
@@ -152,11 +128,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             // If the app was just added to the family, the app metadata will reflect this
-            // after the first RT exchanged. 
+            // after the first RT exchanged.
             bool? isFamilyMember = await CacheManager.IsAppFociMemberAsync(TheOnlyFamilyId).ConfigureAwait(false);
 
             if (isFamilyMember.HasValue && isFamilyMember.Value == false)
-            {                
+            {
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(
                     "[FOCI] App is not part of the family, skipping FOCI.");
 
@@ -179,12 +155,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 catch (MsalServiceException ex)
                 {
-
                     // Hack: STS does not yet send back the suberror on these platforms because they are not in an allowed list,
                     // so the best thing we can do is to consider all errors as client_mismatch.
 #if NETSTANDARD || UAP || MAC
+                    ex?.GetType();  // avoid the "variable 'ex' is declared but never used" in this code path.
                     return null;
-#endif
+#else
                     if (MsalError.InvalidGrantError.Equals(ex?.ErrorCode, StringComparison.OrdinalIgnoreCase) &&
                         FociClientMismatchSubError.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
                     {
@@ -192,18 +168,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         return null;
                     }
 
-                    // Rethrow failures to refresh the FRT, other than client_mismatch, because 
+                    // Rethrow failures to refresh the FRT, other than client_mismatch, because
                     // apps need to handle them in the same way they handle exceptions from refreshing the RT.
                     // For example, some apps have special handling for MFA errors.
                     logger.Error("[FOCI] FRT refresh failed - other error");
                     throw;
+#endif
                 }
             }
 
             return null;
 
         }
-     
+
         private async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken)
         {
             AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");

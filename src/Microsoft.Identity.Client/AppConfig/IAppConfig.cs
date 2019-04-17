@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -43,7 +19,7 @@ namespace Microsoft.Identity.Client
         string ClientId { get; }
 
         /// <summary>
-        /// Flag telling if logging of Personally Identifiable Information (PII) is enabled/disabled for 
+        /// Flag telling if logging of Personally Identifiable Information (PII) is enabled/disabled for
         /// the application. See https://aka.ms/msal-net-logging
         /// </summary>
         /// <seealso cref="IsDefaultPlatformLoggingEnabled"/>
@@ -62,7 +38,7 @@ namespace Microsoft.Identity.Client
         LogLevel LogLevel { get; }
 
         /// <summary>
-        /// Flag telling if logging to platform defaults is enabled/disabled for the app. 
+        /// Flag telling if logging to platform defaults is enabled/disabled for the app.
         /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
         /// In Android, logcat is used. See https://aka.ms/msal-net-logging
         /// </summary>
@@ -101,12 +77,12 @@ namespace Microsoft.Identity.Client
         bool IsBrokerEnabled { get; }
 
         /// <summary>
-        /// The name of the calling application for telemetry purposes. 
+        /// The name of the calling application for telemetry purposes.
         /// </summary>
         string ClientName { get; }
 
         /// <summary>
-        /// The version of the calling application for telemetry purposes. 
+        /// The version of the calling application for telemetry purposes.
         /// </summary>
         string ClientVersion { get; }
 

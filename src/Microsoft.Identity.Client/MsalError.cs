@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 namespace Microsoft.Identity.Client
 {
@@ -33,7 +9,7 @@ namespace Microsoft.Identity.Client
     public static class MsalError
     {
         /// <summary>
-        /// Standard OAuth2 protocol error code. It indicates that the application needs to expose the UI to the user  
+        /// Standard OAuth2 protocol error code. It indicates that the application needs to expose the UI to the user
         /// so that the user does an interactive action in order to get a new token.
         /// <para>Mitigation:</para> If your application is a <see cref="T:IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
         /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
@@ -61,7 +37,7 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
-        /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is 
+        /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is
         /// passed as the <c>account</c> parameter. This can be because you have called AcquireTokenSilent with an <c>account</c> parameter
         /// set to <c>accounts.FirstOrDefault()</c> but <c>accounts</c> is empty.
         /// <para>Mitigation</para>
@@ -81,13 +57,13 @@ namespace Microsoft.Identity.Client
         public const string NoAccountForLoginHint = "no_account_for_login_hint";
 
         /// <summary>
-        /// This error code denotes that multiple accounts were found having the same login hint and MSAL 
+        /// This error code denotes that multiple accounts were found having the same login hint and MSAL
         /// cannot chose one. Please use <see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> to specify the account
         /// </summary>
         public const string MultipleAccountsForLoginHint = "multiple_accounts_for_login_hint";
 
         /// <summary>
-        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when 
+        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when
         /// the user cache had not been set in the application constructor. This should never happen in MSAL.NET 3.x as the cache is created by the applicaiton
         /// </summary>
         public const string TokenCacheNullError = "token_cache_null";
@@ -102,7 +78,7 @@ namespace Microsoft.Identity.Client
         /// An error occurred during a silent web authentication that prevented the authentication flow from completing in a short enough time frame.
         /// </description></item>
         /// </list>
-        /// <para>Remediation:</para>call <c>AcquireTokenInteractive</c> so that the user of your application signs-in and accepts consent. 
+        /// <para>Remediation:</para>call <c>AcquireTokenInteractive</c> so that the user of your application signs-in and accepts consent.
         /// </summary>
         public const string NoPromptFailedError = "no_prompt_failed";
 
@@ -121,7 +97,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// loginHint should be a Upn
         /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:IPublicClientApplication"/> which
-        /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c> 
+        /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c>
         /// expected by the service
         /// <para>Remediation</para> Make sure in your code that you enforce <c>loginHint</c> to be a UPN
         /// </summary>
@@ -231,7 +207,7 @@ namespace Microsoft.Identity.Client
         /// use a different method to acquire tokens.
         /// </summary>
         public const string FailedToRefreshToken = "failed_to_refresh_token";
-               
+
         /// <summary>
         /// Failed to acquire token silently. Used in broker scenarios.
         /// <para>What happens</para>
@@ -306,7 +282,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, System.Security.SecureString)"/>
-        /// In the case of a Federated user (that is owned by a federated IdP, as opposed to a managed user owned in an Azure AD tenant) 
+        /// In the case of a Federated user (that is owned by a federated IdP, as opposed to a managed user owned in an Azure AD tenant)
         /// ID3242: The security token could not be authenticated or authorized.
         /// The user does not exist or has entered the wrong password
         /// </summary>
@@ -363,7 +339,7 @@ namespace Microsoft.Identity.Client
         /// name could not be found.
         ///<para>Mitigation</para>
         /// This might be because you need to add more capabilities to your UWP application in the Package.appxmanifest.
-        /// See https://aka.ms/msal-net-uwp 
+        /// See https://aka.ms/msal-net-uwp
         /// </summary>
         public const string UapCannotFindDomainUser = "user_information_access_failed";
 
@@ -374,7 +350,7 @@ namespace Microsoft.Identity.Client
         /// name could not be found.
         ///<para>Mitigation</para>
         /// This might be because you need to add more capabilities to your UWP application in the Package.appxmanifest.
-        /// See https://aka.ms/msal-net-uwp 
+        /// See https://aka.ms/msal-net-uwp
         /// </summary>
         public const string UapCannotFindUpn = "uap_cannot_find_upn";
 
@@ -415,7 +391,7 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseReturnedError = "broker_response_returned_error";
 
         /// <summary>
-        /// MSAL is not able to invoke the broker. Possible reasons are the broker is not installed on the user's device, 
+        /// MSAL is not able to invoke the broker. Possible reasons are the broker is not installed on the user's device,
         /// or there were issues with the UiParent or CallerViewController being null. See https://aka.ms/msal-brokers
         /// </summary>
         public const string CannotInvokeBroker = "cannot_invoke_broker";
@@ -435,12 +411,12 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Error code used when the <see cref="Extensibility.ICustomWebUi"/> has returned an uri, but it is invalid - it is either null or has no code.
-        /// Consider throwing an exception if you are unable to intercept the uri containing the code. 
+        /// Consider throwing an exception if you are unable to intercept the uri containing the code.
         /// </summary>
         public const string CustomWebUiReturnedInvalidUri = "custom_webui_returned_invalid_uri";
 
         /// <summary>
-        /// Error code used when the CustomWebUI has returned an uri, but it does not match the Authroity and AbsolutePath of 
+        /// Error code used when the CustomWebUI has returned an uri, but it does not match the Authroity and AbsolutePath of
         /// the configured redirect uri.
         /// </summary>
         public const string CustomWebUiRedirectUriMismatch = "custom_webui_invalid_mismatch";
@@ -473,8 +449,8 @@ namespace Microsoft.Identity.Client
         public const string NoRedirectUri = "no_redirect_uri";
 
         /// <summary>
-        /// Multiple Tokens were matched. 
-        /// <para>What happens?</para>This exception happens in the case of applications managing several identitities, 
+        /// Multiple Tokens were matched.
+        /// <para>What happens?</para>This exception happens in the case of applications managing several identitities,
         /// when calling <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
         /// or one of its overrides and the user token cache contains multiple tokens for this client application and the the specified Account, but from different authorities.
         /// <para>Mitigation [App Development]</para>specify the authority to use in the acquire token operation
@@ -483,7 +459,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Non HTTPS redirects are not supported
-        /// <para>What happens?</para>This error happens when you have registered a non-https redirect URI for the 
+        /// <para>What happens?</para>This error happens when you have registered a non-https redirect URI for the
         /// public client application other than <c>urn:ietf:wg:oauth:2.0:oob</c>
         /// <para>Mitigation [App registration and development]</para>Register in the application a Reply URL starting with "https://"
         /// </summary>
@@ -534,7 +510,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// JSON parsing failed.
-        /// <para>What happens?</para>A Json blob read from the token cache or received from the STS was not parseable. 
+        /// <para>What happens?</para>A Json blob read from the token cache or received from the STS was not parseable.
         /// This can happen when reading the token cache, or receiving an IDToken from the STS.
         /// <para>Mitigation</para>Make sure that the token cache was not tampered
         /// </summary>
@@ -550,7 +526,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// State returned from the STS was different from the one sent by the library
-        /// <para>What happens?</para>The library sends to the STS a state associated to a request, and expects the reply to be consistent. 
+        /// <para>What happens?</para>The library sends to the STS a state associated to a request, and expects the reply to be consistent.
         /// This errors indicates that the reply is not associated with the request. This could indicate an attempt to replay a response
         /// <para>Mitigation</para> None
         /// </summary>
@@ -573,7 +549,7 @@ namespace Microsoft.Identity.Client
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
-        /// From MSAL 2.x and ADAL 4.x, the keychain for the publisher needs to be accessed in order to provide 
+        /// From MSAL 2.x and ADAL 4.x, the keychain for the publisher needs to be accessed in order to provide
         /// Single Sign On between applications of the same publisher.
         /// <para>Mitigation</para> In order to access the keychain on iOS, you will need to ensure the Entitlements.plist
         /// file is configured and included under &amp;lt;CodesignEntitlements&amp;gt;Entitlements.plist&amp;lt;/CodesignEntitlements&amp;gt;
@@ -583,10 +559,10 @@ namespace Microsoft.Identity.Client
         public const string CannotAccessPublisherKeyChain = "cannot_access_publisher_keychain";
 
         /// <summary>
-        /// Xamarin.iOS specific. This error indicates that saving a token to the keychain failed. 
+        /// Xamarin.iOS specific. This error indicates that saving a token to the keychain failed.
         /// <para>Mitigation</para> In order to access the keychain on iOS, you will need to set the
         /// keychain access groups in the Entitlements.plist for the application.
-        /// <para>For more details</para> See https://aka.ms/msal-net-enable-keychain-groups 
+        /// <para>For more details</para> See https://aka.ms/msal-net-enable-keychain-groups
         /// </summary>
         public const string MissingEntitlements = "missing_entitlements";
 #endif
@@ -596,8 +572,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Xamarin.Android specific. This error indicates that a system browser was not installed on the user's device, and authentication
         /// using system browser could not be attempted because there was no available Android activity to handle the intent.
-        /// <para>Mitigation</para>If you want to use the System web browser (for instance to get SSO with the browser), notify the end 
-        /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. For a list of supported browsers with 
+        /// <para>Mitigation</para>If you want to use the System web browser (for instance to get SSO with the browser), notify the end
+        /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. For a list of supported browsers with
         /// custom tab support, please see https://aka.ms/msal-net-system-browsers.
         /// Otherwise you can use <see cref="UIParent.IsSystemWebviewAvailable"/> to check if a browser with custom tabs is available on the device
         /// and require the library to use the embedded web view if there is no such browser available by setting the boolean to <c>true</c> in the following
@@ -612,7 +588,7 @@ namespace Microsoft.Identity.Client
         public const string UnresolvableIntentError = "unresolvable_intent";
 
         /// <summary>
-        /// Failed to create shared preferences on the Android platform. 
+        /// Failed to create shared preferences on the Android platform.
         /// <para>What happens?</para> The library uses Android shared preferences to store the token cache
         /// <para>Mitigation</para> Make sure the application is configured to use this platform feature (See also
         /// the AndroidManifest.xml file, and https://aka.ms/msal-net-android-specificities

@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 extern alias msal;
 
@@ -70,8 +46,8 @@ namespace Microsoft.Identity.Test.SideBySide
 
                 _securePassword = new NetworkCredential("", _user.GetOrFetchPassword()).SecurePassword;
                 _authority = string.Format(
-                    CultureInfo.InvariantCulture, 
-                    AuthorityTemplate, 
+                    CultureInfo.InvariantCulture,
+                    AuthorityTemplate,
                     _user.CurrentTenantId);
             }
 
@@ -412,7 +388,7 @@ namespace Microsoft.Identity.Test.SideBySide
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
-            // simulate adalV3 token cache state by setting client info in adal cache entities to null 
+            // simulate adalV3 token cache state by setting client info in adal cache entities to null
             // and clearing msal cache
             UpdateAdalCacheSetClientInfoToNull();
             ClearMsalCache();
@@ -434,7 +410,7 @@ namespace Microsoft.Identity.Test.SideBySide
 
             ValidateMsalAuthResult();
 
-            // make sure Msal remove account api remove corresponding cache entities in all formats  
+            // make sure Msal remove account api remove corresponding cache entities in all formats
             msalAccounts = await _msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
             Assert.AreEqual(1, msalAccounts.Count());
             account = msalAccounts.First();
@@ -455,7 +431,7 @@ namespace Microsoft.Identity.Test.SideBySide
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
-            // simulate adalV3 token cache state by setting client info in adal cache entities to null 
+            // simulate adalV3 token cache state by setting client info in adal cache entities to null
             // and clearing msal cache
             UpdateAdalCacheSetClientInfoToNull();
             ClearMsalCache();
@@ -500,7 +476,7 @@ namespace Microsoft.Identity.Test.SideBySide
 
             ValidateMsalAuthResult();
 
-            // make sure Msal remove account api remove corresponding cache entities in all formats  
+            // make sure Msal remove account api remove corresponding cache entities in all formats
             msalAccounts = await _msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
             Assert.AreEqual(1, msalAccounts.Count());
             account = msalAccounts.First();

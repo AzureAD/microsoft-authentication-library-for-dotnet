@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -81,7 +57,7 @@ namespace Microsoft.Identity.Client.Cache
                     },
                     RefreshToken = rtItem.Secret,
                     RawClientInfo = rtItem.RawClientInfo,
-                    //ResourceInResponse is needed to treat RT as an MRRT. See IsMultipleResourceRefreshToken 
+                    //ResourceInResponse is needed to treat RT as an MRRT. See IsMultipleResourceRefreshToken
                     //property in AdalResultWrapper and its usage. Stronger design would be for the STS to return resource
                     //for which the token was issued as well on v2 endpoint.
                     ResourceInResponse = scope
@@ -113,8 +89,8 @@ namespace Microsoft.Identity.Client.Cache
 
         /// <summary>
         /// Returns a tuple where
-        /// 
-        /// Item1 is a map of ClientInfo -> AdalUserInfo for those users that have ClientInfo 
+        ///
+        /// Item1 is a map of ClientInfo -> AdalUserInfo for those users that have ClientInfo
         /// Item2 is a list of AdalUserInfo for those users that do not have ClientInfo
         /// </summary>
         public static AdalUsersForMsal GetAllAdalUsersForMsal(
@@ -128,7 +104,7 @@ namespace Microsoft.Identity.Client.Cache
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                     AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
 
-                // filter by client id 
+                // filter by client id
                 dictionary.Where(p =>
                         p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
                         !string.IsNullOrEmpty(p.Key.Authority))
@@ -152,19 +128,19 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         /// <summary>
-        /// Algorithm to delete: 
-        /// 
-        /// DisplayableId cannot be null 
+        /// Algorithm to delete:
+        ///
+        /// DisplayableId cannot be null
         /// Removal is scoped by enviroment and clientId;
-        /// 
+        ///
         /// If accountId != null then delete everything with the same clientInfo
         /// otherwise, delete everything with the same displayableId
-        /// 
-        /// Notes: 
+        ///
+        /// Notes:
         /// - displayableId can change rarely
         /// - ClientCredential Grant uses the app token cache, not the user token cache, so this algorithm does not apply
         /// (nor will GetAccounts / RemoveAccount work)
-        /// 
+        ///
         /// </summary>
         public static void RemoveAdalUser(
             ICoreLogger logger,

@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -58,6 +34,7 @@ namespace DesktopTestApp
         private const string B2CAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
         private const string B2CEditProfileAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
         public const string B2CCustomDomainAuthority = "https://public.msidlabb2c.com/tfp/public.msidlabb2c.com/B2C_1_signupsignin_userflow/";
+        public const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
 
         private bool IsForceRefreshEnabled => forceRefreshCheckBox.Checked;
 
@@ -216,20 +193,6 @@ namespace DesktopTestApp
 
         private async void acquireTokenByUPButton_Click(object sender, EventArgs e)
         {
-            using (new UIProgressScope(this))
-            {
-                ClearResultPageInfo();
-                userPasswordTextBox.PasswordChar = '*';
-
-                string username = loginHintTextBox.Text; //Can be blank for U/P
-                SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
-
-                await AcquireTokenByUsernamePasswordAsync(username, securePassword).ConfigureAwait(true);
-            }
-        }
-
-        private async Task AcquireTokenByUsernamePasswordAsync(string username, SecureString password)
-        {
             try
             {
                 _publicClientHandler.PublicClientApplication = PublicClientApplicationBuilder
@@ -237,11 +200,29 @@ namespace DesktopTestApp
                     .WithAuthority("https://login.microsoftonline.com/organizations")
                     .BuildConcrete();
 
+                await AcquireTokenByUsernamePasswordAsync().ConfigureAwait(true);
+            }
+            catch (Exception exc)
+            {
+                CreateException(exc);
+            }
+        }
+
+        private async Task AcquireTokenByUsernamePasswordAsync()
+        {
+            try
+            {
+                ClearResultPageInfo();
+                userPasswordTextBox.PasswordChar = '*';
+
+                string username = loginHintTextBox.Text; //Can be blank for U/P
+                SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
+
                 AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication
                     .AcquireTokenByUsernamePassword(
                         SplitScopeString(scopes.Text),
                         username,
-                        password)
+                        securePassword)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(true);
 
@@ -661,6 +642,22 @@ namespace DesktopTestApp
             }
         }
 
+        private async void RopcB2CAT_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _publicClientHandler.PublicClientApplication = PublicClientApplicationBuilder
+                   .Create(_b2CClientId)
+                   .WithB2CAuthority(B2CROPCAuthority)
+                   .BuildConcrete();
+                await AcquireTokenByUsernamePasswordAsync().ConfigureAwait(true);
+            }
+            catch (Exception exc)
+            {
+                CreateException(exc);
+            }
+        }
+        
         private void GetB2CClientIdFromLab()
         {
             if (_b2CClientId != null)
