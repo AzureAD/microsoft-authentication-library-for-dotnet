@@ -244,6 +244,11 @@ namespace Microsoft.Identity.Client
             return string.Format(CultureInfo.InvariantCulture, "Redirect Uri mismatch.  Expected ({0}) Actual ({1})", expectedUri, actualUri);
         }
 
+        public const string InteractiveAuthNotSupported =
+                "On .Net Core, interactive authentication is not supported. " +
+                "Consider using Device Code Flow https://aka.ms/msal-net-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa " +
+                "- you can also implement your own Web UI - see https://aka.ms/msal-net-custom-web-ui";
+
         public const string CustomWebUiAuthorizationCodeFailed = "CustomWebUi AcquireAuthorizationCode failed";
 
         public const string TokenCacheJsonSerializerFailedParse = "MSAL V3 Deserialization failed to parse the cache contents. Is this possibly an earlier format needed for DeserializeMsalV2? (See https://aka.ms/msal-net-3x-cache-breaking-change)";
