@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client
@@ -41,6 +42,24 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="beforeWrite"></param>
         void SetBeforeWrite(TokenCacheCallback beforeWrite);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beforeAccess"></param>
+        void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="afterAccess"></param>
+        void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> afterAccess);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beforeWrite"></param>
+        void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeWrite);
 
         /// <summary>
         /// Serializes the token cache to the MSAL.NET 3.x cache format, which is compatible with other MSAL desktop libraries, e.g. MSAL for Python and MSAL for Java.

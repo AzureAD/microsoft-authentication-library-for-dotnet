@@ -45,7 +45,7 @@ namespace XForms
 
         private void OnClearAllCache(object sender, EventArgs e)
         {
-            App.MsalPublicClient.UserTokenCacheInternal.Clear();
+            App.MsalPublicClient.UserTokenCacheInternal.ClearAsync();
             RefreshView();
         }
 

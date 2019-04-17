@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
         {
-            return new NullTokenCacheBlobStorage();
+            return null;
         }
 
         // MATS properties

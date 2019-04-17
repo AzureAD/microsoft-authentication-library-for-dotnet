@@ -78,6 +78,46 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return exception;
         }
 
+        public static async Task<T> TaskThrowsAsync<T>(Func<Task> testCode, bool allowDerived = false)
+            where T : Exception
+        {
+            Exception exception = null;
+            try
+            {
+                await testCode().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            if (exception == null)
+            {
+                throw new AssertFailedException("AssertExtensions.Throws failed. No exception occurred.");
+            }
+
+            if (exception is AggregateException aggEx)
+            {
+                if (aggEx.InnerException.GetType() == typeof(AssertFailedException))
+                {
+                    throw aggEx.InnerException;
+                }
+
+                var exceptionsMatching = aggEx.InnerExceptions.OfType<T>().ToList();
+
+                if (!exceptionsMatching.Any())
+                {
+                    throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
+                }
+
+                return exceptionsMatching.First();
+            }
+
+            CheckExceptionType<T>(exception, allowDerived);
+
+            return (exception as T);
+        }
+
 
         public static T TaskThrows<T>(Func<Task> testCode, bool allowDerived = false)
             where T : Exception

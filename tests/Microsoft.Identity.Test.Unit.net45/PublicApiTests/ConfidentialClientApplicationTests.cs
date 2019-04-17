@@ -573,7 +573,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 _tokenCacheHelper.PopulateCacheForClientCredential(app.AppTokenCacheInternal.Accessor);
 
-                var accessTokens = app.AppTokenCacheInternal.GetAllAccessTokens(true);
+                var accessTokens = await app.AppTokenCacheInternal.GetAllAccessTokensAsync(true).ConfigureAwait(false);
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
@@ -634,7 +634,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenRetrievedFromNetCall, result.AccessToken);
 
                 // make sure token in Cache was updated
-                var accessTokens = app.AppTokenCacheInternal.GetAllAccessTokens(true);
+                var accessTokens = await app.AppTokenCacheInternal.GetAllAccessTokensAsync(true).ConfigureAwait(false);
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
@@ -721,7 +721,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
 
-                app.UserTokenCacheInternal.Clear();
+                await app.UserTokenCacheInternal.ClearAsync().ConfigureAwait(false);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
                 result = await ((IByRefreshToken)app)
                     .AcquireTokenByRefreshToken(MsalTestConstants.Scope, "SomeRefreshToken")

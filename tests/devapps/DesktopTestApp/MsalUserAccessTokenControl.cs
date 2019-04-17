@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
@@ -18,9 +19,9 @@ namespace DesktopTestApp
     {
         private readonly ITokenCacheInternal _cache;
         private readonly MsalAccessTokenCacheItem _item;
-        public delegate void RefreshView();
+        public delegate Task RefreshViewAsync();
 
-        public RefreshView RefreshViewDelegate { get; set; }
+        public RefreshViewAsync RefreshViewAsyncDelegate { get; set; }
 
         // todo add id token
         internal MsalUserAccessTokenControl(ITokenCacheInternal cache, MsalAccessTokenCacheItem item) : this()
@@ -49,7 +50,7 @@ namespace DesktopTestApp
             var requestContext = RequestContext.CreateForTest();
 
             _cache.DeleteAccessToken(_item, null, requestContext);
-            RefreshViewDelegate?.Invoke();
+            RefreshViewAsyncDelegate?.Invoke();
         }
     }
 }

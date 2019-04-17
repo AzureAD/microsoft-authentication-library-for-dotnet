@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Test.SideBySide
         {
             await AcquireTokensUsingMsalAsync().ConfigureAwait(false);
 
-            ClearMsalCache();
+            await ClearMsalCacheAsync().ConfigureAwait(false);
             AssertMsalCacheIsEmpty();
 
             // passing empty password to make sure that token returned silenlty - using RT
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Test.SideBySide
         {
             await AcquireTokensUsingMsalAsync().ConfigureAwait(false);
 
-            ClearMsalCache();
+            await ClearMsalCacheAsync().ConfigureAwait(false);
             AssertMsalCacheIsEmpty();
 
             var msalAccounts = await _msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Test.SideBySide
         {
             await AcquireTokensUsingAdalAsync().ConfigureAwait(false);
 
-            ClearMsalCache();
+            await ClearMsalCacheAsync().ConfigureAwait(false);
             AssertMsalCacheIsEmpty();
 
             var msalAccounts = await _msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
@@ -310,7 +310,7 @@ namespace Microsoft.Identity.Test.SideBySide
         {
             await AcquireTokensUsingAdalAsync().ConfigureAwait(false);
 
-            ClearMsalCache();
+            await ClearMsalCacheAsync().ConfigureAwait(false);
             AssertMsalCacheIsEmpty();
 
             // passing empty password to make sure that token returned silenlty - using RT
@@ -337,14 +337,14 @@ namespace Microsoft.Identity.Test.SideBySide
             });
         }
 
-        private void ClearMsalCache()
+        private async Task ClearMsalCacheAsync()
         {
             _adalCache.BeforeAccess(new global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
             {
                 TokenCache = _adalCache
             });
 
-            _msalPublicClient.UserTokenCacheInternal.Clear();
+            await _msalPublicClient.UserTokenCacheInternal.ClearAsync().ConfigureAwait(false);
 
             _adalCache.ClearMsalCache();
             _adalCache.HasStateChanged = true;
@@ -391,7 +391,7 @@ namespace Microsoft.Identity.Test.SideBySide
             // simulate adalV3 token cache state by setting client info in adal cache entities to null
             // and clearing msal cache
             UpdateAdalCacheSetClientInfoToNull();
-            ClearMsalCache();
+            await ClearMsalCacheAsync().ConfigureAwait(false);
             AssertMsalCacheIsEmpty();
 
             // make sure that adal v3 RT is visible for Msal
@@ -434,7 +434,7 @@ namespace Microsoft.Identity.Test.SideBySide
             // simulate adalV3 token cache state by setting client info in adal cache entities to null
             // and clearing msal cache
             UpdateAdalCacheSetClientInfoToNull();
-            ClearMsalCache();
+            await ClearMsalCacheAsync().ConfigureAwait(false);
             AssertMsalCacheIsEmpty();
 
 
@@ -500,7 +500,7 @@ namespace Microsoft.Identity.Test.SideBySide
             Assert.IsTrue(accounts.Any());
 
             _adalCache.Clear();
-            _msalPublicClient.UserTokenCacheInternal.Clear();
+            await _msalPublicClient.UserTokenCacheInternal.ClearAsync().ConfigureAwait(false);
 
             AssertAdalCacheIsEmpty();
             AssertMsalCacheIsEmpty();
@@ -518,7 +518,7 @@ namespace Microsoft.Identity.Test.SideBySide
             var accounts = await _msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
             Assert.IsTrue(accounts.Any());
 
-            _msalPublicClient.UserTokenCacheInternal.Clear();
+            await _msalPublicClient.UserTokenCacheInternal.ClearAsync().ConfigureAwait(false);
 
             AssertAdalCacheIsEmpty();
             AssertMsalCacheIsEmpty();

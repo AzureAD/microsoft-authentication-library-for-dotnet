@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void AcquireTokenSilent_LoginHint_MultipleAccounts()
+        public async Task AcquireTokenSilent_LoginHint_MultipleAccountsAsync()
         {
             var receiver = new MyReceiver();
             using (var httpManager = new MockHttpManager())
@@ -300,11 +300,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid1", "utid");
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid2", "utid");
 
-                var exception = AssertException.TaskThrows<MsalUiRequiredException>(() => app.AcquireTokenSilent(
+                var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () => await app.AcquireTokenSilent(
                     MsalTestConstants.Scope.ToArray(),
                     MsalTestConstants.DisplayableId)
                     .WithAuthority(app.Authority, false)
-                    .ExecuteAsync());
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.MultipleAccountsForLoginHint, exception.ErrorCode);
             }
