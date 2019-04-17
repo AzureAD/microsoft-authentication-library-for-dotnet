@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     {
         public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(MsalErrorMessage.InteractiveAuthNotSupported);
         }
     }
 }

@@ -69,14 +69,9 @@ namespace Microsoft.Identity.Client
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
             IEnumerable<string> scopes)
         {
-#if NET_CORE
-            throw new PlatformNotSupportedException("On .NET Core, interactive authentication is not supported. " +
-                "Consider using Device Code Flow https://aka.ms/msal-net-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa");
-#else
             return AcquireTokenInteractiveParameterBuilder.Create(
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
                 scopes);
-#endif
         }
 
         /// <summary>
