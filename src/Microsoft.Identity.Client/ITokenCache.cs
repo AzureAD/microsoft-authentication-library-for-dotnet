@@ -29,9 +29,9 @@ namespace Microsoft.Identity.Client
         /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
         /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>
+        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialization</param>
         /// <remarks>In the case where the delegate is used to deserialize the cache, it might
-        /// want to call <see cref="Deserialize(byte[])"/></remarks>
+        /// want to call <see cref="DeserializeMsalV3(byte[])"/></remarks>
         void SetBeforeAccess(TokenCacheCallback beforeAccess);
 
         /// <summary>
@@ -41,8 +41,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
         /// member of the cache is <c>true</c></param>
-        /// <remarks>In the case where the delegate is used to serialize the cache entierely (not just a row), it might
-        /// want to call <see cref="Serialize()"/></remarks>
+        /// <remarks>In the case where the delegate is used to serialize the cache entirely (not just a row), it might
+        /// want to call <see cref="SerializeMsalV3()"/></remarks>
         void SetAfterAccess(TokenCacheCallback afterAccess);
 
         /// <summary>
