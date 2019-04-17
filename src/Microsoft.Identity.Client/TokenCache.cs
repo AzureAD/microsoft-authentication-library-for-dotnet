@@ -1029,6 +1029,12 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        /// <summary>
+        /// MSAL account removal depends on wheather we have an FRT or not in the cache. If an FRT exists,
+        /// we can no longer filter by clientID
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="requestContext"></param>
         void ITokenCacheInternal.RemoveMsalAccount(IAccount account, RequestContext requestContext)
         {
             if (account.HomeAccountId == null)
@@ -1037,13 +1043,16 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            bool filterByClientId = !_featureFlags.IsFociEnabled;
-
             // Delete ALL refresh tokens associated with this account
-            var allRefreshTokens = ((ITokenCacheInternal)this).GetAllRefreshTokens(filterByClientId)
+            var allRefreshTokens = ((ITokenCacheInternal)this).GetAllRefreshTokens(false)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
+            bool filterByClientId = !_featureFlags.IsFociEnabled &&
+                allRefreshTokens.Any(rt => !String.IsNullOrEmpty(rt.FamilyId));
+
+
+            
             foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
             {
                 _accessor.DeleteRefreshToken(refreshTokenCacheItem.GetKey());
