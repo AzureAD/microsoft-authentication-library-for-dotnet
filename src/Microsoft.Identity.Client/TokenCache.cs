@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
 #if iOS
-            SetIosKeychainSecurityGroup(ServiceBundle.Config.IosKeychainSecurityGroup);
+            SetIosKeychainSecurityGroup(serviceBundle.Config.IosKeychainSecurityGroup);
 #endif // iOS
 
             // Must happen last, this code can access things like _accessor and such above.
