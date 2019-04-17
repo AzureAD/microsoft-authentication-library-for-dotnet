@@ -17,8 +17,8 @@ namespace FociTestApp
     {
         // TODO: replace with FOCI family members IDs
         // DO NOT CHECK THESE IN
-        private const string FAMILY_MEMBER_1 = "d3590ed6-52b3-4102-aeff-aad2292ab01c";  // Office
-        private const string FAMILY_MEMBER_2 = "1fec8e78-bce4-4aaf-ab1b-5451cc387264";  // Teams
+        private const string FAMILY_MEMBER_1 = "";  // Office
+        private const string FAMILY_MEMBER_2 = "";  // Teams
 
 
         private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
