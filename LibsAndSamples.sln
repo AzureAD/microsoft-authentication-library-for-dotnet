@@ -98,8 +98,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiCloudTestApp", "tests\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9B-427F-AC02-642BDF8D936B}"
 	ProjectSection(SolutionItems) = preProject
+		changelog.txt = changelog.txt
 		Directory.Build.props = Directory.Build.props
 		src\Directory.Build.targets = src\Directory.Build.targets
+		global.json = global.json
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
