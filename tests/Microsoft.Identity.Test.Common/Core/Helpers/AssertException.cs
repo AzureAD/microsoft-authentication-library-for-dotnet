@@ -122,35 +122,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         public static T TaskThrows<T>(Func<Task> testCode, bool allowDerived = false)
             where T : Exception
         {
-            var exception = Recorder.Exception(() => testCode().Wait());
-
-            if (exception == null)
-            {
-                throw new AssertFailedException("AssertExtensions.Throws failed. No exception occurred.");
-            }
-
-            if (exception is AggregateException aggEx)
-            {
-                if (aggEx.InnerException.GetType() == typeof(AssertFailedException))
-                {
-                    throw aggEx.InnerException;
-                }
-
-                var exceptionsMatching = aggEx.InnerExceptions.OfType<T>().ToList();
-
-                if (!exceptionsMatching.Any())
-                {
-                    throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
-                }
-
-                return exceptionsMatching.First();
-            }
-
-            CheckExceptionType<T>(exception, allowDerived);
-
-            return (exception as T);
+            return TaskThrowsAsync<T>(testCode).GetAwaiter().GetResult();
         }
-
 
         public static void TaskDoesNotThrow(Func<Task> testCode)
         {
@@ -163,7 +136,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.TaskDoesNotThrow failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
         }
-
 
         public static void TaskDoesNotThrow<T>(Func<Task> testCode) where T : Exception
         {
