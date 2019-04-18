@@ -616,7 +616,8 @@ namespace Microsoft.Identity.Client
                                 preferredEnvironmentHost,
                                 environmentAliases,
                                 requestParams.ClientId,
-                                upn);
+                                upn,
+                                requestParams.Account.HomeAccountId?.Identifier);
                         }
 
                         return null;
@@ -817,7 +818,6 @@ namespace Microsoft.Identity.Client
             {
                 foreach (MsalAccountCacheItem account in accountCacheItems)
                 {
-                    // todo: look at usage of homeaccountid if it's null....
                     if (RtMatchesAccount(rtItem, account))
                     {
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
@@ -841,7 +841,6 @@ namespace Microsoft.Identity.Client
 
         private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account)
         {
-            // todo: validate homeaccountid
             bool homeAccIdMatch = rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase);
             bool clientIdMatch =
                 rtItem.IsFRT || // Cannot filter by client ID if the RT can be used by multiple clients
