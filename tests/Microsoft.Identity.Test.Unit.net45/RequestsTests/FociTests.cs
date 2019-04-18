@@ -126,7 +126,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert
                 await AssertAccountsAsync().ConfigureAwait(false);
                 AssertFRTExists();
-
             }
         }
 
@@ -217,8 +216,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Remove account from app B
                 await _appB.RemoveAsync(accB.Single()).ConfigureAwait(false);
 
+                var tokens = await _appA.UserTokenCacheInternal.GetAllRefreshTokensAsync(false).ConfigureAwait(false);
+
                 Assert.IsTrue( 
-                    !String.IsNullOrEmpty(_appA.UserTokenCacheInternal.GetAllRefreshTokens(false).Single().FamilyId),
+                    !string.IsNullOrEmpty(tokens.Single().FamilyId),
                     "The FRT should not be deleted when FOCI is disabled");
 
                 Assert.IsFalse(
@@ -249,8 +250,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Remove account from app B
                 await _appB.RemoveAsync(accB.Single()).ConfigureAwait(false);
 
-                Assert.IsTrue(!_appB.UserTokenCacheInternal.GetAllRefreshTokens(true).Any());
-                Assert.IsTrue(!_appB.UserTokenCacheInternal.GetAllAccounts().Any());
+                var tokens = await _appB.UserTokenCacheInternal.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
+                var accounts = await _appB.UserTokenCacheInternal.GetAllAccountsAsync().ConfigureAwait(false);
+
+                Assert.IsFalse(tokens.Any(), "Should not be any tokens");
+                Assert.IsFalse(accounts.Any(), "should not be any accounts");
             }
         }
 
@@ -263,7 +267,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                    .Single(m => m.ClientId == app.AppConfig.ClientId &&
                                 partOfFamily == !string.IsNullOrEmpty(m.FamilyId)));
             }
-
         }
 
         private async Task SilentAsync(
@@ -302,7 +305,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             Assert.IsNotNull(resultB.AccessToken);
             AssertAppMetadata(app, serverTokenResponse == ServerTokenResponse.FociToken);
-
         }
 
         private static string GetSubError(ServerTokenResponse response)
@@ -353,25 +355,26 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             AuthenticationResult result = await app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(result.Account);
             AssertAppMetadata(app, serverTokenResponse == ServerTokenResponse.FociToken);
-
         }
 
         private void InitApps()
         {
 
-            _appA = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                        .WithHttpManager(_harness.HttpManager)
-                                                                        .WithAuthority(MsalTestConstants.AuthorityUtidTenant)
-                                                                        .BuildConcrete();
+            _appA = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithHttpManager(_harness.HttpManager)
+                .WithAuthority(MsalTestConstants.AuthorityUtidTenant)
+                .BuildConcrete();
 
-            _appB = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId2)
-                                                                        .WithHttpManager(_harness.HttpManager)
-                                                                        .WithAuthority(MsalTestConstants.AuthorityUtidTenant)
-                                                                        .BuildConcrete();
+            _appB = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId2)
+                .WithHttpManager(_harness.HttpManager)
+                .WithAuthority(MsalTestConstants.AuthorityUtidTenant)
+                .BuildConcrete();
+
             ConfigureCacheSerialization(_appA);
             ConfigureCacheSerialization(_appB);
         }
-
 
         private void ConfigureCacheSerialization(IPublicClientApplication pca)
         {
@@ -391,13 +394,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             });
         }
 
-
         private async Task AssertAccountsAsync()
         {
             Assert.AreEqual(1, (await _appA.GetAccountsAsync().ConfigureAwait(false)).Count());
             Assert.AreEqual(1, (await _appB.GetAccountsAsync().ConfigureAwait(false)).Count());
         }
-
 
         private void AssertFRTExists()
         {
@@ -411,7 +412,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.IsTrue(app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens()
                 .Any(rt => rt.ClientId == _appB.AppConfig.ClientId && string.IsNullOrEmpty(rt.FamilyId)),
                  "App B has a normal RT associated");
-
         }
     }
 
