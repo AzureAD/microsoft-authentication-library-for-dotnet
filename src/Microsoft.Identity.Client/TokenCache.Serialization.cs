@@ -92,12 +92,17 @@ namespace Microsoft.Identity.Client
             _semaphoreSlim.Wait();
             try
             {
-                return new TokenCacheDictionarySerializer(_accessor).Serialize(_unknownNodes);
+                return SerializeMsalV2NoLocks();
             }
             finally
             {
                 _semaphoreSlim.Release();
             }
+        }
+
+        internal byte[] SerializeMsalV2NoLocks()
+        {
+            return new TokenCacheDictionarySerializer(_accessor).Serialize(_unknownNodes);
         }
 
         /// <summary>
@@ -125,12 +130,17 @@ namespace Microsoft.Identity.Client
             _semaphoreSlim.Wait();
             try
             {
-                _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
+                DeserializeMsalV2NoLocks(msalV2State);
             }
             finally
             {
                 _semaphoreSlim.Release();
             }
+        }
+
+        internal void DeserializeMsalV2NoLocks(byte[] msalV2State)
+        {
+            _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
         }
 
         /// <summary>

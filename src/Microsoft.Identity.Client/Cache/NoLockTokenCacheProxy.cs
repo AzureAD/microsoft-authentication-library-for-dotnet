@@ -48,13 +48,27 @@ namespace Microsoft.Identity.Client.Cache
 #endif
         }
 
+        public byte[] SerializeMsalV2()
+        {
+#if !ANDROID && !iOS
+            return _tokenCache.SerializeMsalV2NoLocks();
+#else
+            return null;
+#endif
+        }
+
+        public void DeserializeMsalV2(byte[] msalV2State)
+        {
+#if !ANDROID && !iOS
+            _tokenCache.DeserializeMsalV2NoLocks(msalV2State);
+#endif
+        }
+
         [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public void DeserializeUnifiedAndAdalCache(CacheData cacheData) => throw new NotImplementedException();
 
         public byte[] Serialize() => throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         public void Deserialize(byte[] msalV2State) => throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
-        public byte[] SerializeMsalV2() => throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
-        public void DeserializeMsalV2(byte[] msalV2State) => throw new NotImplementedException();
 
         [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public CacheData SerializeUnifiedAndAdalCache() => throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
