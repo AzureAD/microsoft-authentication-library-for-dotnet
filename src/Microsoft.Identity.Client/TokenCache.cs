@@ -47,13 +47,11 @@ namespace Microsoft.Identity.Client
         private TokenCacheCallback _userConfiguredAfterAccess;
         private TokenCacheCallback _userConfiguredBeforeWrite;
 
-        internal IServiceBundle ServiceBundle { get; private set; }
+        internal IServiceBundle ServiceBundle { get; }
 
         private readonly ITokenCacheAccessor _accessor;
 
-
-
-        internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
+        internal ILegacyCachePersistence LegacyCachePersistence { get; }
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
@@ -75,16 +73,12 @@ namespace Microsoft.Identity.Client
             _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
-            // Must happen last, this code can access things like _accessor and such above.
-            SetServiceBundle(serviceBundle);
-        }
-
-        internal void SetServiceBundle(IServiceBundle serviceBundle)
-        {
-            ServiceBundle = serviceBundle;
 #if iOS
-            SetIosKeychainSecurityGroup(ServiceBundle.Config.IosKeychainSecurityGroup);
+            SetIosKeychainSecurityGroup(serviceBundle.Config.IosKeychainSecurityGroup);
 #endif // iOS
+
+            // Must happen last, this code can access things like _accessor and such above.
+            ServiceBundle = serviceBundle;
         }
 
         /// <summary>
@@ -95,8 +89,6 @@ namespace Microsoft.Identity.Client
         internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest)
             : this(serviceBundle)
         {
-            SetServiceBundle(serviceBundle);
-
             LegacyCachePersistence = legacyCachePersistenceForTest;
         }
 
@@ -191,7 +183,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
-           // TODO: ensure that instance metadata has occured, otherwise we will use
+            // TODO: ensure that instance metadata has occured, otherwise we will use
 
             // todo: could we look into modifying this to take tenantId to reduce the dependency on IValidatedAuthoritiesCache?
             var tenantId = Authority.CreateAuthority(ServiceBundle, requestParams.TenantUpdatedCanonicalAuthority)
@@ -552,9 +544,9 @@ namespace Microsoft.Identity.Client
             var cacheEvent = new CacheEvent(
                 CacheEvent.TokenCacheLookup,
                 requestParams.RequestContext.TelemetryCorrelationId)
-                {
-                    TokenType = CacheEvent.TokenTypes.RT
-                };
+            {
+                TokenType = CacheEvent.TokenTypes.RT
+            };
 
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(cacheEvent))
             {
@@ -824,7 +816,7 @@ namespace Microsoft.Identity.Client
             {
                 foreach (MsalAccountCacheItem account in accountCacheItems)
                 {
-                    if (rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase))
+                    if (RtMatchesAccount(rtItem, account))
                     {
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
@@ -845,11 +837,23 @@ namespace Microsoft.Identity.Client
             return accounts;
         }
 
+        private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account)
+        {
+            bool homeAccIdMatch = rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase);
+            bool clientIdMatch =
+                rtItem.IsFRT || // Cannot filter by client ID if the RT can be used by multiple clients
+                rtItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase);
+
+            return homeAccIdMatch && clientIdMatch;
+        }
+
         private void FetchAllAccountItemsFromCache(
             out IEnumerable<MsalRefreshTokenCacheItem> tokenCacheItems,
             out IEnumerable<MsalAccountCacheItem> accountCacheItems,
             out AdalUsersForMsal adalUsersResult)
         {
+            bool filterByClientId = !_featureFlags.IsFociEnabled;
+
             lock (LockObject)
             {
                 var args = new TokenCacheNotificationArgs
@@ -862,7 +866,7 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args);
                 try
                 {
-                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(false);
+                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(filterByClientId);
                     accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
 
                     adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
@@ -1035,6 +1039,12 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        /// <summary>
+        /// MSAL account removal depends on wheather we have an FRT or not in the cache. If an FRT exists,
+        /// we can no longer filter by clientID
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="requestContext"></param>
         void ITokenCacheInternal.RemoveMsalAccount(IAccount account, RequestContext requestContext)
         {
             if (account.HomeAccountId == null)
@@ -1043,35 +1053,41 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            // Delete ALL refresh tokens associated with this account
             var allRefreshTokens = ((ITokenCacheInternal)this).GetAllRefreshTokens(false)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
+            // To maintain backward compatiblity with other MSALs, filter all credentials by clientID if
+            // Foci is disabled or if an FRT is not present
+            bool filterByClientId = !_featureFlags.IsFociEnabled || !FrtExists(allRefreshTokens);
+
+            // Delete all credentials associated with this IAccount
+            var refreshTokensToDelete = filterByClientId ?
+                allRefreshTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)) :
+                allRefreshTokens;
+
+            foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in refreshTokensToDelete)
             {
                 _accessor.DeleteRefreshToken(refreshTokenCacheItem.GetKey());
             }
-
             requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
-            IList<MsalAccessTokenCacheItem> allAccessTokens = ((ITokenCacheInternal)this).GetAllAccessTokens(false)
+
+            IList<MsalAccessTokenCacheItem> allAccessTokens = ((ITokenCacheInternal)this).GetAllAccessTokens(filterByClientId)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
             {
                 _accessor.DeleteAccessToken(accessTokenCacheItem.GetKey());
             }
-
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
 
-            var allIdTokens = ((ITokenCacheInternal)this).GetAllIdTokens(false)
+            var allIdTokens = ((ITokenCacheInternal)this).GetAllIdTokens(filterByClientId)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
             {
                 _accessor.DeleteIdToken(idTokenCacheItem.GetKey());
             }
-
             requestContext.Logger.Info("Deleted Id token count - " + allIdTokens.Count);
 
             ((ITokenCacheInternal)this).GetAllAccounts()
@@ -1080,6 +1096,11 @@ namespace Microsoft.Identity.Client
                 .ToList()
                 .ForEach(accItem => _accessor.DeleteAccount(accItem.GetKey()));
 
+        }
+
+        private static bool FrtExists(List<MsalRefreshTokenCacheItem> allRefreshTokens)
+        {
+            return allRefreshTokens.Any(rt => rt.IsFRT);
         }
 
         private void RemoveAdalUser(IAccount account)

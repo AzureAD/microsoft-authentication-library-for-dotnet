@@ -46,6 +46,11 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         public string FamilyId { get; set; }
 
+        /// <summary>
+        /// Family Refresh Tokens, can be used for all clients part of the family
+        /// </summary>
+        public bool IsFRT => !string.IsNullOrEmpty(FamilyId);
+
         internal MsalRefreshTokenCacheKey GetKey()
         {
             return new MsalRefreshTokenCacheKey(Environment, ClientId, HomeAccountId, FamilyId);
