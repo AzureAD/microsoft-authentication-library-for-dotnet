@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Client
                         // filter by identifier of the user instead
                         tokenCacheItems =
                             tokenCacheItems
-                                .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
+                                .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase))
                                 .ToList();
                     }
 
@@ -603,6 +603,10 @@ namespace Microsoft.Identity.Client
 
                         requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
 
+                        string upn = string.IsNullOrWhiteSpace(requestParams.LoginHint)
+                            ? requestParams.Account?.Username
+                            : requestParams.LoginHint;
+
                         // ADAL legacy cache does not store FRTs
                         if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
                         {
@@ -612,13 +616,10 @@ namespace Microsoft.Identity.Client
                                 preferredEnvironmentHost,
                                 environmentAliases,
                                 requestParams.ClientId,
-                                requestParams.LoginHint,
-                                requestParams.Account.HomeAccountId?.Identifier,
-                                null);
+                                upn);
                         }
 
                         return null;
-
                     }
                     finally
                     {
@@ -816,6 +817,7 @@ namespace Microsoft.Identity.Client
             {
                 foreach (MsalAccountCacheItem account in accountCacheItems)
                 {
+                    // todo: look at usage of homeaccountid if it's null....
                     if (RtMatchesAccount(rtItem, account))
                     {
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
@@ -839,6 +841,7 @@ namespace Microsoft.Identity.Client
 
         private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account)
         {
+            // todo: validate homeaccountid
             bool homeAccIdMatch = rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase);
             bool clientIdMatch =
                 rtItem.IsFRT || // Cannot filter by client ID if the RT can be used by multiple clients
@@ -1110,7 +1113,7 @@ namespace Microsoft.Identity.Client
                 LegacyCachePersistence,
                 ClientId,
                 account.Username,
-                account.HomeAccountId.Identifier);
+                account.HomeAccountId?.Identifier);
         }
 
         void ITokenCacheInternal.Clear()
