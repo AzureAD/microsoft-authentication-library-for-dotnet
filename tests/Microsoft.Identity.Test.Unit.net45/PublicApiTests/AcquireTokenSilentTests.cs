@@ -33,17 +33,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void NullAccount_EmptyLoginHint()
+        public async Task NullAccount_EmptyLoginHintAsync()
         {
             IPublicClientApplication app = PublicClientApplicationBuilder
                 .Create(MsalTestConstants.ClientId)
                 .Build();
 
-            AssertException.TaskThrows<ArgumentNullException>(
-             () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (string)null).ExecuteAsync());
+            await AssertException.TaskThrowsAsync<ArgumentNullException>(
+             () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (string)null).ExecuteAsync()).ConfigureAwait(false);
 
-            var ex = AssertException.TaskThrows<MsalUiRequiredException>(
-              () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (IAccount)null).ExecuteAsync());
+            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+              () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (IAccount)null).ExecuteAsync()).ConfigureAwait(false);
             Assert.AreEqual(MsalError.UserNullError, ex.ErrorCode);
         }
 
@@ -265,7 +265,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void AcquireTokenSilent_LoginHint_NoAccount()
+        public async Task AcquireTokenSilent_LoginHint_NoAccountAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -275,11 +275,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
-                var exception = AssertException.TaskThrows<MsalUiRequiredException>(() => app.AcquireTokenSilent(
+                var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     MsalTestConstants.Scope.ToArray(),
                     "other_login_hint@contoso.com")
                     .WithAuthority(app.Authority, false)
-                    .ExecuteAsync());
+                    .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.NoAccountForLoginHint, exception.ErrorCode);
             }

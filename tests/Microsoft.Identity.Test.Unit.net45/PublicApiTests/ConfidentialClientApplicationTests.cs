@@ -534,7 +534,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
-        public void HttpRequestExceptionIsNotSuppressed()
+        public async Task HttpRequestExceptionIsNotSuppressedAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -550,8 +550,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // add mock response bigger than 1MB for Http Client
                 httpManager.AddFailingRequest(new InvalidOperationException());
 
-                AssertException.TaskThrows<InvalidOperationException>(
-                    () => app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None));
+                await AssertException.TaskThrowsAsync<InvalidOperationException>(
+                    () => app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
             }
         }
 

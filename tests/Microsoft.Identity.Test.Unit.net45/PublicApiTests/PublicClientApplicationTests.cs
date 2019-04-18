@@ -694,7 +694,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public void HttpRequestExceptionIsNotSuppressedAsync()
+        public async Task HttpRequestExceptionIsNotSuppressedAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -709,9 +709,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // add mock response bigger than 1MB for Http Client
                 httpManager.AddFailingRequest(new InvalidOperationException());
 
-                AssertException.TaskThrows<InvalidOperationException>(
+                await AssertException.TaskThrowsAsync<InvalidOperationException>(
                     () => app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None));
+                        .AcquireTokenInteractive(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
             }
         }
 
@@ -1183,7 +1183,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #if NET_CORE
 
         [TestMethod]
-        public void NetCore_AcquireToken_ThrowsPlatformNotSupported()
+        public async Task NetCore_AcquireToken_ThrowsPlatformNotSupportedAsync()
         {
             // Arrange
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
@@ -1217,16 +1217,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false),
 
                 async () => await pca.AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)
-
             };
 
             // Act and Assert
             foreach (var acquireTokenInteractiveMethod in acquireTokenInteractiveMethods)
             {
-                AssertException.TaskThrows<PlatformNotSupportedException>(acquireTokenInteractiveMethod);
+                await AssertException.TaskThrowsAsync<PlatformNotSupportedException>(acquireTokenInteractiveMethod).ConfigureAwait(false);
             }
         }
-
 #endif
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {

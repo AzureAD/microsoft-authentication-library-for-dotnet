@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B cannot acquire a token interactivelty, but will try to use FRT
-                var ex = AssertException.TaskThrows<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch));
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
 
                 // B can resume acquiring tokens silently via the normal RT, after a non
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B cannot acquire a token interactivelty, but will try to use FRT
-                var ex = AssertException.TaskThrows<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.OtherError));
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.OtherError)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.InvalidGrantError, ex.ErrorCode);
                 Assert.IsTrue(!String.IsNullOrEmpty(ex.CorrelationId));
 
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await SilentAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B leaves the family -> STS will not refresh its token based on the FRT
-                AssertException.TaskThrows<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch));
+                await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
 
                 // B can resume acquiring tokens silently via the normal RT, after an interactive flow
                 await InteractiveAsync(_appB, ServerTokenResponse.NonFociToken).ConfigureAwait(false);

@@ -108,19 +108,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void TestInteractiveWithCustomWebUi_IncorrectRedirectUri()
+        public void TestInteractiveWithCustomWebUi_IncorrectRedirectUriAsync()
         {
             ExecuteTest(
                 false,
                 ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
                         .ReturnsForAnyArgs(Task.FromResult(new Uri("http://blech"))),
-                request =>
-                {
-
-                    var ex = AssertException.TaskThrows<MsalClientException>(() => request.ExecuteAsync(CancellationToken.None));
-                    Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
-
-                });
+                        async request =>
+                        {
+                            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+                            Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
+                        });
         }
 
 
@@ -132,9 +130,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 false,
                  ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
                         .ReturnsForAnyArgs<Uri>(x => { throw new InvalidOperationException(); }),
-                request =>
+                async request =>
                 {
-                    AssertException.TaskThrows<InvalidOperationException>(() => request.ExecuteAsync(CancellationToken.None));
+                    await AssertException.TaskThrowsAsync<InvalidOperationException>(() => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
                 });
         }
 
@@ -146,10 +144,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 false,
                 ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
                         .ReturnsForAnyArgs(Task.FromResult(new Uri(ExpectedRedirectUri))),
-                request =>
+                async request =>
                 {
-                    var ex = AssertException.TaskThrows<MsalClientException>(
-                        () => request.ExecuteAsync(CancellationToken.None));
+                    var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                        () => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
                     Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
                 });
         }
@@ -167,10 +165,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ui.AcquireAuthorizationCodeAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), CancellationToken.None)
                      .Returns(Task.FromResult(new Uri(ExpectedRedirectUri + "?code=some-code&state=bad_state")));
                 },
-                request =>
+                async request =>
                 {
-                    var ex = AssertException.TaskThrows<MsalClientException>(
-                      () => request.ExecuteAsync(CancellationToken.None));
+                    var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                      () => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
                     Assert.AreEqual(MsalError.StateMismatchError, ex.ErrorCode);
                 });
         }
