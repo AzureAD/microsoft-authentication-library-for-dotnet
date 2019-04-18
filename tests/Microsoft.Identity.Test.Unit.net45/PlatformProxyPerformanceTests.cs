@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         private const long AllowedMilliseconds = 10;
-        private const long DomainJoinedAllowedMilliseconds = 30;
+        private const long DomainJoinedAllowedMilliseconds = 100;
 
 
         [TestMethod]
