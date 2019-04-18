@@ -37,10 +37,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
         }
 
-        private static void ExecuteTest(
+        private static async Task ExecuteTestAsync(
             bool withTokenRequest,
             Action<ICustomWebUi> customizeWebUiBehavior,
-            Action<InteractiveRequest> executionBehavior)
+            Func<InteractiveRequest, Task> executionBehavior)
         {
             var customWebUi = Substitute.For<ICustomWebUi>();
             customizeWebUiBehavior(customWebUi);
@@ -77,15 +77,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     interactiveParameters,
                     new CustomWebUiHandler(customWebUi));
 
-                executionBehavior(request);
+                await executionBehavior(request).ConfigureAwait(false);
             }
         }
 
         [TestMethod]
-        public void TestInteractiveWithCustomWebUi_HappyPath_CorrectRedirectUri_CorrectQueryDataForCode()
+        public async Task TestInteractiveWithCustomWebUi_HappyPath_CorrectRedirectUri_CorrectQueryDataForCodeAsync()
         {
             // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.
-            ExecuteTest(
+            await ExecuteTestAsync(
                 true,
                 ui =>
                 {
@@ -100,17 +100,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                          return Task.FromResult(new Uri(ExpectedRedirectUri + "?code=some-code&state=" + state));
                      });
                 },
-                request =>
+                async request =>
                 {
-                    request.ExecuteAsync(CancellationToken.None)
-                           .Wait();
-                });
+                    await request.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);                           
+                }).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void TestInteractiveWithCustomWebUi_IncorrectRedirectUriAsync()
+        public async Task TestInteractiveWithCustomWebUi_IncorrectRedirectUriAsync()
         {
-            ExecuteTest(
+            await ExecuteTestAsync(
                 false,
                 ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
                         .ReturnsForAnyArgs(Task.FromResult(new Uri("http://blech"))),
@@ -118,29 +117,29 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         {
                             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
                             Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
-                        });
+                        }).ConfigureAwait(false);
         }
 
 
         [TestMethod]
-        public void TestInteractiveWithCustomWebUi_UnhandledException()
+        public async Task TestInteractiveWithCustomWebUi_UnhandledExceptionAsync()
         {
             // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.
-            ExecuteTest(
+            await ExecuteTestAsync(
                 false,
                  ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
                         .ReturnsForAnyArgs<Uri>(x => { throw new InvalidOperationException(); }),
                 async request =>
                 {
                     await AssertException.TaskThrowsAsync<InvalidOperationException>(() => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
-                });
+                }).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void TestInteractiveWithCustomWebUi_CorrectRedirectUri_NoQueryDataForCode()
+        public async Task TestInteractiveWithCustomWebUi_CorrectRedirectUri_NoQueryDataForCodeAsync()
         {
             // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.
-            ExecuteTest(
+            await ExecuteTestAsync(
                 false,
                 ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
                         .ReturnsForAnyArgs(Task.FromResult(new Uri(ExpectedRedirectUri))),
@@ -149,16 +148,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
                         () => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
                     Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
-                });
+                }).ConfigureAwait(false);
         }
 
 
 
         [TestMethod]
-        public void TestInteractiveWithCustomWebUi_IncorrectState()
+        public async Task TestInteractiveWithCustomWebUi_IncorrectStateAsync()
         {
             // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.
-            ExecuteTest(
+            await ExecuteTestAsync(
                 false,
                 ui =>
                 {
@@ -170,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
                       () => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
                     Assert.AreEqual(MsalError.StateMismatchError, ex.ErrorCode);
-                });
+                }).ConfigureAwait(false);
         }
     }
 }

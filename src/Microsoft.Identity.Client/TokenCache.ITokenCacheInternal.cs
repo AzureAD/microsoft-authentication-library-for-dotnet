@@ -520,6 +520,8 @@ namespace Microsoft.Identity.Client
             IEnumerable<MsalAccountCacheItem> accountCacheItems;
             AdalUsersForMsal adalUsersResult;
 
+            bool filterByClientId = !_featureFlags.IsFociEnabled;
+
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
@@ -533,7 +535,7 @@ namespace Microsoft.Identity.Client
                 await OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try
                 {
-                    rtCacheItems = GetAllRefreshTokensWithNoLocks(false);
+                    rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
                     accountCacheItems = _accessor.GetAllAccounts();
 
                     adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
@@ -572,7 +574,7 @@ namespace Microsoft.Identity.Client
             {
                 foreach (MsalAccountCacheItem account in accountCacheItems)
                 {
-                    if (rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase))
+                    if (RtMatchesAccount(rtItem, account))
                     {
                         clientInfoToAccountMap[rtItem.HomeAccountId] = new Account(
                             account.HomeAccountId,
@@ -696,18 +698,26 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            // Delete ALL refresh tokens associated with this account
             var allRefreshTokens = GetAllRefreshTokensWithNoLocks(false)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
+            // To maintain backward compatiblity with other MSALs, filter all credentials by clientID if
+            // Foci is disabled or if an FRT is not present
+            bool filterByClientId = !_featureFlags.IsFociEnabled || !FrtExists(allRefreshTokens);
+
+            // Delete all credentials associated with this IAccount
+            var refreshTokensToDelete = filterByClientId ?
+                allRefreshTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase)) :
+                allRefreshTokens;
+
+            foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in refreshTokensToDelete)
             {
                 _accessor.DeleteRefreshToken(refreshTokenCacheItem.GetKey());
             }
 
             requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
-            IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensWithNoLocks(false)
+            IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensWithNoLocks(filterByClientId)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
@@ -717,7 +727,7 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
 
-            var allIdTokens = GetAllIdTokensWithNoLocks(false)
+            var allIdTokens = GetAllIdTokensWithNoLocks(filterByClientId)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)

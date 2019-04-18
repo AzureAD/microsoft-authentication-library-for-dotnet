@@ -262,6 +262,16 @@ namespace Microsoft.Identity.Client
             return preferredEnvironmentHost;
         }
 
+        private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account)
+        {
+            bool homeAccIdMatch = rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase);
+            bool clientIdMatch =
+                rtItem.IsFRT || // Cannot filter by client ID if the RT can be used by multiple clients
+                rtItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase);
+
+            return homeAccIdMatch && clientIdMatch;
+        }
+
         /// <summary>
         /// Tries to get the env aliases of the authority for selecting accounts.
         /// This can be done without network discovery if all the accounts belong to known envs.
