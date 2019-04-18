@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void EnsureCreatePublicClientWithAzureAdMyOrgAndValidTenantSucceeds()
         {
-            const string tenantId = "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3";
+            const string tenantId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
 
             var options = new PublicClientApplicationOptions
             {

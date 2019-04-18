@@ -41,8 +41,8 @@ namespace Microsoft.Identity.Client
 
         private ICoreLogger Logger => ServiceBundle.DefaultLogger;
 
-        internal IServiceBundle ServiceBundle { get; private set; }
-        internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
+        internal IServiceBundle ServiceBundle { get; }
+        internal ILegacyCachePersistence LegacyCachePersistence { get; }
         internal readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
         internal string ClientId => ServiceBundle.Config.ClientId;
 
@@ -78,16 +78,12 @@ namespace Microsoft.Identity.Client
 
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
-            // Must happen last, this code can access things like _accessor and such above.
-            SetServiceBundle(serviceBundle);
-        }
-
-        internal void SetServiceBundle(IServiceBundle serviceBundle)
-        {
-            ServiceBundle = serviceBundle;
 #if iOS
-            SetIosKeychainSecurityGroup(ServiceBundle.Config.IosKeychainSecurityGroup);
+            SetIosKeychainSecurityGroup(serviceBundle.Config.IosKeychainSecurityGroup);
 #endif // iOS
+
+            // Must happen last, this code can access things like _accessor and such above.
+            ServiceBundle = serviceBundle;
         }
 
         /// <summary>
@@ -98,7 +94,6 @@ namespace Microsoft.Identity.Client
         internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest)
             : this(serviceBundle)
         {
-            SetServiceBundle(serviceBundle);
             LegacyCachePersistence = legacyCachePersistenceForTest;
         }
 
@@ -366,6 +361,11 @@ namespace Microsoft.Identity.Client
             return filterByClientId
                 ? idTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
                 : idTokens;
+        }
+
+        private static bool FrtExists(List<MsalRefreshTokenCacheItem> allRefreshTokens)
+        {
+            return allRefreshTokens.Any(rt => rt.IsFRT);
         }
 
         private void RemoveAdalUser(IAccount account)
