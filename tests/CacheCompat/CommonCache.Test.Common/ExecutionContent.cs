@@ -10,8 +10,7 @@ namespace CommonCache.Test.Common
         public bool IsError { get; set; }
         public string ErrorMessage { get; set; }
         public string StackTrace { get; set; }
-        public string DisplayableUserId { get; set; }
-        public bool ReceivedTokenFromCache { get; set; }
+        public CacheExecutorResults Results { get; set; }
 
         public static ExecutionContent CreateFromException(Exception ex)
         {
@@ -27,8 +26,7 @@ namespace CommonCache.Test.Common
         {
             return new ExecutionContent
             {
-                DisplayableUserId = results.Username,
-                ReceivedTokenFromCache = results.ReceivedTokenFromCache
+                Results = results
             };
         }
     }

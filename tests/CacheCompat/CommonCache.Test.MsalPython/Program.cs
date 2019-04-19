@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,13 +19,11 @@ namespace CommonCache.Test.MsalPython
 
         private class MsalPythonCacheExecutor : AbstractCacheExecutor
         {
-            protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
+            protected override async Task<CacheExecutorResults> InternalExecuteAsync(TestInputData testInputData)
             {
                 var v1App = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;
                 string scope = resource + "/user.read";
-
-                CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
                 string scriptFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestMsalPython.py");
 
@@ -33,8 +32,8 @@ namespace CommonCache.Test.MsalPython
                     v1App.ClientId,
                         v1App.Authority,
                         scope,
-                        options.Username,
-                        options.UserPassword,
+                        testInputData.LabUserDatas.First().Upn,
+                        testInputData.LabUserDatas.First().Password,
                         CommonCacheTestUtils.MsalV3CacheFilePath,
                         CancellationToken.None).ConfigureAwait(false);
             }

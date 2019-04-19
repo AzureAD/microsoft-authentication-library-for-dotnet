@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -16,18 +15,20 @@ namespace CommonCache.Test.Common
             CommandLineExecutor.Execute(args, ExecuteAsync);
         }
 
-        protected abstract Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options);
+        protected abstract Task<CacheExecutorResults> InternalExecuteAsync(TestInputData testInputData);
 
-        private async Task ExecuteAsync(CommandLineOptions options)
+        private async Task ExecuteAsync(TestInputData testInputData)
         {
             try
             {
-                var results = await InternalExecuteAsync(options).ConfigureAwait(false);
-                WriteResultsFile(options.ResultsFilePath, ExecutionContent.CreateSuccess(results));
+                CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
+
+                var results = await InternalExecuteAsync(testInputData).ConfigureAwait(false);
+                WriteResultsFile(testInputData.ResultsFilePath, ExecutionContent.CreateSuccess(results));
             }
             catch (Exception ex)
             {
-                WriteResultsFile(options.ResultsFilePath, ExecutionContent.CreateFromException(ex));
+                WriteResultsFile(testInputData.ResultsFilePath, ExecutionContent.CreateFromException(ex));
             }
         }
 

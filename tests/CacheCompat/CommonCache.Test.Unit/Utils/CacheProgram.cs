@@ -2,11 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
+using Microsoft.Identity.Json;
 
 namespace CommonCache.Test.Unit.Utils
 {
@@ -23,13 +27,25 @@ namespace CommonCache.Test.Unit.Utils
         public string ResultsFilePath { get; }
         public CacheStorageType CacheStorageType { get; }
 
-        public async Task<CacheProgramResults> ExecuteAsync(string username, string password, CancellationToken cancellationToken)
+        public async Task<CacheProgramResults> ExecuteAsync(IEnumerable<LabUserData> labUserData, CancellationToken cancellationToken)
         {
+            var testInputData = new TestInputData
+            {
+                ResultsFilePath = ResultsFilePath,
+                StorageType = CacheStorageType,
+                LabUserDatas = labUserData.ToList()
+            };
+
+            var inputDataJson = JsonConvert.SerializeObject(testInputData);
+            string inputFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            File.WriteAllText(inputFilePath, inputDataJson);
+
             var sb = new StringBuilder();
-            sb.Append($"--userName {username} ");
-            sb.Append($"--userPassword {password} ");
-            sb.Append($"--resultsFilePath {ResultsFilePath.EncloseQuotes()} ");
-            sb.Append($"--cacheStorageType {Convert.ToInt32(CacheStorageType, CultureInfo.InvariantCulture)} ");
+            sb.Append($"--inputPath {inputFilePath.EncloseQuotes()} ");
+            //sb.Append($"--userName {username} ");
+            //sb.Append($"--userPassword {password} ");
+            //sb.Append($"--resultsFilePath {ResultsFilePath.EncloseQuotes()} ");
+            //sb.Append($"--cacheStorageType {Convert.ToInt32(CacheStorageType, CultureInfo.InvariantCulture)} ");
             string arguments = sb.ToString();
 
             var processUtils = new ProcessUtils();

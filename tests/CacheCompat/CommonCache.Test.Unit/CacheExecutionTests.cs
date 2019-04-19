@@ -1,10 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using CommonCache.Test.Unit.Utils;
+using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CommonCache.Test.Unit
@@ -12,6 +15,24 @@ namespace CommonCache.Test.Unit
     [TestClass]
     public class CacheExecutionTests
     {
+        private static readonly List<LabUserData> s_labUsers = new List<LabUserData>();
+
+        private static LabUserData GetLabUserData(string upn)
+        {
+            var labUser = new LabServiceApi().GetLabResponse(new UserQuery { Upn = upn }).User;
+            return new LabUserData(labUser.Upn, labUser.GetOrFetchPassword());
+        }
+
+        [AssemblyInitialize]
+        public static void AssemblyInit(TestContext testContext)
+        {
+            // TODO: these other users throw MsalUiRequiredException invalid_grant.
+            // Are they MFA-required users?  What is different about them?
+            // s_labUsers.Add(GetLabUserData("idlab@msidlab2.onmicrosoft.com"));
+            // s_labUsers.Add(GetLabUserData("idlab@msidlab3.onmicrosoft.com"));
+            s_labUsers.Add(GetLabUserData("idlab@msidlab4.onmicrosoft.com"));
+        }
+
         [DataTestMethod]
         [DataRow(CacheProgramType.AdalV3, CacheProgramType.AdalV3, CacheStorageType.Adal, DisplayName = "AdalV3->AdalV3 adal v3 cache")]
         [DataRow(CacheProgramType.AdalV3, CacheProgramType.AdalV4, CacheStorageType.Adal, DisplayName = "AdalV3->AdalV4 adal v3 cache")]
@@ -24,10 +45,10 @@ namespace CommonCache.Test.Unit
             CacheStorageType cacheStorageType)
         {
             var executor = new CacheTestExecutor(
+                s_labUsers,
                 interactiveType,
                 silentType,
-                cacheStorageType,
-                expectSecondTokenFromCache: true);
+                cacheStorageType);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -48,10 +69,10 @@ namespace CommonCache.Test.Unit
             CacheStorageType cacheStorageType)
         {
             var executor = new CacheTestExecutor(
+                s_labUsers,
                 interactiveType,
                 silentType,
-                cacheStorageType,
-                expectSecondTokenFromCache: true);
+                cacheStorageType);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -74,10 +95,10 @@ namespace CommonCache.Test.Unit
             CacheStorageType cacheStorageType)
         {
             var executor = new CacheTestExecutor(
+                s_labUsers,
                 interactiveType,
                 silentType,
-                cacheStorageType,
-                expectSecondTokenFromCache: true);
+                cacheStorageType);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -98,10 +119,10 @@ namespace CommonCache.Test.Unit
             CacheStorageType cacheStorageType)
         {
             var executor = new CacheTestExecutor(
+                s_labUsers,
                 interactiveType,
                 silentType,
-                cacheStorageType,
-                expectSecondTokenFromCache: true);
+                cacheStorageType);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -122,10 +143,10 @@ namespace CommonCache.Test.Unit
             CacheStorageType cacheStorageType)
         {
             var executor = new CacheTestExecutor(
+                s_labUsers,
                 interactiveType,
                 silentType,
-                cacheStorageType,
-                expectSecondTokenFromCache: true);
+                cacheStorageType);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -141,10 +162,10 @@ namespace CommonCache.Test.Unit
             CacheStorageType cacheStorageType)
         {
             var executor = new CacheTestExecutor(
+                s_labUsers,
                 interactiveType,
                 silentType,
-                cacheStorageType,
-                expectSecondTokenFromCache: true);
+                cacheStorageType);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }

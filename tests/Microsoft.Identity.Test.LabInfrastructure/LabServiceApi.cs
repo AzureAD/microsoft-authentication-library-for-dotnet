@@ -80,6 +80,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
             }
 
+            if (!string.IsNullOrWhiteSpace(query.Upn))
+            {
+                queryDict.Add(LabApiConstants.Upn, query.Upn);
+            }
+
             queryDict.Add(LabApiConstants.MobileAppManagement, query.IsMamUser != null && (bool)(query.IsMamUser) ? LabApiConstants.True : LabApiConstants.False);
             queryDict.Add(LabApiConstants.MultiFactorAuthentication, query.IsMfaUser != null && (bool)(query.IsMfaUser) ? LabApiConstants.True : LabApiConstants.False);
 

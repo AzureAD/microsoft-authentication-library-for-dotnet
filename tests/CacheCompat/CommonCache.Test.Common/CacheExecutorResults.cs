@@ -1,17 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+
 namespace CommonCache.Test.Common
 {
     public class CacheExecutorResults
     {
-        public CacheExecutorResults(string username, bool receivedTokenFromCache)
+        public CacheExecutorResults()
         {
-            Username = username;
-            ReceivedTokenFromCache = receivedTokenFromCache;
         }
 
-        public string Username { get; }
-        public bool ReceivedTokenFromCache { get; }
+        public List<CacheExecutorAccountResult> AccountResults { get; set; } = new List<CacheExecutorAccountResult>();
     }
 }

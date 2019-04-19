@@ -33,25 +33,25 @@ namespace CommonCache.Test.Common
                 string stdout = processRunResults.StandardOut;
 
                 Console.WriteLine();
-                Console.WriteLine("PYTHON STDOUT");
+                Console.WriteLine("STDOUT");
                 Console.WriteLine(stdout);
                 Console.WriteLine();
-                Console.WriteLine("PYTHON STDERR");
+                Console.WriteLine("STDERR");
                 Console.WriteLine(processRunResults.StandardError);
                 Console.WriteLine();
 
                 if (stdout.Contains("**TOKEN RECEIVED FROM CACHE**"))
                 {
-                    return new CacheExecutorResults(username, true);
+                    return new CacheExecutorResults();
                 }
                 else if (stdout.Contains("**TOKEN RECEIVED, BUT _NOT_ FROM CACHE**"))
                 {
-                    return new CacheExecutorResults(username, false);
+                    return new CacheExecutorResults();
                 }
                 else
                 {
                     Console.WriteLine("NO TOKEN REPORTED AS RECEIVED!");
-                    return new CacheExecutorResults(username, false);
+                    return new CacheExecutorResults();
                 }
             }
             catch (ProcessRunException prex)
@@ -59,7 +59,7 @@ namespace CommonCache.Test.Common
                 Console.WriteLine(prex.ProcessStandardOutput);
                 Console.WriteLine(prex.ProcessStandardError);
                 Console.WriteLine(prex.Message);
-                return new CacheExecutorResults(string.Empty, false);
+                return new CacheExecutorResults();
             }
         }
     }

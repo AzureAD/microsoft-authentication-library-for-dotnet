@@ -18,18 +18,21 @@ namespace CommonCache.Test.Common
     // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandLineOptions
     {
-        [Option("resultsFilePath", Required = true, HelpText = "Path to write output results file.")]
-        public string ResultsFilePath { get; set; }
+        [Option("inputPath", Required = true, HelpText = "Path to input JSON (serialization of TestInputData class)")]
+        public string InputFilePath { get; set; }
 
-        [Option("userName", Required = true, HelpText = "Username to login with.")]
-        public string Username{ get; set; }
+        //[Option("resultsFilePath", Required = true, HelpText = "Path to write output results file.")]
+        //public string ResultsFilePath { get; set; }
 
-        [Option("userPassword", Required = true, HelpText = "Password to login with.")]
-        public string UserPassword { get; set; }
+        //[Option("userName", Required = true, HelpText = "Username to login with.")]
+        //public string Username{ get; set; }
 
-        [Option("cacheStorageType", Required = true, HelpText = "Cache storage type(s) supported.")]
-        public int CacheStorageTypeInt {get; set;}
+        //[Option("userPassword", Required = true, HelpText = "Password to login with.")]
+        //public string UserPassword { get; set; }
 
-        public CacheStorageType CacheStorageType => (CacheStorageType)CacheStorageTypeInt;
+        //[Option("cacheStorageType", Required = true, HelpText = "Cache storage type(s) supported.")]
+        //public int CacheStorageTypeInt {get; set;}
+
+        //public CacheStorageType CacheStorageType => (CacheStorageType)CacheStorageTypeInt;
     }
 }
