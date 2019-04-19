@@ -1,8 +1,16 @@
+3.0.6-preview
+=============
+New Features:
+- **MSAL.NET now creates an HttpClient that uses the AndroidClientHandler** for Android 4.1 and higher. See [documentation for more information](https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/http-stack?tabs=windows). [MSAL issue #1076](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1076)
+
+Bug Fixes:
+- **When doing the ADAL.NET fallback from MSAL.NET, MSAL.NET was doing the lookup based on the account.HomeAccountId or requestParameters.LoginHint**. In ADAL.NET an account will never have a HomeAccountId (by design), so lookup needs to happen by Account.UserName instead. [MSAL.NET issue #1100](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1100)
+- **AcquireTokenInteractive would throw a PlatformNotSupportException on NetCore when using CustomWebUI**. MSAL.NET no longer throws an exception when using CustomWebUI on NetCore. [MSAL issue #1058](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1058)
+
+
 3.0.5-preview
 =============
-
 Bug Fixes: 
-
 - **Exception: Failure to parse missing json on first login** [MSAL issue #1052](https://github.com/AzureAD/microsoft-authentication-
 library-for-dotnet/issues/1052)
 - **B2C ROPC support** [MSAL issue #926](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/926)
@@ -11,7 +19,6 @@ library-for-dotnet/issues/1052)
 
 3.0.4-preview
 =============
-
 Bug Fixes:
 - ** AcquireTokenInteractive parent param is not intuitive** [MSAL issue #918](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/918)
 
