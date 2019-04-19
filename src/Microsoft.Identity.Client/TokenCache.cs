@@ -385,7 +385,7 @@ namespace Microsoft.Identity.Client
                 LegacyCachePersistence,
                 ClientId,
                 account.Username,
-                account.HomeAccountId.Identifier);
+                account.HomeAccountId?.Identifier);
         }
     }
 }

@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Client
                         // filter by identifier of the user instead
                         tokenCacheItems =
                             tokenCacheItems
-                                .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
+                                .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase))
                                 .ToList();
                     }
 
@@ -397,6 +397,10 @@ namespace Microsoft.Identity.Client
 
                         requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
 
+                        string upn = string.IsNullOrWhiteSpace(requestParams.LoginHint)
+                            ? requestParams.Account?.Username
+                            : requestParams.LoginHint;
+
                         // ADAL legacy cache does not store FRTs
                         if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
                         {
@@ -406,9 +410,8 @@ namespace Microsoft.Identity.Client
                                 preferredEnvironmentHost,
                                 environmentAliases,
                                 requestParams.ClientId,
-                                requestParams.LoginHint,
-                                requestParams.Account.HomeAccountId?.Identifier,
-                                null);
+                                upn,
+                                requestParams.Account.HomeAccountId?.Identifier);
                         }
 
                         return null;
