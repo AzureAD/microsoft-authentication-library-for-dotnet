@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="beforeAccess">Delegate set in order to handle the cache deserialization</param>
         /// <remarks>In the case where the delegate is used to deserialize the cache, it might
-        /// want to call <see cref="DeserializeMsalV3(byte[])"/></remarks>
+        /// want to call <see cref="DeserializeMsalV3(byte[], bool)"/></remarks>
         void SetBeforeAccess(TokenCacheCallback beforeAccess);
 
         /// <summary>
@@ -73,11 +73,12 @@ namespace Microsoft.Identity.Client
         /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <param name="msalV3State">Byte stream representation of the cache</param>
+        /// <param name="shouldClearExistingCache">Set to true to clear MSAL cache contents.  Defaults to false.</param>
         /// <remarks>
         /// This is the recommended format for maintaining SSO state between applications.
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
-        void DeserializeMsalV3(byte[] msalV3State);
+        void DeserializeMsalV3(byte[] msalV3State, bool shouldClearExistingCache = false);
 
         /// <summary>
         /// Serializes the token cache to the MSAL.NET 2.x unified cache format, which is compatible with ADAL.NET v4 and other MSAL.NET v2 applications.

@@ -398,7 +398,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheDictionarySerializer(otherAccessor);
-            s2.Deserialize(bytes);
+            s2.Deserialize(bytes, false);
 
             AssertAccessorsAreEqual(accessor, otherAccessor);
         }
@@ -458,7 +458,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
-            s2.Deserialize(bytes);
+            s2.Deserialize(bytes, false);
 
             AssertAccessorsAreEqual(accessor, otherAccessor);
 
@@ -480,7 +480,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var s = new TokenCacheJsonSerializer(accessor);
             string pythonBinFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_python.bin");
             byte[] bytes = File.ReadAllBytes(pythonBinFilePath);
-            s.Deserialize(bytes);
+            s.Deserialize(bytes, false);
 
             Assert.AreEqual(0, accessor.GetAllAccessTokens().Count());
             Assert.AreEqual(0, accessor.GetAllRefreshTokens().Count());
@@ -496,7 +496,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var s = new TokenCacheDictionarySerializer(accessor);
             string binFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_dotnet_dictionary.bin");
             byte[] bytes = File.ReadAllBytes(binFilePath);
-            s.Deserialize(bytes);
+            s.Deserialize(bytes, false);
 
             Assert.AreEqual(1, accessor.GetAllAccessTokens().Count());
             Assert.AreEqual(1, accessor.GetAllRefreshTokens().Count());
