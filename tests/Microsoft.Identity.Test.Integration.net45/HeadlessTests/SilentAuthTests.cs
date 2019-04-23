@@ -6,6 +6,7 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +26,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var user = labResponse.User;
 
             var pca = PublicClientApplicationBuilder
-                .Create(labResponse.AppId).WithAuthority("https://login.microsoftonline.com/organizations")
+                .Create(labResponse.AppId)
+                .WithAuthority("https://login.microsoftonline.com/organizations")
                 .Build();
 
             Trace.WriteLine("Part 1 - Acquire a token with U/P");
@@ -60,6 +62,74 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsFalse(at1.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsFalse(at2.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
 
+        }
+
+        [TestMethod]
+        public async Task SilentAuth_TokenCacheRemainsPersistent_Async()
+        {
+            var labResponse = LabUserHelper.GetDefaultUser();
+            var user = labResponse.User;
+            string cacheFilePath = null;
+
+            try
+            {
+                cacheFilePath = Path.GetTempFileName();
+
+                var pca1 = PublicClientApplicationBuilder
+                   .Create(labResponse.AppId)
+                   .WithAuthority("https://login.microsoftonline.com/organizations")
+                   .Build();
+
+                SetCacheSerializationToFile(pca1, cacheFilePath);
+
+                AuthenticationResult authResult = await pca1
+                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                MsalAssert.AssertAuthResult(authResult, user);
+
+                // simulate a restart by creating a new client
+                var pca2 = PublicClientApplicationBuilder
+                 .Create(labResponse.AppId)
+                 .Build();
+
+                SetCacheSerializationToFile(pca2, cacheFilePath);
+
+                authResult = await pca2.AcquireTokenSilent(s_scopes, user.Upn)
+                  .WithAuthority("https://login.microsoftonline.com/organizations")
+                  .ExecuteAsync()
+                  .ConfigureAwait(false);
+
+                MsalAssert.AssertAuthResult(authResult, user);
+            }
+            finally
+            {
+                if (cacheFilePath != null && File.Exists(cacheFilePath))
+                {
+                    File.Delete(cacheFilePath);
+                }
+            }
+        }
+
+        private static void SetCacheSerializationToFile(IPublicClientApplication pca, string filePath)
+        {
+            pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
+            {
+                notificationArgs.TokenCache.DeserializeMsalV3(File.Exists(filePath)
+                    ? File.ReadAllBytes(filePath)
+                    : null);
+            });
+
+            pca.UserTokenCache.SetAfterAccess(notificationArgs =>
+            {
+                // if the access operation resulted in a cache update
+                if (notificationArgs.HasStateChanged)
+                {
+                    // reflect changes in the persistent store
+                    File.WriteAllBytes(filePath, notificationArgs.TokenCache.SerializeMsalV3());
+                }
+            });
         }
     }
 }
