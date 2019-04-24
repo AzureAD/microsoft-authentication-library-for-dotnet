@@ -73,7 +73,11 @@ namespace Microsoft.Identity.Client
         /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <param name="msalV3State">Byte stream representation of the cache</param>
-        /// <param name="shouldClearExistingCache">Set to true to clear MSAL cache contents.  Defaults to false.</param>
+        /// <param name="shouldClearExistingCache">
+        /// Set to true to clear MSAL cache contents.  Defaults to false.
+        /// You would want to set this to true if you want the cache contents in memory to be exactly what's on disk.
+        /// You would want to set this to false if you want to merge the contents of what's on disk with your current in memory state.
+        /// </param>
         /// <remarks>
         /// This is the recommended format for maintaining SSO state between applications.
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
