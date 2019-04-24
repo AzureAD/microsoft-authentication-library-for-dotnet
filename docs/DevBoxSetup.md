@@ -27,6 +27,12 @@ to build from the command line.
 
 * Android SDK level 27 (oreo) and 28 (pie), and Android SDK build tools 27.0.3 are also required. These are not installed through the VS Installer, so instead use the Android SDK Manager (Visual Studio > Tools > Android > Android SDK Manager…)
 
+### Optional but recommended tools
+
+* [Fiddler](https://www.telerik.com/fiddler)
+* [Visual Studio Code](https://code.visualstudio.com)
+
+
 ## Debugging or running samples on Windows 10
 
 * The dev-built binaries are not signed so you will regularly need to run `sn -Vr *` (from an admin console) to bypass strong name validation.  If you're at MSFT on CorpNet then group policy will likely revert this setting and you may need to run this often or setup a Scheduled Task.
