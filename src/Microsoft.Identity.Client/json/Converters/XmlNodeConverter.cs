@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright (c) 2007 James Newton-King
 //
 // Permission is hereby granted, free of charge, to any person
@@ -1520,7 +1520,7 @@ namespace Microsoft.Identity.Json.Converters
                     throw JsonSerializationException.Create(reader, "XmlNodeConverter only supports deserializing XmlDocument, XmlElement or XmlNode.");
                 }
 
-                XmlDocument d = new XmlDocument();
+                XmlDocument d = new XmlDocument();                
 #if HAVE_XML_DOCUMENT_TYPE
                 // prevent http request when resolving any DTD references
                 d.XmlResolver = null;
