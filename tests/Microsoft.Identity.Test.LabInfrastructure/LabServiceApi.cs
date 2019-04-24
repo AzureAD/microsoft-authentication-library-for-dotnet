@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
@@ -26,9 +27,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </summary>
         /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
         /// <returns>Users that match the given query parameters.</returns>
-        public LabResponse GetLabResponse(UserQuery query)
+        public async Task<LabResponse> GetLabResponseAsync(UserQuery query)
         {
-            var response = GetLabResponseFromApi(query);
+            var response = await GetLabResponseFromApiAsync(query).ConfigureAwait(false);
             var user = response.User;
 
             if (!Uri.IsWellFormedUriString(user.CredentialUrl, UriKind.Absolute))
@@ -44,16 +45,21 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        private LabResponse GetLabResponseFromApi(UserQuery query)
+        private async Task<LabResponse> GetLabResponseFromApiAsync(UserQuery query)
         {
             //Fetch user
-            string result = RunQuery(query);
+            string result = await RunQueryAsync(query).ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(result))
             {
                 throw new LabUserNotFoundException(query, "No lab user with specified parameters exists");
             }
 
+            return CreateLabResponseFromResultString(result);
+        }
+
+        private static LabResponse CreateLabResponseFromResultString(string result)
+        {
             LabResponse response = JsonConvert.DeserializeObject<LabResponse>(result);
             LabUser user = JsonConvert.DeserializeObject<LabUser>(result);
 
@@ -65,10 +71,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        private string RunQuery(UserQuery query)
+        private Task<string> RunQueryAsync(UserQuery query)
         {
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
-            UriBuilder uriBuilder = new UriBuilder(LabApiConstants.LabEndpoint);
 
             //Disabled for now until there are tests that use it.
             queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);
@@ -117,8 +122,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
             }
 
+            return SendLabRequestAsync(LabApiConstants.LabEndpoint, queryDict);
+        }
+
+        private async Task<string> SendLabRequestAsync(string requestUrl, IDictionary<string, string> queryDict)
+        {
+            UriBuilder uriBuilder = new UriBuilder(requestUrl);
             uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
-            string result = _httpClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+            string result = await _httpClient.GetStringAsync(uriBuilder.ToString()).ConfigureAwait(false);
 
             return result;
         }
@@ -126,6 +137,17 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public void Dispose()
         {
             _httpClient.Dispose();
+        }
+
+        public async Task<LabResponse> CreateTempLabUserAsync()
+        {
+            IDictionary<string, string> queryDict = new Dictionary<string, string>();
+
+            queryDict.Add("code", "HC1Tud9RHGK12VoBPH3sbeyyPHfjmACKbyq8bFlhIiEwpMbWYR4zTQ");
+            queryDict.Add("userType", "Basic");
+
+            string result = await SendLabRequestAsync(LabApiConstants.CreateLabUser, queryDict).ConfigureAwait(false);
+            return CreateLabResponseFromResultString(result);
         }
     }
 }

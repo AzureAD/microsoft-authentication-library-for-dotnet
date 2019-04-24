@@ -17,9 +17,10 @@ namespace CommonCache.Test.Unit
     {
         private static readonly List<LabUserData> s_labUsers = new List<LabUserData>();
 
-        private static LabUserData GetLabUserData(string upn)
+        private static async Task<LabUserData> GetTempLabUserDataAsync()
         {
-            var labUser = new LabServiceApi().GetLabResponse(new UserQuery { Upn = upn }).User;
+            var api = new LabServiceApi();
+            var labUser = (await api.CreateTempLabUserAsync().ConfigureAwait(false)).User;
             return new LabUserData(labUser.Upn, labUser.GetOrFetchPassword());
         }
 
@@ -30,7 +31,10 @@ namespace CommonCache.Test.Unit
             // Are they MFA-required users?  What is different about them?
             // s_labUsers.Add(GetLabUserData("idlab@msidlab2.onmicrosoft.com"));
             // s_labUsers.Add(GetLabUserData("idlab@msidlab3.onmicrosoft.com"));
-            s_labUsers.Add(GetLabUserData("idlab@msidlab4.onmicrosoft.com"));
+            // "idlab@msidlab4.onmicrosoft.com"
+            s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
+            s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
+            s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
         }
 
         [DataTestMethod]
@@ -128,13 +132,13 @@ namespace CommonCache.Test.Unit
         }
 
         [DataTestMethod]
-        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV3, CacheStorageType.Adal,   DisplayName = "MsalV3->AdalV3 adal v3 cache")]
-        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV4, CacheStorageType.Adal,   DisplayName = "MsalV3->AdalV4 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV3, CacheStorageType.Adal, DisplayName = "MsalV3->AdalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV4, CacheStorageType.Adal, DisplayName = "MsalV3->AdalV4 adal v3 cache")]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV4, CacheStorageType.MsalV2, DisplayName = "MsalV3->AdalV4 msal v2 cache")]
-        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV5, CacheStorageType.Adal,   DisplayName = "MsalV3->AdalV5 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV5, CacheStorageType.Adal, DisplayName = "MsalV3->AdalV5 adal v3 cache")]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV5, CacheStorageType.MsalV2, DisplayName = "MsalV3->AdalV5 msal v2 cache")]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalV3->AdalV5 msal v3 cache")]
-        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.Adal,   DisplayName = "MsalV3->MsalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.Adal, DisplayName = "MsalV3->MsalV3 adal v3 cache")]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "MsalV3->MsalV3 msal v2 cache")]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalV3 msal v3 cache")]
         public async Task TestMsalV3CacheCompatibilityAsync(

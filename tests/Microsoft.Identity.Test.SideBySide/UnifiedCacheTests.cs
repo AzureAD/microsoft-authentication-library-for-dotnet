@@ -36,13 +36,13 @@ namespace Microsoft.Identity.Test.SideBySide
         private byte[] _unifiedStateStorage;
 
         [TestInitialize]
-        public void TestInitialize()
+        public async Task TestInitializeAsync()
         {
             _adalV3StateStorage = null;
             _unifiedStateStorage = null;
             if (_user == null)
             {
-                _user = LabUserHelper.GetDefaultUser().User;
+                _user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
 
                 _securePassword = new NetworkCredential("", _user.GetOrFetchPassword()).SecurePassword;
                 _authority = string.Format(
