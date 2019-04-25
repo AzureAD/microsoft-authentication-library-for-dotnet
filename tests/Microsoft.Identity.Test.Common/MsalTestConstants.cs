@@ -81,6 +81,8 @@ namespace Microsoft.Identity.Test.Unit
                 {"key2", "value2"}
             };
 
+        public const string TestSecretURI = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/e360740b3411452b887e6c3097cb1037";
+
         public enum AuthorityType { B2C };
         public static string[] ProdEnvAliases = new string[] {
                                 "login.microsoftonline.com",
