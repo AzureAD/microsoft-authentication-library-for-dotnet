@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             _config = new KeyVaultConfiguration
             {
-                AuthType = KeyVaultAuthenticationType.ClientSecret
+                AuthType = KeyVaultAuthenticationType.ClientCertificate
             };
 
             //The data.txt is a place holder for the keyvault secret. It will only be written to during build time when testing appcenter.
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 confidentialApp = ConfidentialClientApplicationBuilder
                     .Create(KeyVaultConfidentialClientId)
                     .WithAuthority(new Uri(authority), true)
-                    .WithClientSecret("haFC7VUF61aWjhAH/Oa+11CpmzzKRxgDPth41THkO04=")
+                    .WithClientSecret(_config.KeyVaultSecret)
                     .Build();
 
                 authResult = await confidentialApp
