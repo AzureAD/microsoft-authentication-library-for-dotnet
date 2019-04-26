@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
 {
     [TestClass]
-    public class OnBehalfOfTests
+    public class ConfidentialClientIntegrationTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
@@ -30,18 +30,40 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         }
 
         [TestMethod]
+        public async Task ClientSecretAuthenticationAsync()
+        {
+            var keyvault = new KeyVaultSecretsProvider();
+            var secret = keyvault.GetSecret("https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/e360740b3411452b887e6c3097cb1037").Value;
+            var confidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            string[] scope = { "https://vault.azure.net/.default" };
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(confidentialClientID)
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientSecret(secret)
+                .Build();
+
+            var authResult = await confidentialApp.AcquireTokenForClient(scope)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult);
+        }
+
+        [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
             var secret = keyvault.GetSecret("https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/243c858fe7b9411cbcf05a2a284d8a84").Value;
             var labResponse = LabUserHelper.GetSpecificUser("IDLAB@msidlab4.onmicrosoft.com");
             var user = labResponse.User;
-            var publicClientClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
+            var publicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
             var confidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientClientID).WithAuthority(MsalTestConstants.AuthorityOrganizationsTenant).WithRedirectUri("urn:ietf:wg:oauth:2.0:oob").Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID).WithAuthority(MsalTestConstants.AuthorityOrganizationsTenant).WithRedirectUri("urn:ietf:wg:oauth:2.0:oob").Build();
 
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, securePassword)

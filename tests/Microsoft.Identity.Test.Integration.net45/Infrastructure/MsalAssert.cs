@@ -23,11 +23,15 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             return account;
         }
 
-        public static void AssertAuthResult(AuthenticationResult result, LabUser user)
+        public static void AssertAuthResult(AuthenticationResult result, LabUser user = null)
         {
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
-            Assert.AreEqual(user.Upn, result.Account.Username);
+
+            if (user != null)
+            {
+                Assert.AreEqual(user.Upn, result.Account.Username);
+            }
         }
     }
 }
