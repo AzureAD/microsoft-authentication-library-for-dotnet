@@ -75,6 +75,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
 
             //Building user query
+            if (!string.IsNullOrWhiteSpace(query.Upn))
+            {
+                queryDict.Add(LabApiConstants.Upn, query.Upn);
+
+                uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
+                return _httpClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+            }
+
             if (query.FederationProvider != null)
             {
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
