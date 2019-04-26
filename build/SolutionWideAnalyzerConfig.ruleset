@@ -103,21 +103,27 @@
     <Rule Id="CA2010" Action="None" />
     <Rule Id="CA2201" Action="Error" />
     <Rule Id="CA2207" Action="None" />
-    <Rule Id="CA5350" Action="None" />
-    <Rule Id="CA5351" Action="None" />
+    <Rule Id="CA5350" Action="Error" /> <!-- SDL Required-->
+    <Rule Id="CA5351" Action="Error" /> <!-- SDL Required-->
   </Rules>
   <Rules AnalyzerId="Microsoft.NetFramework.Analyzers" RuleNamespace="Microsoft.NetFramework.Analyzers">
     <Rule Id="CA1058" Action="None" />
-    <Rule Id="CA2153" Action="None" />
+    <Rule Id="CA2153" Action="Error" />
     <Rule Id="CA2229" Action="None" />
     <Rule Id="CA2235" Action="None" />
     <Rule Id="CA2237" Action="None" />
-    <Rule Id="CA3075" Action="None" />
-    <Rule Id="CA3147" Action="None" />
+    <Rule Id="CA3075" Action="Error" /> <!-- SDL Required-->
+    <Rule Id="CA3147" Action="Error" /> <!-- SDL Required-->
   </Rules>
   <Rules AnalyzerId="Microsoft.NetFramework.CSharp.Analyzers" RuleNamespace="Microsoft.NetFramework.CSharp.Analyzers">
-    <Rule Id="CA3076" Action="None" />
-    <Rule Id="CA3077" Action="None" />
+    <Rule Id="CA3076" Action="Error" /> <!-- SDL Required-->
+    <!-- Insecure XSLT script processing. -->
+    <Rule Id="CA3077" Action="Error" /> <!-- SDL Required-->
+    <!-- Insecure Processing in API Design, XmlDocument and XmlTextReader -->
+    <Rule Id="CA5350" Action="Error" /> <!-- SDL Required-->
+    <!-- Do Not Use Weak Cryptographic Algorithms -->
+    <Rule Id="CA5351" Action="Error" /> <!-- SDL Required-->
+    <!-- Do Not Use Broken Cryptographic Algorithms -->
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1101" Action="None" />
