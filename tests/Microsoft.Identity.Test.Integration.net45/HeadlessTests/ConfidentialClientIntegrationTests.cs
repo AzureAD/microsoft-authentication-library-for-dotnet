@@ -33,7 +33,8 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         public async Task ClientSecretAuthenticationAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret("https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/e360740b3411452b887e6c3097cb1037").Value;
+            var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
+            //TODO: acquire scenario specific client ids from the lab resonse
             var confidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
             string[] scope = { "https://vault.azure.net/.default" };
@@ -55,9 +56,10 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         public async Task WebAPIAccessingGraphOnBehalfOfTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret("https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/243c858fe7b9411cbcf05a2a284d8a84").Value;
+            var secret = keyvault.GetSecret(MsalTestConstants.MsalOBOKeyVaultUri).Value;
             var labResponse = LabUserHelper.GetSpecificUser("IDLAB@msidlab4.onmicrosoft.com");
             var user = labResponse.User;
+            //TODO: acquire scenario specific client ids from the lab resonse
             var publicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
             var confidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
