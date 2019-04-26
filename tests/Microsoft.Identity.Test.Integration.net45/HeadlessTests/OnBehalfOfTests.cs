@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
     public class OnBehalfOfTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
-        string[] resource = { "api://ae55a6cc-da5e-42f8-b75d-c37e41a1a0d9/access_as_user" };
+        string[] resource = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -42,21 +42,22 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.AppId).WithAuthority(MsalTestConstants.AuthorityOrganizationsTenant).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create("be9b0186-7dfd-448a-a944-f771029105bf").WithAuthority(MsalTestConstants.AuthorityOrganizationsTenant).WithRedirectUri("urn:ietf:wg:oauth:2.0:oob").Build();
 
             //AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .AcquireTokenByUsernamePassword(resource, user.Upn, securePassword)
+                //.AcquireTokenInteractive(resource)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(labResponse.AppId)
+                .Create("23c64cd8-21e4-41dd-9756-ab9e2c23f58c")
                 .WithAuthority(new Uri(" https://login.microsoftonline.com/" + authResult.TenantId), true)
                 .WithClientSecret("")
                 .Build();
 
-            authResult = await confidentialApp.AcquireTokenOnBehalfOf(resource, new UserAssertion(authResult.AccessToken))
+            authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(authResult.AccessToken))
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
         }
