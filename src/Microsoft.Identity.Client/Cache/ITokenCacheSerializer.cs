@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.Cache
 {
     internal interface ITokenCacheSerializer
     {
-        IDictionary<string, JToken> Deserialize(byte[] bytes);
+        IDictionary<string, JToken> Deserialize(byte[] bytes, bool clearExistingCacheData);
         byte[] Serialize(IDictionary<string, JToken> additionalNodes);
     }
 }
