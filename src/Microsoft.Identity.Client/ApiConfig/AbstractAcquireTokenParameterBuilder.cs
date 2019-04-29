@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
         /// set in the builder</returns>
         /// <remarks>Cancellation is not guaranteed, it is best effort. If the operation reaches a point of no return, e.g.
         /// tokens are acquired and written to the cache, the task will complete even if cancellation was requested.
-        /// Do not rely on cancellation tokens for strong consistency.
+        /// Do not rely on cancellation tokens for strong consistency.</remarks>
         public abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
         internal abstract ApiEvent.ApiIds CalculateApiEventId();
