@@ -11,12 +11,15 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
+using NetCoreTestApp.Experimental;
 
 namespace NetCoreTestApp
 {
     public class Program
     {
-        private static readonly string s_clientIdForPublicApp = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        // This app has http://localhost redirect uri registered
+        private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
         private static readonly string s_clientIdForConfidentialApp = "<enter id>";
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
@@ -33,6 +36,7 @@ namespace NetCoreTestApp
                 .Create(s_clientIdForPublicApp)
                 .WithAuthority(new Uri(s_authority))
                 .WithLogging(Log, LogLevel.Verbose, true)
+                .WithRedirectUri(DefaultOsBrowserWebUi.FindFreeLocalhostRedirectUri()) // required for DefaultOsBrowser
 #if ARIA_TELEMETRY_ENABLED
                 .WithTelemetry(new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
 #endif
@@ -70,9 +74,10 @@ namespace NetCoreTestApp
                         1. Acquire Token by Windows Integrated Auth
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
-                        4. Acquire Token Silently
-                        5. Confidential Client with Certificate (needs extra config)
-                        6. Clear PCA cache
+                        4. Acquire Token Interactive (via Default System Browser)
+                        5. Acquire Token Silently
+                        6. Confidential Client with Certificate (needs extra config)
+                        7. Clear PCA cache
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -83,54 +88,63 @@ namespace NetCoreTestApp
                 {
                     switch (selection)
                     {
-                        case 1: // acquire token
-                            authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                    case 1: // acquire token
+                        authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                            break;
-                        case 2: // acquire token u/p
-                            SecureString password = GetPasswordFromConsole();
-                            authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                        break;
+                    case 2: // acquire token u/p
+                        SecureString password = GetPasswordFromConsole();
+                        authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                            break;
-                        case 3:
-                            authTask = pca.AcquireTokenWithDeviceCode(
-                                s_scopes,
-                                deviceCodeResult =>
-                                {
-                                    Console.WriteLine(deviceCodeResult.Message);
-                                    return Task.FromResult(0);
-                                }).ExecuteAsync(CancellationToken.None);
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
-                            break;
-                        case 4: // acquire token silent
-                            IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
-                            if (account == null)
+                        break;
+                    case 3:
+                        authTask = pca.AcquireTokenWithDeviceCode(
+                            s_scopes,
+                            deviceCodeResult =>
                             {
-                                Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
-                            }
+                                Console.WriteLine(deviceCodeResult.Message);
+                                return Task.FromResult(0);
+                            }).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                            authTask = pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                        break;
+                    case 4: // acquire token interactive
 
-                            break;
-                        case 5:
-                            RunClientCredentialWithCertificate();
-                            break;
-                        case 6:
-                            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-                            foreach (var acc in accounts)
-                            {
-                                await pca.RemoveAsync(acc).ConfigureAwait(false);
-                            }
+                        authTask = pca.AcquireTokenInteractive(s_scopes)
+                            .WithCustomWebUi(new DefaultOsBrowserWebUi()) // make sure you've configured a redirect uri of "http://localhost" or "http://localhost:1234" in the pca builder
+                            .ExecuteAsync(CancellationToken.None);
 
-                            break;
-                        case 0:
-                            return;
-                        default:
-                            break;
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+
+                        break;
+                    case 5: // acquire token silent
+                        IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
+                        if (account == null)
+                        {
+                            Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
+                        }
+
+                        authTask = pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+
+                        break;
+                    case 6:
+                        RunClientCredentialWithCertificate();
+                        break;
+                    case 7:
+                        var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                        foreach (var acc in accounts)
+                        {
+                            await pca.RemoveAsync(acc).ConfigureAwait(false);
+                        }
+
+                        break;
+                    case 0:
+                        return;
+                    default:
+                        break;
                     }
 
                 }
@@ -221,17 +235,17 @@ namespace NetCoreTestApp
 
             switch (level)
             {
-                case LogLevel.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    break;
-                case LogLevel.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    break;
-                case LogLevel.Verbose:
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    break;
-                default:
-                    break;
+            case LogLevel.Error:
+                Console.ForegroundColor = ConsoleColor.Red;
+                break;
+            case LogLevel.Warning:
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                break;
+            case LogLevel.Verbose:
+                Console.ForegroundColor = ConsoleColor.Gray;
+                break;
+            default:
+                break;
             }
 
             Console.WriteLine($"{level} {message}");

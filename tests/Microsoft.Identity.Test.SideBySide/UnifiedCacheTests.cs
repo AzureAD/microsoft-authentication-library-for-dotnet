@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Test.SideBySide
     [TestClass]
     public class UnifiedCacheTests
     {
-        public const string ClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
 
         public const string AuthorityTemplate = "https://login.microsoftonline.com/{0}/";
 
@@ -31,6 +30,7 @@ namespace Microsoft.Identity.Test.SideBySide
         private LabUser _user;
         private SecureString _securePassword;
         private string _authority;
+        private string _clientId;
 
         private byte[] _adalV3StateStorage;
         private byte[] _unifiedStateStorage;
@@ -40,16 +40,15 @@ namespace Microsoft.Identity.Test.SideBySide
         {
             _adalV3StateStorage = null;
             _unifiedStateStorage = null;
-            if (_user == null)
-            {
-                _user = LabUserHelper.GetDefaultUser().User;
+            var response = LabUserHelper.GetDefaultUser();
 
-                _securePassword = new NetworkCredential("", _user.GetOrFetchPassword()).SecurePassword;
-                _authority = string.Format(
-                    CultureInfo.InvariantCulture,
-                    AuthorityTemplate,
-                    _user.CurrentTenantId);
-            }
+            _user = response.User;
+            _clientId = response.AppId;
+            _securePassword = new NetworkCredential("", _user.GetOrFetchPassword()).SecurePassword;
+            _authority = string.Format(
+                CultureInfo.InvariantCulture,
+                AuthorityTemplate,
+                _user.CurrentTenantId);
 
             InitAdal();
             InitMsal();
@@ -118,7 +117,7 @@ namespace Microsoft.Identity.Test.SideBySide
         {
 
             _msalPublicClient = PublicClientApplicationBuilder
-                .Create(ClientId)
+                .Create(_clientId)
                 .WithAuthority(_authority)
                 .BuildConcrete();
 
@@ -153,7 +152,7 @@ namespace Microsoft.Identity.Test.SideBySide
 
             // passing empty password to make sure that token returned silenlty - using RT
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource1, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource1, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, "")).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
@@ -190,7 +189,7 @@ namespace Microsoft.Identity.Test.SideBySide
 
             // passing empty password to make sure that token returned silenlty - using RT
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource1, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource1, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, "")).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
@@ -219,13 +218,13 @@ namespace Microsoft.Identity.Test.SideBySide
         private async Task AcquireTokensUsingAdalAsync()
         {
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource1, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource1, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
 
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource2, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource2, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
         }
@@ -278,7 +277,7 @@ namespace Microsoft.Identity.Test.SideBySide
 
             // passing empty password to make sure that token returned silenlty - using RT
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource1, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource1, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, "")).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
@@ -315,7 +314,7 @@ namespace Microsoft.Identity.Test.SideBySide
 
             // passing empty password to make sure that token returned silenlty - using RT
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource1, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource1, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, "")).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
@@ -379,12 +378,12 @@ namespace Microsoft.Identity.Test.SideBySide
         {
             // acquire adal tokens using adalV4
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource1, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource1, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource2, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource2, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
@@ -427,7 +426,7 @@ namespace Microsoft.Identity.Test.SideBySide
         {
             // acquire adal tokens using adalV4
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource1, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource1, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
@@ -442,12 +441,12 @@ namespace Microsoft.Identity.Test.SideBySide
 
             // make sure that AT in AdalV3 format is used by AdalV4
             Assert.AreEqual(1, _adalCache.ReadItems().Count());
-            _adalAuthResult = await _adalContext.AcquireTokenSilentAsync(AdalResource1, ClientId).ConfigureAwait(false);
+            _adalAuthResult = await _adalContext.AcquireTokenSilentAsync(AdalResource1, _clientId).ConfigureAwait(false);
             Assert.AreEqual(1, _adalCache.ReadItems().Count());
 
             // acquire token to different resource
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource2, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource2, _clientId,
                 new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
@@ -492,7 +491,7 @@ namespace Microsoft.Identity.Test.SideBySide
         public async Task UnifiedCache_Adal_ClearCacheAsync()
         {
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource1, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource1, _clientId,
             new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
 
             Assert.IsTrue(_adalCache.ReadItems().Any());
@@ -511,7 +510,7 @@ namespace Microsoft.Identity.Test.SideBySide
         public async Task UnifiedCache_Msal_ClearCacheAsync()
         {
             _adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(_adalContext, AdalResource1, ClientId,
+                AcquireTokenAsync(_adalContext, AdalResource1, _clientId,
             new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(_user.Upn, _securePassword)).ConfigureAwait(false);
 
             Assert.IsTrue(_adalCache.ReadItems().Any());

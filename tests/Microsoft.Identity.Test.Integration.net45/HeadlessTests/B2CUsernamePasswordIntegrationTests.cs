@@ -26,11 +26,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        [TestInitialize]
-        public void TestInitialize()
-        {
-        }
-
         [TestMethod]
         public async Task ROPC_B2C_Async()
         {
