@@ -981,7 +981,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 // Arrange
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(tenantedAuthority1);
 
                 PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager);
 
@@ -995,9 +994,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.AreEqual(tenant1, response.TenantId);
-
-                // Arrange
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(tenantedAuthority2);
 
                 // Act
                 accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
