@@ -398,32 +398,7 @@ namespace Microsoft.Identity.Client
                     OnAfterAccess(args);
                 }
 
-                // this is OBO flow. match the cache entry with assertion hash,
-                // Authority, ScopeSet and client Id.
-                if (requestParams.UserAssertion != null)
-                {
-                    requestParams.RequestContext.Logger.Info("Filtering by user assertion...");
-                    tokenCacheItems =
-                        tokenCacheItems.Where(
-                                item =>
-                                    !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                    item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-                }
-                else
-                {
-                    if (!requestParams.IsClientCredentialRequest)
-                    {
-                        requestParams.RequestContext.Logger.Info("Filtering by user identifier...");
-                        // filter by identifier of the user instead
-                        tokenCacheItems =
-                            tokenCacheItems
-                                .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
-                    }
-
-                    tokenCacheItems = FilterToTenantIdSpecifiedByAuthenticationRequest(requestParams, tokenCacheItems).ToList();
-                }
+                tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
 
                 // no match found after initial filtering
                 if (!tokenCacheItems.Any())
@@ -507,24 +482,37 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private IEnumerable<MsalAccessTokenCacheItem> FilterToTenantIdSpecifiedByAuthenticationRequest(
-            AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
+        private static List<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(AuthenticationRequestParameters requestParams, List<MsalAccessTokenCacheItem> tokenCacheItems)
         {
-            var items = tokenCacheItems.ToList();
-            if (items.ToList().Count <= 1)
+            // this is OBO flow. match the cache entry with assertion hash,
+            // Authority, ScopeSet and client Id.
+            if (requestParams.UserAssertion != null)
             {
-                return items;
+                return tokenCacheItems.FilterWithLogging(item =>
+                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by user assertion id");
             }
 
-            requestParams.RequestContext.Logger.Info(
-                "Filtering by tenant specified in the authentication request parameters...");
+            if (!requestParams.IsClientCredentialRequest)
+            {
+                tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
+                                requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by home account id");
 
-            var authorityCacheMatches = items.Where(
-                item => item.TenantId.Equals(
-                    requestParams.Authority.GetTenantId(),
-                    StringComparison.OrdinalIgnoreCase)).ToList();
+                string tenantId = requestParams.Authority.GetTenantId();
 
-            return authorityCacheMatches;
+                requestParams.RequestContext.Logger.Info($"Tenant id: {tenantId}");
+                tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.TenantId.Equals(
+                               tenantId, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by tenant id");
+            }
+
+            return tokenCacheItems;
+
         }
 
         private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)

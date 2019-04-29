@@ -22,34 +22,45 @@ namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     [DeploymentItem(@"Resources\valid_cert.pfx")]
-    public class JsonWebTokenTests
+    public class ConfidentialClientWithCertTests
     {
-        private readonly MockHttpMessageHandler _x5CMockHandler = new MockHttpMessageHandler()
+        private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(bool clientCredentialFlow)
         {
-            ExpectedMethod = HttpMethod.Post,
-            ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                MsalTestConstants.Scope.AsSingleString(),
-                MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
-                MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid + "more")),
-            AdditionalRequestValidation = request =>
+            return new MockHttpMessageHandler()
             {
-                var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = CreateResponse(clientCredentialFlow),
+                AdditionalRequestValidation = request =>
+                {
+                    var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
 
-                // Check presence of client_assertion in request
-                Assert.IsTrue(formsData.TryGetValue("client_assertion", out string encodedJwt), "Missing client_assertion from request");
+                    // Check presence of client_assertion in request
+                    Assert.IsTrue(formsData.TryGetValue("client_assertion", out string encodedJwt), "Missing client_assertion from request");
 
-                // Check presence of x5c cert claim. It should exist.
-                var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadJwtToken(encodedJwt);
-                Assert.IsTrue(jsonToken.Header.Any(header => header.Key == "x5c"), "x5c should be present");
-            }
-        };
+                    // Check presence of x5c cert claim. It should exist.
+                    var handler = new JwtSecurityTokenHandler();
+                    var jsonToken = handler.ReadJwtToken(encodedJwt);
+                    Assert.IsTrue(jsonToken.Header.Any(header => header.Key == "x5c"), "x5c should be present");
+                }
+            };
+        }
+
+        private static HttpResponseMessage CreateResponse(bool clientCredentialFlow)
+        {
+            return clientCredentialFlow ?
+                MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage() :
+                MockHelpers.CreateSuccessTokenResponseMessage(
+                          MsalTestConstants.Scope.AsSingleString(),
+                          MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                          MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid + "more"));
+        }
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+
         }
 
         internal void SetupMocks(MockHttpManager httpManager)
@@ -77,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit
                                                               .WithCertificate(certificate).BuildConcrete();
 
                 //Check for x5c claim
-                harness.HttpManager.AddMockHandler(_x5CMockHandler);
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(MsalTestConstants.Scope)
                     .WithSendX5C(true)
@@ -118,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit
                 var userAssertion = new UserAssertion(MsalTestConstants.DefaultAccessToken);
 
                 //Check for x5c claim
-                harness.HttpManager.AddMockHandler(_x5CMockHandler);
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
                 AuthenticationResult result = await app
                     .AcquireTokenOnBehalfOf(MsalTestConstants.Scope, userAssertion)
                     .WithSendX5C(true)
