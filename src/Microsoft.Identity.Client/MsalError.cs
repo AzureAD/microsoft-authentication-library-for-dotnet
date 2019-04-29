@@ -58,13 +58,13 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// This error code denotes that multiple accounts were found having the same login hint and MSAL
-        /// cannot chose one. Please use <see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> to specify the account
+        /// cannot choose one. Please use <see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> to specify the account
         /// </summary>
         public const string MultipleAccountsForLoginHint = "multiple_accounts_for_login_hint";
 
         /// <summary>
         /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when
-        /// the user cache had not been set in the application constructor. This should never happen in MSAL.NET 3.x as the cache is created by the applicaiton
+        /// the user cache had not been set in the application constructor. This should never happen in MSAL.NET 3.x as the cache is created by the application
         /// </summary>
         public const string TokenCacheNullError = "token_cache_null";
 

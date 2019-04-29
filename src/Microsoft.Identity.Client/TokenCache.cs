@@ -1364,7 +1364,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
+                _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State, false);
             }
         }
 
@@ -1395,13 +1395,14 @@ namespace Microsoft.Identity.Client
         /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <param name="msalV3State">Byte stream representation of the cache</param>
+        /// <param name="shouldClearExistingCache">Set to true to clear MSAL cache contents.  Defaults to false.</param>
         /// <remarks>
         /// This format is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
-        public void DeserializeMsalV3(byte[] msalV3State)
+        public void DeserializeMsalV3(byte[] msalV3State, bool shouldClearExistingCache = false)
         {
             GuardOnMobilePlatforms();
 
@@ -1412,11 +1413,9 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
+                _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State, shouldClearExistingCache);
             }
         }
-
-
 
         private static void GuardOnMobilePlatforms()
         {
@@ -1427,7 +1426,6 @@ namespace Microsoft.Identity.Client
             "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
 #endif
         }
-
 
 #endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME
         #endregion
