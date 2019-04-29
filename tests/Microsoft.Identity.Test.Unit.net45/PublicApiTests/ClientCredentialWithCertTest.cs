@@ -24,8 +24,6 @@ namespace Microsoft.Identity.Test.Unit
     [DeploymentItem(@"Resources\valid_cert.pfx")]
     public class ConfidentialClientWithCertTests
     {
-      
-
         private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(bool clientCredentialFlow)
         {
             return new MockHttpMessageHandler()
@@ -107,8 +105,6 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNotNull(result.AccessToken);
             }
         }
-
-
 
         [TestMethod]
         [Description("Test for client assertion with X509 public certificate using sendCertificate")]

@@ -38,17 +38,13 @@ namespace Microsoft.Identity.Test.Unit
             {
                 var cacheJson = JObject.Parse(tokenCacheAsString);
 
-                
-
                 JEnumerable<JToken> tokens = cacheJson["AccessToken"].Children();
                 foreach (JToken token in tokens)
                 {
                     var obj = token.Children().Single() as JObject;
-                    //obj["cached_at"] = DateTime.UtcNow + TimeSpan.FromMinutes(100);
-                    //CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100))
+
                     obj["expires_on"] = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
                     obj["extended_expires_on"] = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
-                 //   obj["ext_expires_on"] = "foo";
                 }
 
                 tokenCacheAsString = cacheJson.ToString();
@@ -57,7 +53,6 @@ namespace Microsoft.Identity.Test.Unit
 
 
             byte[] tokenCacheBlob = new UTF8Encoding().GetBytes(tokenCacheAsString);
-
             pca.UserTokenCache.DeserializeMsalV3(tokenCacheBlob);
         }
 
