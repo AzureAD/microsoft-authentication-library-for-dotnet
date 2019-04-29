@@ -515,23 +515,6 @@ namespace Microsoft.Identity.Client
 
         }
 
-        private List<MsalAccessTokenCacheItem> FilterByTenantId(
-            List<MsalAccessTokenCacheItem> tokenCacheItems, AuthenticationRequestParameters requestParams)
-        {
-            requestParams.RequestContext.Logger.Info(
-                "Filtering by tenant specified in the authentication request parameters...");
-
-            tokenCacheItems = tokenCacheItems.Where(
-                item => item.TenantId.Equals(
-                    requestParams.Authority.GetTenantId(),
-                    StringComparison.OrdinalIgnoreCase)).ToList();
-
-            requestParams.RequestContext.Logger.Info(
-                "Filtered? ");
-
-            return tokenCacheItems;
-        }
-
         private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             return string.Format(
