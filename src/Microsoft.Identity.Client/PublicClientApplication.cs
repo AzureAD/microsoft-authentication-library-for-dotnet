@@ -9,9 +9,7 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 
 namespace Microsoft.Identity.Client
 {
-#if !DESKTOP && !NET_CORE
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
     /// <summary>
     /// Class to be used to acquire tokens in desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
     /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only.
@@ -26,7 +24,6 @@ namespace Microsoft.Identity.Client
     /// </list>
     /// </remarks>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal PublicClientApplication(ApplicationConfiguration configuration)
             : base(configuration)
@@ -74,6 +71,7 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
                 scopes);
         }
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
