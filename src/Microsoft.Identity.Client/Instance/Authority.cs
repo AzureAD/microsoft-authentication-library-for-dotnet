@@ -16,7 +16,8 @@ namespace Microsoft.Identity.Client.Instance
                 "common",
                 "organizations",
                 "consumers"
-            });
+            },
+            StringComparer.OrdinalIgnoreCase);
 
         protected Authority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
         {
@@ -97,7 +98,17 @@ namespace Microsoft.Identity.Client.Instance
         }
 
         internal abstract string GetTenantId();
+
         internal abstract void UpdateTenantId(string tenantId);
+
+        internal bool IsTenantless
+        {
+            get
+            {
+                string tenantId = GetTenantId();
+                return TenantlessTenantNames.Contains(tenantId);
+            }
+        }
 
         internal static string CreateAuthorityUriWithHost(string authority, string host)
         {

@@ -959,6 +959,131 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        /// <summary>
+        /// Cache state:
+        ///
+        /// 2 users have acquired tokens
+        /// 1 of them is a guest in another tenant => 1 request for each tenant
+        ///
+        /// There are 3 access tokens, 3 ATs, 3 Accounts but only 2 RT
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        [DeploymentItem(@"Resources\MultiTenantTokenCache.json")]
+        public async Task MultiTenantWithAuthorityOverrideAsync()
+        {
+            const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+            const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
+            string tenantedAuthority1 = $"https://login.microsoftonline.com/{tenant1}/";
+            string tenantedAuthority2 = $"https://login.microsoftonline.com/{tenant2}/";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(tenantedAuthority1);
+
+                PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager);
+
+                // Act
+                var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                AuthenticationResult response = await
+                    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    .WithAuthority(tenantedAuthority1)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(tenant1, response.TenantId);
+
+                // Arrange
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(tenantedAuthority2);
+
+                // Act
+                accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                response = await
+                    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    .WithAuthority(tenantedAuthority2)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(tenant2, response.TenantId);
+            }
+        }
+
+        /// <summary>
+        /// Cache state:
+        ///
+        /// 2 users have acquired tokens
+        /// 1 of them is a guest in another tenant => 1 request for each tenant
+        ///
+        /// There are 3 access tokens, 3 ATs, 3 Accounts but only 2 RT
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        [DeploymentItem(@"Resources\MultiTenantTokenCache.json")]
+        public async Task MultiTenantViaPcaAsync()
+        {
+            const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+            const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
+            string tenantedAuthority1 = $"https://login.microsoftonline.com/{tenant1}/";
+            string tenantedAuthority2 = $"https://login.microsoftonline.com/{tenant2}/";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, tenantedAuthority1);
+
+                // Act
+                var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                AuthenticationResult response = await
+                    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(tenant1, response.TenantId);
+
+                // Arrange
+                PublicClientApplication pca2 = CreatePcaFromFileWithAuthority(httpManager, tenantedAuthority2);
+
+                // Act
+                accounts = await pca2.GetAccountsAsync().ConfigureAwait(false);
+                response = await
+                    pca2.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(tenant2, response.TenantId);
+            }
+        }
+
+        private static PublicClientApplication CreatePcaFromFileWithAuthority(
+            MockHttpManager httpManager,
+            string authority = null)
+        {
+            const string clientIdInFile = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
+            const string tokenCacheFile = "MultiTenantTokenCache.json";
+
+            var pcaBuilder = PublicClientApplicationBuilder
+             .Create(clientIdInFile)
+             .WithHttpManager(httpManager);
+
+            if (authority != null)
+            {
+                pcaBuilder = pcaBuilder.WithAuthority(authority);
+            }
+
+            var pca = pcaBuilder.BuildConcrete();
+            pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile), true);
+            pca.UserTokenCacheInternal.Accessor.AssertItemCount(3, 2, 3, 3, 1);
+            return pca;
+        }
+
         private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority)
         {
             var app = PublicClientApplicationBuilder
