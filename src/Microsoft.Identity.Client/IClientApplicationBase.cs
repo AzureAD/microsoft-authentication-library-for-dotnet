@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client
 {
     /// <Summary>
     /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>
-    /// extend this class. For details see https://aka.ms/msal-net-client-applications
+    /// extend this class. For details see https://aka.ms/msal-net-client-applications.
     /// </Summary>
     public partial interface IClientApplicationBase
     {
