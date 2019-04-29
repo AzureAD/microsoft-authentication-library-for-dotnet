@@ -246,6 +246,46 @@ namespace XForms
             }
         }
 
+        private async void OnAcquireByROPCClickedAsync(object sender, EventArgs e)
+        {
+            try
+            {
+                acquireResponseTitleLabel.Text = EmptyResult;
+
+                var request = App.MsalPublicClient.AcquireTokenByUsernamePassword(
+                    App.Scopes,
+                    UserName.Text.Trim(),
+                    ConvertToSecureString(Password.Text.Trim()));
+
+                var result = await request.ExecuteAsync().ConfigureAwait(true);
+                var resText = GetResultDescription(result);
+
+                if (resText.Contains("AccessToken"))
+                {
+                    acquireResponseTitleLabel.Text = SuccessfulResult;
+                }
+
+                acquireResponseLabel.Text = resText;
+                RefreshUsers();
+            }
+            catch(Exception exception)
+            {
+                CreateExceptionMessage(exception);
+            }
+        }
+
+        private SecureString ConvertToSecureString(string password)
+        {
+            if (password.Length > 0)
+            {
+                SecureString securePassword = new SecureString();
+                password.ToCharArray().ToList().ForEach(p => securePassword.AppendChar(p));
+                securePassword.MakeReadOnly();
+                return securePassword;
+            }
+            return null;
+        }
+
         private void OnClearClicked(object sender, EventArgs e)
         {
             acquireResponseLabel.Text = "";
