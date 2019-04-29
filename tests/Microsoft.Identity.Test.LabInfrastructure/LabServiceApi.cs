@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
 
-            queryDict.Add("code", "HC1Tud9RHGK12VoBPH3sbeyyPHfjmACKbyq8bFlhIiEwpMbWYR4zTQ");
+            queryDict.Add("code", "HC1Tud9RHGK12VoBPH3sbeyyPHfjmACKbyq8bFlhIiEwpMbWYR4zTQ==");
             queryDict.Add("userType", "Basic");
 
             string result = await SendLabRequestAsync(LabApiConstants.CreateLabUser, queryDict).ConfigureAwait(false);
