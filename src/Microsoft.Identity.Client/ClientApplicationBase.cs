@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client
         /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
-        /// You can set additonal parameters by chaining the builder with:
+        /// You can set additional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
         /// overrides to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client
         /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
-        /// You can set additonal parameters by chaining the builder with:
+        /// You can set additional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
         /// overrides to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
