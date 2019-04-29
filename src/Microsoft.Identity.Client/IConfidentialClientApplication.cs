@@ -17,10 +17,10 @@ namespace Microsoft.Identity.Client
     {
         /// <Summary>
         /// Application token cache. This case holds access tokens and refresh tokens for the application. It's maintained
-        /// and updated silently if needed when <see cref="AcquireTokenForClient(IEnumerable{string})"/>
+        /// and updated silently if needed when calling <see cref="AcquireTokenForClient(IEnumerable{string})"/>
         /// </Summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
-        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms
+        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
         /// </remarks>
         ITokenCache AppTokenCache { get; }
 
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// [V3 API] Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
-        /// using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
+        /// using the client credentials flow. See https://aka.ms/msal-net-client-credentials.
         /// </summary>
         /// <param name="scopes">scopes requested to access a protected API. For this flow (client credentials), the scopes
         /// should be of the form "{ResourceIdUri/.default}" for instance <c>https://management.azure.net/.default</c> or, for Microsoft
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// [V3 API] Acquires an access token for this application (usually a Web API) from the authority configured in the application,
         /// in order to access another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
-        /// (See https://aka.ms/msal-net-on-behalf-of).
+        /// See https://aka.ms/msal-net-on-behalf-of.
         /// This confidential client application was itself called with a token which will be provided in the
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.
         /// </summary>
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request to get the
-        /// URL of the STS authorization endpoint parametrized with the parameters</returns>
+        /// URL of the STS authorization endpoint parameterized with the parameters</returns>
         /// <remarks>You can also chain the following optional parameters:
         /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string)"/>
         /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>

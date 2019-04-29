@@ -14,14 +14,14 @@ namespace Microsoft.Identity.Client
 #endif
     /// <summary>
     /// Class to be used to acquire tokens in desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
-    /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only
-    /// (they only support public client flows). For details see https://aka.ms/msal-net-client-applications
+    /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only.
+    /// For details see https://aka.ms/msal-net-client-applications
     /// </summary>
     /// <remarks>
     /// <list type="bullet">
     /// <item><description>Contrary to <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, public clients are unable to hold configuration time secrets,
     /// and as a result have no client secret</description></item>
-    /// <item><description>the redirect URL is pre-proposed by the library. It does not need to be passed in the constructor</description></item>
+    /// <item><description>The redirect URL is pre-proposed by the library. It does not need to be passed in the constructor</description></item>
     /// <item><description>.NET Core does not support UI, and therefore this platform does not provide the interactive token acquisition methods</description></item>
     /// </list>
     /// </remarks>
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Interactive request to acquire token for the specified scopes. The interactive window will be parented to the specified
+        /// Interactive request to acquire a token for the specified scopes. The interactive window will be parented to the specified
         /// window. The user will be required to select an account
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client
         /// to prevent the select account dialog from appearing in the case you want to sign-in a specific account,
         /// WithParentActivityOrWindow to optimize how the browser is shown, e.g.
         /// for centering the browser window on the app window. Required on Xamarin.Android
+        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)"/>
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
         /// user pre-consent to additional scopes (which won't be returned in the access token),
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
@@ -119,7 +120,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Non-interactive request to acquire a security token for the signed-in user in Windows,
         /// via Integrated Windows Authentication. See https://aka.ms/msal-net-iwa.
-        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// The account used in this overrides is pulled from the operating system as the current user principal name.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
@@ -146,7 +147,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
-        /// Available only on .net desktop and .net core. See https://aka.ms/msal-net-up for details.
+        /// See https://aka.ms/msal-net-up for details.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="username">Identifier of the user application requests token on behalf.
