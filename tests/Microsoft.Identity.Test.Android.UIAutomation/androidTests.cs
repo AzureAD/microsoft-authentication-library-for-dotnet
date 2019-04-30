@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenADFSV4InteractiveNonFederatedTest,
 
                 B2CLocalAccountAcquireTokenTest,
+                B2CROPCLocalAccountAcquireTokenTest
                 // Google Auth does not support embedded webview from b2clogin.com authority.
                 // App Center cannot run system browser tests yet, so this test can only be run in system browser locally.
                 //B2CGoogleB2CLoginAuthorityAcquireTokenTest,
@@ -208,6 +209,16 @@ namespace Microsoft.Identity.Test.UIAutomation
         public void B2CLocalAccountAcquireTokenTest()
         {
             _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
+        }
+
+        /// <summary>
+        /// B2C ROPC acquire token with local account
+        /// b2clogin.com authority
+        /// </summary>
+        [Test]
+        public void B2CROPCLocalAccountAcquireTokenTest()
+        {
+            _mobileTestHelper.B2CAcquireTokenROPCTest(xamarinController, LabUserHelper.GetB2CLocalAccount());
         }
 
         /// <summary>

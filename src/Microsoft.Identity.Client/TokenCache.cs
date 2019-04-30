@@ -398,32 +398,7 @@ namespace Microsoft.Identity.Client
                     OnAfterAccess(args);
                 }
 
-                // this is OBO flow. match the cache entry with assertion hash,
-                // Authority, ScopeSet and client Id.
-                if (requestParams.UserAssertion != null)
-                {
-                    requestParams.RequestContext.Logger.Info("Filtering by user assertion...");
-                    tokenCacheItems =
-                        tokenCacheItems.Where(
-                                item =>
-                                    !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                    item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-                }
-                else
-                {
-                    if (!requestParams.IsClientCredentialRequest)
-                    {
-                        requestParams.RequestContext.Logger.Info("Filtering by user identifier...");
-                        // filter by identifier of the user instead
-                        tokenCacheItems =
-                            tokenCacheItems
-                                .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
-                    }
-
-                    tokenCacheItems = FilterToTenantIdSpecifiedByAuthenticationRequest(requestParams, tokenCacheItems).ToList();
-                }
+                tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
 
                 // no match found after initial filtering
                 if (!tokenCacheItems.Any())
@@ -507,24 +482,37 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private IEnumerable<MsalAccessTokenCacheItem> FilterToTenantIdSpecifiedByAuthenticationRequest(
-            AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
+        private static List<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(AuthenticationRequestParameters requestParams, List<MsalAccessTokenCacheItem> tokenCacheItems)
         {
-            var items = tokenCacheItems.ToList();
-            if (items.ToList().Count <= 1)
+            // this is OBO flow. match the cache entry with assertion hash,
+            // Authority, ScopeSet and client Id.
+            if (requestParams.UserAssertion != null)
             {
-                return items;
+                return tokenCacheItems.FilterWithLogging(item =>
+                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by user assertion id");
             }
 
-            requestParams.RequestContext.Logger.Info(
-                "Filtering by tenant specified in the authentication request parameters...");
+            if (!requestParams.IsClientCredentialRequest)
+            {
+                tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
+                                requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by home account id");
 
-            var authorityCacheMatches = items.Where(
-                item => item.TenantId.Equals(
-                    requestParams.Authority.GetTenantId(),
-                    StringComparison.OrdinalIgnoreCase)).ToList();
+                string tenantId = requestParams.Authority.GetTenantId();
 
-            return authorityCacheMatches;
+                requestParams.RequestContext.Logger.Info($"Tenant id: {tenantId}");
+                tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.TenantId.Equals(
+                               tenantId, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by tenant id");
+            }
+
+            return tokenCacheItems;
+
         }
 
         private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
@@ -1376,7 +1364,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
+                _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State, false);
             }
         }
 
@@ -1407,13 +1395,14 @@ namespace Microsoft.Identity.Client
         /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <param name="msalV3State">Byte stream representation of the cache</param>
+        /// <param name="shouldClearExistingCache">Set to true to clear MSAL cache contents.  Defaults to false.</param>
         /// <remarks>
         /// This format is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
-        public void DeserializeMsalV3(byte[] msalV3State)
+        public void DeserializeMsalV3(byte[] msalV3State, bool shouldClearExistingCache = false)
         {
             GuardOnMobilePlatforms();
 
@@ -1424,11 +1413,9 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
+                _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State, shouldClearExistingCache);
             }
         }
-
-
 
         private static void GuardOnMobilePlatforms()
         {
@@ -1439,7 +1426,6 @@ namespace Microsoft.Identity.Client
             "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
 #endif
         }
-
 
 #endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME
         #endregion

@@ -10,20 +10,20 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Interface to be used with desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
-    /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only
-    /// (they only support public client flows). For details see https://aka.ms/msal-net-client-applications
+    /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only.
+    /// For details see https://aka.ms/msal-net-client-applications.
     /// </summary>
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
         /// <summary>
         /// Tells if the application can use the system web browser, therefore getting single-sign-on with web applications.
-        /// By default, MSAL will try to use a system browser on the mobile platforms if it is available.
-        /// See https://aka.ms/msal-net-uses-web-browser
+        /// By default, MSAL will try to use a system browser on the mobile platforms, if it is available.
+        /// See https://aka.ms/msal-net-uses-web-browser.
         /// </summary>
         bool IsSystemWebViewAvailable { get; }
 
         /// <summary>
-        /// Interactive request to acquire token for the specified scopes. The interactive window will be parented to the specified
+        /// Interactive request to acquire a token for the specified scopes. The interactive window will be parented to the specified
         /// window. The user will be required to select an account
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction
+        /// of the known authorities added to the application construction.
         /// </remarks>
         AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(IEnumerable<string> scopes);
 
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Non-interactive request to acquire a security token for the signed-in user in Windows,
         /// via Integrated Windows Authentication. See https://aka.ms/msal-net-iwa.
-        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// The account used in this overrides is pulled from the operating system as the current user principal name.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>

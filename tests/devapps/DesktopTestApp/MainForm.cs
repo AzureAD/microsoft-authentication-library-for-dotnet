@@ -24,7 +24,7 @@ namespace DesktopTestApp
     public partial class MainForm : Form
     {
         private const string PublicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        private string _b2CClientId = null;
+        private string _b2CClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
         public const string B2CCustomDomainClientId = "64a88201-6bbd-49f5-ab46-9153798493fd ";
 
         private PublicClientHandler _publicClientHandler;

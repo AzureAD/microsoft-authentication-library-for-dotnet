@@ -1,3 +1,9 @@
+3.0.8
+=============
+Bug Fixes:
+- **AcquireTokenSilent sometimes ignored the tenant constraint**. If the same user acquired tokens from different tenants, MSAL.NET would return an account, regardless of the tenant. MSAL.NET now returns the token based on the tenant. [MSAL issue #1123](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1123)
+- **DeserializeMsalV3 on ITokenCache should have the option to clear the in memory cache**. DeserializeMsalV3 is currently a merge operation with existing in-memory data. MSAL.NET now has the option to be able to clear the in memory state and then deserialize the content in. [MSAL issue #1109](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1109)
+
 3.0.6-preview
 =============
 New Features:

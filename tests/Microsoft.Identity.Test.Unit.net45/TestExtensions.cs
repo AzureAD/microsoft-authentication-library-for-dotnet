@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
@@ -27,13 +30,30 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(expectedAppMetadataCount, accessor.GetAllAppMetadata().Count());
         }
 
-        public static void InitializeTokenCacheFromFile(this IPublicClientApplication pca, string resourceFile)
+        public static void InitializeTokenCacheFromFile(this IPublicClientApplication pca, string resourceFile, bool updateATExpiry = false)
         {
             string tokenCacheAsString = File.ReadAllText(resourceFile);
+
+            if (updateATExpiry)
+            {
+                var cacheJson = JObject.Parse(tokenCacheAsString);
+
+                JEnumerable<JToken> tokens = cacheJson["AccessToken"].Children();
+                foreach (JToken token in tokens)
+                {
+                    var obj = token.Children().Single() as JObject;
+
+                    obj["expires_on"] = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
+                    obj["extended_expires_on"] = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
+                }
+
+                tokenCacheAsString = cacheJson.ToString();
+            
+            }
+
+
             byte[] tokenCacheBlob = new UTF8Encoding().GetBytes(tokenCacheAsString);
-
             pca.UserTokenCache.DeserializeMsalV3(tokenCacheBlob);
-
         }
 
     }
