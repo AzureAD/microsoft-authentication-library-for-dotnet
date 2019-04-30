@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28621.142
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D231979-0A13-456D-B9F9-CED41F935FD9}"
 EndProject
@@ -21,8 +21,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Common", "tests\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj", "{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.LabInfrastructure", "tests\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj", "{E22918A8-8FE6-47D2-B65E-34436918C5D7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.SideBySide", "tests\Microsoft.Identity.Test.SideBySide\Microsoft.Identity.Test.SideBySide.csproj", "{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "src\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{528C5488-C0D8-45C3-BEAC-3E52C22631C9}"
 EndProject
@@ -86,10 +84,6 @@ Global
 		{E22918A8-8FE6-47D2-B65E-34436918C5D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E22918A8-8FE6-47D2-B65E-34436918C5D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E22918A8-8FE6-47D2-B65E-34436918C5D7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{528C5488-C0D8-45C3-BEAC-3E52C22631C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{528C5488-C0D8-45C3-BEAC-3E52C22631C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{528C5488-C0D8-45C3-BEAC-3E52C22631C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -147,7 +141,6 @@ Global
 		{DA8E7933-0A56-4668-9786-ECECA3D16944} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{E22918A8-8FE6-47D2-B65E-34436918C5D7} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
-		{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{528C5488-C0D8-45C3-BEAC-3E52C22631C9} = {528F34D9-FF6B-4AAE-8367-182EC19DAB5F}
 		{A8C2D397-BA21-4BD2-93AA-801B0E0804BC} = {7930A443-1981-49CD-8AF5-02E25F3A7FF3}
 		{7930A443-1981-49CD-8AF5-02E25F3A7FF3} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
