@@ -11,6 +11,7 @@ using System.Diagnostics;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using System.Linq;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -105,7 +106,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             return By.XPath($".//*[{xPathSelector}]");
         }
 
-        public static void PerformLogin(this IWebDriver driver, LabUser user, bool withLoginHint = false)
+        public static void PerformLogin(this IWebDriver driver, LabUser user, Prompt prompt, bool withLoginHint = false)
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
@@ -129,6 +130,12 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             Trace.WriteLine("Logging in ... Clicking next after password");
             driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.PasswordSignInButtonId)).Click();
+
+            if (prompt == Prompt.Consent)
+            {
+                Trace.WriteLine("Consenting...");
+                driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.AADSignInButtonId)).Click();
+            }
         }
     }
 }
