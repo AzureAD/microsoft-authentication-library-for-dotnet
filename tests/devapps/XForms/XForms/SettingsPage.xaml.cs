@@ -93,6 +93,10 @@ namespace XForms
                 App.Authority = App.B2CEditProfilePolicyAuthority;
                 CreateB2CAppSettings();
                 break;
+            case 3:
+                App.Authority = App.B2CROPCAuthority;
+                CreateB2CAppSettings();
+                break;
             default:
                 App.Authority = App.DefaultAuthority;
                 App.Scopes = App.DefaultScopes;
