@@ -68,7 +68,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private string RunQuery(UserQuery query)
         {
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
-            UriBuilder uriBuilder = new UriBuilder(LabApiConstants.LabEndpoint);
 
             //Disabled for now until there are tests that use it.
             queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);
@@ -78,9 +77,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             if (!string.IsNullOrWhiteSpace(query.Upn))
             {
                 queryDict.Add(LabApiConstants.Upn, query.Upn);
-
-                uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
-                return _httpClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+                return GetResponse(queryDict);
             }
 
             if (query.FederationProvider != null)
@@ -120,10 +117,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
             }
 
-            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
-            string result = _httpClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+            return GetResponse(queryDict);
+        }
 
-            return result;
+        private string GetResponse(IDictionary<string, string> queryDict)
+        {
+            UriBuilder uriBuilder = new UriBuilder(LabApiConstants.LabEndpoint);
+            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
+            return _httpClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
         }
 
         public void Dispose()
