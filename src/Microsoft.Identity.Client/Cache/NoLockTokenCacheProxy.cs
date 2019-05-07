@@ -73,11 +73,11 @@ namespace Microsoft.Identity.Client.Cache
         [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public CacheData SerializeUnifiedAndAdalCache() => throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
 
-        public void SetAfterAccess(TokenCacheCallback afterAccess) => throw new NotImplementedException(MsalErrorMessage.FunctionalityNotAvailableInTokenCacheCallback);
-        public void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> afterAccess) => throw new NotImplementedException(MsalErrorMessage.FunctionalityNotAvailableInTokenCacheCallback);
-        public void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess) => throw new NotImplementedException(MsalErrorMessage.FunctionalityNotAvailableInTokenCacheCallback);
-        public void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeWrite) => throw new NotImplementedException(MsalErrorMessage.FunctionalityNotAvailableInTokenCacheCallback);
-        public void SetBeforeAccess(TokenCacheCallback beforeAccess) => throw new NotImplementedException(MsalErrorMessage.FunctionalityNotAvailableInTokenCacheCallback);
-        public void SetBeforeWrite(TokenCacheCallback beforeWrite) => throw new NotImplementedException(MsalErrorMessage.FunctionalityNotAvailableInTokenCacheCallback);
+        public void SetAfterAccess(TokenCacheCallback afterAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
+        public void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> afterAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
+        public void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
+        public void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeWrite) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
+        public void SetBeforeAccess(TokenCacheCallback beforeAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
+        public void SetBeforeWrite(TokenCacheCallback beforeWrite) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
     }
 }

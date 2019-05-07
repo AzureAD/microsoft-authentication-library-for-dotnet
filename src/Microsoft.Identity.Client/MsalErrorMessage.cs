@@ -263,6 +263,6 @@ namespace Microsoft.Identity.Client
         public const string B2CAuthorityHostMisMatch = "The B2C authority host that was used when creating the client application is not the same authority host used in the AcquireToken call. " +
            "See https://aka.ms/msal-net-b2c for details. ";
 
-        public const string FunctionalityNotAvailableInTokenCacheCallback = "This functionality is not available inside of a token cache callback.";
+        public const string TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback = "You cannot set a tokencache callback method from within the callback itself.";
     }
 }

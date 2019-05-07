@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
-        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
+        [Obsolete("This is expected to be removed in MSAL.NET v4 and ADAL.NET v6. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public CacheData SerializeUnifiedAndAdalCache()
         {
             GuardOnMobilePlatforms();
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
-        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
+        [Obsolete("This is expected to be removed in MSAL.NET v4 and ADAL.NET v6. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public void DeserializeUnifiedAndAdalCache(CacheData cacheData)
         {
             GuardOnMobilePlatforms();
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
-        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
+        [Obsolete("This is expected to be removed in MSAL.NET v4 and ADAL.NET v6. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public byte[] Serialize()
         {
             return SerializeMsalV2();
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// <paramref name="msalV2State"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information.
         /// </remarks>
-        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
+        [Obsolete("This is expected to be removed in MSAL.NET v4 and ADAL.NET v6. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public void Deserialize(byte[] msalV2State)
         {
             DeserializeMsalV2(msalV2State);
