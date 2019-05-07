@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="beforeAccess"></param>
-        public void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess)
+        public void SetBeforeAccessAsync(Func<TokenCacheNotificationArgs, Task> beforeAccess)
         {
             GuardOnMobilePlatforms();
             AsyncBeforeAccess = beforeAccess;
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="afterAccess"></param>
-        public void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> afterAccess)
+        public void SetAfterAccessAsync(Func<TokenCacheNotificationArgs, Task> afterAccess)
         {
             GuardOnMobilePlatforms();
             AsyncAfterAccess = afterAccess;
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="beforeWrite"></param>
-        public void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeWrite)
+        public void SetBeforeWriteAsync(Func<TokenCacheNotificationArgs, Task> beforeWrite)
         {
             GuardOnMobilePlatforms();
             AsyncBeforeWrite = beforeWrite;

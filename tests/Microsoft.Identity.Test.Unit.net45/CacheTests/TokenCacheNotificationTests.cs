@@ -44,9 +44,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             bool afterAccessCalled = false;
             bool beforeWriteCalled = false;
 
-            pca.UserTokenCache.SetAsyncBeforeAccess(async args => { beforeAccessCalled = true; await Task.Delay(10).ConfigureAwait(false); });
-            pca.UserTokenCache.SetAsyncAfterAccess(async args => { afterAccessCalled = true; await Task.Delay(10).ConfigureAwait(false); });
-            pca.UserTokenCache.SetAsyncBeforeWrite(async args => { beforeWriteCalled = true; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetBeforeAccessAsync(async args => { beforeAccessCalled = true; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetAfterAccessAsync(async args => { afterAccessCalled = true; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetBeforeWriteAsync(async args => { beforeWriteCalled = true; await Task.Delay(10).ConfigureAwait(false); });
 
             await pca.GetAccountsAsync().ConfigureAwait(false);
 
@@ -74,9 +74,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             pca.UserTokenCache.SetAfterAccess(args => { afterAccessCalled = true; });
             pca.UserTokenCache.SetBeforeWrite(args => { beforeWriteCalled = true; });
 
-            pca.UserTokenCache.SetAsyncBeforeAccess(async args => { asyncBeforeAccessCalled = beforeAccessCalled; await Task.Delay(10).ConfigureAwait(false); });
-            pca.UserTokenCache.SetAsyncAfterAccess(async args => { asyncAfterAccessCalled = afterAccessCalled; await Task.Delay(10).ConfigureAwait(false); });
-            pca.UserTokenCache.SetAsyncBeforeWrite(async args => { asyncBeforeWriteCalled = beforeWriteCalled; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetBeforeAccessAsync(async args => { asyncBeforeAccessCalled = beforeAccessCalled; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetAfterAccessAsync(async args => { asyncAfterAccessCalled = afterAccessCalled; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetBeforeWriteAsync(async args => { asyncBeforeWriteCalled = beforeWriteCalled; await Task.Delay(10).ConfigureAwait(false); });
 
             await pca.GetAccountsAsync().ConfigureAwait(false);
 
@@ -108,18 +108,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-                pca.UserTokenCache.SetAsyncBeforeAccess(async args =>
+                pca.UserTokenCache.SetBeforeAccessAsync(async args =>
                 {
                     numBeforeAccessCalls++;
                     await Task.Delay(10).ConfigureAwait(false);
                 });
-                pca.UserTokenCache.SetAsyncAfterAccess(async args =>
+                pca.UserTokenCache.SetAfterAccessAsync(async args =>
                 {
                     numAfterAccessCalls++;
                     serializedPayload = args.TokenCache.SerializeMsalV3();
                     await Task.Delay(10).ConfigureAwait(false);
                 });
-                pca.UserTokenCache.SetAsyncBeforeWrite(async args =>
+                pca.UserTokenCache.SetBeforeWriteAsync(async args =>
                 {
                     numBeforeWriteCalls++;                    
                     await Task.Delay(10).ConfigureAwait(false);

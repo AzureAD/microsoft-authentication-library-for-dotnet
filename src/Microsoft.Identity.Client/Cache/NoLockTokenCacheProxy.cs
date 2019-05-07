@@ -74,9 +74,9 @@ namespace Microsoft.Identity.Client.Cache
         public CacheData SerializeUnifiedAndAdalCache() => throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
 
         public void SetAfterAccess(TokenCacheCallback afterAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
-        public void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> afterAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
-        public void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
-        public void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeWrite) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
+        public void SetAfterAccessAsync(Func<TokenCacheNotificationArgs, Task> afterAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
+        public void SetBeforeAccessAsync(Func<TokenCacheNotificationArgs, Task> beforeAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
+        public void SetBeforeWriteAsync(Func<TokenCacheNotificationArgs, Task> beforeWrite) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
         public void SetBeforeAccess(TokenCacheCallback beforeAccess) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
         public void SetBeforeWrite(TokenCacheCallback beforeWrite) => throw new NotImplementedException(MsalErrorMessage.TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback);
     }

@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
         /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
         /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
         /// See https://aka.ms/msal-net-token-cache-serialization.
-        /// If you need async/task-based callbacks, please use SetAsyncBeforeAccess instead.
+        /// If you need async/task-based callbacks, please use SetBeforeAccessAsync instead.
         /// </summary>
         /// <param name="beforeAccess">Delegate set in order to handle the cache deserialization</param>
         /// <remarks>In the case where the delegate is used to deserialize the cache, it might
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
         /// Sets a delegate to be notified after any library method accesses the cache. This gives an option to the
         /// delegate to serialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
         /// See https://aka.ms/msal-net-token-cache-serialization.
-        /// If you need async/task-based callbacks, please use SetAsyncAfterAccess instead.
+        /// If you need async/task-based callbacks, please use SetAfterAccessAsync instead.
         /// </summary>
         /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
         /// member of the cache is <c>true</c></param>
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client
         /// Sets a delegate called before any library method writes to the cache. This gives an option to the delegate
         /// to reload the cache state from a row in database and lock that row. That database row can then be unlocked in the delegate
         /// registered with <see cref="SetAfterAccess(TokenCacheCallback)"/>
-        /// If you need async/task-based callbacks, please use SetAsyncBeforeWrite instead.
+        /// If you need async/task-based callbacks, please use SetBeforeWriteAsync instead.
         /// </summary>
         /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
         void SetBeforeWrite(TokenCacheCallback beforeWrite);
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
         /// <param name="beforeAccess">Delegate set in order to handle the cache deserialization</param>
         /// <remarks>In the case where the delegate is used to deserialize the cache, it might
         /// want to call <see cref="DeserializeMsalV3(byte[], bool)"/></remarks>
-        void SetAsyncBeforeAccess(Func<TokenCacheNotificationArgs, Task> beforeAccess);
+        void SetBeforeAccessAsync(Func<TokenCacheNotificationArgs, Task> beforeAccess);
 
         /// <summary>
         /// Sets a delegate to be notified after any library method accesses the cache. This gives an option to the
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
         /// member of the cache is <c>true</c></param>
         /// <remarks>In the case where the delegate is used to serialize the cache entirely (not just a row), it might
         /// want to call <see cref="SerializeMsalV3()"/></remarks>
-        void SetAsyncAfterAccess(Func<TokenCacheNotificationArgs, Task> afterAccess);
+        void SetAfterAccessAsync(Func<TokenCacheNotificationArgs, Task> afterAccess);
 
         /// <summary>
         /// Sets a delegate called before any library method writes to the cache. This gives an option to the delegate
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// This provides the same functionality as SetBeforeWrite but it provides for an async/task-based callback.
         /// </summary>
         /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
-        void SetAsyncBeforeWrite(Func<TokenCacheNotificationArgs, Task> beforeWrite);
+        void SetBeforeWriteAsync(Func<TokenCacheNotificationArgs, Task> beforeWrite);
 
         /// <summary>
         /// Serializes the token cache to the MSAL.NET 3.x cache format, which is compatible with other MSAL desktop libraries, e.g. MSAL for Python and MSAL for Java.
