@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
         /// Gets a string containing the identity provider for this account, e.g. <c>login.microsoftonline.com</c>.
         /// </summary>
         /// <remarks>This property replaces the <c>IdentityProvider</c> property of <c>IUser</c> in previous versions of MSAL.NET
-        /// except that IdentityProvider was a URL with information about the tenant (in addition to the cloud environment), whereas Environement is only the <see cref="System.Uri.Host"/></remarks>
+        /// except that IdentityProvider was a URL with information about the tenant (in addition to the cloud environment), whereas Environment is only the <see cref="System.Uri.Host"/></remarks>
         string Environment { get; }
 
         /// <summary>

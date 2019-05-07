@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string B2CGoogle = "google";
         public const string UserContains = "usercontains";
         public const string AppName = "AppName";
+        public const string Upn = "upn";
 
         public const string True = "true";
         public const string False = "false";

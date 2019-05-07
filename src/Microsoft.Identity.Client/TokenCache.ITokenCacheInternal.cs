@@ -215,32 +215,7 @@ namespace Microsoft.Identity.Client
                     await OnAfterAccessAsync(args).ConfigureAwait(false);
                 }
 
-                // this is OBO flow. match the cache entry with assertion hash,
-                // Authority, ScopeSet and client Id.
-                if (requestParams.UserAssertion != null)
-                {
-                    requestParams.RequestContext.Logger.Info("Filtering by user assertion...");
-                    tokenCacheItems =
-                        tokenCacheItems.Where(
-                                item =>
-                                    !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                    item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-                }
-                else
-                {
-                    if (!requestParams.IsClientCredentialRequest)
-                    {
-                        requestParams.RequestContext.Logger.Info("Filtering by user identifier...");
-                        // filter by identifier of the user instead
-                        tokenCacheItems =
-                            tokenCacheItems
-                                .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
-                    }
-
-                    tokenCacheItems = FilterToTenantIdSpecifiedByAuthenticationRequest(requestParams, tokenCacheItems).ToList();
-                }
+                tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
 
                 // no match found after initial filtering
                 if (!tokenCacheItems.Any())

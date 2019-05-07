@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client
 
         internal void DeserializeMsalV2NoLocks(byte[] msalV2State)
         {
-            _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
+            _unknownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State, false);
         }
 
         /// <summary>
@@ -180,20 +180,21 @@ namespace Microsoft.Identity.Client
         /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <param name="msalV3State">Byte stream representation of the cache</param>
+        /// <param name="shouldClearExistingCache">Set to true to clear MSAL cache contents.  Defaults to false.</param>
         /// <remarks>
         /// This format is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
-        public void DeserializeMsalV3(byte[] msalV3State)
+        public void DeserializeMsalV3(byte[] msalV3State, bool shouldClearExistingCache = false)
         {
             GuardOnMobilePlatforms();
 
             _semaphoreSlim.Wait();
             try
             {
-                DeserializeMsalV3NoLocks(msalV3State);
+                DeserializeMsalV3NoLocks(msalV3State, shouldClearExistingCache);
             }
             finally
             {
@@ -201,13 +202,13 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void DeserializeMsalV3NoLocks(byte[] msalV3State)
+        internal void DeserializeMsalV3NoLocks(byte[] msalV3State, bool shouldClearExistingCache)
         {
             if (msalV3State == null || msalV3State.Length == 0)
             {
                 return;
             }
-            _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
+            _unknownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State, shouldClearExistingCache);
         }
 
         private static void GuardOnMobilePlatforms()

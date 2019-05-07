@@ -23,10 +23,10 @@ namespace Microsoft.Identity.Client.Cache
 #endif
         }
 
-        public void DeserializeMsalV3(byte[] msalV3State)
+        public void DeserializeMsalV3(byte[] msalV3State, bool shouldClearExistingCache = false)
         {
 #if !ANDROID && !iOS
-            _tokenCache.DeserializeMsalV3NoLocks(msalV3State);
+            _tokenCache.DeserializeMsalV3NoLocks(msalV3State, shouldClearExistingCache);
 #endif
         }
 

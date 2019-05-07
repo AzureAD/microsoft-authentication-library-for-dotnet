@@ -26,10 +26,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        private static readonly IEnumerable<string> s_appMetadataKeys = new[] {
+        private static readonly IEnumerable<string> s_appMetadataKeys = new[]
+        {
             StorageJsonKeys.ClientId ,
             StorageJsonKeys.Environment,
-            StorageJsonKeys.FamilyId};
+            StorageJsonKeys.FamilyId
+        };
 
         private MsalAccessTokenCacheItem CreateAccessTokenItem()
         {
@@ -94,24 +96,39 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            var accessor = new InMemoryTokenCacheAccessor();
-
             const int NumAccessTokens = 5;
             const int NumRefreshTokens = 3;
             const int NumIdTokens = 3;
             const int NumAccounts = 3;
 
-            for (int i = 1; i <= NumAccessTokens; i++)
+            return CreateTokenCacheAccessorWithKeyPrefix(
+                string.Empty,
+                NumAccessTokens,
+                NumRefreshTokens,
+                NumIdTokens,
+                NumAccounts);
+        }
+
+        private ITokenCacheAccessor CreateTokenCacheAccessorWithKeyPrefix(
+            string keyPrefix,
+            int numAccessTokens,
+            int numRefreshTokens,
+            int numIdTokens,
+            int numAccounts)
+        {
+            var accessor = new InMemoryTokenCacheAccessor();
+
+            for (int i = 1; i <= numAccessTokens; i++)
             {
                 var item = CreateAccessTokenItem();
-                item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
+                item.Environment = item.Environment + $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 accessor.SaveAccessToken(item);
             }
 
-            for (int i = 1; i <= NumRefreshTokens; i++)
+            for (int i = 1; i <= numRefreshTokens; i++)
             {
                 var item = CreateRefreshTokenItem();
-                item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
+                item.Environment = item.Environment + $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 accessor.SaveRefreshToken(item);
             }
 
@@ -120,17 +137,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             frt.FamilyId = "1";
             accessor.SaveRefreshToken(frt);
 
-            for (int i = 1; i <= NumIdTokens; i++)
+            for (int i = 1; i <= numIdTokens; i++)
             {
                 var item = CreateIdTokenItem();
-                item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
+                item.Environment = item.Environment + $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 accessor.SaveIdToken(item);
             }
 
-            for (int i = 1; i <= NumAccounts; i++)
+            for (int i = 1; i <= numAccounts; i++)
             {
                 var item = CreateAccountItem();
-                item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
+                item.Environment = item.Environment + $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 accessor.SaveAccount(item);
             }
 
@@ -399,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheDictionarySerializer(otherAccessor);
-            s2.Deserialize(bytes);
+            s2.Deserialize(bytes, false);
 
             AssertAccessorsAreEqual(accessor, otherAccessor);
         }
@@ -458,7 +475,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
-            s2.Deserialize(bytes);
+            s2.Deserialize(bytes, false);
 
             AssertAccessorsAreEqual(accessor, otherAccessor);
 
@@ -468,6 +485,77 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
         }
 
+        [TestMethod]
+        [DeploymentItem(@"Resources\ExpectedTokenCache.json")]
+        public void TestDeserializeWithClearCache()
+        {
+            // Create a token accessor with keys in it that are NOT in the expected token cache
+            var originalAccessor = CreateTokenCacheAccessorWithKeyPrefix("FAKE", 7, 6, 5, 4);
+            var s1 = new TokenCacheJsonSerializer(originalAccessor);
+            byte[] originalBytes = s1.Serialize(null);
+
+            var differentAccessor = CreateTokenCacheAccessor();
+            var s2 = new TokenCacheJsonSerializer(differentAccessor);
+            byte[] differentBytes = s2.Serialize(null);
+
+            // Assert that they have different counts of items...
+            Assert.AreNotEqual(originalAccessor.GetAllAccessTokens().Count(), differentAccessor.GetAllAccessTokens().Count());
+            Assert.AreNotEqual(originalAccessor.GetAllRefreshTokens().Count(), differentAccessor.GetAllRefreshTokens().Count());
+            Assert.AreNotEqual(originalAccessor.GetAllIdTokens().Count(), differentAccessor.GetAllIdTokens().Count());
+            Assert.AreNotEqual(originalAccessor.GetAllAccounts().Count(), differentAccessor.GetAllAccounts().Count());
+
+            // Now, deserialize differentBytes into originalAccessor with cacheFlush = true
+            // This means we should destroy the contents of originalAccessor and replace them with the
+            // contents of the different cache
+
+            s1.Deserialize(differentBytes, true);
+
+            AssertAccessorsAreEqual(differentAccessor, originalAccessor);
+
+            string expectedJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("ExpectedTokenCache.json"));
+            // serialize again to detect errors that come from deserialization
+            byte[] bytes2 = s1.Serialize(null);
+            string actualJson2 = new UTF8Encoding().GetString(bytes2);
+            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
+        }
+
+        [TestMethod]
+        public void TestDeserializeWithNoClearCache()
+        {
+            // Create a token accessor with keys in it that are NOT in the expected token cache
+            var originalAccessor = CreateTokenCacheAccessorWithKeyPrefix("FAKE", 7, 6, 5, 4);
+            var s1 = new TokenCacheJsonSerializer(originalAccessor);
+            byte[] originalBytes = s1.Serialize(null);
+
+            var differentAccessor = CreateTokenCacheAccessor();
+            var s2 = new TokenCacheJsonSerializer(differentAccessor);
+            byte[] differentBytes = s2.Serialize(null);
+
+            // Assert that they have different counts of items...
+
+            int originalAccessTokenCount = originalAccessor.GetAllAccessTokens().Count();
+            int originalRefreshTokenCount = originalAccessor.GetAllRefreshTokens().Count();
+            int originalIdTokenCount = originalAccessor.GetAllIdTokens().Count();
+            int originalAccountsCount = originalAccessor.GetAllAccounts().Count();
+
+            Assert.AreNotEqual(originalAccessTokenCount, differentAccessor.GetAllAccessTokens().Count());
+            Assert.AreNotEqual(originalRefreshTokenCount, differentAccessor.GetAllRefreshTokens().Count());
+            Assert.AreNotEqual(originalIdTokenCount, differentAccessor.GetAllIdTokens().Count());
+            Assert.AreNotEqual(originalAccountsCount, differentAccessor.GetAllAccounts().Count());
+
+            // Now, deserialize differentBytes into originalAccessor with cacheFlush = false
+            // This means we should merge the contents of originalAccessor and the
+            // contents of the different cache
+
+            s1.Deserialize(differentBytes, false);
+
+            Assert.AreEqual(originalAccessor.GetAllAccessTokens().Count(), differentAccessor.GetAllAccessTokens().Count() + originalAccessTokenCount);
+
+            // This is -1 because the PRT FOCI refresh token will not duplicate since it has the same key.
+            Assert.AreEqual(originalAccessor.GetAllRefreshTokens().Count(), differentAccessor.GetAllRefreshTokens().Count() + originalRefreshTokenCount - 1);
+            Assert.AreEqual(originalAccessor.GetAllIdTokens().Count(), differentAccessor.GetAllIdTokens().Count() + originalIdTokenCount);
+            Assert.AreEqual(originalAccessor.GetAllAccounts().Count(), differentAccessor.GetAllAccounts().Count() + originalAccountsCount);
+        }
 
         #endregion // JSON SERIALIZATION TESTS
 
@@ -480,7 +568,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var s = new TokenCacheJsonSerializer(accessor);
             string pythonBinFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_python.bin");
             byte[] bytes = File.ReadAllBytes(pythonBinFilePath);
-            s.Deserialize(bytes);
+            s.Deserialize(bytes, false);
 
             Assert.AreEqual(0, accessor.GetAllAccessTokens().Count());
             Assert.AreEqual(0, accessor.GetAllRefreshTokens().Count());
@@ -496,7 +584,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var s = new TokenCacheDictionarySerializer(accessor);
             string binFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_dotnet_dictionary.bin");
             byte[] bytes = File.ReadAllBytes(binFilePath);
-            s.Deserialize(bytes);
+            s.Deserialize(bytes, false);
 
             Assert.AreEqual(1, accessor.GetAllAccessTokens().Count());
             Assert.AreEqual(1, accessor.GetAllRefreshTokens().Count());

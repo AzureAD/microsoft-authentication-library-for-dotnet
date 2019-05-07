@@ -196,6 +196,24 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         }
 
         /// <summary>
+        /// Runs through the B2C acquire token ROPC flow with local acount
+        /// </summary>
+        /// <param name="controller">The test framework that will execute the test interaction</param>
+        public void B2CAcquireTokenROPCTest(ITestController controller, LabResponse labResponse)
+        {
+            SetB2CInputDataForROPC(controller);
+            
+            controller.Tap(_acquirePageId);
+
+            controller.Tap(CoreUiTestConstants.ROPCUsernameId, XamarinSelector.ByAutomationId);
+            controller.EnterText(CoreUiTestConstants.ROPCUsernameId, labResponse.User.Upn, XamarinSelector.ByAutomationId);
+            controller.Tap(CoreUiTestConstants.ROPCPasswordId, XamarinSelector.ByAutomationId);
+            controller.EnterText(CoreUiTestConstants.ROPCPasswordId, labResponse.User.GetOrFetchPassword(), XamarinSelector.ByAutomationId);
+
+            VerifyResult(controller);
+        }
+
+        /// <summary>
         /// Runs through the B2C acquire token silent flow with Facebook identity provider
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
@@ -245,11 +263,18 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             SetAuthority(controller, CoreUiTestConstants.B2CLoginAuthority);
         }
 
-        public void SetB2CInputDataForEditProfileAuthority(ITestController controller)
+        private void SetB2CInputDataForEditProfileAuthority(ITestController controller)
         {
             controller.Tap(_settingsPageId);
             // Select Edit Profile for Authority
             SetAuthority(controller, CoreUiTestConstants.B2CEditProfileAuthority);
+        }
+
+        private void SetB2CInputDataForROPC(ITestController controller)
+        {
+            controller.Tap(_settingsPageId);
+            // Select ROPC for authority
+            SetAuthority(controller, CoreUiTestConstants.ROPC);
         }
 
         public void SetAuthority(ITestController controller, string authority)
