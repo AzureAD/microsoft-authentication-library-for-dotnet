@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(pca.AppConfig.LoggingCallback);
             Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
-            Assert.IsNull(pca.AppConfig.TelemetryCallback);
+            //Assert.IsNull(pca.AppConfig.TelemetryCallback);
             Assert.IsNull(pca.AppConfig.TenantId);
             // todo(mats): Assert.IsNull(pca.AppConfig.MatsConfig);
         }
@@ -208,20 +208,20 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(TenantId, pca.AppConfig.TenantId);
         }
 
-        [TestMethod]
-        public void TestConstructor_WithTelemetry()
-        {
-            void Callback(List<Dictionary<string, string>> events)
-            {
-            }
+        //[TestMethod]
+        //public void TestConstructor_WithTelemetry()
+        //{
+        //    void Callback(List<Dictionary<string, string>> events)
+        //    {
+        //    }
 
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithTelemetry(Callback)
-                                                    .Build();
+        //    var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+        //                                            .WithTelemetry(Callback)
+        //                                            .Build();
 
-            Assert.IsNotNull(pca.AppConfig.TelemetryCallback);
-            Assert.AreEqual((TelemetryCallback)Callback, pca.AppConfig.TelemetryCallback);
-        }
+        //    Assert.IsNotNull(pca.AppConfig.TelemetryCallback);
+        //    Assert.AreEqual((TelemetryCallback)Callback, pca.AppConfig.TelemetryCallback);
+        //}
 
         [TestMethod]
         public void TestCreateWithOptions()

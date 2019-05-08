@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    ///
+    /// This callback is for the raw telemetry events (app, http, cache) that we want to aggregate using MATS.
     /// </summary>
     /// <param name="events"></param>
-    public delegate void TelemetryCallback(List<Dictionary<string, string>> events);
+    internal delegate void TelemetryCallback(List<Dictionary<string, string>> events);
 }

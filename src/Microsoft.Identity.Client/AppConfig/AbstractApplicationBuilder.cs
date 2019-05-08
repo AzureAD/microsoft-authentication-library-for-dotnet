@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client
         /// <exception cref="InvalidOperationException"/> is thrown if the method was already
         /// called on the application builder.
 
-        public T WithTelemetry(TelemetryCallback telemetryCallback)
+        internal T WithTelemetry(TelemetryCallback telemetryCallback)
         {
             if (Config.TelemetryCallback != null)
             {

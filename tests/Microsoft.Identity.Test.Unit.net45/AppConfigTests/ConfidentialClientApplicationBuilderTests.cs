@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(false, cca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(cca.AppConfig.LoggingCallback);
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
-            Assert.IsNull(cca.AppConfig.TelemetryCallback);
+            //Assert.IsNull(cca.AppConfig.TelemetryCallback);
             Assert.AreEqual(null, cca.AppConfig.TenantId);
         }
 
@@ -148,14 +148,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(TenantId, cca.AppConfig.TenantId);
         }
 
-        [TestMethod]
-        public void TestConstructor_WithTelemetry()
-        {
-            var cca = ConfidentialClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithTelemetry((events => { })).Build();
+        //[TestMethod]
+        //public void TestConstructor_WithTelemetry()
+        //{
+        //    var cca = ConfidentialClientApplicationBuilder
+        //              .Create(MsalTestConstants.ClientId).WithTelemetry((events => { })).Build();
 
-            Assert.IsNotNull(cca.AppConfig.TelemetryCallback);
-        }
+        //    Assert.IsNotNull(cca.AppConfig.TelemetryCallback);
+        //}
 
         [TestMethod]
         public void TestConstructor_WithClientSecret()

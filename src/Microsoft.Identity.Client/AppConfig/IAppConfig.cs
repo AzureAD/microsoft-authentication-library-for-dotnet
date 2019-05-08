@@ -61,12 +61,6 @@ namespace Microsoft.Identity.Client
         LogCallback LoggingCallback { get; }
 
         /// <summary>
-        /// Callback used for sending telemetry about MSAL.NET out of your app. It was set by a call
-        /// to <see cref="AbstractApplicationBuilder{T}.WithTelemetry(TelemetryCallback)"/>
-        /// </summary>
-        TelemetryCallback TelemetryCallback { get; }
-
-        /// <summary>
         /// Extra query parameters that will be applied to every acquire token operation.
         /// See <see cref="AbstractApplicationBuilder{T}.WithExtraQueryParameters(IDictionary{string, string})"/>
         /// </summary>
