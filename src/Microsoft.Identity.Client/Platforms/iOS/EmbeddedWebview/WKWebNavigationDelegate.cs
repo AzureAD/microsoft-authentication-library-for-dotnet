@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                    requestUrlString.StartsWith(iOSBrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 AuthenticationAgentUIViewController.DismissViewController(true, () =>
-                    AuthenticationAgentUIViewController.callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, requestUrlString)));
+                    AuthenticationAgentUIViewController.callbackMethod(AuthorizationResult.FromUri(requestUrlString)));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }

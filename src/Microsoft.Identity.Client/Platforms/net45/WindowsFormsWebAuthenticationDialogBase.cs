@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 url.AbsolutePath.Equals(_desiredCallbackUri.AbsolutePath))
             {
                 RequestContext.Logger.Info("Redirect Uri was reached. Stopping webview navigation...");
-                Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
+                Result = AuthorizationResult.FromUri(url.OriginalString);
                 readyToClose = true;
             }
 

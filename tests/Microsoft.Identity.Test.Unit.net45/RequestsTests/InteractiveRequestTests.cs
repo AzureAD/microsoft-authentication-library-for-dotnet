@@ -47,9 +47,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var ui = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code"),
+                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?code=some-code"),
                     QueryParamsToValidate = MsalTestConstants.ExtraQueryParams
                 };
 
@@ -120,9 +118,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 MockWebUI ui = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
+                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
                 };
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
@@ -226,9 +222,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 MockWebUI webUi = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.ErrorHttp,
-                        MsalTestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired)
+                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired),
                 };
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
@@ -265,8 +259,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 webUi = new MockWebUI
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.ErrorHttp,
+                    MockResult = AuthorizationResult.FromUri(                     
                         MsalTestConstants.AuthorityHomeTenant + "?error=invalid_request&error_description=some error description")
                 };
 
