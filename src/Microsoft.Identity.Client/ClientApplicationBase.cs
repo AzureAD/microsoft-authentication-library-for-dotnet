@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
         /// </summary>
-        /// <param name="accountId">Account identifier. The identifier is typically
+        /// <param name="accountId">Account identifier. The identifier is typically the
         /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
         /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
         /// </param>
@@ -113,15 +113,13 @@ namespace Microsoft.Identity.Client
         /// Removes all tokens in the cache for the specified account.
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>
-        public Task RemoveAsync(IAccount account)
+        public async Task RemoveAsync(IAccount account)
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-            if (account != null)
+            if (account != null && UserTokenCacheInternal != null)
             {
-                UserTokenCacheInternal?.RemoveAccount(account, requestContext);
+                await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
             }
-
-            return Task.FromResult(0);
         }
 
         internal static Authority GetAuthority(IServiceBundle serviceBundle, IAccount account)
@@ -164,19 +162,19 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. This parameter is optional.
-        /// If nothing is passed and no Account or LoginHint are provided then if one and only
-        /// one account is in the cache, that account is used.  Otherwise, an exception will be thrown.  <see cref="IAccount"/></param>
+        /// If nothing is passed and no Account or LoginHint are provided, then, if one, and only
+        /// one, account is in the cache, that account is used.  Otherwise, an exception will be thrown.  <see cref="IAccount"/></param>
         /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
         /// parameters</returns>
         /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
-        /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// for instance, if no refresh token was in the cache, or the user needs to consent, or re-sign-in (for instance if the password expired),
         /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
         /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
-        /// See also the additional parameters that you can set chain:
+        /// You can set additional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
         /// overrides to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
@@ -203,16 +201,16 @@ namespace Microsoft.Identity.Client
         /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
         /// parameters</returns>
         /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
-        /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// for instance, if no refresh token was in the cache, or the user needs to consent, or re-sign-in (for instance if the password expired),
         /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
-        /// If multiple <see cref="IAccount"/> match the <paramref name="loginHint"/>, or if none do, an exception is thrown.
+        /// If multiple <see cref="IAccount"/> match the <paramref name="loginHint"/>, or if there are no matches, an exception is thrown.
         ///
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
         /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
-        /// See also the additional parameters that you can set chain:
+        /// You can set additional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
         /// overrides to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and

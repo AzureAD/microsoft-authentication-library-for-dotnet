@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     SeleniumExtensions.ByIds(fields.AADSignInButtonId, "continueBtn"));
                 continueBtn?.Click();
 
-                _seleniumDriver.PerformLogin(user);
+                _seleniumDriver.PerformLogin(user, Prompt.SelectAccount);
 
                 Trace.WriteLine("Authentication complete");
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -15,21 +16,21 @@ namespace Microsoft.Identity.Client
 {
     internal interface ITokenCacheInternal : ITokenCache
     {
-        object LockObject { get; }
+        SemaphoreSlim Semaphore { get; }
 
-        void RemoveAccount(IAccount account, RequestContext requestContext);
+        Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
         Task<IEnumerable<IAccount>> GetAccountsAsync(string authority, RequestContext requestContext);
 
         /// <summary>
         /// Persists the AT and RT and updates app metadata (FOCI)
         /// </summary>
         /// <returns></returns>
-        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveTokenResponse(
+        Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> SaveTokenResponseAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             MsalTokenResponse msalTokenResponse);
 
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters authenticationRequestParameters);
-        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey getIdTokenItemKey, RequestContext requestContext);
+        Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalIdTokenCacheKey getIdTokenItemKey, RequestContext requestContext);
 
         /// <summary>
         /// Returns a RT for the request. If familyId is specified, it tries to return the FRT.
@@ -43,12 +44,12 @@ namespace Microsoft.Identity.Client
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
 
-        void RemoveMsalAccount(IAccount account, RequestContext requestContext);
+        void RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext);
 
-        IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens(bool filterByClientId);
-        IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens(bool filterByClientId);
-        IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens(bool filterByClientId);
-        IEnumerable<MsalAccountCacheItem> GetAllAccounts();
+        Task<IEnumerable<MsalAccessTokenCacheItem>> GetAllAccessTokensAsync(bool filterByClientId);
+        Task<IEnumerable<MsalRefreshTokenCacheItem>> GetAllRefreshTokensAsync(bool filterByClientId);
+        Task<IEnumerable<MsalIdTokenCacheItem>> GetAllIdTokensAsync(bool filterByClientId);
+        Task<IEnumerable<MsalAccountCacheItem>> GetAllAccountsAsync();
 
         /// <summary>
         /// FOCI - check in the app metadata to see if the app is part of the family
@@ -58,6 +59,6 @@ namespace Microsoft.Identity.Client
 
         void ClearAdalCache();
         void ClearMsalCache();
-        void Clear();
+        Task ClearAsync();
     }
 }

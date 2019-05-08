@@ -7,8 +7,6 @@ namespace Microsoft.Identity.Client
     ///     Structure containing static members that you can use to specify how the interactive overrides
     ///     of AcquireTokenAsync in <see cref="IPublicClientApplication" /> should prompt the user.
     /// </summary>
-    /// <remarks><c>Prompt</c> is the result of renaming, in MSAL 3.0.0, the <c>UIBehavior</c> structure
-    /// which was in MSAL 2.x</remarks>
     public struct Prompt
     {
         /// <summary>
@@ -25,7 +23,7 @@ namespace Microsoft.Identity.Client
         public static readonly Prompt ForceLogin = new Prompt("login");
 
         /// <summary>
-        ///     The user will be prompted to consent even if consent was granted before. It is achieved
+        ///     The user will be prompted to consent, even if consent was granted before. It is achieved
         ///     by sending <c>prompt=consent</c> to Azure AD.
         /// </summary>
         public static readonly Prompt Consent = new Prompt("consent");
@@ -34,9 +32,9 @@ namespace Microsoft.Identity.Client
         ///     Does not request any specific UI to the service, which therefore decides based on the
         ///     number of signed-in identities.
         ///     This Prompt is, for the moment, recommended for Azure AD B2C scenarios where
-        ///     the developer does not want the user to re-select the account (for instance apply
+        ///     the developer does not want the user to re-select the account (for instance when applying
         ///     policies like EditProfile, or ResetPassword, which should apply to the currently signed-in account.
-        ///     It's not recommended to use this Prompt in Azure AD scenarios for the moment.
+        ///     It's not recommended to use this Prompt in Azure AD scenarios at the moment).
         /// </summary>
         public static readonly Prompt NoPrompt = new Prompt("no_prompt");
 

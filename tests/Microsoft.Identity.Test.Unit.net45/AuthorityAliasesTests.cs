@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 // make sure that all cache entities are stored with "preferred_cache" environment
                 // (it is taken from metadata in instance discovery response)
-                ValidateCacheEntitiesEnvironment(app.UserTokenCacheInternal, MsalTestConstants.ProductionPrefCacheEnvironment);
+                await ValidateCacheEntitiesEnvironmentAsync(app.UserTokenCacheInternal, MsalTestConstants.ProductionPrefCacheEnvironment).ConfigureAwait(false);
 
                 // silent request targeting at, should return at from cache for any environment alias
                 foreach (var envAlias in MsalTestConstants.ProdEnvAliases)
@@ -150,28 +150,28 @@ namespace Microsoft.Identity.Test.Unit
         }
 #endif
 
-        private void ValidateCacheEntitiesEnvironment(ITokenCacheInternal cache, string expectedEnvironment)
+        private async Task ValidateCacheEntitiesEnvironmentAsync(ITokenCacheInternal cache, string expectedEnvironment)
         {
             var requestContext = RequestContext.CreateForTest();
-            var accessTokens = cache.GetAllAccessTokens(true);
+            var accessTokens = await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
             foreach (var at in accessTokens)
             {
                 Assert.AreEqual(expectedEnvironment, at.Environment);
             }
 
-            var refreshTokens = cache.GetAllRefreshTokens(true);
+            var refreshTokens = await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
             foreach (var rt in refreshTokens)
             {
                 Assert.AreEqual(expectedEnvironment, rt.Environment);
             }
 
-            var idTokens = cache.GetAllIdTokens(true);
+            var idTokens = await cache.GetAllIdTokensAsync(true).ConfigureAwait(false);
             foreach (var id in idTokens)
             {
                 Assert.AreEqual(expectedEnvironment, id.Environment);
             }
 
-            var accounts = cache.GetAllAccounts();
+            var accounts = await cache.GetAllAccountsAsync().ConfigureAwait(false);
             foreach (var account in accounts)
             {
                 Assert.AreEqual(expectedEnvironment, account.Environment);

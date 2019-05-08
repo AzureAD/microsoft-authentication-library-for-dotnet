@@ -62,6 +62,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserDataAsync(UserQuery.B2CGoogleUserQuery);
         }
 
+        public static Task<LabResponse> GetSpecificUserAsync(string upn)
+        {
+            var query = new UserQuery();
+            query.Upn = upn;
+            return GetLabUserDataAsync(query);
+        }
+
         public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
         {
             var query = UserQuery.DefaultUserQuery;

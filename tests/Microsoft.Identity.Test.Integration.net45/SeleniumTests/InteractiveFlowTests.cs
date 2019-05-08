@@ -131,6 +131,40 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
+        [TestMethod]
+        public async Task InteractiveConsentPromptAsync()
+        {
+            var labResponse = LabUserHelper.GetDefaultUser();
+
+            await RunPromptTestForUserAsync(labResponse, Prompt.Consent, true).ConfigureAwait(false);
+            await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
+        }
+
+        private async Task RunPromptTestForUserAsync(LabResponse labResponse, Prompt prompt, bool useLoginHint)
+        {
+            var pca = PublicClientApplicationBuilder
+               .Create(labResponse.AppId)
+               .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+               .Build();
+
+            AcquireTokenInteractiveParameterBuilder builder = pca
+               .AcquireTokenInteractive(s_scopes)
+               .WithPrompt(prompt)
+               .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, prompt, useLoginHint));
+
+            if (useLoginHint)
+            {
+                builder = builder.WithLoginHint(labResponse.User.Upn);
+            }
+
+            AuthenticationResult result = await builder
+               .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+               .ConfigureAwait(false);
+
+            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+
+        }
+
         private async Task RunTestForUserAsync(LabResponse labResponse)
         {
             var pca = PublicClientApplicationBuilder
@@ -141,7 +175,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, false))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false))
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
@@ -154,7 +188,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
                 .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, true))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin, true))
                 .WithPrompt(Prompt.ForceLogin)
                 .WithLoginHint(labResponse.User.HomeUPN)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
@@ -171,12 +205,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
         }
 
-        private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, bool withLoginHint)
+        private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint)
         {
             return new SeleniumWebUI((driver) =>
             {
                 Trace.WriteLine("Starting Selenium automation");
-                driver.PerformLogin(user, withLoginHint);
+                driver.PerformLogin(user, prompt, withLoginHint);
             });
         }
     }

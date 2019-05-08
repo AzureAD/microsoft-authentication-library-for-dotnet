@@ -45,7 +45,7 @@ namespace XForms
 
         private void OnClearAllCache(object sender, EventArgs e)
         {
-            App.MsalPublicClient.UserTokenCacheInternal.Clear();
+            App.MsalPublicClient.UserTokenCacheInternal.ClearAsync();
             RefreshView();
         }
 
@@ -91,6 +91,10 @@ namespace XForms
                 break;
             case 2:
                 App.Authority = App.B2CEditProfilePolicyAuthority;
+                CreateB2CAppSettings();
+                break;
+            case 3:
+                App.Authority = App.B2CROPCAuthority;
                 CreateB2CAppSettings();
                 break;
             default:

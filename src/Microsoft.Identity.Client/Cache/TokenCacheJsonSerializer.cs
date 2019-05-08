@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Cache
                         .ToByteArray();
         }
 
-        public IDictionary<string, JToken> Deserialize(byte[] bytes)
+        public IDictionary<string, JToken> Deserialize(byte[] bytes, bool clearExistingCacheData)
         {
             CacheSerializationContract cache;
 
@@ -66,6 +66,11 @@ namespace Microsoft.Identity.Client.Cache
             catch (Exception ex)
             {
                 throw new MsalClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheJsonSerializerFailedParse, ex);
+            }
+
+            if (clearExistingCacheData)
+            {
+                _accessor.Clear();
             }
 
             if (cache.AccessTokens != null)

@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
 
             // Assert 
-            Assert.IsTrue(!accounts.Any(), "No accounts should be returned because the existing account to a different client");
+            Assert.IsFalse(accounts.Any(), "No accounts should be returned because the existing account to a different client");
 
             // Arrange
 

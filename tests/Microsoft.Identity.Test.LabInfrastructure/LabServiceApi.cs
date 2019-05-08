@@ -80,6 +80,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
 
             //Building user query
+            if (!string.IsNullOrWhiteSpace(query.Upn))
+            {
+                queryDict.Add(LabApiConstants.Upn, query.Upn);
+                return SendLabRequestAsync(LabApiConstants.LabEndpoint, queryDict);
+            }
+
             if (query.FederationProvider != null)
             {
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
@@ -129,9 +135,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             UriBuilder uriBuilder = new UriBuilder(requestUrl);
             uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
-            string result = await _httpClient.GetStringAsync(uriBuilder.ToString()).ConfigureAwait(false);
-
-            return result;
+            return await _httpClient.GetStringAsync(uriBuilder.ToString()).ConfigureAwait(false);
         }
 
         public void Dispose()

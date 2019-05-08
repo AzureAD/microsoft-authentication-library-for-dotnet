@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (msalAccessTokenItem != null)
                 {
-                    var msalIdTokenItem = CacheManager.GetIdTokenCacheItem(msalAccessTokenItem.GetIdTokenItemKey());
+                    var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
                     return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
                 }
             }
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse = await RefreshAccessTokenAsync(appRefreshToken, cancellationToken)
                     .ConfigureAwait(false);
             }
-            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
         private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)

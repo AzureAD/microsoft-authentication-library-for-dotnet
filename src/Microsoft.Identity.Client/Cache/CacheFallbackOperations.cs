@@ -240,43 +240,32 @@ namespace Microsoft.Identity.Client.Cache
             ISet<string> environmentAliases,
             string clientId,
             string upn,
-            string uniqueId,
-            string rawClientInfo)
+            string uniqueId)
         {
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                     AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
-                //filter by client id and environment first
-                //TODO - authority check needs to be updated for alias check
+                // filter by client id and environment first
+                // TODO - authority check needs to be updated for alias check
                 List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
                     dictionary.Where(p =>
                         p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
                         environmentAliases.Contains(new Uri(p.Key.Authority).Host)).ToList();
 
-                //if client info is provided then use it to filter
-                if (!string.IsNullOrEmpty(rawClientInfo))
-                {
-                    List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> clientInfoEntries =
-                        listToProcess.Where(p => rawClientInfo.Equals(p.Value.RawClientInfo, StringComparison.OrdinalIgnoreCase)).ToList();
-                    if (clientInfoEntries.Any())
-                    {
-                        listToProcess = clientInfoEntries;
-                    }
-                }
-
-                //if upn is provided then use it to filter
+                // if upn is provided then use it to filter
                 if (!string.IsNullOrEmpty(upn))
                 {
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> upnEntries =
                         listToProcess.Where(p => upn.Equals(p.Key.DisplayableId, StringComparison.OrdinalIgnoreCase)).ToList();
+
                     if (upnEntries.Any())
                     {
                         listToProcess = upnEntries;
                     }
                 }
 
-                //if userId is provided then use it to filter
+                // if userId is provided then use it to filter
                 if (!string.IsNullOrEmpty(uniqueId))
                 {
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> uniqueIdEntries =
@@ -286,12 +275,14 @@ namespace Microsoft.Identity.Client.Cache
                         listToProcess = uniqueIdEntries;
                     }
                 }
-
                 List<MsalRefreshTokenCacheItem> list = new List<MsalRefreshTokenCacheItem>();
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
                 {
-                    list.Add(new MsalRefreshTokenCacheItem
-                        (new Uri(pair.Key.Authority).Host, pair.Key.ClientId, pair.Value.RefreshToken, pair.Value.RawClientInfo));
+                    list.Add(new MsalRefreshTokenCacheItem(
+                        new Uri(pair.Key.Authority).Host,
+                        pair.Key.ClientId,
+                        pair.Value.RefreshToken,
+                        pair.Value.RawClientInfo));
                 }
 
                 return list;
@@ -312,10 +303,9 @@ namespace Microsoft.Identity.Client.Cache
             ISet<string> environmentAliases,
             string clientId,
             string upn,
-            string uniqueId,
-            string rawClientInfo)
+            string uniqueId)
         {
-            var adalRts = GetAllAdalEntriesForMsal(logger, legacyCachePersistence, environmentAliases, clientId, upn, uniqueId, rawClientInfo);
+            var adalRts = GetAllAdalEntriesForMsal(logger, legacyCachePersistence, environmentAliases, clientId, upn, uniqueId);
 
             List<MsalRefreshTokenCacheItem> filteredByPrefEnv = adalRts.Where
                 (rt => rt.Environment.Equals(preferredEnvironment, StringComparison.OrdinalIgnoreCase)).ToList();
