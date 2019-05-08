@@ -193,8 +193,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             MsalMockHelpers.ConfigureMockWebUI(
                 app.ServiceBundle.PlatformProxy,
-                new AuthorizationResult(AuthorizationStatus.Success,
-                app.AppConfig.RedirectUri + "?code=some-code"));
+                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
             //add mock response for tenant endpoint discovery
             harness.HttpManager.AddMockHandler(new MockHttpMessageHandler

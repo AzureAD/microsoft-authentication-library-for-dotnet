@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             if (requestUrlString.ToLower(CultureInfo.InvariantCulture).StartsWith(_callback.ToLower(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase) ||
                 requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                _callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
+                _callbackMethod(AuthorizationResult.FromUri(request.Url.ToString()));
                 WebView.DecideIgnore(decisionToken);
                 Close();
                 return;
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
 
         void CancelAuthentication()
         {
-            _callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
+            _callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel));
         }
 
         [Export("windowShouldClose:")]

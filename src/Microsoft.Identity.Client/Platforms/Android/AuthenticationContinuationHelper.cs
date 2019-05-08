@@ -52,14 +52,15 @@ namespace Microsoft.Identity.Client
         {
             switch ((int)resultCode)
             {
-                case (int)Result.Ok:
-                    return new AuthorizationResult(AuthorizationStatus.Success, data.GetStringExtra("ReturnedUrl"));
+            case (int)Result.Ok:
+                return AuthorizationResult.FromUri(data.GetStringExtra("ReturnedUrl"));
 
-                case (int)Result.Canceled:
-                    return new AuthorizationResult(AuthorizationStatus.UserCancel, null);
 
-                default:
-                    return new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+            case (int)Result.Canceled:
+                return new AuthorizationResult(AuthorizationStatus.UserCancel);
+
+            default:
+                return new AuthorizationResult(AuthorizationStatus.UnknownError);
             }
         }
 
@@ -67,27 +68,15 @@ namespace Microsoft.Identity.Client
         {
             switch ((int)resultCode)
             {
-                case AndroidConstants.AuthCodeReceived:
-                    return CreateResultForOkResponse(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
+            case AndroidConstants.AuthCodeReceived:
+                return AuthorizationResult.FromUri(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
 
-                case AndroidConstants.Cancel:
-                    return new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+            case AndroidConstants.Cancel:
+                return new AuthorizationResult(AuthorizationStatus.UserCancel);
 
-                default:
-                    return new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+            default:
+                return new AuthorizationResult(AuthorizationStatus.UnknownError);
             }
-        }
-
-        private static AuthorizationResult CreateResultForOkResponse(string url)
-        {
-            AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.Success);
-
-            if (!string.IsNullOrEmpty(url))
-            {
-                result.ParseAuthorizeResponse(url);
-            }
-
-            return result;
         }
     }
 }

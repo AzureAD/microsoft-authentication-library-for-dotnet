@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         public void CancelAuthentication(object sender, EventArgs e)
         {
             this.DismissViewController(true, () =>
-                    callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null)));
+                    callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel)));
         }
 
         public override void DismissViewController(bool animated, Action completionHandler)
