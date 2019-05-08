@@ -65,6 +65,18 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="enableWam"></param>
+        /// <returns></returns>
+        internal PublicClientApplicationBuilder WithEnableWam(bool enableWam)
+        {
+            // TODO: should this just be "WithBroker" when running on Windows 10?  Need to determine how to configure this.
+            Config.EnableWam = enableWam;
+            return this;
+        }
+
+        /// <summary>
         ///
         /// </summary>
         /// <param name="enableBroker"></param>
@@ -97,7 +109,14 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public IPublicClientApplication Build()
         {
-            return BuildConcrete();
+            if (Config.EnableWam)
+            {
+                return BuildWamConcrete();
+            }
+            else
+            {
+                return BuildConcrete();
+            }
         }
 
         /// <summary>
@@ -106,6 +125,11 @@ namespace Microsoft.Identity.Client
         internal PublicClientApplication BuildConcrete()
         {
             return new PublicClientApplication(BuildConfiguration());
+        }
+
+        internal WamPublicClientApplication BuildWamConcrete()
+        {
+            return new WamPublicClientApplication(BuildConfiguration());
         }
 
         /// <inheritdoc />

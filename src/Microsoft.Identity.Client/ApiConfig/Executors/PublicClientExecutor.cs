@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         private readonly PublicClientApplication _publicClientApplication;
 
         public PublicClientExecutor(IServiceBundle serviceBundle, PublicClientApplication publicClientApplication)
-            : base(serviceBundle, publicClientApplication)
+            : base(serviceBundle, publicClientApplication.AppConfig)
         {
             _publicClientApplication = publicClientApplication;
         }

@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         private readonly ClientApplicationBase _clientApplicationBase;
 
         public ClientApplicationBaseExecutor(IServiceBundle serviceBundle, ClientApplicationBase clientApplicationBase)
-            : base(serviceBundle, clientApplicationBase)
+            : base(serviceBundle, clientApplicationBase.AppConfig)
         {
             _clientApplicationBase = clientApplicationBase;
         }

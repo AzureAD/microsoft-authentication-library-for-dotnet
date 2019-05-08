@@ -18,6 +18,8 @@ namespace Microsoft.Identity.Client
         // For telemetry, the ClientVersion of the application.
         public string ClientVersion { get; internal set; }
 
+        public bool EnableWam { get; internal set; }
+
         public bool UseCorporateNetwork { get; internal set; }
         public string IosKeychainSecurityGroup { get; internal set; }
 

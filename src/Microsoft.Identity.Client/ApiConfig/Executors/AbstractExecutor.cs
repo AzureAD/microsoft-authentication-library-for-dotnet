@@ -11,12 +11,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
     internal abstract class AbstractExecutor
     {
-        private readonly ClientApplicationBase _clientApplicationBase;
+        private readonly IAppConfig _appConfig;
 
-        protected AbstractExecutor(IServiceBundle serviceBundle, ClientApplicationBase clientApplicationBase)
+        protected AbstractExecutor(IServiceBundle serviceBundle, IAppConfig appConfig)
         {
             ServiceBundle = serviceBundle;
-            _clientApplicationBase = clientApplicationBase;
+            _appConfig = appConfig;
         }
 
         protected IServiceBundle ServiceBundle { get; }
@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         protected RequestContext CreateRequestContextAndLogVersionInfo(Guid telemetryCorrelationId)
         {
             var requestContext = new RequestContext(
-                _clientApplicationBase.AppConfig.ClientId,
+                _appConfig.ClientId,
                 MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config),
                 telemetryCorrelationId);
 

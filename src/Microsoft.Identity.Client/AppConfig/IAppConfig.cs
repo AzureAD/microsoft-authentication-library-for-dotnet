@@ -26,6 +26,11 @@ namespace Microsoft.Identity.Client
         bool EnablePiiLogging { get; }
 
         /// <summary>
+        /// TODO(wam): docs
+        /// </summary>
+        bool EnableWam { get; }
+
+        /// <summary>
         /// <see cref="IMsalHttpClientFactory"/> used to get HttpClient instances to commmunicate
         /// with the identity provider.
         /// </summary>

@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         private readonly ConfidentialClientApplication _confidentialClientApplication;
 
         public ConfidentialClientExecutor(IServiceBundle serviceBundle, ConfidentialClientApplication confidentialClientApplication)
-            : base(serviceBundle, confidentialClientApplication)
+            : base(serviceBundle, confidentialClientApplication.AppConfig)
         {
             _confidentialClientApplication = confidentialClientApplication;
         }

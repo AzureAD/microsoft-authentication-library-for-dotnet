@@ -25,6 +25,36 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return executor;
         }
 
+        public static IPublicClientApplicationExecutor CreateWamPublicClientExecutor(
+            WamPublicClientApplication wamPublicClientApplication)
+        {
+            IPublicClientApplicationExecutor executor = new WamPublicClientExecutor(
+                wamPublicClientApplication.ServiceBundle,
+                wamPublicClientApplication);
+
+            if (wamPublicClientApplication.ServiceBundle.Mats != null)
+            {
+                executor = new MatsPublicClientExecutor(executor, wamPublicClientApplication.ServiceBundle.Mats);
+            }
+
+            return executor;
+        }
+
+        public static IClientApplicationBaseExecutor CreateWamClientApplicationBaseExecutor(
+            WamPublicClientApplication wamPublicClientApplication)
+        {
+            IClientApplicationBaseExecutor executor = new WamPublicClientExecutor(
+                wamPublicClientApplication.ServiceBundle,
+                wamPublicClientApplication);
+
+            if (wamPublicClientApplication.ServiceBundle.Mats != null)
+            {
+                executor = new MatsClientApplicationBaseExecutor(executor, wamPublicClientApplication.ServiceBundle.Mats);
+            }
+
+            return executor;
+        }
+
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         public static IConfidentialClientApplicationExecutor CreateConfidentialClientExecutor(
             ConfidentialClientApplication confidentialClientApplication)
