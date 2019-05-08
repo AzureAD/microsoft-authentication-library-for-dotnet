@@ -113,15 +113,13 @@ namespace Microsoft.Identity.Client
         /// Removes all tokens in the cache for the specified account.
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>
-        public Task RemoveAsync(IAccount account)
+        public async Task RemoveAsync(IAccount account)
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-            if (account != null)
+            if (account != null && UserTokenCacheInternal != null)
             {
-                UserTokenCacheInternal?.RemoveAccount(account, requestContext);
+                await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
             }
-
-            return Task.FromResult(0);
         }
 
         internal static Authority GetAuthority(IServiceBundle serviceBundle, IAccount account)

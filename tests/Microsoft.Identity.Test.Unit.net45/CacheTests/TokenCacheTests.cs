@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
@@ -362,7 +363,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void DoNotSaveRefreshTokenInAdalCacheForMsalB2CAuthorityTest()
+        public async Task DoNotSaveRefreshTokenInAdalCacheForMsalB2CAuthorityTestAsync()
         {
             var appConfig = new ApplicationConfiguration()
             {
@@ -381,7 +382,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
@@ -518,7 +519,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void SaveAccessAndRefreshTokenWithEmptyCacheTest()
+        public async Task SaveAccessAndRefreshTokenWithEmptyCacheTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             ITokenCacheInternal cache = new TokenCache(serviceBundle);
@@ -530,7 +531,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
             cache.Accessor.AssertItemCount(
                 expectedAtCount: 1,
@@ -546,7 +547,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        public void NoAppMetadata_WhenFociIsDisabled()
+        public async Task NoAppMetadata_WhenFociIsDisabledAsync()
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
@@ -563,7 +564,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AddHostToInstanceCache(harness.ServiceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
                 // Act
-                cache.SaveTokenResponse(requestParams, response);
+                await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
                 // Assert
                 cache.Accessor.AssertItemCount(
@@ -579,7 +580,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        public void SaveMultipleAppmetadata()
+        public async Task SaveMultipleAppmetadataAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             ITokenCacheInternal cache = new TokenCache(serviceBundle);
@@ -593,8 +594,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
-            cache.SaveTokenResponse(requestParams, response);
-            cache.SaveTokenResponse(requestParams, response2);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
+            await cache.SaveTokenResponseAsync(requestParams, response2).ConfigureAwait(false);
 
             cache.Accessor.AssertItemCount(
                 expectedAtCount: 1,
@@ -627,7 +628,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void SaveAccessAndRefreshTokenWithMoreScopesTest()
+        public async Task SaveAccessAndRefreshTokenWithMoreScopesTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             ITokenCacheInternal cache = new TokenCache(serviceBundle);
@@ -638,7 +639,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
@@ -650,18 +651,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             response.AccessToken = "access-token-2";
             response.RefreshToken = "refresh-token-2";
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens(true).First().Secret);
-            Assert.AreEqual("access-token-2", cache.GetAllAccessTokens(true).First().Secret);
+            Assert.AreEqual("refresh-token-2", (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First().Secret);
+            Assert.AreEqual("access-token-2", (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First().Secret);
         }
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void SaveAccessAndRefreshTokenWithLessScopesTest()
+        public async Task SaveAccessAndRefreshTokenWithLessScopesTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             ITokenCacheInternal cache = new TokenCache(serviceBundle);
@@ -672,24 +673,24 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
             response = MsalTestConstants.CreateMsalTokenResponse();
             response.Scope = MsalTestConstants.Scope.First();
             response.AccessToken = "access-token-2";
             response.RefreshToken = "refresh-token-2";
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens(true).First().Secret);
-            Assert.AreEqual("access-token-2", cache.GetAllAccessTokens(true).First().Secret);
+            Assert.AreEqual("refresh-token-2", (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First().Secret);
+            Assert.AreEqual("access-token-2", (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First().Secret);
         }
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void SaveAccessAndRefreshTokenWithIntersectingScopesTest()
+        public async Task SaveAccessAndRefreshTokenWithIntersectingScopesTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             ITokenCacheInternal cache = new TokenCache(serviceBundle);
@@ -700,45 +701,37 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
             response = MsalTestConstants.CreateMsalTokenResponse();
             response.Scope = MsalTestConstants.Scope.AsSingleString() + " random-scope";
             response.AccessToken = "access-token-2";
             response.RefreshToken = "refresh-token-2";
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens(true).First().Secret);
-            Assert.AreEqual("access-token-2", cache.GetAllAccessTokens(true).First().Secret);
+            Assert.AreEqual("refresh-token-2", (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First().Secret);
+            Assert.AreEqual("access-token-2", (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First().Secret);
         }
 
         private void AfterAccessChangedNotification(TokenCacheNotificationArgs args)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            Assert.IsTrue(((TokenCache)args.TokenCache).HasStateChanged);
-#pragma warning restore CS0618 // Type or member is obsolete
             Assert.IsTrue(args.HasStateChanged);
-
         }
 
         private void AfterAccessNoChangeNotification(TokenCacheNotificationArgs args)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            Assert.IsFalse(((TokenCache)args.TokenCache).HasStateChanged);
-#pragma warning restore CS0618 // Type or member is obsolete
             Assert.IsFalse(args.HasStateChanged);
         }
-
 
 #if !WINDOWS_APP && !ANDROID && !iOS // Token Cache Serialization N/A
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void SaveAccessAndRefreshTokenWithDifferentAuthoritySameUserTest()
+        public async Task SaveAccessAndRefreshTokenWithDifferentAuthoritySameUserTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             ITokenCacheInternal cache = new TokenCache(serviceBundle);
@@ -749,7 +742,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
             response = MsalTestConstants.CreateMsalTokenResponse();
             response.Scope = MsalTestConstants.Scope.AsSingleString() + " another-scope";
             response.AccessToken = "access-token-2";
@@ -759,7 +752,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             requestParams.TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityGuestTenant;
 
             cache.SetAfterAccess(AfterAccessChangedNotification);
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 #pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(((TokenCache)cache).HasStateChanged);
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -767,7 +760,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(2, cache.Accessor.GetAllAccessTokens().Count());
 
-            Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens(true).First().Secret);
+            Assert.AreEqual("refresh-token-2", (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First().Secret);
         }
 
 
@@ -787,7 +780,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
-        public void SerializeDeserializeCacheTest()
+        public async Task SerializeDeserializeCacheTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             ITokenCacheInternal cache = new TokenCache(serviceBundle);
@@ -800,7 +793,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
-            cache.SaveTokenResponse(requestParams, response);
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
             byte[] serializedCache = cache.SerializeMsalV3();
 
             cache.Accessor.ClearAccessTokens();
@@ -822,7 +815,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
-            var atItem = cache.GetAllAccessTokens(true).First();
+            var atItem = (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First();
             Assert.AreEqual(response.AccessToken, atItem.Secret);
             Assert.AreEqual(MsalTestConstants.AuthorityTestTenant, atItem.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, atItem.ClientId);
@@ -831,7 +824,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // todo add test for idToken serialization
             // Assert.AreEqual(response.IdToken, atItem.RawIdToken);
 
-            var rtItem = cache.GetAllRefreshTokens(true).First();
+            var rtItem = (await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)).First();
             Assert.AreEqual(response.RefreshToken, rtItem.Secret);
             Assert.AreEqual(MsalTestConstants.ClientId, rtItem.ClientId);
             Assert.AreEqual(MsalTestConstants.UserIdentifier, rtItem.HomeAccountId);
@@ -881,7 +874,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var requestParams = CreateAuthenticationRequestParameters(serviceBundle, authority, requestContext: requestContext);
             requestParams.TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant;
 
-            cache.SaveTokenResponse(requestParams, response);
+            cache.SaveTokenResponseAsync(requestParams, response);
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());

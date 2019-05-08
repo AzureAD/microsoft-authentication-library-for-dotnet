@@ -118,7 +118,7 @@ namespace DesktopTestApp
         private void cache_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedTab = cacheTabPage;
-            LoadCacheTabPage();
+            LoadCacheTabPageAsync().ConfigureAwait(true);
         }
 
         private void logs_Click(object sender, EventArgs e)
@@ -385,7 +385,7 @@ namespace DesktopTestApp
         #endregion
 
         #region Cache Tab Operations
-        private void LoadCacheTabPage()
+        private async Task LoadCacheTabPageAsync()
         {
             while (cachePageTableLayout.Controls.Count > 0)
             {
@@ -397,17 +397,24 @@ namespace DesktopTestApp
             Trace.WriteLine("Accounts: " + acc.Count());
 
             cachePageTableLayout.RowCount = 0;
-            var allRefreshTokens = _publicClientHandler.PublicClientApplication.UserTokenCacheInternal
-                .GetAllRefreshTokens(true);
-            var allAccessTokens = _publicClientHandler.PublicClientApplication.UserTokenCacheInternal
-                    .GetAllAccessTokens(true);
+            var allRefreshTokens = await _publicClientHandler
+                .PublicClientApplication
+                .UserTokenCacheInternal
+                .GetAllRefreshTokensAsync(true)
+                .ConfigureAwait(true);
+
+            var allAccessTokens = await _publicClientHandler
+                .PublicClientApplication
+                .UserTokenCacheInternal
+                .GetAllAccessTokensAsync(true)
+                .ConfigureAwait(true);
 
             foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
             {
                 AddControlToCachePageTableLayout(
                     new MsalUserRefreshTokenControl(_publicClientHandler.PublicClientApplication, rtItem)
                     {
-                        RefreshViewDelegate = LoadCacheTabPage
+                        RefreshViewAsyncDelegate = LoadCacheTabPageAsync
                     });
 
                 foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
@@ -418,7 +425,7 @@ namespace DesktopTestApp
                             new MsalUserAccessTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCacheInternal,
                                 atItem)
                             {
-                                RefreshViewDelegate = LoadCacheTabPage
+                                RefreshViewAsyncDelegate = LoadCacheTabPageAsync
                             });
                     }
                 }
