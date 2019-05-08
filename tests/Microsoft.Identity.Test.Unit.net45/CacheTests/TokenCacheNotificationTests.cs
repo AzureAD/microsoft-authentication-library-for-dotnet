@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -98,6 +99,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             byte[] serializedPayload = null;
 
+            var sb = new StringBuilder();
+
             using (var harness = new MockHttpAndServiceBundle())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
@@ -110,17 +113,23 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 pca.UserTokenCache.SetBeforeAccessAsync(async args =>
                 {
+                    sb.Append("beforeaccess-");
                     numBeforeAccessCalls++;
+
+                    // Task Delay is so that we have an await within the async callback and also to simulate
+                    // some level of time that we did work.
                     await Task.Delay(10).ConfigureAwait(false);
                 });
                 pca.UserTokenCache.SetAfterAccessAsync(async args =>
                 {
+                    sb.Append("afteraccess-");
                     numAfterAccessCalls++;
                     serializedPayload = args.TokenCache.SerializeMsalV3();
                     await Task.Delay(10).ConfigureAwait(false);
                 });
                 pca.UserTokenCache.SetBeforeWriteAsync(async args =>
                 {
+                    sb.Append("beforewrite-");
                     numBeforeWriteCalls++;                    
                     await Task.Delay(10).ConfigureAwait(false);
                 });
@@ -137,6 +146,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
+
+            Assert.AreEqual("beforeaccess-beforewrite-afteraccess-", sb.ToString());
 
             Assert.AreEqual(1, numBeforeAccessCalls);
             Assert.AreEqual(1, numAfterAccessCalls);

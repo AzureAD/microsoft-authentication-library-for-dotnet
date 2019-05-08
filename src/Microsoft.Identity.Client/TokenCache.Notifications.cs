@@ -33,31 +33,21 @@ namespace Microsoft.Identity.Client
         {
             AfterAccess?.Invoke(args);
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
             if (AsyncAfterAccess != null)
             {
                 await AsyncAfterAccess.Invoke(args).ConfigureAwait(false);
             }
-#else
-            // When the above code is blocked out, we still need to await since we're an async task.
-            await Task.Delay(0).ConfigureAwait(false);
-#endif
         }
 
         internal async Task OnBeforeAccessAsync(TokenCacheNotificationArgs args)
         {
             BeforeAccess?.Invoke(args);
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
             if (AsyncBeforeAccess != null)
             {
                 await AsyncBeforeAccess
                     .Invoke(args)
                     .ConfigureAwait(false);
             }
-#else
-            // When the above code is blocked out, we still need to await since we're an async task.
-            await Task.Delay(0).ConfigureAwait(false);
-#endif
         }
 
         internal async Task OnBeforeWriteAsync(TokenCacheNotificationArgs args)
@@ -68,15 +58,10 @@ namespace Microsoft.Identity.Client
             args.HasStateChanged = true;
             BeforeWrite?.Invoke(args);
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
             if (AsyncBeforeWrite != null)
             {
                 await AsyncBeforeWrite.Invoke(args).ConfigureAwait(false);
             }
-#else
-            // When the above code is blocked out, we still need to await since we're an async task.
-            await Task.Delay(0).ConfigureAwait(false);
-#endif
         }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME
