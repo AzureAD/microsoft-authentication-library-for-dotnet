@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    internal interface IMatsTelemetryBatch
+    public interface ITelemetryEventPayload
     {
         /// <summary>
         /// 

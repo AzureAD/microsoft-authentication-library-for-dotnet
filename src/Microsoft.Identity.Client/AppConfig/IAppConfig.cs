@@ -86,9 +86,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         string ClientVersion { get; }
 
-        ///// <summary>
-        ///// </summary>
-        //IMatsConfig MatsConfig { get; }
+        /// <summary>
+        /// </summary>
+        ITelemetryConfig TelemetryConfig { get; }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>

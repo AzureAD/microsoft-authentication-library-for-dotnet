@@ -152,14 +152,14 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        public static string AsString(MatsAudienceType audience)
+        public static string AsString(TelemetryAudienceType audience)
         {
             switch (audience)
             {
-            case MatsAudienceType.PreProduction:
+            case TelemetryAudienceType.PreProduction:
                 return "preproduction";
 
-            case MatsAudienceType.Production:
+            case TelemetryAudienceType.Production:
                 return "production";
 
             default:

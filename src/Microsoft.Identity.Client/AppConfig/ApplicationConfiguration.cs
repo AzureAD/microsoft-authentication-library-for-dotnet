@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
-        public IMatsConfig MatsConfig { get; internal set; }
+        public ITelemetryConfig TelemetryConfig { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
         public AuthorityInfo AuthorityInfo { get; internal set; }

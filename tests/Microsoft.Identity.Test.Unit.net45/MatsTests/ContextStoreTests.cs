@@ -24,14 +24,14 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
         public void AddContextCorrectlyAddsFieldsToPropertyBagContents()
         {
             string sessionId = "00000000-0000-0000-0000-000000000000";
-            var contextStore = ContextStore.CreateContextStore(MatsAudienceType.PreProduction, "AppName", "1.0", "deviceId", "deviceNetworkState", sessionId, 1);
+            var contextStore = ContextStore.CreateContextStore(TelemetryAudienceType.PreProduction, "AppName", "1.0", "deviceId", "deviceNetworkState", sessionId, 1);
             var propertyBag = new PropertyBag(EventType.Scenario, null);
             var propertyList = new List<IPropertyBag> { propertyBag };
             contextStore.AddContext(propertyList);
 
             var contentsWithContext = propertyBag.GetContents();
 
-            Assert.AreEqual(MatsConverter.AsString(MatsAudienceType.PreProduction), contentsWithContext.StringProperties[ContextPropertyNames.AppAudienceConstStrKey]);
+            Assert.AreEqual(MatsConverter.AsString(TelemetryAudienceType.PreProduction), contentsWithContext.StringProperties[ContextPropertyNames.AppAudienceConstStrKey]);
             Assert.AreEqual("AppName", contentsWithContext.StringProperties[ContextPropertyNames.AppNameConstStrKey]);
             Assert.AreEqual("1.0", contentsWithContext.StringProperties[ContextPropertyNames.AppVerConstStrKey]);
             Assert.AreEqual("deviceId", contentsWithContext.StringProperties[ContextPropertyNames.DptiConstStrKey]);

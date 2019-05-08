@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
     internal class ContextStore
     {
         public static ContextStore CreateContextStore(
-            MatsAudienceType audienceType,
+            TelemetryAudienceType audienceType,
             string appName,
             string appVersion,
             string dptiInternal,
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
         }
 
         private ContextStore(
-            MatsAudienceType audienceType,
+            TelemetryAudienceType audienceType,
             string appName,
             string appVersion,
             string dptiInternal,
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             Platform = platform;
         }
 
-        public MatsAudienceType AudienceType { get; }
+        public TelemetryAudienceType AudienceType { get; }
         public string AppName { get; }
         public string AppVersion { get; }
         public string DptiInternal { get; }

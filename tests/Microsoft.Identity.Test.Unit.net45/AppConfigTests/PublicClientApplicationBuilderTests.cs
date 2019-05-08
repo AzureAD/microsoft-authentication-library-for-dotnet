@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                     .WithTelemetry((List<Dictionary<string, string>> events) => {})
-                    .WithMatsTelemetry(new MatsConfig())
+                    .WithTelemetry(new TelemetryConfig())
                     .Build();
                 Assert.Fail("Should not reach here, exception should be thrown");
             }
@@ -432,19 +432,17 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void MatsCanBeProperlyConfigured()
         {
-            var matsConfig = new MatsConfig
+            var telemetryConfig = new TelemetryConfig
             {
                 SessionId = "some session id"
             };
 
             var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                .WithMatsTelemetry(matsConfig)
+                .WithTelemetry(telemetryConfig)
                 .Build();
 
-            // todo(mats):
-            //Assert.IsNotNull(app.AppConfig.MatsConfig);
-
-            //Assert.AreEqual<string>(matsConfig.SessionId, app.AppConfig.MatsConfig.SessionId);
+            Assert.IsNotNull(app.AppConfig.TelemetryConfig);
+            Assert.AreEqual<string>(telemetryConfig.SessionId, app.AppConfig.TelemetryConfig.SessionId);
         }
     }
 }

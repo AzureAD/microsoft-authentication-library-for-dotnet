@@ -9,10 +9,10 @@ namespace Microsoft.Identity.Client.Mats.Internal
 {
     internal class TelemetryUploader : IUploader
     {
-        private readonly Action<IMatsTelemetryBatch> _dispatchAction;
+        private readonly Action<ITelemetryEventPayload> _dispatchAction;
         private readonly IPlatformProxy _platformProxy;
 
-        public TelemetryUploader(Action<IMatsTelemetryBatch> dispatchAction, IPlatformProxy platformProxy, string appName)
+        public TelemetryUploader(Action<ITelemetryEventPayload> dispatchAction, IPlatformProxy platformProxy, string appName)
         {
             _dispatchAction = dispatchAction;
             _platformProxy = platformProxy;
@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             foreach (var uploadEvent in uploadEvents)
             {
                 string name = UploadEventUtils.GetUploadEventName(_platformProxy, uploadEvent.EventType, AppName);
-                _dispatchAction(MatsTelemetryBatch.Create(name, uploadEvent));
+                _dispatchAction(TelemetryEventPayload.Create(name, uploadEvent));
             }
         }
     }

@@ -33,10 +33,10 @@ namespace Microsoft.Identity.Client.Core
             PlatformProxy = PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
 
-            if (config.MatsConfig != null)
+            if (config.TelemetryConfig != null)
             {
                 // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
-                Mats = MatsTelemetryClient.CreateMats(config, PlatformProxy, config.MatsConfig);
+                Mats = MatsTelemetryClient.CreateMats(config, PlatformProxy, config.TelemetryConfig);
                 TelemetryManager = Mats?.TelemetryManager ?? new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
             }
             else

@@ -8,12 +8,12 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    internal class MatsConfig : IMatsConfig
+    internal class TelemetryConfig : ITelemetryConfig
     {
         /// <summary>
         /// 
         /// </summary>
-        public MatsAudienceType AudienceType { get; set; }
+        public TelemetryAudienceType AudienceType { get; set; }
 
         /// <summary>
         /// 
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        public Action<IMatsTelemetryBatch> DispatchAction { get; set; }
+        public Action<ITelemetryEventPayload> DispatchAction { get; set; }
 
         /// <summary>
         /// 

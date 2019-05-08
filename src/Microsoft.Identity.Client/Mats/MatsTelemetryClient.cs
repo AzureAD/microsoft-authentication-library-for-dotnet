@@ -20,11 +20,14 @@ namespace Microsoft.Identity.Client.Mats
         private readonly bool _isScenarioUploadDisabled;
         private readonly object _lockObject = new object();
 
-        public static IMatsTelemetryClient CreateMats(IApplicationConfiguration applicationConfiguration, IPlatformProxy platformProxy, IMatsConfig matsConfig)
+        public static IMatsTelemetryClient CreateMats(
+            IApplicationConfiguration applicationConfiguration,
+            IPlatformProxy platformProxy,
+            ITelemetryConfig telemetryConfig)
         {
             string dpti = platformProxy.GetDevicePlatformTelemetryId();
 
-            if (!IsDeviceEnabled(matsConfig.AudienceType, dpti))
+            if (!IsDeviceEnabled(telemetryConfig.AudienceType, dpti))
             {
                 return null;
             }
@@ -38,9 +41,9 @@ namespace Microsoft.Identity.Client.Mats
             var scenarioStore = new ScenarioStore(TimeConstants.ScenarioTimeoutMilliseconds, errorStore);
 
             var allowedScopes = new HashSet<string>();
-            if (matsConfig.AllowedScopes != null)
+            if (telemetryConfig.AllowedScopes != null)
             {
-                foreach (string s in matsConfig.AllowedScopes)
+                foreach (string s in telemetryConfig.AllowedScopes)
                 {
                     allowedScopes.Add(s);
                 }
@@ -54,15 +57,15 @@ namespace Microsoft.Identity.Client.Mats
                 allowedScopes);
 
             var contextStore = ContextStore.CreateContextStore(
-                matsConfig.AudienceType,
+                telemetryConfig.AudienceType,
                 applicationConfiguration.ClientName,
                 applicationConfiguration.ClientVersion,
                 dpti,
                 deviceNetworkState,
-                matsConfig.SessionId,
+                telemetryConfig.SessionId,
                 osPlatformCode);
 
-            IUploader uploader = new TelemetryUploader(matsConfig.DispatchAction, platformProxy, applicationConfiguration.ClientName);
+            IUploader uploader = new TelemetryUploader(telemetryConfig.DispatchAction, platformProxy, applicationConfiguration.ClientName);
 
             // it's this way in mats c++
             bool isScenarioUploadDisabled = true;
@@ -100,9 +103,9 @@ namespace Microsoft.Identity.Client.Mats
 
         public ITelemetryManager TelemetryManager { get; }
 
-        private static bool IsDeviceEnabled(MatsAudienceType audienceType, string dpti)
+        private static bool IsDeviceEnabled(TelemetryAudienceType audienceType, string dpti)
         {
-            if (audienceType == MatsAudienceType.PreProduction)
+            if (audienceType == TelemetryAudienceType.PreProduction)
             {
                 // Pre-production should never be sampled
                 return true;

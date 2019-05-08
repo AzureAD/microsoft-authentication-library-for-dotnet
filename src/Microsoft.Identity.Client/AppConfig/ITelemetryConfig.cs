@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    internal enum MatsAudienceType
+    public enum TelemetryAudienceType
     {
         /// <summary>
         /// 
@@ -23,12 +23,12 @@ namespace Microsoft.Identity.Client
 
     /// <summary>
     /// </summary>
-    internal interface IMatsConfig
+    public interface ITelemetryConfig
     {
         /// <summary>
         /// 
         /// </summary>
-        MatsAudienceType AudienceType { get; }
+        TelemetryAudienceType AudienceType { get; }
 
         /// <summary>
         /// 
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        Action<IMatsTelemetryBatch> DispatchAction { get; }
+        Action<ITelemetryEventPayload> DispatchAction { get; }
 
         /// <summary>
         /// 

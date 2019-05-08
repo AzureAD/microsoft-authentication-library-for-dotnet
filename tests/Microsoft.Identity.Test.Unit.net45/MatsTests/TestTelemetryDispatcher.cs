@@ -7,9 +7,9 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
 {
     internal class TestTelemetryDispatcher
     {
-        public void DispatchEvent(IMatsTelemetryBatch batch)
+        public void DispatchEvent(ITelemetryEventPayload eventPayload)
         {
-            string eventName = batch.Name.ToLowerInvariant();
+            string eventName = eventPayload.Name.ToLowerInvariant();
             if (eventName.Contains("error"))
             {
                 ErrorEventCount++;

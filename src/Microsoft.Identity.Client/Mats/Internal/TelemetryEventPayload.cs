@@ -7,16 +7,16 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
-    internal class MatsTelemetryBatch : IMatsTelemetryBatch
+    internal class TelemetryEventPayload : ITelemetryEventPayload
     {
         private readonly Dictionary<string, bool> _boolData = new Dictionary<string, bool>();
         private readonly Dictionary<string, long> _int64Data = new Dictionary<string, long>();
         private readonly Dictionary<string, int> _intData = new Dictionary<string, int>();
         private readonly Dictionary<string, string> _stringData = new Dictionary<string, string>();
 
-        public static IMatsTelemetryBatch Create(string name, PropertyBagContents contents)
+        public static ITelemetryEventPayload Create(string name, PropertyBagContents contents)
         {
-            var batch = new MatsTelemetryBatch(name);
+            var batch = new TelemetryEventPayload(name);
             batch.SetStringData(contents.StringProperties);
             batch.SetIntData(contents.IntProperties);
             batch.SetInt64Data(contents.Int64Properties);
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private MatsTelemetryBatch(string name)
+        private TelemetryEventPayload(string name)
         {
             Name = name;
         }

@@ -251,14 +251,13 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Generate MATS telemetry aggregation events.
-        /// TODO(mats): make this public when we're ready to turn it on.
+        /// Generate telemetry aggregation events.
         /// </summary>
-        /// <param name="matsConfig"></param>
+        /// <param name="telemetryConfig"></param>
         /// <returns></returns>
-        internal T WithMatsTelemetry(MatsConfig matsConfig)
+        public T WithTelemetry(ITelemetryConfig telemetryConfig)
         {
-            Config.MatsConfig = matsConfig;
+            Config.TelemetryConfig = telemetryConfig;
             return (T)this;
         }
 
@@ -282,7 +281,7 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.AdfsNotCurrentlySupportedAuthorityType);
             }
 
-            if (Config.TelemetryCallback != null && Config.MatsConfig != null)
+            if (Config.TelemetryCallback != null && Config.TelemetryConfig != null)
             {
                 throw new InvalidOperationException(MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously);
             }

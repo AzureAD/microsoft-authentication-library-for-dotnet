@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
         [TestMethod]
         public void TestAcquireTokenSilent()
         {
-            var batches = new List<IMatsTelemetryBatch>();
+            var eventPayloads = new List<ITelemetryEventPayload>();
 
             using (var harness = new MockHttpAndServiceBundle())
             {
@@ -28,9 +28,9 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
                     .WithHttpManager(harness.HttpManager)
                     .WithClientName(AppName)
                     .WithClientVersion(AppVersion)
-                    .WithMatsTelemetry(new MatsConfig
+                    .WithTelemetry(new TelemetryConfig
                     {
-                        DispatchAction = batch => { batches.Add(batch); }
+                        DispatchAction = eventPayload => { eventPayloads.Add(eventPayload); }
                     })
                     .Build();
 
@@ -39,12 +39,12 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
                     .ConfigureAwait(false);
             }
 
-            foreach (var batch in batches)
+            foreach (var eventPayload in eventPayloads)
             {
-                Console.WriteLine(batch.ToJsonString());
+                Console.WriteLine(eventPayload.ToJsonString());
             }
 
-            Assert.AreEqual(1, batches.Count);
+            Assert.AreEqual(1, eventPayloads.Count);
         }
     }
 }
