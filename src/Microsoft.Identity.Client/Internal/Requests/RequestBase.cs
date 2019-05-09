@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return apiEvent;
         }
 
-        protected AuthenticationResult CacheTokenResponseAndCreateAuthenticationResult(MsalTokenResponse msalTokenResponse)
+        protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse)
         {
             // developer passed in user object.
             AuthenticationRequestParameters.RequestContext.Logger.Info("Checking client info returned from the server..");
@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                var tuple = CacheManager.SaveTokenResponse(msalTokenResponse);
+                var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
                 return new AuthenticationResult(tuple.Item1, tuple.Item2);
             }
             else

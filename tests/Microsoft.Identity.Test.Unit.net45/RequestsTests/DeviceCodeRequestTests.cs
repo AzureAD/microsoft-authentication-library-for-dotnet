@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         [TestMethod]
         [TestCategory("DeviceCodeRequestTests")]
-        public void TestDeviceCodeCancel()
+        public async Task TestDeviceCodeCancelAsync()
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // We setup the cancel before calling the RunAsync operation since we don't check the cancel
                 // until later and the mock network calls run insanely fast for us to timeout for them.
                 cancellationSource.Cancel();
-                AssertException.TaskThrows<OperationCanceledException>(() => request.RunAsync(cancellationSource.Token));
+                await AssertException.TaskThrowsAsync<OperationCanceledException>(() => request.RunAsync(cancellationSource.Token)).ConfigureAwait(false);
             }
         }
 

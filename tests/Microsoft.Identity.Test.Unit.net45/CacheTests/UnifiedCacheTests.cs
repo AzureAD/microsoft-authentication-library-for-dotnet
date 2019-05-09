@@ -17,6 +17,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using System.Threading;
 using Microsoft.Identity.Client.Instance;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -66,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     MsalTestConstants.AuthorityCommonTenant, requestContext).Result;
                 foreach (IAccount account in accounts)
                 {
-                    app.UserTokenCacheInternal.RemoveMsalAccount(account, requestContext);
+                    app.UserTokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
                 }
 
                 httpManager.AddMockHandler(
