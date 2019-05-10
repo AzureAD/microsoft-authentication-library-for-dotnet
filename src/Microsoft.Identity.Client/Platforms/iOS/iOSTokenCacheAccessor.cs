@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         // Identifier for the keychain item used to retrieve current team ID
         private const string TeamIdKey = "DotNetTeamIDHint";
+        private const string DefaultKeychainAccessGroup = "com.microsoft.adalcache";
 
         private string _keychainGroup;
         private readonly RequestContext _requestContext;
@@ -35,9 +36,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
         {
-            if (keychainSecurityGroup == null)
+            if (String.IsNullOrEmpty(keychainSecurityGroup))
             {
-                _keychainGroup = GetTeamId() + '.' + GetBundleId();
+                _keychainGroup = GetTeamId() + '.' + DefaultKeychainAccessGroup;
             }
             else
             {
