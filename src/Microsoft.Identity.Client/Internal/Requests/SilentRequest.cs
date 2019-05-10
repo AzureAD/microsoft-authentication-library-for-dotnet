@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return accounts.First();
         }
 
-        private async Task<IAccount>  GetAccountFromParamsOrLoginHintAsync(AcquireTokenSilentParameters silentParameters)
+        private async Task<IAccount> GetAccountFromParamsOrLoginHintAsync(AcquireTokenSilentParameters silentParameters)
         {
             if (silentParameters.Account != null)
             {

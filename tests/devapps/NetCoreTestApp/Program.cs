@@ -94,11 +94,12 @@ namespace NetCoreTestApp
                         1. IWA
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
-                        4. Acquire Token Interactive (via Default System Browser)
-                        5. Acquire Token Silently
-                        6. Confidential Client with Certificate (needs extra config)
-                        7. Clear cache
-                        8. Rotate Tenant ID
+                        4. Acquire Token Interactive (via CustomWebUI)
+                        5. Acquire Token Interactive 
+                        6. Acquire Token Silently
+                        7. Confidential Client with Certificate (needs extra config)
+                        8. Clear cache
+                        9. Rotate Tenant ID
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -140,7 +141,16 @@ namespace NetCoreTestApp
                         await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
 
                         break;
-                    case 5: // acquire token silent
+                    case 5: // acquire token interactive
+
+                        CancellationTokenSource cts = new CancellationTokenSource();
+                        authTask = s_pca.AcquireTokenInteractive(s_scopes)
+                            .ExecuteAsync(cts.Token);
+
+                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+
+                        break;
+                    case 6: // acquire token silent
                         IAccount account = s_pca.GetAccountsAsync().Result.FirstOrDefault();
                         if (account == null)
                         {
@@ -151,10 +161,10 @@ namespace NetCoreTestApp
                         await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
 
                         break;
-                    case 6:
+                    case 7:
                         RunClientCredentialWithCertificate();
                         break;
-                    case 7:
+                    case 8:
                         var accounts = await s_pca.GetAccountsAsync().ConfigureAwait(false);
                         foreach (var acc in accounts)
                         {
@@ -162,7 +172,7 @@ namespace NetCoreTestApp
                         }
 
                         break;
-                    case 8:
+                    case 9:
 
                         s_currentTid = (s_currentTid + 1) % s_tids.Length;
                         s_pca = CreatePca();

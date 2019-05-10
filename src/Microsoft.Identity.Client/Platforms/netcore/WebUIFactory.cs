@@ -3,15 +3,17 @@
 
 using System;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Platforms.netcore.OsBrowser;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.netcore
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext, IPlatformProxy platformProxy)
         {
-            throw new PlatformNotSupportedException(MsalErrorMessage.InteractiveAuthNotSupported);
+            return new DefaultOsBrowserWebUi(requestContext.Logger, platformProxy);
         }
     }
 }

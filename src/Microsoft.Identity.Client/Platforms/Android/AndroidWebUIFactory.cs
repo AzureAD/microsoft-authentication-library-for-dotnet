@@ -4,6 +4,7 @@
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Android
@@ -11,7 +12,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
     [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class AndroidWebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext, IPlatformProxy platformProxy)
         {
             if (coreUIParent.UseEmbeddedWebview)
             {

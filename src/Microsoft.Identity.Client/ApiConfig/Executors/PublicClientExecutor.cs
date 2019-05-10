@@ -136,7 +136,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             coreUiParent.UseCorporateNetwork = _publicClientApplication.AppConfig.UseCorporateNetwork;
 #endif
 #endif
-            return ServiceBundle.PlatformProxy.GetWebUiFactory().CreateAuthenticationDialog(coreUiParent, requestContext);
+            return ServiceBundle.PlatformProxy.GetWebUiFactory().CreateAuthenticationDialog(
+                coreUiParent,
+                requestContext,
+                ServiceBundle.PlatformProxy);
         }
 
     }
