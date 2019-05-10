@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 using System;
 
@@ -9,7 +10,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
 {
     internal class MacUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext, IPlatformProxy platformProxy)
         {
             return new MacEmbeddedWebUI()
             {

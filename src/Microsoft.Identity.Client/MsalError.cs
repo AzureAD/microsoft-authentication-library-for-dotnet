@@ -546,6 +546,17 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string PlatformNotSupported = "platform_not_supported";
 
+        /// <summary>
+        /// An authorization Uri has been intercepted, but it cannot be parsed. See the log for more details.
+        /// </summary>
+        public const string InvalidAuthorizationUri = "invalid_authorization_uri";
+
+        /// <summary>
+        /// To use the OS browser, a loopback url must be configured. See https://aka.ms/msal-net-os-browser for details.
+        /// </summary>
+        public const string LoopbackRedirectUri = "loopback_redirect_uri";
+
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
