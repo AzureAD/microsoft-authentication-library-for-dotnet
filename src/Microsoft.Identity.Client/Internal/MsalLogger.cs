@@ -1,35 +1,10 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Globalization;
-using Microsoft.Identity.Client.AppConfig;
+using System.Text;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
@@ -41,9 +16,16 @@ namespace Microsoft.Identity.Client.Internal
         private readonly LogCallback _loggingCallback;
         private readonly LogLevel _logLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
-        private static readonly Lazy<ICoreLogger> _nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
+        private static readonly Lazy<ICoreLogger> s_nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
 
-        internal MsalLogger(Guid correlationId, string component, LogLevel logLevel, bool enablePiiLogging, bool isDefaultPlatformLoggingEnabled, LogCallback loggingCallback)
+        internal MsalLogger(
+            Guid correlationId,
+            string clientName,
+            string clientVersion,
+            LogLevel logLevel,
+            bool enablePiiLogging,
+            bool isDefaultPlatformLoggingEnabled,
+            LogCallback loggingCallback)
         {
             CorrelationId = correlationId;
             PiiLoggingEnabled = enablePiiLogging;
@@ -52,32 +34,49 @@ namespace Microsoft.Identity.Client.Internal
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
             _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
-            Component = string.Empty;
-            if (!string.IsNullOrEmpty(component))
+            ClientName = clientName ?? string.Empty;
+            ClientVersion = clientVersion ?? string.Empty;
+
+            ClientInformation = string.Empty;
+            if (!string.IsNullOrEmpty(clientName))
             {
-                //space is intentional for formatting of the message
-                Component = string.Format(CultureInfo.InvariantCulture, " ({0})", component);
+                // space is intentional for formatting of the message
+                if (string.IsNullOrEmpty(clientVersion))
+                {
+                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0})", clientName);
+                }
+                else
+                {
+                    ClientInformation = string.Format(CultureInfo.InvariantCulture, " ({0}: {1})", clientName, clientVersion);
+                }
             }
         }
 
-        public static ICoreLogger Create(Guid correlationId, IApplicationConfiguration config, bool isDefaultPlatformLoggingEnabled = false)
+        public static ICoreLogger Create(
+            Guid correlationId,
+            IApplicationConfiguration config,
+            bool isDefaultPlatformLoggingEnabled = false)
         {
             return new MsalLogger(
                 correlationId,
-                config?.Component ?? string.Empty,
+                config?.ClientName ?? string.Empty,
+                config?.ClientVersion ?? string.Empty,
                 config?.LogLevel ?? LogLevel.Verbose,
                 config?.EnablePiiLogging ?? false,
                 config?.IsDefaultPlatformLoggingEnabled ?? isDefaultPlatformLoggingEnabled,
                 config?.LoggingCallback ?? null);
         }
 
-        public static ICoreLogger NullLogger => _nullLogger.Value;
+        public static ICoreLogger NullLogger => s_nullLogger.Value;
 
         public Guid CorrelationId { get; }
 
         public bool PiiLoggingEnabled { get; }
 
-        internal string Component { get; }
+        public string ClientName { get; }
+        public string ClientVersion { get; }
+
+        internal string ClientInformation { get; }
 
         public void Info(string messageScrubbed)
         {
@@ -91,12 +90,12 @@ namespace Microsoft.Identity.Client.Internal
 
         public void InfoPii(Exception exWithPii)
         {
-            Log(LogLevel.Info, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Info, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void InfoPiiWithPrefix(Exception exWithPii, string prefix)
         {
-            Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void Verbose(string messageScrubbed)
@@ -121,12 +120,12 @@ namespace Microsoft.Identity.Client.Internal
 
         public void WarningPii(Exception exWithPii)
         {
-            Log(LogLevel.Warning, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Warning, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void WarningPiiWithPrefix(Exception exWithPii, string prefix)
         {
-            Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void Error(string messageScrubbed)
@@ -136,12 +135,12 @@ namespace Microsoft.Identity.Client.Internal
 
         public void ErrorPii(Exception exWithPii)
         {
-            Log(LogLevel.Error, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Error, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
         {
-            Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+            Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public void ErrorPii(string messageWithPii, string messageScrubbed)
@@ -177,7 +176,7 @@ namespace Microsoft.Identity.Client.Internal
                 isLoggingPii ? "(True)" : "(False)",
                 MsalIdHelper.GetMsalVersion(),
                 msalIdParameters[MsalIdParameter.Product],
-                os, DateTime.UtcNow, correlationId, Component, messageToLog);
+                os, DateTime.UtcNow, correlationId, ClientInformation, messageToLog);
 
             if (_isDefaultPlatformLoggingEnabled)
             {
@@ -199,6 +198,40 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             _loggingCallback.Invoke(msalLogLevel, log, isLoggingPii);
+        }
+
+        internal static string GetPiiScrubbedExceptionDetails(Exception ex)
+        {
+            var sb = new StringBuilder();
+            if (ex != null)
+            {
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Exception type: {0}", ex.GetType()));
+
+                if (ex is MsalException msalException)
+                {
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, ", ErrorCode: {0}", msalException.ErrorCode));
+                }
+
+                if (ex is MsalServiceException msalServiceException)
+                {
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
+                }
+
+                if (ex.InnerException != null)
+                {
+                    sb.AppendLine("---> Inner Exception Details");
+                    sb.AppendLine(GetPiiScrubbedExceptionDetails(ex.InnerException));
+                    sb.AppendLine("=== End of inner exception stack trace ===");
+                }
+
+                if (ex.StackTrace != null)
+                {
+                    sb.Append(Environment.NewLine + ex.StackTrace);
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

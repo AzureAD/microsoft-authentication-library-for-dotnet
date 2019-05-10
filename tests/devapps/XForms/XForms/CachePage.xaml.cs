@@ -1,39 +1,12 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -48,42 +21,42 @@ namespace XForms
             InitializeComponent();
         }
 
-        private void RefreshCacheView()
+        private async Task RefreshCacheViewAsync()
         {
             var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
 
             IDictionary<string, MsalAccessTokenCacheItem> accessTokens = new Dictionary<string, MsalAccessTokenCacheItem>();
-            foreach (var accessItem in tokenCache.GetAllAccessTokens(true))
+            foreach (var accessItem in (await tokenCache.GetAllAccessTokensAsync(true).ConfigureAwait(false)))
             {
                 accessTokens.Add(accessItem.GetKey().ToString(), accessItem);
             }
             accessTokenCacheItems.ItemsSource = accessTokens;
 
             IDictionary<string, MsalRefreshTokenCacheItem> refreshTokens = new Dictionary<string, MsalRefreshTokenCacheItem>();
-            foreach (var refreshItem in tokenCache.GetAllRefreshTokens(true))
+            foreach (var refreshItem in (await tokenCache.GetAllRefreshTokensAsync(true).ConfigureAwait(false)))
             {
                 refreshTokens.Add(refreshItem.GetKey().ToString(), refreshItem);
             }
             refreshTokenCacheItems.ItemsSource = refreshTokens;
 
             IDictionary<string, MsalIdTokenCacheItem> idTokens = new Dictionary<string, MsalIdTokenCacheItem>();
-            foreach (var idItem in tokenCache.GetAllIdTokens(true))
+            foreach (var idItem in (await tokenCache.GetAllIdTokensAsync(true).ConfigureAwait(false)))
             {
                 idTokens.Add(idItem.GetKey().ToString(), idItem);
             }
             idTokenCacheItems.ItemsSource = idTokens;
 
             IDictionary<string, MsalAccountCacheItem> accounts = new Dictionary<string, MsalAccountCacheItem>();
-            foreach (var accountItem in tokenCache.GetAllAccounts())
+            foreach (var accountItem in (await tokenCache.GetAllAccountsAsync().ConfigureAwait(false)))
             {
                 accounts.Add(accountItem.GetKey().ToString(), accountItem);
             }
             accountsCacheItems.ItemsSource = accounts;
         }
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
-            RefreshCacheView();
+            await RefreshCacheViewAsync().ConfigureAwait(false);
         }
 
         private async void OnClearClickedAsync(object sender, EventArgs e)
@@ -93,7 +66,7 @@ namespace XForms
                 await App.MsalPublicClient.RemoveAsync(user).ConfigureAwait(false);
             }
 
-            RefreshCacheView();
+            await RefreshCacheViewAsync().ConfigureAwait(false);
         }
 
         private static string GetCurrentTimestamp()
@@ -114,7 +87,7 @@ namespace XForms
             // update entry in the cache
             tokenCache.AddAccessTokenCacheItem(accessTokenCacheItem);
 
-            RefreshCacheView();
+            RefreshCacheViewAsync().ConfigureAwait(true);
         }
 
         public void OnAtDelete(object sender, EventArgs e)
@@ -128,7 +101,7 @@ namespace XForms
 
             tokenCache.DeleteAccessToken(accessTokenCacheItem, null, requestContext);
 
-            RefreshCacheView();
+            RefreshCacheViewAsync().ConfigureAwait(true);
         }
 
         public void OnInvalidate(object sender, EventArgs e)
@@ -143,7 +116,7 @@ namespace XForms
             // update entry in the cache
             tokenCache.AddRefreshTokenCacheItem(refreshTokenCacheItem);
 
-            RefreshCacheView();
+            RefreshCacheViewAsync().ConfigureAwait(true);
         }
 
         public async void ShowAccessTokenDetailsAsync(object sender, EventArgs e)

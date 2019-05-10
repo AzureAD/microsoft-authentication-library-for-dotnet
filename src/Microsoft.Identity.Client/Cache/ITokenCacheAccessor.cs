@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
@@ -33,13 +9,6 @@ namespace Microsoft.Identity.Client.Cache
 {
     internal interface ITokenCacheAccessor
     {
-        int RefreshTokenCount { get; }
-        int AccessTokenCount { get; }
-        int AccountCount { get; }
-        int IdTokenCount { get; }
-        void ClearRefreshTokens();
-        void ClearAccessTokens();
-
         void SaveAccessToken(MsalAccessTokenCacheItem item);
 
         void SaveRefreshToken(MsalRefreshTokenCacheItem item);
@@ -47,6 +16,8 @@ namespace Microsoft.Identity.Client.Cache
         void SaveIdToken(MsalIdTokenCacheItem item);
 
         void SaveAccount(MsalAccountCacheItem item);
+
+        void SaveAppMetadata(MsalAppMetadataCacheItem item);
 
         MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey);
 
@@ -56,6 +27,8 @@ namespace Microsoft.Identity.Client.Cache
 
         MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey);
 
+        MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey);
+
         void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey);
 
         void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey);
@@ -64,13 +37,16 @@ namespace Microsoft.Identity.Client.Cache
 
         void DeleteAccount(MsalAccountCacheKey cacheKey);
 
-        ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens();
+        IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens();
 
-        ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
+        IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
 
-        ICollection<MsalIdTokenCacheItem> GetAllIdTokens();
+        IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens();
 
-        ICollection<MsalAccountCacheItem> GetAllAccounts();
+        IEnumerable<MsalAccountCacheItem> GetAllAccounts();
+
+        IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata();
+
 
 #if iOS
         void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);

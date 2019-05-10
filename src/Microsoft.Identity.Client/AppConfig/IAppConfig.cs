@@ -1,33 +1,11 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Configuration properties used to build a public or confidential client application
@@ -41,7 +19,7 @@ namespace Microsoft.Identity.Client.AppConfig
         string ClientId { get; }
 
         /// <summary>
-        /// Flag telling if logging of Personally Identifiable Information (PII) is enabled/disabled for 
+        /// Flag telling if logging of Personally Identifiable Information (PII) is enabled/disabled for
         /// the application. See https://aka.ms/msal-net-logging
         /// </summary>
         /// <seealso cref="IsDefaultPlatformLoggingEnabled"/>
@@ -60,7 +38,7 @@ namespace Microsoft.Identity.Client.AppConfig
         LogLevel LogLevel { get; }
 
         /// <summary>
-        /// Flag telling if logging to platform defaults is enabled/disabled for the app. 
+        /// Flag telling if logging to platform defaults is enabled/disabled for the app.
         /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
         /// In Android, logcat is used. See https://aka.ms/msal-net-logging
         /// </summary>
@@ -89,12 +67,6 @@ namespace Microsoft.Identity.Client.AppConfig
         TelemetryCallback TelemetryCallback { get; }
 
         /// <summary>
-        /// Name of the component using MSAL.NET. See <see cref="ApplicationOptions.Component"/>
-        /// and <see cref="AbstractApplicationBuilder{T}.WithComponent(string)"/>
-        /// </summary>
-        string Component { get; }
-
-        /// <summary>
         /// Extra query parameters that will be applied to every acquire token operation.
         /// See <see cref="AbstractApplicationBuilder{T}.WithExtraQueryParameters(IDictionary{string, string})"/>
         /// </summary>
@@ -104,10 +76,28 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         bool IsBrokerEnabled { get; }
 
+        /// <summary>
+        /// The name of the calling application for telemetry purposes.
+        /// </summary>
+        string ClientName { get; }
+
+        /// <summary>
+        /// The version of the calling application for telemetry purposes.
+        /// </summary>
+        string ClientVersion { get; }
+
+        ///// <summary>
+        ///// </summary>
+        //IMatsConfig MatsConfig { get; }
+
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
         /// </summary>
-        ClientCredential ClientCredential { get; }
+        string ClientSecret { get; }
+
+        /// <summary>
+        /// </summary>
+        X509Certificate2 ClientCredentialCertificate { get; }
 #endif
 
 #if WINDOWS_APP

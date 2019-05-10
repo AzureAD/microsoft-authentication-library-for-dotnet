@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -35,7 +11,6 @@ using WebKit;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Platforms.AppleShared;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
@@ -92,9 +67,9 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 using (var pool = new NSAutoreleasePool())
                 {
                     var nextEvent = NSApplication.SharedApplication.NextEvent(
-                        NSEventMask.AnyEvent, 
+                        NSEventMask.AnyEvent,
                         NSDate.DistantFuture,
-                        NSRunLoopMode.Default, 
+                        NSRunLoopMode.Default,
                         true);
 
                     //discard events that are for other windows, else they remain somewhat interactive
@@ -160,9 +135,9 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             // at least make it looks like something is happening.
             _progressIndicator = new NSProgressIndicator(
                 new CGRect(
-                    (DEFAULT_WINDOW_WIDTH / 2) - 16, 
-                    (DEFAULT_WINDOW_HEIGHT / 2) - 16, 
-                    32, 
+                    (DEFAULT_WINDOW_WIDTH / 2) - 16,
+                    (DEFAULT_WINDOW_HEIGHT / 2) - 16,
+                    32,
                     32))
             {
                 Style = NSProgressIndicatorStyle.Spinning,

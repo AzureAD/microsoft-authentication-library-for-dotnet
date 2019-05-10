@@ -9,10 +9,8 @@
         </OnPlatform>
     </ContentPage.Padding>
 
-    <StackLayout Padding="10,0">
-
+    <StackLayout Padding="5,0">
         <Label Text="Acquire" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
-
         <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
             <Label Text="Scopes" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
             <Entry x:Name="ScopesEntry" Text=""  HorizontalOptions="FillAndExpand" AutomationId="scopesList"/>
@@ -23,8 +21,18 @@
             <Picker x:Name="usersPicker" HorizontalOptions="FillAndExpand" AutomationId="userList"/>
         </StackLayout>
 
-        <Frame OutlineColor="Black" Padding="10">
+        <Frame OutlineColor="Black" Padding="5">
             <StackLayout Orientation="Vertical">
+                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                    <Label Text="UserName" HorizontalTextAlignment="Center" Margin="2" Font="Bold,10"/>
+                    <Entry x:Name="UserName" Text=""  HorizontalOptions="FillAndExpand" AutomationId="usernameId"/>
+                </StackLayout>
+
+                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                    <Label Text="Password" HorizontalTextAlignment="Center" Margin="2" Font="Bold,10"/>
+                    <Entry x:Name="Password" Text=""  HorizontalOptions="FillAndExpand" AutomationId="passwordId"/>
+                </StackLayout>
+
                 <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
                     <Label Text="UIBehavior" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
                     <Picker x:Name="UIBehaviorPicker" AutomationId="uiBehavior"/>
@@ -44,21 +52,22 @@
                 <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                     <Button  Text="Acquire" Clicked="OnAcquireClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireToken_button"/>
                     <Button  Text="DeviceCode" Clicked="OnAcquireByDeviceCodeClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenByDeviceCode"/>
+                    <Button  Text="ROPC" Clicked="OnAcquireByROPCClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenByROPC"/>
                 </StackLayout>
             </StackLayout>
         </Frame>
 
-        <Frame OutlineColor="Black" Padding="10">
+        <Frame OutlineColor="Black" Padding="5">
             <StackLayout Orientation="Vertical"  >
                 <StackLayout Orientation="Vertical"  HorizontalOptions="FillAndExpand">
 
                     <StackLayout Orientation="Horizontal"  HorizontalOptions="Start">
-                        <Label Text="Force Refresh" Margin="5" Font="Bold,13"/>
+                        <Label Text="Force Refresh" Font="Bold,13"/>
                         <Switch x:Name="ForceRefreshSwitch" AutomationId="forceRefreshSwitch"/>
                     </StackLayout>
 
                     <StackLayout Orientation="Horizontal"  HorizontalOptions="Start">
-                        <Label Text="Pass Authority" Margin="5" Font="Bold,13"/>
+                        <Label Text="Pass Authority" Font="Bold,13"/>
                         <Switch x:Name="PassAuthoritySwitch" AutomationId="passAuthoritySwitch"/>
                     </StackLayout>
 
@@ -72,7 +81,7 @@
 
         <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
             <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
-                <Frame OutlineColor="Black" Padding="10">
+                <Frame OutlineColor="Black" Padding="5">
                     <Label x:Name="acquireResponseLabel" Text=""/>
                 </Frame>
             </StackLayout>

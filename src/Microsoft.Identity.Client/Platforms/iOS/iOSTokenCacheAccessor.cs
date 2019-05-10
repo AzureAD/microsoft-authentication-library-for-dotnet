@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -34,8 +10,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Utils;
 using Security;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
@@ -43,21 +17,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     internal class iOSTokenCacheAccessor : ITokenCacheAccessor
     {
         public const string CacheKeyDelimiter = "-";
-        private static readonly Dictionary<string, int> AuthorityTypeToAttrType = new Dictionary<string, int>()
-        {
-            {AuthorityType.AAD.ToString(), 1001},
-            {AuthorityType.MSA.ToString(), 1002},
-            {AuthorityType.MSSTS.ToString(), 1003},
-            {AuthorityType.OTHER.ToString(), 1004},
-        };
 
-        private enum CredentialAttrType
-        {
-            AccessToken = 2001,
-            RefreshToken = 2002,
-            IdToken = 2003,
-            Password = 2004
-        }
 
         private const bool _defaultSyncSetting = false;
         private const SecAccessible _defaultAccessiblityPolicy = SecAccessible.AfterFirstUnlockThisDeviceOnly;
@@ -66,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         // Identifier for the keychain item used to retrieve current team ID
         private const string TeamIdKey = "DotNetTeamIDHint";
 
-        private string keychainGroup;
+        private string _keychainGroup;
         private readonly RequestContext _requestContext;
 
         private string GetBundleId()
@@ -78,11 +38,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             if (keychainSecurityGroup == null)
             {
-                keychainGroup = GetBundleId();
+                _keychainGroup = GetBundleId();
             }
             else
             {
-                keychainGroup = GetTeamId() + '.' + keychainSecurityGroup;
+                _keychainGroup = GetTeamId() + '.' + keychainSecurityGroup;
             }
         }
 
@@ -108,14 +68,14 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return match.AccessGroup.Split('.')[0];
             }
 
-            throw MsalExceptionFactory.GetClientException(
+            throw new MsalClientException(
                 MsalError.CannotAccessPublisherKeyChain,
                 MsalErrorMessage.CannotAccessPublisherKeyChain);
         }
 
         public iOSTokenCacheAccessor()
         {
-            keychainGroup = GetTeamId() + '.' + DefaultKeychainGroup;
+            _keychainGroup = GetTeamId() + '.' + DefaultKeychainGroup;
         }
 
         public iOSTokenCacheAccessor(RequestContext requestContext) : this()
@@ -125,127 +85,81 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            var key = item.GetKey();
-
-            var account = key.GetiOSAccountKey();
-            var service = key.GetiOSServiceKey();
-            var generic = key.GetiOSGenericKey();
-            var type = (int)CredentialAttrType.AccessToken;
-
-            var value = item.ToJsonString();
-
-            Save(account, service, generic, type, value);
+            IiOSKey key = item.GetKey();
+            Save(key, item.ToJsonString());
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            var key = item.GetKey();
-            var account = key.GetiOSAccountKey();
-            var service = key.GetiOSServiceKey();
-            var generic = key.GetiOSGenericKey();
-
-            var type = (int)CredentialAttrType.RefreshToken;
-
-            var value = item.ToJsonString();
-
-            Save(account, service, generic, type, value);
+            Save(item.GetKey(), item.ToJsonString());
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            var key = item.GetKey();
-            var account = key.GetiOSAccountKey();
-            var service = key.GetiOSServiceKey();
-            var generic = key.GetiOSGenericKey();
-
-            var type = (int)CredentialAttrType.IdToken;
-
-            var value = item.ToJsonString();
-
-            Save(account, service, generic, type, value);
+            Save(item.GetKey(), item.ToJsonString());
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            var key = item.GetKey();
-            var account = key.GetiOSAccountKey();
-            var service = key.GetiOSServiceKey();
-            var generic = key.GetiOSGenericKey();
-
-            var type = AuthorityTypeToAttrType[item.AuthorityType];
-
-            var value = item.ToJsonString();
-
-            Save(account, service, generic, type, value);
+            Save(item.GetKey(), item.ToJsonString());
         }
 
         public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
         {
-            var account = cacheKey.GetiOSAccountKey();
-            var service = cacheKey.GetiOSServiceKey();
-
-            var type = (int)CredentialAttrType.AccessToken;
-
-            Remove(account, service, type);
+            Remove(cacheKey);
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey)
         {
-            var account = cacheKey.GetiOSAccountKey();
-            var service = cacheKey.GetiOSServiceKey();
-
-            var type = (int)CredentialAttrType.RefreshToken;
-
-            Remove(account, service, type);
+            Remove(cacheKey);
         }
 
         public void DeleteIdToken(MsalIdTokenCacheKey cacheKey)
         {
-            var account = cacheKey.GetiOSAccountKey();
-            var service = cacheKey.GetiOSServiceKey();
-
-            var type = (int)CredentialAttrType.IdToken;
-
-            Remove(account, service, type);
+            Remove(cacheKey);
         }
 
         public void DeleteAccount(MsalAccountCacheKey cacheKey)
         {
-            var account = cacheKey.GetiOSAccountKey();
-            var service = cacheKey.GetiOSServiceKey();
-
-            var type = AuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()];
-
-            Remove(account, service, type);
+            Remove(cacheKey);
         }
-        public ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens()
+
+        public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
-            return GetValues((int)CredentialAttrType.AccessToken).Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
+            return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken)
+                .Select(x => MsalAccessTokenCacheItem.FromJsonString(x))
+                .ToList();
         }
 
-        public ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
-            return GetValues((int)CredentialAttrType.RefreshToken).Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
+            return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken)
+                .Select(x => MsalRefreshTokenCacheItem.FromJsonString(x))
+                .ToList();
         }
 
-        public ICollection<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
         {
-            return GetValues((int)CredentialAttrType.IdToken).Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
+            return GetPayloadAsString((int)MsalCacheKeys.iOSCredentialAttrType.IdToken)
+                .Select(x => MsalIdTokenCacheItem.FromJsonString(x))
+                .ToList();
         }
 
-        public ICollection<MsalAccountCacheItem> GetAllAccounts()
+        public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
         {
-            return GetValues(AuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()]).Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
+            return GetPayloadAsString(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()])
+                .Select(x => MsalAccountCacheItem.FromJsonString(x))
+                .ToList();
         }
 
-        private string GetValue(string account, string service, int type)
+        private string GetPayload(IiOSKey key)
         {
             var queryRecord = new SecRecord(SecKind.GenericPassword)
             {
-                Account = account,
-                Service = service,
-                CreatorType = type,
-                AccessGroup = keychainGroup
+                Account = key.iOSAccount,
+                Service = key.iOSService,
+                CreatorType = key.iOSType,
+                AccessGroup = _keychainGroup
             };
 
             var match = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);
@@ -255,15 +169,15 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 : string.Empty;
         }
 
-        private ICollection<string> GetValues(int type)
+        private ICollection<string> GetPayloadAsString(int type)
         {
             var queryRecord = new SecRecord(SecKind.GenericPassword)
             {
                 CreatorType = type,
-                AccessGroup = keychainGroup
+                AccessGroup = _keychainGroup
             };
 
-            SecRecord[] records = SecKeyChain.QueryAsRecord(queryRecord, Int32.MaxValue, out SecStatusCode resultCode);
+            SecRecord[] records = SecKeyChain.QueryAsRecord(queryRecord, int.MaxValue, out SecStatusCode resultCode);
 
             ICollection<string> res = new List<string>();
 
@@ -279,9 +193,19 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return res;
         }
 
-        private SecStatusCode Save(string account, string service, string generic, int type, string value)
+        private SecStatusCode Save(IiOSKey key, string payload)
         {
-            SecRecord recordToSave = CreateRecord(account, service, generic, type, value);
+            var recordToSave = new SecRecord(SecKind.GenericPassword)
+            {
+                Account = key.iOSAccount,
+                Service = key.iOSService,
+                Generic = key.iOSGeneric,
+                CreatorType = key.iOSType,
+                ValueData = NSData.FromString(payload, NSStringEncoding.UTF8),
+                AccessGroup = _keychainGroup,
+                Accessible = _defaultAccessiblityPolicy,
+                Synchronizable = _defaultSyncSetting,
+            };
 
             var secStatusCode = Update(recordToSave);
 
@@ -292,7 +216,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (secStatusCode == SecStatusCode.MissingEntitlement)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                 MsalError.MissingEntitlements,
                 string.Format(
                     CultureInfo.InvariantCulture,
@@ -303,29 +227,15 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return secStatusCode;
         }
 
-        private SecRecord CreateRecord(string account, string service, string generic, int type, string value)
-        {
-            return new SecRecord(SecKind.GenericPassword)
-            {
-                Account = account,
-                Service = service,
-                Generic = generic,
-                CreatorType = type,
-                ValueData = NSData.FromString(value, NSStringEncoding.UTF8),
-                AccessGroup = keychainGroup,
-                Accessible = _defaultAccessiblityPolicy,
-                Synchronizable = _defaultSyncSetting,
-            };
-        }
 
-        private SecStatusCode Remove(string account, string service, int type)
+        private SecStatusCode Remove(IiOSKey key)
         {
             var record = new SecRecord(SecKind.GenericPassword)
             {
-                Account = account,
-                Service = service,
-                CreatorType = type,
-                AccessGroup = keychainGroup
+                Account = key.iOSAccount,
+                Service = key.iOSService,
+                CreatorType = key.iOSType,
+                AccessGroup = _keychainGroup
             };
 
             return SecKeyChain.Remove(record);
@@ -338,7 +248,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 Account = updatedRecord.Account,
                 Service = updatedRecord.Service,
                 CreatorType = updatedRecord.CreatorType,
-                AccessGroup = keychainGroup
+                AccessGroup = _keychainGroup
             };
             var attributesToUpdate = new SecRecord()
             {
@@ -348,88 +258,73 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return SecKeyChain.Update(currentRecord, attributesToUpdate);
         }
 
-        private void RemoveAll(int type)
+        private void RemoveByType(int type)
         {
             var queryRecord = new SecRecord(SecKind.GenericPassword)
             {
                 CreatorType = type,
-                AccessGroup = keychainGroup
+                AccessGroup = _keychainGroup
             };
             SecKeyChain.Remove(queryRecord);
         }
 
         public void Clear()
         {
-            RemoveAll((int)CredentialAttrType.AccessToken);
-            RemoveAll((int)CredentialAttrType.RefreshToken);
-            RemoveAll((int)CredentialAttrType.IdToken);
+            RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken);
+            RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken);
+            RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.IdToken);
 
-            RemoveAll(AuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()]);
+            RemoveByType(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()]);
         }
 
         public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
-            var account = accessTokenKey.GetiOSAccountKey();
-            var service = accessTokenKey.GetiOSServiceKey();
-
-            var type = (int)CredentialAttrType.AccessToken;
-
-            return MsalAccessTokenCacheItem.FromJsonString(GetValue(account, service, type));
+            return MsalAccessTokenCacheItem.FromJsonString(GetPayload(accessTokenKey));
         }
 
         public MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
         {
-            var account = refreshTokenKey.GetiOSAccountKey();
-            var service = refreshTokenKey.GetiOSServiceKey();
-
-
-            var type = (int)CredentialAttrType.RefreshToken;
-
-            return MsalRefreshTokenCacheItem.FromJsonString(GetValue(account, service, type));
+            return MsalRefreshTokenCacheItem.FromJsonString(GetPayload(refreshTokenKey));
         }
 
         public MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey)
         {
-            var account = idTokenKey.GetiOSAccountKey();
-            var service = idTokenKey.GetiOSServiceKey();
+            return MsalIdTokenCacheItem.FromJsonString(GetPayload(idTokenKey));
 
-            var type = (int)CredentialAttrType.IdToken;
-
-            return MsalIdTokenCacheItem.FromJsonString(GetValue(account, service, type));
         }
 
         public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
         {
-            var account = accountKey.GetiOSAccountKey();
-            var service = accountKey.GetiOSServiceKey();
-
-            var type = AuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()];
-
-            return MsalAccountCacheItem.FromJsonString(GetValue(account, service, type));
+            return MsalAccountCacheItem.FromJsonString(GetPayload(accountKey));
         }
 
-        /// <inheritdoc />
-        public int RefreshTokenCount => throw new NotImplementedException();
+        #region AppMetatada - not implemented on iOS
+        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        {
+            //return MsalAppMetadataCacheItem.FromJsonString(GetPayload(appMetadataKey));
+            throw new NotImplementedException();
+        }
 
-        /// <inheritdoc />
-        public int AccessTokenCount => throw new NotImplementedException();
+        public void WriteAppMetadata(MsalAppMetadataCacheItem appMetadata)
+        {
+            //Save(appMetadata.GetKey(), appMetadata.ToJsonString());
+            throw new NotImplementedException();
+        }
 
-        /// <inheritdoc />
-        public int AccountCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public int IdTokenCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public void ClearRefreshTokens()
+        public void SaveAppMetadata(MsalAppMetadataCacheItem item)
         {
             throw new NotImplementedException();
         }
 
-        /// <inheritdoc />
-        public void ClearAccessTokens()
+        public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
             throw new NotImplementedException();
         }
+
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }

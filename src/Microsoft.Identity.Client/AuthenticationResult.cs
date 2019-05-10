@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -38,14 +14,14 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Contains the results of one token acquisition operation in <see cref="PublicClientApplication"/>
     /// or <see cref="T:ConfidentialClientApplication"/>. For details see https://aka.ms/msal-net-authenticationresult
-    /// </summary> 
+    /// </summary>
     public partial class AuthenticationResult
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
 
         /// <summary>
-        /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows. 
+        /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
         /// App developers should <b>never</b> new-up <see cref="AuthenticationResult"/> in product code.
         /// </summary>
         /// <param name="accessToken">Access Token that can be used as a bearer token to access protected web APIs</param>
@@ -59,14 +35,14 @@ namespace Microsoft.Identity.Client
         /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that
         /// is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
         public AuthenticationResult(
-            string accessToken, 
-            bool isExtendedLifeTimeToken, 
-            string uniqueId, 
-            DateTimeOffset expiresOn, 
-            DateTimeOffset extendedExpiresOn, 
-            string tenantId, 
-            IAccount account, 
-            string idToken, 
+            string accessToken,
+            bool isExtendedLifeTimeToken,
+            string uniqueId,
+            DateTimeOffset expiresOn,
+            DateTimeOffset extendedExpiresOn,
+            string tenantId,
+            IAccount account,
+            string idToken,
             IEnumerable<string> scopes)
         {
             AccessToken = accessToken;
@@ -149,8 +125,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Gets the account information. Some elements in <see cref="IAccount"/> might be null if not returned by the
-        /// service. The account can be passed back in some API overloads to identify which account should be used such 
-        /// as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/> or
+        /// service. The account can be passed back in some API overloads to identify which account should be used such
+        /// as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> or
         /// <see cref="IClientApplicationBase.RemoveAsync(IAccount)"/> for instance
         /// </summary>
         public IAccount Account { get; }

@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
 
@@ -59,11 +34,10 @@ namespace Microsoft.Identity.Client.WsTrust
                         MsalErrorMessage.HttpRequestUnsuccessful,
                         (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
-                throw MsalExceptionFactory.GetServiceException(
-                    MsalError.AccessingWsMetadataExchangeFailed,
-                    message,
-                    httpResponse,
-                    innerException: null);
+                throw new MsalServiceException(MsalError.AccessingWsMetadataExchangeFailed, message)
+                {
+                    HttpResponse = httpResponse
+                };
             }
 
             var mexDoc = new MexDocument(httpResponse.Body);
@@ -111,11 +85,10 @@ namespace Microsoft.Identity.Client.WsTrust
                         wsTrustEndpoint.Uri,
                         errorMessage);
 
-                throw MsalExceptionFactory.GetServiceException(
-                    MsalError.FederatedServiceReturnedError,
-                    message,
-                    resp,
-                    innerException: null);
+                throw new MsalServiceException(MsalError.FederatedServiceReturnedError, message)
+                {
+                    HttpResponse = resp
+                };
             }
 
             try
@@ -124,7 +97,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (System.Xml.XmlException ex)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.ParsingWsTrustResponseFailed, MsalError.ParsingWsTrustResponseFailed, ex);
             }
         }
@@ -139,9 +112,9 @@ namespace Microsoft.Identity.Client.WsTrust
              var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
 
             var httpResponse = await _httpManager.SendGetAsync(uri, MsalIdHelper.GetMsalIdParameters(requestContext.Logger), requestContext).ConfigureAwait(false);
-            return httpResponse.StatusCode == System.Net.HttpStatusCode.OK 
-                ? JsonHelper.DeserializeFromJson<UserRealmDiscoveryResponse>(httpResponse.Body) 
+            return httpResponse.StatusCode == System.Net.HttpStatusCode.OK
+                ? JsonHelper.DeserializeFromJson<UserRealmDiscoveryResponse>(httpResponse.Body)
                 : null;
         }
-    } 
+    }
 }

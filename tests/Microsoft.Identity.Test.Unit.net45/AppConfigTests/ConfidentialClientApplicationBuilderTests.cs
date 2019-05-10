@@ -1,35 +1,11 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
@@ -38,18 +14,24 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
     [TestCategory("BuilderTests")]
     public class ConfidentialClientApplicationBuilderTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
+        }
+
         [TestMethod]
         public void TestConstructor()
         {
             var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
-            Assert.AreEqual(MsalTestConstants.ClientId, cca.ClientId);
+            Assert.AreEqual(MsalTestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNotNull(cca.UserTokenCache);
 
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, cca.AppConfig.LogLevel);
-            Assert.IsNull(cca.AppConfig.ClientCredential);
             Assert.AreEqual(MsalTestConstants.ClientId, cca.AppConfig.ClientId);
-            Assert.IsNull(cca.AppConfig.Component);
+            Assert.IsNull(cca.AppConfig.ClientName);
+            Assert.IsNull(cca.AppConfig.ClientVersion);
             Assert.AreEqual(false, cca.AppConfig.EnablePiiLogging);
             Assert.IsNull(cca.AppConfig.HttpClientFactory);
             Assert.AreEqual(false, cca.AppConfig.IsDefaultPlatformLoggingEnabled);
@@ -64,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string ClientId = "9340c42a-f5de-4a80-aea0-874adc2ca325";
             var cca = ConfidentialClientApplicationBuilder.Create(ClientId).Build();
-            Assert.AreEqual(ClientId, cca.ClientId);
+            Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
         }
 
         [TestMethod]
@@ -72,16 +54,18 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string ClientId = "73cc145e-798f-430c-8d6d-618f1a5802e9";
             var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithClientId(ClientId).Build();
-            Assert.AreEqual(ClientId, cca.ClientId);
+            Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
         }
 
         [TestMethod]
-        public void TestConstructor_WithComponent()
+        public void TestConstructor_WithClientNameAndVersion()
         {
-            const string Component = "my component name";
+            const string ClientName = "my client name";
+            const string ClientVersion = "1.2.3.4-prerelease";
             var cca =
-                ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithComponent(Component).Build();
-            Assert.AreEqual(Component, cca.AppConfig.Component);
+                ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithClientName(ClientName).WithClientVersion(ClientVersion).Build();
+            Assert.AreEqual(ClientName, cca.AppConfig.ClientName);
+            Assert.AreEqual(ClientVersion, cca.AppConfig.ClientVersion);
         }
 
         [TestMethod]
@@ -94,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithHttpClientFactory()
         {
-            var httpClientFactory = new MyHttpClientFactory();  
+            var httpClientFactory = NSubstitute.Substitute.For<IMsalHttpClientFactory>();
             var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithHttpClientFactory(httpClientFactory).Build();
             Assert.AreEqual(httpClientFactory, cca.AppConfig.HttpClientFactory);
         }
@@ -180,8 +164,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var cca = ConfidentialClientApplicationBuilder
                       .Create(MsalTestConstants.ClientId).WithClientSecret(ClientSecret).Build();
 
-            Assert.IsNotNull(cca.AppConfig.ClientCredential);
-            Assert.AreEqual(ClientSecret, cca.AppConfig.ClientCredential.Secret);
+            Assert.IsNotNull(cca.AppConfig.ClientSecret);
+            Assert.AreEqual(ClientSecret, cca.AppConfig.ClientSecret);
         }
 
         [TestMethod]
@@ -194,8 +178,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var cca = ConfidentialClientApplicationBuilder
                       .Create(MsalTestConstants.ClientId).WithCertificate(cert).Build();
 
-            Assert.IsNotNull(cca.AppConfig.ClientCredential);
-            Assert.IsNotNull(cca.AppConfig.ClientCredential.Certificate);
+            Assert.IsNotNull(cca.AppConfig.ClientCredentialCertificate);
         }
     }
 }

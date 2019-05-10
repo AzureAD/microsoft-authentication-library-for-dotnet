@@ -1,30 +1,6 @@
 ﻿/*
-//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -40,7 +16,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 {
     class OboFlowTests
     {    /// <summary>
-         /// This test class executes and validates OBO scenarios where token cache may or may not 
+         /// This test class executes and validates OBO scenarios where token cache may or may not
          /// contain entries with user assertion hash. It accounts for cases where there is
          /// a single user and when there are multiple users in the cache.
          /// user assertion hash exists so that the API can deterministically identify the user
@@ -164,7 +140,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 }
                 });
 
-                // call acquire token with matching username from cache entry. this will result in a network call 
+                // call acquire token with matching username from cache entry. this will result in a network call
                 // because cache entry with no assertion hash is treated as a cache miss.
 
                 var result =
@@ -575,7 +551,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 }
                 });
 
-                // call acquire token with matching username from cache entry. this will result in a network call 
+                // call acquire token with matching username from cache entry. this will result in a network call
                 // because cache entry with no assertion hash is treated as a cache miss.
 
                 var result =

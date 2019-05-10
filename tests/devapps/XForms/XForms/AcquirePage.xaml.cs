@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Globalization;
@@ -36,6 +12,8 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using System.Threading;
+using System.Security;
 
 namespace XForms
 {
@@ -176,8 +154,13 @@ namespace XForms
 
                 var authority = PassAuthoritySwitch.IsToggled ? App.Authority : null;
 
-                var res = await App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount())
-                    .WithAuthority(authority)
+                var builder = App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount());
+                if (PassAuthoritySwitch.IsToggled)
+                {
+                    builder = builder.WithAuthority(App.Authority);
+                }
+
+                var res = await builder
                     .WithForceRefresh(ForceRefreshSwitch.IsToggled)
                     .ExecuteAsync()
                     .ConfigureAwait(true);
@@ -203,14 +186,11 @@ namespace XForms
             {
                 acquireResponseTitleLabel.Text = EmptyResult;
 
-                var request = App.MsalPublicClient.AcquireTokenInteractive(GetScopes(), App.AndroidActivity)
+                var request = App.MsalPublicClient.AcquireTokenInteractive(GetScopes())
                     .WithPrompt(GetPrompt())
+                    .WithParentActivityOrWindow(App.AndroidActivity)
                     .WithUseEmbeddedWebView(true)
                     .WithExtraQueryParameters(GetExtraQueryParams());
-
-                request = LoginHintSwitch.IsToggled ?
-                    request.WithLoginHint(LoginHintEntry.Text.Trim()) :
-                    request.WithAccount(GetSelectedAccount());
 
                 var result = await request.ExecuteAsync().ConfigureAwait(true);
 
@@ -235,18 +215,20 @@ namespace XForms
             try
             {
                 acquireResponseTitleLabel.Text = EmptyResult;
-                AuthenticationResult res =
-                        await App.MsalPublicClient.AcquireTokenWithDeviceCodeAsync(
-                            GetScopes(),
-                            GetExtraQueryParams(),
-                            dcr =>
+                AuthenticationResult res = await App.MsalPublicClient
+                    .AcquireTokenWithDeviceCode(
+                        GetScopes(),
+                        dcr =>
+                        {
+                            Device.BeginInvokeOnMainThread(() =>
                             {
-                                Device.BeginInvokeOnMainThread(() =>
-                                {
-                                    acquireResponseLabel.Text = dcr.Message;
-                                });
-                                return Task.FromResult(0);
-                            }).ConfigureAwait(true);
+                                acquireResponseLabel.Text = dcr.Message;
+                            });
+                            return Task.FromResult(0);
+                        })
+                        .WithExtraQueryParameters(GetExtraQueryParams())
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(true);
 
                 var resText = GetResultDescription(res);
 
@@ -264,6 +246,46 @@ namespace XForms
             }
         }
 
+        private async void OnAcquireByROPCClickedAsync(object sender, EventArgs e)
+        {
+            try
+            {
+                acquireResponseTitleLabel.Text = EmptyResult;
+
+                var request = App.MsalPublicClient.AcquireTokenByUsernamePassword(
+                    App.Scopes,
+                    UserName.Text.Trim(),
+                    ConvertToSecureString(Password.Text.Trim()));
+
+                var result = await request.ExecuteAsync().ConfigureAwait(true);
+                var resText = GetResultDescription(result);
+
+                if (resText.Contains("AccessToken"))
+                {
+                    acquireResponseTitleLabel.Text = SuccessfulResult;
+                }
+
+                acquireResponseLabel.Text = resText;
+                RefreshUsers();
+            }
+            catch(Exception exception)
+            {
+                CreateExceptionMessage(exception);
+            }
+        }
+
+        private SecureString ConvertToSecureString(string password)
+        {
+            if (password.Length > 0)
+            {
+                SecureString securePassword = new SecureString();
+                password.ToCharArray().ToList().ForEach(p => securePassword.AppendChar(p));
+                securePassword.MakeReadOnly();
+                return securePassword;
+            }
+            return null;
+        }
+
         private void OnClearClicked(object sender, EventArgs e)
         {
             acquireResponseLabel.Text = "";
@@ -272,11 +294,11 @@ namespace XForms
 
         private async Task OnClearCacheClickedAsync(object sender, EventArgs e)
         {
-            var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
-            var users = tokenCache.GetAccounts(App.Authority);
-            foreach (var user in users)
+            var accounts = await App.MsalPublicClient.GetAccountsAsync().ConfigureAwait(true);
+
+            foreach (var account in accounts)
             {
-                await App.MsalPublicClient.RemoveAsync(user).ConfigureAwait(true);
+                await App.MsalPublicClient.RemoveAsync(account).ConfigureAwait(true);
             }
 
             acquireResponseLabel.Text = "";
@@ -299,4 +321,3 @@ namespace XForms
         }
     }
 }
-

@@ -1,37 +1,13 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace CommonCache.Test.MsalV2
 {
@@ -75,13 +51,23 @@ namespace CommonCache.Test.MsalV2
                 IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 try
                 {
-                    var result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault(), app.Authority, false).ConfigureAwait(false);
+                    var result = await app
+                        .AcquireTokenSilent(scopes, accounts.FirstOrDefault())
+                        .WithAuthority(app.Authority)
+                        .WithForceRefresh(false)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
+
                     Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
                     return new CacheExecutorResults(result.Account.Username, true);
                 }
                 catch (MsalUiRequiredException)
                 {
-                    var result = await app.AcquireTokenByUsernamePasswordAsync(scopes, options.Username, options.UserPassword.ToSecureString()).ConfigureAwait(false);
+                    var result = await app
+                        .AcquireTokenByUsernamePassword(scopes, options.Username, options.UserPassword.ToSecureString())
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
+
                     Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
                     return new CacheExecutorResults(result.Account.Username, false);
                 }

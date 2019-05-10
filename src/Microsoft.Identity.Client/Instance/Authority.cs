@@ -1,39 +1,10 @@
-﻿// ------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -45,7 +16,8 @@ namespace Microsoft.Identity.Client.Instance
                 "common",
                 "organizations",
                 "consumers"
-            });
+            },
+            StringComparer.OrdinalIgnoreCase);
 
         protected Authority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
         {
@@ -59,19 +31,20 @@ namespace Microsoft.Identity.Client.Instance
 
         public static Authority CreateAuthorityWithOverride(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
         {
-            switch (serviceBundle.Config.AuthorityInfo.AuthorityType)
+            switch (authorityInfo.AuthorityType)
             {
             case AuthorityType.Adfs:
                 return new AdfsAuthority(serviceBundle, authorityInfo);
 
             case AuthorityType.B2C:
+                CheckB2CAuthorityHost(serviceBundle, authorityInfo);
                 return new B2CAuthority(serviceBundle, authorityInfo);
 
             case AuthorityType.Aad:
                 return new AadAuthority(serviceBundle, authorityInfo);
 
             default:
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.InvalidAuthorityType,
                     "Unsupported authority type");
             }
@@ -96,7 +69,12 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static string GetFirstPathSegment(string authority)
         {
-            return new Uri(authority).Segments[1].TrimEnd('/');
+            var uri = new Uri(authority);
+            if (uri.Segments.Length > 1)
+            {
+                return uri.Segments[1].TrimEnd('/');
+            }
+            return string.Empty;
         }
 
         internal static AuthorityType GetAuthorityType(string authority)
@@ -118,7 +96,17 @@ namespace Microsoft.Identity.Client.Instance
         }
 
         internal abstract string GetTenantId();
+
         internal abstract void UpdateTenantId(string tenantId);
+
+        internal bool IsTenantless
+        {
+            get
+            {
+                string tenantId = GetTenantId();
+                return TenantlessTenantNames.Contains(tenantId);
+            }
+        }
 
         internal static string CreateAuthorityUriWithHost(string authority, string host)
         {
@@ -128,6 +116,19 @@ namespace Microsoft.Identity.Client.Instance
             };
 
             return uriBuilder.Uri.AbsoluteUri;
+        }
+
+        private static void CheckB2CAuthorityHost(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
+        {
+            if (serviceBundle.Config.AuthorityInfo.Host != authorityInfo.Host)
+            {
+                throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
+            }
+        }
+
+        internal static string GetEnviroment(string authority)
+        {
+            return new Uri(authority).Host;
         }
     }
 }

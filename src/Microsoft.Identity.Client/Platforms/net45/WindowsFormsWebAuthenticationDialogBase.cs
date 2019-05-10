@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.ComponentModel;
@@ -33,17 +9,17 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
+    // This class (and related/derived classes) must be public so that COM can see them via ComVisible to attach to the browser.
     /// <summary>
     /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal abstract class WindowsFormsWebAuthenticationDialogBase : Form
+    public abstract class WindowsFormsWebAuthenticationDialogBase : Form
     {
         internal RequestContext RequestContext { get; set; }
 
@@ -63,13 +39,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// </summary>
         protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
         {
-            // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx): 
-            // The net session count tracks the number of instances of the web browser control. 
-            // When a web browser control is created, the net session count is incremented. When the control 
-            // is destroyed, the net session count is decremented. When the net session count reaches zero, 
-            // the session cookies for the process are cleared. SetQueryNetSessionCount can be used to prevent 
-            // the session cookies from being cleared for applications where web browser controls are being created 
-            // and destroyed throughout the lifetime of the application. (Because the application lives longer than 
+            // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx):
+            // The net session count tracks the number of instances of the web browser control.
+            // When a web browser control is created, the net session count is incremented. When the control
+            // is destroyed, the net session count is decremented. When the net session count reaches zero,
+            // the session cookies for the process are cleared. SetQueryNetSessionCount can be used to prevent
+            // the session cookies from being cleared for applications where web browser controls are being created
+            // and destroyed throughout the lifetime of the application. (Because the application lives longer than
             // a given instance, session cookies must be retained for a longer periods of time.
             int sessionCount = NativeMethods.SetQueryNetSessionCount(NativeMethods.SessionOp.SESSION_QUERY);
             if (sessionCount == 0)
@@ -230,7 +206,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     "Redirection to non-HTTPS scheme ({0}) found! Webview will fail...", url.Scheme));
                 Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
-                    Error = MsalClientException.NonHttpsRedirectNotSupported,
+                    Error = MsalError.NonHttpsRedirectNotSupported,
                     ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported
                 };
                 readyToClose = true;
@@ -369,7 +345,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 MaximizeBox = false;
                 MinimizeBox = false;
 
-                // If we don't have an owner we need to make sure that the pop up browser 
+                // If we don't have an owner we need to make sure that the pop up browser
                 // window is in the task bar so that it can be selected with the mouse.
                 ShowInTaskbar = null == ownerWindow;
 
@@ -398,12 +374,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
             {
                 string format = "The browser based authentication dialog failed to complete. Reason: {0}";
                 string message = string.Format(CultureInfo.InvariantCulture, format, NavigateErrorStatus.Messages[statusCode]);
-                return new MsalClientException(MsalClientException.AuthenticationUiFailedError, message);
+                return new MsalClientException(MsalError.AuthenticationUiFailedError, message);
             }
 
             string formatUnknown = "The browser based authentication dialog failed to complete for an unknown reason. StatusCode: {0}";
             string messageUnknown = string.Format(CultureInfo.InvariantCulture, formatUnknown, statusCode);
-            return new MsalClientException(MsalClientException.AuthenticationUiFailedError, messageUnknown);
+            return new MsalClientException(MsalError.AuthenticationUiFailedError, messageUnknown);
         }
 
         private sealed class WindowsFormsWin32Window : IWin32Window

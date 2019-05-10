@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Text;
@@ -31,17 +7,18 @@ using System.Text;
 namespace Microsoft.Identity.Client.Cache.Keys
 {
     /// <summary>
-    /// An object representing the key of the token cache Account dictionary. The 
+    /// An object representing the key of the token cache Account dictionary. The
     /// format of the key is not important for this library, as long as it is unique.
     /// </summary>
-    internal class MsalAccountCacheKey 
+    internal class MsalAccountCacheKey : IiOSKey
     {
         private readonly string _environment;
         private readonly string _homeAccountId;
         private readonly string _tenantId;
         private readonly string _username;
+        private readonly string _authorityType;
 
-        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier, string username)
+        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier, string username, string authorityType)
         {
             if (string.IsNullOrEmpty(environment))
             {
@@ -52,6 +29,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             _environment = environment;
             _homeAccountId = userIdentifier;
             _username = username;
+            _authorityType = authorityType;
         }
 
         public override string ToString()
@@ -67,27 +45,26 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         #region iOS
 
-        public string GetiOSAccountKey()
+        public string iOSAccount
         {
-            var stringBuilder = new StringBuilder();
+            get
+            {
+                var stringBuilder = new StringBuilder();
 
-            stringBuilder.Append(_homeAccountId ?? "");
-            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
+                stringBuilder.Append(_homeAccountId ?? "");
+                stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
 
-            stringBuilder.Append(_environment);
+                stringBuilder.Append(_environment);
 
-            return stringBuilder.ToString().ToLowerInvariant();
+                return stringBuilder.ToString().ToLowerInvariant();
+            }
         }
 
-        public string GetiOSServiceKey()
-        {
-            return (_tenantId ?? "").ToLowerInvariant();
-        }
+        public string iOSGeneric => _username.ToLowerInvariant();
 
-        public string GetiOSGenericKey()
-        {
-            return _username.ToLowerInvariant();
-        }
+        public string iOSService => (_tenantId ?? "").ToLowerInvariant();
+
+        public int iOSType => MsalCacheKeys.iOSAuthorityTypeToAttrType[_authorityType];
 
 
         #endregion

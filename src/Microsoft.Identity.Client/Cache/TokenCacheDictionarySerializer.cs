@@ -1,38 +1,17 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache
 {
+    /// <remarks>
+    /// The dictionary serializer does not handle Unknown Nodes
+    /// </remarks>
     internal class TokenCacheDictionarySerializer : ITokenCacheSerializer
     {
         private const string AccessTokenKey = "access_tokens";
@@ -46,7 +25,7 @@ namespace Microsoft.Identity.Client.Cache
             _accessor = accessor;
         }
 
-        public byte[] Serialize()
+        public byte[] Serialize(IDictionary<string, JToken> unkownNodes)
         {
             var accessTokensAsString = new List<string>();
             var refreshTokensAsString = new List<string>();
@@ -86,7 +65,7 @@ namespace Microsoft.Identity.Client.Cache
                              .ToByteArray();
         }
 
-        public void Deserialize(byte[] bytes)
+        public IDictionary<string, JToken> Deserialize(byte[] bytes, bool clearExistingCacheData)
         {
             Dictionary<string, IEnumerable<string>> cacheDict;
 
@@ -96,12 +75,17 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                throw MsalExceptionFactory.GetClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheDictionarySerializerFailedParse, ex);
+                throw new MsalClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheDictionarySerializerFailedParse, ex);
+            }
+
+            if (clearExistingCacheData)
+            {
+                _accessor.Clear();
             }
 
             if (cacheDict == null || cacheDict.Count == 0)
             {
-                return;
+                return null;
             }
 
             if (cacheDict.ContainsKey(AccessTokenKey))
@@ -135,6 +119,8 @@ namespace Microsoft.Identity.Client.Cache
                     _accessor.SaveAccount(MsalAccountCacheItem.FromJsonString(account));
                 }
             }
+
+            return null;
         }
     }
 }

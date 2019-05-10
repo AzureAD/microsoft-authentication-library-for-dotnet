@@ -1,27 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using Android.App;
 using Android.Content;
@@ -31,7 +9,6 @@ using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Cache.Keys;
 
 namespace Microsoft.Identity.Client.Platforms.Android
@@ -64,7 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             if (_accessTokenSharedPreference == null || _refreshTokenSharedPreference == null
                 || _idTokenSharedPreference == null || _accountSharedPreference == null)
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.FailedToCreateSharedPreference,
                     "Fail to create SharedPreference");
             }
@@ -137,22 +114,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
             editor.Apply();
         }
 
-        public ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens()
+        public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
             return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
             return _refreshTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
         {
             return _idTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<MsalAccountCacheItem> GetAllAccounts()
+        public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
         {
             return _accountSharedPreference.All.Values.Cast<string>().Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
         }
@@ -185,28 +162,31 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountKey.ToString(), null));
         }
 
-        /// <inheritdoc />
-        public int RefreshTokenCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public int AccessTokenCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public int AccountCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public int IdTokenCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public void ClearRefreshTokens()
+        #region App Metadata - not used on Android
+        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
         {
             throw new NotImplementedException();
         }
 
-        /// <inheritdoc />
-        public void ClearAccessTokens()
+        public void WriteAppMetadata(MsalAppMetadataCacheItem appMetadata)
         {
             throw new NotImplementedException();
         }
+
+        public void SaveAppMetadata(MsalAppMetadataCacheItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        {
+            throw new NotImplementedException();
+        }
+
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }

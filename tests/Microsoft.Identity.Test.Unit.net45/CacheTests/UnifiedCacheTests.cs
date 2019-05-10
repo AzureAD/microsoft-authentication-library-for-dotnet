@@ -1,36 +1,11 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Cache;
@@ -39,6 +14,10 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using System.Threading;
+using Microsoft.Identity.Client.Instance;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -48,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
 #if !NET_CORE
@@ -74,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
-                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).Result;
                 Assert.IsNotNull(result);
 
                 // make sure Msal stored RT in Adal cache
@@ -84,10 +63,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
                 var requestContext = RequestContext.CreateForTest(app.ServiceBundle);
-                var accounts = app.UserTokenCacheInternal.GetAccounts(MsalTestConstants.AuthorityCommonTenant);
+                var accounts = app.UserTokenCacheInternal.GetAccountsAsync(
+                    MsalTestConstants.AuthorityCommonTenant, requestContext).Result;
                 foreach (IAccount account in accounts)
                 {
-                    app.UserTokenCacheInternal.RemoveMsalAccount(account, requestContext);
+                    app.UserTokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
                 }
 
                 httpManager.AddMockHandler(
@@ -105,11 +85,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     });
 
                 // Using RT from Adal cache for silent call
-                AuthenticationResult result1 = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope,
-                    result.Account,
-                    MsalTestConstants.AuthorityCommonTenant,
-                    false).Result;
+                AuthenticationResult result1 = app
+                    .AcquireTokenSilent(MsalTestConstants.Scope, result.Account)
+                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
+                    .WithForceRefresh(false)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
 
                 Assert.IsNotNull(result1);
             }
@@ -148,15 +129,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
-                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
                 Assert.IsNotNull(result);
 
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.AccountCount);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccounts().Count());
                 Assert.AreEqual(1, app.GetAccountsAsync().Result.Count());
 
                 // login to app1 with same credentials
 
-                var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId_1)
+                var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId2)
                                                          .WithHttpManager(httpManager)
                                                          .WithAuthority(
                                                              new Uri(ClientApplicationBase.DefaultAuthority),
@@ -175,19 +160,23 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 {
                     data = args.TokenCache.SerializeMsalV3();
                 });
-                
+
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
-                result = app1.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                result = app1
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
                 Assert.IsNotNull(result);
 
                 // make sure that only one account cache entity was created
-                Assert.AreEqual(1, app1.UserTokenCacheInternal.Accessor.AccountCount);
                 Assert.AreEqual(1, app1.GetAccountsAsync().Result.Count());
 
-                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.AccessTokenCount);
-                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.RefreshTokenCount);
-                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.IdTokenCount);
+                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(1, app1.UserTokenCacheInternal.Accessor.GetAllAccounts().Count());
 
                 // remove account from app
                 app.RemoveAsync(app.GetAccountsAsync().Result.First()).Wait();
@@ -227,7 +216,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                         app.UserTokenCacheInternal.LegacyPersistence,
                         MsalTestConstants.ClientId);
 
-                Assert.AreEqual(adalUsers.ClientInfoUsers.Keys.First(), adalUsers2.ClientInfoUsers.Keys.First());
+                Assert.AreEqual(
+                    adalUsers.GetUsersWithClientInfo(null).Single().Key,
+                    adalUsers2.GetUsersWithClientInfo(null).Single().Key);
 
                 app.UserTokenCacheInternal.Accessor.ClearAccessTokens();
                 app.UserTokenCacheInternal.Accessor.ClearRefreshTokens();

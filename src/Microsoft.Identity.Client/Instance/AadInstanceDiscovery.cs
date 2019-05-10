@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Concurrent;
@@ -44,7 +20,7 @@ namespace Microsoft.Identity.Client.Instance
         // in the case where a ConfidentialClientApplication is created per-request, for example.
         // So moving this back to static to keep the existing behavior but the rest of the code
         // won't know this is static.
-        private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> _cache =
+        private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> s_cache =
             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
         private readonly ICoreLogger _logger;
@@ -58,13 +34,13 @@ namespace Microsoft.Identity.Client.Instance
             _telemetryManager = telemetryManager;
             if (shouldClearCache)
             {
-                _cache.Clear();
+                s_cache.Clear();
             }
         }
 
         public bool TryGetValue(string host, out InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry)
         {
-            return _cache.TryGetValue(host, out instanceDiscoveryMetadataEntry);
+            return s_cache.TryGetValue(host, out instanceDiscoveryMetadataEntry);
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
@@ -91,7 +67,7 @@ namespace Microsoft.Identity.Client.Instance
 
         public bool TryAddValue(string host, InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry)
         {
-            return _cache.TryAdd(host, instanceDiscoveryMetadataEntry);
+            return s_cache.TryAdd(host, instanceDiscoveryMetadataEntry);
         }
 
         public static string BuildAuthorizeEndpoint(string host, string tenant)
@@ -133,7 +109,6 @@ namespace Microsoft.Identity.Client.Instance
         {
             foreach (var entry in instanceDiscoveryResponse.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
-                entry.TenantDiscoveryEndpoint = instanceDiscoveryResponse.TenantDiscoveryEndpoint;
                 foreach (string aliasedAuthority in entry.Aliases ?? Enumerable.Empty<string>())
                 {
                     TryAddValue(aliasedAuthority, entry);
@@ -146,7 +121,6 @@ namespace Microsoft.Identity.Client.Instance
                 {
                     PreferredNetwork = host,
                     PreferredCache = host,
-                    TenantDiscoveryEndpoint = instanceDiscoveryResponse.TenantDiscoveryEndpoint,
                     Aliases = null
                 });
         }

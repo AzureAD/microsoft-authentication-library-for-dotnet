@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Globalization;
@@ -148,15 +124,15 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             return json;
         }
 
-        private static string AuthorityTypeToString(AuthorityType authorityType)
+        private static string AuthorityTypeToString(CacheV2AuthorityType authorityType)
         {
             switch (authorityType)
             {
-            case AuthorityType.MsSts:
+            case CacheV2AuthorityType.MsSts:
                 return StorageJsonValues.AuthorityTypeMsSts;
-            case AuthorityType.Adfs:
+            case CacheV2AuthorityType.Adfs:
                 return StorageJsonValues.AuthorityTypeAdfs;
-            case AuthorityType.Msa:
+            case CacheV2AuthorityType.Msa:
                 return StorageJsonValues.AuthorityTypeMsa;
             default:
                 return StorageJsonValues.AuthorityTypeOther;
@@ -186,27 +162,27 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             return account;
         }
 
-        private static AuthorityType AuthorityTypeToEnum(string authorityTypeString)
+        private static CacheV2AuthorityType AuthorityTypeToEnum(string authorityTypeString)
         {
             if (string.Compare(
                     authorityTypeString,
                     StorageJsonValues.AuthorityTypeMsSts,
                     StringComparison.OrdinalIgnoreCase) == 0)
             {
-                return AuthorityType.MsSts;
+                return CacheV2AuthorityType.MsSts;
             }
 
             if (string.Compare(authorityTypeString, StorageJsonValues.AuthorityTypeAdfs, StringComparison.OrdinalIgnoreCase) == 0)
             {
-                return AuthorityType.Adfs;
+                return CacheV2AuthorityType.Adfs;
             }
 
             if (string.Compare(authorityTypeString, StorageJsonValues.AuthorityTypeMsa, StringComparison.OrdinalIgnoreCase) == 0)
             {
-                return AuthorityType.Msa;
+                return CacheV2AuthorityType.Msa;
             }
 
-            return AuthorityType.Other;
+            return CacheV2AuthorityType.Other;
         }
 
         public static JObject AppMetadataToJson(AppMetadata appMetadata)

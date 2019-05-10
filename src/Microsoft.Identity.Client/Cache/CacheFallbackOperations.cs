@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -31,17 +7,16 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
     internal static class CacheFallbackOperations
     {
-        internal /* internal for testing only */ const string DifferentEnvError = 
+        internal /* internal for testing only */ const string DifferentEnvError =
             "Not expecting the RT and IdT to have different env when adding to legacy cache";
-        internal /* internal for testing only */ const string DifferentAuthorityError = 
+        internal /* internal for testing only */ const string DifferentAuthorityError =
             "Not expecting authority to have a different env than the RT and IdT";
 
         public static void WriteAdalRefreshToken(
@@ -57,7 +32,13 @@ namespace Microsoft.Identity.Client.Cache
             {
                 if (rtItem == null)
                 {
-                    logger.Info("No refresh token available. Skipping MSAL refresh token cache write");
+                    logger.Info("No refresh token available. Skipping writing to ADAL legacy cache.");
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(rtItem.FamilyId))
+                {
+                    logger.Info("Not writing FRT in ADAL legacy cache");
                     return;
                 }
 
@@ -76,13 +57,16 @@ namespace Microsoft.Identity.Client.Cache
                     },
                     RefreshToken = rtItem.Secret,
                     RawClientInfo = rtItem.RawClientInfo,
-                    //ResourceInResponse is needed to treat RT as an MRRT. See IsMultipleResourceRefreshToken 
+                    //ResourceInResponse is needed to treat RT as an MRRT. See IsMultipleResourceRefreshToken
                     //property in AdalResultWrapper and its usage. Stronger design would be for the STS to return resource
                     //for which the token was issued as well on v2 endpoint.
                     ResourceInResponse = scope
                 };
 
-                IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
+                IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(
+                    logger,
+                    legacyCachePersistence.LoadCache());
+
                 dictionary[key] = wrapper;
                 legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(logger, dictionary));
             }
@@ -105,63 +89,58 @@ namespace Microsoft.Identity.Client.Cache
 
         /// <summary>
         /// Returns a tuple where
-        /// 
-        /// Item1 is a map of ClientInfo -> AdalUserInfo for those users that have ClientInfo 
+        ///
+        /// Item1 is a map of ClientInfo -> AdalUserInfo for those users that have ClientInfo
         /// Item2 is a list of AdalUserInfo for those users that do not have ClientInfo
         /// </summary>
-        public static AdalUsersForMsalResult GetAllAdalUsersForMsal(
+        public static AdalUsersForMsal GetAllAdalUsersForMsal(
             ICoreLogger logger,
-            ILegacyCachePersistence legacyCachePersistence, 
+            ILegacyCachePersistence legacyCachePersistence,
             string clientId)
         {
-            var clientInfoToAdalUserMap = new Dictionary<string, AdalUserInfo>();
-            var adalUsersWithoutClientInfo = new List<AdalUserInfo>();
+            var userEntries = new List<AdalUserForMsalEntry>();
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                     AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
-                // filter by client id and environment first
-                // TODO - authority check needs to be updated for alias check
-                List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
-                    dictionary.Where(p =>
-                        p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
-                {
-                    if (!string.IsNullOrEmpty(pair.Value.RawClientInfo))
-                    {
-                        clientInfoToAdalUserMap[pair.Value.RawClientInfo] = pair.Value.Result.UserInfo;
-                    }
-                    else
-                    {
-                        adalUsersWithoutClientInfo.Add(pair.Value.Result.UserInfo);
-                    }
-                }
+                // filter by client id
+                dictionary.Where(p =>
+                        p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
+                        !string.IsNullOrEmpty(p.Key.Authority))
+                        .ToList()
+                        .ForEach(kvp =>
+                            {
+                                userEntries.Add(new AdalUserForMsalEntry(
+                                    authority: kvp.Key.Authority,
+                                    clientId: clientId,
+                                    clientInfo: kvp.Value.RawClientInfo, // optional, missing in ADAL v3
+                                    userInfo: kvp.Value.Result.UserInfo));
+                            });
             }
             catch (Exception ex)
             {
                 logger.WarningPiiWithPrefix(ex, "An error occurred while reading accounts in ADAL format from the cache for MSAL. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
-
-                return new AdalUsersForMsalResult();
             }
-            return new AdalUsersForMsalResult(clientInfoToAdalUserMap, adalUsersWithoutClientInfo);
+
+            return new AdalUsersForMsal(userEntries);
         }
 
         /// <summary>
-        /// Algorithm to delete: 
-        /// 
-        /// DisplayableId cannot be null 
+        /// Algorithm to delete:
+        ///
+        /// DisplayableId cannot be null
         /// Removal is scoped by enviroment and clientId;
-        /// 
+        ///
         /// If accountId != null then delete everything with the same clientInfo
         /// otherwise, delete everything with the same displayableId
-        /// 
-        /// Notes: 
+        ///
+        /// Notes:
         /// - displayableId can change rarely
         /// - ClientCredential Grant uses the app token cache, not the user token cache, so this algorithm does not apply
         /// (nor will GetAccounts / RemoveAccount work)
-        /// 
+        ///
         /// </summary>
         public static void RemoveAdalUser(
             ICoreLogger logger,
@@ -258,46 +237,35 @@ namespace Microsoft.Identity.Client.Cache
         public static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
-            ISet<string> environmentAliases, 
-            string clientId, 
-            string upn, 
-            string uniqueId, 
-            string rawClientInfo)
+            ISet<string> environmentAliases,
+            string clientId,
+            string upn,
+            string uniqueId)
         {
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                     AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
-                //filter by client id and environment first
-                //TODO - authority check needs to be updated for alias check
+                // filter by client id and environment first
+                // TODO - authority check needs to be updated for alias check
                 List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
                     dictionary.Where(p =>
                         p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
                         environmentAliases.Contains(new Uri(p.Key.Authority).Host)).ToList();
 
-                //if client info is provided then use it to filter
-                if (!string.IsNullOrEmpty(rawClientInfo))
-                {
-                    List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> clientInfoEntries =
-                        listToProcess.Where(p => rawClientInfo.Equals(p.Value.RawClientInfo, StringComparison.OrdinalIgnoreCase)).ToList();
-                    if (clientInfoEntries.Any())
-                    {
-                        listToProcess = clientInfoEntries;
-                    }
-                }
-
-                //if upn is provided then use it to filter
+                // if upn is provided then use it to filter
                 if (!string.IsNullOrEmpty(upn))
                 {
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> upnEntries =
                         listToProcess.Where(p => upn.Equals(p.Key.DisplayableId, StringComparison.OrdinalIgnoreCase)).ToList();
+
                     if (upnEntries.Any())
                     {
                         listToProcess = upnEntries;
                     }
                 }
 
-                //if userId is provided then use it to filter
+                // if userId is provided then use it to filter
                 if (!string.IsNullOrEmpty(uniqueId))
                 {
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> uniqueIdEntries =
@@ -307,12 +275,14 @@ namespace Microsoft.Identity.Client.Cache
                         listToProcess = uniqueIdEntries;
                     }
                 }
-
                 List<MsalRefreshTokenCacheItem> list = new List<MsalRefreshTokenCacheItem>();
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
                 {
-                    list.Add(new MsalRefreshTokenCacheItem
-                        (new Uri(pair.Key.Authority).Host, pair.Key.ClientId, pair.Value.RefreshToken, pair.Value.RawClientInfo));
+                    list.Add(new MsalRefreshTokenCacheItem(
+                        new Uri(pair.Key.Authority).Host,
+                        pair.Key.ClientId,
+                        pair.Value.RefreshToken,
+                        pair.Value.RawClientInfo));
                 }
 
                 return list;
@@ -329,14 +299,13 @@ namespace Microsoft.Identity.Client.Cache
         public static MsalRefreshTokenCacheItem GetAdalEntryForMsal(
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
-            string preferredEnvironment, 
-            ISet<string> environmentAliases, 
-            string clientId, 
-            string upn, 
-            string uniqueId, 
-            string rawClientInfo)
+            string preferredEnvironment,
+            ISet<string> environmentAliases,
+            string clientId,
+            string upn,
+            string uniqueId)
         {
-            var adalRts = GetAllAdalEntriesForMsal(logger, legacyCachePersistence, environmentAliases, clientId, upn, uniqueId, rawClientInfo);
+            var adalRts = GetAllAdalEntriesForMsal(logger, legacyCachePersistence, environmentAliases, clientId, upn, uniqueId);
 
             List<MsalRefreshTokenCacheItem> filteredByPrefEnv = adalRts.Where
                 (rt => rt.Environment.Equals(preferredEnvironment, StringComparison.OrdinalIgnoreCase)).ToList();

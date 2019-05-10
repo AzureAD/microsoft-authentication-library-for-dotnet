@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 
@@ -33,7 +9,7 @@ using Microsoft.Identity.Client;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.AppConfig;
+using System.Threading;
 
 namespace MacCocoaApp
 {
@@ -41,7 +17,7 @@ namespace MacCocoaApp
     {
         private const string ClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private const string Authority = "https://login.microsoftonline.com/common";
-        private readonly string[] Scopes = new[] { "User.Read" };
+        private readonly string[] _scopes = new[] { "User.Read" };
         // Consider having a single object for the entire app.
         private readonly IPublicClientApplication _pca;
 
@@ -92,7 +68,7 @@ namespace MacCocoaApp
             set => base.RepresentedObject = value;
         }
 
-      
+
 #pragma warning disable AvoidAsyncVoid // Avoid async void
         async partial void GetTokenClickAsync(NSObject sender)
 #pragma warning restore AvoidAsyncVoid // Avoid async void
@@ -107,17 +83,23 @@ namespace MacCocoaApp
                 {
                     try
                     {
-                        result = await _pca.AcquireTokenSilentAsync(Scopes, firstExistingAccount).ConfigureAwait(false);
+                        result = await _pca
+                            .AcquireTokenSilent(_scopes, firstExistingAccount)
+                            .ExecuteAsync(CancellationToken.None)
+                            .ConfigureAwait(false);
                     }
                     catch (MsalUiRequiredException)
                     {
-                        Console.WriteLine("No token found the in the cache, need to call AcquireTokenAsync");                
+                        Console.WriteLine("No token found the in the cache, need to call AcquireTokenAsync");
                     }
                 }
 
                 if (result == null)
                 {
-                    result = await _pca.AcquireTokenAsync(Scopes).ConfigureAwait(false);
+                    result = await _pca
+                        .AcquireTokenInteractive(_scopes)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
                 }
 
                 UpdateStatus($"Access token acquired: {result.AccessToken}");
@@ -125,7 +107,7 @@ namespace MacCocoaApp
             }
             catch (Exception e)
             {
-                UpdateStatus("Unexpected error: " + 
+                UpdateStatus("Unexpected error: " +
                     e.Message + Environment.NewLine + e.StackTrace);
             }
         }
@@ -166,13 +148,16 @@ namespace MacCocoaApp
             try
             {
                 // Left out checking the token cache for clarity
-                var result = await _pca.AcquireTokenWithDeviceCodeAsync(
-                                   Scopes,
-                                   deviceCodeResult =>
-                                   {
-                                       UpdateStatus(deviceCodeResult.Message);
-                                       return Task.FromResult(0);
-                                   }).ConfigureAwait(false);
+                var result = await _pca
+                    .AcquireTokenWithDeviceCode(
+                        _scopes,
+                        deviceCodeResult =>
+                        {
+                            UpdateStatus(deviceCodeResult.Message);
+                            return Task.FromResult(0);
+                        })
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
                 UpdateStatus($"Access token acquired: {result.AccessToken}");
             }

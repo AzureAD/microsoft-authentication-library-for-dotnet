@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
@@ -73,6 +49,8 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
         public const string RedirectUriEntryId = "redirectUriEntry";
         public const string ConsentAcceptId = "idBtn_Accept";
+        public const string PasswordInput = "password";
+        public const string AlternativePasswordInput = "Passwd";
 
         // ADFSv2 fields
         public const string AdfsV2WebUsernameInputId = "ContentPlaceHolder1_UsernameTextBox";
@@ -85,6 +63,9 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string B2CWebSubmitId = "next";
         public const string B2CWebPasswordId = "password";
         public const string B2CLoginAuthority = "b2clogin.com";
+        public const string ROPC = "ROPC";
+        public const string ROPCUsernameId = "usernameId";
+        public const string ROPCPasswordId = "passwordId";
         public const string MicrosoftOnlineAuthority = "login.microsoftonline.com";
         public const string NonB2CAuthority = "non-b2c authority";
         public const string B2CEditProfileAuthority = "Edit profile policy authority";
@@ -108,6 +89,5 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         // Test Constants
         public const int ResultCheckPolliInterval = 1000;
         public const int MaximumResultCheckRetryAttempts = 20;
-
     }
 }

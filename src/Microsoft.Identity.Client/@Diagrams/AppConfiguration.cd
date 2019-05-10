@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
-  <Class Name="Microsoft.Identity.Client.AppConfig.AbstractApplicationBuilder&lt;T&gt;">
+  <Class Name="Microsoft.Identity.Client.AbstractApplicationBuilder&lt;T&gt;">
     <Position X="1.5" Y="6.5" Width="9.25" />
     <Members>
       <Method Name="AbstractApplicationBuilder" Hidden="true" />
@@ -15,11 +15,11 @@
       <Method Name="WithOptions" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAQDAAAIEiCAAgAAAAAAAAACCAAIAhAAAABARAIgAAQ=</HashCode>
+      <HashCode>AAQDAAAIEiCAAgAAAAAAAAACCAAIAhAAAABARAIgAAA=</HashCode>
       <FileName>AppConfig\AbstractApplicationBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Microsoft.Identity.Client.AppConfig.PublicClientApplicationBuilder">
+  <Class Name="Microsoft.Identity.Client.PublicClientApplicationBuilder">
     <Position X="0.5" Y="12" Width="7" />
     <Members>
       <Method Name="BuildConcrete" Hidden="true" />
@@ -33,22 +33,21 @@
       <FileName>AppConfig\PublicClientApplicationBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Microsoft.Identity.Client.AppConfig.ConfidentialClientApplicationBuilder">
-    <Position X="8" Y="12" Width="3.75" />
+  <Class Name="Microsoft.Identity.Client.ConfidentialClientApplicationBuilder">
+    <Position X="8" Y="12" Width="5.25" />
     <Members>
       <Method Name="BuildConcrete" Hidden="true" />
       <Method Name="ConfidentialClientApplicationBuilder" Hidden="true" />
       <Method Name="Validate" Hidden="true" />
-      <Method Name="WithClientCredential" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAACgBAgAAAAAAAAAAACAgEAAAEAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAACgAAgAAAAAAAAAAACAgEAAAEAAAAAAAAA=</HashCode>
       <FileName>AppConfig\ConfidentialClientApplicationBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Microsoft.Identity.Client.AppConfig.ApplicationOptions">
+  <Class Name="Microsoft.Identity.Client.ApplicationOptions">
     <Position X="4" Y="14.75" Width="4" />
-    <AssociationLine Name="AadAuthorityAudience" Type="Microsoft.Identity.Client.AppConfig.AadAuthorityAudience" FixedFromPoint="true" FixedToPoint="true">
+    <AssociationLine Name="AadAuthorityAudience" Type="Microsoft.Identity.Client.AadAuthorityAudience" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="8" Y="16.316" />
         <Point X="8.375" Y="16.316" />
@@ -69,23 +68,15 @@
       <Property Name="LogLevel" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="Microsoft.Identity.Client.AppConfig.ConfidentialClientApplicationOptions">
-    <Position X="5.75" Y="17.75" Width="3" />
-    <InheritanceLine Type="Microsoft.Identity.Client.AppConfig.ApplicationOptions" ManuallyRouted="true" FixedToPoint="true">
-      <Path>
-        <Point X="6" Y="17.007" />
-        <Point X="6" Y="17.375" />
-        <Point X="7.375" Y="17.375" />
-        <Point X="7.375" Y="17.75" />
-      </Path>
-    </InheritanceLine>
+  <Class Name="Microsoft.Identity.Client.ConfidentialClientApplicationOptions">
+    <Position X="5.25" Y="17.75" Width="3" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>AppConfig\ConfidentialClientApplicationOptions.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Microsoft.Identity.Client.AppConfig.PublicClientApplicationOptions" Collapsed="true">
-    <Position X="3" Y="17.75" Width="2.5" />
+  <Class Name="Microsoft.Identity.Client.PublicClientApplicationOptions" Collapsed="true">
+    <Position X="2" Y="17.75" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>AppConfig\PublicClientApplicationOptions.cs</FileName>
@@ -122,7 +113,7 @@
     </Members>
     <TypeIdentifier>
       <HashCode>AAAAAAAEAEAQDAAACAAACAAAAAAAAACAAAAAAAAABAA=</HashCode>
-      <FileName>IConfidentialClientApplication.cs</FileName>
+      <FileName>MigrationAid\MigrationAid.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="AppTokenCache" />
@@ -148,14 +139,14 @@
       <FileName>ITokenCache.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Microsoft.Identity.Client.AppConfig.IAppConfig" Collapsed="true">
+  <Interface Name="Microsoft.Identity.Client.IAppConfig" Collapsed="true">
     <Position X="12.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAIAgAAAQAAAIAgAAAgAAAAABAAAKAAABgAAAAAAA=</HashCode>
+      <HashCode>AAAAAAgAAAQAAAIAgAAAgAAAAAhAAAKAAABgARAAAAA=</HashCode>
       <FileName>AppConfig\IAppConfig.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Enum Name="Microsoft.Identity.Client.AppConfig.AadAuthorityAudience">
+  <Enum Name="Microsoft.Identity.Client.AadAuthorityAudience">
     <Position X="9.75" Y="16.75" Width="2.5" />
     <Members>
       <Field Name="None" Hidden="true" />
@@ -165,7 +156,7 @@
       <FileName>AppConfig\AadAuthorityAudience.cs</FileName>
     </TypeIdentifier>
   </Enum>
-  <Enum Name="Microsoft.Identity.Client.AppConfig.AzureCloudInstance">
+  <Enum Name="Microsoft.Identity.Client.AzureCloudInstance">
     <Position X="9.75" Y="14.75" Width="1.75" />
     <Members>
       <Field Name="None" Hidden="true" />

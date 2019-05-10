@@ -1,0 +1,107 @@
+﻿{
+  "AccessToken": {
+    "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-accesstoken-0615b6ca-88d4-4884-8729-b178178f7c27-49f548d0-12b7-4169-a390-bb5304d24462-calendars.read calendars.read.shared files.read.all files.readwrite.appfolder openid profile user.read email": {
+      "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "AccessToken",
+      "realm": "49f548d0-12b7-4169-a390-bb5304d24462",
+      "target": "Calendars.Read Calendars.Read.Shared Files.Read.All Files.ReadWrite.AppFolder openid profile User.Read email",
+      "user_assertion_hash": null,
+      "cached_at": "1554221881",
+      "expires_on": "1554225481",
+      "extended_expires_on": "1554225481",
+      "ext_expires_on": "1554225481"
+    },
+    "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-accesstoken-0615b6ca-88d4-4884-8729-b178178f7c27-72f988bf-86f1-41af-91ab-2d7cd011db47-openid profile user.read email": {
+      "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "AccessToken",
+      "realm": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "target": "openid profile User.Read email",
+      "user_assertion_hash": null,
+      "cached_at": "1554222198",
+      "expires_on": "1554225797",
+      "extended_expires_on": "1554225797",
+      "ext_expires_on": "1554225797"
+    }
+  },
+  "RefreshToken": {
+    "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-refreshtoken-0615b6ca-88d4-4884-8729-b178178f7c27--": {
+      "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "RefreshToken",
+      "family_id": null
+    },
+    "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-refreshtoken-0615b6ca-88d4-4884-8729-b178178f7c27--": {
+      "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "environment": "sts.windows.net",
+      "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "RefreshToken",
+      "family_id": null
+    }
+  },
+  "IdToken": {
+    "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-idtoken-0615b6ca-88d4-4884-8729-b178178f7c27-49f548d0-12b7-4169-a390-bb5304d24462-": {
+      "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "IdToken",
+      "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
+    },
+    "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-idtoken-0615b6ca-88d4-4884-8729-b178178f7c27-72f988bf-86f1-41af-91ab-2d7cd011db47-": {
+      "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "secret": "secret",
+      "credential_type": "IdToken",
+      "realm": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+    }
+  },
+  "Account": {
+    "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-49f548d0-12b7-4169-a390-bb5304d24462": {
+      "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+      "environment": "login.windows.net",
+      "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+      "username": "user2@bogavrilLTD.onmicrosoft.com",
+      "name": "Art Blogs",
+      "given_name": null,
+      "family_name": null,
+      "local_account_id": "ae821e4d-f408-451a-af82-882691148603",
+      "authority_type": "MSSTS",
+      "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
+    },
+    "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47-login.windows.net-72f988bf-86f1-41af-91ab-2d7cd011db47": {
+      "home_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7.72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "environment": "login.microsoft.com",
+      "client_info": "eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0",
+      "username": "user1@microsoft.com",
+      "name": "Joe Blogs",
+      "given_name": null,
+      "family_name": null,
+      "local_account_id": "6eeda3a1-c3b9-4e92-a94d-965a50c06de7",
+      "authority_type": "MSSTS",
+      "realm": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+    }
+  },
+  "AppMetadata": {
+    "appmetadata-login.windows.net-0615b6ca-88d4-4884-8729-b178178f7c27": {
+      "environment": "login.windows.net",
+      "client_id": "0615b6ca-88d4-4884-8729-b178178f7c27",
+      "family_id": null
+    }
+  }
+}

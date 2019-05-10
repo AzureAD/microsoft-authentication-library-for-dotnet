@@ -1,34 +1,14 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -48,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
 
-        public const string SovereignEnvironment = "login.microsoftonline.de";
+        public const string SovereignNetworkEnvironment = "login.microsoftonline.de";
         public const string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/home/";
         public const string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
@@ -62,12 +42,14 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
         public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
         public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";
-        public const string B2CRandomHost = "https://sometenantid.randomhost.com/tfp/sometenantid/policy/";
+        public const string B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/sometenantid/policy/";
+        public const string B2CCustomDomain = "https://catsareamazing.com/tfp/catsareamazing/policy/";
         public const string B2CLoginAuthorityUsGov = "https://sometenantid.b2clogin.us/tfp/sometenantid/policy/";
         public const string B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/policy/";
         public const string B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/policy/";
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
-        public static readonly string ClientId_1 = "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3";
+        public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+        public const string FamilyId = "1";
         public const string UniqueId = "unique_id";
         public const string IdentityProvider = "my-idp";
         public const string Name = "First Last";
@@ -99,6 +81,9 @@ namespace Microsoft.Identity.Test.Unit
                 {"key2", "value2"}
             };
 
+        public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/e360740b3411452b887e6c3097cb1037";
+        public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/243c858fe7b9411cbcf05a2a284d8a84";
+
         public enum AuthorityType { B2C };
         public static string[] ProdEnvAliases = new string[] {
                                 "login.microsoftonline.com",
@@ -124,6 +109,21 @@ namespace Microsoft.Identity.Test.Unit
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", uid, utid);
         }
 
+        public static MsalTokenResponse CreateMsalTokenResponse()
+        {
+            return new MsalTokenResponse
+            {
+                IdToken = MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                AccessToken = "access-token",
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = "refresh-token",
+                Scope = MsalTestConstants.Scope.AsSingleString(),
+                TokenType = "Bearer"
+            };
+        }
+
         public static readonly Account User = new Account(UserIdentifier, DisplayableId, ProductionPrefNetworkEnvironment);
 
         public static readonly string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
@@ -145,8 +145,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string BrokerClaims = "testClaims";
 
 #if !ANDROID && !iOS && !WINDOWS_APP
-        public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
-        public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
+        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
+        public static readonly ClientCredentialWrapper CredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
 #endif
     }
 
@@ -157,6 +157,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string PublicClientId = "PublicClientId";
         public const string ConfidentialClientId = "ConfidentialClientId";
         public const string ClientRedirectUri = "http://localhost:8080";
-        public static readonly SortedSet<string> SupportedScopes = new SortedSet<string>(new[] {"openid", "email", "profile" });
+        public static readonly SortedSet<string> SupportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" });
     }
 }

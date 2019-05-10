@@ -1,33 +1,11 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
@@ -40,46 +18,6 @@ namespace Microsoft.Identity.Client
     public class MsalServiceException : MsalException
     {
         /// <summary>
-        /// Service is unavailable and returned HTTP error code within the range of 500-599
-        /// <para>Mitigation</para> you can retry after a delay. Note that the retry-after header is not yet
-        /// surfaced in MSAL.NET (on the backlog)
-        /// </summary>
-        public const string ServiceNotAvailable = "service_not_available";
-
-        /// <summary>
-        /// The Http Request to the STS timed out.
-        /// <para>Mitigation</para> you can retry after a delay.
-        /// </summary>
-        public const string RequestTimeout = "request_timeout";
-
-        /// <summary>
-        /// Upn required
-        /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:PublicClientApplication"/> which
-        /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c> 
-        /// expected by the service
-        /// <para>Remediation</para> Make sure in your code that you enforce <c>loginHint</c> to be a UPN
-        /// </summary>
-        public const string UpnRequired = "upn_required";
-
-        /// <summary>
-        /// No passive auth endpoint was found in the OIDC configuration of the authority
-        /// <para>What happens?</para> When the libraries go to the authority and get its open id connect configuration
-        /// it expects to find a Passive Auth Endpoint entry, and could not find it.
-        /// <para>remediation</para> Check that the authority configured for the application, or passed on some overrides of token acquisition tokens
-        /// supporting authority override is correct
-        /// </summary>
-        public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
-
-        /// <summary>
-        /// Invalid authority
-        /// <para>What happens</para> When the library attempts to discover the authority and get the endpoints it needs to
-        /// acquire a token, it got an un-authorize HTTP code or an unexpected response
-        /// <para>remediation</para> Check that the authority configured for the application, or passed on some overrides of token acquisition tokens
-        /// supporting authority override is correct
-        /// </summary>
-        public const string InvalidAuthority = "invalid_authority";
-
-        /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code, error message and a reference to the inner exception that is the cause of
         /// this exception.
@@ -89,10 +27,13 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        public MsalServiceException(string errorCode, string errorMessage) 
-            : base(
-                errorCode, errorMessage)
+        public MsalServiceException(string errorCode, string errorMessage)
+            : base(errorCode, errorMessage)
         {
+            if (string.IsNullOrWhiteSpace(errorMessage))
+            {
+                throw new ArgumentNullException(nameof(errorMessage));
+            }
         }
 
         /// <summary>
@@ -106,7 +47,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="statusCode">Status code of the resposne received from the service.</param>
-        public MsalServiceException(string errorCode, string errorMessage, int statusCode) 
+        public MsalServiceException(string errorCode, string errorMessage, int statusCode)
             : this(errorCode, errorMessage)
         {
             StatusCode = statusCode;
@@ -128,8 +69,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         public MsalServiceException(string errorCode, string errorMessage,
             Exception innerException)
-            : base(
-                errorCode, errorMessage, innerException)
+            : base(errorCode, errorMessage, innerException)
         {
         }
 
@@ -156,7 +96,6 @@ namespace Microsoft.Identity.Client
             StatusCode = statusCode;
         }
 
-
         /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code, error message and a reference to the inner exception that is the cause of
@@ -173,17 +112,51 @@ namespace Microsoft.Identity.Client
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.
         /// </param>
-        public MsalServiceException(string errorCode, string errorMessage, int statusCode, string claims,
+        public MsalServiceException(
+            string errorCode,
+            string errorMessage,
+            int statusCode,
+            string claims,
             Exception innerException)
-            : this(
-                errorCode, errorMessage, statusCode, innerException)
+            : this(errorCode, errorMessage, statusCode, innerException)
         {
             Claims = claims;
         }
 
+        private HttpResponse _httpResponse;
+
+        internal HttpResponse HttpResponse
+        {
+            get => _httpResponse;
+            set
+            {
+                _httpResponse = value;
+                ResponseBody = _httpResponse?.Body;
+                StatusCode = _httpResponse != null ? (int)_httpResponse.StatusCode : 0;
+                Headers = _httpResponse?.Headers;
+
+                // In most cases we can deserialize the body to get more details such as the suberror
+                OAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(_httpResponse?.Body);
+            }
+        }
+
+        private OAuth2ResponseBase _oauth2ResponseBase;
+
+        internal OAuth2ResponseBase OAuth2Response
+        {
+            get => _oauth2ResponseBase;
+            set
+            {
+                _oauth2ResponseBase = value;
+                Claims = _oauth2ResponseBase?.Claims;
+                CorrelationId = _oauth2ResponseBase?.CorrelationId;
+                SubError = _oauth2ResponseBase?.SubError;
+            }
+        }
+
         /// <summary>
         /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c> in the inner
-        /// <see cref="T:System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
+        /// <see cref="System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
         /// http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
         /// You can use this code for purposes such as implementing retry logic or error investigation.
         /// </summary>
@@ -193,64 +166,40 @@ namespace Microsoft.Identity.Client
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
         /// <summary>
-        /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to 
+        /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to
         /// provide additional claims, such as doing two factor authentication. The are two cases:
         /// <list type="bullent">
         /// <item><description>
-        /// If your application is a <see cref="PublicClientApplication"/>, you should just call an override of <see cref="PublicClientApplication.AcquireTokenAsync(System.Collections.Generic.IEnumerable{string}, string, Prompt, string, System.Collections.Generic.IEnumerable{string}, string)"/>
-        /// in <see cref="PublicClientApplication"/> having an <c>extraQueryParameter</c> argument, and add the following string <c>$"claims={ex.Claims}"</c>
-        /// to the extraQueryParameters, where ex is an instance of this exception.
+        /// If your application is a <see cref="IPublicClientApplication"/>, you should just call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
+        /// and add the <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims(string)"/> modifier.
         /// </description></item>
-        /// <item>><description>If your application is a <see cref="ConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize 
+        /// <item>><description>If your application is a <see cref="IConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize
         /// exception with a message containing the claims</description></item>
         /// </list>
         /// For more details see https://aka.ms/msal-net-claim-challenge
         /// </summary>
         public string Claims { get; internal set; }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
-        
+
         /// <summary>
         /// Raw response body received from the server.
         /// </summary>
         public string ResponseBody { get; internal set; }
 
-        /// <summary>
-        /// Contains the http headers from the server response that indicated an error. 
-        /// </summary>
         /// <remarks>
-        /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the 
-        /// time specified in the Retry-After header to avoid a retry storm. 
+        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
+        /// first.
         /// </remarks>
-        public HttpResponseHeaders Headers { get; internal set; }
+        internal string SubError { get; set; }
 
         /// <summary>
-        /// A string that provides more details about the error. Common sub errors are:
-        /// <list type="bullet">
-        /// <item>
-        /// <term>message_only</term>
-        /// <description>
-        /// User will be shown an informational message with no immediate remediation steps.
-        /// For example, access was blocked due to location or the device is not domain joined
-        /// </description>
-        /// </item>
-        /// <item>
-        /// <term>additional_action</term>
-        /// <description>
-        /// This indicates additional action is required that is in the user control, 
-        /// but is outside of the sign in session .For example, enroll in MDM or
-        /// install an app that uses Intune app protection.
-        /// </description>
-        /// </item>
-        /// <item>
-        /// <term>basic_action</term>
-        /// <description>
-        /// This indicates a simple action is required by the end user, like MFA.
-        /// Custom controls fall into this category..
-        /// </description>
-        /// </item>
-        /// </list>
+        /// Contains the http headers from the server response that indicated an error.
         /// </summary>
-        public string SubError { get; internal set; }
+        /// <remarks>
+        /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the
+        /// time specified in the Retry-After header to avoid a retry storm.
+        /// </remarks>
+        public HttpResponseHeaders Headers { get; internal set; }
 
         /// <summary>
         /// An ID that can used to piece up a single authentication flow.
@@ -265,16 +214,16 @@ namespace Microsoft.Identity.Client
         {
             return base.ToString() + string.Format(
                 CultureInfo.InvariantCulture,
-                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}", 
-                StatusCode, 
-                ResponseBody, 
+                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}",
+                StatusCode,
+                ResponseBody,
                 Headers);
         }
 
         private const string ClaimsKey = "claims";
         private const string ResponseBodyKey = "response_body";
-        private const string SubErrorKey = "sub_error";
         private const string CorrelationIdKey = "correlation_id";
+        private const string SubErrorKey = "sub_error";
 
         internal override void PopulateJson(JObject jobj)
         {
@@ -282,8 +231,8 @@ namespace Microsoft.Identity.Client
 
             jobj[ClaimsKey] = Claims;
             jobj[ResponseBodyKey] = ResponseBody;
-            jobj[SubErrorKey] = SubError;
             jobj[CorrelationIdKey] = CorrelationId;
+            jobj[SubErrorKey] = SubError;
         }
 
         internal override void PopulateObjectFromJson(JObject jobj)
@@ -292,8 +241,8 @@ namespace Microsoft.Identity.Client
 
             Claims = JsonUtils.GetExistingOrEmptyString(jobj, ClaimsKey);
             ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
-            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
             CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
+            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
         }
     }
 }

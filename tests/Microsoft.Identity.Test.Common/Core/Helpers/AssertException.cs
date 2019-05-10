@@ -1,29 +1,5 @@
-//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Diagnostics;
@@ -36,7 +12,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public static class AssertException
     {
-        
         public static void DoesNotThrow(Action testCode)
         {
             var ex = Recorder.Exception<Exception>(testCode);
@@ -46,7 +21,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
         }
 
-        
         public static void DoesNotThrow(Func<object> testCode)
         {
             var ex = Recorder.Exception<Exception>(testCode);
@@ -56,14 +30,12 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
         }
 
-        
         public static TException Throws<TException>(Action testCode)
              where TException : Exception
         {
             return Throws<TException>(testCode, false);
         }
 
-        
         public static TException Throws<TException>(Action testCode, bool allowDerived)
              where TException : Exception
         {
@@ -79,14 +51,12 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return exception;
         }
 
-        
         public static TException Throws<TException>(Func<object> testCode)
             where TException : Exception
         {
             return Throws<TException>(testCode, false);
         }
 
-        
         public static TException Throws<TException>(Func<object> testCode, bool allowDerived)
             where TException : Exception
         {
@@ -102,24 +72,36 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return exception;
         }
 
-        
-        public static T TaskThrows<T>(Func<Task> testCode, bool allowDerived = false)
+        public static async Task<T> TaskThrowsAsync<T>(Func<Task> testCode, bool allowDerived = false)
             where T : Exception
         {
-            var exception = Recorder.Exception(() => testCode().Wait());
+            Exception exception = null;
+            try
+            {
+                await testCode().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
 
             if (exception == null)
             {
-                throw new AssertFailedException("AssertExtensions.Throws failed. No exception occurred.");
+                throw new AssertFailedException("AssertExtensions.TaskThrowsAsync failed. No exception occurred.");
             }
 
             if (exception is AggregateException aggEx)
             {
+                if (aggEx.InnerException.GetType() == typeof(AssertFailedException))
+                {
+                    throw aggEx.InnerException;
+                }
+
                 var exceptionsMatching = aggEx.InnerExceptions.OfType<T>().ToList();
 
                 if (!exceptionsMatching.Any())
                 {
-                    throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
+                    ThrowAssertFailedForExceptionMismatch(typeof(T), exception);
                 }
 
                 return exceptionsMatching.First();
@@ -130,7 +112,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return (exception as T);
         }
 
-        
         public static void TaskDoesNotThrow(Func<Task> testCode)
         {
             var exception = Recorder.Exception(() => testCode().Wait());
@@ -140,10 +121,14 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 return;
             }
 
-            throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.TaskDoesNotThrow failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
+            throw new AssertFailedException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    "AssertExtensions.TaskDoesNotThrow failed. Incorrect exception {0} occurred.",
+                    exception.GetType().Name),
+                exception);
         }
 
-        
         public static void TaskDoesNotThrow<T>(Func<Task> testCode) where T : Exception
         {
             var exception = Recorder.Exception<AggregateException>(() => testCode().Wait());
@@ -160,42 +145,51 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 return;
             }
 
-            throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
+            ThrowAssertFailedForExceptionMismatch(typeof(T), exception);
         }
 
-        
         private static void CheckExceptionType<TException>(Exception actualException, bool allowDerived)
         {
             Type expectedType = typeof(TException);
 
-            string message = string.Format(System.Globalization.CultureInfo.CurrentCulture,
+            string message = string.Format(
+                CultureInfo.CurrentCulture,
                 "Checking exception:{0}\tType:{1}{0}\tToString: {2}{0}",
                 Environment.NewLine,
                 actualException.GetType().FullName,
                 actualException.ToString());
+
             Debug.WriteLine(message);
 
             if (allowDerived)
             {
                 if (!(actualException is TException))
                 {
-                    throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", expectedType.Name),
-                        actualException);
+                    ThrowAssertFailedForExceptionMismatch(expectedType, actualException);
                 }
             }
             else
             {
                 if (!expectedType.Equals(actualException.GetType()))
                 {
-                    throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", expectedType.Name),
-                        actualException);
+                    ThrowAssertFailedForExceptionMismatch(expectedType, actualException);
                 }
             }
         }
 
+        private static void ThrowAssertFailedForExceptionMismatch(Type expectedExceptionType, Exception actualException)
+        {
+            throw new AssertFailedException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    "Exception types do not match. Expected: {0}  Actual: {1}",
+                    expectedExceptionType.Name,
+                    actualException.GetType().Name),
+                actualException);
+        }
+
         private static class Recorder
         {
-            
             public static Exception Exception(Action code)
             {
                 try
@@ -209,7 +203,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 }
             }
 
-            
             public static TException Exception<TException>(Action code)
                 where TException : Exception
             {
@@ -228,7 +221,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 }
             }
 
-            
             public static TException Exception<TException>(Func<object> code)
                 where TException : Exception
             {

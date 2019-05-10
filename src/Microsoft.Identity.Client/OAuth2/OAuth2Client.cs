@@ -1,34 +1,10 @@
-﻿// ------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using System;
@@ -82,23 +58,32 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext)
         {
-            bool addCorrelationId =
-                requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
+            bool addCorrelationId = requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
             if (addCorrelationId)
             {
                 _headers.Add(OAuth2Header.CorrelationId, requestContext.Logger.CorrelationId.ToString());
                 _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
             }
 
+            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName))
+            {
+                _headers.Add(OAuth2Header.AppName, requestContext.Logger.ClientName);
+            }
+
+            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
+            {
+                _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
+            }
+
             HttpResponse response = null;
             Uri endpointUri = CreateFullEndpointUri(endPoint);
-            var httpEvent = new HttpEvent()
+            var httpEvent = new HttpEvent(requestContext.TelemetryCorrelationId)
             {
                 HttpPath = endpointUri,
                 QueryParams = endpointUri.Query
             };
 
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId, httpEvent))
+            using (_telemetryManager.CreateTelemetryHelper(httpEvent))
             {
                 if (method == HttpMethod.Post)
                 {
@@ -190,21 +175,30 @@ namespace Microsoft.Identity.Client.OAuth2
             }
             catch (SerializationException) // in the rare case we get an error response we cannot deserialize
             {
-                exceptionToThrow = MsalExceptionFactory.GetServiceException(
+                exceptionToThrow = new MsalServiceException(
                     MsalError.NonParsableOAuthError,
-                    MsalErrorMessage.NonParsableOAuthError,
-                    response);
+                    MsalErrorMessage.NonParsableOAuthError)
+                {
+                    HttpResponse = response
+                };
             }
             catch (Exception ex)
             {
-                exceptionToThrow = MsalExceptionFactory.GetServiceException(MsalError.UnknownError, response.Body, response, ex);
+                exceptionToThrow = new MsalServiceException(MsalError.UnknownError, response.Body, ex)
+                {
+                    HttpResponse = response
+                };
             }
 
             if (exceptionToThrow == null)
             {
-                exceptionToThrow = response.StatusCode != HttpStatusCode.NotFound ?
-                    MsalExceptionFactory.GetServiceException(MsalError.HttpStatusCodeNotOk, httpErrorCodeMessage, response) :
-                    MsalExceptionFactory.GetServiceException(MsalError.HttpStatusNotFound, httpErrorCodeMessage, response);
+                exceptionToThrow = new MsalServiceException(
+                    response.StatusCode == HttpStatusCode.NotFound
+                        ? MsalError.HttpStatusNotFound
+                        : MsalError.HttpStatusCodeNotOk, httpErrorCodeMessage)
+                {
+                    HttpResponse = response
+                };
             }
 
             if (shouldLogAsError)
@@ -235,25 +229,29 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 return null;
             }
-            
+
             if (MsalError.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
             {
-                exceptionToThrow = MsalExceptionFactory.GetUiRequiredException(
+                exceptionToThrow = new MsalUiRequiredException(
                     MsalError.InvalidGrantError,
-                    msalTokenResponse.ErrorDescription,
-                    response);
+                    msalTokenResponse.ErrorDescription)
+                {
+                    HttpResponse = response
+                };
             }
             else
             {
-                exceptionToThrow = MsalExceptionFactory.GetServiceException(
+                exceptionToThrow = new MsalServiceException(
                     msalTokenResponse.Error,
-                    msalTokenResponse.ErrorDescription,
-                    response);
+                    msalTokenResponse.ErrorDescription)
+                {
+                    HttpResponse = response
+                };
             }
 
             // For device code flow, AuthorizationPending can occur a lot while waiting
             // for the user to auth via browser and this causes a lot of error noise in the logs.
-            // So suppress this particular case to an Info so we still see the data but don't 
+            // So suppress this particular case to an Info so we still see the data but don't
             // log it as an error since it's expected behavior while waiting for the user.
             if (string.Compare(msalTokenResponse.Error, OAuth2Error.AuthorizationPending,
                     StringComparison.OrdinalIgnoreCase) == 0)

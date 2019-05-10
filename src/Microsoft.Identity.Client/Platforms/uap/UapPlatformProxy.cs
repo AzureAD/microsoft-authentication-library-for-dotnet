@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -37,18 +13,16 @@ using Windows.Storage;
 using Windows.System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
-using String = System.String;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Windows.Foundation.Collections;
+using Microsoft.Identity.Client.Mats.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
     /// <summary>
-    /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here. 
+    /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
     internal class UapPlatformProxy : AbstractPlatformProxy
     {
@@ -57,11 +31,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
         {
         }
 
+        public override bool IsSystemWebViewAvailable => false;
+
         /// <summary>
         /// Get the user logged in to Windows or throws
         /// </summary>
         /// <remarks>
-        /// Win10 allows several identities to be logged in at once; 
+        /// Win10 allows several identities to be logged in at once;
         /// select the first principal name that can be used
         /// </remarks>
         /// <returns>The username or throws</returns>
@@ -70,7 +46,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             IReadOnlyList<User> users = await User.FindAllAsync();
             if (users == null || !users.Any())
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                     MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
                     MsalErrorMessage.UapCannotFindDomainUser);
             }
@@ -110,13 +86,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
             // user has domain name, but no upn -> missing Enterprise Auth capability
             if (userDetails.Any(d => !string.IsNullOrWhiteSpace(d.Domain)))
             {
-                throw MsalExceptionFactory.GetClientException(
+                throw new MsalClientException(
                    MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
                    MsalErrorMessage.UapCannotFindUpn);
             }
 
             // no domain, no upn -> missing User Info capability
-            throw MsalExceptionFactory.GetClientException(
+            throw new MsalClientException(
                 MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
                 MsalErrorMessage.UapCannotFindDomainUser);
 
@@ -146,7 +122,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         protected override string InternalGetOperatingSystem()
         {
-            // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check 
+            // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check
             // for existence of specific features which does not help in this case, so we do not emit OS in WinRT.
             return null;
         }
@@ -175,7 +151,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
         protected override string InternalGetCallingApplicationName()
@@ -184,7 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
         protected override string InternalGetCallingApplicationVersion()
@@ -193,7 +169,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <summary>
-        /// Considered PII. Please ensure that it is hashed. 
+        /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
         protected override string InternalGetDeviceId()
@@ -201,24 +177,37 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return new EasClientDeviceInformation()?.Id.ToString();
         }
 
-        public override ILegacyCachePersistence CreateLegacyCachePersistence()
-        {
-            return new UapLegacyCachePersistence(Logger, CryptographyManager);
-        }
+        public override ILegacyCachePersistence CreateLegacyCachePersistence() => new UapLegacyCachePersistence(Logger, CryptographyManager);
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
-        {
-            return new InMemoryTokenCacheAccessor();
-        }
+        public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor();
 
-        public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
-        {
-            return new UapTokenCacheBlobStorage(CryptographyManager, Logger);
-        }
+        public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage() => new UapTokenCacheBlobStorage(CryptographyManager, Logger);
 
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
+        public override string GetDeviceNetworkState()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetDevicePlatformTelemetryId()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetMatsOsPlatform()
+        {
+            return MatsConverter.AsString(OsPlatform.Win32);
+        }
+
+        public override int GetMatsOsPlatformCode()
+        {
+            return MatsConverter.AsInt(OsPlatform.Win32);
+        }
+        protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
     }
 }

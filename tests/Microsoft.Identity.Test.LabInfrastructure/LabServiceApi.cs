@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -36,19 +12,43 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     /// <summary>
     /// Wrapper for new lab service API
     /// </summary>
-    public class LabServiceApi : ILabService
+    public class LabServiceApi : ILabService, IDisposable
     {
-        private readonly KeyVaultSecretsProvider _keyVault;
+        private readonly HttpClient _httpClient;
+        private bool _queryRequiresBetaEndpoint = false;
 
-        public LabServiceApi(KeyVaultSecretsProvider keyVault)
+        public LabServiceApi()
         {
-            _keyVault = keyVault;
+            _httpClient = new HttpClient();
+        }
+
+        /// <summary>
+        /// Returns a test user account for use in testing.
+        /// </summary>
+        /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
+        /// <returns>Users that match the given query parameters.</returns>
+        public LabResponse GetLabResponse(UserQuery query)
+        {
+            var response = GetLabResponseFromApi(query);
+            var user = response.User;
+
+            if (!Uri.IsWellFormedUriString(user.CredentialUrl, UriKind.Absolute))
+            {
+                Console.WriteLine($"User '{user.Upn}' has invalid Credential URL: '{user.CredentialUrl}'");
+            }
+
+            if (user.IsExternal && user.HomeUser == null)
+            {
+                Console.WriteLine($"User '{user.Upn}' has no matching home user.");
+            }
+
+            return response;
         }
 
         private LabResponse GetLabResponseFromApi(UserQuery query)
         {
             //Fetch user
-            string result = CreateLabQuery(query);
+            string result = RunQuery(query);
 
             if (string.IsNullOrWhiteSpace(result))
             {
@@ -56,10 +56,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
 
             LabResponse response = JsonConvert.DeserializeObject<LabResponse>(result);
-
-            LabUser user = response.User;
-
-            user = JsonConvert.DeserializeObject<LabUser>(result);
+            LabUser user = JsonConvert.DeserializeObject<LabUser>(result);
 
             if (!string.IsNullOrEmpty(user.HomeTenantId) && !string.IsNullOrEmpty(user.HomeUPN))
             {
@@ -69,10 +66,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        private string CreateLabQuery(UserQuery query)
+        private string RunQuery(UserQuery query)
         {
-            bool queryRequiresBetaEndpoint = false;
-            HttpClient webClient = new HttpClient();
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
 
             //Disabled for now until there are tests that use it.
@@ -80,11 +75,17 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
 
             //Building user query
+            if (!string.IsNullOrWhiteSpace(query.Upn))
+            {
+                queryDict.Add(LabApiConstants.Upn, query.Upn);
+                return GetResponse(queryDict);
+            }
+
             if (query.FederationProvider != null)
             {
                 if (query.FederationProvider == FederationProvider.ADFSv2019)
                 {
-                    queryRequiresBetaEndpoint = true;
+                    _queryRequiresBetaEndpoint = true;
                 }
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
             }
@@ -121,45 +122,31 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
             }
 
-            if (!string.IsNullOrEmpty(query.UserSearch))
+			if (!string.IsNullOrEmpty(query.UserSearch))
             {
-                queryDict.Add(LabApiConstants.UserSearchQuery, query.UserSearch);
-                queryRequiresBetaEndpoint = true;
+                queryDict.Add(LabApiConstants.UserContains, query.UserSearch);
+                _queryRequiresBetaEndpoint = true;
             }
 
             if (!string.IsNullOrEmpty(query.AppName))
             {
                 queryDict.Add(LabApiConstants.AppName, query.AppName);
-                queryRequiresBetaEndpoint = true;
+                _queryRequiresBetaEndpoint = true;
             }
 
-            UriBuilder uriBuilder = queryRequiresBetaEndpoint? new UriBuilder(LabApiConstants.BetaEndpoint) : new UriBuilder(LabApiConstants.LabEndpoint);
-
-            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
-            return webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+            return GetResponse(queryDict);
         }
 
-        /// <summary>
-        /// Returns a test user account for use in testing.
-        /// </summary>
-        /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
-        /// <returns>Users that match the given query parameters.</returns>
-        public LabResponse GetLabResponse(UserQuery query)
+        private string GetResponse(IDictionary<string, string> queryDict)
         {
-            var response = GetLabResponseFromApi(query);
-            var user = response.User;
+            UriBuilder uriBuilder = _queryRequiresBetaEndpoint? new UriBuilder(LabApiConstants.BetaEndpoint) : new UriBuilder(LabApiConstants.LabEndpoint);
+            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
+            return _httpClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+        }
 
-            if (!Uri.IsWellFormedUriString(user.CredentialUrl, UriKind.Absolute))
-            {
-                Console.WriteLine($"User '{user.Upn}' has invalid Credential URL: '{user.CredentialUrl}'");
-            }
-
-            if (user.IsExternal && user.HomeUser == null)
-            {
-                Console.WriteLine($"User '{user.Upn}' has no matching home user.");
-            }
-
-            return response;
+        public void Dispose()
+        {
+            _httpClient.Dispose();
         }
     }
 }

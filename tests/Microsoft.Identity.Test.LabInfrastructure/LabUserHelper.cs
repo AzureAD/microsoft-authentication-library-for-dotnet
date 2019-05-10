@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -33,35 +9,34 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public static class LabUserHelper
     {
-        static LabServiceApi _labService;
-        static KeyVaultSecretsProvider _keyVaultSecretsProvider;
-        private static readonly IDictionary<UserQuery, LabResponse> _userCache =
+        private static readonly LabServiceApi s_labService;
+        private static readonly KeyVaultSecretsProvider s_keyVaultSecretsProvider;
+        private static readonly IDictionary<UserQuery, LabResponse> s_userCache =
             new Dictionary<UserQuery, LabResponse>();
 
 
         static LabUserHelper()
         {
-            _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
-            _labService = new LabServiceApi(_keyVaultSecretsProvider);
+            s_keyVaultSecretsProvider = new KeyVaultSecretsProvider();
+            s_labService = new LabServiceApi();
         }
-
 
         public static LabResponse GetLabUserData(UserQuery query)
         {
-            if (_userCache.ContainsKey(query))
+            if (s_userCache.ContainsKey(query))
             {
                 Debug.WriteLine("User cache hit");
-                return _userCache[query];
+                return s_userCache[query];
             }
 
-            var user = _labService.GetLabResponse(query);
+            var user = s_labService.GetLabResponse(query);
             if (user == null)
             {
                 throw new LabUserNotFoundException(query, "Found no users for the given query.");
             }
 
             Debug.WriteLine("User cache miss");
-            _userCache.Add(query, user);
+            s_userCache.Add(query, user);
 
             return user;
         }
@@ -86,6 +61,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserData(UserQuery.B2CGoogleUserQuery);
         }
 
+        public static LabResponse GetSpecificUser(string upn)
+        {
+            var query = new UserQuery();
+            query.Upn = upn;
+            return GetLabUserData(query);
+        }
+
         public static LabResponse GetAdfsUser(FederationProvider federationProvider, bool federated = true)
         {
             var query = UserQuery.DefaultUserQuery;
@@ -95,21 +77,21 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserData(query);
         }
 
-        public static string GetUserPassword(LabUser user)
+        public static string FetchUserPassword(string passwordUri)
         {
-            if (string.IsNullOrWhiteSpace(user.CredentialUrl))
+            if (string.IsNullOrWhiteSpace(passwordUri))
             {
                 throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
             }
 
-            if (_keyVaultSecretsProvider == null)
+            if (s_keyVaultSecretsProvider == null)
             {
                 throw new InvalidOperationException("Error: Keyvault secrets provider is not set");
             }
 
             try
             {
-                var secret = _keyVaultSecretsProvider.GetSecret(user.CredentialUrl);
+                var secret = s_keyVaultSecretsProvider.GetSecret(passwordUri);
                 return secret.Value;
             }
             catch (Exception e)

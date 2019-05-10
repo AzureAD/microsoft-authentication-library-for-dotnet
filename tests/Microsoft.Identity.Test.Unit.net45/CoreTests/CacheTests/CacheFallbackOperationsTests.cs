@@ -1,43 +1,17 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 {
@@ -50,6 +24,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetInternalStaticCaches();
+
             // Methods in CacheFallbackOperations silently catch all exceptions and log them;
             // By setting this to null, logging will fail, making the test fail.
             _logger = Substitute.For<ICoreLogger>();
@@ -73,17 +49,30 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertByUsername(
                 adalUsers,
+                new[] {
+                    MsalTestConstants.ProductionPrefNetworkEnvironment,
+                    MsalTestConstants.SovereignNetworkEnvironment },
                 new[]
                 {
                     "user1",
                     "user2",
-                    "sovereign_user5"  // this user has different environment but same client id
+                    "sovereign_user5"
                 },
                 new[]
                 {
                     "no_client_info_user3",
                     "no_client_info_user4"
                 });
+
+            AssertByUsername(
+              adalUsers,
+              new[] {
+                    MsalTestConstants.SovereignNetworkEnvironment },
+              new[]
+              {
+                    "sovereign_user5"
+              },
+              Enumerable.Empty<string>());
 
             // Act - query users for different clientId and env
             adalUsers = CacheFallbackOperations.GetAllAdalUsersForMsal(
@@ -94,6 +83,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             // Assert
             AssertByUsername(
                 adalUsers,
+                null,
                 new[]
                 {
                     "user6"
@@ -131,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
                 "username_does_not_matter",
                 "uid1.tenantId1");
 
-            // Assert 
+            // Assert
             var adalUsers =
                 CacheFallbackOperations.GetAllAdalUsersForMsal(
                     _logger,
@@ -140,10 +130,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertByUsername(
                 adalUsers,
+                new[] { MsalTestConstants.ProductionPrefNetworkEnvironment},
                 new[]
                 {
                     "user2",
-                    "sovereign_user5"  // this user has different environment but same client id
                 },
                 new[]
                 {
@@ -184,15 +174,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertByUsername(
                 adalUsers,
+                new[] { MsalTestConstants.ProductionPrefNetworkEnvironment },
                 new[]
                 {
                     "user2",
                     "user1",
-                    "sovereign_user5"  // this user has different environment but same client id
                 },
                 new[]
                 {
-                    "no_client_info_user3",
                     "no_client_info_user3",
                     "no_client_info_user4"
                 });
@@ -207,7 +196,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertCacheEntryCount(6);
 
-            // Assert 
+            // Assert
             adalUsers = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 _logger,
                 _legacyCachePersistence,
@@ -215,11 +204,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertByUsername(
                 adalUsers,
+                new[] { MsalTestConstants.ProductionPrefNetworkEnvironment },
                 new[]
                 {
                     "user2",
                     "user1",
-                    "sovereign_user5"  // this user has different environment but same client id
                 },
                 new[]
                 {
@@ -251,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
                 "",
                 "");
 
-            // Assert 
+            // Assert
             AssertCacheEntryCount(6);
 
             _logger.Received().Error(Arg.Is<string>(MsalErrorMessage.InternalErrorCacheEmptyUsername));
@@ -331,6 +320,40 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             _logger.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentEnvError));
         }
 
+
+        [TestMethod]
+        public void DoNotWriteFRTs()
+        {
+            // Arrange
+            _legacyCachePersistence.ThrowOnWrite = true;
+
+            var rtItem = new MsalRefreshTokenCacheItem(
+                MsalTestConstants.ProductionPrefNetworkEnvironment,
+                MsalTestConstants.ClientId,
+                "someRT",
+                MockHelpers.CreateClientInfo("u1", "ut1"),
+                "familyId");
+
+            var idTokenCacheItem = new MsalIdTokenCacheItem(
+                MsalTestConstants.ProductionPrefNetworkEnvironment, // different env
+                MsalTestConstants.ClientId,
+                MockHelpers.CreateIdToken("u1", "username"),
+                MockHelpers.CreateClientInfo("u1", "ut1"),
+                "ut1");
+
+            // Act
+            CacheFallbackOperations.WriteAdalRefreshToken(
+                _logger,
+                _legacyCachePersistence,
+                rtItem,
+                idTokenCacheItem,
+                "https://some_env.com/common", // yet another env
+                "uid",
+                "scope1");
+
+            AssertCacheEntryCount(0);
+        }
+
         private void PopulateLegacyCache(ILegacyCachePersistence legacyCachePersistence)
         {
             PopulateLegacyWithRtAndId(
@@ -368,7 +391,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
                 MsalTestConstants.ClientId,
-                MsalTestConstants.SovereignEnvironment, // different env
+                MsalTestConstants.SovereignNetworkEnvironment, // different env
                 "uid4",
                 "tenantId4",
                 "sovereign_user5");
@@ -376,7 +399,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
                 "other_client_id", // different client id
-                MsalTestConstants.SovereignEnvironment,
+                MsalTestConstants.SovereignNetworkEnvironment,
                 "uid5",
                 "tenantId5",
                 "user6");
@@ -442,13 +465,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         }
 
         private static void AssertByUsername(
-            AdalUsersForMsalResult adalUsers,
+            AdalUsersForMsal adalUsers,
+            IEnumerable<string> enviroments,
             IEnumerable<string> expectedUsersWithClientInfo,
             IEnumerable<string> expectedUsersWithoutClientInfo)
         {
             // Assert
-            var usersWithClientInfo = adalUsers.ClientInfoUsers.Values;
-            List<AdalUserInfo> usersWithoutClientInfo = adalUsers.UsersWithoutClientInfo;
+            var usersWithClientInfo = adalUsers.GetUsersWithClientInfo(enviroments).Select(x => x.Value);
+            IEnumerable<AdalUserInfo> usersWithoutClientInfo = adalUsers.GetUsersWithoutClientInfo(enviroments);
 
             AssertUsersByDisplayName(
                 expectedUsersWithClientInfo,

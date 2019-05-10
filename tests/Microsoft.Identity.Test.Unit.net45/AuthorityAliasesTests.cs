@@ -1,47 +1,21 @@
-﻿// ------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -51,13 +25,13 @@ namespace Microsoft.Identity.Test.Unit
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
 #if !NET_CORE
         [TestMethod]
         [Description("Test authority migration")]
-        public async Task AuthorityMigration_IntegrationTestAsync()
+        public async Task AuthorityMigrationTestAsync()
         {
             // make sure that for all network calls "preferred_cache" environment is used
             // (it is taken from metadata in instance discovery response),
@@ -104,19 +78,23 @@ namespace Microsoft.Identity.Test.Unit
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 });
 
-                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).Result;
 
                 // make sure that all cache entities are stored with "preferred_cache" environment
                 // (it is taken from metadata in instance discovery response)
-                ValidateCacheEntitiesEnvironment(app.UserTokenCacheInternal, MsalTestConstants.ProductionPrefCacheEnvironment);
+                await ValidateCacheEntitiesEnvironmentAsync(app.UserTokenCacheInternal, MsalTestConstants.ProductionPrefCacheEnvironment).ConfigureAwait(false);
 
                 // silent request targeting at, should return at from cache for any environment alias
                 foreach (var envAlias in MsalTestConstants.ProdEnvAliases)
                 {
-                    result = await app.AcquireTokenSilentAsync(MsalTestConstants.Scope,
-                        app.GetAccountsAsync().Result.First(),
-                        string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid),
-                        false).ConfigureAwait(false);
+                    result = await app
+                        .AcquireTokenSilent(
+                            MsalTestConstants.Scope,
+                            app.GetAccountsAsync().Result.First())
+                        .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid))
+                        .WithForceRefresh(false)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
 
                     Assert.IsNotNull(result);
                 }
@@ -150,15 +128,13 @@ namespace Microsoft.Identity.Test.Unit
 
                     try
                     {
-                        result = await app.AcquireTokenSilentAsync(
-                                     MsalTestConstants.ScopeForAnotherResource,
-                                     (await app.GetAccountsAsync().ConfigureAwait(false)).First(),
-                                     string.Format(
-                                         CultureInfo.InvariantCulture,
-                                         "https://{0}/{1}/",
-                                         envAlias,
-                                         MsalTestConstants.Utid),
-                                     false).ConfigureAwait(false);
+                        result = await app
+                            .AcquireTokenSilent(
+                                MsalTestConstants.ScopeForAnotherResource,
+                                (await app.GetAccountsAsync().ConfigureAwait(false)).First())
+                            .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid))
+                            .WithForceRefresh(false)
+                            .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                     }
                     catch (MsalUiRequiredException)
                     {
@@ -174,28 +150,28 @@ namespace Microsoft.Identity.Test.Unit
         }
 #endif
 
-        private void ValidateCacheEntitiesEnvironment(ITokenCacheInternal cache, string expectedEnvironment)
+        private async Task ValidateCacheEntitiesEnvironmentAsync(ITokenCacheInternal cache, string expectedEnvironment)
         {
             var requestContext = RequestContext.CreateForTest();
-            var accessTokens = cache.GetAllAccessTokens(true);
+            var accessTokens = await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
             foreach (var at in accessTokens)
             {
                 Assert.AreEqual(expectedEnvironment, at.Environment);
             }
 
-            var refreshTokens = cache.GetAllRefreshTokens(true);
+            var refreshTokens = await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
             foreach (var rt in refreshTokens)
             {
                 Assert.AreEqual(expectedEnvironment, rt.Environment);
             }
 
-            var idTokens = cache.GetAllIdTokens(true);
+            var idTokens = await cache.GetAllIdTokensAsync(true).ConfigureAwait(false);
             foreach (var id in idTokens)
             {
                 Assert.AreEqual(expectedEnvironment, id.Environment);
             }
 
-            var accounts = cache.GetAllAccounts();
+            var accounts = await cache.GetAllAccountsAsync().ConfigureAwait(false);
             foreach (var account in accounts)
             {
                 Assert.AreEqual(expectedEnvironment, account.Environment);

@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Runtime.Serialization;
@@ -90,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal
             };
         }
 
-        public string Sign(ClientAssertionCertificate credential, bool sendCertificate)
+        public string Sign(ClientAssertionCertificateWrapper credential, bool sendCertificate)
         {
             // Base64Url encoded header and claims
             string token = Encode(credential, sendCertificate);
@@ -114,7 +90,7 @@ namespace Microsoft.Identity.Client.Internal
             return Base64UrlHelpers.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(ClientAssertionCertificate credential, bool sendCertificate)
+        private static string EncodeHeaderToJson(ClientAssertionCertificateWrapper credential, bool sendCertificate)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential, sendCertificate);
             return JsonHelper.SerializeToJson(header);
@@ -127,7 +103,7 @@ namespace Microsoft.Identity.Client.Internal
             return (long)diff.TotalSeconds;
         }
 
-        private string Encode(ClientAssertionCertificate credential, bool sendCertificate)
+        private string Encode(ClientAssertionCertificateWrapper credential, bool sendCertificate)
         {
             // Header segment
             string jsonHeader = EncodeHeaderToJson(credential, sendCertificate);
@@ -145,12 +121,12 @@ namespace Microsoft.Identity.Client.Internal
         [DataContract]
         internal class JWTHeader
         {
-            public JWTHeader(ClientAssertionCertificate credential)
+            public JWTHeader(ClientAssertionCertificateWrapper credential)
             {
                 Credential = credential;
             }
 
-            protected ClientAssertionCertificate Credential { get; }
+            protected ClientAssertionCertificateWrapper Credential { get; }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
@@ -207,7 +183,7 @@ namespace Microsoft.Identity.Client.Internal
         [DataContract]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(ClientAssertionCertificate credential, bool sendCertificate)
+            public JWTHeaderWithCertificate(ClientAssertionCertificateWrapper credential, bool sendCertificate)
                 : base(credential)
             {
                 X509CertificateThumbprint = Credential.Thumbprint;
@@ -218,7 +194,7 @@ namespace Microsoft.Identity.Client.Internal
                     return;
                 }
 
-#if NETSTANDARD1_3
+#if NETSTANDARD
                 X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
 #elif DESKTOP
                 X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());

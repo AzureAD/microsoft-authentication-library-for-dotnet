@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using Microsoft.Identity.Client;
@@ -42,24 +18,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestInitialize]
         public void TestInit()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
 
             _callback = Substitute.For<LogCallback>();
         }
 
         private MsalLogger CreateLogger(LogLevel logLevel = LogLevel.Verbose, bool enablePiiLogging = false)
         {
-            return new MsalLogger(Guid.Empty, null, logLevel, enablePiiLogging, true, _callback);
+            return new MsalLogger(Guid.Empty, null, null, logLevel, enablePiiLogging, true, _callback);
         }
 
         [TestMethod()]
         [TestCategory("LoggerTests")]
         public void ConstructorComponentTest()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Verbose, false, true, null);
-            Assert.AreEqual(string.Empty, logger.Component);
-            logger = new MsalLogger(Guid.Empty, "comp1", LogLevel.Verbose, false, true, null);
-            Assert.AreEqual(" (comp1)", logger.Component);
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, null, LogLevel.Verbose, false, true, null);
+            Assert.AreEqual(string.Empty, logger.ClientName);
+            Assert.AreEqual(string.Empty, logger.ClientVersion);
+            Assert.AreEqual(string.Empty, logger.ClientInformation);
+            logger = new MsalLogger(Guid.Empty, "comp1", null, LogLevel.Verbose, false, true, null);
+            Assert.AreEqual(" (comp1)", logger.ClientInformation);
+            logger = new MsalLogger(Guid.Empty, "comp1", "version1", LogLevel.Verbose, false, true, null);
+            Assert.AreEqual(" (comp1: version1)", logger.ClientInformation);
         }
 
         [TestMethod()]

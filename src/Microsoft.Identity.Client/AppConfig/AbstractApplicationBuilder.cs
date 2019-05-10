@@ -1,38 +1,13 @@
-﻿// ------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-// ------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
@@ -198,6 +173,28 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
+        /// Sets the name of the calling application for telemetry purposes.
+        /// </summary>
+        /// <param name="clientName">The name of the application for telemetry purposes.</param>
+        /// <returns></returns>
+        public T WithClientName(string clientName)
+        {
+            Config.ClientName = GetValueIfNotEmpty(Config.ClientName, clientName);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Sets the version of the calling application for telemetry purposes.
+        /// </summary>
+        /// <param name="clientVersion">The version of the calling application for telemetry purposes.</param>
+        /// <returns></returns>
+        public T WithClientVersion(string clientVersion)
+        {
+            Config.ClientVersion = GetValueIfNotEmpty(Config.ClientVersion, clientVersion);
+            return (T)this;
+        }
+
+        /// <summary>
         /// Sets application options, which can, for instance have been read from configuration files.
         /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
@@ -208,7 +205,8 @@ namespace Microsoft.Identity.Client.AppConfig
             WithClientId(applicationOptions.ClientId);
             WithRedirectUri(applicationOptions.RedirectUri);
             WithTenantId(applicationOptions.TenantId);
-            WithComponent(applicationOptions.Component);
+            WithClientName(applicationOptions.ClientName);
+            WithClientVersion(applicationOptions.ClientVersion);
 
             WithLogging(
                 null,
@@ -220,20 +218,6 @@ namespace Microsoft.Identity.Client.AppConfig
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
             Config.AzureCloudInstance = applicationOptions.AzureCloudInstance;
 
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Sets the identifier of the software component (libraries/SDK) consuming MSAL.NET.
-        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage
-        /// by component libraries. You can, for instance set it to the name of your application.
-        /// This is used in telemetry.
-        /// </summary>
-        /// <param name="component">identifier of the software component (libraries/SDK) consuming MSAL.NET</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithComponent(string component)
-        {
-            Config.Component = GetValueIfNotEmpty(Config.Component, component);
             return (T)this;
         }
 
@@ -266,6 +250,17 @@ namespace Microsoft.Identity.Client.AppConfig
             return (T)this;
         }
 
+        /// <summary>
+        /// Generate MATS telemetry aggregation events.
+        /// TODO(mats): make this public when we're ready to turn it on.
+        /// </summary>
+        /// <param name="matsConfig"></param>
+        /// <returns></returns>
+        internal T WithMatsTelemetry(MatsConfig matsConfig)
+        {
+            Config.MatsConfig = matsConfig;
+            return (T)this;
+        }
 
         internal virtual void Validate()
         {
@@ -282,6 +277,11 @@ namespace Microsoft.Identity.Client.AppConfig
             }
 
             TryAddDefaultAuthority();
+
+            if (Config.TelemetryCallback != null && Config.MatsConfig != null)
+            {
+                throw new InvalidOperationException(MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously);
+            }
         }
 
         internal ApplicationConfiguration BuildConfiguration()

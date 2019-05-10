@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Core;
 using System.Collections.Generic;
@@ -36,7 +12,7 @@ using System;
 using CoreFoundation;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -55,7 +31,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             _serviceBundle = serviceBundle;
         }
 
-        public bool CanInvokeBroker(OwnerUiParent uiParent)
+        public bool CanInvokeBroker(CoreUIParent uiParent)
         {
             if (uiParent == null)
             {
@@ -63,17 +39,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return false;
             }
 
-            if (uiParent.CoreUiParent.CallerViewController == null)
+            if (uiParent.CallerViewController == null)
             {
                 _serviceBundle.DefaultLogger.Error(iOSBrokerConstants.CallerViewControllerIsNullCannotInvokeBroker);
                 return false;
-            }            
+            }
 
             _serviceBundle.DefaultLogger.Info(iOSBrokerConstants.CanInvokeBroker + _serviceBundle.Config.IsBrokerEnabled);
 
             var result = false;
 
-            uiParent.CoreUiParent.CallerViewController.InvokeOnMainThread(() =>
+            uiParent.CallerViewController.InvokeOnMainThread(() =>
             {
                 result = UIApplication.SharedApplication.CanOpenUrl(new NSUrl(BrokerParameter.BrokerV2));
             });
@@ -205,7 +181,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 brokerTokenResponse = new MsalTokenResponse
                 {
                     Error = MsalError.BrokerResponseHashMismatch,
-                    ErrorDescription = MsalClientException.BrokerResponseHashMismatch
+                    ErrorDescription = MsalErrorMessage.BrokerResponseHashMismatch
                 };
             }
 

@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -35,7 +11,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
     ///     format of the key is not important for this library, as long as it is unique.
     /// </summary>
     /// <remarks>The format of the key is platform dependent</remarks>
-    internal class MsalAccessTokenCacheKey
+    internal class MsalAccessTokenCacheKey : IiOSKey
     {
         private readonly string _clientId;
         private readonly string _environment;
@@ -78,52 +54,15 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 _normalizedScopes);
         }
 
-        #region UWP
-
-        /// <summary>
-        ///     Gets a key that is smaller than 255 characters, which is a limitation for
-        ///     UWP storage. This is done by hashing the scopes and env.
-        /// </summary>
-        /// <remarks>
-        ///     accountId - two guids plus separator - 73 chars
-        ///     "accesstoken" string - 11 chars
-        ///     env - a sha256 string - 44 chars
-        ///     clientid - a guid - 36 chars
-        ///     tenantid - a guid - 36 chars
-        ///     scopes - a sha256 string - 44 chars
-        ///     delimiters - 4 chars
-        ///     total: 248 chars
-        /// </remarks>
-        public string GetUWPFixedSizeKey(ICryptographyManager cryptographyManager)
-        {
-            return MsalCacheKeys.GetCredentialKey(
-                _homeAccountId,
-                cryptographyManager.CreateSha256Hash(_environment),
-                StorageJsonValues.CredentialTypeAccessToken,
-                _clientId,
-                _tenantId,
-                cryptographyManager.CreateSha256Hash(
-                    _normalizedScopes)); // can't use scopes and env because they are of variable length
-        }
-
-        #endregion
-
         #region iOS
 
-        public string GetiOSAccountKey()
-        {
-            return MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
-        }
+        public string iOSAccount => MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
 
-        public string GetiOSServiceKey()
-        {
-            return MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeAccessToken, _clientId, _tenantId, _normalizedScopes);
-        }
+        public string iOSService => MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeAccessToken, _clientId, _tenantId, _normalizedScopes);
 
-        public string GetiOSGenericKey()
-        {
-            return MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeAccessToken, _clientId, _tenantId);
-        }
+        public string iOSGeneric => MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeAccessToken, _clientId, _tenantId);
+
+        public int iOSType => (int)MsalCacheKeys.iOSCredentialAttrType.AccessToken;
 
         #endregion
     }

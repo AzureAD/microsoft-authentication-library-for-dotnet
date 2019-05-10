@@ -1,8 +1,8 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
-  <Import Project="../MSAL.Frameworks.props" />
 
-  <!-- Platform flags, NuGet metadata properties and versioning properties are in Directory.Build.props -->
-  <Import Project="../MSAL.Common.props" />
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);RUNTIME</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <DefineConstants>$(DefineConstants);NET_CORE_RUNTIME</DefineConstants>
   </PropertyGroup>
@@ -20,11 +20,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
-  </PropertyGroup>
+  </PropertyGroup>  
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" />
   </ItemGroup>
 </Project>

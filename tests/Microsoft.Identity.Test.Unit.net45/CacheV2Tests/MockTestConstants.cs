@@ -1,32 +1,8 @@
-﻿// ------------------------------------------------------------------------------
-// 
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-// 
-// This code is licensed under the MIT License.
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Globalization;
-using Microsoft.Identity.Client.CacheV2.Schema;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
@@ -53,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         public const string Name = "Joe Charles Doe II";
         public const string AlternativeAccountId = "test_alternative_account_id";
         public const string Scopes = "scope1 scope2";
-        public const AuthorityType DefaultAuthorityType = AuthorityType.Adfs;
+        public const Client.CacheV2.Schema.CacheV2AuthorityType DefaultAuthorityType = Client.CacheV2.Schema.CacheV2AuthorityType.Adfs;
         public const long ExpiresIn = 3599;
         public const long ExtendedExpiresIn = 0;
         public const long CachedAt = (long)1 << 40;
@@ -68,9 +44,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             return "test_uid.test_utid";
         }
 
-        public static Credential GetAccessToken()
+        public static Client.CacheV2.Schema.Credential GetAccessToken()
         {
-            return Credential.CreateAccessToken(
+            return Client.CacheV2.Schema.Credential.CreateAccessToken(
                 GetHomeAccountId(),
                 Environment,
                 Realm,
@@ -88,9 +64,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             return "scope1 scope2";
         }
 
-        public static Credential GetRefreshToken()
+        public static Client.CacheV2.Schema.Credential GetRefreshToken()
         {
-            return Credential.CreateRefreshToken(
+            return Client.CacheV2.Schema.Credential.CreateRefreshToken(
                 GetHomeAccountId(),
                 Environment,
                 ClientId,
@@ -99,9 +75,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                 AdditionalFieldsJson);
         }
 
-        public static Credential GetFamilyRefreshToken()
+        public static Client.CacheV2.Schema.Credential GetFamilyRefreshToken()
         {
-            return Credential.CreateFamilyRefreshToken(
+            return Client.CacheV2.Schema.Credential.CreateFamilyRefreshToken(
                 GetHomeAccountId(),
                 Environment,
                 ClientId,
@@ -111,9 +87,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                 AdditionalFieldsJson);
         }
 
-        public static Credential GetIdToken()
+        public static Client.CacheV2.Schema.Credential GetIdToken()
         {
-            return Credential.CreateIdToken(
+            return Client.CacheV2.Schema.Credential.CreateIdToken(
                 GetHomeAccountId(),
                 Environment,
                 Realm,
@@ -133,9 +109,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             return Base64UrlHelpers.Encode(input);
         }
 
-        public static Account GetAccount()
+        public static Client.CacheV2.Schema.Account GetAccount()
         {
-            return Account.Create(
+            return Client.CacheV2.Schema.Account.Create(
                 GetHomeAccountId(),
                 Environment,
                 Realm,
@@ -156,9 +132,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             return Base64UrlEncodeUnpadded(ClientInfoJson);
         }
 
-        public static AppMetadata GetAppMetadata()
+        public static Client.CacheV2.Schema.AppMetadata GetAppMetadata()
         {
-            return new AppMetadata(Environment, ClientId, FamilyId);
+            return new Client.CacheV2.Schema.AppMetadata(Environment, ClientId, FamilyId);
         }
     }
 }

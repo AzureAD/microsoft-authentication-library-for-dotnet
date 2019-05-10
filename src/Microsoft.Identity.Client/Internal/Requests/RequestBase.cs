@@ -1,37 +1,12 @@
-//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Mats.Internal;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
@@ -40,6 +15,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Mats.Internal.Events;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -68,7 +44,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
 
-            AuthenticationRequestParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
 
@@ -127,20 +102,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
+        internal virtual Task PreRunAsync()
+        {
+            return Task.FromResult(0);
+        }
+
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken)
         {
-            LogRequestStarted(AuthenticationRequestParameters);
-            string accountId = AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier;
-            ApiEvent apiEvent = InitializeApiEvent(accountId);
+            ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
 
-            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
-                AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
-                AuthenticationRequestParameters.ClientId,
-                apiEvent,
-                shouldFlush: true))
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(apiEvent))
             {
                 try
                 {
+                    await PreRunAsync().ConfigureAwait(false);
+                    AuthenticationRequestParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
+                    LogRequestStarted(AuthenticationRequestParameters);
+
                     AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     LogReturnedToken(authenticationResult);
 
@@ -160,6 +138,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     throw;
                 }
+                finally
+                {
+                    ServiceBundle.TelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId);
+                }
             }
         }
 
@@ -170,15 +152,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private ApiEvent InitializeApiEvent(string accountId)
         {
-            AuthenticationRequestParameters.RequestContext.TelemetryRequestId = ServiceBundle.TelemetryManager.GenerateNewRequestId();
-            ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger, ServiceBundle.PlatformProxy.CryptographyManager)
+            ApiEvent apiEvent = new ApiEvent(
+                AuthenticationRequestParameters.RequestContext.Logger,
+                ServiceBundle.PlatformProxy.CryptographyManager,
+                AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
+                ApiTelemId = AuthenticationRequestParameters.ApiTelemId,
                 AccountId = accountId ?? "",
-                CorrelationId = AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString(),
-                RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
                 WasSuccessful = false
             };
+
+            foreach (var kvp in AuthenticationRequestParameters.GetApiTelemetryFeatures())
+            {
+                apiEvent[kvp.Key] = kvp.Value;
+            }
 
             if (AuthenticationRequestParameters.AuthorityInfo != null)
             {
@@ -192,7 +180,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return apiEvent;
         }
 
-        protected AuthenticationResult CacheTokenResponseAndCreateAuthenticationResult(MsalTokenResponse msalTokenResponse)
+        protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse)
         {
             // developer passed in user object.
             AuthenticationRequestParameters.RequestContext.Logger.Info("Checking client info returned from the server..");
@@ -201,7 +189,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
                 !AuthenticationRequestParameters.IsRefreshTokenRequest &&
-                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AppConfig.AuthorityType.Adfs)
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs)
             {
                 //client_info is not returned from client credential flows because there is no user present.
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
@@ -218,7 +206,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                var tuple = CacheManager.SaveAccessAndRefreshToken(msalTokenResponse);
+                var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
                 return new AuthenticationResult(tuple.Item1, tuple.Item2);
             }
             else
@@ -262,7 +250,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return;
             }
 
-            if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.B2C &&
+            if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C &&
                 fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,
                     StringComparison.OrdinalIgnoreCase))
             {

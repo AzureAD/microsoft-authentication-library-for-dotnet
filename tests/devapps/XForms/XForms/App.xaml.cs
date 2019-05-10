@@ -1,33 +1,8 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Xamarin.Forms;
 
 namespace XForms
@@ -48,10 +23,10 @@ namespace XForms
         public static string RedirectUriOnAndroid = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; // will not work with system browser
         // For system browser
         //public static string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
-        
+
         public const string BrokerRedirectUriOnIos = "msauth.com.yourcompany.XForms://auth";
 
-        public static string RedirectUriOnIos =  Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri;
+        public static string RedirectUriOnIos = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri;
         // For system browser
         //public static string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
 
@@ -61,6 +36,7 @@ namespace XForms
         public const string B2cAuthority = "https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
         public const string B2CLoginAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
         public const string B2CEditProfilePolicyAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
+        public const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
 
         public static string[] DefaultScopes = { "User.Read" };
         public static string[] B2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
@@ -97,25 +73,26 @@ namespace XForms
             if (UseBroker)
             {
                 //builder.WithBroker(true);
-                builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
-                builder.WithRedirectUri(BrokerRedirectUriOnIos);
+                builder = builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
+                builder = builder.WithRedirectUri(BrokerRedirectUriOnIos);
             }
 
             else
             {
-                 // Let Android set its own redirect uri
+                // Let Android set its own redirect uri
                 switch (Device.RuntimePlatform)
                 {
-                    case "iOS":
-                        builder.WithRedirectUri(RedirectUriOnIos);
-                        break;
-                    case "Android":
-                        builder.WithRedirectUri(RedirectUriOnAndroid);
-                        break;
+                case "iOS":
+                    builder = builder.WithRedirectUri(RedirectUriOnIos);
+                    builder = builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
+                    break;
+                case "Android":
+                    builder = builder.WithRedirectUri(RedirectUriOnAndroid);
+                    break;
                 }
 
 #if IS_APPCENTER_BUILD
-            builder.WithIosKeychainSecurityGroup("*");
+            builder = builder.WithIosKeychainSecurityGroup("*");
 #endif
             }
 

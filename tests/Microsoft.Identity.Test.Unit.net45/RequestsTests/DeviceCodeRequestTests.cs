@@ -1,29 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-// ------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -46,7 +22,6 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -88,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetStateAndInitMsal();
+            TestCommon.ResetInternalStaticCaches();
         }
 
         private HttpResponseMessage CreateDeviceCodeResponseSuccessMessage()
@@ -117,10 +92,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var cache = parameters.CacheSessionManager.TokenCacheInternal;
 
                 // Check that cache is empty
-                Assert.AreEqual(0, cache.Accessor.AccessTokenCount);
-                Assert.AreEqual(0, cache.Accessor.AccountCount);
-                Assert.AreEqual(0, cache.Accessor.IdTokenCount);
-                Assert.AreEqual(0, cache.Accessor.RefreshTokenCount);
+                Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllAccounts().Count());
 
                 DeviceCodeResult actualDeviceCodeResult = null;
 
@@ -133,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     }
                 };
 
-              
+
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
@@ -152,10 +127,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 CoreAssert.AreScopesEqual(expectedScopes.AsSingleString(), actualDeviceCodeResult.Scopes.AsSingleString());
 
                 // Validate that entries were added to cache
-                Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
-                Assert.AreEqual(1, cache.Accessor.AccountCount);
-                Assert.AreEqual(1, cache.Accessor.IdTokenCount);
-                Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
+                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllAccounts().Count());
             }
         }
 
@@ -177,10 +152,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var cache = parameters.CacheSessionManager.TokenCacheInternal;
 
                 // Check that cache is empty
-                Assert.AreEqual(0, cache.Accessor.AccessTokenCount);
-                Assert.AreEqual(0, cache.Accessor.AccountCount);
-                Assert.AreEqual(0, cache.Accessor.IdTokenCount);
-                Assert.AreEqual(0, cache.Accessor.RefreshTokenCount);
+                Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllAccounts().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
 
                 DeviceCodeResult actualDeviceCodeResult = null;
 
@@ -208,16 +183,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(ExpectedAdfsVerificationUrl, actualDeviceCodeResult.VerificationUrl);
                 CoreAssert.AreScopesEqual(expectedScopes.AsSingleString(), actualDeviceCodeResult.Scopes.AsSingleString());
                 // Validate that entries were added to cache
-                Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
-                Assert.AreEqual(1, cache.Accessor.AccountCount);
-                Assert.AreEqual(1, cache.Accessor.IdTokenCount);
-                Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
+                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllAccounts().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             }
         }
 
         [TestMethod]
         [TestCategory("DeviceCodeRequestTests")]
-        public void TestDeviceCodeCancel()
+        public async Task TestDeviceCodeCancelAsync()
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
@@ -243,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // We setup the cancel before calling the RunAsync operation since we don't check the cancel
                 // until later and the mock network calls run insanely fast for us to timeout for them.
                 cancellationSource.Cancel();
-                AssertException.TaskThrows<OperationCanceledException>(() => request.RunAsync(cancellationSource.Token));
+                await AssertException.TaskThrowsAsync<OperationCanceledException>(() => request.RunAsync(cancellationSource.Token)).ConfigureAwait(false);
             }
         }
 
@@ -330,9 +305,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var cache = new TokenCache(harness.ServiceBundle);
             var parameters = harness.CreateAuthenticationRequestParameters(
                 isAdfs ? MsalTestConstants.OnPremiseAuthority : MsalTestConstants.AuthorityHomeTenant, 
-                null, 
-                cache, 
-                null, 
+                null,
+                cache,
+                null,
                 extraQueryParameters: MsalTestConstants.ExtraQueryParams, 
                 claims: MsalTestConstants.Claims);
 

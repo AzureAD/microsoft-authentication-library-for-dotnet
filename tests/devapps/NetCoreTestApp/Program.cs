@@ -1,29 +1,5 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -32,35 +8,59 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Extensibility;
+using NetCoreTestApp.Experimental;
 
 namespace NetCoreTestApp
 {
     public class Program
     {
-        private static readonly string ClientIdForPublicApp = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        private static readonly string ClientIdForConfidentialApp = "<enter id>";
+        // This app has http://localhost redirect uri registered
+        private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
+        private static readonly string s_clientIdForConfidentialApp = "<enter id>";
 
-        private static readonly string Username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly string Authority = "https://login.microsoftonline.com/organizations/v2.0"; // common will not work for WIA and U/P but it is a good test case
-        private static readonly IEnumerable<string> Scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
+        private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
+        private static readonly string s_authority = "https://login.microsoftonline.com/organizations/v2.0"; // common will not work for WIA and U/P but it is a good test case
+        private static readonly IEnumerable<string> s_scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
-        public static readonly string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.bin";
+        private static IPublicClientApplication s_pca = null;
+        public static readonly string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.json";
+
+
+        private static readonly string[] s_tids = new[]  {
+            "common",
+            "49f548d0-12b7-4169-a390-bb5304d24462",
+            "72f988bf-86f1-41af-91ab-2d7cd011db47" };
+
+        private static int s_currentTid = 0;
+
+
 
         public static void Main(string[] args)
         {
+            s_pca = CreatePca();
+            RunConsoleAppLogicAsync().Wait();
+        }
+
+        private static string GetAuthority()
+        {
+            string tenant = s_tids[s_currentTid];
+            return $"https://login.microsoftonline.com/{tenant}";
+        }
+
+        private static IPublicClientApplication CreatePca()
+        {
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(ClientIdForPublicApp)
-                .WithAuthority(new Uri(Authority))
-                .WithLogging(Log, LogLevel.Verbose, true)
-#if ARIA_TELEMETRY_ENABLED
-                .WithTelemetry(new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
-#endif
-                .Build();
+                            .Create(s_clientIdForPublicApp)
+                            .WithAuthority(GetAuthority())
+                            .WithLogging(Log, LogLevel.Verbose, true)
+                            .WithRedirectUri(DefaultOsBrowserWebUi.FindFreeLocalhostRedirectUri()) // required for DefaultOsBrowser
+                            .Build();
 
             pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
             {
@@ -77,26 +77,28 @@ namespace NetCoreTestApp
                     File.WriteAllBytes(CacheFilePath, notificationArgs.TokenCache.SerializeMsalV3());
                 }
             });
-
-            RunConsoleAppLogicAsync(pca).Wait();
+            return pca;
         }
 
-        private static async Task RunConsoleAppLogicAsync(IPublicClientApplication pca)
+        private static async Task RunConsoleAppLogicAsync()
         {
             while (true)
             {
                 Console.Clear();
 
-                await DisplayAccountsAsync(pca).ConfigureAwait(false);
+                Console.WriteLine("Authority: " + GetAuthority());
+                await DisplayAccountsAsync(s_pca).ConfigureAwait(false);
 
                 // display menu
                 Console.WriteLine(@"
-                        1. Acquire Token by Windows Integrated Auth
+                        1. IWA
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
-                        4. Acquire Token Silently
-                        5. Confidential Client with Certificate (needs extra config)
-                        6. Clear PCA cache
+                        4. Acquire Token Interactive (via Default System Browser)
+                        5. Acquire Token Silently
+                        6. Confidential Client with Certificate (needs extra config)
+                        7. Clear cache
+                        8. Rotate Tenant ID
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -107,54 +109,72 @@ namespace NetCoreTestApp
                 {
                     switch (selection)
                     {
-                        case 1: // acquire token
-                            authTask = pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes, Username);
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                    case 1: // acquire token
+                        authTask = s_pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
 
-                            break;
-                        case 2: // acquire token u/p
-                            SecureString password = GetPasswordFromConsole();
-                            authTask = pca.AcquireTokenByUsernamePasswordAsync(Scopes, Username, password);
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                        break;
+                    case 2: // acquire token u/p
+                        SecureString password = GetPasswordFromConsole();
+                        authTask = s_pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
 
-                            break;
-                        case 3:
-                            authTask = pca.AcquireTokenWithDeviceCodeAsync(
-                                Scopes,
-                                deviceCodeResult =>
-                                {
-                                    Console.WriteLine(deviceCodeResult.Message);
-                                    return Task.FromResult(0);
-                                });
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
-                            break;
-                        case 4: // acquire token silent
-                            IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
-                            if (account == null)
+                        break;
+                    case 3:
+                        authTask = s_pca.AcquireTokenWithDeviceCode(
+                            s_scopes,
+                            deviceCodeResult =>
                             {
-                                Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
-                            }
+                                Console.WriteLine(deviceCodeResult.Message);
+                                return Task.FromResult(0);
+                            }).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
 
-                            authTask = pca.AcquireTokenSilentAsync(Scopes, account);
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                        break;
+                    case 4: // acquire token interactive
 
-                            break;
-                        case 5:
-                            RunClientCredentialWithCertificate();
-                            break;
-                        case 6:
-                            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-                            foreach (var acc in accounts)
-                            {
-                                await pca.RemoveAsync(acc).ConfigureAwait(false);
-                            }
+                        authTask = s_pca.AcquireTokenInteractive(s_scopes)
+                            .WithCustomWebUi(new DefaultOsBrowserWebUi()) // make sure you've configured a redirect uri of "http://localhost" or "http://localhost:1234" in the _pca builder
+                            .ExecuteAsync(CancellationToken.None);
 
-                            break;
-                        case 0:
-                            return;
-                        default:
-                            break;
+                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+
+                        break;
+                    case 5: // acquire token silent
+                        IAccount account = s_pca.GetAccountsAsync().Result.FirstOrDefault();
+                        if (account == null)
+                        {
+                            Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
+                        }
+
+                        authTask = s_pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+
+                        break;
+                    case 6:
+                        RunClientCredentialWithCertificate();
+                        break;
+                    case 7:
+                        var accounts = await s_pca.GetAccountsAsync().ConfigureAwait(false);
+                        foreach (var acc in accounts)
+                        {
+                            await s_pca.RemoveAsync(acc).ConfigureAwait(false);
+                        }
+
+                        break;
+                    case 8:
+
+                        s_currentTid = (s_currentTid + 1) % s_tids.Length;
+                        s_pca = CreatePca();
+
+                        RunConsoleAppLogicAsync().Wait();
+                        break;
+
+
+                    case 0:
+                        return;
+                    default:
+                        break;
                     }
 
                 }
@@ -169,7 +189,7 @@ namespace NetCoreTestApp
             }
         }
 
-        private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
+        private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication _pca, Task<AuthenticationResult> authTask)
         {
             await authTask.ConfigureAwait(false);
 
@@ -179,7 +199,7 @@ namespace NetCoreTestApp
 
 
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
-            await DisplayAccountsAsync(pca).ConfigureAwait(false);
+            await DisplayAccountsAsync(_pca).ConfigureAwait(false);
             var callGraphTask = CallGraphAsync(authTask.Result.AccessToken);
             callGraphTask.Wait();
             Console.WriteLine("Result from calling the ME endpoint of the graph: " + callGraphTask.Result);
@@ -188,11 +208,19 @@ namespace NetCoreTestApp
 
         private static void RunClientCredentialWithCertificate()
         {
-            ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(GetCertificateByThumbprint("<THUMBPRINT>")));
-            ConfidentialClientApplication app = new ConfidentialClientApplication(ClientIdForConfidentialApp, "http://localhost", cc, new TokenCache(), new TokenCache());
+            var app = ConfidentialClientApplicationBuilder
+                .Create(s_clientIdForConfidentialApp)
+                .WithRedirectUri("http://localhost")
+                .WithCertificate(GetCertificateByThumbprint("<THUMBPRINT>"))
+                .Build();
+
             try
             {
-                AuthenticationResult result = app.AcquireTokenForClientAsync(new string[] { "User.Read.All" }, true).Result;
+                AuthenticationResult result = app
+                    .AcquireTokenForClient(new string[] { "User.Read.All" })
+                    .WithForceRefresh(true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
             }
             catch (Exception exc)
             {
@@ -216,15 +244,15 @@ namespace NetCoreTestApp
         }
 
 
-        private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
+        private static async Task DisplayAccountsAsync(IPublicClientApplication _pca)
         {
-            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
 
             Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "For the public client, the tokenCache contains {0} token(s)", accounts.Count()));
 
             foreach (var account in accounts)
             {
-                Console.WriteLine("PCA account for: " + account.Username + "\n");
+                Console.WriteLine("_pca account for: " + account.Username + "\n");
             }
         }
 
@@ -237,17 +265,17 @@ namespace NetCoreTestApp
 
             switch (level)
             {
-                case LogLevel.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    break;
-                case LogLevel.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    break;
-                case LogLevel.Verbose:
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    break;
-                default:
-                    break;
+            case LogLevel.Error:
+                Console.ForegroundColor = ConsoleColor.Red;
+                break;
+            case LogLevel.Warning:
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                break;
+            case LogLevel.Verbose:
+                Console.ForegroundColor = ConsoleColor.Gray;
+                break;
+            default:
+                break;
             }
 
             Console.WriteLine($"{level} {message}");
