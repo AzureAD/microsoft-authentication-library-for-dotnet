@@ -65,8 +65,8 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
                !authCodeUri.AbsolutePath.Equals(redirectUri.AbsolutePath))
             {
                 throw new MsalClientException(
-                    MsalError.CustomWebUiRedirectUriMismatch,
-                    MsalErrorMessage.CustomWebUiRedirectUriMismatch(
+                    MsalError.LoopbackResponseUriMisatch,
+                    MsalErrorMessage.RedirectUriMismatch(
                         authCodeUri.AbsolutePath,
                         redirectUri.AbsolutePath));
             }

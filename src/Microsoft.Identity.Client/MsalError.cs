@@ -556,6 +556,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string LoopbackRedirectUri = "loopback_redirect_uri";
 
+        /// <summary>
+        /// Error code used when the CustomWebUI has returned an uri, but it does not match the Authroity and AbsolutePath of
+        /// the configured redirect uri.
+        /// </summary>
+        public const string LoopbackResponseUriMisatch = "loopback_response_uri_mismatch";
+
 
 #if iOS
         /// <summary>

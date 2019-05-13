@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.UI
 
                 throw new MsalClientException(
                     MsalError.CustomWebUiRedirectUriMismatch,
-                    MsalErrorMessage.CustomWebUiRedirectUriMismatch(
+                    MsalErrorMessage.RedirectUriMismatch(
                         uri.AbsolutePath,
                         redirectUri.AbsolutePath));
             }

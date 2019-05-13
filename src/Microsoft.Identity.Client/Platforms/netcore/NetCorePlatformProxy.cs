@@ -156,7 +156,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override Task StartDefaultOsBrowserAsync(string url)
         {
-            // TODO: bogavril - move to platform proxy
             try
             {
                 var psi = new ProcessStartInfo
