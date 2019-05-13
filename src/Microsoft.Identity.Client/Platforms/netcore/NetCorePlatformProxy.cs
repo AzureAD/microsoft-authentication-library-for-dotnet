@@ -175,7 +175,18 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    Process.Start("xdg-open", url);
+                    try
+                    {
+                        Process.Start("xdg-open", url);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new MsalClientException(
+                            MsalError.LinuxXdgOpen,
+                            "Unable to open a web page using xdg-open. See inner exception for details. Possible causes for this error are: xdg-open is not installed or " +
+                            "it cannot find a way to open an url - make sure you can open a web page by invoking from a terminal: xdg-open https://www.bing.com ",
+                            ex);
+                    }
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
