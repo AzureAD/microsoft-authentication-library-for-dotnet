@@ -562,6 +562,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string LoopbackResponseUriMisatch = "loopback_response_uri_mismatch";
 
+        /// <summary>
+        /// To use the default OS browser on Linux, make sure you can open a page using xdg-open tool. See https://aka.ms/msal-net-os-browser for details.
+        /// </summary>
+        public const string LinuxXdgOpen = "linux_xdg_open_failed";
+
 
 #if iOS
         /// <summary>
