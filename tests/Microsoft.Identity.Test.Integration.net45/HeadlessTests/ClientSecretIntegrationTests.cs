@@ -61,20 +61,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        string GetClientSecret()
-        {
-            string secretUrl = null;
-            if (!string.IsNullOrEmpty(data))
-            {
-                secretUrl = data;
-            }
-            else
-            {
-                throw new FileNotFoundException("An error occured when when trying to read the client secret url from data.txt");
-            }
-            return secretUrl;
-        }
-
         [TestMethod]
         [TestCategory("ClientSecretIntegrationTests")]
         public async Task AcquireTokenWithClientSecretFromAdfsAsync()

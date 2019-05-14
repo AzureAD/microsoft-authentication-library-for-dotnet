@@ -134,7 +134,8 @@ namespace Microsoft.Identity.Client
                             msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                                 preferredEnvironmentHost,
                                 requestParams.ClientId,
-                                response);
+                                response,
+                                subject);
 
                             if (!_featureFlags.IsFociEnabled)
                             {

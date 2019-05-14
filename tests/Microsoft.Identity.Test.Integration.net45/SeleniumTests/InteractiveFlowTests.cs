@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponseFederated = LabUserHelper.GetLabUserData(FederatedUserquery);
-            var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, true).ConfigureAwait(false);
+            var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, false).ConfigureAwait(false);
 
             UserQuery MSAUserquery = new UserQuery
             {
