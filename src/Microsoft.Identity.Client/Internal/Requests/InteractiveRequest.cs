@@ -252,7 +252,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (_authorizationResult.Status != AuthorizationStatus.Success)
             {
-                throw new MsalServiceException(_authorizationResult.Error, _authorizationResult.ErrorDescription);
+                throw new MsalClientException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unkown error.");
             }
         }
     }

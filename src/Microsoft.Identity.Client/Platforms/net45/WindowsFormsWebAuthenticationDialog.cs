@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 case DialogResult.OK:
                     break;
                 case DialogResult.Cancel:
-                    Result = new AuthorizationResult(AuthorizationStatus.UserCancel);
+                    Result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
                     break;
                 default:
                     throw CreateExceptionForAuthenticationUiFailed(_statusCode);

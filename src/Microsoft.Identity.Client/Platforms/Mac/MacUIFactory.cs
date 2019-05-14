@@ -10,11 +10,11 @@ namespace Microsoft.Identity.Client.Platforms.Mac
 {
     internal class MacUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext, IPlatformProxy platformProxy)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {
             return new MacEmbeddedWebUI()
             {
-                CoreUIParent = coreUIParent,
+                CoreUIParent = parent,
                 RequestContext = requestContext
             };
         }

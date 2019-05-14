@@ -662,9 +662,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 // Interactive call and user cancels authentication
-                MockWebUI ui = new MockWebUI()
+                var ui = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(AuthorizationStatus.UserCancel)
+                    MockResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel)
                 };
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
@@ -726,7 +726,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }
-                catch (MsalServiceException exc)
+                catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual("access_denied", exc.ErrorCode);
@@ -1139,52 +1139,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 #endif
 
-#if NET_CORE
-
-        [TestMethod]
-        public async Task NetCore_AcquireToken_ThrowsPlatformNotSupportedAsync()
-        {
-            // Arrange
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
-            var account = new Account("a.b", null, null);
-
-            // All interactive auth overloads
-            IEnumerable<Func<Task<AuthenticationResult>>> acquireTokenInteractiveMethods = new List<Func<Task<AuthenticationResult>>>
-            {
-                // without UI Parent
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithLoginHint("login hint").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithAccount(account).ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithLoginHint("login hint").WithPrompt(Prompt.Consent).WithExtraQueryParameters("extra_query_params").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithAccount(account).WithPrompt(Prompt.Consent).WithExtraQueryParameters("extra_query_params").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .WithLoginHint("login hint")
-                    .WithPrompt(Prompt.Consent)
-                    .WithExtraQueryParameters("extra_query_params")
-                    .WithExtraScopesToConsent(new[] {"extra scopes" })
-                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false),
-
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .WithAccount(account)
-                    .WithPrompt(Prompt.Consent)
-                    .WithExtraQueryParameters("extra_query_params")
-                    .WithExtraScopesToConsent(new[] {"extra scopes" })
-                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false),
-
-                async () => await pca.AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)
-            };
-
-            // Act and Assert
-            foreach (var acquireTokenInteractiveMethod in acquireTokenInteractiveMethods)
-            {
-                await AssertException.TaskThrowsAsync<PlatformNotSupportedException>(acquireTokenInteractiveMethod).ConfigureAwait(false);
-            }
-        }
-#endif
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {
             builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)

@@ -104,22 +104,19 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 result = AuthorizationResult.FromUri(webAuthenticationResult.ResponseData);
                 break;
             case WebAuthenticationStatus.ErrorHttp:
-                result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
-                {
-                    Code = webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture)
-                };
+                result = AuthorizationResult.FromStatus(AuthorizationStatus.ErrorHttp);
+                result.Code = webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture);
                 break;
             case WebAuthenticationStatus.UserCancel:
-                result = new AuthorizationResult(AuthorizationStatus.UserCancel);
+                result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
                 break;
             default:
-                result = new AuthorizationResult(AuthorizationStatus.UnknownError);
+                result = AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
                 break;
             }
 
             return result;
         }
-
 
         public void ValidateRedirectUri(Uri redirectUri)
         {

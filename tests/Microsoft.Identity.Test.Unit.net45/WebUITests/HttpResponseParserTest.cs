@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
     public class HttpResponseParserTest
     {
         [TestMethod]
-        public void HappyPath()
+        public void CanParseValidHttpGet()
         {
             // Arrange
             const string ValidTcpMessage = @"
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
-        public void BadMessages()
+        public void WillRejectPostAndNoHost()
         {
             const string PostTcpMessage = @"
                 {POST /?code=_some-code_ HTTP/1.1

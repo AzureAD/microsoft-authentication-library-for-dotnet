@@ -72,7 +72,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
@@ -109,7 +110,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
@@ -160,7 +162,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         null,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        .ConfigureAwait(false).GetAwaiter().GetResult();
 
                     Assert.Fail("validation should have failed here");
                 }
@@ -201,7 +204,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         null,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        .ConfigureAwait(false).GetAwaiter().GetResult();
 
                     Assert.Fail("validation should have failed here");
                 }
@@ -238,7 +242,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         null,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        .ConfigureAwait(false).GetAwaiter().GetResult();
 
                     Assert.Fail("validation should have failed here");
                 }

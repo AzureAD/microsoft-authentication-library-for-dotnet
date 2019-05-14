@@ -21,24 +21,107 @@ namespace Microsoft.Identity.Client.UI
     [DataContract]
     internal class AuthorizationResult
     {
-        internal AuthorizationResult(AuthorizationStatus status)
+        public static AuthorizationResult FromUri(string webAuthenticationResult)
         {
-            Status = status;
-
-            if (Status == AuthorizationStatus.UserCancel)
+            if (String.IsNullOrWhiteSpace(webAuthenticationResult))
             {
-                Error = MsalError.AuthenticationCanceledError;
+                return FromStatus(AuthorizationStatus.UnknownError,
+                   MsalError.AuthenticationFailed,
+                   MsalErrorMessage.AuthorizationServerInvalidResponse);
+            }
+
+            var resultUri = new Uri(webAuthenticationResult);
+
+            // NOTE: The Fragment property actually contains the leading '#' character and that must be dropped
+            string resultData = resultUri.Query;
+
+            if (string.IsNullOrWhiteSpace(resultData))
+            {
+                return FromStatus(AuthorizationStatus.UnknownError,
+                   MsalError.AuthenticationFailed,
+                   MsalErrorMessage.AuthorizationServerInvalidResponse);
+            }
+
+            Dictionary<string, string> uriParams = CoreHelpers.ParseKeyValueList(resultData.Substring(1), '&',
+                true, null);
+
+            if (uriParams.ContainsKey(TokenResponseClaim.Error))
+            {
+                return FromStatus(AuthorizationStatus.ProtocolError,
+                    uriParams[TokenResponseClaim.Error],
+                    uriParams.ContainsKey(TokenResponseClaim.ErrorDescription)
+                            ? uriParams[TokenResponseClaim.ErrorDescription]
+                        : null);
+            }
+
+
+            var result = new AuthorizationResult();
+            result.Status = AuthorizationStatus.Success;
+
+            if (uriParams.ContainsKey(OAuth2Parameter.State))
+            {
+                result.State = uriParams[OAuth2Parameter.State];
+            }
+
+            if (uriParams.ContainsKey(TokenResponseClaim.CloudInstanceHost))
+            {
+                result.CloudInstanceHost = uriParams[TokenResponseClaim.CloudInstanceHost];
+            }
+
+            if (uriParams.ContainsKey(TokenResponseClaim.Code))
+            {
+                result.Code = uriParams[TokenResponseClaim.Code];
+            }
+            else if (webAuthenticationResult.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
+            {
+                result.Code = webAuthenticationResult;
+            }
+            else
+            {
+                return FromStatus(
+                   AuthorizationStatus.UnknownError,
+                   MsalError.AuthenticationFailed,
+                   MsalErrorMessage.AuthorizationServerInvalidResponse);
+            }
+
+            return result;
+        }
+
+        internal static AuthorizationResult FromStatus(AuthorizationStatus status)
+        {
+            if (status == AuthorizationStatus.Success)
+            {
+                throw new InvalidOperationException("Use the FromUri builder");
+            }
+
+            var result = new AuthorizationResult() { Status = status };
+
+            if (status == AuthorizationStatus.UserCancel)
+            {
+                result.Error = MsalError.AuthenticationCanceledError;
 #if ANDROID
-                ErrorDescription = MsalErrorMessage.AuthenticationCanceledAndroid;
+                result.ErrorDescription = MsalErrorMessage.AuthenticationCanceledAndroid;
 #else
-                ErrorDescription = MsalErrorMessage.AuthenticationCanceled;
+                result.ErrorDescription = MsalErrorMessage.AuthenticationCanceled;
 #endif
             }
-            else if (Status == AuthorizationStatus.UnknownError)
+            else if (status == AuthorizationStatus.UnknownError)
             {
-                Error = MsalError.UnknownError;
-                ErrorDescription = MsalErrorMessage.Unknown;
+                result.Error = MsalError.UnknownError;
+                result.ErrorDescription = MsalErrorMessage.Unknown;
             }
+
+            return result;
+        }
+
+        public static AuthorizationResult FromStatus(AuthorizationStatus status, string error, string errorDescription)
+        {
+            return new AuthorizationResult()
+            {
+                Status = status,
+                Error = error,
+                ErrorDescription = errorDescription,
+            };
         }
 
         public AuthorizationStatus Status { get; private set; }
@@ -65,82 +148,7 @@ namespace Microsoft.Identity.Client.UI
         /// </remarks>
         public string State { get; set; }
 
-        public static AuthorizationResult FromUri(string webAuthenticationResult)
-        {
-            if (String.IsNullOrWhiteSpace(webAuthenticationResult))
-            {
-                return CreateFailedAuthResult(
-                    MsalError.AuthenticationFailed,
-                    MsalErrorMessage.AuthorizationServerInvalidResponse, //TODO: bogavril - different error message ?
-                    AuthorizationStatus.UnknownError);
-            }
 
-            var resultUri = new Uri(webAuthenticationResult);
-
-            // NOTE: The Fragment property actually contains the leading '#' character and that must be dropped
-            string resultData = resultUri.Query;
-
-            if (string.IsNullOrWhiteSpace(resultData))
-            {
-                return CreateFailedAuthResult(
-                   MsalError.AuthenticationFailed,
-                   MsalErrorMessage.AuthorizationServerInvalidResponse, //TODO: bogavril - different error message ?
-                   AuthorizationStatus.UnknownError);
-            }
-
-            // RemoveAccount the leading '?' first
-            Dictionary<string, string> uriParams = CoreHelpers.ParseKeyValueList(resultData.Substring(1), '&',
-                true, null);
-
-            if (uriParams.ContainsKey(TokenResponseClaim.Error))
-            {
-                return CreateFailedAuthResult(
-                    uriParams[TokenResponseClaim.Error],
-                    uriParams.ContainsKey(TokenResponseClaim.ErrorDescription)
-                            ? uriParams[TokenResponseClaim.ErrorDescription]
-                        : null,
-                    AuthorizationStatus.ProtocolError);
-            }
-
-
-            var result = new AuthorizationResult(AuthorizationStatus.Success);
-
-            if (uriParams.ContainsKey(OAuth2Parameter.State))
-            {
-                result.State = uriParams[OAuth2Parameter.State];
-            }
-
-            if (uriParams.ContainsKey(TokenResponseClaim.CloudInstanceHost))
-            {
-                result.CloudInstanceHost = uriParams[TokenResponseClaim.CloudInstanceHost];
-            }
-
-            if (uriParams.ContainsKey(TokenResponseClaim.Code))
-            {
-                result.Code = uriParams[TokenResponseClaim.Code];
-            }
-            else if (webAuthenticationResult.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
-            {
-                result.Code = webAuthenticationResult;
-            }
-            else
-            {
-                return CreateFailedAuthResult(
-                   MsalError.AuthenticationFailed,
-                   MsalErrorMessage.AuthorizationServerInvalidResponse, //TODO: bogavril - different error message ?
-                   AuthorizationStatus.UnknownError);
-            }
-
-            return result;
-        }
-
-        private static AuthorizationResult CreateFailedAuthResult(string error, string errorDescription, AuthorizationStatus status)
-        {
-            return new AuthorizationResult(status)
-            {
-                Error = error,
-                ErrorDescription = errorDescription,
-            };
-        }
+     
     }
 }

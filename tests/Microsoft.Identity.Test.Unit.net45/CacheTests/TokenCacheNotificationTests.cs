@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     pca.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, pca.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);

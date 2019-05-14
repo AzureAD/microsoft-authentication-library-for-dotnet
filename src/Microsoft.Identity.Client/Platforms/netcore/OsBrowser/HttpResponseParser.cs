@@ -64,12 +64,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
             if (!match.Success || match.Groups.Count != 2)
             {
                 logger.ErrorPii(
-                    "Could not extract the query from the authrorization response: " + httpRequest,
-                    "Could not extract the query from the authrorization response. Enable Pii on to see the request");
+                    "Could not extract the query from the authorization response: " + httpRequest,
+                    "Could not extract the query from the authorization response. Enable Pii on to see the request");
 
                 throw new MsalClientException(
                     MsalError.InvalidAuthorizationUri,
-                    "Could not extract the query from the authrorization response - check Pii enabled logs for details");
+                    "Could not extract the query from the authorization response - check Pii enabled logs for details");
             }
 
             return match.Groups[1].Value;
@@ -83,12 +83,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
             if (!match.Success || match.Groups.Count != 2)
             {
                 logger.ErrorPii(
-                    "Could not extract the host from the authrorization response: " + httpRequest,
-                    "Could not extract the host from the authrorization response. Enable Pii on to see the request");
+                    "Could not extract the host from the authorization response: " + httpRequest,
+                    "Could not extract the host from the authorization response. Enable Pii on to see the request");
 
                 throw new MsalClientException(
                     MsalError.InvalidAuthorizationUri,
-                    "Could not extract the host from the authrorization response - check Pii enabled logs for details");
+                    "Could not extract the host from the authorization response - check Pii enabled logs for details");
             }
 
             return match.Groups[1].Value.Trim();

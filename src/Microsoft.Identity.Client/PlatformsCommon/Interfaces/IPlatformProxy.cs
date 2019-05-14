@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         void /* for test */ SetFeatureFlags(IFeatureFlags featureFlags);
 
         /// <summary>
-        /// Open an url using the OS default browser. 
+        /// Go to a Url using the OS default browser. 
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url);
     }

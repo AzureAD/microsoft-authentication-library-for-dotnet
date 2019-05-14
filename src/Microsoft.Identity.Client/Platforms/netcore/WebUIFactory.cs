@@ -11,9 +11,9 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext, IPlatformProxy platformProxy)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {
-            return new DefaultOsBrowserWebUi(requestContext.Logger, platformProxy);
+            return new DefaultOsBrowserWebUi(requestContext.ServiceBundle.PlatformProxy, requestContext.Logger);
         }
     }
 }
