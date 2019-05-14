@@ -158,5 +158,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string ConfidentialClientId = "ConfidentialClientId";
         public const string ClientRedirectUri = "http://localhost:8080";
         public static readonly SortedSet<string> SupportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" });
+        public const string SecretURL = "https://buildautomation.vault.azure.net/secrets/ADFS2019ClientCredSecret/c55ec1128f32493da85b7643ede6eb80";
     }
 }

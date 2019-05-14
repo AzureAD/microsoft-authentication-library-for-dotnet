@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal override string GetTenantId()
         {
-            return null;
+            return String.Empty;
         }
 
         internal override void UpdateTenantId(string tenantId)

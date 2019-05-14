@@ -65,13 +65,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestCategory("ClientSecretIntegrationTests")]
         public async Task AcquireTokenWithClientSecretFromAdfsAsync()
         {
-            //To run this test locally, get the "Secret Identifier" Url for a secret called ADFS2019ClientCredSecret and use it to initialize 
-            //secretUrl. Comment out the line below as well
-            var secretUrl = GetClientSecret();
-            //var secretUrl = "ADFS2019ClientCredSecret Url";
-
             KeyVaultSecretsProvider secretProvider = new KeyVaultSecretsProvider();
-            SecretBundle secret = secretProvider.GetSecret(secretUrl);
+            SecretBundle secret = secretProvider.GetSecret(Adfs2019LabConstants.SecretURL);
 
             ConfidentialClientApplication msalConfidentialClient = ConfidentialClientApplicationBuilder.Create(Adfs2019LabConstants.ConfidentialClientId)
                                             .WithAdfsAuthority(Adfs2019LabConstants.Authority, true)
