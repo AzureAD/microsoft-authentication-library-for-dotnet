@@ -39,12 +39,13 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
         private readonly IPlatformProxy _platformProxy;
 
         public DefaultOsBrowserWebUi(
+            IPlatformProxy proxy,
             ICoreLogger logger,
-            IPlatformProxy platformProxy,
             /* for test */ ITcpInterceptor tcpInterceptor = null)
         {
-            _logger = logger;
-            _platformProxy = platformProxy;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _platformProxy = proxy ?? throw new ArgumentNullException(nameof(proxy));
+
             _tcpInterceptor = tcpInterceptor ?? new TcpInterceptor(_logger);
         }
 
@@ -80,7 +81,10 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
             {
                 throw new MsalClientException(
                     MsalError.LoopbackRedirectUri,
-                    "Only loopback redirect uri is supported with this WebUI. Configure http://localhost or http://localhost:port during app registration. See https://aka.ms/msal-net-os-browser for details");
+                    string.Format(CultureInfo.InvariantCulture,
+                        "Only loopback redirect uri is supported, but {0} was found. " +
+                        "Configure http://localhost or http://localhost:port both during app registration and when you create the PublicClientApplication object. " +
+                        "See https://aka.ms/msal-net-os-browser for details", redirectUri.AbsoluteUri));
             }
 
             int port = redirectUri.Port;
@@ -92,7 +96,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
                     "Please configure a redirect uri with a valid, non-default, port number, i.e. > 0, not 80");
             }
         }
-
 
         private async Task<Uri> InterceptAuthorizationUriAsync(
             Uri authorizationUri,

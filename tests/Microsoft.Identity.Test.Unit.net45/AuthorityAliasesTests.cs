@@ -16,6 +16,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -151,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit
 
         private async Task ValidateCacheEntitiesEnvironmentAsync(ITokenCacheInternal cache, string expectedEnvironment)
         {
-            var requestContext = RequestContext.CreateForTest();
+            var logger = Substitute.For<ICoreLogger>();
             var accessTokens = await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
             foreach (var at in accessTokens)
             {
@@ -177,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit
             }
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
-                AdalCacheOperations.Deserialize(requestContext.Logger, cache.LegacyPersistence.LoadCache());
+                AdalCacheOperations.Deserialize(logger, cache.LegacyPersistence.LoadCache());
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {

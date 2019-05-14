@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
-                var requestContext = RequestContext.CreateForTest(app.ServiceBundle);
+                var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid());
                 var accounts = app.UserTokenCacheInternal.GetAccountsAsync(
                     MsalTestConstants.AuthorityCommonTenant, requestContext).Result;
                 foreach (IAccount account in accounts)

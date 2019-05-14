@@ -10,7 +10,6 @@ namespace Microsoft.Identity.Client.UI
     {
         IWebUI CreateAuthenticationDialog(
             CoreUIParent coreUIParent,
-            RequestContext requestContext,
-            IPlatformProxy platformProxy);
+            RequestContext requestContext);
     }
 }

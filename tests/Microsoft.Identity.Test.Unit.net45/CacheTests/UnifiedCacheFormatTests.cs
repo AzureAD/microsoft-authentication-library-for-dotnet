@@ -75,8 +75,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private string _expectedAccountCacheValue;
         private string _expectedRtCacheValue;
 
-        private readonly RequestContext _requestContext = RequestContext.CreateForTest();
-
         private void IntitTestData(string fileName)
         {
             using (StreamReader r = new StreamReader(fileName))

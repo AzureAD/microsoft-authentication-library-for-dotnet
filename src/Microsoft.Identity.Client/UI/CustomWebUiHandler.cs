@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.UI
             catch (OperationCanceledException)
             {
                 requestContext.Logger.Info(LogMessages.CustomWebUiOperationCancelled);
-                return new AuthorizationResult(AuthorizationStatus.UserCancel);
+                return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
             }
             catch (Exception ex)
             {

@@ -138,8 +138,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 #endif
             return ServiceBundle.PlatformProxy.GetWebUiFactory().CreateAuthenticationDialog(
                 coreUiParent,
-                requestContext,
-                ServiceBundle.PlatformProxy);
+                requestContext);
         }
 
     }

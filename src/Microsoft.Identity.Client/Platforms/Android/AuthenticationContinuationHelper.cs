@@ -29,13 +29,10 @@ namespace Microsoft.Identity.Client
         {
             // TODO(migration): how can a public static method get access to the proper ClientRequestBase to wire into the logger and appropriate requestcontext?
             // Can we move this call to be somewhere on the ClientApplicationBase or something else that's wired into that?
-            RequestContext requestContext = new RequestContext(null, MsalLogger.Create(Guid.Empty, null), Guid.Empty);
+            var logger = MsalLogger.Create(Guid.Empty, null);
+            logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
 
-            requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
-            AuthorizationResult authorizationResult = null;
-
-            int code = (int)resultCode;
-
+            AuthorizationResult authorizationResult;
             if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
             {
                 authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
@@ -45,7 +42,7 @@ namespace Microsoft.Identity.Client
                 authorizationResult = ProcessFromSystemWebview(requestCode, resultCode, data);
             }
 
-            WebviewBase.SetAuthorizationResult(authorizationResult, requestContext);
+            WebviewBase.SetAuthorizationResult(authorizationResult, logger);
         }
 
         private static AuthorizationResult ProcessFromEmbeddedWebview(int requestCode, Result resultCode, Intent data)
@@ -57,10 +54,10 @@ namespace Microsoft.Identity.Client
 
 
             case (int)Result.Canceled:
-                return new AuthorizationResult(AuthorizationStatus.UserCancel);
+                return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
 
             default:
-                return new AuthorizationResult(AuthorizationStatus.UnknownError);
+                return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
             }
         }
 
@@ -72,10 +69,10 @@ namespace Microsoft.Identity.Client
                 return AuthorizationResult.FromUri(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
 
             case AndroidConstants.Cancel:
-                return new AuthorizationResult(AuthorizationStatus.UserCancel);
+                return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
 
             default:
-                return new AuthorizationResult(AuthorizationStatus.UnknownError);
+                return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
             }
         }
     }

@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ServiceBundle,
                     cache,
                     commonParameters,
-                    RequestContext.CreateForTest(ServiceBundle))
+                    new RequestContext(ServiceBundle, Guid.NewGuid()))
                 {
                     Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
                 };

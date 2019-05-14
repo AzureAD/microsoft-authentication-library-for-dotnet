@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class NetDesktopWebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext, IPlatformProxy platformProxy)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {
             if (parent.UseHiddenBrowser)
             {

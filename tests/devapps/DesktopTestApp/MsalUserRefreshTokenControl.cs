@@ -29,7 +29,7 @@ namespace DesktopTestApp
             _cache = publicClient.UserTokenCacheInternal;
             _rtItem = rtItem;
 
-            _accountItem = _cache.GetAccountAsync(_rtItem, RequestContext.CreateForTest()).GetAwaiter().GetResult(); // todo: yuck
+            _accountItem = _cache.GetAccountAsync(_rtItem).GetAwaiter().GetResult(); // todo: yuck
             upnLabel.Text = _accountItem.PreferredUsername;
 
             invalidateRefreshTokenBtn.Enabled = !_rtItem.Secret.Equals(GarbageRtValue, StringComparison.OrdinalIgnoreCase);
