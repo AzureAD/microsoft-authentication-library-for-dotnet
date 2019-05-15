@@ -30,7 +30,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-#if !NET_CORE
         [TestMethod]
         [Description("Test unified token cache")]
         public void UnifiedCache_MsalStoresToAndReadRtFromAdalCache()
@@ -185,7 +184,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.AreEqual(1, app1.GetAccountsAsync().Result.Count());
             }
         }
-#endif
 
         [TestMethod]
         [Description("Test for duplicate key in ADAL cache")]

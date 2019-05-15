@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit
             TestCommon.ResetInternalStaticCaches();
         }
 
-#if !NET_CORE
         [TestMethod]
         [Description("Test authority migration")]
         public async Task AuthorityMigrationTestAsync()
@@ -148,7 +147,6 @@ namespace Microsoft.Identity.Test.Unit
                 }
             }
         }
-#endif
 
         private async Task ValidateCacheEntitiesEnvironmentAsync(ITokenCacheInternal cache, string expectedEnvironment)
         {
