@@ -46,8 +46,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class ClientSecretIntegrationTests
     {
-        string data = Microsoft.Identity.Test.Integration.Properties.Resources.data;
-        public string[] AdfsScopes = { string.Format(CultureInfo.CurrentCulture, "{0}/email openid", Adfs2019LabConstants.AppId) };
+        private static string[] s_adfsScopes = { string.Format(CultureInfo.CurrentCulture, "{0}/email openid", Adfs2019LabConstants.AppId) };
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -66,7 +65,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AcquireTokenWithClientSecretFromAdfsAsync()
         {
             KeyVaultSecretsProvider secretProvider = new KeyVaultSecretsProvider();
-            SecretBundle secret = secretProvider.GetSecret(Adfs2019LabConstants.SecretURL);
+            SecretBundle secret = secretProvider.GetSecret(Adfs2019LabConstants.ADFS2019ClientSecretURL);
 
             ConfidentialClientApplication msalConfidentialClient = ConfidentialClientApplicationBuilder.Create(Adfs2019LabConstants.ConfidentialClientId)
                                             .WithAdfsAuthority(Adfs2019LabConstants.Authority, true)
@@ -75,7 +74,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                             .BuildConcrete();
 
             //AuthenticationResult authResult = await msalConfidentialClient.AcquireTokenForClientAsync(AdfsScopes).ConfigureAwait(false);
-            AuthenticationResult authResult = await msalConfidentialClient.AcquireTokenForClient(AdfsScopes).ExecuteAsync().ConfigureAwait(false);
+            AuthenticationResult authResult = await msalConfidentialClient.AcquireTokenForClient(s_adfsScopes).ExecuteAsync().ConfigureAwait(false);
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNull(authResult.IdToken);

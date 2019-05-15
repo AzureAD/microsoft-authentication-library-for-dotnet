@@ -180,11 +180,14 @@ namespace Microsoft.Identity.Client
 
                 string tenantId = requestParams.Authority.GetTenantId();
 
-                requestParams.RequestContext.Logger.Info($"Tenant id: {tenantId}");
-                tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.TenantId.Equals(
-                               tenantId, StringComparison.OrdinalIgnoreCase),
-                                requestParams.RequestContext.Logger,
-                                "Filtering by tenant id");
+                if (!String.IsNullOrEmpty(tenantId))
+                {
+                    requestParams.RequestContext.Logger.Info($"Tenant id: {tenantId}");
+                    tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.TenantId.Equals(
+                                   tenantId, StringComparison.OrdinalIgnoreCase),
+                                    requestParams.RequestContext.Logger,
+                                    "Filtering by tenant id");
+                }
             }
 
             return tokenCacheItems;

@@ -46,9 +46,10 @@ namespace Microsoft.Identity.Client.Instance
         {
         }
 
+        //ADFS does not have a concept of a tenant ID. This prevents ADFS from supporting multiple tenants
         internal override string GetTenantId()
         {
-            return String.Empty;
+            return null;
         }
 
         internal override void UpdateTenantId(string tenantId)

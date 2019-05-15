@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponseDefault = LabUserHelper.GetDefaultUser();
             AuthenticationResult defaultAccountResult = await RunTestForUserAsync(labResponseDefault).ConfigureAwait(false);
 
-            UserQuery FederatedUserquery = new UserQuery
+            UserQuery federatedUserquery = new UserQuery
             {
                 FederationProvider = FederationProvider.ADFSv2019,
                 IsMamUser = false,
@@ -235,17 +235,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = true
             };
 
-            LabResponse labResponseFederated = LabUserHelper.GetLabUserData(FederatedUserquery);
+            LabResponse labResponseFederated = LabUserHelper.GetLabUserData(federatedUserquery);
             var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, false).ConfigureAwait(false);
 
-            UserQuery MSAUserquery = new UserQuery
+            UserQuery msaUserquery = new UserQuery
             {
                 UserSearch = LabApiConstants.MSAOutlookAccount,
                 IsExternalUser = true,
                 AppName = "Lab4V2App"
             };
 
-            LabResponse labResponseMsa = LabUserHelper.GetLabUserData(MSAUserquery);
+            LabResponse labResponseMsa = LabUserHelper.GetLabUserData(msaUserquery);
             labResponseMsa.AppId = LabApiConstants.MSAOutlookAccountClientID;
             var msaAccountResult = await RunTestForUserAsync(labResponseMsa).ConfigureAwait(false);
 
@@ -303,7 +303,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false, directToAdfs))
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
                 .AcquireTokenInteractive(s_scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin, true))
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin, true, directToAdfs))
                 .WithPrompt(Prompt.ForceLogin)
                 .WithLoginHint(labResponse.User.HomeUPN)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
@@ -334,12 +334,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         	return result;
 		}
 
-        private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint)
+        private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint, bool adfsOnly = false)
         {
             return new SeleniumWebUI((driver) =>
             {
                 Trace.WriteLine("Starting Selenium automation");
-                driver.PerformLogin(user, prompt, withLoginHint);
+                driver.PerformLogin(user, prompt, withLoginHint, adfsOnly);
             });
         }
     }

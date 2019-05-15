@@ -89,14 +89,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             get
             {
-                if (_loginHint == null && Account != null)
+                if (String.IsNullOrEmpty(_loginHint) && Account != null)
                 {
                     return Account.Username;
                 }
-                else
-                {
-                    return _loginHint;
-                }
+
+                return _loginHint;
             }
 
             set => _loginHint = value;
