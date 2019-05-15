@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             _tokenCacheHelper = new TokenCacheHelper();
         }
 
-#if !NET_CORE
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         [Description("Tests the public interfaces can be mocked")]
@@ -556,11 +555,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
+
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 // add mock response bigger than 1MB for Http Client
                 httpManager.AddFailingRequest(new InvalidOperationException());
@@ -1213,8 +1217,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                   .WithRefreshToken("refreshtoken");
             CheckBuilderCommonMethods(byRefreshTokenBuilder);
         }
-
-#endif
 
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {

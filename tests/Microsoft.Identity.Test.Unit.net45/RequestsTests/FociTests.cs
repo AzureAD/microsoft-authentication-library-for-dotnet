@@ -19,7 +19,6 @@ using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
-#if DESKTOP
     [TestClass]
     public class FociTests
     {
@@ -414,6 +413,4 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                  "App B has a normal RT associated");
         }
     }
-
-#endif
 }
