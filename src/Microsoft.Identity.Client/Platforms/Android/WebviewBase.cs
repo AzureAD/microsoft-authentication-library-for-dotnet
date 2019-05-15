@@ -40,6 +40,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
             RequestContext requestContext,
             CancellationToken cancellationToken);
 
-        public abstract void ValidateRedirectUri(Uri redirectUri);
+        public abstract Uri UpdateRedirectUri(Uri redirectUri);
     }
 }

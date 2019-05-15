@@ -100,6 +100,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
         }
 
-        public abstract void ValidateRedirectUri(Uri redirectUri);
+        public abstract Uri UpdateRedirectUri(Uri redirectUri);
     }
 }

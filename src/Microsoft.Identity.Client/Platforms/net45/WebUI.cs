@@ -106,9 +106,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         protected abstract AuthorizationResult OnAuthenticate();
 
-        public void ValidateRedirectUri(Uri redirectUri)
+        public Uri UpdateRedirectUri(Uri redirectUri)
         {
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+            return redirectUri;
         }
     }
 }

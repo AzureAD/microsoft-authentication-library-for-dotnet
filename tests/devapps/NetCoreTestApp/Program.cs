@@ -58,7 +58,7 @@ namespace NetCoreTestApp
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
-                            .WithRedirectUri(DefaultOsBrowserWebUi.FindFreeLocalhostRedirectUri()) // required for DefaultOsBrowser
+                            .WithRedirectUri("https://localhost:12346") // required for DefaultOsBrowser
                             .Build();
 
             pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
