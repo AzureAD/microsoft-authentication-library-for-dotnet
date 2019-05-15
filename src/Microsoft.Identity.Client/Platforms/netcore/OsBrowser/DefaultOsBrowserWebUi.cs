@@ -55,6 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
+            
             var authCodeUri = await InterceptAuthorizationUriAsync(
                 authorizationUri,
                 redirectUri,
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
             return AuthorizationResult.FromUri(authCodeUri.OriginalString);
         }
 
-        public void ValidateRedirectUri(Uri redirectUri)
+        public Uri UpdateRedirectUri(Uri redirectUri)
         {
             if (!redirectUri.IsLoopback)
             {
@@ -87,13 +88,37 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
                         "See https://aka.ms/msal-net-os-browser for details", redirectUri.AbsoluteUri));
             }
 
-            int port = redirectUri.Port;
-            if (port < 1 || port == 80)
+            if (redirectUri.Scheme != Uri.UriSchemeHttp)
             {
-                // TODO: bogavril - generate a port if one is not given.
                 throw new MsalClientException(
-                     MsalError.LoopbackRedirectUri,
-                    "Please configure a redirect uri with a valid, non-default, port number, i.e. > 0, not 80");
+                    MsalError.LoopbackRedirectUri,
+                    string.Format(CultureInfo.InvariantCulture,
+                        "Only http uri scheme is supported, but {0} was found. " +
+                        "Configure http://localhost or http://localhost:port both during app registration and when you create the PublicClientApplication object. " +
+                        "See https://aka.ms/msal-net-os-browser for details", redirectUri.Scheme));
+            }
+
+            return FindFreeLocalhostRedirectUri(redirectUri);
+        }
+
+        private static Uri FindFreeLocalhostRedirectUri(Uri redirectUri)
+        {
+            if (redirectUri.Port > 0 && redirectUri.Port != 80)
+            {
+                return redirectUri;
+            }
+
+
+            TcpListener listner = new TcpListener(IPAddress.Loopback, 0);
+            try
+            {
+                listner.Start();
+                int port = ((IPEndPoint)listner.LocalEndpoint).Port;
+                return new Uri("http://localhost:" + port);
+            }
+            finally
+            {
+                listner?.Stop();
             }
         }
 
