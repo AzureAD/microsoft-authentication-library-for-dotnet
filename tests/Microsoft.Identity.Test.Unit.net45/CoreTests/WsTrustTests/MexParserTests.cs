@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -18,14 +19,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
     [DeploymentItem(@"Resources\TestMex2005.xml")]
     public class MexParserTests
     {
-        private RequestContext _requestContext;
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
-            _requestContext = RequestContext.CreateForTest();
         }
 
         [TestMethod]
@@ -65,7 +64,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
                 try
                 {
-                    await harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync("http://somehost", _requestContext).ConfigureAwait(false);
+                    await harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync("http://somehost",
+                                            new RequestContext(harness.ServiceBundle, Guid.NewGuid())
+
+                        ).ConfigureAwait(false);
                     Assert.Fail("We expect an exception to be thrown here");
                 }
                 catch (MsalException ex)

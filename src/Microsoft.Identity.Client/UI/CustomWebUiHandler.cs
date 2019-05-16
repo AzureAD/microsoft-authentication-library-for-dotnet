@@ -48,26 +48,20 @@ namespace Microsoft.Identity.Client.UI
                 if (uri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) &&
                     uri.AbsolutePath.Equals(redirectUri.AbsolutePath))
                 {
-                    IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(
-                        authorizationUri.Query.Substring(1),
-                        '&',
-                        true,
-                        null);
-
                     requestContext.Logger.Info(LogMessages.CustomWebUiRedirectUriMatched);
-                    return new AuthorizationResult(AuthorizationStatus.Success, uri.OriginalString);
+                    return AuthorizationResult.FromUri(uri.OriginalString);
                 }
 
                 throw new MsalClientException(
                     MsalError.CustomWebUiRedirectUriMismatch,
-                    MsalErrorMessage.CustomWebUiRedirectUriMismatch(
+                    MsalErrorMessage.RedirectUriMismatch(
                         uri.AbsolutePath,
                         redirectUri.AbsolutePath));
             }
             catch (OperationCanceledException)
             {
                 requestContext.Logger.Info(LogMessages.CustomWebUiOperationCancelled);
-                return new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
             }
             catch (Exception ex)
             {

@@ -1,10 +1,10 @@
-# Microsoft Authentication Library (MSAL) Preview for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
+# Microsoft Authentication Library (MSAL) for .NET, UWP, NetCore, Xamarin Android and iOS
 
-The MSAL library for .NET gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Microsoft Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
+The MSAL library for .NET is part of the [Microsoft identity platform for developers](https://aka.ms/aaddevv2) (formerly named Azure AD) v2.0. It enables you to acquire security tokens to call protected APIs. It uses industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
 
 Quick links:
 
-| [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-windows-desktop) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [Library Reference](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet) | [Support](README.md#community-help-and-support) |
+| [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/#quickstarts) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [Library Reference](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet) | [Support](README.md#community-help-and-support) |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
 
 ## Nuget packages
@@ -17,38 +17,47 @@ Released     | Nightly
  
 ![DEV Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20&%20PR%20&%20Nightly?branchName=master)
 
+## Roadmap and SLA
+
+### Roadmap
+
+MSAL.NET roadmap is available from [Roadmap](wiki#roadmap) in the [Wiki pages](https://aka.ms/msal-net), along with release notes.
+
+### Support SLA
+
+From the moment MSAL.NET became Generally Available (MSAL.NET 3.0.8):
+
+- Major versions are supported for twelve months after the release of the next major version.
+- Minor versions older than N-1 are not supported.
+  > Minor versions are bugfixes or features with non-breaking (additive) API changes.  It is expected apps can upgrade.  Therefore, we will not patch old minor versions of the library. You should also confirm, in issue repros, that you are using the latest minor version before the MSAL.NET team spends time investigating an issue.
 
 ## Using MSAL.NET
 
-- The conceptual documentation is currently available from our [Wiki pages](https://aka.ms/msal-net)
+- The conceptual documentation is currently available from the [Microsoft identity platform documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-overview) and our [Wiki pages](https://aka.ms/msal-net)
 - The reference documentation is available from the dotnet APIs reference in [docs.microsoft.com](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet)
 - A number of quickstarts are available for:
   - [.NET desktop application](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-windows-desktop)
   - [Universal Windows Platform (UWP)](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-uwp)
   - [.NET Core daemon console](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-netcore-daemon)
+- Code samples are available from [Samples](https://aka.ms/aaddevsamplesv2)
 
 ## Where do I file issues
 
 This is the correct repo to file [issues](issues)
 
-
-
-## Important Note about the MSAL Preview
-
-This library is suitable for use in a production environment.
-We provide the same production level support for this library as we do our current production libraries.
-During the preview we may make changes to the API, internal cache format, and other mechanisms of this library,
-which you will be required to take along with bug fixes or feature improvements.
-This may impact your application. For instance, a change to the cache format may impact your users,
-such as requiring them to sign in again. An API change may require you to update your code.
-When we provide the General Availability release we will require you to update to the General Availability version within six months,
-as applications written using a preview version of library may no longer work.
-
 ## Requirements
 
+Operating system:
 * Windows 7 or greater
+
+Platform of choice:
 * .NET 4.5 or greater
-* .NET Core 2.0 or greater
+* .NET Core 2.1 or greater
+* .NET Standard 1.3
+* Mono Android 9.0
+* UAP 10.0
+* Xamarin.iOS 10
+* Xamarin.Mac 2.0
  
 ## Community Help and Support
 

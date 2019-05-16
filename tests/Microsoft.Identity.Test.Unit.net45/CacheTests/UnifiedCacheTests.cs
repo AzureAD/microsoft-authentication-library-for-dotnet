@@ -48,8 +48,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success,
-                    app.AppConfig.RedirectUri + "?code=some-code"));
+                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
@@ -62,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
-                var requestContext = RequestContext.CreateForTest(app.ServiceBundle);
+                var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid());
                 var accounts = app.UserTokenCacheInternal.GetAccountsAsync(
                     MsalTestConstants.AuthorityCommonTenant, requestContext).Result;
                 foreach (IAccount account in accounts)
@@ -123,8 +122,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success,
-                    app.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
@@ -149,8 +147,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app1.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success,
-                    app1.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 app1.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
                 {

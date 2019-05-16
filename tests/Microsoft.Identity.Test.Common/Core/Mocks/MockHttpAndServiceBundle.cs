@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ServiceBundle,
                 tokenCache,
                 commonParameters,
-                RequestContext.CreateForTest(ServiceBundle))
+                new RequestContext(ServiceBundle, Guid.NewGuid()))
             {
                 Account = account,
                 Authority = Authority.CreateAuthority(ServiceBundle, authority)

@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             MsalMockHelpers.ConfigureMockWebUI(
                 app.ServiceBundle.PlatformProxy,
-                new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                AuthorizationResult.FromUri(MsalTestConstants.B2CLoginAuthority + "?code=some-code"));
 
             _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                 MsalTestConstants.AuthorityUtidTenant,

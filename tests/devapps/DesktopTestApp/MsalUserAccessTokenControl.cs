@@ -47,9 +47,7 @@ namespace DesktopTestApp
 
         private void deleteAccessTokenButton_Click(object sender, EventArgs e)
         {
-            var requestContext = RequestContext.CreateForTest();
-
-            _cache.DeleteAccessToken(_item, null, requestContext);
+            _cache.DeleteAccessToken(_item);
             RefreshViewAsyncDelegate?.Invoke();
         }
     }

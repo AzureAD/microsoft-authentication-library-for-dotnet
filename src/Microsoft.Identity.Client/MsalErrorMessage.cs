@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Client
 
         public const string CustomWebUiReturnedInvalidUri = "ICustomWebUi returned an invalid uri - it is empty or has no query.";
 
-        public static string CustomWebUiRedirectUriMismatch(string expectedUri, string actualUri)
+        public static string RedirectUriMismatch(string expectedUri, string actualUri)
         {
             return string.Format(CultureInfo.InvariantCulture, "Redirect Uri mismatch.  Expected ({0}) Actual ({1})", expectedUri, actualUri);
         }

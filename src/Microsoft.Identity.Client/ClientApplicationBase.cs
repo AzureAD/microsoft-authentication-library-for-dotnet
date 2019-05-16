@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
         // For service calls, the request context should be created in the **Executor classes as part of request execution.
         private RequestContext CreateRequestContext(Guid telemetryCorrelationId)
         {
-            return new RequestContext(AppConfig.ClientId, MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config), telemetryCorrelationId);
+            return new RequestContext(ServiceBundle, telemetryCorrelationId);
         }
 
         /// <summary>

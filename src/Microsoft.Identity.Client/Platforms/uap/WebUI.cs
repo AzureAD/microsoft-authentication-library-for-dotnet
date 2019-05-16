@@ -100,24 +100,23 @@ namespace Microsoft.Identity.Client.Platforms.uap
             AuthorizationResult result;
             switch (webAuthenticationResult.ResponseStatus)
             {
-                case WebAuthenticationStatus.Success:
-                    result = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);
-                    break;
-                case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
-                        webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture));
-                    break;
-                case WebAuthenticationStatus.UserCancel:
-                    result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
-                    break;
-                default:
-                    result = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
-                    break;
+            case WebAuthenticationStatus.Success:
+                result = AuthorizationResult.FromUri(webAuthenticationResult.ResponseData);
+                break;
+            case WebAuthenticationStatus.ErrorHttp:
+                result = AuthorizationResult.FromStatus(AuthorizationStatus.ErrorHttp);
+                result.Code = webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture);
+                break;
+            case WebAuthenticationStatus.UserCancel:
+                result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
+                break;
+            default:
+                result = AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
+                break;
             }
 
             return result;
         }
-
 
         public void ValidateRedirectUri(Uri redirectUri)
         {
