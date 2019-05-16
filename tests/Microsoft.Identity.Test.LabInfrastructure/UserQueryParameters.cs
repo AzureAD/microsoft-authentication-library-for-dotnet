@@ -17,7 +17,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public bool? IsExternalUser { get; set; }
         public B2CIdentityProvider? B2CIdentityProvider { get; set; }
         public string UserSearch { get; set; }
-        public string AppName { get; set; }
         public string Upn { get; set; }
 
         public static UserQuery DefaultUserQuery => new UserQuery
@@ -43,6 +42,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             UserType = LabInfrastructure.UserType.B2C,
             B2CIdentityProvider = LabInfrastructure.B2CIdentityProvider.Google
+        };
+
+        public static UserQuery B2CMSAUserQuery => new UserQuery
+        {
+            UserType = LabInfrastructure.UserType.B2C,
+            B2CIdentityProvider = LabInfrastructure.B2CIdentityProvider.MSA
         };
 
         // generated code, re-generate or update manually if you change the members of this class !

@@ -19,6 +19,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string B2CLocal = "local";
         public const string B2CFacebook = "facebook";
         public const string B2CGoogle = "google";
+        public const string B2CMSA = "msa";
         public const string UserContains = "usercontains";
         public const string AppName = "AppName";
         public const string MSAOutlookAccount = "MSIDLAB4_Outlook";

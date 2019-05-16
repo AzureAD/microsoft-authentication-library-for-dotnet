@@ -25,7 +25,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
         private static readonly string[] s_scopes = new[] { "user.read" };
-		private TokenCache cache;
 
         #region MSTest Hooks
         /// <summary>
@@ -219,14 +218,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
+        [Ignore("Lab needs a way to provide multiple account types(AAD, ADFS, MSA) that can sign into the same client id")]
         public async Task MultiUserCacheCompatabilityTestAsync()
         {
             // Arrange
-            cache = new TokenCache();
+            //cache = new TokenCache();
 
+            //Acquire AT for default lab account
             LabResponse labResponseDefault = LabUserHelper.GetDefaultUser();
             AuthenticationResult defaultAccountResult = await RunTestForUserAsync(labResponseDefault).ConfigureAwait(false);
 
+            //Acquire AT for ADFS 2019 account
             UserQuery federatedUserquery = new UserQuery
             {
                 FederationProvider = FederationProvider.ADFSv2019,
@@ -238,19 +240,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponseFederated = LabUserHelper.GetLabUserData(federatedUserquery);
             var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, false).ConfigureAwait(false);
 
-            UserQuery msaUserquery = new UserQuery
-            {
-                UserSearch = LabApiConstants.MSAOutlookAccount,
-                IsExternalUser = true,
-                AppName = "Lab4V2App"
-            };
-
-            LabResponse labResponseMsa = LabUserHelper.GetLabUserData(msaUserquery);
+            //Acquire AT for MSA account
+            LabResponse labResponseMsa = LabUserHelper.GetB2CMSAAccount();
             labResponseMsa.AppId = LabApiConstants.MSAOutlookAccountClientID;
             var msaAccountResult = await RunTestForUserAsync(labResponseMsa).ConfigureAwait(false);
 
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponseDefault.AppId).BuildConcrete();
-            pca.UserTokenCacheInternal = cache;
 
             AuthenticationResult authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, defaultAccountResult.Account)
                                                        .ExecuteAsync()
@@ -260,7 +255,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(authResult.IdToken);
 
             pca = PublicClientApplicationBuilder.Create(labResponseFederated.AppId).BuildConcrete();
-            pca.UserTokenCacheInternal = cache;
 
             authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, federatedAccountResult.Account)
                                   .ExecuteAsync()
@@ -270,7 +264,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNull(authResult.IdToken);
 
             pca = PublicClientApplicationBuilder.Create(LabApiConstants.MSAOutlookAccountClientID).BuildConcrete();
-            pca.UserTokenCacheInternal = cache;
 
             authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, msaAccountResult.Account)
                                   .ExecuteAsync()
@@ -278,8 +271,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNull(authResult.IdToken);
-
-            cache = null;
         }
 
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)

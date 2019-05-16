@@ -27,6 +27,8 @@ namespace Microsoft.Identity.Client
                 .CreateAuthority(ServiceBundle, requestParams.TenantUpdatedCanonicalAuthority)
                 .GetTenantId();
 
+            bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
+
             IdToken idToken = IdToken.Parse(response.IdToken);
 
             string subject = idToken?.Subject;
@@ -36,11 +38,34 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger.Warning("Subject not present in Id token");
             }
 
+            string preferredUsername;
+
             // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
             // It will be set to "preferred_username not in idtoken"
-            var preferredUsername = !string.IsNullOrWhiteSpace(idToken?.PreferredUsername)
-                ? idToken.PreferredUsername
-                : NullPreferredUsernameDisplayLabel;
+            if (idToken == null)
+            {
+                preferredUsername = NullPreferredUsernameDisplayLabel;
+            }
+            else if(string.IsNullOrWhiteSpace(idToken.PreferredUsername))
+            {
+                if (isAdfsAuthority)
+                {
+                    //The direct to adfs scenario does not return preferred_username in the id token so it needs to be set to the upn
+                    preferredUsername = !string.IsNullOrEmpty(idToken.Upn)
+                        ? idToken.Upn
+                        : NullPreferredUsernameDisplayLabel;
+                }
+                else
+                {
+                    preferredUsername = NullPreferredUsernameDisplayLabel;
+                }
+            }
+            else
+            {
+                preferredUsername = idToken.PreferredUsername;
+            }
+
+
 
             var instanceDiscoveryMetadataEntry = GetCachedAuthorityMetaData(requestParams.TenantUpdatedCanonicalAuthority);
 
@@ -51,8 +76,6 @@ namespace Microsoft.Identity.Client
             var preferredEnvironmentHost = GetPreferredEnvironmentHost(
                 requestParams.AuthorityInfo.Host,
                 instanceDiscoveryMetadataEntry);
-
-            bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
 
             var msalAccessTokenCacheItem =
                 new MsalAccessTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId, subject)
@@ -124,6 +147,12 @@ namespace Microsoft.Identity.Client
                                 response,
                                 preferredUsername,
                                 tenantId);
+
+                            //The ADFS direct scenrio does not return client info so the home account id is acquired from the subject
+                            if (isAdfsAuthority && String.IsNullOrEmpty(msalAccountCacheItem.HomeAccountId))
+                            {
+                                msalAccountCacheItem.HomeAccountId = idToken.Subject;
+                            }
 
                             _accessor.SaveAccount(msalAccountCacheItem);
                         }
