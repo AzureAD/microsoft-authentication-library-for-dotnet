@@ -430,7 +430,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public async Task UnknownNodesTestAsync()
         {
             string jsonFilePath = ResourceHelper.GetTestResourceRelativePath("CacheFromTheFuture.json");
-            string jsonFilePath2 = ResourceHelper.GetTestResourceRelativePath("CacheFromTheFuture.json");
             string jsonContent = File.ReadAllText(jsonFilePath);
             byte[] cache = Encoding.UTF8.GetBytes(jsonContent);
 
