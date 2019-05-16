@@ -20,7 +20,7 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class FociTests
+    public class FociTests : TestBase
     {
         private enum ServerTokenResponse
         {
@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestInitialize]
         public void Init()
         {
-            TestCommon.ResetInternalStaticCaches();
+            base.TestInitialize();
+
             _inMemoryCache = "{}";
             _instanceAndEndpointRequestPerformed = false;
         }
@@ -51,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task FociHappyPathAsync()
         {
             // Arrange
-            using (_harness = new MockHttpAndServiceBundle())
+            using (_harness = CreateTestHarness())
             {
                 InitApps();
 
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task FociAndNonFociAppsCoexistAsync()
         {
-            using (_harness = new MockHttpAndServiceBundle())
+            using (_harness = CreateTestHarness())
             {
                 InitApps();
 
@@ -105,7 +106,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [WorkItem(1067)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1067
         public async Task FociDoesNotHideRTRefreshErrorsAsync()
         {
-            using (_harness = new MockHttpAndServiceBundle())
+            using (_harness = CreateTestHarness())
             {
                 InitApps();
 
@@ -134,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task FociAppWithTokensJoinsFamilyAsync()
         {
-            using (_harness = new MockHttpAndServiceBundle())
+            using (_harness = CreateTestHarness())
             {
                 InitApps();
 
@@ -165,7 +166,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task FociAppLeavesFamilyAsync()
         {
-            using (_harness = new MockHttpAndServiceBundle())
+            using (_harness = CreateTestHarness())
             {
                 InitApps();
 
@@ -191,7 +192,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task TestGetAndRemoveAccountsFociDisabledAsync()
         {
-            using (_harness = new MockHttpAndServiceBundle())
+            using (_harness = CreateTestHarness())
             {
                 InitApps();
 
@@ -230,7 +231,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task TestGetAndRemoveAccountsFociEnabledAsync()
         {
-            using (_harness = new MockHttpAndServiceBundle())
+            using (_harness = CreateTestHarness())
             {
                 InitApps();
 

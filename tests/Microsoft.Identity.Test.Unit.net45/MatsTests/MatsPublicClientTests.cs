@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.MatsTests
 {
     [TestClass]
-    public class MatsPublicClientTests
+    public class MatsPublicClientTests : TestBase
     {
         private const string AppName = "The app Name";
         private const string AppVersion = "1.2.3.4";
@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
         {
             var batches = new List<IMatsTelemetryBatch>();
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
