@@ -736,7 +736,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             response.Scope = MsalTestConstants.Scope.AsSingleString();
             response.TokenType = "Bearer";
 
-            RequestContext requestContext = RequestContext.CreateForTest(serviceBundle);
+            RequestContext requestContext = new RequestContext(serviceBundle, new Guid());
             var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
             requestParams.TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant;
 

@@ -138,6 +138,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
                                             .WithClientSecret(secret.Value)
                                             .BuildConcrete();
 
+            //AuthenticationResult authResult = await msalConfidentialClient.AcquireTokenForClientAsync(AdfsScopes).ConfigureAwait(false);
             AuthenticationResult authResult = await msalConfidentialClient.AcquireTokenForClient(s_adfsScopes).ExecuteAsync().ConfigureAwait(false);
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
