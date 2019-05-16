@@ -59,7 +59,7 @@ namespace Test.Microsoft.Identity.UIAutomation
             var tests = new List<Action>()
             {
                 AcquireTokenTest,
-                AcquireTokenSilentTest,
+                //AcquireTokenSilentTest,
                 AcquireTokenADFSV3InteractiveFederatedTest,
                 AcquireTokenADFSV3InteractiveNonFederatedTest,
                 AcquireTokenADFSV4InteractiveFederatedTest,
