@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security;
@@ -10,7 +11,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -24,6 +27,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
+        private static readonly string[] s_adfsScopes = { string.Format(CultureInfo.CurrentCulture, "{0}/email openid", Adfs2019LabConstants.AppId) };
         //TODO: acquire scenario specific client ids from the lab resonse
         private const string _confidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
 
@@ -31,6 +35,12 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         public static void ClassInitialize(TestContext context)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+        }
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetInternalStaticCaches();
         }
 
         [TestMethod]
@@ -113,6 +123,25 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
                 .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult, user);
+        }
+
+        [TestMethod]
+        [TestCategory("ClientSecretIntegrationTests")]
+        public async Task AcquireTokenWithClientSecretFromAdfsAsync()
+        {
+            KeyVaultSecretsProvider secretProvider = new KeyVaultSecretsProvider();
+            SecretBundle secret = secretProvider.GetSecret(Adfs2019LabConstants.ADFS2019ClientSecretURL);
+
+            ConfidentialClientApplication msalConfidentialClient = ConfidentialClientApplicationBuilder.Create(Adfs2019LabConstants.ConfidentialClientId)
+                                            .WithAdfsAuthority(Adfs2019LabConstants.Authority, true)
+                                            .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
+                                            .WithClientSecret(secret.Value)
+                                            .BuildConcrete();
+
+            AuthenticationResult authResult = await msalConfidentialClient.AcquireTokenForClient(s_adfsScopes).ExecuteAsync().ConfigureAwait(false);
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNull(authResult.IdToken);
         }
     }
 }

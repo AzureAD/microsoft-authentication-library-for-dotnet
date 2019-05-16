@@ -1117,7 +1117,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                                 app.ServiceBundle.PlatformProxy,
-                                new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
