@@ -37,6 +37,9 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class PlatformProxyPerformanceTests
     {
+        private const long AllowedMilliseconds = 10;
+        private const long DomainJoinedAllowedMilliseconds = 100;
+
         [TestMethod]
         public void ValidateGetPlatformProxyPerformance()
         {
@@ -63,49 +66,49 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void ValidateGetDeviceModelPerformance()
         {
-            ValidateMethodPerformance(2, "GetDeviceModel", proxy => proxy.GetDeviceModel());
+            ValidateMethodPerformance(AllowedMilliseconds, "GetDeviceModel", proxy => proxy.GetDeviceModel());
         }
 
         [TestMethod]
         public void ValidateGetDeviceIdPerformance()
         {
-            ValidateMethodPerformance(2, "GetDeviceId", proxy => proxy.GetDeviceId());
+            ValidateMethodPerformance(AllowedMilliseconds, "GetDeviceId", proxy => proxy.GetDeviceId());
         }
 
         [TestMethod]
         public void ValidateGetOperatingSystemPerformance()
         {
-            ValidateMethodPerformance(2, "GetOperatingSystem", proxy => proxy.GetOperatingSystem());
+            ValidateMethodPerformance(AllowedMilliseconds, "GetOperatingSystem", proxy => proxy.GetOperatingSystem());
         }
 
         [TestMethod]
         public void ValidateGetProcessorArchitecturePerformance()
         {
-            ValidateMethodPerformance(2, "GetProcessorArchitecture", proxy => proxy.GetProcessorArchitecture());
+            ValidateMethodPerformance(AllowedMilliseconds, "GetProcessorArchitecture", proxy => proxy.GetProcessorArchitecture());
         }
 
         [TestMethod]
         public void ValidateIsDomainJoinedPerformance()
         {
-            ValidateMethodPerformance(2, "IsDomainJoined", proxy => proxy.IsDomainJoined());
+            ValidateMethodPerformance(DomainJoinedAllowedMilliseconds, "IsDomainJoined", proxy => proxy.IsDomainJoined());
         }
 
         [TestMethod]
         public void ValidateGetCallingApplicationNamePerformance()
         {
-            ValidateMethodPerformance(2, "GetCallingApplicationName", proxy => proxy.GetCallingApplicationName());
+            ValidateMethodPerformance(AllowedMilliseconds, "GetCallingApplicationName", proxy => proxy.GetCallingApplicationName());
         }
 
         [TestMethod]
         public void ValidateGetCallingApplicationVersionPerformance()
         {
-            ValidateMethodPerformance(2, "GetCallingApplicationVersion", proxy => proxy.GetCallingApplicationVersion());
+            ValidateMethodPerformance(AllowedMilliseconds, "GetCallingApplicationVersion", proxy => proxy.GetCallingApplicationVersion());
         }
 
         [TestMethod]
         public void ValidateGetProductNamePerformance()
         {
-            ValidateMethodPerformance(2, "GetProductName", proxy => proxy.GetProductName());
+            ValidateMethodPerformance(AllowedMilliseconds, "GetProductName", proxy => proxy.GetProductName());
         }
     }
 }
