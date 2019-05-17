@@ -187,7 +187,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ClientInfo fromServer = null;
 
-            if (!AuthenticationRequestParameters.IsClientCredentialRequest && !AuthenticationRequestParameters.IsRefreshTokenRequest)
+            if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
+                !AuthenticationRequestParameters.IsRefreshTokenRequest &&
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs)
             {
                 //client_info is not returned from client credential flows because there is no user present.
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);

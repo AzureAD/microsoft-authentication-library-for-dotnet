@@ -72,6 +72,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             //Disabled for now until there are tests that use it.
             queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);
             queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
+            bool queryRequiresBetaEndpoint = false;
 
             //Building user query
             if (!string.IsNullOrWhiteSpace(query.Upn))
@@ -82,6 +83,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             if (query.FederationProvider != null)
             {
+                if (query.FederationProvider == FederationProvider.ADFSv2019)
+                {
+                    queryRequiresBetaEndpoint = true;
+                }
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
             }
 
@@ -117,12 +122,22 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
             }
 
-            return GetResponse(queryDict);
+            if (query.B2CIdentityProvider == B2CIdentityProvider.MSA)
+            {
+                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CMSA);
+            }
+
+            if (!string.IsNullOrEmpty(query.UserSearch))
+            {
+                queryDict.Add(LabApiConstants.UserContains, query.UserSearch);
+            }
+
+            return GetResponse(queryDict, queryRequiresBetaEndpoint);
         }
 
-        private string GetResponse(IDictionary<string, string> queryDict)
+        private string GetResponse(IDictionary<string, string> queryDict, bool queryRequiresBetaEndpoint = false)
         {
-            UriBuilder uriBuilder = new UriBuilder(LabApiConstants.LabEndpoint);
+            UriBuilder uriBuilder = queryRequiresBetaEndpoint? new UriBuilder(LabApiConstants.BetaEndpoint) : new UriBuilder(LabApiConstants.LabEndpoint);
             uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
             return _httpClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
         }

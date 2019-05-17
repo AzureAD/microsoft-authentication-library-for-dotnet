@@ -18,11 +18,13 @@ namespace Microsoft.Identity.Client.Cache.Items
             CredentialType = StorageJsonValues.CredentialTypeAccessToken;
         }
 
+
         internal MsalAccessTokenCacheItem(
             string environment,
             string clientId,
             MsalTokenResponse response,
-            string tenantId)
+            string tenantId,
+            string userId = null)
             : this(
                 environment,
                 clientId,
@@ -31,7 +33,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 response.AccessToken,
                 response.AccessTokenExpiresOn,
                 response.AccessTokenExtendedExpiresOn,
-                response.ClientInfo)
+                response.ClientInfo,
+                userId)
         {
         }
 
@@ -43,7 +46,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string secret,
             DateTimeOffset accessTokenExpiresOn,
             DateTimeOffset accessTokenExtendedExpiresOn,
-            string rawClientInfo)
+            string rawClientInfo,
+            string userId = null)
             : this()
         {
             Environment = environment;
@@ -56,10 +60,18 @@ namespace Microsoft.Identity.Client.Cache.Items
             CachedAt = CoreHelpers.CurrDateTimeInUnixTimestamp();
             RawClientInfo = rawClientInfo;
 
+            //Adfs does not send back client info, so HomeAccountId must be explicitly set
+            HomeAccountId = userId;
             InitUserIdentifier();
         }
 
-        internal string TenantId { get; set; }
+        private string _tenantId;
+
+        internal string TenantId
+        {
+            get => _tenantId;
+            set => _tenantId = value ?? string.Empty;
+        }
 
         /// <summary>
         /// String comprised of scopes that have been lowercased and ordered.
@@ -70,9 +82,13 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string ExpiresOnUnixTimestamp { get; set; }
         internal string ExtendedExpiresOnUnixTimestamp { get; set; }
         public string UserAssertionHash { get; set; }
+ 
+
+        internal bool IsAdfs { get; set; }
 
         internal string Authority =>
-            string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
+                                    IsAdfs ? string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, "adfs") :
+                                    string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
 
         internal SortedSet<string> ScopeSet => ScopeHelper.ConvertStringToLowercaseSortedSet(NormalizedScopes);
 

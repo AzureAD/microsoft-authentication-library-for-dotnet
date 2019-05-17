@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -34,6 +35,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private const int ExpectedExpiresIn = 900;
         private const int ExpectedInterval = 1;
         private const string ExpectedVerificationUrl = "https://microsoft.com/devicelogin";
+        private const string ExpectedAdfsVerificationUrl = "https://fs.contoso.com/adfs/oauth2/deviceauth";
 
         private string ExpectedMessage =>
             $"To sign in, use a web browser to open the page {ExpectedVerificationUrl} and enter the code {ExpectedUserCode} to authenticate.";
@@ -48,6 +50,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             $"\"message\":\"{ExpectedMessage}\"," +
             $"}}";
 
+        private string ExpectedAdfsResponseMessage =>
+            $"{{" +
+            $"\"user_code\":\"{ExpectedUserCode}\"," +
+            $"\"device_code\":\"{ExpectedDeviceCode}\"," +
+            $"\"verification_url\":\"{ExpectedAdfsVerificationUrl}\"," +
+            $"\"expires_in\":\"{ExpectedExpiresIn}\"," +
+            $"\"interval\":\"{ExpectedInterval}\"," +
+            $"\"message\":\"{ExpectedMessage}\"," +
+            $"}}";
+
         [TestInitialize]
         public void TestInitialize()
         {
@@ -57,6 +69,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private HttpResponseMessage CreateDeviceCodeResponseSuccessMessage()
         {
             return MockHelpers.CreateSuccessResponseMessage(ExpectedResponseMessage);
+        }
+
+        private HttpResponseMessage CreateAdfsDeviceCodeResponseSuccessMessage()
+        {
+            return MockHelpers.CreateSuccessResponseMessage(ExpectedAdfsResponseMessage);
         }
 
         [TestMethod]
@@ -114,6 +131,62 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
                 Assert.AreEqual(1, cache.Accessor.GetAllIdTokens().Count());
                 Assert.AreEqual(1, cache.Accessor.GetAllAccounts().Count());
+            }
+        }
+
+        [TestMethod]
+        [Ignore("Adfs does not currently support device code flow")]
+        [TestCategory("DeviceCodeRequestTests")]
+        public void TestDeviceCodeAuthSuccessWithAdfs()
+        {
+            const int NumberOfAuthorizationPendingRequestsToInject = 1;
+
+            using (var harness = new MockHttpAndServiceBundle(authority: MsalTestConstants.OnPremiseAuthority))
+            {
+                var parameters = CreateAuthenticationParametersAndSetupMocks(
+                    harness,
+                    NumberOfAuthorizationPendingRequestsToInject,
+                    out HashSet<string> expectedScopes,
+                    true);
+
+                var cache = parameters.CacheSessionManager.TokenCacheInternal;
+
+                // Check that cache is empty
+                Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllAccounts().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
+
+                DeviceCodeResult actualDeviceCodeResult = null;
+
+                var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
+                {
+                    DeviceCodeResultCallback = result =>
+                    {
+                        actualDeviceCodeResult = result;
+                        return Task.FromResult(0);
+                    }
+                };
+
+                var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
+
+                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
+                task.Wait();
+                var authenticationResult = task.Result;
+                Assert.IsNotNull(authenticationResult);
+                Assert.IsNotNull(actualDeviceCodeResult);
+                Assert.AreEqual(MsalTestConstants.ClientId, actualDeviceCodeResult.ClientId);
+                Assert.AreEqual(ExpectedDeviceCode, actualDeviceCodeResult.DeviceCode);
+                Assert.AreEqual(ExpectedInterval, actualDeviceCodeResult.Interval);
+                Assert.AreEqual(ExpectedMessage, actualDeviceCodeResult.Message);
+                Assert.AreEqual(ExpectedUserCode, actualDeviceCodeResult.UserCode);
+                Assert.AreEqual(ExpectedAdfsVerificationUrl, actualDeviceCodeResult.VerificationUrl);
+                CoreAssert.AreScopesEqual(expectedScopes.AsSingleString(), actualDeviceCodeResult.Scopes.AsSingleString());
+                // Validate that entries were added to cache
+                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllAccounts().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             }
         }
 
@@ -226,18 +299,30 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private AuthenticationRequestParameters CreateAuthenticationParametersAndSetupMocks(
             MockHttpAndServiceBundle harness,
             int numAuthorizationPendingResults,
-            out HashSet<string> expectedScopes)
+            out HashSet<string> expectedScopes,
+            bool isAdfs = false)
         {
             var cache = new TokenCache(harness.ServiceBundle);
             var parameters = harness.CreateAuthenticationRequestParameters(
-                MsalTestConstants.AuthorityHomeTenant,
+                isAdfs ? MsalTestConstants.OnPremiseAuthority : MsalTestConstants.AuthorityHomeTenant, 
                 null,
                 cache,
                 null,
-                extraQueryParameters: MsalTestConstants.ExtraQueryParams,
+                extraQueryParameters: MsalTestConstants.ExtraQueryParams, 
                 claims: MsalTestConstants.Claims);
 
-            TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+            if (isAdfs)
+            {
+                harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = MockHelpers.CreateAdfsOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                });
+            }
+            else
+            {
+                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+            }
 
             expectedScopes = new HashSet<string>();
             expectedScopes.UnionWith(MsalTestConstants.Scope);
@@ -259,7 +344,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         { OAuth2Parameter.ClientId, MsalTestConstants.ClientId },
                         { OAuth2Parameter.Scope, expectedScopes.AsSingleString() }
                     },
-                    ResponseMessage = CreateDeviceCodeResponseSuccessMessage(),
+                    ResponseMessage = isAdfs ? CreateAdfsDeviceCodeResponseSuccessMessage() : CreateDeviceCodeResponseSuccessMessage(),
                     ExpectedQueryParams = extraQueryParamsAndClaims
                 });
 
@@ -269,7 +354,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Post,
-                        ExpectedUrl = "https://login.microsoftonline.com/home/oauth2/v2.0/token",
+                        ExpectedUrl = isAdfs ? "https://fs.contoso.com/adfs/oauth2/token" :"https://login.microsoftonline.com/home/oauth2/v2.0/token",
                         ResponseMessage = MockHelpers.CreateFailureMessage(
                             HttpStatusCode.Forbidden,
                             "{\"error\":\"authorization_pending\"," +
@@ -294,7 +379,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                             {OAuth2Parameter.ClientId, MsalTestConstants.ClientId},
                             {OAuth2Parameter.Scope, expectedScopes.AsSingleString()}
                         },
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                        ResponseMessage = isAdfs ? MockHelpers.CreateAdfsSuccessTokenResponseMessage() : MockHelpers.CreateSuccessTokenResponseMessage()
                     });
             }
 

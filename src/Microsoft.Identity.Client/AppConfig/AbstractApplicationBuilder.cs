@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -270,17 +270,13 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.NoClientIdWasSpecified);
             }
 
-            if (!Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
+            //Adfs does not require client id to be in the form of a Guid
+            if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
             {
                 throw new InvalidOperationException(MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
             TryAddDefaultAuthority();
-
-            if (Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
-            {
-                throw new InvalidOperationException(MsalErrorMessage.AdfsNotCurrentlySupportedAuthorityType);
-            }
 
             if (Config.TelemetryCallback != null && Config.MatsConfig != null)
             {

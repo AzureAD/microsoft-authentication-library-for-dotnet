@@ -61,6 +61,16 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserData(UserQuery.B2CGoogleUserQuery);
         }
 
+        public static LabResponse GetB2CMSAAccount()
+        {
+            var response = GetLabUserData(UserQuery.B2CMSAUserQuery);
+            if (String.IsNullOrEmpty(response.User.HomeUPN))
+            {
+                response.User.HomeUPN = response.User.Upn;
+            }
+            return response;
+        }
+
         public static LabResponse GetSpecificUser(string upn)
         {
             var query = new UserQuery();

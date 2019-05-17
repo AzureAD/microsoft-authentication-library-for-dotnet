@@ -18,14 +18,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public MockHttpAndServiceBundle(
             TelemetryCallback telemetryCallback = null,
             LogCallback logCallback = null,
-            bool isExtendedTokenLifetimeEnabled = false)
+            bool isExtendedTokenLifetimeEnabled = false,
+            string authority = ClientApplicationBase.DefaultAuthority)
         {
             HttpManager = new MockHttpManager();
             ServiceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
                 HttpManager,
                 telemetryCallback: telemetryCallback,
                 logCallback: logCallback,
-                isExtendedTokenLifetimeEnabled: isExtendedTokenLifetimeEnabled);
+                isExtendedTokenLifetimeEnabled: isExtendedTokenLifetimeEnabled,
+                authority: authority);
         }
 
         public IServiceBundle ServiceBundle { get; }

@@ -717,6 +717,35 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual("access-token-2", (await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)).First().Secret);
         }
 
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void CacheAdfsTokenTest()
+        {
+            var serviceBundle = TestCommon.CreateDefaultAdfsServiceBundle();
+            ITokenCacheInternal adfsCache = new TokenCache(serviceBundle);
+            var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.OnPremiseAuthority);
+
+            MsalTokenResponse response = new MsalTokenResponse();
+            
+            response.IdToken = MockHelpers.CreateIdToken(String.Empty, MsalTestConstants.FabrikamDisplayableId, null);
+            response.ClientInfo = null;
+            response.AccessToken = "access-token";
+            response.ExpiresIn = 3599; 
+            response.CorrelationId = "correlation-id";
+            response.RefreshToken = "refresh-token";
+            response.Scope = MsalTestConstants.Scope.AsSingleString();
+            response.TokenType = "Bearer";
+
+            RequestContext requestContext = new RequestContext(serviceBundle, new Guid());
+            var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
+            requestParams.TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant;
+
+            adfsCache.SaveTokenResponseAsync(requestParams, response);
+
+            Assert.AreEqual(1, adfsCache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, adfsCache.Accessor.GetAllAccessTokens().Count());
+        }
+
         private void AfterAccessChangedNotification(TokenCacheNotificationArgs args)
         {
             Assert.IsTrue(args.HasStateChanged);

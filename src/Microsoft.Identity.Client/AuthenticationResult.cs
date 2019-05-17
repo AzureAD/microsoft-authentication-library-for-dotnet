@@ -64,9 +64,10 @@ namespace Microsoft.Identity.Client
         {
             if (msalAccessTokenCacheItem.HomeAccountId != null)
             {
+                string username = msalAccessTokenCacheItem.IsAdfs ? msalIdTokenCacheItem?.IdToken.Upn : msalIdTokenCacheItem?.IdToken?.PreferredUsername;
                 Account = new Account(
                     msalAccessTokenCacheItem.HomeAccountId,
-                    msalIdTokenCacheItem?.IdToken?.PreferredUsername,
+                    username,
                     msalAccessTokenCacheItem.Environment);
             }
 

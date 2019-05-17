@@ -257,6 +257,7 @@ namespace Microsoft.Identity.Client
 
         public const string MsalExceptionFailedToParse = "Attempted to deserialize an MsalException but the type was unknown.";
 
+        public const string AdfsDeviceFlowNotSupported = "Device Code Flow is not currently supported for ADFS.";
         public const string MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously = "MATS cannot be configured at the same time as a TelemetryCallback is provided. These are mututally exclusive.";
         public const string AkaMsmsalnet3BreakingChanges = "See https://aka.ms/msal-net-3-breaking-changes";
 

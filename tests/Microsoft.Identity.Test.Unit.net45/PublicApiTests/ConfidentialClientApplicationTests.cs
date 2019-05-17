@@ -162,6 +162,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             Assert.AreEqual(MsalTestConstants.AuthorityGuestTenant, app.Authority);
+
+            app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                      .WithAdfsAuthority(MsalTestConstants.OnPremiseAuthority, true)
+                                                      .WithRedirectUri(MsalTestConstants.RedirectUri)
+                                                      .WithClientSecret(MsalTestConstants.OnPremiseCredentialWithSecret.Secret)
+                                                      .BuildConcrete();
+
+
+            Assert.AreEqual(MsalTestConstants.OnPremiseAuthority, app.Authority);
         }
 
         [TestMethod]
@@ -250,6 +259,70 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // check app token cache count to be 1
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public async Task ConfidentialClientUsingAdfsAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+
+                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                              .WithAuthority(new Uri(MsalTestConstants.OnPremiseAuthority), true)
+                                                              .WithRedirectUri(MsalTestConstants.RedirectUri)
+                                                              .WithClientSecret(MsalTestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = "https://fs.contoso.com/.well-known/webfinger",
+                    ExpectedQueryParams = new Dictionary<string, string>
+                    {
+                                            {"resource", "https://fs.contoso.com"},
+                                            {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
+                    },
+                    ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.contoso.com")
+                });
+
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                });
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no refresh tokens are returned
+
+                // call AcquireTokenForClientAsync again to get result back from the cache
+                result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync().ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no refresh tokens are returned
             }
         }
 
