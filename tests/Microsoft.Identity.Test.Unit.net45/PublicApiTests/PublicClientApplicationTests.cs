@@ -1190,8 +1190,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                .WithAccount(MsalTestConstants.User)
                .WithExtraScopesToConsent(MsalTestConstants.Scope)
                .WithLoginHint("loginhint")
-               .WithPrompt(Prompt.ForceLogin)
-               .WithUseEmbeddedWebView(true);
+               .WithPrompt(Prompt.ForceLogin);
+
+#if DESKTOP
+            interactiveBuilder = interactiveBuilder.WithUseEmbeddedWebView(true);
+#endif
             CheckBuilderCommonMethods(interactiveBuilder);
 
             var iwaBuilder = app.AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)

@@ -88,6 +88,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
                         "See https://aka.ms/msal-net-os-browser for details", redirectUri.AbsoluteUri));
             }
 
+            // AAD does not allow https:\\localhost redirects from any port
             if (redirectUri.Scheme != Uri.UriSchemeHttp)
             {
                 throw new MsalClientException(

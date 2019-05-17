@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+#if !NET_CORE_BUILDTIME
         /// <summary>
         /// Specifies if the public client application should used an embedded web browser
         /// or the system default browser
@@ -76,19 +77,25 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
+#if NET_CORE
+            if (useEmbeddedWebView)
+            {
+                throw new PlatformNotSupportedException("Only the system browser is available on when using MSAL in a .NET Core context. See See https://aka.ms/msal-net-os-browser for details.");
+            }
+#endif
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithEmbeddedWebView);
             Parameters.UseEmbeddedWebView = useEmbeddedWebView;
             return this;
         }
-
-        /// <summary>
-        /// Sets the <paramref name="loginHint"/>, in order to avoid select account
-        /// dialogs in the case the user is signed-in with several identities. This method is mutually exclusive
-        /// with <see cref="WithAccount(IAccount)"/>. If both are used, an exception will be thrown
-        /// </summary>
-        /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenInteractiveParameterBuilder WithLoginHint(string loginHint)
+#endif
+            /// <summary>
+            /// Sets the <paramref name="loginHint"/>, in order to avoid select account
+            /// dialogs in the case the user is signed-in with several identities. This method is mutually exclusive
+            /// with <see cref="WithAccount(IAccount)"/>. If both are used, an exception will be thrown
+            /// </summary>
+            /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
+            /// <returns>The builder to chain the .With methods</returns>
+            public AcquireTokenInteractiveParameterBuilder WithLoginHint(string loginHint)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithLoginHint);
             Parameters.LoginHint = loginHint;
