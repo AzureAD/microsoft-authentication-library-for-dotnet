@@ -6,16 +6,16 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
-using NetCoreTestApp.Experimental;
-using NetStandard;
+//using NetStandard;
 
-namespace NetCoreTestApp
+namespace NetFx
 {
     public class Program
     {
@@ -58,7 +58,7 @@ namespace NetCoreTestApp
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
-                            .WithRedirectUri("https://localhost") // required for DefaultOsBrowser
+                            .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();
 
             pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
@@ -93,7 +93,6 @@ namespace NetCoreTestApp
                         1. IWA
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
-                        4. Acquire Token Interactive (via CustomWebUI)
                         5. Acquire Token Interactive 
                         6. Acquire Token Silently
                         7. Acquire Interactive (logic in netstandard, default authority)
@@ -131,19 +130,12 @@ namespace NetCoreTestApp
                         await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
 
                         break;
-                    case 4: // acquire token interactive with custom web ui
-
-                        authTask = s_pca.AcquireTokenInteractive(s_scopes)
-                            .WithCustomWebUi(new DefaultOsBrowserWebUi()) // make sure you've configured a redirect uri of "http://localhost" or "http://localhost:1234" in the _pca builder
-                            .ExecuteAsync(CancellationToken.None);
-
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
-
-                        break;
+                 
                     case 5: // acquire token interactive
 
                         CancellationTokenSource cts = new CancellationTokenSource();
                         authTask = s_pca.AcquireTokenInteractive(s_scopes)
+                            .WithUseEmbeddedWebView(false)
                             .ExecuteAsync(cts.Token);
 
                         await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
@@ -161,9 +153,9 @@ namespace NetCoreTestApp
 
                         break;
                     case 7:
-                        CancellationTokenSource cts2 = new CancellationTokenSource();
-                        NetStandardAuthenticator authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
-                        await FetchTokenAndCallGraphAsync(s_pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
+                        //CancellationTokenSource cts2 = new CancellationTokenSource();
+                        //var authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
+                        //await FetchTokenAndCallGraphAsync(s_pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
                         break;
                     case 8:
                         var accounts = await s_pca.GetAccountsAsync().ConfigureAwait(false);
@@ -211,26 +203,9 @@ namespace NetCoreTestApp
 
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
             await DisplayAccountsAsync(_pca).ConfigureAwait(false);
-            var callGraphTask = CallGraphAsync(authTask.Result.AccessToken);
-            callGraphTask.Wait();
-            Console.WriteLine("Result from calling the ME endpoint of the graph: " + callGraphTask.Result);
             Console.ResetColor();
         }
 
-
-        private static X509Certificate2 GetCertificateByThumbprint(string thumbprint)
-        {
-            using (var store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
-            {
-                store.Open(OpenFlags.ReadOnly);
-                var certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
-                if (certs.Count > 0)
-                {
-                    return certs[0];
-                }
-                throw new InvalidOperationException($"Cannot find certificate with thumbprint '{thumbprint}'");
-            }
-        }
 
 
         private static async Task DisplayAccountsAsync(IPublicClientApplication _pca)
@@ -299,24 +274,24 @@ namespace NetCoreTestApp
             return pwd;
         }
 
-        private static async Task<string> CallGraphAsync(string token)
-        {
-            var httpClient = new System.Net.Http.HttpClient();
-            System.Net.Http.HttpResponseMessage response;
-            try
-            {
-                var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, GraphAPIEndpoint);
-                //Add the token in Authorization header
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                response = await httpClient.SendAsync(request).ConfigureAwait(false);
-                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                return content;
-            }
-            catch (Exception ex)
-            {
-                return ex.ToString();
-            }
-        }
+        //private static async Task<string> CallGraphAsync(string token)
+        //{
+        //    var httpClient = new HttpClient();
+        //    System.Net.Http.HttpResponseMessage response;
+        //    try
+        //    {
+        //        var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, GraphAPIEndpoint);
+        //        //Add the token in Authorization header
+        //        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        //        response = await httpClient.SendAsync(request).ConfigureAwait(false);
+        //        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        //        return content;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return ex.ToString();
+        //    }
+        //}
 
 
     }
