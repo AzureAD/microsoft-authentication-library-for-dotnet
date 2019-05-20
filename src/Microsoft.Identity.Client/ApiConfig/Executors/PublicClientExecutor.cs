@@ -125,9 +125,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             var coreUiParent = interactiveParameters.UiParent;
 
-#if ANDROID || iOS
-            coreUiParent.UseEmbeddedWebview = interactiveParameters.UseEmbeddedWebView;
-#endif
+            coreUiParent.UseEmbeddedWebview = interactiveParameters.UseEmbeddedWebView.GetValueOrDefault(
+                requestContext.ServiceBundle.PlatformProxy.UseEmbeddedWebViewDefault);
+
 
 #if WINDOWS_APP || DESKTOP
             // hidden web view can be used in both WinRT and desktop applications.
@@ -140,6 +140,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 coreUiParent,
                 requestContext);
         }
+
+        
 
     }
 }

@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             }
 
             // AAD does not allow https:\\localhost redirects from any port
-            if (redirectUri.Scheme != Uri.UriSchemeHttp)
+            if (redirectUri.Scheme != "http")
             {
                 throw new MsalClientException(
                     MsalError.LoopbackRedirectUri,

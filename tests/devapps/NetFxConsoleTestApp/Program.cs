@@ -135,7 +135,7 @@ namespace NetFx
 
                         CancellationTokenSource cts = new CancellationTokenSource();
                         authTask = s_pca.AcquireTokenInteractive(s_scopes)
-                            .WithUseEmbeddedWebView(false)
+                            //.WithUseEmbeddedWebView(false)
                             .ExecuteAsync(cts.Token);
 
                         await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);

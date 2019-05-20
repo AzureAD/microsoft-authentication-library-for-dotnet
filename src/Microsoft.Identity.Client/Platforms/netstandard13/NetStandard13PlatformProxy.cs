@@ -156,5 +156,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             PlatformProxyShared.StartDefaultOsBrowser(url);
             return Task.FromResult(0);
         }
+
+        public override bool UseEmbeddedWebViewDefault => false;
+
     }
 }

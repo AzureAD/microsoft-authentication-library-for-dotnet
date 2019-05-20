@@ -210,22 +210,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
         protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
 
-        public override async Task StartDefaultOsBrowserAsync(string url)
-        {
-            var uriToLaunch = new Uri(url);
-            bool launchSuccess = true;
-
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
-                CoreDispatcherPriority.Normal,
-                async () =>
-                {
-                     launchSuccess = await Windows.System.Launcher.LaunchUriAsync(uriToLaunch);
-                });
-
-            if (!launchSuccess)
-            {
-                throw new MsalClientException("TODO");
-            }
-        }
+        public override bool IsSystemWebViewAvailable => false;
     }
 }

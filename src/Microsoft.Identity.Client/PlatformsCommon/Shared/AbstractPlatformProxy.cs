@@ -44,6 +44,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
+        public virtual bool UseEmbeddedWebViewDefault
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         protected IWebUIFactory OverloadWebUiFactory { get; set; }
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
 
