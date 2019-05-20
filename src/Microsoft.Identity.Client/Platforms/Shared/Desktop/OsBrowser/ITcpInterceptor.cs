@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
+namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
     internal interface ITcpInterceptor
     {

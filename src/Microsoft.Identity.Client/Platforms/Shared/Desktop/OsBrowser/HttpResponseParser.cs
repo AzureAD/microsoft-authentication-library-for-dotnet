@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
+namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
     internal static class HttpResponseParser
     {
