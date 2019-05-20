@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
-        public override bool IsSystemWebViewAvailable => false;
+
 
         /// <summary>
         ///     Get the user logged in to Windows or throws
@@ -272,5 +273,26 @@ namespace Microsoft.Identity.Client.Platforms.net45
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
         protected override IFeatureFlags CreateFeatureFlags() => new NetDesktopFeatureFlags();
+
+        public override Task StartDefaultOsBrowserAsync(string url)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                url = url.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            }
+
+            return Task.FromResult(0);
+        }
     }
 }
