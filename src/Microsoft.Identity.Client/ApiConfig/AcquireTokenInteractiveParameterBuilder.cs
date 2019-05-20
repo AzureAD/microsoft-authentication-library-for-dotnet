@@ -76,6 +76,23 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
+#if NET_CORE || NETSTANDARD
+            if (useEmbeddedWebView)
+            {
+                throw new MsalClientException(MsalError.WebviewUnavailable, "An embedded webview is not available on this platform. " +
+                    "Please use WithUseEmbeddedWebView(false) or leave the default. " +
+                    "See https://aka.ms/msal-net-os-browser for details about the system webview.");
+            }
+#elif WINDOWS_APP
+            if (!useEmbeddedWebView)
+            {
+                throw new MsalClientException(
+                   MsalError.WebviewUnavailable,
+                   "On UWP, MSAL does not offer a system webview out of the box. Please set .WithUseEmbeddedWebview to true or leave the default. " +
+                   "To use the UWP Web Authentication Manager (WAM) see https://aka.ms/msal-net-uwp-wam");
+            }
+#endif
+
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithEmbeddedWebView);
             Parameters.UseEmbeddedWebView = useEmbeddedWebView;
             return this;
@@ -133,7 +150,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        #region WithParentActivityOrWindow
+#region WithParentActivityOrWindow
 
         /*
          * .WithParentActivityOrWindow is platform specific but we need a solution for
@@ -142,7 +159,7 @@ namespace Microsoft.Identity.Client
          * since Activity, ViewController etc. do not exist in NetStandard.
          */
 
-#if RUNTIME || NETSTANDARD_BUILDTIME 
+#if RUNTIME || NETSTANDARD_BUILDTIME
         /// <summary>
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
@@ -283,7 +300,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-        #endregion
+#endregion
 
         /// <inheritdoc />
         protected override void Validate()
