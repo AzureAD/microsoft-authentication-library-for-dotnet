@@ -127,19 +127,5 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: true);
         }
 #endif
-
-#if NET_CORE
-        [TestMethod]
-        public async Task TestAcquireTokenInteractive_EmbeddedNetCore_Async()
-        {
-            var customWebUi = Substitute.For<ICustomWebUi>();
-
-            await AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() =>
-                 AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
-                                                         .WithUseEmbeddedWebView(true)
-                                                         .ExecuteAsync()
-                                                        ).ConfigureAwait(false);
-        }
-#endif
     }
 }
