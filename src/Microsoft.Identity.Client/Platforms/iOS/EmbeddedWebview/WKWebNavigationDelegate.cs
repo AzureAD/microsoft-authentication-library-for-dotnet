@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using CoreFoundation;
 using Foundation;
-using Microsoft.Identity.Client.Platforms.AppleShared;
+using Microsoft.Identity.Client.Platforms.Shared.Apple;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using UIKit;
@@ -16,11 +16,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
     internal class WKWebNavigationDelegate : WKNavigationDelegate
     {
         private const string AboutBlankUri = "about:blank";
-        private MsalAuthenticationAgentUIViewController AuthenticationAgentUIViewController = null;
+        private MsalAuthenticationAgentUIViewController _authenticationAgentUIViewController = null;
 
-        public WKWebNavigationDelegate(MsalAuthenticationAgentUIViewController AuthUIViewController)
+        public WKWebNavigationDelegate(MsalAuthenticationAgentUIViewController authUIViewController)
         {
-            AuthenticationAgentUIViewController = AuthUIViewController;
+            _authenticationAgentUIViewController = authUIViewController;
             return;
         }
 
@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             // If the URL has the browser:// scheme then this is a request to open an external browser
             if (requestUrlString.StartsWith(iOSBrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                DispatchQueue.MainQueue.DispatchAsync(() => AuthenticationAgentUIViewController.CancelAuthentication(null, null));
+                DispatchQueue.MainQueue.DispatchAsync(() => _authenticationAgentUIViewController.CancelAuthentication(null, null));
 
                 // Build the HTTPS URL for launching with an external browser
                 var httpsUrlBuilder = new UriBuilder(requestUrlString)
@@ -41,16 +41,16 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 
                 DispatchQueue.MainQueue.DispatchAsync(
                     () => UIApplication.SharedApplication.OpenUrl(new NSUrl(requestUrlString)));
-                AuthenticationAgentUIViewController.DismissViewController(true, null);
+                _authenticationAgentUIViewController.DismissViewController(true, null);
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }
 
-            if (requestUrlString.StartsWith(AuthenticationAgentUIViewController.Callback, StringComparison.OrdinalIgnoreCase) ||
+            if (requestUrlString.StartsWith(_authenticationAgentUIViewController.Callback, StringComparison.OrdinalIgnoreCase) ||
                    requestUrlString.StartsWith(iOSBrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                AuthenticationAgentUIViewController.DismissViewController(true, () =>
-                    AuthenticationAgentUIViewController.CallbackMethod(AuthorizationResult.FromUri(requestUrlString)));
+                _authenticationAgentUIViewController.DismissViewController(true, () =>
+                    _authenticationAgentUIViewController.CallbackMethod(AuthorizationResult.FromUri(requestUrlString)));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                     MsalError.NonHttpsRedirectNotSupported,
                     MsalErrorMessage.NonHttpsRedirectNotSupported);
 
-                AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.CallbackMethod(result));
+                _authenticationAgentUIViewController.DismissViewController(true, () => _authenticationAgentUIViewController.CallbackMethod(result));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }
