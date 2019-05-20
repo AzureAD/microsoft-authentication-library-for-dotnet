@@ -36,7 +36,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _platformLogger = new Lazy<IPlatformLogger>(InternalGetPlatformLogger);
         }
 
-        public abstract bool IsSystemWebViewAvailable { get; }
+        public virtual bool IsSystemWebViewAvailable
+        {
+            get
+            {
+                return true;
+            }
+        }
 
         protected IWebUIFactory OverloadWebUiFactory { get; set; }
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
