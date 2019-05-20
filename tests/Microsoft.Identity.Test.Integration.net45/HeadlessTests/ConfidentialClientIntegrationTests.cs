@@ -101,15 +101,8 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.ADFSv2019,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
 
-            await RunOnBehalfOfTestAsync(LabUserHelper.GetLabUserData(query)).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(LabUserHelper.GetAdfsUser(FederationProvider.ADFSv2019)).ConfigureAwait(false);
         }
 
         [TestMethod]
