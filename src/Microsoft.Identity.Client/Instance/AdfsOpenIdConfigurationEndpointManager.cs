@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Instance
                     drsResponse.IdentityProviderService.PassiveAuthEndpoint.Host,
                     resource);
 
-                var httpResponse = await _serviceBundle.HttpManager.SendGetAsync(new Uri(webFingerUrl), null, requestContext)
+                var httpResponse = await _serviceBundle.HttpManager.SendGetAsync(new Uri(webFingerUrl), null, requestContext.Logger)
                                                        .ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)

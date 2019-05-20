@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             viewController.InvokeOnMainThread(() =>
             {
-                authorizationResult = new AuthorizationResult(AuthorizationStatus.Success, url);
+                authorizationResult = AuthorizationResult.FromUri(url);
                 returnedUriReady.Release();
             });
 

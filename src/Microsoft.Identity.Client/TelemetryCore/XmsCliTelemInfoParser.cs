@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private const int TokenAgeIndex = 3;
         private const int SpeInfoIndex = 4;
 
-        internal XmsCliTelemInfo ParseXMsTelemHeader(string headerValue, RequestContext requestContext)
+        internal XmsCliTelemInfo ParseXMsTelemHeader(string headerValue, ICoreLogger logger)
         {
             if (string.IsNullOrEmpty(headerValue))
             {
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             string[] headerSegments = headerValue.Split(',');
             if (headerSegments.Length == 0)
             {
-                requestContext.Logger.Warning(
+                logger.Warning(
                     FormatLogMessage(TelemetryError.XmsCliTelemMalformed, headerValue));
                 return null;
             }
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
             if (!string.Equals(headerVersion, ExpectedCliTelemHeaderVersion))
             {
-                requestContext.Logger.Warning(
+                logger.Warning(
                     FormatLogMessage(TelemetryError.XmsUnrecognizedHeaderVersion, headerVersion));
                 return xMsTelemetryInfo;
             }
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             MatchCollection formatMatcher = MatchHeaderToExpectedFormat(headerValue);
             if (formatMatcher.Count < 1)
             {
-                requestContext.Logger.Warning(
+                logger.Warning(
                     FormatLogMessage(TelemetryError.XmsCliTelemMalformed, headerValue));
                 return xMsTelemetryInfo;
             }

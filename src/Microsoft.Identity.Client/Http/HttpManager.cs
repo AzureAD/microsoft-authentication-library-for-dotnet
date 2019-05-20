@@ -38,31 +38,31 @@ namespace Microsoft.Identity.Client.Http
             Uri endpoint,
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
-            RequestContext requestContext)
+            ICoreLogger logger)
         {
             HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendPostAsync(endpoint, headers, body, requestContext).ConfigureAwait(false);
+            return await SendPostAsync(endpoint, headers, body, logger).ConfigureAwait(false);
         }
 
         public async Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
-            RequestContext requestContext)
+            ICoreLogger logger)
         {
-            return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, requestContext).ConfigureAwait(false);
+            return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, logger).ConfigureAwait(false);
         }
 
         public async Task<HttpResponse> SendGetAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
-            RequestContext requestContext)
+            ICoreLogger logger)
         {
-            return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, requestContext).ConfigureAwait(false);
+            return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, logger).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, RequestContext)"/>
+        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, ICoreLogger)"/>
         /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
         /// with the request.
         /// </summary>
@@ -70,9 +70,9 @@ namespace Microsoft.Identity.Client.Http
             Uri uri,
             Dictionary<string, string> headers,
             StringContent body,
-            RequestContext requestContext)
+            ICoreLogger logger)
         {
-            return await ExecuteWithRetryAsync(uri, headers, body, HttpMethod.Post, requestContext, doNotThrow: true).ConfigureAwait(false);
+            return await ExecuteWithRetryAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true).ConfigureAwait(false);
         }
 
         private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             HttpContent body,
             HttpMethod method,
-            RequestContext requestContext,
+            ICoreLogger logger,
             bool doNotThrow = false,
             bool retry = true)
         {
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Http
                     return response;
                 }
 
-                requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                logger.Info(string.Format(CultureInfo.InvariantCulture,
                     MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)response.StatusCode, response.StatusCode));
 
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.Http
             }
             catch (TaskCanceledException exception)
             {
-                requestContext.Logger.Error("The HTTP request failed or it was canceled. " + exception.Message);
+                logger.Error("The HTTP request failed or it was canceled. " + exception.Message);
                 isRetryable = true;
                 timeoutException = exception;
             }
@@ -140,19 +140,19 @@ namespace Microsoft.Identity.Client.Http
             {
                 if (retry)
                 {
-                    requestContext.Logger.Info("Retrying one more time..");
+                    logger.Info("Retrying one more time..");
                     await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
                     return await ExecuteWithRetryAsync(
                         endpoint,
                         headers,
                         body,
                         method,
-                        requestContext,
+                        logger,
                         doNotThrow,
                         retry: false).ConfigureAwait(false);
                 }
 
-                requestContext.Logger.Error("Request retry failed.");
+                logger.Error("Request retry failed.");
                 if (timeoutException != null)
                 {
                     throw new MsalServiceException(

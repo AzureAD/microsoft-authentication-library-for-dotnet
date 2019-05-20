@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 url.AbsolutePath.Equals(_desiredCallbackUri.AbsolutePath))
             {
                 RequestContext.Logger.Info("Redirect Uri was reached. Stopping webview navigation...");
-                Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
+                Result = AuthorizationResult.FromUri(url.OriginalString);
                 readyToClose = true;
             }
 
@@ -204,11 +204,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
             {
                 RequestContext.Logger.Error(string.Format(CultureInfo.InvariantCulture,
                     "Redirection to non-HTTPS scheme ({0}) found! Webview will fail...", url.Scheme));
-                Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
-                {
-                    Error = MsalError.NonHttpsRedirectNotSupported,
-                    ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported
-                };
+                Result = AuthorizationResult.FromStatus(AuthorizationStatus.ErrorHttp);
+                Result.Error = MsalError.NonHttpsRedirectNotSupported;
+                Result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
                 readyToClose = true;
             }
 
@@ -305,7 +303,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     : Screen.PrimaryScreen;
 
                 // Window height is set to 70% of the screen height.
-                int uiHeight = (int) (Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
+                int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
                 _webBrowserPanel = new Panel();
                 _webBrowserPanel.SuspendLayout();
                 SuspendLayout();

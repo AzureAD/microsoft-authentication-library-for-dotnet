@@ -158,5 +158,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             OverloadFeatureFlags = featureFlags;
         }
+
+        public virtual Task StartDefaultOsBrowserAsync(string url)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

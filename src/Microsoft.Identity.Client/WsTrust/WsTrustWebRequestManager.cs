@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.WsTrust
         public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext)
         {
             var uri = new UriBuilder(federationMetadataUrl);
-            HttpResponse httpResponse = await _httpManager.SendGetAsync(uri.Uri, null, requestContext).ConfigureAwait(false);
+            HttpResponse httpResponse = await _httpManager.SendGetAsync(uri.Uri, null, requestContext.Logger).ConfigureAwait(false);
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string message = string.Format(CultureInfo.CurrentCulture,
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 wsTrustRequest,
                 Encoding.UTF8, headers["ContentType"]);
 
-            HttpResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, headers, body, requestContext).ConfigureAwait(false);
+            HttpResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, headers, body, requestContext.Logger).ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -111,7 +111,11 @@ namespace Microsoft.Identity.Client.WsTrust
 
              var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
 
-            var httpResponse = await _httpManager.SendGetAsync(uri, MsalIdHelper.GetMsalIdParameters(requestContext.Logger), requestContext).ConfigureAwait(false);
+            var httpResponse = await _httpManager.SendGetAsync(
+                uri,
+                MsalIdHelper.GetMsalIdParameters(requestContext.Logger),
+                requestContext.Logger).ConfigureAwait(false);
+
             return httpResponse.StatusCode == System.Net.HttpStatusCode.OK
                 ? JsonHelper.DeserializeFromJson<UserRealmDiscoveryResponse>(httpResponse.Body)
                 : null;

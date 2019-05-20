@@ -4,7 +4,6 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
@@ -23,10 +22,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         protected RequestContext CreateRequestContextAndLogVersionInfo(Guid telemetryCorrelationId)
         {
-            var requestContext = new RequestContext(
-                _clientApplicationBase.AppConfig.ClientId,
-                MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config),
-                telemetryCorrelationId);
+            var requestContext = new RequestContext(ServiceBundle, telemetryCorrelationId);
 
             requestContext.Logger.Info(
                 string.Format(
