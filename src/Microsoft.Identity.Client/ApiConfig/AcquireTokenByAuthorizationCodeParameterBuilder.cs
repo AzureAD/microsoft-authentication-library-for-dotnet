@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope;
+            return ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeV2;
         }
 
         /// <inheritdoc />

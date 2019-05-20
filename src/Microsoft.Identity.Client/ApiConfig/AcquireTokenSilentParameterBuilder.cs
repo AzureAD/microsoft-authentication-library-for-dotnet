@@ -86,9 +86,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return CommonParameters.AuthorityOverride == null
-                ? ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority
-                : ApiEvent.ApiIds.AcquireTokenSilentWithAuthority;
+            return ApiEvent.ApiIds.AcquireTokenSilentV2;
         }
 
         internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenSilent;

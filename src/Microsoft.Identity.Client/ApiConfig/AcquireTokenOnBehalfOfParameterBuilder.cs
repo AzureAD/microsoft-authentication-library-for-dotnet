@@ -73,9 +73,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return CommonParameters.AuthorityOverride == null
-                       ? ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser
-                       : ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority;
+            return ApiEvent.ApiIds.AcquireTokenOnBehalfOfV2;
         }
     }
 #endif

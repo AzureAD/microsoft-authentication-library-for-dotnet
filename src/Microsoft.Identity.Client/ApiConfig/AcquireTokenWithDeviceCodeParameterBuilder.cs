@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return ApiEvent.ApiIds.None;
+            return ApiEvent.ApiIds.AcquireTokenByDeviceCodeV2;
         }
 
         /// <summary>

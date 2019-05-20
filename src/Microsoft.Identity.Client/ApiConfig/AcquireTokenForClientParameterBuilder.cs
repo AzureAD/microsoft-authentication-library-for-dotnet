@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return Parameters.ForceRefresh ? ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh : ApiEvent.ApiIds.AcquireTokenForClientWithScope;
+            return ApiEvent.ApiIds.AcquireTokenForClientV2;
         }
     }
 #endif
