@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
+namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
     /// <summary>
     /// This object is responsible for listening to a single TCP request, on localhost:port, 
