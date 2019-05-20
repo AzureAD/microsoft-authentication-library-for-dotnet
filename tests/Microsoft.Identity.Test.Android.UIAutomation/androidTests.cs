@@ -66,6 +66,8 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenADFSV3InteractiveNonFederatedTest,
                 AcquireTokenADFSV4InteractiveFederatedTest,
                 AcquireTokenADFSV4InteractiveNonFederatedTest,
+                AcquireTokenADFSV2019InteractiveFederatedTest,
+                AcquireTokenADFSV2019InteractiveNonFederatedTest,
 
                 B2CLocalAccountAcquireTokenTest,
                 B2CROPCLocalAccountAcquireTokenTest
@@ -233,6 +235,17 @@ namespace Microsoft.Identity.Test.UIAutomation
         }
 
         /// <summary>
+        /// Runs through the standard acquire token ADFSV2019 Federated flow
+        /// </summary
+        [Test]
+        public void AcquireTokenADFSV2019InteractiveFederatedTest()
+        {
+            _mobileTestHelper.AcquireTokenInteractiveTestHelper(
+                xamarinController,
+                LabUserHelper.GetAdfsUser(FederationProvider.ADFSv2019));
+        }
+
+        /// <summary>
         /// Runs through the standard acquire token ADFSV3 Federated flow
         /// </summary>
         [Test]
@@ -248,6 +261,15 @@ namespace Microsoft.Identity.Test.UIAutomation
         public void AcquireTokenADFSV4InteractiveNonFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
+        }
+
+        /// <summary>
+        /// Runs through the standard acquire token ADFSV2019 Non-Federated flow
+        /// </summary>
+        [Test]
+        public void AcquireTokenADFSV2019InteractiveNonFederatedTest()
+        {
+            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.ADFSv2019, false));
         }
 
         /// <summary>

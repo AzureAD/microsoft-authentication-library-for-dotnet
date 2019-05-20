@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string ClearCacheId = "clearCache";
         public const string SaveID = "saveButton";
         public const string WebUPNInputId = "i0116";
+        public const string AdfsV4UsernameInputdId = "userNameInput";
         public const string AdfsV4WebPasswordId = "passwordInput";
         public const string AdfsV4WebSubmitId = "submitButton";
         public const string WebPasswordId = "i0118";
@@ -47,6 +48,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string UserMissingFromResponse = "Missing from the token response";
         public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
         public const string RedirectUriEntryId = "redirectUriEntry";
+        public const string ConsentAcceptId = "idBtn_Accept";
         public const string PasswordInput = "password";
         public const string AlternativePasswordInput = "Passwd";
 

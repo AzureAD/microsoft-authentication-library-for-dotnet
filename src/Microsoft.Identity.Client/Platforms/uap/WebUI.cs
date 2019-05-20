@@ -16,15 +16,15 @@ namespace Microsoft.Identity.Client.Platforms.uap
 {
     internal class WebUI : IWebUI
     {
-        private readonly bool useCorporateNetwork;
-        private readonly bool silentMode;
+        private readonly bool _useCorporateNetwork;
+        private readonly bool _silentMode;
 
         public RequestContext RequestContext { get; set; }
 
         public WebUI(CoreUIParent parent, RequestContext requestContext)
         {
-            useCorporateNetwork = parent.UseCorporateNetwork;
-            silentMode = parent.UseHiddenBrowser;
+            _useCorporateNetwork = parent.UseCorporateNetwork;
+            _silentMode = parent.UseHiddenBrowser;
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
@@ -36,13 +36,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
             bool ssoMode = string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase);
 
             WebAuthenticationResult webAuthenticationResult;
-            WebAuthenticationOptions options = (useCorporateNetwork &&
+            WebAuthenticationOptions options = (_useCorporateNetwork &&
                                                 (ssoMode || redirectUri.Scheme == Constants.MsAppScheme))
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
 
             ThrowOnNetworkDown();
-            if (silentMode)
+            if (_silentMode)
             {
                 options |= WebAuthenticationOptions.SilentMode;
             }
@@ -118,9 +118,10 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return result;
         }
 
-        public void ValidateRedirectUri(Uri redirectUri)
+        public Uri UpdateRedirectUri(Uri redirectUri)
         {
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+            return redirectUri;
         }
     }
 }

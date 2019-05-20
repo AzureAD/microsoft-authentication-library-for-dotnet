@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             _tokenCacheHelper = new TokenCacheHelper();
         }
 
-#if !NET_CORE
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         [Description("Tests the public interfaces can be mocked")]
@@ -130,6 +129,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
+
+            //app = new PublicClientApplication(MsalTestConstants.ClientId, MsalTestConstants.OnPremiseAuthority);
+            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithAuthority(MsalTestConstants.OnPremiseAuthority).BuildConcrete();
+            Assert.IsNotNull(app);
+            Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
+            Assert.AreEqual(MsalTestConstants.ClientId, app.AppConfig.ClientId);
+            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
+            
         }
 
         [TestMethod]
@@ -548,11 +555,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
+
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 // add mock response bigger than 1MB for Http Client
                 httpManager.AddFailingRequest(new InvalidOperationException());
@@ -1098,6 +1110,75 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenFromAdfs()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAdfsAuthority(MsalTestConstants.OnPremiseAuthority, true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                                app.ServiceBundle.PlatformProxy,
+                                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+
+                httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = "https://fs.contoso.com/.well-known/webfinger",
+                    ExpectedQueryParams = new Dictionary<string, string>
+                    {
+                            {"resource", "https://fs.contoso.com"},
+                            {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
+                    },
+                    ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.contoso.com")
+                });
+
+                //add mock response for tenant endpoint discovery
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                });
+
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateAdfsSuccessTokenResponseMessage()
+                });
+
+                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync().Result;
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+                Assert.AreEqual(MsalTestConstants.OnPremiseUniqueId, result.UniqueId);
+                Assert.AreEqual(new AccountId(MsalTestConstants.OnPremiseUniqueId), result.Account.HomeAccountId);
+                Assert.AreEqual(MsalTestConstants.OnPremiseDisplayableId, result.Account.Username);
+
+                //Find token in cache now
+
+                AuthenticationResult cachedAuth = null;
+                try
+                {
+                    cachedAuth = app.AcquireTokenSilent(MsalTestConstants.Scope, result.Account).ExecuteAsync().Result;
+                }
+                catch
+                {
+                    Assert.Fail("Did not find access token");
+                }
+                Assert.IsNotNull(cachedAuth);
+                Assert.IsNotNull(cachedAuth.Account);
+                Assert.AreEqual(MsalTestConstants.OnPremiseUniqueId, cachedAuth.UniqueId);
+                Assert.AreEqual(new AccountId(MsalTestConstants.OnPremiseUniqueId), cachedAuth.Account.HomeAccountId);
+                Assert.AreEqual(MsalTestConstants.OnPremiseDisplayableId, cachedAuth.Account.Username);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
         public void EnsurePublicApiSurfaceExistsOnInterface()
         {
             IPublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
@@ -1109,8 +1190,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                .WithAccount(MsalTestConstants.User)
                .WithExtraScopesToConsent(MsalTestConstants.Scope)
                .WithLoginHint("loginhint")
-               .WithPrompt(Prompt.ForceLogin)
-               .WithUseEmbeddedWebView(true);
+               .WithPrompt(Prompt.ForceLogin);
+
+#if DESKTOP
+            interactiveBuilder = interactiveBuilder.WithUseEmbeddedWebView(true);
+#endif
             CheckBuilderCommonMethods(interactiveBuilder);
 
             var iwaBuilder = app.AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
@@ -1136,8 +1220,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                   .WithRefreshToken("refreshtoken");
             CheckBuilderCommonMethods(byRefreshTokenBuilder);
         }
-
-#endif
 
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {

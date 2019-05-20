@@ -149,4 +149,15 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly ClientCredentialWrapper CredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
 #endif
     }
+
+    internal static class Adfs2019LabConstants
+    {
+        public const string Authority = "https://fs.msidlab8.com/adfs";
+        public const string AppId = "TestAppIdentifier";
+        public const string PublicClientId = "PublicClientId";
+        public const string ConfidentialClientId = "ConfidentialClientId";
+        public const string ClientRedirectUri = "http://localhost:8080";
+        public static readonly SortedSet<string> SupportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" });
+        public const string ADFS2019ClientSecretURL = "https://buildautomation.vault.azure.net/secrets/ADFS2019ClientCredSecret/c55ec1128f32493da85b7643ede6eb80";
+    }
 }

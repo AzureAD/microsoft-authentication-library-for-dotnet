@@ -49,6 +49,11 @@ namespace Microsoft.Identity.Test.Common
             return CreateServiceBundleWithCustomHttpManager(null);
         }
 
+        public static IServiceBundle CreateDefaultAdfsServiceBundle()
+        {
+            return CreateServiceBundleWithCustomHttpManager(null, authority: MsalTestConstants.OnPremiseAuthority);
+        }
+
         internal static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();

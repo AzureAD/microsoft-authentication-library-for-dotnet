@@ -72,9 +72,10 @@ namespace Microsoft.Identity.Test.Common.Mocks
             return await Task.Factory.StartNew(() => MockResult).ConfigureAwait(false);
         }
 
-        public void ValidateRedirectUri(Uri redirectUri)
+        public Uri UpdateRedirectUri(Uri redirectUri)
         {
             RedirectUriHelper.Validate(redirectUri);
+            return redirectUri;
         }
     }
 }

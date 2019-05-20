@@ -21,7 +21,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-#if !NET_CORE
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -136,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                IntitTestData("AADTestData.txt");
+                IntitTestData(ResourceHelper.GetTestResourceRelativePath("AADTestData.txt"));
                 Init(harness.HttpManager);
                 await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
             }
@@ -148,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                IntitTestData("MSATestData.txt");
+                IntitTestData(ResourceHelper.GetTestResourceRelativePath("MSATestData.txt"));
                 Init(harness.HttpManager);
                 await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
             }
@@ -162,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = new MockHttpAndServiceBundle())
             {
                 TestCommon.ResetInternalStaticCaches();
-                IntitTestData("B2CNoTenantIdTestData.txt");
+                IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CNoTenantIdTestData.txt"));
                 await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
             }
         }
@@ -176,7 +175,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                IntitTestData("B2CWithTenantIdTestData.txt");
+                IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CWithTenantIdTestData.txt"));
                 await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
             }
         }
@@ -328,4 +327,3 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
     }
 }
-#endif

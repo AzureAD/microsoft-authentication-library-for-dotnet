@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [DeploymentItem(@"Resources\CacheFromTheFuture.json")]
-        public async Task UnkownNodesTestAsync()
+        public async Task UnknownNodesTestAsync()
         {
             string jsonFilePath = ResourceHelper.GetTestResourceRelativePath("CacheFromTheFuture.json");
             string jsonContent = File.ReadAllText(jsonFilePath);

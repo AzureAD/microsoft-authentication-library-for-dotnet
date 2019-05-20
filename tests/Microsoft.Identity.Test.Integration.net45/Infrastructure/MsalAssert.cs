@@ -6,6 +6,7 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Client;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Globalization;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -18,7 +19,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));
             var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
-            Assert.AreEqual(labResponse.User.HomeUPN, account.Username);
+            Assert.AreEqual(labResponse.User.HomeUPN.ToLower(CultureInfo.InvariantCulture), account.Username.ToLower(CultureInfo.InvariantCulture));
 
             return account;
         }

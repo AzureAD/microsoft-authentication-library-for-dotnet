@@ -72,9 +72,10 @@ namespace Microsoft.Identity.Client.UI
 
 
         /// <inheritdoc />
-        public void ValidateRedirectUri(Uri redirectUri)
+        public Uri UpdateRedirectUri(Uri redirectUri)
         {
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+            return redirectUri;
         }
     }
 }

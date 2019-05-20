@@ -48,9 +48,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             return authorizationResult;
         }
 
-        public override void ValidateRedirectUri(Uri redirectUri)
+        public override Uri UpdateRedirectUri(Uri redirectUri)
         {
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+            return redirectUri;
         }
     }
 }

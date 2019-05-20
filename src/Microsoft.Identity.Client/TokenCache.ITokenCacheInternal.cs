@@ -27,13 +27,45 @@ namespace Microsoft.Identity.Client
                 .CreateAuthority(ServiceBundle, requestParams.TenantUpdatedCanonicalAuthority)
                 .GetTenantId();
 
+            bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
+
             IdToken idToken = IdToken.Parse(response.IdToken);
+
+            string subject = idToken?.Subject;
+
+            if (idToken != null && string.IsNullOrEmpty(subject))
+            {
+                requestParams.RequestContext.Logger.Warning("Subject not present in Id token");
+            }
+
+            string preferredUsername;
 
             // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
             // It will be set to "preferred_username not in idtoken"
-            var preferredUsername = !string.IsNullOrWhiteSpace(idToken?.PreferredUsername)
-                ? idToken.PreferredUsername
-                : NullPreferredUsernameDisplayLabel;
+            if (idToken == null)
+            {
+                preferredUsername = NullPreferredUsernameDisplayLabel;
+            }
+            else if(string.IsNullOrWhiteSpace(idToken.PreferredUsername))
+            {
+                if (isAdfsAuthority)
+                {
+                    //The direct to adfs scenario does not return preferred_username in the id token so it needs to be set to the upn
+                    preferredUsername = !string.IsNullOrEmpty(idToken.Upn)
+                        ? idToken.Upn
+                        : NullPreferredUsernameDisplayLabel;
+                }
+                else
+                {
+                    preferredUsername = NullPreferredUsernameDisplayLabel;
+                }
+            }
+            else
+            {
+                preferredUsername = idToken.PreferredUsername;
+            }
+
+
 
             var instanceDiscoveryMetadataEntry = GetCachedAuthorityMetaData(requestParams.TenantUpdatedCanonicalAuthority);
 
@@ -46,9 +78,10 @@ namespace Microsoft.Identity.Client
                 instanceDiscoveryMetadataEntry);
 
             var msalAccessTokenCacheItem =
-                new MsalAccessTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId)
+                new MsalAccessTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId, subject)
                 {
-                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash
+                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
+                    IsAdfs = isAdfsAuthority
                 };
 
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
@@ -59,7 +92,11 @@ namespace Microsoft.Identity.Client
                     preferredEnvironmentHost,
                     requestParams.ClientId,
                     response,
-                    tenantId);
+                    tenantId,
+                    subject)
+                {
+                    IsAdfs = isAdfsAuthority
+                };
             }
 
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
@@ -67,13 +104,20 @@ namespace Microsoft.Identity.Client
             {
                 try
                 {
+                    Account account = null;
+                    string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
+                    if (msalAccessTokenCacheItem.HomeAccountId != null)
+                    {
+                        account = new Account(
+                                          msalAccessTokenCacheItem.HomeAccountId,
+                                          username,
+                                          preferredEnvironmentHost);
+                    }
                     var args = new TokenCacheNotificationArgs
                     {
                         TokenCache = new NoLockTokenCacheProxy(this),
                         ClientId = ClientId,
-                        Account = msalAccessTokenCacheItem.HomeAccountId != null
-                            ? new Account(msalAccessTokenCacheItem.HomeAccountId, preferredUsername, preferredEnvironmentHost)
-                            : null,
+                        Account = account,
                         HasStateChanged = true
                     };
 
@@ -104,6 +148,12 @@ namespace Microsoft.Identity.Client
                                 preferredUsername,
                                 tenantId);
 
+                            //The ADFS direct scenrio does not return client info so the home account id is acquired from the subject
+                            if (isAdfsAuthority && String.IsNullOrEmpty(msalAccountCacheItem.HomeAccountId))
+                            {
+                                msalAccountCacheItem.HomeAccountId = idToken.Subject;
+                            }
+
                             _accessor.SaveAccount(msalAccountCacheItem);
                         }
 
@@ -113,7 +163,8 @@ namespace Microsoft.Identity.Client
                             msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                                 preferredEnvironmentHost,
                                 requestParams.ClientId,
-                                response);
+                                response,
+                                subject);
 
                             if (!_featureFlags.IsFociEnabled)
                             {
@@ -177,7 +228,11 @@ namespace Microsoft.Identity.Client
                     requestParams.AuthorityInfo.CanonicalAuthority,
                     instanceDiscoveryMetadataEntry));
 
-                if (requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
+                if (requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
+                {
+                    preferredEnvironmentAlias = requestParams.AuthorityInfo.CanonicalAuthority;
+                }
+                else if (requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
                 {
                     preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
                 }
@@ -244,7 +299,7 @@ namespace Microsoft.Identity.Client
                 {
                     filteredItems = filteredItems.Where(
                         item => environmentAliases.Contains(item.Environment) &&
-                        item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase));
+                        (item.IsAdfs || item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase)));
                 }
 
                 // no match

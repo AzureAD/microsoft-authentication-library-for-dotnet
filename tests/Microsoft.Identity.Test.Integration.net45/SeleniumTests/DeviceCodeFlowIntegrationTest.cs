@@ -10,6 +10,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 
@@ -75,7 +76,40 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
         }
 
-        private void RunAutomatedDeviceCodeFlow(DeviceCodeResult deviceCodeResult, LabUser user)
+		[TestMethod]
+        [Ignore("Adfs does not currently support device code flow")]
+        [Timeout(1 * 60 * 1000)] // 1 min timeout
+        public async Task DeviceCodeFlowAdfsTestAsync()
+        {
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.ADFSv2019,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = true
+            };
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+
+            Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
+            PublicClientApplication pca = PublicClientApplicationBuilder.Create(Adfs2019LabConstants.PublicClientId)
+                                                                        .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
+                                                                        .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                                                                        .BuildConcrete();
+            var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
+            {
+                RunAutomatedDeviceCodeFlow(deviceCodeResult, labResponse.User, true);
+
+                return Task.FromResult(0);
+            }).ExecuteAsync().ConfigureAwait(false);
+
+            Trace.WriteLine("Running asserts");
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
+        }
+
+        private void RunAutomatedDeviceCodeFlow(DeviceCodeResult deviceCodeResult, LabUser user, bool isAdfs = false)
         {
             try
             {
@@ -83,17 +117,20 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
                 Trace.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
 
+				string codeId = isAdfs ? "userCodeInput" : "code";
+                string continueId = isAdfs ? "confirmationButton" : "continueBtn";
+
                 _seleniumDriver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
                 _seleniumDriver
                     // Device Code Flow web ui is undergoing A/B testing and is sometimes different - use 2 IDs
-                    .FindElement(SeleniumExtensions.ByIds("otc", "code"))
+                    .FindElement(SeleniumExtensions.ByIds("otc", codeId))
                     .SendKeys(deviceCodeResult.UserCode);
 
                 IWebElement continueBtn = _seleniumDriver.WaitForElementToBeVisibleAndEnabled(
-                    SeleniumExtensions.ByIds(fields.AADSignInButtonId, "continueBtn"));
+                    SeleniumExtensions.ByIds(fields.AADSignInButtonId, continueId));
                 continueBtn?.Click();
 
-                _seleniumDriver.PerformLogin(user, Prompt.SelectAccount);
+                _seleniumDriver.PerformLogin(user, Prompt.SelectAccount, isAdfs);
 
                 Trace.WriteLine("Authentication complete");
 

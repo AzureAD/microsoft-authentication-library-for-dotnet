@@ -35,9 +35,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IWebUI webUi)
             : base(serviceBundle, authenticationRequestParameters, interactiveParameters)
         {
+            _webUi = webUi; // can be null just to generate the authroization uri 
+
             _interactiveParameters = interactiveParameters;
             RedirectUriHelper.Validate(authenticationRequestParameters.RedirectUri);
-            webUi?.ValidateRedirectUri(authenticationRequestParameters.RedirectUri);
 
             // todo(migration): can't this just come directly from interactive parameters instead of needing do to this?
             _extraScopesToConsent = new SortedSet<string>();
@@ -48,7 +49,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateScopeInput(_extraScopesToConsent);
 
-            _webUi = webUi;
             _interactiveParameters.LogParameters(authenticationRequestParameters.RequestContext.Logger);
         }
 
@@ -90,6 +90,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task AcquireAuthorizationAsync(CancellationToken cancellationToken)
         {
+            if (_webUi == null)
+            {
+                throw new ArgumentNullException("webUi");
+            }
+
+            AuthenticationRequestParameters.RedirectUri = _webUi.UpdateRedirectUri(AuthenticationRequestParameters.RedirectUri);
             var authorizationUri = CreateAuthorizationUri(true);
 
             var uiEvent = new UiEvent(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId);
@@ -190,7 +196,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private Dictionary<string, string> CreateAuthorizationRequestParameters()
+        private Dictionary<string, string> CreateAuthorizationRequestParameters(Uri redirectUriOverride = null)
         {
             SortedSet<string> unionScope = GetDecoratedScope(
                 new SortedSet<string>(AuthenticationRequestParameters.Scope.Union(_extraScopesToConsent)));
@@ -201,7 +207,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code,
 
                 [OAuth2Parameter.ClientId] = AuthenticationRequestParameters.ClientId,
-                [OAuth2Parameter.RedirectUri] = AuthenticationRequestParameters.RedirectUri.OriginalString
+                [OAuth2Parameter.RedirectUri] = redirectUriOverride?.OriginalString ?? AuthenticationRequestParameters.RedirectUri.OriginalString
             };
 
             if (!string.IsNullOrWhiteSpace(_interactiveParameters.LoginHint))
