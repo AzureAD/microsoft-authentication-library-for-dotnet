@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .WithUserTokenLegacyCachePersistenceForTest(
                                                             new TestLegacyCachePersistance())
                                                         .BuildConcrete();
@@ -106,6 +107,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 app.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
@@ -140,6 +142,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId2)
                                                          .WithHttpManager(httpManager)
+                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                          .WithAuthority(
                                                              new Uri(ClientApplicationBase.DefaultAuthority),
                                                              true).BuildConcrete();
@@ -192,8 +195,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = new MockHttpAndServiceBundle())
             {
                 var app = PublicClientApplicationBuilder
-                          .Create(MsalTestConstants.ClientId).WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                          .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance()).BuildConcrete();
+                          .Create(MsalTestConstants.ClientId)
+                          .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                          .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
+                          .WithTelemetry(new TraceTelemetryConfig())
+                          .BuildConcrete();
 
                 CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, MsalTestConstants.Scope.ToString());
 

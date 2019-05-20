@@ -363,12 +363,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .Create(MsalTestConstants.ClientId)
                 .WithHttpManager(_harness.HttpManager)
                 .WithAuthority(MsalTestConstants.AuthorityUtidTenant)
+                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             _appB = PublicClientApplicationBuilder
                 .Create(MsalTestConstants.ClientId2)
                 .WithHttpManager(_harness.HttpManager)
                 .WithAuthority(MsalTestConstants.AuthorityUtidTenant)
+                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             ConfigureCacheSerialization(_appA);

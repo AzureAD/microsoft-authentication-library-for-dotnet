@@ -63,6 +63,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(ClientIdInFile)
                 .WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.PersonalMicrosoftAccount)
                 .WithHttpClientFactory(factoryThatThrows)
+                .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath("SingleCloudTokenCache.json"));
@@ -145,6 +146,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 IEnumerable<IAccount> accounts = app.GetAccountsAsync().Result;
@@ -224,7 +226,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             // Arrange
             var tokenCacheHelper = new TokenCacheHelper();
-            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
+            PublicClientApplication app = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithTelemetry(new TraceTelemetryConfig())
+                .BuildConcrete();
 
             // Populate with tokens tied to ClientId2
             tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId2);
@@ -271,7 +276,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void GetAccountsAndSignThemOutTest()
         {
-            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
+            PublicClientApplication app = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithTelemetry(new TraceTelemetryConfig())
+                .BuildConcrete();
             var tokenCacheHelper = new TokenCacheHelper();
             tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
@@ -292,6 +300,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                   .Create(ClientIdInFile)
                   .WithAuthority(cloud, AadAuthorityAudience.PersonalMicrosoftAccount)
                   .WithHttpManager(httpManager)
+                  .WithTelemetry(new TraceTelemetryConfig())
                   .BuildConcrete();
 
             pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile));

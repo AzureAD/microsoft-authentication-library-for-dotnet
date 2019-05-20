@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public async Task TestSubscribeNonAsync()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithTelemetry(new TraceTelemetryConfig()).Build();
 
             bool beforeAccessCalled = false;
             bool afterAccessCalled = false;
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public async Task TestSubscribeAsync()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithTelemetry(new TraceTelemetryConfig()).Build();
 
             bool beforeAccessCalled = false;
             bool afterAccessCalled = false;
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public async Task TestSubscribeBothAsync()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithTelemetry(new TraceTelemetryConfig()).Build();
 
             bool beforeAccessCalled = false;
             bool afterAccessCalled = false;
@@ -109,6 +109,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(harness.HttpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
                 pca.UserTokenCache.SetBeforeAccessAsync(async args =>

@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             IPublicClientApplication app = PublicClientApplicationBuilder
                 .Create(MsalTestConstants.ClientId)
+                .WithTelemetry(new TraceTelemetryConfig())
                 .Build();
 
             await AssertException.TaskThrowsAsync<ArgumentNullException>(
@@ -92,6 +93,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
@@ -125,6 +127,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
@@ -159,6 +162,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.AuthorityGuestTenant), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
@@ -246,6 +250,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
@@ -272,6 +277,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
@@ -322,6 +328,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 _tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
@@ -498,6 +505,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 // PopulateCache() creates two access tokens
@@ -602,6 +610,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
