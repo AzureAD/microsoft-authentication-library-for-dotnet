@@ -36,12 +36,29 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
                 CancellationToken.None).ConfigureAwait(false);
         }
 
+
         public void ValidateInteractiveParameters(
+           IAccount expectedAccount = null,
+           IEnumerable<string> expectedExtraScopesToConsent = null,
+           string expectedLoginHint = null,
+           string expectedPromptValue = null,
+           ICustomWebUi expectedCustomWebUi = null)
+        {
+             ValidateInteractiveParameters(
+                Maybe<bool>.Empty(),
+                expectedAccount,
+                expectedExtraScopesToConsent,
+                expectedLoginHint,
+                expectedPromptValue,
+                expectedCustomWebUi);
+        }
+
+        public void ValidateInteractiveParameters(
+            Maybe<bool> expectedEmbeddedWebView,
             IAccount expectedAccount = null,
             IEnumerable<string> expectedExtraScopesToConsent = null,
             string expectedLoginHint = null,
             string expectedPromptValue = null,
-            bool expectedEmbeddedWebView = false,
             ICustomWebUi expectedCustomWebUi = null)
         {
             Assert.IsNotNull(InteractiveParametersReceived);

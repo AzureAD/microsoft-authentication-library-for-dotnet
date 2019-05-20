@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses;
@@ -113,6 +114,20 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _harness.ValidateInteractiveParameters(expectedCustomWebUi: customWebUi);
         }
 
+        [TestMethod]
+        public async Task TestAcquireTokenInteractive_SystemWebview_Async()
+        {
+            var customWebUi = Substitute.For<ICustomWebUi>();
+
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                                                         .WithUseEmbeddedWebView(false)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
+
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
+            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: new Maybe<bool>(false));
+        }
+
 #if DESKTOP
         [TestMethod]
         public async Task TestAcquireTokenInteractive_EmbeddedNet45_Async()
@@ -123,8 +138,23 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .WithUseEmbeddedWebView(true)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
-            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: true);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
+            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: new Maybe<bool>(true));
+        }
+#endif
+
+#if NET_CORE
+        [TestMethod]
+        public async Task TestAcquireTokenInteractive_EmbeddedNetCore_Async()
+        {
+            var customWebUi = Substitute.For<ICustomWebUi>();
+
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                 AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                                                         .WithUseEmbeddedWebView(true)
+                                                         .ExecuteAsync()
+                                                        ).ConfigureAwait(false);
+            Assert.AreEqual(MsalError.WebviewUnavailable, ex.ErrorCode);
         }
 #endif
     }

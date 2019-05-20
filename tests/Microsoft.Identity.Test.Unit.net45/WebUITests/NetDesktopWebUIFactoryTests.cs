@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.net45;
+using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -26,6 +27,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public void Net45Factory_DefaultEmbedded()
         {
             // Arrange
+            _parent.UseEmbeddedWebview = true;
 
             // Act
             var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, _requestContext);

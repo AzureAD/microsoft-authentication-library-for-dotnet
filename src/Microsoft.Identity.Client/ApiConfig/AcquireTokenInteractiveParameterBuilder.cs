@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 #if iOS
 using UIKit;
@@ -94,7 +95,7 @@ namespace Microsoft.Identity.Client
 #endif
 
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithEmbeddedWebView);
-            Parameters.UseEmbeddedWebView = useEmbeddedWebView;
+            Parameters.UseEmbeddedWebView = new Maybe<bool>(useEmbeddedWebView);
             return this;
         }
 

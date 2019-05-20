@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
     {
         bool IsSystemWebViewAvailable { get; }
 
+        bool UseEmbeddedWebViewDefault { get; }
+
         /// <summary>
         /// Gets the device model. On some TFMs this is not returned for security reasonons.
         /// </summary>
