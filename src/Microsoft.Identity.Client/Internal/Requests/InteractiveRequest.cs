@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IWebUI webUi)
             : base(serviceBundle, authenticationRequestParameters, interactiveParameters)
         {
-            _webUi = webUi; // can be null just to generate the authroization uri 
+            _webUi = webUi; // can be null just to generate the authorization uri 
 
             _interactiveParameters = interactiveParameters;
             RedirectUriHelper.Validate(authenticationRequestParameters.RedirectUri);
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (_authorizationResult.Status != AuthorizationStatus.Success)
             {
-                throw new MsalClientException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unkown error.");
+                throw new MsalClientException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unknown error.");
             }
         }
     }

@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.UI
         public string CloudInstanceHost { get; set; }
 
         /// <summary>
-        /// A string that is added to each Authroization Request and is expected to be sent back along with the
+        /// A string that is added to each Authorization Request and is expected to be sent back along with the
         /// authorization code. MSAL is responsible for validating that the state sent is identical to the state received.
         /// </summary>
         /// <remarks>
