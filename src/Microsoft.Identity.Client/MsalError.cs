@@ -560,7 +560,7 @@ namespace Microsoft.Identity.Client
         /// Error code used when the CustomWebUI has returned an uri, but it does not match the Authroity and AbsolutePath of
         /// the configured redirect uri.
         /// </summary>
-        public const string LoopbackResponseUriMisatch = "loopback_response_uri_mismatch";
+        public const string LoopbackResponseUriMismatch = "loopback_response_uri_mismatch";
 
         /// <summary>
         /// To use the default OS browser on Linux, make sure you can open a page using xdg-open tool. See https://aka.ms/msal-net-os-browser for details.

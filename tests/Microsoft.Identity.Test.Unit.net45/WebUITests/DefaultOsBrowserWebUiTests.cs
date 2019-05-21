@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 () => AcquireAuthCodeAsync(responseUriString: differentPortRedirectUri))
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.LoopbackResponseUriMisatch, ex.ErrorCode);
+            Assert.AreEqual(MsalError.LoopbackResponseUriMismatch, ex.ErrorCode);
         }
 
         private async Task<AuthorizationResult> AcquireAuthCodeAsync(
