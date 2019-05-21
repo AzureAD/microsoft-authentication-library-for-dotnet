@@ -26,25 +26,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\OpenidConfiguration-OnPremise.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-OnPremise.json")]
     [Ignore] // disable until we support ADFS
-    public class AdfsAuthorityTests
+    public class AdfsAuthorityTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-
-        }
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
         public void SuccessfulValidationUsingOnPremiseDrsTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -121,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void SuccessfulValidationUsingCloudDrsFallbackTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock failure response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -197,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void ValidationOffSuccessTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(
@@ -230,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void FailedValidationTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -286,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void FailedValidationResourceNotInTrustedRealmTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -341,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void FailedValidationMissingFieldsInDrsResponseTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock failure response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -382,7 +371,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void FailedTenantDiscoveryMissingEndpointsTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(

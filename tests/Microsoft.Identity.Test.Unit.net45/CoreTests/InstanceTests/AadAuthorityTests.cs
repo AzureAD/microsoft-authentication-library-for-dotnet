@@ -22,19 +22,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     [DeploymentItem("Resources\\OpenidConfiguration.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields.json")]
-    public class AadAuthorityTests
+    public class AadAuthorityTests : TestBase
     {
-        [TestInitialize]
-        public void Init()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void SuccessfulValidationTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for instance validation
                 harness.HttpManager.AddMockHandler(
@@ -90,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void ValidationOffSuccessTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(
@@ -127,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void FailedValidationTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for instance validation
                 harness.HttpManager.AddMockHandler(
@@ -179,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void FailedValidationMissingFieldsTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for instance validation
                 harness.HttpManager.AddMockHandler(
@@ -220,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void FailedTenantDiscoveryMissingEndpointsTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(

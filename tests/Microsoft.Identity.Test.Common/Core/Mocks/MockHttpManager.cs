@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -16,6 +17,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     internal sealed class MockHttpManager : HttpManager,
                                             IDisposable
     {
+        private readonly TestContext _testContext;
+
+        public MockHttpManager(TestContext testContext = null)
+        {
+            _testContext = testContext;
+        }
+
         private Queue<HttpMessageHandler> _httpMessageHandlerQueue
         {
             get;
@@ -33,7 +41,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 #pragma warning restore CS0618 // Type or member is obsolete
             {
                 string remainingMocks = string.Join(" ",
-                    _httpMessageHandlerQueue.Select(m => (m as MockHttpMessageHandler)?.ExpectedUrl));
+                    _httpMessageHandlerQueue.Select(m => GetExpectedUrlFromHandler(m)));
                 Assert.AreEqual(0, _httpMessageHandlerQueue.Count,
                     "All mocks should have been consumed. Remaining mocks are for: " + remainingMocks);
             }
@@ -41,6 +49,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public void AddMockHandler(HttpMessageHandler handler)
         {
+            string testName = _testContext?.TestName ?? "";
+            Trace.WriteLine($"Test {testName} adds an HttpMessageHandler for { GetExpectedUrlFromHandler(handler) }");
             _httpMessageHandlerQueue.Enqueue(handler);
         }
 
@@ -54,6 +64,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
 
             var messageHandler = _httpMessageHandlerQueue.Dequeue();
+
+            Trace.WriteLine($"Test {_testContext?.TestName ?? ""} dequeued a mock handler for { GetExpectedUrlFromHandler(messageHandler) }");
+
             var httpClient = new HttpClient(messageHandler)
             {
                 MaxResponseContentBufferSize = HttpClientFactory.MaxResponseContentBufferSizeInBytes
@@ -63,6 +76,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             return httpClient;
+        }
+
+        private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
+        {
+            return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
         }
     }
 }

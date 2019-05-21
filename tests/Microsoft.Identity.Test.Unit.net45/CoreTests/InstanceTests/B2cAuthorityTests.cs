@@ -16,19 +16,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-B2CLogin.json")]
-    public class B2CAuthorityTests
+    public class B2CAuthorityTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-        }
-
         [TestMethod]
         [TestCategory("B2CAuthorityTests")]
         public void NotEnoughPathSegmentsTest()
@@ -106,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1038
         public void B2CMicrosoftOnlineCreateAuthority()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(

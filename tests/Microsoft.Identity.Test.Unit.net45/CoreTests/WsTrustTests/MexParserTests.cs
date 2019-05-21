@@ -17,16 +17,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
     [TestClass]
     [DeploymentItem(@"Resources\TestMex2005.xml")]
-    public class MexParserTests
+    public class MexParserTests : TestBase
     {
-        public TestContext TestContext { get; set; }
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
         public void WsTrust2005AddressExtractionTest()
@@ -58,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         public async Task MexEndpointFailsToResolveTestAsync()
         {
             // TODO: should we move this into a separate test class for WsTrustWebRequestManager?
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get);
 

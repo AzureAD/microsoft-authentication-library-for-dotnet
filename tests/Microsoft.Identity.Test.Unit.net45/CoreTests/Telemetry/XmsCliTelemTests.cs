@@ -15,7 +15,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
     [TestClass]
     public class XmsCliTelemTests
     {
-        private RequestContext _requestContext;
         private ICoreLogger _coreLogger;
 
         [TestInitialize]
