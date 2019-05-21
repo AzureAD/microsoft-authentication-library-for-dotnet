@@ -45,12 +45,22 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         public static IWebDriver CreateDefaultWebDriver()
         {
             ChromeOptions options = new ChromeOptions();
+            ChromeDriver driver;
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
-            //options.AddArguments("headless");
+            options.AddArguments("headless");
 
-            var driver = new ChromeDriver(options);
+            var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
+            if (String.IsNullOrEmpty(env))
+            {
+                driver = new ChromeDriver(options);
+            }
+            else
+            {
+                driver = new ChromeDriver(env, options);
+            }
+
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(ImplicitTimeoutSeconds);
 
             return driver;

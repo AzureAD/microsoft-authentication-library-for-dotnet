@@ -51,9 +51,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private KeyVaultConfiguration _config;
 
-        private readonly string _keyVaultClientID = "ebe49c8f-61de-4357-9194-7a786f6402b4";
+        private readonly string _keyVaultClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
 
-        private readonly string _keyVaultThumbPrint = "440A5BE6C4BE2FF02A0ADBED1AAA43D6CF12E269";
+        private readonly string _keyVaultThumbPrint = "79FBCBEB5CD28994E50DAFF8035BACF764B14306";
 
         private readonly string _dataFileName = "data.txt";
 
