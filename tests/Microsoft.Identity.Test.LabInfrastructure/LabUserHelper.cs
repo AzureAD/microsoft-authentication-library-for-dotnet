@@ -82,7 +82,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             var query = UserQuery.DefaultUserQuery;
             query.FederationProvider = federationProvider;
-            query.IsFederatedUser = true;
             query.IsFederatedUser = federated;
             return GetLabUserData(query);
         }
