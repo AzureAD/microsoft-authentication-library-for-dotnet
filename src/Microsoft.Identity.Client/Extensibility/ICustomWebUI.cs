@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Extensibility
     public interface ICustomWebUi
     {
         /// <summary>
-        /// Method called by MSAL.NET to delegate the authentication code Web with with the STS
+        /// Method called by MSAL.NET to delegate the authentication code Web with the Secure Token Service (STS)
         /// </summary>
         /// <param name="authorizationUri"> URI computed by MSAL.NET that will let the UI extension
         /// navigate to the STS authorization endpoint in order to sign-in the user and have them consent
