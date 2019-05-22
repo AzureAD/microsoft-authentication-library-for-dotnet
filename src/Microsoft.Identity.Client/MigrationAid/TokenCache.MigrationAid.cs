@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <returns>Serialized token cache <see cref="CacheData"/></returns>
         /// <remarks>
-        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// <see cref="ITokenCacheSerializer.SerializeMsalV3"/>/<see cref="ITokenCacheSerializer.DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
         [Obsolete("This is expected to be removed in MSAL.NET v4 and ADAL.NET v6. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public CacheData SerializeUnifiedAndAdalCache()
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="cacheData">Array of bytes containing serialize cache data</param>
         /// <remarks>
-        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// <see cref="ITokenCacheSerializer.SerializeMsalV3"/>/<see cref="ITokenCacheSerializer.DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
         [Obsolete("This is expected to be removed in MSAL.NET v4 and ADAL.NET v6. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public void DeserializeUnifiedAndAdalCache(CacheData cacheData)
@@ -78,38 +78,38 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Serializes using the <see cref="SerializeMsalV2"/> serializer.
+        /// Serializes using the <see cref="ITokenCacheSerializer.SerializeMsalV2"/> serializer.
         /// Obsolete: Please use specialized Serialization methods.
-        /// <see cref="SerializeMsalV2"/> replaces <see cref="Serialize"/>.
-        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> Is our recommended way of serializing/deserializing.
-        /// <see cref="SerializeAdalV3"/> For interoperability with ADAL.NET v3.
+        /// <see cref="ITokenCacheSerializer.SerializeMsalV2"/> replaces <see cref="Serialize"/>.
+        /// <see cref="ITokenCacheSerializer.SerializeMsalV3"/>/<see cref="ITokenCacheSerializer.DeserializeMsalV3"/> Is our recommended way of serializing/deserializing.
+        /// <see cref="ITokenCacheSerializer.SerializeAdalV3"/> For interoperability with ADAL.NET v3.
         /// </summary>
-        /// <returns>array of bytes, <see cref="SerializeMsalV2"/></returns>
+        /// <returns>array of bytes, <see cref="ITokenCacheSerializer.SerializeMsalV2"/></returns>
         /// <remarks>
-        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// <see cref="ITokenCacheSerializer.SerializeMsalV3"/>/<see cref="ITokenCacheSerializer.DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
         [Obsolete("This is expected to be removed in MSAL.NET v4 and ADAL.NET v6. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public byte[] Serialize()
         {
-            return SerializeMsalV2();
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Deserializes the token cache from a serialization blob in the unified cache format
         /// Obsolete: Please use specialized Deserialization methods.
-        /// <see cref="DeserializeMsalV2"/> replaces <see cref="Deserialize"/>
-        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> Is our recommended way of serializing/deserializing.
-        /// <see cref="DeserializeAdalV3"/> For interoperability with ADAL.NET v3
+        /// <see cref="ITokenCacheSerializer.DeserializeMsalV2"/> replaces <see cref="Deserialize"/>
+        /// <see cref="ITokenCacheSerializer.SerializeMsalV3"/>/<see cref="ITokenCacheSerializer.DeserializeMsalV3"/> Is our recommended way of serializing/deserializing.
+        /// <see cref="ITokenCacheSerializer.DeserializeAdalV3"/> For interoperability with ADAL.NET v3
         /// </summary>
         /// <param name="msalV2State">Array of bytes containing serialized MSAL.NET V2 cache data</param>
         /// <remarks>
-        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// <see cref="ITokenCacheSerializer.SerializeMsalV3"/>/<see cref="ITokenCacheSerializer.DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// <paramref name="msalV2State"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information.
         /// </remarks>
         [Obsolete("This is expected to be removed in MSAL.NET v4 and ADAL.NET v6. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public void Deserialize(byte[] msalV2State)
         {
-            DeserializeMsalV2(msalV2State);
+            throw new NotImplementedException();
         }
 
         /// <summary>

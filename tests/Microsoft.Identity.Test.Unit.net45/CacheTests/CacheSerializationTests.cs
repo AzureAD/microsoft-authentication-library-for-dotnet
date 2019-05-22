@@ -443,7 +443,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache = notificationArgs.TokenCache.SerializeMsalV3();
             });
 
-            var notification = new TokenCacheNotificationArgs() { TokenCache = tokenCache };
+            var notification = new TokenCacheNotificationArgs(tokenCache, null, null, false);
             await tokenCache.OnBeforeAccessAsync(notification).ConfigureAwait(false);
             await tokenCache.OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
