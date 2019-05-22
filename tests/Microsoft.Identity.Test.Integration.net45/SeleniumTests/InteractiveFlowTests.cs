@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Test.Unit;
 using System.Globalization;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
-
+using OpenQA.Selenium;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
         private static readonly string[] s_scopes = new[] { "user.read" };
+        private IWebDriver _driver;
 
         #region MSTest Hooks
         /// <summary>
@@ -325,13 +326,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         	return result;
 		}
 
-        private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint, bool adfsOnly = false)
+        private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint, bool adfsOnly = false)
         {
             return new SeleniumWebUI((driver) =>
             {
                 Trace.WriteLine("Starting Selenium automation");
+                _driver = driver; 
                 driver.PerformLogin(user, prompt, withLoginHint, adfsOnly);
-            });
+            }, TestContext);
         }
     }
 }

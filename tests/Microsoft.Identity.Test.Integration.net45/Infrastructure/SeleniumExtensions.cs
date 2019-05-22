@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
-            options.AddArguments("headless");
+            //options.AddArguments("headless");
 
             var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
             if (String.IsNullOrEmpty(env))
@@ -45,12 +45,12 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         }
 
         #region ScreenShot support
-        private static int _picNumber = 1;
+        private static int s_picNumber = 1;
 
         public static void SaveScreenshot(this IWebDriver driver, TestContext testContext, string name = "failure")
         {
             Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
-            string picName = name + _picNumber++ + ".png";
+            string picName = name + s_picNumber++ + ".png";
 #if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
             string failurePicturePath = Path.Combine(testContext.TestResultsDirectory, picName);
 #else
@@ -69,7 +69,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static IWebElement WaitForElementToBeVisibleAndEnabled(this IWebDriver driver, By by)
         {
-            WebDriverWait webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(ExplicitTimeoutSeconds));
+            Trace.WriteLine($"[Selenium UI] Waiting for {by.ToString()} to be visible and enabled");
+            var webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(ExplicitTimeoutSeconds));
+
             IWebElement continueBtn = webDriverWait.Until(dr =>
             {
                 try
@@ -90,6 +92,8 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     return null;
                 }
             });
+
+
             return continueBtn;
         }
 
@@ -99,11 +103,19 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         /// </summary>
         public static By ByIds(params string[] ids)
         {
+            Trace.WriteLine("Finding first elements by id: " + string.Join(" ", ids));
             string xPathSelector = string.Join(
                 " or ",
                 ids.Select(id => $"@id='{id}'"));
 
             return By.XPath($".//*[{xPathSelector}]");
+        }
+
+        public static IWebElement FindElementById(this IWebDriver driver, string id)
+        {
+            Trace.WriteLine("Finding element by id: " + id);
+
+            return driver.FindElement(By.Id(id));
         }
 
         public static void PerformLogin(this IWebDriver driver, LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
@@ -120,16 +132,16 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 if (!withLoginHint)
                 {
                     Trace.WriteLine("Logging in ... Entering username");
-                    driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn.Contains("EXT")? user.HomeUPN : user.Upn);
+                    driver.FindElementById(fields.AADUsernameInputId).SendKeys(user.Upn.Contains("EXT") ? user.HomeUPN : user.Upn);
 
                     Trace.WriteLine("Logging in ... Clicking <Next> after username");
-                    driver.FindElement(By.Id(fields.AADSignInButtonId)).Click();
+                    driver.FindElementById(fields.AADSignInButtonId).Click();
                 }
 
                 if (user.FederationProvider == FederationProvider.AdfsV2 && user.IsFederated)
                 {
                     Trace.WriteLine("Logging in ... AFDSv2 - Entering the username again, this time in the ADFSv2 form");
-                    driver.FindElement(By.Id(CoreUiTestConstants.AdfsV2WebUsernameInputId)).SendKeys(user.Upn);
+                    driver.FindElementById(CoreUiTestConstants.AdfsV2WebUsernameInputId).SendKeys(user.Upn);
                 }
             }
 
@@ -141,7 +153,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             if (user.HomeUPN.Contains("outlook.com"))
             {
-                Trace.WriteLine("Loggin in ... clicking accept promps for outlook.com MSA user");
+                Trace.WriteLine("Logging in ... clicking accept prompts for outlook.com MSA user");
                 driver.WaitForElementToBeVisibleAndEnabled(By.Id(CoreUiTestConstants.ConsentAcceptId)).Click();
             }
 
