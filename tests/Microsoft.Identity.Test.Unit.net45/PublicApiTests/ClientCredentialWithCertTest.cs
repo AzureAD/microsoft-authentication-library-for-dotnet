@@ -31,10 +31,9 @@ namespace Microsoft.Identity.Test.Unit
         private TokenCacheHelper _tokenCacheHelper;
 
         [TestInitialize]
-        public void TestInitialize()
+        public override void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
-
+            base.TestInitialize();
             _tokenCacheHelper = new TokenCacheHelper();
         }
 
@@ -52,10 +51,12 @@ namespace Microsoft.Identity.Test.Unit
                     // Check presence of client_assertion in request
                     Assert.IsTrue(formsData.TryGetValue("client_assertion", out string encodedJwt), "Missing client_assertion from request");
 
-                    // Check presence of x5c cert claim. It should exist.
+                    // Check presence and value of x5c cert claim.
                     var handler = new JwtSecurityTokenHandler();
                     var jsonToken = handler.ReadJwtToken(encodedJwt);
-                    Assert.IsTrue(jsonToken.Header.Any(header => header.Key == "x5c"), "x5c should be present");
+                    var x5c = jsonToken.Header.Where(header => header.Key == "x5c").FirstOrDefault();
+                    Assert.IsTrue((x5c.Key == "x5c"), "x5c should be present");
+                    Assert.AreEqual(x5c.Value.ToString(), MsalTestConstants.Defaultx5cValue);
                 }
             };
         }
@@ -70,13 +71,13 @@ namespace Microsoft.Identity.Test.Unit
                           MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid));
         }
 
-        internal void SetupMocks(MockHttpManager httpManager)
+        private void SetupMocks(MockHttpManager httpManager)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
             httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
         }
 
-        internal void SetupMocks(MockHttpManager httpManager, string authority)
+        private void SetupMocks(MockHttpManager httpManager, string authority)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
             httpManager.AddMockHandlerForTenantEndpointDiscovery(authority);
@@ -116,6 +117,12 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result.AccessToken);
+
+                //Check app cache
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+
+                //Clear cache
+                app.AppTokenCacheInternal.ClearMsalCache();
             }
         }
 
@@ -156,6 +163,12 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result.AccessToken);
+
+                //Check user cache
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+
+                //Clear cache
+                app.UserTokenCacheInternal.ClearMsalCache();
             }
         }
 
@@ -177,9 +190,7 @@ namespace Microsoft.Identity.Test.Unit
                                                               .WithHttpManager(harness.HttpManager)
                                                               .WithCertificate(certificate).BuildConcrete();
 
-
-
-                _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                _tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
                     new MsalAccessTokenCacheKey(
                         MsalTestConstants.ProductionPrefNetworkEnvironment,
@@ -188,6 +199,7 @@ namespace Microsoft.Identity.Test.Unit
                         MsalTestConstants.ClientId,
                         MsalTestConstants.ScopeForAnotherResourceStr));
 
+                //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
 
                 var result = await app
@@ -199,6 +211,12 @@ namespace Microsoft.Identity.Test.Unit
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result.AccessToken);
+
+                //Check user cache
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+
+                //Clear cache
+                app.UserTokenCacheInternal.ClearMsalCache();
             }
         }
 
