@@ -45,12 +45,12 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         }
 
         #region ScreenShot support
-        private static int _picNumber = 1;
+        private static int s_picNumber = 1;
 
         public static void SaveScreenshot(this IWebDriver driver, TestContext testContext, string name = "failure")
         {
             Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
-            string picName = name + _picNumber++ + ".png";
+            string picName = name + s_picNumber++ + ".png";
 #if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
             string failurePicturePath = Path.Combine(testContext.TestResultsDirectory, picName);
 #else
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         public static IWebElement WaitForElementToBeVisibleAndEnabled(this IWebDriver driver, By by)
         {
             Trace.WriteLine($"[Selenium UI] Waiting for {by.ToString()} to be visible and enabled");
-            var webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+            var webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(ExplicitTimeoutSeconds));
 
             IWebElement continueBtn = webDriverWait.Until(dr =>
             {
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
 
             Trace.WriteLine("Logging in ... Entering password");
-            driver.WaitForElementToBeVisibleAndEnabled(fields.GetPasswordInputId()).SendKeys(user.GetOrFetchPassword());
+            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordInputId())).SendKeys(user.GetOrFetchPassword());
 
             Trace.WriteLine("Logging in ... Clicking next after password");
             driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordSignInButtonId())).Click();

@@ -1,8 +1,6 @@
-﻿using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.UI;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -11,6 +9,9 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenQA.Selenium;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -40,10 +41,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             _testContext = testContext;
         }
 
-
         public async Task<Uri> AcquireAuthorizationCodeAsync(
             Uri authorizationUri,
-            Uri redirectUri, 
+            Uri redirectUri,
             CancellationToken cancellationToken)
         {
             if (redirectUri.IsDefaultPort)
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         private async Task<Uri> SeleniumAcquireAuthAsync(
             Uri authorizationUri,
-            Uri redirectUri, 
+            Uri redirectUri,
             CancellationToken cancellationToken)
         {
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         _seleniumAutomationLogic(driver);
                     });
 
-                    //await Task.WhenAll(seleniumAutomationTask, listenForAuthCodeTask).ConfigureAwait(false);
+                    await Task.WhenAll(seleniumAutomationTask, listenForAuthCodeTask).ConfigureAwait(false);
                     return authCodeUri;
                 }
                 catch (Exception ex)
