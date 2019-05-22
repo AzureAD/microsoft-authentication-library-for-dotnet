@@ -157,14 +157,14 @@ namespace Microsoft.Identity.Client
         {
             GuardOnMobilePlatforms();
 
-            _semaphoreSlim.Wait();
+            _semaphoreSlimTC.Wait();
             try
             {
                 return SerializeMsalV3NoLocks();
             }
             finally
             {
-                _semaphoreSlim.Release();
+                _semaphoreSlimTC.Release();
             }
         }
 
@@ -191,14 +191,14 @@ namespace Microsoft.Identity.Client
         {
             GuardOnMobilePlatforms();
 
-            _semaphoreSlim.Wait();
+            _semaphoreSlimTC.Wait();
             try
             {
                 DeserializeMsalV3NoLocks(msalV3State, shouldClearExistingCache);
             }
             finally
             {
-                _semaphoreSlim.Release();
+                _semaphoreSlimTC.Release();
             }
         }
 

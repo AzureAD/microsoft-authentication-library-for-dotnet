@@ -115,7 +115,8 @@ namespace Microsoft.Identity.Client
                     }
                     var args = new TokenCacheNotificationArgs
                     {
-                        TokenCache = new NoLockTokenCacheProxy(this),
+                        // TokenCache = new NoLockTokenCacheProxy(this),
+                        TokenCache = this,
                         ClientId = ClientId,
                         Account = account,
                         HasStateChanged = true
@@ -252,7 +253,9 @@ namespace Microsoft.Identity.Client
                 MsalAccessTokenCacheItem msalAccessTokenCacheItem;
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
-                    TokenCache = new NoLockTokenCacheProxy(this),
+                    //TokenCache = new NoLockTokenCacheProxy(this),
+                    TokenCache = this,
+
                     ClientId = ClientId,
                     Account = requestParams.Account
                 };
@@ -395,7 +398,8 @@ namespace Microsoft.Identity.Client
 
                     TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                     {
-                        TokenCache = new NoLockTokenCacheProxy(this),
+                        //TokenCache = new NoLockTokenCacheProxy(this),
+                        TokenCache = this,
                         ClientId = ClientId,
                         Account = requestParams.Account
                     };
@@ -478,7 +482,8 @@ namespace Microsoft.Identity.Client
 
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
             {
-                TokenCache = new NoLockTokenCacheProxy(this),
+                //TokenCache = new NoLockTokenCacheProxy(this),
+                TokenCache = this,
                 ClientId = ClientId,
                 Account = requestParams?.Account,
                 HasStateChanged = false
@@ -519,7 +524,8 @@ namespace Microsoft.Identity.Client
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
-                    TokenCache = new NoLockTokenCacheProxy(this),
+                    //TokenCache = new NoLockTokenCacheProxy(this),
+                    TokenCache = this,
                     ClientId = ClientId,
                     Account = null
                 };
@@ -560,7 +566,8 @@ namespace Microsoft.Identity.Client
             {
                 var args = new TokenCacheNotificationArgs
                 {
-                    TokenCache = new NoLockTokenCacheProxy(this),
+                    //TokenCache = new NoLockTokenCacheProxy(this),
+                    TokenCache = this,
                     ClientId = ClientId,
                     Account = null
                 };
@@ -691,7 +698,8 @@ namespace Microsoft.Identity.Client
                 {
                     var args = new TokenCacheNotificationArgs
                     {
-                        TokenCache = new NoLockTokenCacheProxy(this),
+                        //TokenCache = new NoLockTokenCacheProxy(this),
+                        TokenCache = this,
                         ClientId = ClientId,
                         Account = account,
                         HasStateChanged = true
@@ -784,7 +792,8 @@ namespace Microsoft.Identity.Client
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
-                    TokenCache = new NoLockTokenCacheProxy(this),
+                    //TokenCache = new NoLockTokenCacheProxy(this),
+                    TokenCache = this,
                     ClientId = ClientId,
                     Account = null,
                     HasStateChanged = true
