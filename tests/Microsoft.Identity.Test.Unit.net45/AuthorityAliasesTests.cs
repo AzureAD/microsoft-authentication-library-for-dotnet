@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Test.Unit
                           .WithHttpManager(httpManager)
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
                           .WithTelemetry(new TraceTelemetryConfig())
+                          .WithDebugLoggingCallback()
                           .BuildConcrete();
 
                 // mock for openId config request

@@ -41,13 +41,16 @@ namespace Microsoft.Identity.Client.Mats
             var scenarioStore = new ScenarioStore(TimeConstants.ScenarioTimeoutMilliseconds, errorStore);
 
             var allowedScopes = new HashSet<string>();
-            if (telemetryConfig.AllowedScopes != null)
-            {
-                foreach (string s in telemetryConfig.AllowedScopes)
-                {
-                    allowedScopes.Add(s);
-                }
-            }
+
+            // TODO: need to determine what MATS was doing with the AllowedScopes and DeniedScopes values in the C++ impl
+            // and possibly expose this value in the ITelemetryConfig interface.
+            //if (telemetryConfig.AllowedScopes != null)
+            //{
+            //    foreach (string s in telemetryConfig.AllowedScopes)
+            //    {
+            //        allowedScopes.Add(s);
+            //    }
+            //}
 
             var actionStore = new ActionStore(
                 TimeConstants.ActionTimeoutMilliseconds,

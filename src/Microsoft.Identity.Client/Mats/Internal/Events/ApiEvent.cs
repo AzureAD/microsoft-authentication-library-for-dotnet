@@ -48,6 +48,10 @@ namespace Microsoft.Identity.Client.Mats.Internal.Events
             //AcquireTokenByAuthorizationCodeWithCodeScope = 830,
 
             // TODO: These are all new ids, one for each of the flows.
+            // These are differentiated from the existing IDs because of the new construct of having
+            // the TelemetryFeature bits to avoid geometric permutations of ID values and allow more robust filtering
+            // on the server side.
+
             // If these arrive, then the permutuations of "with behavior/hint/scope/refresh/etc" are all
             // bits sent as separate fields via ApiTelemetryFeature values.
             AcquireTokenByAuthorizationCodeV2 = 1000,
