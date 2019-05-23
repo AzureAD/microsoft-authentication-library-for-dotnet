@@ -3,7 +3,7 @@
 
 using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Test.Unit.MatsTests
+namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
     internal class TestTelemetryDispatcher
     {

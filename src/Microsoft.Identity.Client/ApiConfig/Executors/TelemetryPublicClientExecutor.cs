@@ -9,11 +9,11 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-    internal class MatsPublicClientExecutor : AbstractMatsExecutor, IPublicClientApplicationExecutor
+    internal class TelemetryPublicClientExecutor : AbstractMatsExecutor, IPublicClientApplicationExecutor
     {
         private readonly IPublicClientApplicationExecutor _executor;
 
-        public MatsPublicClientExecutor(IPublicClientApplicationExecutor executor, ITelemetryClient mats)
+        public TelemetryPublicClientExecutor(IPublicClientApplicationExecutor executor, ITelemetryClient mats)
             : base(mats)
         {
             _executor = executor;

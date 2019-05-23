@@ -11,14 +11,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
     internal class ApiEvent : EventBase
     {
-        //public const string ApiIdKey = EventNamePrefix + "api_id";
         public const string AuthorityKey = EventNamePrefix + "authority";
         public const string AuthorityTypeKey = EventNamePrefix + "authority_type";
         public const string PromptKey = EventNamePrefix + "ui_behavior";
         public const string TenantIdKey = EventNamePrefix + "tenant_id";
         public const string UserIdKey = EventNamePrefix + "user_id";
         public const string WasSuccessfulKey = EventNamePrefix + "was_successful";
-        // public const string CorrelationIdKey = EventNamePrefix + "correlation_id";
         public const string IsConfidentialClientKey = EventNamePrefix + "is_confidential_client";
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
         public const string LoginHintKey = EventNamePrefix + "login_hint";
@@ -27,26 +25,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         {
             None = 0,
 
-            //AcquireTokenSilentWithAuthority = 31,
-            //AcquireTokenSilentWithoutAuthority = 30,
-
-            //AcquireTokenWithScope = 170,
-            //AcquireTokenWithScopeHint = 171,
-            //AcquireTokenWithScopeHintBehavior = 172,
-            //AcquireTokenWithScopeHintBehaviorAuthority = 173,
-            //AcquireTokenWithScopeUser = 176,
-            //AcquireTokenWithScopeUserBehavior = 174,
-            //AcquireTokenWithScopeUserBehaviorAuthority = 175,
-
-            //AcquireTokenOnBehalfOfWithScopeUser = 520,
-            //AcquireTokenOnBehalfOfWithScopeUserAuthority = 521,
-
-            //AcquireTokenForClientWithScope = 726,
-            //AcquireTokenForClientWithScopeRefresh = 727,
-            //AcquireTokenByRefreshToken = 728,
-
-            //AcquireTokenByAuthorizationCodeWithCodeScope = 830,
-
             // TODO: These are all new ids, one for each of the flows.
             // These are differentiated from the existing IDs because of the new construct of having
             // the TelemetryFeature bits to avoid geometric permutations of ID values and allow more robust filtering
@@ -54,16 +32,16 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
             // If these arrive, then the permutuations of "with behavior/hint/scope/refresh/etc" are all
             // bits sent as separate fields via ApiTelemetryFeature values.
-            AcquireTokenByAuthorizationCodeV2 = 1000,
-            AcquireTokenByRefreshTokenV2 = 1001,
-            AcquireTokenByIntegratedWindowsAuthV2 = 1002,
-            AcquireTokenByUsernamePasswordV2 = 1003,
-            AcquireTokenForClientV2 = 1004,
-            AcquireTokenInteractiveV2 = 1005,
-            AcquireTokenOnBehalfOfV2 = 1006,
-            AcquireTokenSilentV2 = 1007,
-            AcquireTokenByDeviceCodeV2 = 1008,
-            GetAuthorizationRequestUrlV2 = 1009,
+            AcquireTokenByAuthorizationCode = 1000,
+            AcquireTokenByRefreshToken = 1001,
+            AcquireTokenByIntegratedWindowsAuth = 1002,
+            AcquireTokenByUsernamePassword = 1003,
+            AcquireTokenForClient = 1004,
+            AcquireTokenInteractive = 1005,
+            AcquireTokenOnBehalfOf = 1006,
+            AcquireTokenSilent = 1007,
+            AcquireTokenByDeviceCode = 1008,
+            GetAuthorizationRequestUrl = 1009,
         }
 
         private readonly ICryptographyManager _cryptographyManager;

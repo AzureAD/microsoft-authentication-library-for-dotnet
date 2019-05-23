@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return ApiEvent.ApiIds.AcquireTokenSilentV2;
+            return ApiEvent.ApiIds.AcquireTokenSilent;
         }
 
         internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenSilent;

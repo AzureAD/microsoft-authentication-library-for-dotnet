@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return ApiEvent.ApiIds.GetAuthorizationRequestUrlV2;
+            return ApiEvent.ApiIds.GetAuthorizationRequestUrl;
         }
     }
 #endif

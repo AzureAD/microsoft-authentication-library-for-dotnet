@@ -9,10 +9,10 @@ using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.MatsTests
+namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
     [TestClass]
-    public class ContextStoreTests : AbstractMatsTest
+    public class ContextStoreTests : AbstractTelemetryTest
     {
         [TestInitialize]
         public override void Setup() => base.Setup();

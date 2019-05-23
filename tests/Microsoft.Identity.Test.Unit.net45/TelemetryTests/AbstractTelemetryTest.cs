@@ -7,9 +7,9 @@ using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Test.Common;
 
-namespace Microsoft.Identity.Test.Unit.MatsTests
+namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
-    public abstract class AbstractMatsTest
+    public abstract class AbstractTelemetryTest
     {
         internal ErrorStore _errorStore;
         internal TestTelemetryDispatcher _dispatcher;

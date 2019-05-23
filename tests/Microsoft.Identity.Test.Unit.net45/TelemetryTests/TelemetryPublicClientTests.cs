@@ -8,10 +8,10 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.MatsTests
+namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
     [TestClass]
-    public class MatsPublicClientTests
+    public class TelemetryPublicClientTests
     {
         private const string AppName = "The app Name";
         private const string AppVersion = "1.2.3.4";

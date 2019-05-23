@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractiveV2);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters();
         }
 
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractiveV2);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(account, expectedLoginHint: MsalTestConstants.DisplayableId);
         }
 
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractiveV2);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(expectedLoginHint: MsalTestConstants.DisplayableId);
         }
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractiveV2);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(account, expectedLoginHint: "SomeOtherLoginHint");
         }
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(
-                ApiEvent.ApiIds.AcquireTokenInteractiveV2,
+                ApiEvent.ApiIds.AcquireTokenInteractive,
                 expectedExtraQueryParameters: new Dictionary<string, string> { { "domain_hint", "mydomain.com" } });
             _harness.ValidateInteractiveParameters(
                 expectedLoginHint: MsalTestConstants.DisplayableId);
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .WithCustomWebUi(customWebUi)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractiveV2);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(expectedCustomWebUi: customWebUi);
         }
 
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .WithUseEmbeddedWebView(true)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractiveV2);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: true);
         }
 #endif

@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(false, cca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(cca.AppConfig.LoggingCallback);
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
-            //Assert.IsNull(cca.AppConfig.TelemetryCallback);
             Assert.AreEqual(null, cca.AppConfig.TenantId);
         }
 

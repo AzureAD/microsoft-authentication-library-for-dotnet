@@ -309,7 +309,7 @@ namespace Microsoft.Identity.Client
 
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return ApiEvent.ApiIds.AcquireTokenInteractiveV2;
+            return ApiEvent.ApiIds.AcquireTokenInteractive;
         }
     }
 }
