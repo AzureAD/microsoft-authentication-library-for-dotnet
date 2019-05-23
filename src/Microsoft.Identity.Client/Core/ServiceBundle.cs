@@ -5,7 +5,6 @@ using System;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Mats;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -36,7 +35,7 @@ namespace Microsoft.Identity.Client.Core
             if (config.TelemetryConfig != null)
             {
                 // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
-                Mats = MatsTelemetryClient.CreateMats(config, PlatformProxy, config.TelemetryConfig);
+                Mats = TelemetryClient.CreateMats(config, PlatformProxy, config.TelemetryConfig);
                 TelemetryManager = Mats?.TelemetryManager ?? new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
             }
             else
@@ -73,7 +72,7 @@ namespace Microsoft.Identity.Client.Core
         public IApplicationConfiguration Config { get; }
 
         /// <inheritdoc />
-        public IMatsTelemetryClient Mats { get; }
+        public ITelemetryClient Mats { get; }
 
         public static ServiceBundle Create(ApplicationConfiguration config)
         {

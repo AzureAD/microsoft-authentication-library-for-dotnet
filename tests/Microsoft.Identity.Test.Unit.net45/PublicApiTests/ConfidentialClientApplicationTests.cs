@@ -23,8 +23,8 @@ using NSubstitute;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Threading;
-using Microsoft.Identity.Client.Mats.Internal.Events;
-using Microsoft.Identity.Client.Mats.Internal.Constants;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 
 #if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Microsoft.Identity.Test.Unit.PublicApiTests

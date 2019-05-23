@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Mats;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
     {
         private readonly IPublicClientApplicationExecutor _executor;
 
-        public MatsPublicClientExecutor(IPublicClientApplicationExecutor executor, IMatsTelemetryClient mats)
+        public MatsPublicClientExecutor(IPublicClientApplicationExecutor executor, ITelemetryClient mats)
             : base(mats)
         {
             _executor = executor;

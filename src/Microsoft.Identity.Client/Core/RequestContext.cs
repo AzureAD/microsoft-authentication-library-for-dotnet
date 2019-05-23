@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Client.Core
 {

@@ -4,8 +4,8 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Keys;
-using Microsoft.Identity.Client.Mats.Internal.Constants;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;

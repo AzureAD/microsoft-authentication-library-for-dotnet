@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Mats.Internal;
-using Microsoft.Identity.Client.Mats.Internal.Constants;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.MatsTests
