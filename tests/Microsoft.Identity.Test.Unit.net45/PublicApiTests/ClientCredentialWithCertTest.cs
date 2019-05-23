@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit
                     var handler = new JwtSecurityTokenHandler();
                     var jsonToken = handler.ReadJwtToken(encodedJwt);
                     var x5c = jsonToken.Header.Where(header => header.Key == "x5c").FirstOrDefault();
-                    Assert.IsTrue((x5c.Key == "x5c"), "x5c should be present");
+                    Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
                     Assert.AreEqual(x5c.Value.ToString(), MsalTestConstants.Defaultx5cValue);
                 }
             };
@@ -94,12 +94,12 @@ namespace Microsoft.Identity.Test.Unit
                     ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
                     MsalTestConstants.DefaultPassword);
 
-                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .WithAuthority(
-                                                                  new System.Uri(ClientApplicationBase.DefaultAuthority),
-                                                                  true).WithRedirectUri(MsalTestConstants.RedirectUri)
-                                                              .WithHttpManager(harness.HttpManager)
-                                                              .WithCertificate(certificate).BuildConcrete();
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority),true)
+                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate).BuildConcrete();
 
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Description("Test for client assertion with X509 public certificate using sendCertificate")]
+        [Description("Test for acqureTokenSilent with X509 public certificate using sendCertificate")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateSilentTestAsync()
         {
             using (var harness = CreateTestHarness())
@@ -183,12 +183,12 @@ namespace Microsoft.Identity.Test.Unit
                     ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
                     MsalTestConstants.DefaultPassword);
 
-                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .WithAuthority(
-                                                                  new System.Uri("https://login.microsoftonline.com/my-utid"),
-                                                                  true).WithRedirectUri(MsalTestConstants.RedirectUri)
-                                                              .WithHttpManager(harness.HttpManager)
-                                                              .WithCertificate(certificate).BuildConcrete();
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new System.Uri("https://login.microsoftonline.com/my-utid"),true)
+                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate).BuildConcrete();
 
                 _tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
