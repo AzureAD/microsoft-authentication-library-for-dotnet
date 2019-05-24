@@ -21,15 +21,9 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class InteractiveRequestWithCustomWebUiTests
+    public class InteractiveRequestWithCustomWebUiTests : TestBase
     {
         private const string ExpectedRedirectUri = "https://theredirecturi";
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
@@ -37,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
         }
 
-        private static async Task ExecuteTestAsync(
+        private async Task ExecuteTestAsync(
             bool withTokenRequest,
             Action<ICustomWebUi> customizeWebUiBehavior,
             Func<InteractiveRequest, Task> executionBehavior)
@@ -45,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var customWebUi = Substitute.For<ICustomWebUi>();
             customizeWebUiBehavior(customWebUi);
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 

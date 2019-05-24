@@ -16,15 +16,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class BrokerRequestTests
+    public class BrokerRequestTests : TestBase
     {
         private BrokerInteractiveRequest _brokerInteractiveRequest;
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         [TestCategory("BrokerRequestTests")]
@@ -118,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         private void CreateBrokerHelper()
         {
-            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityHomeTenant,

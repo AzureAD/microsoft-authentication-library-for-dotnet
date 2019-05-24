@@ -40,7 +40,13 @@ namespace Microsoft.Identity.Client.Platforms.netcore.OsBrowser
             try
             {
                 tcpListener = new TcpListener(IPAddress.Loopback, port);
-                cancellationToken.Register(() => tcpListener.Stop());
+                cancellationToken.Register(
+                () =>
+                {
+                    tcpListener.Stop();
+                    throw new OperationCanceledException();
+                });
+
                 tcpListener.Start();
 
                 tcpClient =

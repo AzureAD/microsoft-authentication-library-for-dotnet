@@ -1,20 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -23,19 +9,29 @@ using System.Net.Http;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
-    public class PublicClientApplicationTests
+    public class PublicClientApplicationTests : TestBase
     {
         private TokenCacheHelper _tokenCacheHelper;
 
         [TestInitialize]
-        public void TestInitialize()
+        public override void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
-
+            base.TestInitialize();
             _tokenCacheHelper = new TokenCacheHelper();
         }
 
@@ -145,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var receiver = new MyReceiver();
 
-            using (var harness = new MockHttpAndServiceBundle(telemetryCallback: receiver.HandleTelemetryEvents))
+            using (var harness = CreateTestHarness(telemetryCallback: receiver.HandleTelemetryEvents))
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -195,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var receiver = new MyReceiver();
 
-            using (var harness = new MockHttpAndServiceBundle(telemetryCallback: receiver.HandleTelemetryEvents))
+            using (var harness = CreateTestHarness(telemetryCallback: receiver.HandleTelemetryEvents))
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -236,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public async Task AcquireTokenNoClientInfoReturnedTestAsync()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -282,7 +278,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSameUserTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -333,7 +329,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenAddTwoUsersTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -975,7 +971,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("B2C")]
         public void B2CAcquireTokenWithB2CLoginAuthorityTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CAuthority);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthority);

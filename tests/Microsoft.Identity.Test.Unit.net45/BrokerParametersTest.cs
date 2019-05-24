@@ -13,21 +13,15 @@ using System;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
-    public class BrokerParametersTest
+    public class BrokerParametersTest : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         public static readonly string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(MsalTestConstants.AuthorityTestTenant));
 
         [TestMethod]
         [Description("Test setting of the broker parameters in the BrokerInteractiveRequest constructor.")]
         public void BrokerInteractiveRequest_CreateBrokerParametersTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // Arrange
                 var parameters = harness.CreateAuthenticationRequestParameters(

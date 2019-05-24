@@ -19,7 +19,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
     [TestClass]
-    public class TokenCacheV2Tests
+    public class TokenCacheV2Tests : TestBase
     {
         private InMemoryCachePathStorage _cachePathStorage;
         private FileSystemCredentialPathManager _credentialPathManager;
@@ -29,9 +29,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         private const string TheSecret = "the_secret";
 
         [TestInitialize]
-        public void TestInitialize()
+        public override void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
+            base.TestInitialize();
 
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             _cachePathStorage = new InMemoryCachePathStorage();
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                     atItem
                 });
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // TODO:  In MSALC++, the request parameters only really needs the
                 // Authority URI itself since the cache isn't meant to

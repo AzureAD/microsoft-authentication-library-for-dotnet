@@ -22,14 +22,8 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class UnifiedCacheTests
-    {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
+    public class UnifiedCacheTests : TestBase
+    {    
         [TestMethod]
         [Description("Test unified token cache")]
         public void UnifiedCache_MsalStoresToAndReadRtFromAdalCache()
@@ -192,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Description("Test for duplicate key in ADAL cache")]
         public void UnifiedCache_ProcessAdalDictionaryForDuplicateKeyTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 var app = PublicClientApplicationBuilder
                           .Create(MsalTestConstants.ClientId)

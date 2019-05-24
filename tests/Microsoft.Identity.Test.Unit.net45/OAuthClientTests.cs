@@ -20,20 +20,14 @@ using static Microsoft.Identity.Test.Unit.RequestsTests.InteractiveRequestTests;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
-    public class OAuthClientTests
+    public class OAuthClientTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         public void RedirectUriContainsFragmentErrorTest()
         {
             try
             {
-                using (var harness = new MockHttpAndServiceBundle())
+                using (var harness = CreateTestHarness())
                 {
                     AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                         MsalTestConstants.AuthorityHomeTenant,
@@ -169,9 +163,9 @@ namespace Microsoft.Identity.Test.Unit
                 });
         }
 
-        private static void ValidateOathClient(HttpResponseMessage httpResponseMessage, Action<Exception> validationHandler)
+        private void ValidateOathClient(HttpResponseMessage httpResponseMessage, Action<Exception> validationHandler)
         {
-            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler

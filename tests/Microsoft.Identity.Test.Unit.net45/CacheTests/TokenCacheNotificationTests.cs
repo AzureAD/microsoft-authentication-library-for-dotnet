@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class TokenCacheNotificationTests
+    public class TokenCacheNotificationTests : TestBase
     {
         [TestMethod]
         public async Task TestSubscribeNonAsync()
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var sb = new StringBuilder();
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 

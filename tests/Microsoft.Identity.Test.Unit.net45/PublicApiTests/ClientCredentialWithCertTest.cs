@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     [DeploymentItem(@"Resources\valid_cert.pfx")]
     [DeploymentItem(@"Resources\testCert.crtfile")]
-    public class ConfidentialClientWithCertTests
+    public class ConfidentialClientWithCertTests : TestBase
     {
         private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(bool clientCredentialFlow)
         {
@@ -56,13 +56,6 @@ namespace Microsoft.Identity.Test.Unit
                           MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid + "more"));
         }
 
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-
-        }
-
         internal void SetupMocks(MockHttpManager httpManager)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
@@ -73,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test for client assertion with X509 public certificate using sendCertificate")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateTestAsync()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 SetupMocks(harness.HttpManager);
                 var certificate = new X509Certificate2(
@@ -110,7 +103,7 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test for client assertion with X509 public certificate using sendCertificate")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateOnBehalfOfTestAsync()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 SetupMocks(harness.HttpManager);
 
