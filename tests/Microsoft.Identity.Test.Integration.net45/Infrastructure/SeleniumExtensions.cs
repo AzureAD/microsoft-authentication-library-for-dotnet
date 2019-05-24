@@ -145,17 +145,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 }
             }
 
-            Trace.WriteLine("This should fail with a Selenium failure");
-            driver.FindElementById(fields.AADSignInButtonId).Click();
-
-
             Trace.WriteLine("Logging in ... Entering password");
             driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordInputId())).SendKeys(user.GetOrFetchPassword());
 
             Trace.WriteLine("Logging in ... Clicking next after password");
             driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordSignInButtonId())).Click();
-
-           
 
             if (user.HomeUPN.Contains("outlook.com"))
             {
