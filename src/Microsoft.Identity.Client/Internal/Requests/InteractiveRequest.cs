@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Mats.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
@@ -27,6 +28,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _state;
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private MsalTokenResponse _msalTokenResponse;
+#if WINDOWS_APP
+        private readonly string _redirectUriRequestParameter;
+#endif //WINDOWS_APP
 
         public InteractiveRequest(
             IServiceBundle serviceBundle,
@@ -39,6 +43,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             _interactiveParameters = interactiveParameters;
             RedirectUriHelper.Validate(authenticationRequestParameters.RedirectUri);
+
+#if WINDOWS_APP
+            _redirectUriRequestParameter = PlatformProxyFactory.CreatePlatformProxy(serviceBundle.DefaultLogger).GetBrokerOrRedirectUri(authenticationRequestParameters.RedirectUri);
+#endif //WINDOWS_APP
 
             // todo(migration): can't this just come directly from interactive parameters instead of needing do to this?
             _extraScopesToConsent = new SortedSet<string>();
@@ -123,7 +131,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.AuthorizationCode,
                 [OAuth2Parameter.Code] = _authorizationResult.Code,
+#if WINDOWS_APP
+                [OAuth2Parameter.RedirectUri] = _redirectUriRequestParameter,
+#else
                 [OAuth2Parameter.RedirectUri] = AuthenticationRequestParameters.RedirectUri.OriginalString,
+#endif //WINDOWS_APP
                 [OAuth2Parameter.CodeVerifier] = _codeVerifier
             };
 
@@ -207,7 +219,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code,
 
                 [OAuth2Parameter.ClientId] = AuthenticationRequestParameters.ClientId,
+#if WINDOWS_APP
+                [OAuth2Parameter.RedirectUri] = _redirectUriRequestParameter
+#else
                 [OAuth2Parameter.RedirectUri] = redirectUriOverride?.OriginalString ?? AuthenticationRequestParameters.RedirectUri.OriginalString
+#endif //WINDOWS_APP
             };
 
             if (!string.IsNullOrWhiteSpace(_interactiveParameters.LoginHint))

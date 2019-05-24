@@ -16,8 +16,9 @@
         <Button Content="Clear First Account" HorizontalAlignment="Left" Margin="750,354,0,0" VerticalAlignment="Top" Click="ClearFirstAccountAsync"/>
 
         <Button Content="Show Cache Size" HorizontalAlignment="Center" Margin="0,407,0,0" VerticalAlignment="Top" Click="ShowCacheCountAsync"/>
-        <TextBlock HorizontalAlignment="Center" Margin="0,469,0,0" Height="450" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="AccessToken"/>
+        
         <Button Content="Acquire Token Integrated Windows Auth" HorizontalAlignment="Center" Margin="0,200,0,0" VerticalAlignment="Top" Click="AcquireTokenIWA_ClickAsync"/>
-
+        <ComboBox PlaceholderText="RedirectURI" x:Name="redirectUriCbx" ItemsSource="{x:Bind _redirectUris}" HorizontalAlignment="Center" Margin="0,468,0,0" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Center" Margin="0,520,0,0" Height="450" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="AccessToken"/>
     </Grid>
 </Page>

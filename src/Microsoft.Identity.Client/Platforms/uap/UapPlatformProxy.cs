@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Mats.Internal;
+using Windows.Security.Authentication.Web;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -136,13 +137,15 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// <inheritdoc />
         public override string GetBrokerOrRedirectUri(Uri redirectUri)
         {
-            return redirectUri.OriginalString;
+            return string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase)
+                ? WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString
+                : redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
         public override string GetDefaultRedirectUri(string correlationId)
         {
-            return Constants.DefaultRedirectUri;
+            return Constants.UapWEBRedirectUri;
         }
 
         protected override string InternalGetProductName()

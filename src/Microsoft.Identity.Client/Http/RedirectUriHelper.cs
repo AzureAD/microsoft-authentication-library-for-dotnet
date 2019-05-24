@@ -21,7 +21,6 @@ namespace Microsoft.Identity.Client.Http
                 throw new MsalClientException(
                     MsalError.NoRedirectUri,
                     MsalErrorMessage.NoRedirectUri);
-
             }
 
             if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))

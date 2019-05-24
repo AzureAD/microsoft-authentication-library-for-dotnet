@@ -28,6 +28,38 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <None Update="AccessTokenCacheItemDetails.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="AccountCacheItemDetails.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="AcquirePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="CachePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="IdTokenCacheItemDetails.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="LogPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="RefreshTokenCacheItemDetails.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="SettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
   <PropertyGroup Condition="'$(APPCENTER_BUILD)' != ''">
     <DefineConstants>$(DefineConstants);IS_APPCENTER_BUILD</DefineConstants>
   </PropertyGroup>
