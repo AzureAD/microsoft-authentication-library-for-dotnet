@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(
                 receiver.EventsReceived.Find(
                     anEvent => // Expect finding such an event
-                        anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "30" &&
+                        anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1007" &&
                         anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                         anEvent[ApiEvent.ApiErrorCodeKey] == "no_tokens_found"));
         }
