@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _clientApplicationBase.UserTokenCacheInternal);
 
+            requestParameters.SendX5C = silentParameters.SendX5C;
+
             var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
