@@ -154,8 +154,8 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     throw listenForAuthCodeTask.Exception;
                 }
 
-                Trace.WriteLine("Unknown state - not expecting to be here.");
-                throw new InvalidOperationException("Unknown exception");
+                throw new InvalidOperationException(
+                    $"Unknown exception: selenium status: {seleniumAutomationTask.Status} TCP listener status: {listenForAuthCodeTask.Status}");
             }
         }
 
