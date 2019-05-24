@@ -38,11 +38,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Func<Uri, string> responseProducer,
             CancellationToken cancellationToken)
         {
-            cancellationToken.Register(
-                () => {
-                    _tcpListener.Stop();
-                    throw new OperationCanceledException();
-            });
 
             TcpClient tcpClient = null;
             try
@@ -67,15 +62,27 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         /// the cancellation token is registered to stop the listener.
         /// </summary>
         /// <remarks>See https://stackoverflow.com/questions/19220957/tcplistener-how-to-stop-listening-while-awaiting-accepttcpclientasync</remarks>
-        private static async Task<TcpClient> AcceptTcpClientAsync(TcpListener listener, CancellationToken token)
+        private static async Task<TcpClient> AcceptTcpClientAsync(TcpListener listener, CancellationToken ct)
         {
-            try
+            using (ct.Register(listener.Stop))
             {
-                return await listener.AcceptTcpClientAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex) when (token.IsCancellationRequested)
-            {
-                throw new OperationCanceledException("Cancellation was requested while awaiting TCP client connection.", ex);
+                try
+                {
+                    return await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                }
+                catch (SocketException e) when (e.SocketErrorCode == SocketError.Interrupted)
+                {
+                    throw new OperationCanceledException(ct);
+                }
+                catch (ObjectDisposedException) when (ct.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException(ct);
+                }
+                // thrown when cancellation is requested before the call to listen
+                catch (InvalidOperationException) when (ct.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException(ct);
+                }
             }
         }
 
