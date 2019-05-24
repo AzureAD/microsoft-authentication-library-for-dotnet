@@ -430,7 +430,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "726"));
+                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1004"));
             }
         }
 
@@ -717,7 +717,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "727"));
+                            anEvent[ApiEvent.WasSuccessfulKey] == "true" && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1004"));
             }
         }
 

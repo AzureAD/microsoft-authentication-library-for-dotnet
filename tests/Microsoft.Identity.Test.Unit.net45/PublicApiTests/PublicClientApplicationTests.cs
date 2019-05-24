@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "170" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1005" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "state_mismatch"));
             }
         }
@@ -471,7 +471,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "176" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1005" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "user_mismatch"));
 
                 var users = app.GetAccountsAsync().Result;

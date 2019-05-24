@@ -12,6 +12,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -74,7 +75,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(
                 receiver.EventsReceived.Find(
                     anEvent => // Expect finding such an event
-                        anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1007" &&
+                        anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
+                        anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1007" &&
                         anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                         anEvent[ApiEvent.ApiErrorCodeKey] == "no_tokens_found"));
         }
@@ -238,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
                 Assert.IsNotNull(receiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                     anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "true"
-                    && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "31"));
+                    && anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1007"));
             }
         }
 
