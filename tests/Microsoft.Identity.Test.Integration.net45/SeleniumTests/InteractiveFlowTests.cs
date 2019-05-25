@@ -193,7 +193,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
         }
 
-
         [TestMethod]
         [Ignore("Lab needs a way to provide multiple account types(AAD, ADFS, MSA) that can sign into the same client id")]
         public async Task MultiUserCacheCompatabilityTestAsync()
@@ -326,7 +325,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
 
         }
-
 
         private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint, bool adfsOnly = false)
         {

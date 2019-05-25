@@ -49,12 +49,11 @@ namespace Microsoft.Identity.Test.Integration.net45.SeleniumTests
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .Build();
 
-            // This should fail after a the Selenium Implicit timeout
+            // This should fail after a few seconds
             var seleniumLogic = new SeleniumWebUI((driver) =>
             {
                 Trace.WriteLine("Looking for an element that does not exist");
                 driver.FindElement(By.Id("i_hope_this_element_does_not_exist"));
-
             }, TestContext);
 
             // The exception propagated to the test should be Selenium exception,
@@ -74,11 +73,11 @@ namespace Microsoft.Identity.Test.Integration.net45.SeleniumTests
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .Build();
 
-            // This should fail after a the Selenium Implicit timeout
+            // The timeout is greater than the timeout of the TCP listener
             var seleniumLogic = new SeleniumWebUI((driver) =>
             {
-                Trace.WriteLine("Looking for an element that does not exist");
-                Task.Delay(TimeSpan.FromSeconds(3));
+                Trace.WriteLine("Doing nothing for while, until the TCP listener times out");
+                Task.Delay(TimeSpan.FromSeconds(3));  
 
             }, TestContext);
 
