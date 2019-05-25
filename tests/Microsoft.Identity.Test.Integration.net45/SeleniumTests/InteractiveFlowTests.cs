@@ -1,22 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Test.Unit;
-using System.Globalization;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
-using OpenQA.Selenium;
+using Microsoft.Identity.Test.Unit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
@@ -25,7 +23,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
         private static readonly string[] s_scopes = new[] { "user.read" };
-        private IWebDriver _driver;
 
         #region MSTest Hooks
         /// <summary>
@@ -55,6 +52,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
+#if DESKTOP // no point in running these tests on NetCore - the code path is similar
         [TestMethod]
         public async Task Interactive_AdfsV3_NotFederatedAsync()
         {
@@ -145,32 +143,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
         }
 
-        private async Task RunPromptTestForUserAsync(LabResponse labResponse, Prompt prompt, bool useLoginHint)
-        {
-            var pca = PublicClientApplicationBuilder
-               .Create(labResponse.AppId)
-               .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-               .Build();
-
-            AcquireTokenInteractiveParameterBuilder builder = pca
-               .AcquireTokenInteractive(s_scopes)
-               .WithPrompt(prompt)
-               .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, prompt, useLoginHint));
-
-            if (useLoginHint)
-            {
-                builder = builder.WithLoginHint(labResponse.User.Upn);
-            }
-
-            AuthenticationResult result = await builder
-               .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
-               .ConfigureAwait(false);
-
-            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-
-        }
-
-		[TestMethod]
+        [TestMethod]
         public async Task Interactive_AdfsV2019_NotFederatedAsync()
         {
             // Arrange
@@ -201,6 +174,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
+
+#endif
 
         [TestMethod]
         public async Task Interactive_AdfsV2019_DirectAsync()
@@ -277,21 +252,21 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
         {
             IPublicClientApplication pca;
-            if(directToAdfs)
+            if (directToAdfs)
             {
                 pca = PublicClientApplicationBuilder
-					.Create(Adfs2019LabConstants.PublicClientId)
+                    .Create(Adfs2019LabConstants.PublicClientId)
                     .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
                     .WithAdfsAuthority(Adfs2019LabConstants.Authority)
                     .BuildConcrete();
             }
             else
             {
-            	pca = PublicClientApplicationBuilder
-                	.Create(labResponse.AppId)
-                	.WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                	.Build();
-			}
+                pca = PublicClientApplicationBuilder
+                    .Create(labResponse.AppId)
+                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .Build();
+            }
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(s_scopes)
@@ -323,15 +298,39 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ConfigureAwait(false);
 
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-        	return result;
-		}
+            return result;
+        }
+
+        private async Task RunPromptTestForUserAsync(LabResponse labResponse, Prompt prompt, bool useLoginHint)
+        {
+            var pca = PublicClientApplicationBuilder
+               .Create(labResponse.AppId)
+               .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+               .Build();
+
+            AcquireTokenInteractiveParameterBuilder builder = pca
+               .AcquireTokenInteractive(s_scopes)
+               .WithPrompt(prompt)
+               .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, prompt, useLoginHint));
+
+            if (useLoginHint)
+            {
+                builder = builder.WithLoginHint(labResponse.User.Upn);
+            }
+
+            AuthenticationResult result = await builder
+               .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+               .ConfigureAwait(false);
+
+            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+
+        }
 
         private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint, bool adfsOnly = false)
         {
             return new SeleniumWebUI((driver) =>
             {
                 Trace.WriteLine("Starting Selenium automation");
-                _driver = driver; 
                 driver.PerformLogin(user, prompt, withLoginHint, adfsOnly);
             }, TestContext);
         }

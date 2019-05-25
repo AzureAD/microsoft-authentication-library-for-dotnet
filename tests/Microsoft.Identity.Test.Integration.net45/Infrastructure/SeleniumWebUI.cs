@@ -107,40 +107,72 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
             using (var listener = new SingleMessageTcpListener(redirectUri.Port)) // starts listening
             {
-
-                try
-                {
-                    Uri authCodeUri = null;
-                    var listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
-                        (uri) =>
-                        {
-                            Trace.WriteLine("Intercepted an auth code url: " + uri.ToString());
-                            authCodeUri = uri;
-
-                            return GetMessageToShowInBroswerAfterAuth(uri);
-                        },
-                        cancellationToken);
-
-
-                    // Run the TCP listener and the selenium automation in parallel
-                    var seleniumAutomationTask = Task.Run(() =>
+                Uri authCodeUri = null;
+                var listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
+                    (uri) =>
                     {
-                        _seleniumAutomationLogic(driver);
-                    });
+                        Trace.WriteLine("Intercepted an auth code url: " + uri.ToString());
+                        authCodeUri = uri;
 
-                    await Task.WhenAll(seleniumAutomationTask, listenForAuthCodeTask).ConfigureAwait(false);
+                        return GetMessageToShowInBroswerAfterAuth(uri);
+                    },
+                    cancellationToken);
+
+                // Run the TCP listener and the selenium automation in parallel
+                var seleniumAutomationTask = Task.Factory.StartNew(() => _seleniumAutomationLogic(driver));
+
+                await Task.WhenAny(seleniumAutomationTask, listenForAuthCodeTask)
+                    .ConfigureAwait(false);
+
+                if (listenForAuthCodeTask.Status == TaskStatus.RanToCompletion)
+                {
                     return authCodeUri;
                 }
-                catch (Exception ex)
+
+                if (seleniumAutomationTask.IsFaulted)
                 {
-                    Trace.WriteLine("Error occurred while acquiring auth. Possible cause: the browser never finished auth or the Selenium automation failed. A screenshot may be available");
-                    Trace.WriteLine($"Exception: {ex.GetType()} with message {ex.Message}");
-                    Trace.WriteLine("Page source:");
-                    Trace.WriteLine(driver?.PageSource);
-                    driver.SaveScreenshot(_testContext);
-                    throw;
+                    Trace.WriteLine("The selenium automation failed: " + seleniumAutomationTask.Exception.Message);
+                    RecordException(driver, seleniumAutomationTask.Exception);
+                    throw seleniumAutomationTask.Exception;
+                }
+
+                if (listenForAuthCodeTask.IsCanceled)
+                {
+                    Trace.WriteLine("The TCP listener has timed out (or was canceled).");
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        Assert.Fail("The TCP listener is in a canceled state, but cancellation has not been requested!");
+                    }
+
+                    throw new OperationCanceledException(cancellationToken);
+                }
+
+                if (listenForAuthCodeTask.IsFaulted )
+                {
+                    Trace.WriteLine("The TCP listener failed.");
+                    RecordException(driver, listenForAuthCodeTask.Exception);
+                    throw listenForAuthCodeTask.Exception;
+                }
+
+                throw new InvalidOperationException(
+                    $"Unknown exception: selenium status: {seleniumAutomationTask.Status} TCP listener status: {listenForAuthCodeTask.Status}");
+            }
+        }
+
+        private void RecordException(IWebDriver driver, Exception ex)
+        {
+            Trace.WriteLine("Error occurred while acquiring auth. Possible cause: the browser never finished auth or the Selenium automation failed. A screenshot may be available");
+            Trace.WriteLine($"Exception: {ex.GetType()} with message {ex.ToString()}");
+            if (ex is AggregateException aggEx)
+            {
+                foreach (var e in aggEx.Flatten().InnerExceptions)
+                {
+                    Trace.WriteLine($"Aggregate exception detail: {e.ToString()}");
                 }
             }
+            Trace.WriteLine("Page source:");
+            Trace.WriteLine(driver?.PageSource);
+            driver.SaveScreenshot(_testContext);
         }
 
         private static string GetMessageToShowInBroswerAfterAuth(Uri uri)
