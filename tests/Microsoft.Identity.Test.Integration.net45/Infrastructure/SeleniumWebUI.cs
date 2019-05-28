@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 
@@ -104,11 +106,13 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Uri redirectUri,
             CancellationToken cancellationToken)
         {
+            NullLogger nullLogger = new NullLogger();
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
-            using (var listener = new SingleMessageTcpListener(redirectUri.Port)) // starts listening
             {
+                var listener = new TcpInterceptor(nullLogger);
                 Uri authCodeUri = null;
                 var listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
+                    redirectUri.Port,
                     (uri) =>
                     {
                         Trace.WriteLine("Intercepted an auth code url: " + uri.ToString());

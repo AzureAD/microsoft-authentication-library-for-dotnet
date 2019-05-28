@@ -40,14 +40,6 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             try
             {
                 tcpListener = new TcpListener(IPAddress.Loopback, port);
-                cancellationToken.Register(
-                () =>
-                {
-                    tcpListener.Stop();
-                    throw new OperationCanceledException();
-                });
-
-                tcpListener.Start();
 
                 tcpClient =
                     await AcceptTcpClientAsync(tcpListener, cancellationToken)
@@ -74,15 +66,29 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         /// the cancellation token is registered to stop the listener.
         /// </summary>
         /// <remarks>See https://stackoverflow.com/questions/19220957/tcplistener-how-to-stop-listening-while-awaiting-accepttcpclientasync</remarks>
-        private async Task<TcpClient> AcceptTcpClientAsync(TcpListener tcpListener, CancellationToken token)
+        private static async Task<TcpClient> AcceptTcpClientAsync(TcpListener listener, CancellationToken ct)
         {
-            try
+            ct.ThrowIfCancellationRequested();
+            using (ct.Register(listener.Stop))
             {
-                return await tcpListener.AcceptTcpClientAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex) when (token.IsCancellationRequested)
-            {
-                throw new OperationCanceledException("Cancellation was requested while awaiting TCP client connection.", ex);
+                try
+                {
+                    listener.Start();
+                    return await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                }
+                catch (SocketException e) when (e.SocketErrorCode == SocketError.Interrupted)
+                {
+                    throw new OperationCanceledException(ct);
+                }
+                catch (ObjectDisposedException) when (ct.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException(ct);
+                }
+                // thrown when cancellation is requested before the call to listen
+                catch (InvalidOperationException) when (ct.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException(ct);
+                }
             }
         }
 
@@ -130,7 +136,6 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             NetworkStream stream,
             CancellationToken cancellationToken)
         {
-            // TODO: bogavril - allow users to configure a redirect
             string fullResponse = $"HTTP/1.1 200 OK\r\n\r\n{message}";
             var response = Encoding.ASCII.GetBytes(fullResponse);
             await stream.WriteAsync(response, 0, response.Length, cancellationToken).ConfigureAwait(false);
