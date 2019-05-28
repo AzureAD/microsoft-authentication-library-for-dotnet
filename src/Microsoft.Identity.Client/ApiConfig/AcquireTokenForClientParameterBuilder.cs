@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
-        /// Sending the x5x enables application developers to achieve easy certificate roll-over in Azure AD:
+        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
         /// this method will send the public certificate to Azure AD along with the token request,
         /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
