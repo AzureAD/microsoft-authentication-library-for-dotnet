@@ -30,14 +30,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, cca.AppConfig.LogLevel);
             Assert.AreEqual(MsalTestConstants.ClientId, cca.AppConfig.ClientId);
-            Assert.IsNull(cca.AppConfig.ClientName);
-            Assert.IsNull(cca.AppConfig.ClientVersion);
+            Assert.IsNotNull(cca.AppConfig.ClientName);
+            Assert.IsNotNull(cca.AppConfig.ClientVersion);
             Assert.AreEqual(false, cca.AppConfig.EnablePiiLogging);
             Assert.IsNull(cca.AppConfig.HttpClientFactory);
             Assert.AreEqual(false, cca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(cca.AppConfig.LoggingCallback);
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
-            Assert.IsNull(cca.AppConfig.TelemetryCallback);
             Assert.AreEqual(null, cca.AppConfig.TenantId);
         }
 
@@ -146,15 +145,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                       .Create(MsalTestConstants.ClientId).WithTenantId(TenantId).Build();
 
             Assert.AreEqual(TenantId, cca.AppConfig.TenantId);
-        }
-
-        [TestMethod]
-        public void TestConstructor_WithTelemetry()
-        {
-            var cca = ConfidentialClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithTelemetry((events => { })).Build();
-
-            Assert.IsNotNull(cca.AppConfig.TelemetryCallback);
         }
 
         [TestMethod]

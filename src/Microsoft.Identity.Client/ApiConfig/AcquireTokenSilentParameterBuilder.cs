@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
@@ -86,9 +86,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return CommonParameters.AuthorityOverride == null
-                ? ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority
-                : ApiEvent.ApiIds.AcquireTokenSilentWithAuthority;
+            return ApiEvent.ApiIds.AcquireTokenSilent;
         }
 
         internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenSilent;

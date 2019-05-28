@@ -12,18 +12,31 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IApplicationConfiguration
     {
+        public const string DefaultClientName = "UnknownClient";
+        public const string DefaultClientVersion = "0.0.0.0";
+
         // For telemetry, the ClientName of the application.
-        public string ClientName { get; internal set; }
+        private string _clientName = DefaultClientName;
+        public string ClientName
+        {
+            get => _clientName;
+            internal set { _clientName = string.IsNullOrWhiteSpace(value) ? DefaultClientName : value; }
+        }
 
         // For telemetry, the ClientVersion of the application.
-        public string ClientVersion { get; internal set; }
+        private string _clientVersion = DefaultClientVersion;
+        public string ClientVersion
+        {
+            get => _clientVersion;
+            internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? DefaultClientVersion : value; }
+        }
 
         public bool UseCorporateNetwork { get; internal set; }
         public string IosKeychainSecurityGroup { get; internal set; }
 
         public bool IsBrokerEnabled { get; internal set; }
 
-        public IMatsConfig MatsConfig { get; internal set; }
+        public ITelemetryConfig TelemetryConfig { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
         public AuthorityInfo AuthorityInfo { get; internal set; }

@@ -4,7 +4,7 @@
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using System;

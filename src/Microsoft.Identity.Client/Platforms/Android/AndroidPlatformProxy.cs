@@ -11,7 +11,7 @@ using Android.Content;
 using Android.Content.PM;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;

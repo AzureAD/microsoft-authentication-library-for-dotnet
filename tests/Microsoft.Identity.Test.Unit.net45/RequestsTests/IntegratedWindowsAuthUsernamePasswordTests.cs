@@ -191,6 +191,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 // Act
@@ -232,6 +233,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 // Act
@@ -272,6 +274,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithExtraQueryParameters(MsalTestConstants.ExtraQueryParams)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 var result = await app
@@ -309,6 +312,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 var result = await app.AcquireTokenByUsernamePassword(
@@ -358,6 +362,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 // Call acquire token, Mex parser fails
@@ -395,6 +400,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 // Call acquire token, endpoint not found
@@ -429,6 +435,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 // Call acquire token
@@ -466,6 +473,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 SecureString str = null;
@@ -511,6 +519,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 // Call acquire token
@@ -563,6 +572,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 // Call acquire token
@@ -605,6 +615,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 var result = await app.AcquireTokenByUsernamePassword(
@@ -631,6 +642,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 SecureString str = null;
@@ -679,6 +691,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 // Call acquire token

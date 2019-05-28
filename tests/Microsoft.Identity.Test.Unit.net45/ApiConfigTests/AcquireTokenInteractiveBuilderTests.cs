@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses;
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters();
         }
 
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScopeUser);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(account, expectedLoginHint: MsalTestConstants.DisplayableId);
         }
 
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScopeHint);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(expectedLoginHint: MsalTestConstants.DisplayableId);
         }
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScopeUser);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(account, expectedLoginHint: "SomeOtherLoginHint");
         }
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(
-                ApiEvent.ApiIds.AcquireTokenWithScopeHint,
+                ApiEvent.ApiIds.AcquireTokenInteractive,
                 expectedExtraQueryParameters: new Dictionary<string, string> { { "domain_hint", "mydomain.com" } });
             _harness.ValidateInteractiveParameters(
                 expectedLoginHint: MsalTestConstants.DisplayableId);
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .WithCustomWebUi(customWebUi)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(expectedCustomWebUi: customWebUi);
         }
 
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .WithUseEmbeddedWebView(true)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: true);
         }
 #endif
