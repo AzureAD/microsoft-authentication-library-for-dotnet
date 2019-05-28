@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client
         PreProduction,
 
         /// <summary>
-        /// Indicates a Productdion environment.  These environments are sampled based on the platforms' device info to reduce data load.
+        /// Indicates a Production environment.  These environments are sampled based on the platforms' device info to reduce data load.
         /// </summary>
         Production
     }
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client
     public interface ITelemetryConfig
     {
         /// <summary>
-        /// Communicates whether which audience the telemetry is for (e.g. Production or Pre-Production) so we can change sampling
+        /// Communicates which audience the telemetry is for (e.g. Production or Pre-Production) so we can change sampling
         /// and filtering behavior.
         /// </summary>
         TelemetryAudienceType AudienceType { get; }

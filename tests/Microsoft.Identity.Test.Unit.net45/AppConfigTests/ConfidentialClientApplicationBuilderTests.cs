@@ -147,15 +147,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(TenantId, cca.AppConfig.TenantId);
         }
 
-        //[TestMethod]
-        //public void TestConstructor_WithTelemetry()
-        //{
-        //    var cca = ConfidentialClientApplicationBuilder
-        //              .Create(MsalTestConstants.ClientId).WithTelemetry((events => { })).Build();
-
-        //    Assert.IsNotNull(cca.AppConfig.TelemetryCallback);
-        //}
-
         [TestMethod]
         public void TestConstructor_WithClientSecret()
         {
