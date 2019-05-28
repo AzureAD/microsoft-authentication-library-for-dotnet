@@ -7,7 +7,7 @@ using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using System;
@@ -27,13 +27,45 @@ namespace Microsoft.Identity.Client
                 .CreateAuthority(ServiceBundle, requestParams.TenantUpdatedCanonicalAuthority)
                 .GetTenantId();
 
+            bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
+
             IdToken idToken = IdToken.Parse(response.IdToken);
+
+            string subject = idToken?.Subject;
+
+            if (idToken != null && string.IsNullOrEmpty(subject))
+            {
+                requestParams.RequestContext.Logger.Warning("Subject not present in Id token");
+            }
+
+            string preferredUsername;
 
             // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
             // It will be set to "preferred_username not in idtoken"
-            var preferredUsername = !string.IsNullOrWhiteSpace(idToken?.PreferredUsername)
-                ? idToken.PreferredUsername
-                : NullPreferredUsernameDisplayLabel;
+            if (idToken == null)
+            {
+                preferredUsername = NullPreferredUsernameDisplayLabel;
+            }
+            else if(string.IsNullOrWhiteSpace(idToken.PreferredUsername))
+            {
+                if (isAdfsAuthority)
+                {
+                    //The direct to adfs scenario does not return preferred_username in the id token so it needs to be set to the upn
+                    preferredUsername = !string.IsNullOrEmpty(idToken.Upn)
+                        ? idToken.Upn
+                        : NullPreferredUsernameDisplayLabel;
+                }
+                else
+                {
+                    preferredUsername = NullPreferredUsernameDisplayLabel;
+                }
+            }
+            else
+            {
+                preferredUsername = idToken.PreferredUsername;
+            }
+
+
 
             var instanceDiscoveryMetadataEntry = GetCachedAuthorityMetaData(requestParams.TenantUpdatedCanonicalAuthority);
 
@@ -46,9 +78,10 @@ namespace Microsoft.Identity.Client
                 instanceDiscoveryMetadataEntry);
 
             var msalAccessTokenCacheItem =
-                new MsalAccessTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId)
+                new MsalAccessTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId, subject)
                 {
-                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash
+                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
+                    IsAdfs = isAdfsAuthority
                 };
 
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
@@ -59,7 +92,11 @@ namespace Microsoft.Identity.Client
                     preferredEnvironmentHost,
                     requestParams.ClientId,
                     response,
-                    tenantId);
+                    tenantId,
+                    subject)
+                {
+                    IsAdfs = isAdfsAuthority
+                };
             }
 
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
@@ -67,15 +104,16 @@ namespace Microsoft.Identity.Client
             {
                 try
                 {
-                    var args = new TokenCacheNotificationArgs
+                    Account account = null;
+                    string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
+                    if (msalAccessTokenCacheItem.HomeAccountId != null)
                     {
-                        TokenCache = new NoLockTokenCacheProxy(this),
-                        ClientId = ClientId,
-                        Account = msalAccessTokenCacheItem.HomeAccountId != null
-                            ? new Account(msalAccessTokenCacheItem.HomeAccountId, preferredUsername, preferredEnvironmentHost)
-                            : null,
-                        HasStateChanged = true
-                    };
+                        account = new Account(
+                                          msalAccessTokenCacheItem.HomeAccountId,
+                                          username,
+                                          preferredEnvironmentHost);
+                    }
+                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
 
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = true;
@@ -104,6 +142,12 @@ namespace Microsoft.Identity.Client
                                 preferredUsername,
                                 tenantId);
 
+                            //The ADFS direct scenrio does not return client info so the home account id is acquired from the subject
+                            if (isAdfsAuthority && String.IsNullOrEmpty(msalAccountCacheItem.HomeAccountId))
+                            {
+                                msalAccountCacheItem.HomeAccountId = idToken.Subject;
+                            }
+
                             _accessor.SaveAccount(msalAccountCacheItem);
                         }
 
@@ -113,7 +157,8 @@ namespace Microsoft.Identity.Client
                             msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                                 preferredEnvironmentHost,
                                 requestParams.ClientId,
-                                response);
+                                response,
+                                subject);
 
                             if (!_featureFlags.IsFociEnabled)
                             {
@@ -177,7 +222,11 @@ namespace Microsoft.Identity.Client
                     requestParams.AuthorityInfo.CanonicalAuthority,
                     instanceDiscoveryMetadataEntry));
 
-                if (requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
+                if (requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
+                {
+                    preferredEnvironmentAlias = requestParams.AuthorityInfo.CanonicalAuthority;
+                }
+                else if (requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
                 {
                     preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
                 }
@@ -195,12 +244,7 @@ namespace Microsoft.Identity.Client
             {
                 requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
                 MsalAccessTokenCacheItem msalAccessTokenCacheItem;
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = new NoLockTokenCacheProxy(this),
-                    ClientId = ClientId,
-                    Account = requestParams.Account
-                };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, requestParams.Account, false);
 
                 List<MsalAccessTokenCacheItem> tokenCacheItems;
 
@@ -244,7 +288,7 @@ namespace Microsoft.Identity.Client
                 {
                     filteredItems = filteredItems.Where(
                         item => environmentAliases.Contains(item.Environment) &&
-                        item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase));
+                        (item.IsAdfs || item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase)));
                 }
 
                 // no match
@@ -338,12 +382,7 @@ namespace Microsoft.Identity.Client
                 {
                     requestParams.RequestContext.Logger.Info("Looking up refresh token in the cache..");
 
-                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                    {
-                        TokenCache = new NoLockTokenCacheProxy(this),
-                        ClientId = ClientId,
-                        Account = requestParams.Account
-                    };
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, requestParams.Account, false);
 
                     // make sure to check preferredEnvironmentHost first
                     var allEnvAliases = new List<string>() { preferredEnvironmentHost };
@@ -421,13 +460,7 @@ namespace Microsoft.Identity.Client
                 requestParams.AuthorityInfo.CanonicalAuthority,
                 instanceDiscoveryMetadataEntry);
 
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-            {
-                TokenCache = new NoLockTokenCacheProxy(this),
-                ClientId = ClientId,
-                Account = requestParams?.Account,
-                HasStateChanged = false
-            };
+            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, requestParams?.Account, false);
 
             //TODO: bogavril - is the env ok here? Can I cache it or pass it in?
             MsalAppMetadataCacheItem appMetadata;
@@ -462,12 +495,7 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = new NoLockTokenCacheProxy(this),
-                    ClientId = ClientId,
-                    Account = null
-                };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, false);
 
                 await OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try
@@ -503,12 +531,7 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                var args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = new NoLockTokenCacheProxy(this),
-                    ClientId = ClientId,
-                    Account = null
-                };
+                var args = new TokenCacheNotificationArgs(this, ClientId, null, false);
 
                 await OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try
@@ -634,13 +657,7 @@ namespace Microsoft.Identity.Client
 
                 try
                 {
-                    var args = new TokenCacheNotificationArgs
-                    {
-                        TokenCache = new NoLockTokenCacheProxy(this),
-                        ClientId = ClientId,
-                        Account = account,
-                        HasStateChanged = true
-                    };
+                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
 
                     await OnBeforeAccessAsync(args).ConfigureAwait(false);
                     try
@@ -727,13 +744,7 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = new NoLockTokenCacheProxy(this),
-                    ClientId = ClientId,
-                    Account = null,
-                    HasStateChanged = true
-                };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true);
 
                 await OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try

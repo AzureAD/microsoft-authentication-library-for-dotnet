@@ -4,16 +4,16 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Mats;
-using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
     internal abstract class AbstractMatsExecutor
     {
-        private readonly IMatsTelemetryClient _mats;
+        private readonly ITelemetryClient _mats;
 
-        protected AbstractMatsExecutor(IMatsTelemetryClient mats)
+        protected AbstractMatsExecutor(ITelemetryClient mats)
         {
             _mats = mats;
         }

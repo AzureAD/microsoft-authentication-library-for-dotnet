@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -32,13 +32,6 @@ namespace Microsoft.Identity.Client.Instance
             string userPrincipalName,
             RequestContext requestContext)
         {
-            if (authorityInfo.AuthorityType == AuthorityType.Adfs && string.IsNullOrEmpty(userPrincipalName))
-            {
-                throw new MsalClientException(
-                    MsalError.UpnRequired,
-                    MsalErrorMessage.UpnRequiredForAuthroityValidation);
-            }
-
             if (TryGetCacheValue(authorityInfo, userPrincipalName, out var endpoints))
             {
                 requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - TRUE");
@@ -135,7 +128,10 @@ namespace Microsoft.Identity.Client.Instance
                     }
                 }
 
-                updatedCacheEntry.ValidForDomainsList.Add(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName));
+                if(!string.IsNullOrEmpty(userPrincipalName))
+                {
+                    updatedCacheEntry.ValidForDomainsList.Add(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName));
+                }    
             }
 
             s_endpointCacheEntries.TryAdd(authorityInfo.CanonicalAuthority, updatedCacheEntry);

@@ -22,19 +22,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     [DeploymentItem("Resources\\OpenidConfiguration.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields.json")]
-    public class AadAuthorityTests
+    public class AadAuthorityTests : TestBase
     {
-        [TestInitialize]
-        public void Init()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void SuccessfulValidationTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for instance validation
                 harness.HttpManager.AddMockHandler(
@@ -72,7 +66,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
@@ -89,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void ValidationOffSuccessTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(
@@ -109,7 +104,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
@@ -125,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void FailedValidationTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for instance validation
                 harness.HttpManager.AddMockHandler(
@@ -160,7 +156,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         null,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        .ConfigureAwait(false).GetAwaiter().GetResult();
 
                     Assert.Fail("validation should have failed here");
                 }
@@ -176,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void FailedValidationMissingFieldsTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for instance validation
                 harness.HttpManager.AddMockHandler(
@@ -201,7 +198,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         null,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        .ConfigureAwait(false).GetAwaiter().GetResult();
 
                     Assert.Fail("validation should have failed here");
                 }
@@ -216,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void FailedTenantDiscoveryMissingEndpointsTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(
@@ -238,7 +236,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         null,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        .ConfigureAwait(false).GetAwaiter().GetResult();
 
                     Assert.Fail("validation should have failed here");
                 }

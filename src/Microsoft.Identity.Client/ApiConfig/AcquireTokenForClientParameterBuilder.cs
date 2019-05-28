@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
-        /// Sending the x5x enables application developers to achieve easy certificate roll-over in Azure AD:
+        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
         /// this method will send the public certificate to Azure AD along with the token request,
         /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return Parameters.ForceRefresh ? ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh : ApiEvent.ApiIds.AcquireTokenForClientWithScope;
+            return ApiEvent.ApiIds.AcquireTokenForClient;
         }
     }
 #endif

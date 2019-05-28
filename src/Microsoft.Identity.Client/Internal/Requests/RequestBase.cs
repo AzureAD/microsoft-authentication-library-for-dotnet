@@ -5,7 +5,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using System;
@@ -15,7 +15,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -35,8 +35,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             IAcquireTokenParameters acquireTokenParameters)
         {
-            ServiceBundle = serviceBundle;
-            AuthenticationRequestParameters = authenticationRequestParameters;
+            ServiceBundle = serviceBundle ??
+                throw new ArgumentNullException(nameof(serviceBundle));
+
+            AuthenticationRequestParameters = authenticationRequestParameters ??
+                throw new ArgumentNullException(nameof(authenticationRequestParameters));
+
+            if (acquireTokenParameters == null)
+            {
+                throw new ArgumentNullException(nameof(acquireTokenParameters));
+            }
+
             if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
             {
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.Scope));
@@ -187,7 +196,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ClientInfo fromServer = null;
 
-            if (!AuthenticationRequestParameters.IsClientCredentialRequest && !AuthenticationRequestParameters.IsRefreshTokenRequest)
+            if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
+                !AuthenticationRequestParameters.IsRefreshTokenRequest &&
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs)
             {
                 //client_info is not returned from client credential flows because there is no user present.
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);

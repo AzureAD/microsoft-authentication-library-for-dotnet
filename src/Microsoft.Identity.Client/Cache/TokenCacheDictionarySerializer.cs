@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Cache
     /// <remarks>
     /// The dictionary serializer does not handle Unknown Nodes
     /// </remarks>
-    internal class TokenCacheDictionarySerializer : ITokenCacheSerializer
+    internal class TokenCacheDictionarySerializer : ITokenCacheSerializable
     {
         private const string AccessTokenKey = "access_tokens";
         private const string RefreshTokenKey = "refresh_tokens";

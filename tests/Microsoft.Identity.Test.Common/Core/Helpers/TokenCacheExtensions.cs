@@ -45,9 +45,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public static void DeleteAccessToken(
             this ITokenCacheInternal tokenCache,
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem,
-            RequestContext requestContext)
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             tokenCache.Semaphore.Wait();
             try
@@ -62,8 +60,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public static async Task<MsalAccountCacheItem> GetAccountAsync(
             this ITokenCacheInternal tokenCache,
-            MsalRefreshTokenCacheItem refreshTokenCacheItem,
-            RequestContext requestContext)
+            MsalRefreshTokenCacheItem refreshTokenCacheItem)
         {
             IEnumerable<MsalAccountCacheItem> accounts = await tokenCache.GetAllAccountsAsync().ConfigureAwait(false);
 

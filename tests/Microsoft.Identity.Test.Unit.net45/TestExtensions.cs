@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit
 
 
             byte[] tokenCacheBlob = new UTF8Encoding().GetBytes(tokenCacheAsString);
-            pca.UserTokenCache.DeserializeMsalV3(tokenCacheBlob);
+            ((ITokenCacheSerializer)pca.UserTokenCache).DeserializeMsalV3(tokenCacheBlob);
         }
 
     }

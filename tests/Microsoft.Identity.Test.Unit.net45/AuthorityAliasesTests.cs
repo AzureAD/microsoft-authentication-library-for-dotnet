@@ -16,6 +16,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -28,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit
             TestCommon.ResetInternalStaticCaches();
         }
 
-#if !NET_CORE
         [TestMethod]
         [Description("Test authority migration")]
         public async Task AuthorityMigrationTestAsync()
@@ -52,6 +52,8 @@ namespace Microsoft.Identity.Test.Unit
                           .WithAuthority(authorityUri, true)
                           .WithHttpManager(httpManager)
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
+                          .WithTelemetry(new TraceTelemetryConfig())
+                          .WithDebugLoggingCallback()
                           .BuildConcrete();
 
                 // mock for openId config request
@@ -66,8 +68,7 @@ namespace Microsoft.Identity.Test.Unit
                 // mock webUi authorization
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success,
-                    app.AppConfig.RedirectUri + "?code=some-code"), null, MsalTestConstants.ProductionPrefNetworkEnvironment);
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"), null, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
                 // mock token request
                 httpManager.AddMockHandler(new MockHttpMessageHandler
@@ -148,11 +149,10 @@ namespace Microsoft.Identity.Test.Unit
                 }
             }
         }
-#endif
 
         private async Task ValidateCacheEntitiesEnvironmentAsync(ITokenCacheInternal cache, string expectedEnvironment)
         {
-            var requestContext = RequestContext.CreateForTest();
+            var logger = Substitute.For<ICoreLogger>();
             var accessTokens = await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
             foreach (var at in accessTokens)
             {
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit
             }
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
-                AdalCacheOperations.Deserialize(requestContext.Logger, cache.LegacyPersistence.LoadCache());
+                AdalCacheOperations.Deserialize(logger, cache.LegacyPersistence.LoadCache());
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {

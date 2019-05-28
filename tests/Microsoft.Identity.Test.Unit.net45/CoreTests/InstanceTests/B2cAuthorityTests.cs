@@ -16,19 +16,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-B2CLogin.json")]
-    public class B2CAuthorityTests
+    public class B2CAuthorityTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-        }
-
         [TestMethod]
         [TestCategory("B2CAuthorityTests")]
         public void NotEnoughPathSegmentsTest()
@@ -44,7 +33,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest(serviceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(serviceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
                 Assert.Fail("test should have failed");
             }
             catch (Exception exc)
@@ -87,7 +77,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest(serviceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(serviceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/authorize",
@@ -104,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1038
         public void B2CMicrosoftOnlineCreateAuthority()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(
@@ -126,7 +117,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/authorize",

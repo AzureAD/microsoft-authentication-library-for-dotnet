@@ -1,7 +1,6 @@
-﻿using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.UI;
-using OpenQA.Selenium;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -10,13 +9,16 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenQA.Selenium;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     internal class SeleniumWebUI : ICustomWebUi
     {
         private readonly Action<IWebDriver> _seleniumAutomationLogic;
-
+        private readonly TestContext _testContext;
         private const string CloseWindowSuccessHtml = @"<html>
   <head><title>Authentication Complete</title></head>
   <body>
@@ -33,15 +35,15 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
   </body>
 </html>";
 
-        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic)
+        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext)
         {
             _seleniumAutomationLogic = seleniumAutomationLogic;
+            _testContext = testContext;
         }
-
 
         public async Task<Uri> AcquireAuthorizationCodeAsync(
             Uri authorizationUri,
-            Uri redirectUri, 
+            Uri redirectUri,
             CancellationToken cancellationToken)
         {
             if (redirectUri.IsDefaultPort)
@@ -99,7 +101,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         private async Task<Uri> SeleniumAcquireAuthAsync(
             Uri authorizationUri,
-            Uri redirectUri, 
+            Uri redirectUri,
             CancellationToken cancellationToken)
         {
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
@@ -116,26 +118,61 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     },
                     cancellationToken);
 
-                try
+                // Run the TCP listener and the selenium automation in parallel
+                var seleniumAutomationTask = Task.Factory.StartNew(() => _seleniumAutomationLogic(driver));
+
+                await Task.WhenAny(seleniumAutomationTask, listenForAuthCodeTask)
+                    .ConfigureAwait(false);
+
+                if (listenForAuthCodeTask.Status == TaskStatus.RanToCompletion)
                 {
-
-                    // Run the tcp listener and the selenium automation in parallel
-                    var seleniumAutomationTask = Task.Run(() =>
-                    {
-                        _seleniumAutomationLogic(driver);
-                    });
-
-                    await Task.WhenAll(seleniumAutomationTask, listenForAuthCodeTask).ConfigureAwait(false);
                     return authCodeUri;
-
                 }
-                catch (SocketException ex)
+
+                if (seleniumAutomationTask.IsFaulted)
                 {
-                    throw new MsalClientException(
-                        "selenium_ui_socket_error",
-                        "A socket exception occured " + ex.Message + " socket error code " + ex.SocketErrorCode);
+                    Trace.WriteLine("The selenium automation failed: " + seleniumAutomationTask.Exception.Message);
+                    RecordException(driver, seleniumAutomationTask.Exception);
+                    throw seleniumAutomationTask.Exception;
+                }
+
+                if (listenForAuthCodeTask.IsCanceled)
+                {
+                    Trace.WriteLine("The TCP listener has timed out (or was canceled).");
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        Assert.Fail("The TCP listener is in a canceled state, but cancellation has not been requested!");
+                    }
+
+                    throw new OperationCanceledException(cancellationToken);
+                }
+
+                if (listenForAuthCodeTask.IsFaulted )
+                {
+                    Trace.WriteLine("The TCP listener failed.");
+                    RecordException(driver, listenForAuthCodeTask.Exception);
+                    throw listenForAuthCodeTask.Exception;
+                }
+
+                throw new InvalidOperationException(
+                    $"Unknown exception: selenium status: {seleniumAutomationTask.Status} TCP listener status: {listenForAuthCodeTask.Status}");
+            }
+        }
+
+        private void RecordException(IWebDriver driver, Exception ex)
+        {
+            Trace.WriteLine("Error occurred while acquiring auth. Possible cause: the browser never finished auth or the Selenium automation failed. A screenshot may be available");
+            Trace.WriteLine($"Exception: {ex.GetType()} with message {ex.ToString()}");
+            if (ex is AggregateException aggEx)
+            {
+                foreach (var e in aggEx.Flatten().InnerExceptions)
+                {
+                    Trace.WriteLine($"Aggregate exception detail: {e.ToString()}");
                 }
             }
+            Trace.WriteLine("Page source:");
+            Trace.WriteLine(driver?.PageSource);
+            driver.SaveScreenshot(_testContext);
         }
 
         private static string GetMessageToShowInBroswerAfterAuth(Uri uri)

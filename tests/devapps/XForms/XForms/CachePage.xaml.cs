@@ -96,10 +96,7 @@ namespace XForms
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
 
             var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
-            // todo pass idToken instead of null
-            var requestContext = RequestContext.CreateForTest();
-
-            tokenCache.DeleteAccessToken(accessTokenCacheItem, null, requestContext);
+            tokenCache.DeleteAccessToken(accessTokenCacheItem);
 
             RefreshCacheViewAsync().ConfigureAwait(true);
         }

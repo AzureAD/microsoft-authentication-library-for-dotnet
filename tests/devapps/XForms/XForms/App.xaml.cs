@@ -73,7 +73,6 @@ namespace XForms
             if (UseBroker)
             {
                 //builder.WithBroker(true);
-                builder = builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
                 builder = builder.WithRedirectUri(BrokerRedirectUriOnIos);
             }
 
@@ -84,7 +83,6 @@ namespace XForms
                 {
                 case "iOS":
                     builder = builder.WithRedirectUri(RedirectUriOnIos);
-                    builder = builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
                     break;
                 case "Android":
                     builder = builder.WithRedirectUri(RedirectUriOnAndroid);

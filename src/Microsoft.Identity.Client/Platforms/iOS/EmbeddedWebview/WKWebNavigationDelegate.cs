@@ -46,11 +46,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 return;
             }
 
-            if (requestUrlString.StartsWith(AuthenticationAgentUIViewController.callback, StringComparison.OrdinalIgnoreCase) ||
+            if (requestUrlString.StartsWith(AuthenticationAgentUIViewController.Callback, StringComparison.OrdinalIgnoreCase) ||
                    requestUrlString.StartsWith(iOSBrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 AuthenticationAgentUIViewController.DismissViewController(true, () =>
-                    AuthenticationAgentUIViewController.callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, requestUrlString)));
+                    AuthenticationAgentUIViewController.CallbackMethod(AuthorizationResult.FromUri(requestUrlString)));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }
@@ -78,12 +78,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             if (!navigationAction.Request.Url.AbsoluteString.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase)
                 && !navigationAction.Request.Url.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
             {
-                AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
-                {
-                    Error = MsalError.NonHttpsRedirectNotSupported,
-                    ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported
-                };
-                AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.callbackMethod(result));
+                AuthorizationResult result = AuthorizationResult.FromStatus(
+                    AuthorizationStatus.ErrorHttp,
+                    MsalError.NonHttpsRedirectNotSupported,
+                    MsalErrorMessage.NonHttpsRedirectNotSupported);
+
+                AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.CallbackMethod(result));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }

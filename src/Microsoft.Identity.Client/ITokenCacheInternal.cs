@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
-    internal interface ITokenCacheInternal : ITokenCache
+    internal interface ITokenCacheInternal : ITokenCache, ITokenCacheSerializer
     {
         SemaphoreSlim Semaphore { get; }
 

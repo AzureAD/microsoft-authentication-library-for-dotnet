@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var data = File.ReadAllBytes(Path.Combine(@"C:\Users\mzuber\Downloads", "unencryptedAdalCache.txt"));
             
-            publicClient.UserTokenCache.DeserializeAdalV3(data);
+            ((ITokenCacheSerializer)publicClient.UserTokenCache).DeserializeAdalV3(data);
 
             var accounts = await publicClient.GetAccountsAsync().ConfigureAwait(false);
             foreach (var account in accounts)
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 .WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
-            publicClient2.UserTokenCache.DeserializeMsalV3(msalCache);
+            ((ITokenCacheSerializer)publicClient2.UserTokenCache).DeserializeMsalV3(msalCache);
 
             var accounts2 = await publicClient2.GetAccountsAsync().ConfigureAwait(false);
             foreach (var account in accounts2)

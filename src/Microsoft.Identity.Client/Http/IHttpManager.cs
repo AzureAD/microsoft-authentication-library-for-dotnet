@@ -15,23 +15,23 @@ namespace Microsoft.Identity.Client.Http
             Uri endpoint,
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
-            RequestContext requestContext);
+            ICoreLogger logger);
 
         Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
-            RequestContext requestContext);
+            ICoreLogger logger);
 
         Task<HttpResponse> SendGetAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
-            RequestContext requestContext);
+            ICoreLogger logger);
 
         Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
             Dictionary<string, string> headers,
             StringContent body,
-            RequestContext requestContext);
+            ICoreLogger logger);
     }
 }

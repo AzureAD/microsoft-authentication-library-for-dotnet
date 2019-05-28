@@ -22,9 +22,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private const bool _defaultSyncSetting = false;
         private const SecAccessible _defaultAccessiblityPolicy = SecAccessible.AfterFirstUnlockThisDeviceOnly;
 
-        private const string DefaultKeychainGroup = "com.microsoft.adalcache";
         // Identifier for the keychain item used to retrieve current team ID
         private const string TeamIdKey = "DotNetTeamIDHint";
+        private const string DefaultKeychainAccessGroup = "com.microsoft.adalcache";
 
         private string _keychainGroup;
         private readonly RequestContext _requestContext;
@@ -36,9 +36,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
         {
-            if (keychainSecurityGroup == null)
+            if (String.IsNullOrEmpty(keychainSecurityGroup))
             {
-                _keychainGroup = GetBundleId();
+                _keychainGroup = GetTeamId() + '.' + DefaultKeychainAccessGroup;
             }
             else
             {
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public iOSTokenCacheAccessor()
         {
-            _keychainGroup = GetTeamId() + '.' + DefaultKeychainGroup;
+            SetiOSKeychainSecurityGroup(null);
         }
 
         public iOSTokenCacheAccessor(RequestContext requestContext) : this()

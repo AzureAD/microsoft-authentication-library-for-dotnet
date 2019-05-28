@@ -78,6 +78,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             //Disabled for now until there are tests that use it.
             queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);
             queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
+            bool queryRequiresBetaEndpoint = false;
 
             //Building user query
             if (!string.IsNullOrWhiteSpace(query.Upn))
@@ -88,6 +89,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             if (query.FederationProvider != null)
             {
+                if (query.FederationProvider == FederationProvider.ADFSv2019)
+                {
+                    queryRequiresBetaEndpoint = true;
+                }
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
             }
 
@@ -128,13 +133,25 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
             }
 
-            return SendLabRequestAsync(LabApiConstants.LabEndpoint, queryDict);
+            if (query.B2CIdentityProvider == B2CIdentityProvider.MSA)
+            {
+                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CMSA);
+            }
+
+            if (!string.IsNullOrEmpty(query.UserSearch))
+            {
+                queryDict.Add(LabApiConstants.UserContains, query.UserSearch);
+            }
+
+            return SendLabRequestAsync(queryRequiresBetaEndpoint ? LabApiConstants.BetaEndpoint : LabApiConstants.LabEndpoint, queryDict);
         }
 
         private async Task<string> SendLabRequestAsync(string requestUrl, IDictionary<string, string> queryDict)
         {
-            UriBuilder uriBuilder = new UriBuilder(requestUrl);
-            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
+            UriBuilder uriBuilder = new UriBuilder(requestUrl)
+            {
+                Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()))
+            };
             return await _httpClient.GetStringAsync(uriBuilder.ToString()).ConfigureAwait(false);
         }
 
@@ -145,10 +162,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public async Task<LabResponse> CreateTempLabUserAsync()
         {
-            IDictionary<string, string> queryDict = new Dictionary<string, string>();
-
-            queryDict.Add("code", "HC1Tud9RHGK12VoBPH3sbeyyPHfjmACKbyq8bFlhIiEwpMbWYR4zTQ==");
-            queryDict.Add("userType", "Basic");
+            IDictionary<string, string> queryDict = new Dictionary<string, string>
+            {
+                { "code", "HC1Tud9RHGK12VoBPH3sbeyyPHfjmACKbyq8bFlhIiEwpMbWYR4zTQ==" },
+                { "userType", "Basic" }
+            };
 
             string result = await SendLabRequestAsync(LabApiConstants.CreateLabUser, queryDict).ConfigureAwait(false);
             return CreateLabResponseFromResultString(result);

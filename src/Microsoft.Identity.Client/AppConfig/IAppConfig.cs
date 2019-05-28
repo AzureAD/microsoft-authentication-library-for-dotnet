@@ -61,12 +61,6 @@ namespace Microsoft.Identity.Client
         LogCallback LoggingCallback { get; }
 
         /// <summary>
-        /// Callback used for sending telemetry about MSAL.NET out of your app. It was set by a call
-        /// to <see cref="AbstractApplicationBuilder{T}.WithTelemetry(TelemetryCallback)"/>
-        /// </summary>
-        TelemetryCallback TelemetryCallback { get; }
-
-        /// <summary>
         /// Extra query parameters that will be applied to every acquire token operation.
         /// See <see cref="AbstractApplicationBuilder{T}.WithExtraQueryParameters(IDictionary{string, string})"/>
         /// </summary>
@@ -86,9 +80,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         string ClientVersion { get; }
 
-        ///// <summary>
-        ///// </summary>
-        //IMatsConfig MatsConfig { get; }
+        /// <summary>
+        /// </summary>
+        ITelemetryConfig TelemetryConfig { get; }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>

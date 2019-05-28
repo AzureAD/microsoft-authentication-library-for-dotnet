@@ -32,6 +32,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ":\"" + CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
 
+        public static readonly string DefaultAdfsTokenResponse =
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+            "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
+            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\"" +
+            ":\"" + CreateAdfsIdToken(MsalTestConstants.OnPremiseDisplayableId) +
+            "\",\"id_token_expires_in\":\"3600\"}";
         public static readonly string FociTokenResponse =
            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
            "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
@@ -114,6 +120,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             return CreateSuccessResponseMessage(
                 foci ? FociTokenResponse : DefaultTokenResponse);
+        }
+
+        public static HttpResponseMessage CreateAdfsSuccessTokenResponseMessage()
+        {
+            return CreateSuccessResponseMessage(DefaultAdfsTokenResponse);
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage(string subError = null)
@@ -225,11 +236,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
 
+        public static string CreateAdfsIdToken(string upn)
+        {
+            string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
+                        "\"iss\": \"" + MsalTestConstants.OnPremiseAuthority + "\"," +
+                        "\"iat\": 1455833828," +
+                        "\"nbf\": 1455833828," +
+                        "\"exp\": 1455837728," +
+                        "\"ipaddr\": \"131.107.159.117\"," +
+                        "\"name\": \"Marrrrrio Bossy\"," +
+                        "\"upn\": \"" + upn + "\"," +
+                        "\"sub\": \"" + MsalTestConstants.OnPremiseUniqueId + "\"}";
+
+            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
+        }
+
         public static HttpResponseMessage CreateSuccessWebFingerResponseMessage(string href)
         {
             return
                 CreateSuccessResponseMessage(
-                    "{\"subject\": \"https://fabrikam.com\",\"links\": [{\"rel\": " +
+                    "{\"subject\": \"https://fs.contoso.com\",\"links\": [{\"rel\": " +
                     "\"http://schemas.microsoft.com/rel/trusted-realm\"," +
                     "\"href\": \"" + href + "\"}]}");
         }
@@ -293,6 +319,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,
                 "{{\"authorization_endpoint\":\"{0}oauth2/v2.0/authorize{2}\",\"token_endpoint\":\"{0}oauth2/v2.0/token{2}\",\"issuer\":\"https://sts.windows.net/{1}\"}}",
                 authority, tenant, qp));
+        }
+
+        public static HttpResponseMessage CreateAdfsOpenIdConfigurationResponse(string authority, string qp = "")
+        {
+            var authorityUri = new Uri(authority);
+            string path = authorityUri.AbsolutePath.Substring(1);
+
+            if (!string.IsNullOrEmpty(qp))
+            {
+                qp = "?" + qp;
+            }
+
+            return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,
+                "{{\"authorization_endpoint\":\"{0}oauth2/authorize\",\"token_endpoint\":\"{0}oauth2/token\",\"issuer\":\"{0}\"}}",
+                authority, qp));
         }
 
         public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string url)

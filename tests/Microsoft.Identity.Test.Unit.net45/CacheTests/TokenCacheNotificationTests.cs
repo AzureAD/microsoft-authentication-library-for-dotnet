@@ -14,12 +14,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class TokenCacheNotificationTests
+    public class TokenCacheNotificationTests : TestBase
     {
         [TestMethod]
         public async Task TestSubscribeNonAsync()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithTelemetry(new TraceTelemetryConfig()).Build();
 
             bool beforeAccessCalled = false;
             bool afterAccessCalled = false;
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public async Task TestSubscribeAsync()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithTelemetry(new TraceTelemetryConfig()).Build();
 
             bool beforeAccessCalled = false;
             bool afterAccessCalled = false;
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public async Task TestSubscribeBothAsync()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithTelemetry(new TraceTelemetryConfig()).Build();
 
             bool beforeAccessCalled = false;
             bool afterAccessCalled = false;
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var sb = new StringBuilder();
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -109,6 +109,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(harness.HttpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
                 pca.UserTokenCache.SetBeforeAccessAsync(async args =>
@@ -136,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     pca.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, pca.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);

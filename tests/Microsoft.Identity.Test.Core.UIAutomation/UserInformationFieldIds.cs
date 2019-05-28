@@ -17,28 +17,26 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             _user = user;
         }
 
-        public string PasswordInputId
+        public string GetPasswordInputId(bool isB2CTest = false)
         {
-            get
+
+            if (String.IsNullOrWhiteSpace(_passwordInputId))
             {
-                if (String.IsNullOrWhiteSpace(_passwordInputId))
-                {
-                    DetermineFieldIds();
-                }
-                return _passwordInputId;
+                DetermineFieldIds(isB2CTest);
             }
+            return _passwordInputId;
+
         }
 
-        public string PasswordSignInButtonId
+        public string GetPasswordSignInButtonId(bool isB2CTest = false)
         {
-            get
+
+            if (String.IsNullOrWhiteSpace(_passwordSignInButtonId))
             {
-                if (String.IsNullOrWhiteSpace(_passwordSignInButtonId))
-                {
-                    DetermineFieldIds();
-                }
-                return _passwordSignInButtonId;
+                DetermineFieldIds(isB2CTest);
             }
+            return _passwordSignInButtonId;
+
         }
 
         /// <summary>
@@ -65,7 +63,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             }
         }
 
-        private void DetermineFieldIds()
+        private void DetermineFieldIds(bool isB2CTest)
         {
             if (_user.IsFederated)
             {
@@ -82,7 +80,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                 return;
             }
 
-            if (_user.UserType == UserType.B2C)
+            if (_user.UserType == UserType.B2C && isB2CTest)
             {
                 DetermineB2CFieldIds();
                 return;
@@ -96,18 +94,18 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             switch (_user.B2CIdentityProvider)
             {
-                case B2CIdentityProvider.Local:
-                    _passwordInputId = CoreUiTestConstants.B2CWebPasswordId;
-                    _passwordSignInButtonId = CoreUiTestConstants.B2CWebSubmitId;
-                    break;
-                case B2CIdentityProvider.Facebook:
-                    _passwordInputId = CoreUiTestConstants.B2CWebPasswordFacebookId;
-                    _passwordSignInButtonId = CoreUiTestConstants.B2CFacebookSubmitId;
-                    break;
-                case B2CIdentityProvider.Google:
-                    _passwordInputId = CoreUiTestConstants.B2CWebPasswordGoogleId;
-                    _passwordSignInButtonId = CoreUiTestConstants.B2CGoogleSignInId;
-                    break;
+            case B2CIdentityProvider.Local:
+                _passwordInputId = CoreUiTestConstants.B2CWebPasswordId;
+                _passwordSignInButtonId = CoreUiTestConstants.B2CWebSubmitId;
+                break;
+            case B2CIdentityProvider.Facebook:
+                _passwordInputId = CoreUiTestConstants.B2CWebPasswordFacebookId;
+                _passwordSignInButtonId = CoreUiTestConstants.B2CFacebookSubmitId;
+                break;
+            case B2CIdentityProvider.Google:
+                _passwordInputId = CoreUiTestConstants.B2CWebPasswordGoogleId;
+                _passwordSignInButtonId = CoreUiTestConstants.B2CGoogleSignInId;
+                break;
             }
         }
     }

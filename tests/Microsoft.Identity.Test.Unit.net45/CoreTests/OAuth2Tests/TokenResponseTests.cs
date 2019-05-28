@@ -16,14 +16,8 @@ using Microsoft.Identity.Test.Common;
 namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 {
     [TestClass]
-    public class TokenResponseTests
+    public class TokenResponseTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         [TestCategory("TokenResponseTests")]
         public void ExpirationTimeTest()
@@ -42,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         [TestCategory("TokenResponseTests")]
         public void JsonDeserializationTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
@@ -53,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 
                 Task<MsalTokenResponse> task = client.GetTokenAsync(
                     new Uri(MsalTestConstants.AuthorityCommonTenant + "oauth2/v2.0/token"),
-                    RequestContext.CreateForTest(harness.ServiceBundle));
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()));
                 MsalTokenResponse response = task.Result;
                 Assert.IsNotNull(response);
             }

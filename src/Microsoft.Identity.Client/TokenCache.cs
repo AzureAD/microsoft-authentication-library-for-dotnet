@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
             {
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
-                    accessToken.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase) &&
+                    (accessToken.IsAdfs || accessToken.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase)) &&
                     accessToken.ScopeSet.Overlaps(scopeSet))
                 {
                     requestParams.RequestContext.Logger.Verbose("Intersecting scopes found - " + accessToken.NormalizedScopes);
@@ -180,11 +180,14 @@ namespace Microsoft.Identity.Client
 
                 string tenantId = requestParams.Authority.GetTenantId();
 
-                requestParams.RequestContext.Logger.Info($"Tenant id: {tenantId}");
-                tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.TenantId.Equals(
-                               tenantId, StringComparison.OrdinalIgnoreCase),
-                                requestParams.RequestContext.Logger,
-                                "Filtering by tenant id");
+                if (!String.IsNullOrEmpty(tenantId))
+                {
+                    requestParams.RequestContext.Logger.Info($"Tenant id: {tenantId}");
+                    tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.TenantId.Equals(
+                                   tenantId, StringComparison.OrdinalIgnoreCase),
+                                    requestParams.RequestContext.Logger,
+                                    "Filtering by tenant id");
+                }
             }
 
             return tokenCacheItems;

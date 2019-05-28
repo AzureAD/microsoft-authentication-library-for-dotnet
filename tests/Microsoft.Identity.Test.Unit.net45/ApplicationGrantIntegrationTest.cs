@@ -79,8 +79,8 @@ namespace Microsoft.Identity.Test.Unit
                 .WithClientSecret("wrong_password")
                 .BuildConcrete();
 
-            confidentialClient.AppTokenCacheInternal.DeserializeMsalV3(appCache.SerializeMsalV3());
-            confidentialClient.UserTokenCacheInternal.DeserializeMsalV3(userCache.SerializeMsalV3());
+            ((ITokenCacheSerializer)confidentialClient.AppTokenCacheInternal).DeserializeMsalV3(((ITokenCacheSerializer)appCache).SerializeMsalV3());
+            ((ITokenCacheSerializer)confidentialClient.UserTokenCacheInternal).DeserializeMsalV3(((ITokenCacheSerializer)userCache).SerializeMsalV3());
 
             res = await confidentialClient
                 .AcquireTokenForClient(_msalScopes)

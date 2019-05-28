@@ -21,7 +21,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-#if !NET_CORE
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -30,14 +29,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     [DeploymentItem(@"Resources\MSATestData.txt")]
     [DeploymentItem(@"Resources\B2CNoTenantIdTestData.txt")]
     [DeploymentItem(@"Resources\B2CWithTenantIdTestData.txt")]
-    public class UnifiedCacheFormatTests
+    public class UnifiedCacheFormatTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         private void Init(MockHttpManager httpManager)
         {
             httpManager.AddMockHandler(
@@ -74,8 +67,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private string _expectedAccountCacheKeyIosGeneric;
         private string _expectedAccountCacheValue;
         private string _expectedRtCacheValue;
-
-        private readonly RequestContext _requestContext = RequestContext.CreateForTest();
 
         private void IntitTestData(string fileName)
         {
@@ -136,9 +127,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Description("Test unified token cache")]
         public async Task AAD_CacheFormatValidationTestAsync()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
-                IntitTestData("AADTestData.txt");
+                IntitTestData(ResourceHelper.GetTestResourceRelativePath("AADTestData.txt"));
                 Init(harness.HttpManager);
                 await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
             }
@@ -148,9 +139,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Description("Test unified token cache")]
         public async Task MSA_CacheFormatValidationTestAsync()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
-                IntitTestData("MSATestData.txt");
+                IntitTestData(ResourceHelper.GetTestResourceRelativePath("MSATestData.txt"));
                 Init(harness.HttpManager);
                 await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
             }
@@ -161,10 +152,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1037
         public async Task B2C_NoTenantId_CacheFormatValidationTestAsync()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 TestCommon.ResetInternalStaticCaches();
-                IntitTestData("B2CNoTenantIdTestData.txt");
+                IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CNoTenantIdTestData.txt"));
                 await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
             }
         }
@@ -176,9 +167,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         // test data generated based on GUID, Msal uses tenantId from passed in authotiry
         public async Task B2C_WithTenantId_CacheFormatValidationTestAsync()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
-                IntitTestData("B2CWithTenantIdTestData.txt");
+                IntitTestData(ResourceHelper.GetTestResourceRelativePath("B2CWithTenantIdTestData.txt"));
                 await RunCacheFormatValidationAsync(harness).ConfigureAwait(false);
             }
         }
@@ -189,12 +180,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                           .Create(_clientId)
                                           .WithAuthority(new Uri(_requestAuthority), true)
                                           .WithHttpManager(harness.HttpManager)
+                                          .WithTelemetry(new TraceTelemetryConfig())
                                           .BuildConcrete();
 
             MsalMockHelpers.ConfigureMockWebUI(
                 app.ServiceBundle.PlatformProxy,
-                new AuthorizationResult(AuthorizationStatus.Success,
-                app.AppConfig.RedirectUri + "?code=some-code"));
+                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
             //add mock response for tenant endpoint discovery
             harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
@@ -331,4 +322,3 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
     }
 }
-#endif

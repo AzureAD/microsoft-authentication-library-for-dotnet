@@ -288,9 +288,9 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             controller.EnterText(CoreUiTestConstants.WebUpnB2CLocalInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.EnterText(userInformationFieldIds.PasswordInputId, user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(userInformationFieldIds.GetPasswordInputId(true), user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
 
-            controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(userInformationFieldIds.GetPasswordSignInButtonId(true), XamarinSelector.ByHtmlIdAttribute);
         }
 
         public void PerformB2CFacebookProviderSignInFlow(ITestController controller, LabUser user, UserInformationFieldIds userInformationFieldIds)
@@ -303,11 +303,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             controller.EnterText(CoreUiTestConstants.WebUpnB2CFacebookInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.EnterText(userInformationFieldIds.PasswordInputId, user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(userInformationFieldIds.GetPasswordInputId(true), user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
 
-            controller.WaitForWebElementByCssId(userInformationFieldIds.PasswordSignInButtonId);
+            controller.WaitForWebElementByCssId(userInformationFieldIds.GetPasswordSignInButtonId(true));
 
-            controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(userInformationFieldIds.GetPasswordSignInButtonId(true), XamarinSelector.ByHtmlIdAttribute);
         }
 
         public void PerformB2CGoogleProviderSignInFlow(ITestController controller, LabUser user, UserInformationFieldIds userInformationFieldIds)
@@ -318,9 +318,9 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             controller.Tap(CoreUiTestConstants.B2CGoogleNextId, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.EnterText(userInformationFieldIds.PasswordInputId, user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(userInformationFieldIds.GetPasswordInputId(true), user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
 
-            controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(userInformationFieldIds.GetPasswordSignInButtonId(true), XamarinSelector.ByHtmlIdAttribute);
         }
 
         public void PerformB2CSignInFlow(ITestController controller, LabUser user, B2CIdentityProvider b2CIdentityProvider, bool isB2CLoginAuthority)
@@ -424,8 +424,8 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                 //idSIButton9 = Sign in button
                 controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
                 //i0118 = password text field
-                controller.EnterText(userInformationFieldIds.PasswordInputId, user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
-                controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
+                controller.EnterText(userInformationFieldIds.GetPasswordInputId(), user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
+                controller.Tap(userInformationFieldIds.GetPasswordSignInButtonId(), XamarinSelector.ByHtmlIdAttribute);
             }
             catch
             {

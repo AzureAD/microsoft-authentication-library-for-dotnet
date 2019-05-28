@@ -26,25 +26,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\OpenidConfiguration-OnPremise.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-OnPremise.json")]
     [Ignore] // disable until we support ADFS
-    public class AdfsAuthorityTests
+    public class AdfsAuthorityTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-
-        }
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
         public void SuccessfulValidationUsingOnPremiseDrsTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -93,7 +82,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = harness.ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     MsalTestConstants.FabrikamDisplayableId,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
 
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
@@ -107,7 +97,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 endpoints = harness.ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     MsalTestConstants.FabrikamDisplayableId,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
 
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
@@ -119,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void SuccessfulValidationUsingCloudDrsFallbackTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock failure response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -182,7 +173,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     MsalTestConstants.FabrikamDisplayableId,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
 
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
@@ -194,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void ValidationOffSuccessTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(
@@ -214,7 +206,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     MsalTestConstants.FabrikamDisplayableId,
-                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
 
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
@@ -226,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void FailedValidationTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -267,7 +260,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         MsalTestConstants.FabrikamDisplayableId,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
                 }
                 catch (Exception exc)
@@ -281,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void FailedValidationResourceNotInTrustedRealmTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -321,7 +315,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         MsalTestConstants.FabrikamDisplayableId,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
                 }
                 catch (Exception exc)
@@ -335,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void FailedValidationMissingFieldsInDrsResponseTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock failure response for on-premise DRS request
                 harness.HttpManager.AddMockHandler(
@@ -361,7 +356,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         MsalTestConstants.FabrikamDisplayableId,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
                 }
                 catch (Exception exc)
@@ -375,7 +371,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AdfsAuthorityTests")]
         public void FailedTenantDiscoveryMissingEndpointsTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(
@@ -396,7 +392,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         MsalTestConstants.FabrikamDisplayableId,
-                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .GetAwaiter().GetResult();
                     Assert.Fail("validation should have failed here");
                 }
                 catch (MsalServiceException exc)
