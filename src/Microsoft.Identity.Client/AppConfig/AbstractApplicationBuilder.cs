@@ -1,10 +1,11 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -39,6 +40,12 @@ namespace Microsoft.Identity.Client
         internal T WithHttpManager(IHttpManager httpManager)
         {
             Config.HttpManager = httpManager;
+            return (T)this;
+        }
+
+        internal T WithPlatformProxy(IPlatformProxy platformProxy)
+        {
+            Config.PlatformProxy = platformProxy;
             return (T)this;
         }
 

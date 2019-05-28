@@ -18,6 +18,8 @@ namespace Microsoft.Identity.Test.Unit
     {
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
         public const string ScopeStr = "r1/scope1 r1/scope2";
+        public static readonly string[] GraphScopes = new[] { "user.read" };
+
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly SortedSet<string> CacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
         public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";

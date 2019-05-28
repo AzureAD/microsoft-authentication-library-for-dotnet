@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: new Maybe<bool>(false));
         }
 
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .WithUseEmbeddedWebView(true)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: new Maybe<bool>(true));
         }
 #endif
