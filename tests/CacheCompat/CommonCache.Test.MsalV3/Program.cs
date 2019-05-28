@@ -39,6 +39,7 @@ namespace CommonCache.Test.MsalV2
                     {
                         Console.WriteLine("{0}: {1}", level, message);
                     })
+                    .WithTelemetry(new TraceTelemetryConfig())
                     .Build();
 
                 FileBasedTokenCacheHelper.ConfigureUserCache(

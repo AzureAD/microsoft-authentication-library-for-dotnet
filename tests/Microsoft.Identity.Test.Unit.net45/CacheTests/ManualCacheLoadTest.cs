@@ -33,7 +33,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             string filePathCacheBin = @"C:\Users\mark\Downloads\python_msal_cache.bin";
 
-            var pca = PublicClientApplicationBuilder.Create(clientId).WithAuthority(authority).Build();
+            var pca = PublicClientApplicationBuilder
+                .Create(clientId)
+                .WithAuthority(authority)
+                .WithTelemetry(new TraceTelemetryConfig())
+                .Build();
+
             pca.UserTokenCache.DeserializeMsalV3(File.ReadAllBytes(filePathCacheBin));
 
             var account = await pca.GetAccountAsync(accountId).ConfigureAwait(false);

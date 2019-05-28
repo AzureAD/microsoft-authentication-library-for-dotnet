@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client
         /// <exception cref="InvalidOperationException"/> is thrown if the method was already
         /// called on the application builder.
 
-        public T WithTelemetry(TelemetryCallback telemetryCallback)
+        internal T WithTelemetry(TelemetryCallback telemetryCallback)
         {
             if (Config.TelemetryCallback != null)
             {
@@ -249,16 +249,14 @@ namespace Microsoft.Identity.Client
             }
             return (T)this;
         }
-
         /// <summary>
-        /// Generate MATS telemetry aggregation events.
-        /// TODO(mats): make this public when we're ready to turn it on.
+        /// Generate telemetry aggregation events.
         /// </summary>
-        /// <param name="matsConfig"></param>
+        /// <param name="telemetryConfig"></param>
         /// <returns></returns>
-        internal T WithMatsTelemetry(MatsConfig matsConfig)
+        public T WithTelemetry(ITelemetryConfig telemetryConfig)
         {
-            Config.MatsConfig = matsConfig;
+            Config.TelemetryConfig = telemetryConfig;
             return (T)this;
         }
 
@@ -278,7 +276,7 @@ namespace Microsoft.Identity.Client
 
             TryAddDefaultAuthority();
 
-            if (Config.TelemetryCallback != null && Config.MatsConfig != null)
+            if (Config.TelemetryCallback != null && Config.TelemetryConfig != null)
             {
                 throw new InvalidOperationException(MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously);
             }

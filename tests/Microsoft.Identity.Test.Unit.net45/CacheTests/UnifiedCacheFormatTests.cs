@@ -180,6 +180,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                           .Create(_clientId)
                                           .WithAuthority(new Uri(_requestAuthority), true)
                                           .WithHttpManager(harness.HttpManager)
+                                          .WithTelemetry(new TraceTelemetryConfig())
                                           .BuildConcrete();
 
             MsalMockHelpers.ConfigureMockWebUI(

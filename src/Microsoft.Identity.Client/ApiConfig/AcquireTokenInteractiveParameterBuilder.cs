@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 #if iOS
 using UIKit;
@@ -309,17 +309,7 @@ namespace Microsoft.Identity.Client
 
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenWithScope;
-            if (Parameters.Account != null)
-            {
-                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser;
-            }
-            else if (!string.IsNullOrWhiteSpace(Parameters.LoginHint))
-            {
-                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
-            }
-
-            return apiId;
+            return ApiEvent.ApiIds.AcquireTokenInteractive;
         }
     }
 }
