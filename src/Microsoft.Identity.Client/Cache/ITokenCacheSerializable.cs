@@ -6,7 +6,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal interface ITokenCacheSerializer
+    internal interface ITokenCacheSerializable
     {
         IDictionary<string, JToken> Deserialize(byte[] bytes, bool clearExistingCacheData);
         byte[] Serialize(IDictionary<string, JToken> additionalNodes);

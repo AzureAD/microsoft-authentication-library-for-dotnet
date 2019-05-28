@@ -113,13 +113,7 @@ namespace Microsoft.Identity.Client
                                           username,
                                           preferredEnvironmentHost);
                     }
-                    var args = new TokenCacheNotificationArgs
-                    {
-                        TokenCache = new NoLockTokenCacheProxy(this),
-                        ClientId = ClientId,
-                        Account = account,
-                        HasStateChanged = true
-                    };
+                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
 
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = true;
@@ -250,12 +244,7 @@ namespace Microsoft.Identity.Client
             {
                 requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
                 MsalAccessTokenCacheItem msalAccessTokenCacheItem;
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = new NoLockTokenCacheProxy(this),
-                    ClientId = ClientId,
-                    Account = requestParams.Account
-                };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, requestParams.Account, false);
 
                 List<MsalAccessTokenCacheItem> tokenCacheItems;
 
@@ -393,12 +382,7 @@ namespace Microsoft.Identity.Client
                 {
                     requestParams.RequestContext.Logger.Info("Looking up refresh token in the cache..");
 
-                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                    {
-                        TokenCache = new NoLockTokenCacheProxy(this),
-                        ClientId = ClientId,
-                        Account = requestParams.Account
-                    };
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, requestParams.Account, false);
 
                     // make sure to check preferredEnvironmentHost first
                     var allEnvAliases = new List<string>() { preferredEnvironmentHost };
@@ -476,13 +460,7 @@ namespace Microsoft.Identity.Client
                 requestParams.AuthorityInfo.CanonicalAuthority,
                 instanceDiscoveryMetadataEntry);
 
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-            {
-                TokenCache = new NoLockTokenCacheProxy(this),
-                ClientId = ClientId,
-                Account = requestParams?.Account,
-                HasStateChanged = false
-            };
+            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, requestParams?.Account, false);
 
             //TODO: bogavril - is the env ok here? Can I cache it or pass it in?
             MsalAppMetadataCacheItem appMetadata;
@@ -517,12 +495,7 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = new NoLockTokenCacheProxy(this),
-                    ClientId = ClientId,
-                    Account = null
-                };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, false);
 
                 await OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try
@@ -558,12 +531,7 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                var args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = new NoLockTokenCacheProxy(this),
-                    ClientId = ClientId,
-                    Account = null
-                };
+                var args = new TokenCacheNotificationArgs(this, ClientId, null, false);
 
                 await OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try
@@ -689,13 +657,7 @@ namespace Microsoft.Identity.Client
 
                 try
                 {
-                    var args = new TokenCacheNotificationArgs
-                    {
-                        TokenCache = new NoLockTokenCacheProxy(this),
-                        ClientId = ClientId,
-                        Account = account,
-                        HasStateChanged = true
-                    };
+                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
 
                     await OnBeforeAccessAsync(args).ConfigureAwait(false);
                     try
@@ -782,13 +744,7 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-                {
-                    TokenCache = new NoLockTokenCacheProxy(this),
-                    ClientId = ClientId,
-                    Account = null,
-                    HasStateChanged = true
-                };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true);
 
                 await OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try

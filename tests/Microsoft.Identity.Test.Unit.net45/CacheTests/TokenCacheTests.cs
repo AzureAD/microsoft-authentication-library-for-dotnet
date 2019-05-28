@@ -780,7 +780,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
             };
-            tokenCache.DeserializeMsalV3(null);
+            ((ITokenCacheSerializer)tokenCache).DeserializeMsalV3(null);
 #pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -802,7 +802,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
-            byte[] serializedCache = cache.SerializeMsalV3();
+            byte[] serializedCache = ((ITokenCacheSerializer)cache).SerializeMsalV3();
 
             cache.Accessor.ClearAccessTokens();
             cache.Accessor.ClearRefreshTokens();
@@ -810,13 +810,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
 
-            cache.DeserializeMsalV3(serializedCache);
+            ((ITokenCacheSerializer)cache).DeserializeMsalV3(serializedCache);
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
-            serializedCache = cache.SerializeMsalV3();
-            cache.DeserializeMsalV3(serializedCache);
+            serializedCache = ((ITokenCacheSerializer)cache).SerializeMsalV3();
+            ((ITokenCacheSerializer)cache).DeserializeMsalV3(serializedCache);
             // item count should not change because old cache entries should have
             // been overriden
 
@@ -915,7 +915,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void TestCacheDeserializeWithoutServiceBundle()
         {
             var tokenCache = new TokenCache();
-            tokenCache.DeserializeMsalV3(new byte[0]);
+            ((ITokenCacheSerializer)tokenCache).DeserializeMsalV3(new byte[0]);
         }
 
         [TestMethod]
