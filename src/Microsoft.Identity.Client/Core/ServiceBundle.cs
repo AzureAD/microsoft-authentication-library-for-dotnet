@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Core
                 config.IsDefaultPlatformLoggingEnabled,
                 config.LoggingCallback);
 
-            PlatformProxy = PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
+            PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
 
             if (config.TelemetryConfig != null)
