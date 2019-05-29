@@ -16,8 +16,10 @@ namespace Microsoft.Identity.Client
         /// Unique identifier for the account
         /// </summary>
         /// <remarks>
-        /// For Azure AD, the identifier is the concatenation of <see cref="ObjectId"/> and <see cref="TenantId"/> separated by a dot.
+        /// For the Microsoft identity platform (formerly named Azure AD v2.0), the identifier is the concatenation of
+        /// <see cref="ObjectId"/> and <see cref="TenantId"/> separated by a dot.
         /// Contrary to what was happening in ADAL.NET, these two segments are no longer base64 encoded.
+        /// Note that there are some legitimate cases (for instance domain takeover), where the same ObjectId may show up in multiple tenants.
         /// </remarks>
         public string Identifier { get; }
 
