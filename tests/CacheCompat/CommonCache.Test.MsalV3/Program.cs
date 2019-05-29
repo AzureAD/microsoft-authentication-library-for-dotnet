@@ -52,7 +52,7 @@ namespace CommonCache.Test.MsalV2
                 try
                 {
                     var result = await app
-                        .AcquireTokenSilent(scopes, accounts.FirstOrDefault())
+                        .AcquireTokenSilentWithAccount(scopes, accounts.FirstOrDefault())
                         .WithAuthority(app.Authority)
                         .WithForceRefresh(false)
                         .ExecuteAsync(CancellationToken.None)

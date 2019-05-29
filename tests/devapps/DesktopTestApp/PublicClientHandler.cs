@@ -108,7 +108,7 @@ namespace DesktopTestApp
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, bool forceRefresh)
         {
             var builder = PublicClientApplication
-                .AcquireTokenSilent(scopes, CurrentUser)
+                .AcquireTokenSilentWithAccount(scopes, CurrentUser)
                 .WithForceRefresh(forceRefresh);
 
             if (!string.IsNullOrWhiteSpace(AuthorityOverride))

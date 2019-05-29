@@ -196,7 +196,7 @@ namespace FociTestApp
                 return null;
             }
 
-            return pca.AcquireTokenSilent(s_scopes, accounts.FirstOrDefault()).ExecuteAsync();
+            return pca.AcquireTokenSilentWithAccount(s_scopes, accounts.FirstOrDefault()).ExecuteAsync();
         }
 
         private static async Task FetchTokenAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)

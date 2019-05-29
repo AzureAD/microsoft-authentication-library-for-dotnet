@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
         /// It's usually used in Web Apps (for instance ASP.NET / ASP.NET Core Web apps) which sign-in users,
         /// and can request an authorization code.
         /// This method does not lookup the token cache, but stores the result in it, so it can be looked up
-        /// using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
+        /// using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentWithAccount(IEnumerable{string}, IAccount)"/>.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="authorizationCode">The authorization code received from the service authorization endpoint.</param>

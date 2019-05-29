@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             pca.UserTokenCache.DeserializeMsalV3(File.ReadAllBytes(filePathCacheBin));
 
             var account = await pca.GetAccountAsync(accountId).ConfigureAwait(false);
-            var result = await pca.AcquireTokenSilent(new List<string> { scope }, account).ExecuteAsync().ConfigureAwait(false);
+            var result = await pca.AcquireTokenSilentWithAccount(new List<string> { scope }, account).ExecuteAsync().ConfigureAwait(false);
 
             Console.WriteLine();
         }

@@ -784,7 +784,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             try
             {
                 AuthenticationResult result = await app
-                    .AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), string.Empty)
+                    .AcquireTokenSilentWithLoginHint(MsalTestConstants.Scope.ToArray(), string.Empty)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -985,7 +985,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                 AuthenticationResult response = await
-                    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    pca.AcquireTokenSilentWithAccount(new[] { "User.Read" }, accounts.First())
                     .WithAuthority(tenantedAuthority1)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -996,7 +996,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                 response = await
-                    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    pca.AcquireTokenSilentWithAccount(new[] { "User.Read" }, accounts.First())
                     .WithAuthority(tenantedAuthority2)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -1034,7 +1034,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                 AuthenticationResult response = await
-                    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    pca.AcquireTokenSilentWithAccount(new[] { "User.Read" }, accounts.First())
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -1047,7 +1047,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 accounts = await pca2.GetAccountsAsync().ConfigureAwait(false);
                 response = await
-                    pca2.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    pca2.AcquireTokenSilentWithAccount(new[] { "User.Read" }, accounts.First())
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -1159,7 +1159,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AuthenticationResult cachedAuth = null;
                 try
                 {
-                    cachedAuth = app.AcquireTokenSilent(MsalTestConstants.Scope, result.Account).ExecuteAsync().Result;
+                    cachedAuth = app.AcquireTokenSilentWithAccount(MsalTestConstants.Scope, result.Account).ExecuteAsync().Result;
                 }
                 catch
                 {
@@ -1204,11 +1204,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                .WithDeviceCodeResultCallback(result => Task.FromResult(0));
             CheckBuilderCommonMethods(deviceCodeBuilder);
 
-            var silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, MsalTestConstants.User)
+            var silentBuilder = app.AcquireTokenSilentWithAccount(MsalTestConstants.Scope, MsalTestConstants.User)
                .WithForceRefresh(true);
             CheckBuilderCommonMethods(silentBuilder);
 
-            silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, "upn@live.co.uk")
+            silentBuilder = app.AcquireTokenSilentWithLoginHint(MsalTestConstants.Scope, "upn@live.co.uk")
               .WithForceRefresh(true);
             CheckBuilderCommonMethods(silentBuilder);
 

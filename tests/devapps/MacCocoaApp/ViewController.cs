@@ -84,7 +84,7 @@ namespace MacCocoaApp
                     try
                     {
                         result = await _pca
-                            .AcquireTokenSilent(_scopes, firstExistingAccount)
+                            .AcquireTokenSilentWithAccount(_scopes, firstExistingAccount)
                             .ExecuteAsync(CancellationToken.None)
                             .ConfigureAwait(false);
                     }

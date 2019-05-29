@@ -40,10 +40,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Build();
 
             await AssertException.TaskThrowsAsync<ArgumentNullException>(
-             () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (string)null).ExecuteAsync()).ConfigureAwait(false);
+             () => app.AcquireTokenSilentWithLoginHint(MsalTestConstants.Scope.ToArray(), (string)null).ExecuteAsync()).ConfigureAwait(false);
 
             var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
-              () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (IAccount)null).ExecuteAsync()).ConfigureAwait(false);
+              () => app.AcquireTokenSilentWithAccount(MsalTestConstants.Scope.ToArray(), (IAccount)null).ExecuteAsync()).ConfigureAwait(false);
             Assert.AreEqual(MsalError.UserNullError, ex.ErrorCode);
         }
 
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             try
             {
                 AuthenticationResult result = await app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .ExecuteAsync(CancellationToken.None)
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         MsalTestConstants.ScopeForAnotherResourceStr));
 
                 Task<AuthenticationResult> task = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.ScopeForAnotherResource.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .ExecuteAsync(CancellationToken.None);
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 Task<AuthenticationResult> task = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .ExecuteAsync(CancellationToken.None);
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 Task<AuthenticationResult> task = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .ExecuteAsync(CancellationToken.None);
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 Task<AuthenticationResult> task = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .WithAuthority(app.Authority, false)
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                AuthenticationResult result = await app.AcquireTokenSilent(
+                AuthenticationResult result = await app.AcquireTokenSilentWithLoginHint(
                     MsalTestConstants.Scope.ToArray(),
                     MsalTestConstants.DisplayableId)
                     .WithAuthority(app.Authority, false)
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
-                var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
+                var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilentWithLoginHint(
                     MsalTestConstants.Scope.ToArray(),
                     "other_login_hint@contoso.com")
                     .WithAuthority(app.Authority, false)
@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid1", "utid");
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid2", "utid");
 
-                var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () => await app.AcquireTokenSilent(
+                var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () => await app.AcquireTokenSilentWithLoginHint(
                     MsalTestConstants.Scope.ToArray(),
                     MsalTestConstants.DisplayableId)
                     .WithAuthority(app.Authority, false)
@@ -340,7 +340,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 Task<AuthenticationResult> task = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .WithForceRefresh(true)
@@ -385,7 +385,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // ForceRefresh=true, so skip cache lookup of Access Token
                 // Use refresh token to acquire a new Access Token
                 Task<AuthenticationResult> task = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
@@ -412,7 +412,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 Task<AuthenticationResult> task2 = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .WithAuthority(MsalTestConstants.AuthorityGuidTenant2)
@@ -444,7 +444,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
                 Task<AuthenticationResult> task3 = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .WithAuthority(MsalTestConstants.AuthorityGuidTenant)
@@ -471,7 +471,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 Task<AuthenticationResult> task4 = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .WithAuthority(MsalTestConstants.AuthorityGuidTenant)
@@ -517,7 +517,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 Task<AuthenticationResult> task = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
@@ -547,7 +547,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
                 Task<AuthenticationResult> task2 = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .WithAuthority(MsalTestConstants.AuthorityGuidTenant2)
@@ -577,7 +577,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
                 Task<AuthenticationResult> task3 = app
-                    .AcquireTokenSilent(
+                    .AcquireTokenSilentWithAccount(
                         MsalTestConstants.Scope.ToArray(),
                         new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                     .WithAuthority(MsalTestConstants.AuthorityGuidTenant)
@@ -618,7 +618,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 try
                 {
                     Task<AuthenticationResult> task = app
-                        .AcquireTokenSilent(
+                        .AcquireTokenSilentWithAccount(
                             MsalTestConstants.CacheMissScope,
                             new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
                         .WithAuthority(app.Authority)

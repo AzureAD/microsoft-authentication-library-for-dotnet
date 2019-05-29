@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponseDefault.AppId).BuildConcrete();
 
-            AuthenticationResult authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, defaultAccountResult.Account)
+            AuthenticationResult authResult = await pca.AcquireTokenSilentWithAccount(new[] { CoreUiTestConstants.DefaultScope }, defaultAccountResult.Account)
                                                        .ExecuteAsync()
                                                        .ConfigureAwait(false);
             Assert.IsNotNull(authResult);
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             pca = PublicClientApplicationBuilder.Create(labResponseFederated.AppId).BuildConcrete();
 
-            authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, federatedAccountResult.Account)
+            authResult = await pca.AcquireTokenSilentWithAccount(new[] { CoreUiTestConstants.DefaultScope }, federatedAccountResult.Account)
                                   .ExecuteAsync()
                                   .ConfigureAwait(false);
             Assert.IsNotNull(authResult);
@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             pca = PublicClientApplicationBuilder.Create(LabApiConstants.MSAOutlookAccountClientID).BuildConcrete();
 
-            authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, msaAccountResult.Account)
+            authResult = await pca.AcquireTokenSilentWithAccount(new[] { CoreUiTestConstants.DefaultScope }, msaAccountResult.Account)
                                   .ExecuteAsync()
                                   .ConfigureAwait(false);
             Assert.IsNotNull(authResult);
@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca
-                .AcquireTokenSilent(s_scopes, account)
+                .AcquireTokenSilentWithAccount(s_scopes, account)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 

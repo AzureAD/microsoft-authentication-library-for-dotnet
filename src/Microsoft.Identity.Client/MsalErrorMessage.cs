@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint.";
         public const string MultipleAccountsForLoginHint = "You are trying to acquire a token silently using a login hint. Multiple accounts were found in the token cache having this login hint. Please choose an account manually an pass it in to AcquireTokenSilently.";
-
+        public const string AmbigiousAccount = "You are trying to acquire a token silently with AquireTokenSilentWithSingleAccount(scopes) which supposes that your application manages only one user account, but the token cache contains several accounts. Mitigation: Your application needs to choose (or let the user choose) the account to use. The accounts are available from app.GetAccountsAsync(). See https://aka.ms/msal-net-multiple-accounts”";
         public const string UnknownUser = "Could not identify the user logged into the OS. See http://aka.ms/msal-net-iwa for details.";
 
         public const string HttpRequestUnsuccessful = "Response status code does not indicate success: {0} ({1}).";

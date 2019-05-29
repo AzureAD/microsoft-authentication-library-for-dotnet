@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the account information. Some elements in <see cref="IAccount"/> might be null if not returned by the
         /// service. The account can be passed back in some API overloads to identify which account should be used such
-        /// as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> or
+        /// as <see cref="IClientApplicationBase.AcquireTokenSilentWithAccount(IEnumerable{string}, IAccount)"/> or
         /// <see cref="IClientApplicationBase.RemoveAsync(IAccount)"/> for instance
         /// </summary>
         public IAccount Account { get; }

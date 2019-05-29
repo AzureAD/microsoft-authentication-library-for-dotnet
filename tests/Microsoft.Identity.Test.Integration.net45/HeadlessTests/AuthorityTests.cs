@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Acquire a token silently using the common authority alias");
 
-            authResult = await pca.AcquireTokenSilent(_scopes, (await pca.GetAccountsAsync().ConfigureAwait(false)).First())
+            authResult = await pca.AcquireTokenSilentWithAccount(_scopes, (await pca.GetAccountsAsync().ConfigureAwait(false)).First())
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .ExecuteAsync()
                 .ConfigureAwait(false);

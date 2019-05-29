@@ -12,6 +12,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string LoginHint { get; set; }
         public IAccount Account { get; set; }
         public bool SendX5C { get; set; }
+        public bool SingleAccount { get; set; }
 
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)

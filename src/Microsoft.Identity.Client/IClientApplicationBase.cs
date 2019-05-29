@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client
 
         /// <Summary>
         /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
-        /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+        /// and updated silently if needed when calling <see cref="AcquireTokenSilentWithAccount(IEnumerable{string}, IAccount)"/>
         /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
         /// cache (see <c>IConfidentialClientApplication</c>).
         /// </Summary>
@@ -51,6 +51,34 @@ namespace Microsoft.Identity.Client
         Task<IAccount> GetAccountAsync(string identifier);
 
         /// <summary>
+        /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// If nothing is passed and no Account or LoginHint are provided, then, if one, and only
+        /// one, account is in the cache, that account is used.  Otherwise, an exception will be thrown.  <see cref="IAccount"/></param>
+        /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
+        /// parameters</returns>
+        /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache, or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or the user needs to perform two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// You can set additional parameters by chaining the builder with:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
+        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
+        /// force refreshing the token, as well as
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
+        /// specify extra query parameters
+        ///
+        /// </remarks>
+        AcquireTokenSilentParameterBuilder AquireTokenSilentWithSingleAccount(IEnumerable<string> scopes);
+
+        /// <summary>
         /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache,
         /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
@@ -74,7 +102,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
         /// specify extra query parameters
         /// </remarks>
-        AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account);
+        AcquireTokenSilentParameterBuilder AcquireTokenSilentWithAccount(IEnumerable<string> scopes, IAccount account);
 
         /// <summary>
         /// Attempts to acquire an access token for the <paramref name="loginHint"/> from the user token cache,
@@ -100,7 +128,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
         /// specify extra query parameters
         /// </remarks>
-        AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint);
+        AcquireTokenSilentParameterBuilder AcquireTokenSilentWithLoginHint(IEnumerable<string> scopes, string loginHint);
 
         /// <summary>
         /// Removes all tokens in the cache for the specified account.

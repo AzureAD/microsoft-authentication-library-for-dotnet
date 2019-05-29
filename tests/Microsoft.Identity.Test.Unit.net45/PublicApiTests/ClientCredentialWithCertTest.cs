@@ -203,9 +203,8 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
 
                 var result = await app
-                    .AcquireTokenSilent(
-                        new[] { "someTestScope"},
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .AquireTokenSilentWithSingleAccount(
+                        new[] { "someTestScope"})
                     .WithSendX5C(true)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);

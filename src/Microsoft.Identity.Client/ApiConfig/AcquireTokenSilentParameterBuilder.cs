@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client
 {
     /// <inheritdoc />
     /// <summary>
-    /// Parameter builder for the <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+    /// Parameter builder for the <see cref="IClientApplicationBase.AcquireTokenSilentWithAccount(IEnumerable{string}, IAccount)"/>
     /// operation. See https://aka.ms/msal-net-acquiretokensilent
     /// </summary>
     public sealed class AcquireTokenSilentParameterBuilder :
@@ -23,6 +23,13 @@ namespace Microsoft.Identity.Client
         internal AcquireTokenSilentParameterBuilder(IClientApplicationBaseExecutor clientApplicationBaseExecutor)
             : base(clientApplicationBaseExecutor)
         {
+        }
+
+        internal static AcquireTokenSilentParameterBuilder Create(
+            IClientApplicationBaseExecutor clientApplicationBaseExecutor,
+            IEnumerable<string> scopes)
+        {
+            return new AcquireTokenSilentParameterBuilder(clientApplicationBaseExecutor).WithScopes(scopes).WithSingleAccount();
         }
 
         internal static AcquireTokenSilentParameterBuilder Create(
@@ -56,6 +63,12 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        private AcquireTokenSilentParameterBuilder WithSingleAccount()
+        {
+            //CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithLoginHint);
+            Parameters.SingleAccount = true;
+            return this;
+        }
 
         /// <summary>
         /// Specifies if the client application should force refreshing the
@@ -117,7 +130,7 @@ namespace Microsoft.Identity.Client
         protected override void Validate()
         {
             base.Validate();
-            if (Parameters.Account == null && string.IsNullOrWhiteSpace(Parameters.LoginHint))
+            if (Parameters.Account == null && string.IsNullOrWhiteSpace(Parameters.LoginHint) && !Parameters.SingleAccount)
             {
                 throw new MsalUiRequiredException(MsalError.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
             }

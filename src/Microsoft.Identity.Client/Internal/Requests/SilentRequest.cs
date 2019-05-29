@@ -29,16 +29,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _silentParameters = silentParameters;
         }
 
-        private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint)
+        private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint, bool singleAccount = false)
         {
             var accounts = await CacheManager.TokenCacheInternal.GetAccountsAsync(
                 ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
                 AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
-            accounts = accounts
+            if (!singleAccount)
+            {
+                accounts = accounts
                 .Where(a => !string.IsNullOrWhiteSpace(a.Username) &&
                        a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
                 .ToList();
+            }
 
             if (!accounts.Any())
             {
@@ -49,6 +52,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (accounts.Count() > 1)
             {
+                if (singleAccount)
+                {
+                    throw new MsalClientException(
+                        MsalError.AmbigiousAccount,
+                        MsalErrorMessage.AmbigiousAccount);
+                }
                 throw new MsalUiRequiredException(
                     MsalError.MultipleAccountsForLoginHint,
                     MsalErrorMessage.MultipleAccountsForLoginHint);
@@ -64,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return silentParameters.Account;
             }
 
-            return await GetSingleAccountForLoginHintAsync(silentParameters.LoginHint).ConfigureAwait(false);
+            return await GetSingleAccountForLoginHintAsync(silentParameters.LoginHint, silentParameters.SingleAccount).ConfigureAwait(false);
         }
 
         internal async override Task PreRunAsync()
