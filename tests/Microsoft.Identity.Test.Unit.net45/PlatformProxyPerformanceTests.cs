@@ -49,23 +49,6 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private void ValidateMethodPerformance(long maxMilliseconds, string name, Action<IPlatformProxy> action)
-        {
-            var platformProxy = PlatformProxyFactory.GetPlatformProxy();
-
-            // Call it once to pre-load it.  We're not worried about the time it takes to call it
-            // the first time, we're worried about subsequent calls.
-            action(platformProxy);
-
-            using (new PerformanceValidator(maxMilliseconds, name))
-            {
-                action(platformProxy);
-            }
-        }
-        
-        private const long AllowedMilliseconds = 10;
-        private const long DomainJoinedAllowedMilliseconds = 100;
-
         [TestMethod]
         public void ValidateGetDeviceModelPerformance()
         {
@@ -112,6 +95,21 @@ namespace Microsoft.Identity.Test.Unit
         public void ValidateGetProductNamePerformance()
         {
             ValidateMethodPerformance(AllowedMilliseconds, "GetProductName", proxy => proxy.GetProductName());
+        }
+
+
+        private void ValidateMethodPerformance(long maxMilliseconds, string name, Action<IPlatformProxy> action)
+        {
+            var platformProxy = PlatformProxyFactory.GetPlatformProxy();
+
+            // Call it once to pre-load it.  We're not worried about the time it takes to call it
+            // the first time, we're worried about subsequent calls.
+            action(platformProxy);
+
+            using (new PerformanceValidator(maxMilliseconds, name))
+            {
+                action(platformProxy);
+            }
         }
     }
 }
