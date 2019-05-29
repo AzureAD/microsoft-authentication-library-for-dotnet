@@ -161,9 +161,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="account">Account for which the token is requested.
-        /// If nothing is passed and no Account or LoginHint are provided, then, if one, and only
-        /// one, account is in the cache, that account is used.  Otherwise, an exception will be thrown.  <see cref="IAccount"/></param>
+        /// <param name="account">Account for which the token is requested.</param>
         /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
         /// parameters</returns>
         /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
