@@ -85,7 +85,10 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var json = base.ToJObject();
 
-            json[StorageJsonKeys.FamilyId] = FamilyId;
+            if (!string.IsNullOrEmpty(FamilyId))
+            {
+                json[StorageJsonKeys.FamilyId] = FamilyId;
+            }
 
             return json;
         }

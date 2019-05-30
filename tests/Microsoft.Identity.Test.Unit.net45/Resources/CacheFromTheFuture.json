@@ -83,8 +83,7 @@
       "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
-      "credential_type": "RefreshToken",
-      "family_id": null
+      "credential_type": "RefreshToken"
     },
     "my-uid.my-utid-env_2-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
       "home_account_id": "my-uid.my-utid",
@@ -92,8 +91,7 @@
       "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
-      "credential_type": "RefreshToken",
-      "family_id": null
+      "credential_type": "RefreshToken"
     },
     "my-uid.my-utid-env_3-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
       "home_account_id": "my-uid.my-utid",
@@ -101,8 +99,7 @@
       "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
-      "credential_type": "RefreshToken",
-      "family_id": null
+      "credential_type": "RefreshToken"
     },
     "my-uid.my-utid-env-refreshtoken-1--": {
       "home_account_id": "my-uid.my-utid",
@@ -189,8 +186,7 @@
     },
     "appmetadata-env_2-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3": {
       "environment": "env_2",
-      "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
-      "family_id": ""
+      "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3"
     },
     "appmetadata-env_1-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa": {
       "environment": "env_1",

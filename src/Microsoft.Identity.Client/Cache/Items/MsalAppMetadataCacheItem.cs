@@ -79,7 +79,12 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             json[StorageJsonKeys.Environment] = Environment;
             json[StorageJsonKeys.ClientId] = ClientId;
-            json[StorageJsonKeys.FamilyId] = FamilyId;
+
+            // Workaround: MSAL-ObjC has a problem with 
+            if (!String.IsNullOrEmpty(FamilyId))
+            {
+                json[StorageJsonKeys.FamilyId] = FamilyId;
+            }
 
             return json;
         }
