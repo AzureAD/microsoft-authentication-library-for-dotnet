@@ -42,6 +42,5 @@ namespace Microsoft.Identity.Client.Http
                         Constants.DefaultRedirectUri));
             }
         }
-
     }
 }

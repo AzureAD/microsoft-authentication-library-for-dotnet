@@ -1,6 +1,7 @@
 ﻿using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,17 +20,30 @@ namespace UWP
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private readonly IPublicClientApplication _pca;
-        private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
+        private IPublicClientApplication _pca;
+        //TODO...update the commented ClientId to have the webAuthBroker redirectUri
+        private static readonly string s_clientID = "3082fdc1-da23-4881-bd1d-1d11c7f0cb38"; //"9058d700-ccd7-4dd4-a029-aec31995add0";
         private static readonly string s_authority = "https://login.microsoftonline.com/common/";
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";
+
+        private const string NullRedirectUri = "None - WEB redirect uri";
+        private readonly ObservableCollection<string> _redirectUris = new ObservableCollection<string>();
 
         public MainPage()
         {
             InitializeComponent();
 
-            _pca = PublicClientApplicationBuilder.Create(s_clientID).WithAuthority(s_authority).Build();
+            _redirectUris.Add(NullRedirectUri);
+            _redirectUris.Add("https://MyDirectorySearcherApp");
+        }
+
+        private void CreatePublicClient()
+        {
+            _pca = PublicClientApplicationBuilder.Create(s_clientID)
+               .WithAuthority(s_authority)
+               .WithRedirectUri(GetRedirectUri())
+               .Build();
 
             // custom serialization - this is very similar to what MSAL is doing
             // but extenders can implement their own cache.
@@ -68,8 +82,25 @@ namespace UWP
 #endif
         }
 
+        private string GetRedirectUri()
+        {
+            if (redirectUriCbx.SelectedValue == null)
+            {
+                return null;
+            }
+
+            string selectedRedirectUri = redirectUriCbx.SelectedValue.ToString();
+            if (selectedRedirectUri == NullRedirectUri)
+            {
+                return null;
+            }
+
+            return selectedRedirectUri;
+        }
+
         private async void AcquireTokenIWA_ClickAsync(object sender, RoutedEventArgs e)
         {
+            CreatePublicClient();
             AuthenticationResult result = null;
             try
             {
@@ -93,7 +124,8 @@ namespace UWP
                 Environment.NewLine +
                 string.Join(", ", accounts.Select(a => a.Username));
 
-            await DisplayMessageAsync(message).ConfigureAwait(false); ;
+            await DisplayMessageAsync(message).ConfigureAwait(false);
+            ;
 
         }
 
@@ -104,6 +136,8 @@ namespace UWP
             {
                 await _pca.RemoveAsync(account).ConfigureAwait(false);
             }
+
+            await DisplayMessageAsync("Cache Cleared").ConfigureAwait(false);
         }
 
         private async void ClearFirstAccountAsync(object sender, RoutedEventArgs e)
@@ -117,27 +151,35 @@ namespace UWP
 
         private async void AccessTokenSilentButton_ClickAsync(object sender, RoutedEventArgs e)
         {
-            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
-
-            AuthenticationResult result = null;
-            try
+            if (_pca == null)
             {
-                result = await _pca
-                    .AcquireTokenSilent(s_scopes, accounts.FirstOrDefault())
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
+                await DisplayMessageAsync("No PCA created yet. Call acquire token interactive first. ").ConfigureAwait(false);
             }
-            catch (Exception ex)
+            else
             {
-                await DisplayErrorAsync(ex).ConfigureAwait(false);
-                return;
-            }
+                IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
 
-            await DisplayResultAsync(result).ConfigureAwait(false);
+                AuthenticationResult result = null;
+                try
+                {
+                    result = await _pca
+                        .AcquireTokenSilent(s_scopes, accounts.FirstOrDefault())
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    await DisplayErrorAsync(ex).ConfigureAwait(false);
+                    return;
+                }
+
+                await DisplayResultAsync(result).ConfigureAwait(false);
+            }
         }
 
         private async void AccessTokenButton_ClickAsync(object sender, RoutedEventArgs e)
         {
+            CreatePublicClient();
             AuthenticationResult result = null;
             try
             {
@@ -147,6 +189,12 @@ namespace UWP
                 result = await _pca.AcquireTokenInteractive(s_scopes)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                    () =>
+                    {
+                        AccessToken.Text = "\nAccessToken: \n" + result.AccessToken;
+                    });
             }
             catch (Exception ex)
             {

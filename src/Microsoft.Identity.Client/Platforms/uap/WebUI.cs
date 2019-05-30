@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
     {
         private readonly bool _useCorporateNetwork;
         private readonly bool _silentMode;
+        private bool _ssoMode = false;
 
         public RequestContext RequestContext { get; set; }
 
@@ -33,11 +34,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            bool ssoMode = string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase);
-
             WebAuthenticationResult webAuthenticationResult;
             WebAuthenticationOptions options = (_useCorporateNetwork &&
-                                                (ssoMode || redirectUri.Scheme == Constants.MsAppScheme))
+                                                (_ssoMode || redirectUri.Scheme == Constants.MsAppScheme))
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
 
@@ -52,7 +51,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 webAuthenticationResult = await CoreApplication.MainView.CoreWindow.Dispatcher.RunTaskAsync(
                         async () =>
                         {
-                            if (ssoMode)
+                            if (_ssoMode)
                             {
                                 return await
                                     WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri)
@@ -120,8 +119,16 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public Uri UpdateRedirectUri(Uri redirectUri)
         {
-            RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
-            return redirectUri;
+            if (string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase))
+            {
+                _ssoMode = true;
+                return WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
+            }
+            else
+            {
+                RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+                return redirectUri;
+            }
         }
     }
 }

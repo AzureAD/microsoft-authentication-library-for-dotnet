@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// <inheritdoc />
         public override string GetDefaultRedirectUri(string correlationId)
         {
-            return Constants.DefaultRedirectUri;
+            return Constants.UapWEBRedirectUri;
         }
 
         protected override string InternalGetProductName()

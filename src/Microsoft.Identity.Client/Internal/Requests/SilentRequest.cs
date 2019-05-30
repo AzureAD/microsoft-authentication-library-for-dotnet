@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     // Hack: STS does not yet send back the suberror on these platforms because they are not in an allowed list,
                     // so the best thing we can do is to consider all errors as client_mismatch.
-#if NETSTANDARD || UAP || MAC
+#if NETSTANDARD || WINDOWS_APP || MAC
                     ex?.GetType();  // avoid the "variable 'ex' is declared but never used" in this code path.
                     return null;
 #else
