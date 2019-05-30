@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
 
         private AcquireTokenSilentParameterBuilder WithSingleAccount()
         {
-            //CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithLoginHint);
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSingleAccount);
             Parameters.SingleAccount = true;
             return this;
         }

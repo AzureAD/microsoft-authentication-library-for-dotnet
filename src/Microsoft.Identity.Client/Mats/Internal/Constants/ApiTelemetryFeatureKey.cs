@@ -10,6 +10,7 @@ namespace Microsoft.Identity.Client.Mats.Internal.Constants
         public const string WithAccount = "api_with_account";
         public const string WithForceRefresh = "api_with_force_refresh";
         public const string WithLoginHint = "api_with_login_hint";
+        public const string WithSingleAccount = "api_with_single_account";
 
         public const string WithRedirectUri = "api_with_redirect_uri";
         public const string WithExtraScopesToConsent = "api_with_extra_scopes_to_consent";

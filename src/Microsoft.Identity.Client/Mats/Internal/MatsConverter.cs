@@ -236,6 +236,8 @@ namespace Microsoft.Identity.Client.Mats.Internal
                 return ApiTelemetryFeatureKey.WithB2CAuthority;
             case ApiTelemetryFeature.WithCustomWebUi:
                 return ApiTelemetryFeatureKey.WithCustomWebUi;
+            case ApiTelemetryFeature.WithSingleAccount:
+                return ApiTelemetryFeatureKey.WithSingleAccount;
             default:
                 return ApiTelemetryFeatureKey.Unknown;
             }
