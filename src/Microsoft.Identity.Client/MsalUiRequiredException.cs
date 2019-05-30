@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// This exception class is to inform developers that UI interaction is required for authentication to
-    /// succeed. It's thrown when calling <see cref="ClientApplicationBase.AcquireTokenSilentWithAccount(System.Collections.Generic.IEnumerable{string}, IAccount)"/> or one
+    /// succeed. It's thrown when calling <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> or one
     /// of its overrides, and when the token does not exists in the cache, or the user needs to provide more content, or perform multiple factor authentication based
     /// on Azure AD policies, etc..
     /// For more details, see https://aka.ms/msal-net-exceptions

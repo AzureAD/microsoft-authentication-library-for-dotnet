@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
-        /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilentWithAccount(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is
+        /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is
         /// passed as the <c>account</c> parameter. This can be because you have called AcquireTokenSilent with an <c>account</c> parameter
         /// set to <c>accounts.FirstOrDefault()</c> but <c>accounts</c> is empty.
         /// <para>Mitigation</para>
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// This error code denotes that no account was found having the given login hint.
         /// <para>What happens?</para>
-        /// <see cref="IClientApplicationBase.AcquireTokenSilentWithLoginHint(System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, string)"/>
         /// or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
         /// was called with a <c>loginHint</c> parameter which does not match any account in <see cref="IClientApplicationBase.GetAccountsAsync"/>
         /// <para>Mitigation</para>
@@ -64,13 +64,13 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// This error code denotes that multiple accounts were found in the cache while rying to acquire a token silently with a single account
-        /// and MSAL cannot choose one. Please use either <see cref="ClientApplicationBase.AquireTokenSilentWithAccount(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
-        /// or <see cref="ClientApplicationBase.AquireTokenSilentWithLoginHint(System.Collections.Generic.IEnumerable{string}, string)"/> to specify the account.
+        /// and MSAL cannot choose one. Please use either <see cref="ClientApplicationBase.AquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// or <see cref="ClientApplicationBase.AquireTokenSilent(System.Collections.Generic.IEnumerable{string}, string)"/> to specify the account.
         /// </summary>
         public const string AmbigiousAccount = "ambigious_account";
 
         /// <summary>
-        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilentWithAccount(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when
+        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when
         /// the user cache had not been set in the application constructor. This should never happen in MSAL.NET 3.x as the cache is created by the application
         /// </summary>
         public const string TokenCacheNullError = "token_cache_null";
@@ -218,8 +218,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Failed to acquire token silently. Used in broker scenarios.
         /// <para>What happens</para>
-        /// you called <see cref="IClientApplicationBase.AcquireTokenSilentWithAccount(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
-        /// or <see cref="IClientApplicationBase.AcquireTokenSilentWithLoginHint(System.Collections.Generic.IEnumerable{string}, string)"/> and your
+        /// you called <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// or <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, string)"/> and your
         /// mobile (Xamarin) application leverages the broker (Microsoft Authenticator or Microsoft Company Portal), but the broker
         /// was not able to acquire the token silently.
         /// <para>Mitigation</para>
@@ -456,7 +456,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Multiple Tokens were matched.
         /// <para>What happens?</para>This exception happens in the case of applications managing several identities,
-        /// when calling <see cref="ClientApplicationBase.AcquireTokenSilentWithAccount(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// when calling <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
         /// or one of its overrides and the user token cache contains multiple tokens for this client application and the specified Account, but from different authorities.
         /// <para>Mitigation [App Development]</para>specify the authority to use in the acquire token operation
         /// </summary>

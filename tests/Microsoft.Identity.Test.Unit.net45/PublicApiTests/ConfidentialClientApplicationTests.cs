@@ -832,12 +832,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                        .WithSendX5C(true);
             PublicClientApplicationTests.CheckBuilderCommonMethods(onBehalfOfBuilder);
 
-            var silentBuilder = app.AcquireTokenSilentWithLoginHint(MsalTestConstants.Scope, "user@contoso.com")
+            var silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, "user@contoso.com")
                 .WithForceRefresh(false);
 
             PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
 
-            silentBuilder = app.AcquireTokenSilentWithAccount(MsalTestConstants.Scope, MsalTestConstants.User)
+            silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, MsalTestConstants.User)
                .WithForceRefresh(true);
             PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
 

@@ -156,7 +156,7 @@ namespace NetCoreTestApp
                             Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
                         }
 
-                        authTask = s_pca.AcquireTokenSilentWithAccount(s_scopes, account).ExecuteAsync(CancellationToken.None);
+                        authTask = s_pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
                         await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
 
                         break;

@@ -154,7 +154,7 @@ namespace XForms
 
                 var authority = PassAuthoritySwitch.IsToggled ? App.Authority : null;
 
-                var builder = App.MsalPublicClient.AcquireTokenSilentWithAccount(GetScopes(), GetSelectedAccount());
+                var builder = App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount());
                 if (PassAuthoritySwitch.IsToggled)
                 {
                     builder = builder.WithAuthority(App.Authority);

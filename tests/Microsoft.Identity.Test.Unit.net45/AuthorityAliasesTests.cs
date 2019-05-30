@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit
                 foreach (var envAlias in MsalTestConstants.ProdEnvAliases)
                 {
                     result = await app
-                        .AcquireTokenSilentWithAccount(
+                        .AcquireTokenSilent(
                             MsalTestConstants.Scope,
                             app.GetAccountsAsync().Result.First())
                         .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid))
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit
                     try
                     {
                         result = await app
-                            .AcquireTokenSilentWithAccount(
+                            .AcquireTokenSilent(
                                 MsalTestConstants.ScopeForAnotherResource,
                                 (await app.GetAccountsAsync().ConfigureAwait(false)).First())
                             .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid))

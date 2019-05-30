@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.MatsTests
                     })
                     .Build();
 
-                var authResult = pca.AcquireTokenSilentWithLoginHint(MsalTestConstants.Scope, MsalTestConstants.DisplayableId)
+                var authResult = pca.AcquireTokenSilent(MsalTestConstants.Scope, MsalTestConstants.DisplayableId)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }

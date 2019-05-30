@@ -200,7 +200,7 @@ namespace MultiCloudTestApp
                 return null;
             }
 
-            return pca.AcquireTokenSilentWithAccount(scopes, accounts.FirstOrDefault()).ExecuteAsync();
+            return pca.AcquireTokenSilent(scopes, accounts.FirstOrDefault()).ExecuteAsync();
         }
 
         private static async Task FetchTokenAsync(

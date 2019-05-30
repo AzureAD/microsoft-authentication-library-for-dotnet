@@ -298,7 +298,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                             foci: serverTokenResponse == ServerTokenResponse.FociToken)
                 });
 
-            AuthenticationResult resultB = await app.AcquireTokenSilentWithAccount(MsalTestConstants.Scope, account)
+            AuthenticationResult resultB = await app.AcquireTokenSilent(MsalTestConstants.Scope, account)
                 .WithForceRefresh(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);

@@ -72,7 +72,7 @@ namespace AutomationApp
             string[] scope = { "mail.read" };
 
             AuthenticationResult result = await _publicClientApplication
-                .AcquireTokenSilentWithAccount(scope, CurrentUser)
+                .AcquireTokenSilent(scope, CurrentUser)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 

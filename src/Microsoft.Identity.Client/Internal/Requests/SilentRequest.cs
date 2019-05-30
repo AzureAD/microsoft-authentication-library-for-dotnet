@@ -29,13 +29,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _silentParameters = silentParameters;
         }
 
-        private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint, bool singleAccount = false)
+        private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint)
         {
             var accounts = await CacheManager.TokenCacheInternal.GetAccountsAsync(
                 ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
                 AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
-            if (!singleAccount)
+            if (!_silentParameters.SingleAccount)
             {
                 accounts = accounts
                 .Where(a => !string.IsNullOrWhiteSpace(a.Username) &&
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (accounts.Count() > 1)
             {
-                if (singleAccount)
+                if (_silentParameters.SingleAccount)
                 {
                     throw new MsalClientException(
                         MsalError.AmbigiousAccount,
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return silentParameters.Account;
             }
 
-            return await GetSingleAccountForLoginHintAsync(silentParameters.LoginHint, silentParameters.SingleAccount).ConfigureAwait(false);
+            return await GetSingleAccountForLoginHintAsync(silentParameters.LoginHint).ConfigureAwait(false);
         }
 
         internal async override Task PreRunAsync()

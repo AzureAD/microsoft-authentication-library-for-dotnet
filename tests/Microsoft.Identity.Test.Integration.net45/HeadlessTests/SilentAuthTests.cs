@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Part 2 - Acquire a token silently, with forceRefresh = true");
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, authResult).ConfigureAwait(false);
 
-            authResult = await pca.AcquireTokenSilentWithAccount(s_scopes, account)
+            authResult = await pca.AcquireTokenSilent(s_scopes, account)
                 .WithForceRefresh(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var at2 = authResult.AccessToken;
 
             Trace.WriteLine("Part 3 - Acquire a token silently with a login hint, with forceRefresh = true");
-            authResult = await pca.AcquireTokenSilentWithLoginHint(s_scopes, user.Upn)
+            authResult = await pca.AcquireTokenSilent(s_scopes, user.Upn)
                .WithForceRefresh(true)
                .ExecuteAsync()
                .ConfigureAwait(false);
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 SetCacheSerializationToFile(pca2, cacheFilePath);
 
-                authResult = await pca2.AcquireTokenSilentWithLoginHint(s_scopes, user.Upn)
+                authResult = await pca2.AcquireTokenSilent(s_scopes, user.Upn)
                   .WithAuthority("https://login.microsoftonline.com/organizations")
                   .ExecuteAsync()
                   .ConfigureAwait(false);

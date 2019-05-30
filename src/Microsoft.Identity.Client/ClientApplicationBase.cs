@@ -51,8 +51,8 @@ namespace Microsoft.Identity.Client
 
         /// <Summary>
         /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
-        /// and updated silently if needed when calling <see cref="AcquireTokenSilentWithAccount(IEnumerable{string}, IAccount)"/>
-        /// or one of the overrides of <see cref="AcquireTokenSilentWithAccount(IEnumerable{string}, IAccount)"/>.
+        /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+        /// or one of the overrides of <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
         /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
         /// cache (see <c>IConfidentialClientApplication</c>).
         /// </Summary>
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client
         /// specify extra query parameters
         ///
         /// </remarks>
-        public AcquireTokenSilentParameterBuilder AcquireTokenSilentWithAccount(IEnumerable<string> scopes, IAccount account)
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {
             return AcquireTokenSilentParameterBuilder.Create(
                 ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Client
         /// specify extra query parameters
         ///
         /// </remarks>
-        public AcquireTokenSilentParameterBuilder AcquireTokenSilentWithLoginHint(IEnumerable<string> scopes, string loginHint)
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
         {
             if (string.IsNullOrWhiteSpace(loginHint))
             {

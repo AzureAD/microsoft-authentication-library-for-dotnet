@@ -123,7 +123,7 @@ namespace UWP
             try
             {
                 result = await _pca
-                    .AcquireTokenSilentWithAccount(s_scopes, accounts.FirstOrDefault())
+                    .AcquireTokenSilent(s_scopes, accounts.FirstOrDefault())
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
