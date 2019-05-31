@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         WithValidateAuthority,
         WithAdfsAuthority,
         WithB2CAuthority,
-        WithCustomWebUi
+        WithCustomWebUi,
+        WithDefaultBrowserOptions
     }
 }

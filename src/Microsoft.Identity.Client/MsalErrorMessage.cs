@@ -266,5 +266,8 @@ namespace Microsoft.Identity.Client
            "See https://aka.ms/msal-net-b2c for details. ";
 
         public const string TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback = "You cannot set a tokencache callback method from within the callback itself.";
+
+        public const string EmbeddedWebviewDefaultBrowser = "You configured MSAL interactive authentication to use an embedded WebView " +
+            "and you also configured system WebView options. These are mutually exclusive.";
     }
 }

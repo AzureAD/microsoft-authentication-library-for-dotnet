@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 return new CustomWebUiHandler(interactiveParameters.CustomWebUi);
             }
 
-            var coreUiParent = interactiveParameters.UiParent;
+            CoreUIParent coreUiParent = interactiveParameters.UiParent;
 
             coreUiParent.UseEmbeddedWebview = GetUseEmbeddedWebview(
                 interactiveParameters.UseEmbeddedWebView,

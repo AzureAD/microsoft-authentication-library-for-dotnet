@@ -42,7 +42,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
            IEnumerable<string> expectedExtraScopesToConsent = null,
            string expectedLoginHint = null,
            string expectedPromptValue = null,
-           ICustomWebUi expectedCustomWebUi = null)
+           ICustomWebUi expectedCustomWebUi = null,
+           SystemWebViewOptions browserOptions = null)
         {
              ValidateInteractiveParameters(
                 WebViewPreference.NotSpecified,
@@ -50,7 +51,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
                 expectedExtraScopesToConsent,
                 expectedLoginHint,
                 expectedPromptValue,
-                expectedCustomWebUi);
+                expectedCustomWebUi,
+                browserOptions);
         }
 
         public void ValidateInteractiveParameters(
@@ -59,7 +61,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             IEnumerable<string> expectedExtraScopesToConsent = null,
             string expectedLoginHint = null,
             string expectedPromptValue = null,
-            ICustomWebUi expectedCustomWebUi = null)
+            ICustomWebUi expectedCustomWebUi = null,
+            SystemWebViewOptions browserOptions = null)
         {
             Assert.IsNotNull(InteractiveParametersReceived);
 
@@ -72,6 +75,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             Assert.IsNotNull(InteractiveParametersReceived.UiParent);
             Assert.AreEqual(expectedEmbeddedWebView, InteractiveParametersReceived.UseEmbeddedWebView);
             Assert.AreEqual(expectedCustomWebUi, InteractiveParametersReceived.CustomWebUi);
+            Assert.AreEqual(browserOptions, InteractiveParametersReceived.UiParent.SystemWebViewOptions);
         }
     }
 }
