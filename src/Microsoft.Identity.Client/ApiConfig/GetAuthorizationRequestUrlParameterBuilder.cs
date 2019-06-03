@@ -103,6 +103,18 @@ namespace Microsoft.Identity.Client
             return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public new Task<Uri> ExecuteAsync()
+        {
+            // This method is marked "public new" because it only differs in return type from the base class
+            // ExecuteAsync() and we need this one to return Uri and not AuthenticationResult.
+
+            return ExecuteAsync(CancellationToken.None);
+        }
+
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
