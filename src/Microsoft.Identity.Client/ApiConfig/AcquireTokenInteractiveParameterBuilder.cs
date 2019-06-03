@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client
 
 // Default browser WebUI is not available on mobile (Android, iOS, UWP), but allow it at runtime
 // to avoid MissingMethodException
-#if NET_CORE || NETSTANDARD || DESKTOP || MAC || RUNTIME
+#if NET_CORE || NETSTANDARD || DESKTOP || RUNTIME
         /// <summary>
         /// Specifies options for using the system OS browser handle interactive authentication.
         /// </summary>

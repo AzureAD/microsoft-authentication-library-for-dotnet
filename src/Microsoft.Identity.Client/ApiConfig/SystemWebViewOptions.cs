@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client
     /// It can however respond with a 200 OK message or a 302 Redirect, which can be configured here.
     /// For more details see https://aka.ms/msal-net-os-browser
     /// </summary>
-#if NET_CORE || NETSTANDARD || DESKTOP || MAC || RUNTIME
+#if NET_CORE || NETSTANDARD || DESKTOP || RUNTIME
     public
 #else
     internal
@@ -30,7 +30,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// When the user finishes authenticating, but an error occurred,
-        /// MSAL will respond with a 200 OK message, which the browser will show to the user. 
+        /// MSAL will respond with a 200 OK message, which the browser will show to the user.
+        /// You can use a string format e.g. "An error has occurred: {0} details: {1}"
         /// </summary>
         public string HtmlMessageError { get; set; }
 
@@ -44,11 +45,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public Uri BrowserRedirectError { get; set; }
 
-        /// <summary>
-        /// Command line template, e.g. "start -c edge {0}" where {0} will be replaced by the url that starts authentication 
-        /// </summary>
-        public string CommandLineTemplateToStartTheBrowser { get; set; }
-
         internal void LogParameters(ICoreLogger logger)
         {
             logger.Info("DefaultBrowserOptions configured");
@@ -61,8 +57,6 @@ namespace Microsoft.Identity.Client
                "BrowserRedirectSuccess? " + (BrowserRedirectSuccess != null));
             logger.InfoPii("BrowserRedirectError " + BrowserRedirectError,
                "BrowserRedirectError? " + (BrowserRedirectError != null));
-            logger.InfoPii("CommandLineTemplateToStartTheBrowser " + CommandLineTemplateToStartTheBrowser,
-              "CommandLineTemplateToStartTheBrowser? " + !String.IsNullOrEmpty(CommandLineTemplateToStartTheBrowser));
         }
     }
 }

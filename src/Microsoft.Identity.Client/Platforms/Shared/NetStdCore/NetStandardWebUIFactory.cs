@@ -11,7 +11,10 @@ namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
     {
         public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {
-            return new DefaultOsBrowserWebUi(requestContext.ServiceBundle.PlatformProxy, requestContext.Logger);
+            return new DefaultOsBrowserWebUi(
+                requestContext.ServiceBundle.PlatformProxy,
+                requestContext.Logger,
+                parent.SystemWebViewOptions);
         }
     }
 }
