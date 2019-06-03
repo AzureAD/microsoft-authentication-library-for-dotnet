@@ -11,7 +11,7 @@ using Microsoft.Identity.Json.Linq;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// A simple <see cref="ITelemetryConfig"/> implementation that writes data using <see cref="Trace"/>
+    /// A simple <see cref="ITelemetryConfig"/> implementation that writes data using System.Diagnostics.Trace.
     /// </summary>
     /// <remarks>This API is experimental and it may change in future versions of the library without an major version increment</remarks>
     public class TraceTelemetryConfig : ITelemetryConfig
