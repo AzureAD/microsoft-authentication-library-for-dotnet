@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the <see cref="ITokenCacheSerializer"/> involved in the transaction
         /// </summary>
+        /// <remarks><see cref="TokenCache" > objects</see> implement this interface.</remarks>
         public ITokenCacheSerializer TokenCache { get; }
 
         /// <summary>
