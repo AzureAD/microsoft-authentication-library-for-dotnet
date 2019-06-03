@@ -6,6 +6,7 @@ using System.Collections.Generic;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
+    /// Data that represents a single snapshot in the series of events that are collected
     /// </summary>
     /// <remarks>This API is experimental and it may change in future versions of the library without an major version increment</remarks>
     public interface ITelemetryEventPayload
