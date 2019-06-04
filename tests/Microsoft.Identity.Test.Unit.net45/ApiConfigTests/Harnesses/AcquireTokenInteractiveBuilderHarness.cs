@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
            ICustomWebUi expectedCustomWebUi = null)
         {
              ValidateInteractiveParameters(
-                Maybe<bool>.Empty(),
+                WebViewPreference.NotSpecified,
                 expectedAccount,
                 expectedExtraScopesToConsent,
                 expectedLoginHint,
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
         }
 
         public void ValidateInteractiveParameters(
-            Maybe<bool> expectedEmbeddedWebView,
+            WebViewPreference expectedEmbeddedWebView,
             IAccount expectedAccount = null,
             IEnumerable<string> expectedExtraScopesToConsent = null,
             string expectedLoginHint = null,

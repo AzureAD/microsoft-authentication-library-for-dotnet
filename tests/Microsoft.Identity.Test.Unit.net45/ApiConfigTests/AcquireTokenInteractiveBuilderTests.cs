@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -125,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
-            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: new Maybe<bool>(false));
+            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: WebViewPreference.System);
         }
 
 #if DESKTOP
@@ -139,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
-            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: new Maybe<bool>(true));
+            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: WebViewPreference.Embedded);
         }
 #endif
 
