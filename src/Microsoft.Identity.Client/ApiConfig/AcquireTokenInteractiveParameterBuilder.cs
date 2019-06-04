@@ -333,8 +333,7 @@ namespace Microsoft.Identity.Client
             }
 #endif
             if (Parameters.UiParent.SystemWebViewOptions!=null &&
-                Parameters.UseEmbeddedWebView.HasItem &&
-                Parameters.UseEmbeddedWebView.Item == true)
+                Parameters.UseEmbeddedWebView == WebViewPreference.Embedded)
             {
                 throw new MsalClientException(
                     MsalError.SystemWebviewOptionsNotApplicable,
@@ -342,7 +341,7 @@ namespace Microsoft.Identity.Client
             }
 
             if (Parameters.UiParent.SystemWebViewOptions != null &&
-               !Parameters.UseEmbeddedWebView.HasItem)
+               Parameters.UseEmbeddedWebView == WebViewPreference.NotSpecified)
             {
                 WithUseEmbeddedWebView(false);
             }

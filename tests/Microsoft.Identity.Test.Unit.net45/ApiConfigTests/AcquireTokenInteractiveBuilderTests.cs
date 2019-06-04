@@ -181,9 +181,9 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
-            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
             _harness.ValidateInteractiveParameters(
-                expectedEmbeddedWebView: new Maybe<bool>(false), // If system webview options are set, force usage of system webview
+                expectedEmbeddedWebView: WebViewPreference.System, // If system webview options are set, force usage of system webview
                 browserOptions: options);
         }
     }

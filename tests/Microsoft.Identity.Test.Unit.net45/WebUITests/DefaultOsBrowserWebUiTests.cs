@@ -2,26 +2,18 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.netcore;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -54,10 +46,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         private const string TestAuthorizationResponseUri = "http://localhost:50997/?code=OAQABAAIAAADCoMpjJXrxTq9VG9te-7FX1n0H3n1cOvvLstfUYt_wAqcm96iwQKYzTWLqkz44aUnx4mswa7tn53DFy03fIJie9zOUjk5y6R9vU-rhCSUTLTJR6wUdqsbZfqgRpcCHRPHgmOFk7c3MqJ6WF5Y9AfQgXLaXsZN5vy7ZqS9viU0-NXxKDuBx17yqsT0FPvuoO_0yEZkuVkwd_x_fuUpejHqmORRPfdS-rN6e-7TwfbpsjvUl_eZ2BbzOSJu9rRltWqK-cBVkBhmt3jYEXVWsuTFRD9GHPELscdMJxkwqeOyA8-Lt6zCskKQMq_aAwSPR34CxA9YXoLy-psqjeMDLA5ieP5rmdoNcGBPSXS-imNMKfFSxHN_df6rqpQCOShJ_SmuBFY6qfcARgXpAlobRiUHat-K5heDVJTude47uE_NCSdmRJVZzY1dOeVEJ6f6O1TgR8EHq_MOSyc9HTUU0CpYvf8zePZIjn4jFPv4CZwvdmc4sOCntWrPxxj0JfRval58-aueRgnyhkm9G23FG4oCWWjydaKp5EytHhyYYf_qztsycUkL3Z2Ox7brQ8_Sj1IQr14J3G2FUYgwjuvi6RYK3cvXPM6oUrhOlQcvx03y10xAtizogcA5UR2m8GIpDkm4GEMYX4yYcvBUI6y0qKHmjnZuS5UsymUhUbNG8kEsnI0WTODZ4zYlEHweTsTXq1QNawZqxAW-ZsQ9EbrEbuDFaybJtNYFuHkm1kUjUwpsbZXFLnTUI6CKKDNlUdvPpbiENgapB_p_AgLl3L5KihfY8AkVbVgHZVAcpDClEu_autQZa2jGvPEQka-oKpHqIFZbDEi4qB4yrkU_hDsjf-EqnIAA&state=901e7d87-6f49-4f9f-9fa7-e6b8c32d5b9595bc1797-dacc-4ff1-b9e9-0df81be286c7&session_state=1b37b349-61fe-4ad5-a049-9f8eadfded26";
         private const string TestErrorAuthorizationResponseUri = "http://localhost:50997/?error=errorMsg&error_description=errorDesc";
         private const int TestPort = 50997;
-
-        ITcpInterceptor _tcpInterceptor;
-        IPlatformProxy _platformProxy;
-        ICoreLogger _logger;
+        private ITcpInterceptor _tcpInterceptor;
+        private IPlatformProxy _platformProxy;
+        private ICoreLogger _logger;
 
         [TestInitialize]
         public override void TestInitialize()
