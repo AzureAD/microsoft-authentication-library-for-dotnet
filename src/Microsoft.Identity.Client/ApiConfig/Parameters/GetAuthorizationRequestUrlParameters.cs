@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 ExtraScopesToConsent = ExtraScopesToConsent,
                 LoginHint = LoginHint,
                 Prompt = Prompt.SelectAccount,
-                UseEmbeddedWebView = new Maybe<bool>()
+                UseEmbeddedWebView = WebViewPreference.NotSpecified
             };
         }
 
