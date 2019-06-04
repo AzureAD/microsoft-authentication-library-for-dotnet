@@ -11,16 +11,13 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
+
     internal class AcquireTokenInteractiveParameters : IAcquireTokenParameters
     {
         public Prompt Prompt { get; set; } = Prompt.SelectAccount;
         public CoreUIParent UiParent { get; } = new CoreUIParent();
         public IEnumerable<string> ExtraScopesToConsent { get; set; } = new List<string>();
-
-        /// <summary>
-        /// False for system webUi, true for embedded webUi and null for using the default, which is platform specifc
-        /// </summary>
-        public Maybe<bool> UseEmbeddedWebView { get; set; } = new Maybe<bool>();
+        public WebViewPreference UseEmbeddedWebView { get; set; } = WebViewPreference.NotSpecified;
         public string LoginHint { get; set; }
         public IAccount Account { get; set; }
         public ICustomWebUi CustomWebUi { get; set; }

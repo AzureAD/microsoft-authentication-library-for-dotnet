@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
+using NetStandard;
 //using NetStandard;
 
 namespace NetFx
@@ -27,7 +28,6 @@ namespace NetFx
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
-        private static IPublicClientApplication s_pca = null;
         public static readonly string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.json";
 
 
@@ -38,12 +38,10 @@ namespace NetFx
 
         private static int s_currentTid = 0;
 
-
-
         public static void Main(string[] args)
         {
-            s_pca = CreatePca();
-            RunConsoleAppLogicAsync().Wait();
+            var pca = CreatePca();
+            RunConsoleAppLogicAsync(pca).Wait();
         }
 
         private static string GetAuthority()
@@ -79,14 +77,14 @@ namespace NetFx
             return pca;
         }
 
-        private static async Task RunConsoleAppLogicAsync()
+        private static async Task RunConsoleAppLogicAsync(IPublicClientApplication pca)
         {
             while (true)
             {
                 Console.Clear();
 
                 Console.WriteLine("Authority: " + GetAuthority());
-                await DisplayAccountsAsync(s_pca).ConfigureAwait(false);
+                await DisplayAccountsAsync(pca).ConfigureAwait(false);
 
                 // display menu
                 Console.WriteLine(@"
@@ -109,68 +107,67 @@ namespace NetFx
                     switch (selection)
                     {
                     case 1: // acquire token
-                        authTask = s_pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                     case 2: // acquire token u/p
                         SecureString password = GetPasswordFromConsole();
-                        authTask = s_pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                     case 3:
-                        authTask = s_pca.AcquireTokenWithDeviceCode(
+                        authTask = pca.AcquireTokenWithDeviceCode(
                             s_scopes,
                             deviceCodeResult =>
                             {
                                 Console.WriteLine(deviceCodeResult.Message);
                                 return Task.FromResult(0);
                             }).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                  
                     case 5: // acquire token interactive
 
                         CancellationTokenSource cts = new CancellationTokenSource();
-                        authTask = s_pca.AcquireTokenInteractive(s_scopes)
-                            //.WithUseEmbeddedWebView(false)
+                        authTask = pca.AcquireTokenInteractive(s_scopes)
+                            .WithUseEmbeddedWebView(false)
                             .ExecuteAsync(cts.Token);
 
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                     case 6: // acquire token silent
-                        IAccount account = s_pca.GetAccountsAsync().Result.FirstOrDefault();
+                        IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
                         if (account == null)
                         {
                             Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
                         }
 
-                        authTask = s_pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        authTask = pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                     case 7:
-                        //CancellationTokenSource cts2 = new CancellationTokenSource();
-                        //var authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
-                        //await FetchTokenAndCallGraphAsync(s_pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
+                        CancellationTokenSource cts2 = new CancellationTokenSource();
+                        var authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
+                        await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
                         break;
                     case 8:
-                        var accounts = await s_pca.GetAccountsAsync().ConfigureAwait(false);
+                        var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                         foreach (var acc in accounts)
                         {
-                            await s_pca.RemoveAsync(acc).ConfigureAwait(false);
+                            await pca.RemoveAsync(acc).ConfigureAwait(false);
                         }
 
                         break;
                     case 9:
 
                         s_currentTid = (s_currentTid + 1) % s_tids.Length;
-                        s_pca = CreatePca();
-
-                        RunConsoleAppLogicAsync().Wait();
+                        pca = CreatePca();
+                        RunConsoleAppLogicAsync(pca).Wait();
                         break;
 
 
@@ -192,7 +189,7 @@ namespace NetFx
             }
         }
 
-        private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication _pca, Task<AuthenticationResult> authTask)
+        private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
             await authTask.ConfigureAwait(false);
 
@@ -202,15 +199,15 @@ namespace NetFx
 
 
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
-            await DisplayAccountsAsync(_pca).ConfigureAwait(false);
+            await DisplayAccountsAsync(pca).ConfigureAwait(false);
             Console.ResetColor();
         }
 
 
 
-        private static async Task DisplayAccountsAsync(IPublicClientApplication _pca)
+        private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
         {
-            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
             Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "For the public client, the tokenCache contains {0} token(s)", accounts.Count()));
 
@@ -273,26 +270,5 @@ namespace NetFx
             }
             return pwd;
         }
-
-        //private static async Task<string> CallGraphAsync(string token)
-        //{
-        //    var httpClient = new HttpClient();
-        //    System.Net.Http.HttpResponseMessage response;
-        //    try
-        //    {
-        //        var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, GraphAPIEndpoint);
-        //        //Add the token in Authorization header
-        //        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        //        response = await httpClient.SendAsync(request).ConfigureAwait(false);
-        //        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        //        return content;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return ex.ToString();
-        //    }
-        //}
-
-
     }
 }

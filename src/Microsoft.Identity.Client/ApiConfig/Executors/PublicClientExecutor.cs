@@ -125,9 +125,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             var coreUiParent = interactiveParameters.UiParent;
 
-            coreUiParent.UseEmbeddedWebview = interactiveParameters.UseEmbeddedWebView.GetValueOrDefault(
+            coreUiParent.UseEmbeddedWebview = GetUseEmbeddedWebview(
+                interactiveParameters.UseEmbeddedWebView,
                 requestContext.ServiceBundle.PlatformProxy.UseEmbeddedWebViewDefault);
-
 
 #if WINDOWS_APP || DESKTOP
             // hidden web view can be used in both WinRT and desktop applications.
@@ -141,7 +141,19 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext);
         }
 
-        
-
+        private static bool GetUseEmbeddedWebview(WebViewPreference userPreference, bool defaultValue)
+        {
+            switch (userPreference)
+            {
+            case WebViewPreference.NotSpecified:
+                return defaultValue;
+            case WebViewPreference.Embedded:
+                return true;
+            case WebViewPreference.System:
+                return false;
+            default:
+                throw new NotImplementedException("Unknown option");
+            }
+        }
     }
 }

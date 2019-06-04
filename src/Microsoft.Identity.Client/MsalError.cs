@@ -571,7 +571,7 @@ namespace Microsoft.Identity.Client
         public const string LinuxXdgOpen = "linux_xdg_open_failed";
 
         /// <summary>
-        /// The selected webview is not available on this platform. You can switch to a different webview using .WithUseEmbeddedWebview(bool). See https://aka.ms/msal-net-os-browser for details
+        /// The selected webview is not available on this platform. You can switch to a different webview using .WithUseEmbeddedWebView(bool). See https://aka.ms/msal-net-os-browser for details
         /// </summary>
         public const string WebviewUnavailable = "no_system_webview";
 
