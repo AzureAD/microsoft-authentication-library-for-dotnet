@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client
@@ -42,10 +43,17 @@ namespace Microsoft.Identity.Client
         public Uri BrowserRedirectSuccess { get; set; }
 
         /// <summary>
-        /// When the user finishes authenticating, but an error occurred, MSAL will redirect the browser to the given url
+        /// When the user finishes authenticating, but an error occurred, MSAL will redirect the browser to the given Uri
         /// </summary>
         /// <remarks>Takes precedence over <see cref="HtmlMessageError"/></remarks>
         public Uri BrowserRedirectError { get; set; }
+
+        /// <summary>
+        /// Allows developers to implement their own logic for starting a browser and navigating to a specific Uri. MSAL
+        /// will use this when opening the browser. Leave it null and the user configured browser will be used. 
+        /// </summary>
+        /// <remarks>This property is experimental and the signature may change without a major version increment.</remarks>
+        public Func<Uri, Task> OpenBrowserAsync { get; set; }
 
         internal void LogParameters(ICoreLogger logger)
         {

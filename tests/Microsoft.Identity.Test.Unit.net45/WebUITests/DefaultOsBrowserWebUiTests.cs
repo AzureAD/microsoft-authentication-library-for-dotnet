@@ -81,6 +81,46 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
+        public async Task DefaultOsBrowserWebUi_CustomBrowser_Async()
+        {
+            bool customOpenBrowserCalled = false;
+            var options = new SystemWebViewOptions()
+            {
+                OpenBrowserAsync = (Uri u) =>
+                {
+                    customOpenBrowserCalled = true;
+                    return Task.FromResult(0);
+                }
+            };
+
+            var webUI = CreateTestWebUI(options);
+            var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
+            var responseUri = new Uri(TestAuthorizationResponseUri);
+
+            _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
+                TestPort,
+                Arg.Any<Func<Uri, string>>(),
+                CancellationToken.None)
+               .Returns(Task.FromResult(responseUri));
+
+            // Act
+            AuthorizationResult authorizationResult = await webUI.AcquireAuthorizationAsync(
+                new Uri(TestAuthorizationRequestUri),
+                new Uri(TestRedirectUri),
+                requestContext,
+                CancellationToken.None).ConfigureAwait(false);
+
+            // Assert that we didn't open the browser using platform proxy
+            await _platformProxy.DidNotReceiveWithAnyArgs().StartDefaultOsBrowserAsync(default)
+                .ConfigureAwait(false);
+
+            await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
+                TestPort, Arg.Any<Func<Uri, string>>(), CancellationToken.None).ConfigureAwait(false);
+
+            Assert.IsTrue(customOpenBrowserCalled);
+        }
+
+        [TestMethod]
         public async Task DefaultOsBrowserWebUi_ReturnUriInvalid_Async()
         {
             string differentPortRedirectUri = TestAuthorizationResponseUri.Replace(TestRedirectUri, "http://localhost:1111");
@@ -102,13 +142,11 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
             var responseUri = new Uri(responseUriString);
 
-            Func<Uri, string> func;
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
                 Arg.Any<Func<Uri, string>>(),
                 CancellationToken.None)
-               .Returns(Task.FromResult(responseUri))
-               .AndDoes(x => func = (Func<Uri, string>)x[1]);
+               .Returns(Task.FromResult(responseUri));
 
             // Act
             AuthorizationResult authorizationResult = await webUI.AcquireAuthorizationAsync(
