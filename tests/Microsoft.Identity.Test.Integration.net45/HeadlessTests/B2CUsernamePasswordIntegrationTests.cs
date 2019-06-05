@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ROPC_B2C_Async()
         {
-            var labResponse = LabUserHelper.GetB2CLocalAccount();
+            var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
             await RunB2CHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 

@@ -38,42 +38,42 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ROPC_AAD_Async()
         {
-            var labResponse = LabUserHelper.GetDefaultUser();
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv4Federated_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, true);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv4Managed_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv3Federated_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3, true);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv3Managed_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3, false);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, false).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv2Fderated_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV2, true);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV2, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IsFederatedUser = true
             };
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
 
 
             var user = labResponse.User;
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {
-            var labResponse = LabUserHelper.GetDefaultUser();
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public void AcquireTokenWithFederatedUsernameIncorrectPassword()
+        public async Task AcquireTokenWithFederatedUsernameIncorrectPasswordAsync()
         {
             UserQuery query = new UserQuery
             {
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IsFederatedUser = false
             };
 
-            var labResponse = LabUserHelper.GetLabUserData(query);
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();

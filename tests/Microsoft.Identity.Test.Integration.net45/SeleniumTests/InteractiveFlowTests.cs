@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task Interactive_AADAsync()
         {
             // Arrange
-            LabResponse labResponse = LabUserHelper.GetDefaultUser();
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = false
             };
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = true
             };
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = false
             };
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -130,14 +130,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = true
             };
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);            
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task InteractiveConsentPromptAsync()
         {
-            var labResponse = LabUserHelper.GetDefaultUser();
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, true).ConfigureAwait(false);
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = false
             };
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = true
             };
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = true
             };
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
         }
 
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             //cache = new TokenCache();
 
             //Acquire AT for default lab account
-            LabResponse labResponseDefault = LabUserHelper.GetDefaultUser();
+            LabResponse labResponseDefault = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);           
             AuthenticationResult defaultAccountResult = await RunTestForUserAsync(labResponseDefault).ConfigureAwait(false);
 
             //Acquire AT for ADFS 2019 account
@@ -213,11 +213,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = true
             };
 
-            LabResponse labResponseFederated = LabUserHelper.GetLabUserData(federatedUserquery);
+            LabResponse labResponseFederated = await LabUserHelper.GetLabUserDataAsync(federatedUserquery).ConfigureAwait(false);
             var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, false).ConfigureAwait(false);
 
             //Acquire AT for MSA account
-            LabResponse labResponseMsa = LabUserHelper.GetB2CMSAAccount();
+            LabResponse labResponseMsa = await LabUserHelper.GetB2CMSAAccountAsync().ConfigureAwait(false);
             labResponseMsa.AppId = LabApiConstants.MSAOutlookAccountClientID;
             var msaAccountResult = await RunTestForUserAsync(labResponseMsa).ConfigureAwait(false);
 

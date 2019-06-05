@@ -129,14 +129,14 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
-            await RunOnBehalfOfTestAsync(LabUserHelper.GetSpecificUser("IDLAB@msidlab4.onmicrosoft.com")).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(await LabUserHelper.GetSpecificUserAsync("IDLAB@msidlab4.onmicrosoft.com").ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
 
-            await RunOnBehalfOfTestAsync(LabUserHelper.GetAdfsUser(FederationProvider.ADFSv2019)).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         [TestMethod]
