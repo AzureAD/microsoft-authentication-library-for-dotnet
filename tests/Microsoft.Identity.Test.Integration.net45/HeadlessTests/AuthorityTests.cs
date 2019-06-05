@@ -3,15 +3,10 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Security;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -19,13 +14,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class AuthorityMigrationTests
     {
-        private static readonly string[] _scopes = { "User.Read" };
-
+        private static readonly string[] s_scopes = { "User.Read" };
 
         [TestMethod]
         public async Task AuthorityMigrationAsync()
         {
-            var labResponse = LabUserHelper.GetDefaultUser();
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             var user = labResponse.User;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
@@ -35,7 +29,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Acquire a token using a not so common authority alias");
 
             AuthenticationResult authResult = await pca.AcquireTokenByUsernamePassword(
-               _scopes,
+               s_scopes,
                 user.Upn,
                 new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
                 .WithAuthority("https://sts.windows.net/" + user.CurrentTenantId + "/")
@@ -46,7 +40,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Acquire a token silently using the common authority alias");
 
-            authResult = await pca.AcquireTokenSilent(_scopes, (await pca.GetAccountsAsync().ConfigureAwait(false)).First())
+            authResult = await pca.AcquireTokenSilent(s_scopes, (await pca.GetAccountsAsync().ConfigureAwait(false)).First())
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .ExecuteAsync()
                 .ConfigureAwait(false);

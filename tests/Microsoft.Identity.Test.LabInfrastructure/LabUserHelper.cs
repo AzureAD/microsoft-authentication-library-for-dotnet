@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -21,7 +22,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             s_labService = new LabServiceApi();
         }
 
-        public static LabResponse GetLabUserData(UserQuery query)
+        public static async Task<LabResponse> GetLabUserDataAsync(UserQuery query)
         {
             if (s_userCache.ContainsKey(query))
             {
@@ -29,7 +30,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 return s_userCache[query];
             }
 
-            var user = s_labService.GetLabResponse(query);
+            var user = await s_labService.GetLabResponseAsync(query).ConfigureAwait(false);
             if (user == null)
             {
                 throw new LabUserNotFoundException(query, "Found no users for the given query.");
@@ -41,29 +42,29 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return user;
         }
 
-        public static LabResponse GetDefaultUser()
+        public static Task<LabResponse> GetDefaultUserAsync()
         {
-            return GetLabUserData(UserQuery.DefaultUserQuery);
+            return GetLabUserDataAsync(UserQuery.DefaultUserQuery);
         }
 
-        public static LabResponse GetB2CLocalAccount()
+        public static Task<LabResponse> GetB2CLocalAccountAsync()
         {
-            return GetLabUserData(UserQuery.B2CLocalAccountUserQuery);
+            return GetLabUserDataAsync(UserQuery.B2CLocalAccountUserQuery);
         }
 
-        public static LabResponse GetB2CFacebookAccount()
+        public static Task<LabResponse> GetB2CFacebookAccountAsync()
         {
-            return GetLabUserData(UserQuery.B2CFacebookUserQuery);
+            return GetLabUserDataAsync(UserQuery.B2CFacebookUserQuery);
         }
 
-        public static LabResponse GetB2CGoogleAccount()
+        public static Task<LabResponse> GetB2CGoogleAccountAsync()
         {
-            return GetLabUserData(UserQuery.B2CGoogleUserQuery);
+            return GetLabUserDataAsync(UserQuery.B2CGoogleUserQuery);
         }
 
-        public static LabResponse GetB2CMSAAccount()
+        public static async Task<LabResponse> GetB2CMSAAccountAsync()
         {
-            var response = GetLabUserData(UserQuery.B2CMSAUserQuery);
+            var response = await GetLabUserDataAsync(UserQuery.B2CMSAUserQuery).ConfigureAwait(false);
             if (String.IsNullOrEmpty(response.User.HomeUPN))
             {
                 response.User.HomeUPN = response.User.Upn;
@@ -71,19 +72,19 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        public static LabResponse GetSpecificUser(string upn)
+        public static Task<LabResponse> GetSpecificUserAsync(string upn)
         {
             var query = new UserQuery();
             query.Upn = upn;
-            return GetLabUserData(query);
+            return GetLabUserDataAsync(query);
         }
 
-        public static LabResponse GetAdfsUser(FederationProvider federationProvider, bool federated = true)
+        public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
         {
             var query = UserQuery.DefaultUserQuery;
             query.FederationProvider = federationProvider;
             query.IsFederatedUser = federated;
-            return GetLabUserData(query);
+            return GetLabUserDataAsync(query);
         }
 
         public static string FetchUserPassword(string passwordUri)

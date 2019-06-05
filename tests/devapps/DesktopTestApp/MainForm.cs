@@ -522,7 +522,7 @@ namespace DesktopTestApp
         {
             using (new UIProgressScope(this))
             {
-                GetB2CClientIdFromLab();
+                await GetB2CClientIdFromLabAsync().ConfigureAwait(false);
 
                 ClearResultPageInfo();
 
@@ -550,7 +550,7 @@ namespace DesktopTestApp
         {
             using (new UIProgressScope(this))
             {
-                GetB2CClientIdFromLab();
+                await GetB2CClientIdFromLabAsync().ConfigureAwait(false);
 
                 ClearResultPageInfo();
 
@@ -665,13 +665,13 @@ namespace DesktopTestApp
             }
         }
         
-        private void GetB2CClientIdFromLab()
+        private async Task GetB2CClientIdFromLabAsync()
         {
             if (_b2CClientId != null)
             {
                 return;
             }
-            LabResponse labResponse = LabUserHelper.GetB2CLocalAccount();
+            LabResponse labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
             _b2CClientId = labResponse.AppId;
         }
     }

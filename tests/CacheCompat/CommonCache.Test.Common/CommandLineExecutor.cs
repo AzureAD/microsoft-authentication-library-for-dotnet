@@ -13,18 +13,21 @@ namespace CommonCache.Test.Common
 {
     public static class CommandLineExecutor
     {
-        public static void Execute(string[] args, Func<CommandLineOptions, Task> runFunc)
+        public static void Execute(string[] args, Func<TestInputData, Task> runFunc)
         {
             void SyncRunAction(CommandLineOptions options)
             {
+                string inputOptionsJson = File.ReadAllText(options.InputFilePath);
+                var inputOptions = JsonConvert.DeserializeObject<TestInputData>(inputOptionsJson);
+
                 Console.WriteLine(Assembly.GetEntryAssembly().Location);
                 try
                 {
-                    runFunc.Invoke(options).ConfigureAwait(false).GetAwaiter().GetResult();
+                    runFunc.Invoke(inputOptions).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
                 catch (Exception ex)
                 {
-                    File.WriteAllText(options.ResultsFilePath, JsonConvert.SerializeObject(ExecutionContent.CreateFromException(ex)));
+                    File.WriteAllText(inputOptions.ResultsFilePath, JsonConvert.SerializeObject(ExecutionContent.CreateFromException(ex)));
                 }
             }
 

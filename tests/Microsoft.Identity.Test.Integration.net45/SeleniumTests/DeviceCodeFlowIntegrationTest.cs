@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [Timeout(1 * 60 * 1000)] // 1 min timeout
         public async Task DeviceCodeFlowTestAsync()
         {
-            LabResponse labResponse = LabUserHelper.GetDefaultUser();
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
             Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
             var pca = PublicClientApplicationBuilder.Create(labResponse.AppId).Build();
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = true
             };
 
-            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
 
             Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(Adfs2019LabConstants.PublicClientId)
