@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 namespace CommonCache.Test.Common
 {
-    public class CacheExecutorResults
-    {
-        public CacheExecutorResults()
-        {
-        }
+    //public class CacheExecutorResults
+    //{
+    //    public CacheExecutorResults()
+    //    {
+    //    }
 
-        public List<CacheExecutorAccountResult> AccountResults { get; set; } = new List<CacheExecutorAccountResult>();
-    }
+    //    public List<CacheExecutorAccountResult> AccountResults { get; set; } = new List<CacheExecutorAccountResult>();
+    //}
 }

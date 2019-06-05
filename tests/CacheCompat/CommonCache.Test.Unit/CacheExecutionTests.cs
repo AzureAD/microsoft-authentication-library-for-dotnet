@@ -24,6 +24,13 @@ namespace CommonCache.Test.Unit
             return new LabUserData(labUser.Upn, labUser.GetOrFetchPassword());
         }
 
+        private static async Task<LabUserData> GetLabUserDataAsync(string upn)
+        {
+            var api = new LabServiceApi();
+            var labUser = (await api.GetLabResponseAsync(new UserQuery() { Upn = upn }).ConfigureAwait(false)).User;
+            return new LabUserData(labUser.Upn, labUser.GetOrFetchPassword());
+        }
+
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext testContext)
         {
@@ -32,9 +39,10 @@ namespace CommonCache.Test.Unit
             // s_labUsers.Add(GetLabUserData("idlab@msidlab2.onmicrosoft.com"));
             // s_labUsers.Add(GetLabUserData("idlab@msidlab3.onmicrosoft.com"));
             // "idlab@msidlab4.onmicrosoft.com"
-            s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
-            s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
-            s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
+            s_labUsers.Add(GetLabUserDataAsync("idlab@msidlab4.onmicrosoft.com").GetAwaiter().GetResult());
+            //s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
+            //s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
+            //s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
         }
 
         [DataTestMethod]

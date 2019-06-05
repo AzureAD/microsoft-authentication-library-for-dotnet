@@ -21,7 +21,7 @@ namespace CommonCache.Test.MsalV2
         private class MsalV3CacheExecutor : AbstractCacheExecutor
         {
             /// <inheritdoc />
-            protected override async Task<CacheExecutorResults> InternalExecuteAsync(TestInputData testInputData)
+            protected override async Task<List<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
                 var v1App = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;
@@ -49,7 +49,7 @@ namespace CommonCache.Test.MsalV2
 
                 IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
 
-                var results = new CacheExecutorResults();
+                var results = new List<CacheExecutorAccountResult>();
 
                 foreach (var labUserData in testInputData.LabUserDatas)
                 {
@@ -66,7 +66,7 @@ namespace CommonCache.Test.MsalV2
 
                         Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
 
-                        results.AccountResults.Add(new CacheExecutorAccountResult(labUserData.Upn, result.Account.Username, true));
+                        results.Add(new CacheExecutorAccountResult(labUserData.Upn, result.Account.Username, true));
                     }
                     catch (MsalUiRequiredException)
                     {
@@ -77,12 +77,12 @@ namespace CommonCache.Test.MsalV2
 
                         if (string.IsNullOrWhiteSpace(result.AccessToken))
                         {
-                            results.AccountResults.Add(new CacheExecutorAccountResult(labUserData.Upn, string.Empty, false));
+                            results.Add(new CacheExecutorAccountResult(labUserData.Upn, string.Empty, false));
                         }
                         else
                         {
                             Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
-                            results.AccountResults.Add(new CacheExecutorAccountResult(labUserData.Upn, result.Account.Username, false));
+                            results.Add(new CacheExecutorAccountResult(labUserData.Upn, result.Account.Username, false));
                         }
                     }
                 }

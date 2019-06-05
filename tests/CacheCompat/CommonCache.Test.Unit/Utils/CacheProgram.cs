@@ -42,12 +42,7 @@ namespace CommonCache.Test.Unit.Utils
 
             var sb = new StringBuilder();
             sb.Append($"--inputPath {inputFilePath.EncloseQuotes()} ");
-            //sb.Append($"--userName {username} ");
-            //sb.Append($"--userPassword {password} ");
-            //sb.Append($"--resultsFilePath {ResultsFilePath.EncloseQuotes()} ");
-            //sb.Append($"--cacheStorageType {Convert.ToInt32(CacheStorageType, CultureInfo.InvariantCulture)} ");
             string arguments = sb.ToString();
-
             var processUtils = new ProcessUtils();
 
             try

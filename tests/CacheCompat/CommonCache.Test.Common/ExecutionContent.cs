@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace CommonCache.Test.Common
 {
@@ -10,7 +12,9 @@ namespace CommonCache.Test.Common
         public bool IsError { get; set; }
         public string ErrorMessage { get; set; }
         public string StackTrace { get; set; }
-        public CacheExecutorResults Results { get; set; }
+
+        [JsonProperty("Results")]
+        public List<CacheExecutorAccountResult> Results { get; set; } = new List<CacheExecutorAccountResult>();
 
         public static ExecutionContent CreateFromException(Exception ex)
         {
@@ -22,7 +26,7 @@ namespace CommonCache.Test.Common
             };
         }
 
-        public static ExecutionContent CreateSuccess(CacheExecutorResults results)
+        public static ExecutionContent CreateSuccess(List<CacheExecutorAccountResult> results)
         {
             return new ExecutionContent
             {

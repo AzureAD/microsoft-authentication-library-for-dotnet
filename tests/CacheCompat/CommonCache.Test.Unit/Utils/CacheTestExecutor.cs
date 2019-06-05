@@ -65,16 +65,16 @@ namespace CommonCache.Test.Unit.Utils
             Assert.IsFalse(firstResults.ProcessExecutionFailed, $"{cacheProgramFirst.ExecutablePath} should not fail");
             Assert.IsFalse(secondResults.ProcessExecutionFailed, $"{cacheProgramSecond.ExecutablePath} should not fail");
 
-            foreach (var upnResult in firstResults.ExecutionResults.Results.AccountResults)
+            foreach (var upnResult in firstResults.ExecutionResults.Results)
             {
                 Assert.IsFalse(upnResult.IsAuthResultFromCache, $"{upnResult.LabUserUpn} --> First result should not be from the cache");
-                Assert.AreEqual(upnResult.LabUserUpn.ToLowerInvariant(), upnResult.AuthResultUpn.ToLowerInvariant());
+                Assert.AreEqual(upnResult?.LabUserUpn?.ToLowerInvariant(), upnResult?.AuthResultUpn?.ToLowerInvariant());
             }
 
-            foreach (var upnResult in secondResults.ExecutionResults.Results.AccountResults)
+            foreach (var upnResult in secondResults.ExecutionResults.Results)
             {
                 Assert.IsTrue(upnResult.IsAuthResultFromCache, $"{upnResult.LabUserUpn} --> Second result should be from the cache");
-                Assert.AreEqual(upnResult.LabUserUpn.ToLowerInvariant(), upnResult.AuthResultUpn.ToLowerInvariant());
+                Assert.AreEqual(upnResult?.LabUserUpn?.ToLowerInvariant(), upnResult?.AuthResultUpn?.ToLowerInvariant());
             }
 
             Assert.IsFalse(

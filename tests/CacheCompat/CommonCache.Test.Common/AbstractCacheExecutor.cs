@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -15,7 +16,7 @@ namespace CommonCache.Test.Common
             CommandLineExecutor.Execute(args, ExecuteAsync);
         }
 
-        protected abstract Task<CacheExecutorResults> InternalExecuteAsync(TestInputData testInputData);
+        protected abstract Task<List<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData);
 
         private async Task ExecuteAsync(TestInputData testInputData)
         {

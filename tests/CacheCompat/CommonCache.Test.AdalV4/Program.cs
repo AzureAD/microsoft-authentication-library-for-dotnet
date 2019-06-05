@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
@@ -19,7 +20,7 @@ namespace CommonCache.Test.AdalV4
         private class AdalV4CacheExecutor : AbstractCacheExecutor
         {
             /// <inheritdoc />
-            protected override async Task<CacheExecutorResults> InternalExecuteAsync(TestInputData testInputData)
+            protected override async Task<List<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
                 var app = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;
@@ -35,7 +36,7 @@ namespace CommonCache.Test.AdalV4
                     CommonCacheTestUtils.MsalV2CacheFilePath);
                 var authenticationContext = new AuthenticationContext(app.Authority, tokenCache);
 
-                var results = new CacheExecutorResults();
+                var results = new List<CacheExecutorAccountResult>();
 
                 foreach (var labUserData in testInputData.LabUserDatas)
                 {
@@ -47,7 +48,7 @@ namespace CommonCache.Test.AdalV4
                             new UserIdentifier(labUserData.Upn, UserIdentifierType.RequiredDisplayableId)).ConfigureAwait(false);
 
                         Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' from the cache");
-                        results.AccountResults.Add(new CacheExecutorAccountResult(
+                        results.Add(new CacheExecutorAccountResult(
                             labUserData.Upn,
                             result.UserInfo.DisplayableId,
                             true));
@@ -61,12 +62,12 @@ namespace CommonCache.Test.AdalV4
 
                         if (string.IsNullOrWhiteSpace(result.AccessToken))
                         {
-                            results.AccountResults.Add(new CacheExecutorAccountResult(labUserData.Upn, string.Empty, false));
+                            results.Add(new CacheExecutorAccountResult(labUserData.Upn, string.Empty, false));
                         }
                         else
                         {
                             Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' without the cache");
-                            results.AccountResults.Add(new CacheExecutorAccountResult(
+                            results.Add(new CacheExecutorAccountResult(
                                 labUserData.Upn,
                                 result.UserInfo.DisplayableId,
                                 false));
