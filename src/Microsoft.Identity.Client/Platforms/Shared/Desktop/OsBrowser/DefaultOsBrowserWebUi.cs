@@ -64,7 +64,6 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 cancellationToken)
                 .ConfigureAwait(true);
 
-
             if (!authCodeUri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) ||
                !authCodeUri.AbsolutePath.Equals(redirectUri.AbsolutePath))
             {
@@ -130,8 +129,10 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             Uri redirectUri,
             CancellationToken cancellationToken)
         {
-            await _platformProxy.StartDefaultOsBrowserAsync(authorizationUri.AbsoluteUri)
-                .ConfigureAwait(false);
+            Func<Uri, Task> defaultBrowserAction = (Uri u) => _platformProxy.StartDefaultOsBrowserAsync(u.AbsoluteUri);
+            Func<Uri, Task> openBrowserAction = _webViewOptions?.OpenBrowserAsync ?? defaultBrowserAction;
+
+            await openBrowserAction(authorizationUri).ConfigureAwait(false);
 
             return await _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 redirectUri.Port,
@@ -171,7 +172,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 return $"HTTP/1.1 302 Found\r\nLocation: {redirectUri.ToString()}";
             }
 
-            return $"HTTP/1.1 200 OK\r\n{message}";
+            return $"HTTP/1.1 200 OK\r\n\r\n{message}";
         }
     }
 }

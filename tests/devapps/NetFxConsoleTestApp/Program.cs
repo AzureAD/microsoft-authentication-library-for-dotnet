@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -134,6 +135,19 @@ namespace NetFx
                         CancellationTokenSource cts = new CancellationTokenSource();
                         authTask = pca.AcquireTokenInteractive(s_scopes)
                             .WithUseEmbeddedWebView(false)
+                            .WithSystemWebViewOptions(new SystemWebViewOptions()
+                            {
+                                //BrowserRedirectSuccess = new Uri("https://www.google.com"),
+                                     HtmlMessageSuccess = "All good, close the browser!",
+
+                                OpenBrowserAsync = (Uri u) =>
+                                {
+                                    string url = u.AbsoluteUri;
+                                    url = url.Replace("&", "^&");
+                                    Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
+                                    return Task.FromResult(0);
+                                }
+                            })
                             .ExecuteAsync(cts.Token);
 
                         await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
