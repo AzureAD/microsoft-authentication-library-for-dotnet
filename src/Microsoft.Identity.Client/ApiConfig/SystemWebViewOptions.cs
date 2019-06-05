@@ -36,13 +36,15 @@ namespace Microsoft.Identity.Client
         public string HtmlMessageError { get; set; }
 
         /// <summary>
-        /// When the user finishes authenticating, MSAL will redirect the browser to the given url
+        /// When the user finishes authenticating, MSAL will redirect the browser to the given Uri
         /// </summary>
+        /// <remarks>Takes precedence over <see cref="HtmlMessageSuccess"/></remarks>
         public Uri BrowserRedirectSuccess { get; set; }
 
         /// <summary>
         /// When the user finishes authenticating, but an error occurred, MSAL will redirect the browser to the given url
         /// </summary>
+        /// <remarks>Takes precedence over <see cref="HtmlMessageError"/></remarks>
         public Uri BrowserRedirectError { get; set; }
 
         internal void LogParameters(ICoreLogger logger)

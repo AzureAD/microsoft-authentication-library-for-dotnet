@@ -268,6 +268,6 @@ namespace Microsoft.Identity.Client
         public const string TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback = "You cannot set a tokencache callback method from within the callback itself.";
 
         public const string EmbeddedWebviewDefaultBrowser = "You configured MSAL interactive authentication to use an embedded WebView " +
-            "and you also configured system WebView options. These are mutually exclusive.";
+            "and you also configured system WebView options. These are mutually exclusive. See https://aka.ms/msal-net-os-browser";
     }
 }

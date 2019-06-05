@@ -130,7 +130,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             Uri redirectUri,
             CancellationToken cancellationToken)
         {
-            await _platformProxy.StartDefaultOsBrowserAsync(authorizationUri.ToString()).ConfigureAwait(false);
+            await _platformProxy.StartDefaultOsBrowserAsync(authorizationUri.AbsoluteUri)
+                .ConfigureAwait(false);
 
             return await _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 redirectUri.Port,

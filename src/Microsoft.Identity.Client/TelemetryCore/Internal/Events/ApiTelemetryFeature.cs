@@ -24,6 +24,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         WithAdfsAuthority,
         WithB2CAuthority,
         WithCustomWebUi,
-        WithDefaultBrowserOptions
+        WithSystemBrowserOptions
     }
 }
