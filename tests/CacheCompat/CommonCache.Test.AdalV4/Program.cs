@@ -20,7 +20,7 @@ namespace CommonCache.Test.AdalV4
         private class AdalV4CacheExecutor : AbstractCacheExecutor
         {
             /// <inheritdoc />
-            protected override async Task<List<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
+            protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
                 var app = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;

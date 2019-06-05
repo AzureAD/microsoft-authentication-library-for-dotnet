@@ -20,7 +20,7 @@ namespace CommonCache.Test.MsalV2
         private class MsalV2CacheExecutor : AbstractCacheExecutor
         {
             /// <inheritdoc />
-            protected override async Task<List<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
+            protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
                 var v1App = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;

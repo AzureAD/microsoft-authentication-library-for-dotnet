@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace CommonCache.Test.Common
@@ -26,11 +27,11 @@ namespace CommonCache.Test.Common
             };
         }
 
-        public static ExecutionContent CreateSuccess(List<CacheExecutorAccountResult> results)
+        public static ExecutionContent CreateSuccess(IEnumerable<CacheExecutorAccountResult> results)
         {
             return new ExecutionContent
             {
-                Results = results
+                Results = results.ToList()
             };
         }
     }

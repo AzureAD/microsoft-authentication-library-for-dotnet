@@ -16,7 +16,7 @@ namespace CommonCache.Test.Common
             CommandLineExecutor.Execute(args, ExecuteAsync);
         }
 
-        protected abstract Task<List<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData);
+        protected abstract Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData);
 
         private async Task ExecuteAsync(TestInputData testInputData)
         {
