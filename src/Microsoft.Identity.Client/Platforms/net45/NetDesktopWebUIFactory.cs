@@ -19,7 +19,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             if (!parent.UseEmbeddedWebview)
             {
-                return new DefaultOsBrowserWebUi(requestContext.ServiceBundle.PlatformProxy, requestContext.Logger);
+                return new DefaultOsBrowserWebUi(
+                    requestContext.ServiceBundle.PlatformProxy,
+                    requestContext.Logger,
+                    parent.SystemWebViewOptions);
             }
 
             return new InteractiveWebUI(parent, requestContext);

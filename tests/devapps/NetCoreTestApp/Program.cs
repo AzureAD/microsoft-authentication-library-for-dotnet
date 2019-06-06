@@ -36,6 +36,7 @@ namespace NetCoreTestApp
             "72f988bf-86f1-41af-91ab-2d7cd011db47" };
 
         private static int s_currentTid = 0;
+
         public static void Main(string[] args)
         {
             var pca = CreatePca();
@@ -138,8 +139,14 @@ namespace NetCoreTestApp
                         break;
                     case 5: // acquire token interactive
 
-                        CancellationTokenSource cts = new CancellationTokenSource();
+                        var options = new SystemWebViewOptions()
+                        {
+                            BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
+                        };
+
+                        var cts = new CancellationTokenSource();
                         authTask = pca.AcquireTokenInteractive(s_scopes)
+                            .WithSystemWebViewOptions(options)
                             .ExecuteAsync(cts.Token);
 
                         await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);

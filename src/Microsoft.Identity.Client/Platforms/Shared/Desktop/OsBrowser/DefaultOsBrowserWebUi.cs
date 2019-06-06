@@ -17,15 +17,14 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
     internal class DefaultOsBrowserWebUi : IWebUI
     {
-        // TODO (bogavril): Make these configurable
-        private const string CloseWindowSuccessHtml = @"<html>
+        internal const string DefaultSuccessHtml = @"<html>
   <head><title>Authentication Complete</title></head>
   <body>
     Authentication complete. You can return to the application. Feel free to close this browser tab.
   </body>
 </html>";
 
-        private const string CloseWindowFailureHtml = @"<html>
+        internal const string DefaultFailureHtml = @"<html>
   <head><title>Authentication Failed</title></head>
   <body>
     Authentication failed. You can return to the application. Feel free to close this browser tab.
@@ -36,14 +35,17 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 
         private readonly ITcpInterceptor _tcpInterceptor;
         private readonly ICoreLogger _logger;
+        private readonly SystemWebViewOptions _webViewOptions;
         private readonly IPlatformProxy _platformProxy;
 
         public DefaultOsBrowserWebUi(
             IPlatformProxy proxy,
             ICoreLogger logger,
+            SystemWebViewOptions webViewOptions,
             /* for test */ ITcpInterceptor tcpInterceptor = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _webViewOptions = webViewOptions;
             _platformProxy = proxy ?? throw new ArgumentNullException(nameof(proxy));
 
             _tcpInterceptor = tcpInterceptor ?? new TcpInterceptor(_logger);
@@ -128,30 +130,48 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             Uri redirectUri,
             CancellationToken cancellationToken)
         {
-            await _platformProxy.StartDefaultOsBrowserAsync(authorizationUri.ToString()).ConfigureAwait(false);
+            await _platformProxy.StartDefaultOsBrowserAsync(authorizationUri.AbsoluteUri)
+                .ConfigureAwait(false);
 
             return await _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 redirectUri.Port,
-                GetMessageToShowInBroswerAfterAuth,
+                GetResponseMessage,
                 cancellationToken)
             .ConfigureAwait(false);
         }
 
-        private static string GetMessageToShowInBroswerAfterAuth(Uri authCodeUri)
+        internal /* internal for testing only */ string GetResponseMessage(Uri authCodeUri)
         {
             // Parse the uri to understand if an error was returned. This is done just to show the user a nice error message in the browser.
             var authorizationResult = AuthorizationResult.FromUri(authCodeUri.OriginalString);
 
             if (!string.IsNullOrEmpty(authorizationResult.Error))
             {
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    CloseWindowFailureHtml,
-                    authorizationResult.Error,
-                    authorizationResult.ErrorDescription);
+                _logger.Warning($"Default OS Browser intercepted an Uri with an error: " +
+                    $"{authorizationResult.Error} {authorizationResult.ErrorDescription}");
+
+                string errorMessage = string.Format(
+                        CultureInfo.InvariantCulture,
+                        _webViewOptions?.HtmlMessageError ?? DefaultFailureHtml,
+                        authorizationResult.Error,
+                        authorizationResult.ErrorDescription);
+
+                return GetMessage(_webViewOptions?.BrowserRedirectError, errorMessage);
             }
 
-            return CloseWindowSuccessHtml;
+            return GetMessage(
+                _webViewOptions?.BrowserRedirectSuccess,
+                _webViewOptions?.HtmlMessageSuccess ?? DefaultSuccessHtml);
+        }
+
+        private string GetMessage(Uri redirectUri, string message)
+        {
+            if (redirectUri != null)
+            {
+                return $"HTTP/1.1 302 Found\r\nLocation: {redirectUri.ToString()}";
+            }
+
+            return $"HTTP/1.1 200 OK\r\n{message}";
         }
     }
 }

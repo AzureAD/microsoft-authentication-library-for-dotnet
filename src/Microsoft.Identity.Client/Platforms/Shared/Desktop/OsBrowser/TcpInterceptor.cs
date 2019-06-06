@@ -136,8 +136,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             NetworkStream stream,
             CancellationToken cancellationToken)
         {
-            string fullResponse = $"HTTP/1.1 200 OK\r\n\r\n{message}";
-            var response = Encoding.ASCII.GetBytes(fullResponse);
+            var response = Encoding.ASCII.GetBytes(message);
             await stream.WriteAsync(response, 0, response.Length, cancellationToken).ConfigureAwait(false);
             await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
         }

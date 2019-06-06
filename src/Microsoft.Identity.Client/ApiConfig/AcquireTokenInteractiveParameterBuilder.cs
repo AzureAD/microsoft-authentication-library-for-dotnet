@@ -101,6 +101,22 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        // Default browser WebUI is not available on mobile (Android, iOS, UWP), but allow it at runtime
+        // to avoid MissingMethodException
+#if NET_CORE || NETSTANDARD || DESKTOP || RUNTIME
+        /// <summary>
+        /// Specifies options for using the system OS browser handle interactive authentication.
+        /// </summary>
+        /// <param name="options">Data object with options</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenInteractiveParameterBuilder WithSystemWebViewOptions(SystemWebViewOptions options)
+        {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSystemBrowserOptions);
+            Parameters.UiParent.SystemWebViewOptions = options;
+            return this;
+        }
+#endif
+
         /// <summary>
         /// Sets the <paramref name="loginHint"/>, in order to avoid select account
         /// dialogs in the case the user is signed-in with several identities. This method is mutually exclusive
@@ -153,7 +169,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#region WithParentActivityOrWindow
+        #region WithParentActivityOrWindow
 
         /*
          * .WithParentActivityOrWindow is platform specific but we need a solution for
@@ -303,7 +319,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#endregion
+        #endregion
 
         /// <inheritdoc />
         protected override void Validate()
@@ -316,6 +332,20 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.ActivityRequiredForParentObjectAndroid);
             }
 #endif
+            if (Parameters.UiParent.SystemWebViewOptions != null &&
+                Parameters.UseEmbeddedWebView == WebViewPreference.Embedded)
+            {
+                throw new MsalClientException(
+                    MsalError.SystemWebviewOptionsNotApplicable,
+                    MsalErrorMessage.EmbeddedWebviewDefaultBrowser);
+            }
+
+            if (Parameters.UiParent.SystemWebViewOptions != null &&
+               Parameters.UseEmbeddedWebView == WebViewPreference.NotSpecified)
+            {
+                WithUseEmbeddedWebView(false);
+            }
+
             Parameters.LoginHint = string.IsNullOrWhiteSpace(Parameters.LoginHint)
                                           ? Parameters.Account?.Username
                                           : Parameters.LoginHint;
