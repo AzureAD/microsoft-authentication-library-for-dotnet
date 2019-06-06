@@ -55,7 +55,9 @@ namespace CommonCache.Test.MsalV2
                 }
                 if (msalv2State != null)
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     args.TokenCache.DeserializeMsalV2(msalv2State);
+#pragma warning restore CS0618 // Type or member is obsolete
                 }
                 if (msalv3State != null)
                 {
@@ -72,7 +74,9 @@ namespace CommonCache.Test.MsalV2
                 lock (s_fileLock)
                 {
                     var adalV3State = args.TokenCache.SerializeAdalV3();
+#pragma warning disable CS0618 // Type or member is obsolete
                     var msalV2State = args.TokenCache.SerializeMsalV2();
+#pragma warning restore CS0618 // Type or member is obsolete
                     var msalV3State = args.TokenCache.SerializeMsalV3();
 
                     // reflect changes in the persistent store

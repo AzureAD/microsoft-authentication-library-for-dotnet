@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
         /// Sets the certificate associated with the application
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        /// <returns></returns>
+        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
         {
             Config.ClientCredentialCertificate = certificate;

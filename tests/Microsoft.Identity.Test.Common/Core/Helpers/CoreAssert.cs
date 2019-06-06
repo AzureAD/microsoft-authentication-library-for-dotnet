@@ -20,5 +20,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 Assert.IsTrue(actualScopes.Contains(expectedScope));
             }
         }
+
+        public static void AreEqual<T>(T val1, T val2, T val3)
+        {
+            Assert.AreEqual(val1, val2, "First and second values differ");
+            Assert.AreEqual(val1, val3, "First and third values differ");
+        }
     }
 }

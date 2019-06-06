@@ -570,6 +570,18 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string LinuxXdgOpen = "linux_xdg_open_failed";
 
+        /// <summary>
+        /// The selected webview is not available on this platform. You can switch to a different webview using <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/>. See https://aka.ms/msal-net-os-browser for details
+        /// </summary>
+        public const string WebviewUnavailable = "no_system_webview";
+
+        /// <summary>
+        /// <para>What happens?</para>You configured MSAL interactive authentication to use an embedded webview and you also configured <see cref="SystemWebViewOptions"/>.
+        /// These are mutually exclusive.
+        /// <para>Mitigation</para>Either set <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to true or do not use
+        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/>
+        /// </summary>
+        public const string SystemWebviewOptionsNotApplicable = "embedded_webview_not_compatible_default_browser";
 
 #if iOS
         /// <summary>

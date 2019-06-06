@@ -51,17 +51,16 @@ namespace Microsoft.Identity.Client
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithPrompt(Prompt)"/> to specify the user experience
         /// when signing-in, <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to specify
         /// if you want to use the embedded web browser or the system default browser,
+        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/> to configure
+        /// the user experience when using the Default browser,
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
         /// to prevent the select account dialog from appearing in the case you want to sign-in a specific account,
-        /// WithParentActivityOrWindow to optimize how the browser is shown, e.g.
-        /// for centering the browser window on the app window. Required on Xamarin.Android
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)"/>
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
         /// user pre-consent to additional scopes (which won't be returned in the access token),
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction
+        /// of the known authorities added to the application construction.
         /// </remarks>
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(

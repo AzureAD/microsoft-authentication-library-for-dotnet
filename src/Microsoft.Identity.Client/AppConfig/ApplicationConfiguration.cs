@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -39,6 +40,9 @@ namespace Microsoft.Identity.Client
         public ITelemetryConfig TelemetryConfig { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
+
+        public IPlatformProxy PlatformProxy { get; internal set; }
+
         public AuthorityInfo AuthorityInfo { get; internal set; }
         public string ClientId { get; internal set; }
         public string TenantId { get; internal set; }

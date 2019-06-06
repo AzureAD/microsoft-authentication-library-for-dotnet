@@ -18,6 +18,8 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -30,8 +32,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
             : base(logger)
         {
         }
-
-        public override bool IsSystemWebViewAvailable => false;
 
         /// <summary>
         /// Get the user logged in to Windows or throws
@@ -209,5 +209,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return MatsConverter.AsInt(OsPlatform.Win32);
         }
         protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
+
+        public override bool IsSystemWebViewAvailable => false;
     }
 }

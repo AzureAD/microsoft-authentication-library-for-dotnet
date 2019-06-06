@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses;
@@ -113,19 +115,76 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _harness.ValidateInteractiveParameters(expectedCustomWebUi: customWebUi);
         }
 
-#if DESKTOP
         [TestMethod]
-        public async Task TestAcquireTokenInteractive_EmbeddedNet45_Async()
+        public async Task TestAcquireTokenInteractive_SystemWebview_Async()
         {
             var customWebUi = Substitute.For<ICustomWebUi>();
 
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                                                         .WithUseEmbeddedWebView(false)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
+
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
+            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: WebViewPreference.System);
+        }
+
+#if DESKTOP
+        [TestMethod]
+        public async Task TestAcquireTokenInteractive_Embedded_Async()
+        {
             await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
                                                          .WithUseEmbeddedWebView(true)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
-            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: true);
+            _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: WebViewPreference.Embedded);
+        }
+
+        [TestMethod]
+        public async Task TestAcquireTokenInteractive_EmbeddedAndSystemOptions_Async()
+        {
+            var options = new SystemWebViewOptions();
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+
+                 AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                                                         .WithSystemWebViewOptions(options)
+                                                         .WithUseEmbeddedWebView(true)
+                                                         .ExecuteAsync()
+                                                        ).ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.SystemWebviewOptionsNotApplicable, ex.ErrorCode);
         }
 #endif
+
+#if NET_CORE
+        [TestMethod]
+        public async Task TestAcquireTokenInteractive_EmbeddedNetCore_Async()
+        {
+            var customWebUi = Substitute.For<ICustomWebUi>();
+
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                 AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                                                         .WithUseEmbeddedWebView(true)
+                                                         .ExecuteAsync()
+                                                        ).ConfigureAwait(false);
+            Assert.AreEqual(MsalError.WebviewUnavailable, ex.ErrorCode);
+        }
+#endif
+
+        [TestMethod]
+        public async Task TestAcquireTokenInteractive_Options_Async()
+        {
+            var options = new SystemWebViewOptions();
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                                                         .WithSystemWebViewOptions(options)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
+
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
+            _harness.ValidateInteractiveParameters(
+                expectedEmbeddedWebView: WebViewPreference.System, // If system webview options are set, force usage of system webview
+                browserOptions: options);
+        }
     }
 }

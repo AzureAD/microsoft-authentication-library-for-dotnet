@@ -1,74 +1,97 @@
-﻿# ------------------------------------------------------------------------------
-# 
-# Copyright (c) Microsoft Corporation.
-# All rights reserved.
-# 
-# This code is licensed under the MIT License.
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files(the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions :
-# 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-# 
-# ------------------------------------------------------------------------------
+﻿#-----------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See LICENSE in the project root for license information.
+#-----------------------------------------------------------------------------------------
 
 import sys
 import os
 import atexit
+import json
 import msal
 
-config = {}
+class TestInputData:
+    def __init__(self, labUserDatas, resultsFilePath, storageType):
+        self.labUserDatas = labUserDatas
+        self.resultsFilePath = resultsFilePath
+        self.storageType = storageType
 
-config["client_id"] = sys.argv[1]
-config["authority"] = sys.argv[2]
-config["scope"] = sys.argv[3]
-config["username"] = sys.argv[4]
-config["password"] = sys.argv[5]
-config["cache_path"] = sys.argv[6]
+class CacheExecutorAccountResult:
+    def __init__(self, labUserUpn, authResultUpn, isAuthResultFromCache):
+        self.LabUserUpn = labUserUpn
+        self.AuthResultUpn = authResultUpn
+        self.IsAuthResultFromCache = isAuthResultFromCache
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+class ExecutionContext:
+    def __init__(self, isError, errorMessage, results):
+        self.IsError = isError
+        self.ErrorMessage = errorMessage
+        self.Results = results
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+cmdlineargs = {}
+cmdlineargs["inputFilePath"] = sys.argv[2]
+
+print(os.path.dirname(os.path.realpath(__file__)))
+print(sys.argv[2])
+with open(sys.argv[2], 'r') as fp:
+    testInput = json.load(fp)
+
+the_scopes = [ testInput['Scope'] ]
 
 cache = msal.SerializableTokenCache()
 
-if os.path.exists(config["cache_path"]):
-    cache.deserialize(open(config["cache_path"], "r").read())
+cacheFilePath = testInput['CacheFilePath']
+print('CacheFilePath: ' + cacheFilePath)
+
+resultsFilePath = testInput['ResultsFilePath']
+print('ResultsFilePath: ' + resultsFilePath)
 
 atexit.register(lambda:
-    open(config["cache_path"], "w").write(cache.serialize())
+    open(cacheFilePath, 'w').write(cache.serialize())
 )
 
-the_scopes = [ config["scope"] ]
+if os.path.exists(cacheFilePath):
+    cache.deserialize(open(cacheFilePath, 'r').read())
 
-# Create a preferably long-lived app instance which maintains a token cache.
-app = msal.PublicClientApplication(config["client_id"], authority=config["authority"], token_cache=cache)
+app = msal.PublicClientApplication(testInput['ClientId'], authority=testInput['Authority'], token_cache=cache)
 
-# The pattern to acquire a token looks like this.
-result = None
+results = []
 
-# Firstly, check the cache to see if this end user has signed in before
-accounts = app.get_accounts(username=config["username"])
-if accounts:
-    result = app.acquire_token_silent(the_scopes, account=accounts[0])
+for labUserData in testInput['LabUserDatas']:
+    upn = labUserData['Upn']
+    print('Handling labUserData.Upn = ' + upn)
+    accounts = app.get_accounts(username=upn)
 
-if result:
-    print("**TOKEN RECEIVED FROM CACHE**")
-else:
-    result = app.acquire_token_by_username_password(config["username"], config["password"], scopes=the_scopes)
+    result = None
+
+    if accounts:
+        result = app.acquire_token_silent(the_scopes, account=accounts[0])
+
     if result:
-        print("**TOKEN RECEIVED, BUT _NOT_ FROM CACHE**")
+        print("got token for '" + upn + "' from the cache")
+        # results.append(CacheExecutorAccountResult(upn, result.get("Username"), True))  
+        results.append(CacheExecutorAccountResult(upn, upn, True))  # TODO(BUG): Tried to do line above for result.get("Username") but I don't get the UPN that was acquired
     else:
-        print("**TOKEN ACQUIRE FAILURE**")
-        print(result.get("error"))
-        print(result.get("error_description"))
-        print(result.get("correlation_id"))  # You may need this when reporting a bug
+        result = app.acquire_token_by_username_password(upn, labUserData['Password'], scopes=the_scopes)
+        if result:
+            print("got token for '" + upn + "' by signing in with credentials")
+            print(result)
+            # results.append(CacheExecutorAccountResult(upn, result.get("Username"), False))
+            results.append(CacheExecutorAccountResult(upn, upn, False))  # TODO(BUG): Tried to do line above for result.get("Username") but I don't get the UPN that was acquired
+        else:
+            print("** ACQUIRE TOKEN FAILURE **")
+            print(result.get("error"))
+            print(result.get("error_description"))
+            print(result.get("correlation_id")) 
+            results.append(CacheExecutorAccountResult(upn, '', False))
+
+executionContext = ExecutionContext(False, '', results)
+json = executionContext.toJSON()
+
+with open(resultsFilePath, 'w') as outfile:
+    outfile.write(json)

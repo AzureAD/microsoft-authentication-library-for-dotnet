@@ -11,13 +11,16 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
 {
@@ -29,7 +32,8 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
         private static readonly string[] s_adfsScopes = { string.Format(CultureInfo.CurrentCulture, "{0}/email openid", Adfs2019LabConstants.AppId) };
         //TODO: acquire scenario specific client ids from the lab resonse
-        private const string _confidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+        private const string ConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+        private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -41,6 +45,36 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+        }
+
+        [TestMethod]
+        // Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1193
+        public async Task GetAuthorizationRequestUrl_ReturnsUri_Async()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+               .Create(ConfidentialClientID)
+               .WithRedirectUri(RedirectUri)
+               .Build();
+
+            var uri1 = await cca.GetAuthorizationRequestUrl(s_scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            var uri2 = await cca.GetAuthorizationRequestUrl(s_scopes).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(uri1.Host, uri2.Host);
+            Assert.AreEqual(uri1.LocalPath, uri2.LocalPath);
+
+            var uriParams1 = HttpUtility.ParseQueryString(uri1.Query);
+            var uriParams2 = HttpUtility.ParseQueryString(uri2.Query);
+
+            CoreAssert.AreEqual("offline_access openid profile User.Read", uriParams1["scope"], uriParams2["scope"]);
+            CoreAssert.AreEqual("code", uriParams1["response_type"], uriParams2["response_type"]);
+            CoreAssert.AreEqual(ConfidentialClientID, uriParams1["client_id"], uriParams2["client_id"]);
+            CoreAssert.AreEqual(RedirectUri, uriParams1["redirect_uri"], uriParams2["redirect_uri"]);
+            CoreAssert.AreEqual("select_account", uriParams1["prompt"], uriParams2["prompt"]);
+
+            Assert.AreEqual(uriParams1["x-client-CPU"], uriParams2["x-client-CPU"]);
+            Assert.AreEqual(uriParams1["x-client-OS"], uriParams2["x-client-OS"]);
+            Assert.AreEqual(uriParams1["x-client-Ver"], uriParams2["x-client-Ver"]);
+            Assert.AreEqual(uriParams1["x-client-SKU"], uriParams2["x-client-SKU"]);
         }
 
         [TestMethod]
@@ -59,7 +93,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             }
 
             confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(_confidentialClientID)
+                .Create(ConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithCertificate(cert)
                 .Build();
@@ -80,7 +114,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(_confidentialClientID)
+                .Create(ConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientSecret(secret)
                 .Build();
@@ -95,14 +129,14 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
-            await RunOnBehalfOfTestAsync(LabUserHelper.GetSpecificUser("IDLAB@msidlab4.onmicrosoft.com")).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(await LabUserHelper.GetSpecificUserAsync("IDLAB@msidlab4.onmicrosoft.com").ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
 
-            await RunOnBehalfOfTestAsync(LabUserHelper.GetAdfsUser(FederationProvider.ADFSv2019)).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         [TestMethod]

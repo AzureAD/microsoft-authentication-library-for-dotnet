@@ -23,9 +23,9 @@ namespace Microsoft.Identity.Test.UIAutomation
     [TestFixture(Platform.Android)]
     public class AndroidTests
     {
-        IApp app;
-        Platform platform;
-        ITestController xamarinController = new AndroidXamarinUiTestController();
+        private IApp _app;
+        private readonly Platform _platform;
+        private readonly ITestController _xamarinController = new AndroidXamarinUiTestController();
         MobileTestHelper _mobileTestHelper;
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// <param name="platform">The platform where the tests will be performed</param>
         public AndroidTests(Platform platform)
         {
-            this.platform = platform;
+            this._platform = platform;
         }
 
         /// <summary>
@@ -43,9 +43,9 @@ namespace Microsoft.Identity.Test.UIAutomation
         [SetUp]
         public void InitializeBeforeTest()
         {
-            app = AppFactory.StartApp(platform, "com.Microsoft.XFormsDroid.MSAL");
-            xamarinController.Application = app;
-            _mobileTestHelper = new MobileTestHelper(platform);
+            _app = AppFactory.StartApp(_platform, "com.Microsoft.XFormsDroid.MSAL");
+            _xamarinController.Application = _app;
+            _mobileTestHelper = new MobileTestHelper(_platform);
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
+            _mobileTestHelper.AcquireTokenInteractiveTestHelper(_xamarinController, LabUserHelper.GetDefaultUserAsync().GetAwaiter().GetResult());
         }
 
         /// <summary>
@@ -122,9 +122,9 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void PromptBehaviorConsentSelectAccount()
         {
-            var labResponse = LabUserHelper.GetDefaultUser();
+            var labResponse = LabUserHelper.GetDefaultUserAsync().GetAwaiter().GetResult();
 
-            _mobileTestHelper.PromptBehaviorTestHelperWithConsent(xamarinController, labResponse);
+            _mobileTestHelper.PromptBehaviorTestHelperWithConsent(_xamarinController, labResponse);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenSilentTest()
         {
-            _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
+            _mobileTestHelper.AcquireTokenSilentTestHelper(_xamarinController, LabUserHelper.GetDefaultUserAsync().GetAwaiter().GetResult());
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookB2CLoginAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CFacebookAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
+            _mobileTestHelper.B2CFacebookAcquireTokenSilentTest(_xamarinController, LabUserHelper.GetB2CFacebookAccountAsync().GetAwaiter().GetResult(), true);
         }
 
         /// <summary>
@@ -157,8 +157,8 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookMicrosoftAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, false);
-            _mobileTestHelper.B2CSilentFlowHelper(xamarinController);
+            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(_xamarinController, LabUserHelper.GetB2CFacebookAccountAsync().GetAwaiter().GetResult().User, B2CIdentityProvider.Facebook, false);
+            _mobileTestHelper.B2CSilentFlowHelper(_xamarinController);
         }
 
         /// <summary>
@@ -171,9 +171,9 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Ignore("issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1026")]
         public void B2CFacebookEditPolicyAcquireTokenTest()
         {
-            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, true);
-            _mobileTestHelper.B2CSilentFlowHelper(xamarinController);
-            _mobileTestHelper.B2CFacebookEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
+            _mobileTestHelper.PerformB2CSelectProviderOnlyFlow(_xamarinController, LabUserHelper.GetB2CFacebookAccountAsync().GetAwaiter().GetResult().User, B2CIdentityProvider.Facebook, true);
+            _mobileTestHelper.B2CSilentFlowHelper(_xamarinController);
+            _mobileTestHelper.B2CFacebookEditPolicyAcquireTokenInteractiveTestHelper(_xamarinController);
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CGoogleB2CLoginAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CGoogleAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), true);
+            _mobileTestHelper.B2CGoogleAcquireTokenSilentTest(_xamarinController, LabUserHelper.GetB2CGoogleAccountAsync().GetAwaiter().GetResult(), true);
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CGoogleMicrosoftAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CGoogleAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), false);
+            _mobileTestHelper.B2CGoogleAcquireTokenSilentTest(_xamarinController, LabUserHelper.GetB2CGoogleAccountAsync().GetAwaiter().GetResult(), false);
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CLocalAccountAcquireTokenTest()
         {
-            _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
+            _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(_xamarinController, LabUserHelper.GetB2CLocalAccountAsync().GetAwaiter().GetResult(), true);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CROPCLocalAccountAcquireTokenTest()
         {
-            _mobileTestHelper.B2CAcquireTokenROPCTest(xamarinController, LabUserHelper.GetB2CLocalAccount());
+            _mobileTestHelper.B2CAcquireTokenROPCTest(_xamarinController, LabUserHelper.GetB2CLocalAccountAsync().GetAwaiter().GetResult());
         }
 
         /// <summary>
@@ -230,8 +230,8 @@ namespace Microsoft.Identity.Test.UIAutomation
         public void AcquireTokenADFSV4InteractiveFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(
-                xamarinController,
-                LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4));
+                _xamarinController,
+                LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4).GetAwaiter().GetResult());
         }
 
         /// <summary>
@@ -241,8 +241,8 @@ namespace Microsoft.Identity.Test.UIAutomation
         public void AcquireTokenADFSV2019InteractiveFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(
-                xamarinController,
-                LabUserHelper.GetAdfsUser(FederationProvider.ADFSv2019));
+                _xamarinController,
+                LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019).GetAwaiter().GetResult());
         }
 
         /// <summary>
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenADFSV3InteractiveFederatedTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3));
+            _mobileTestHelper.AcquireTokenInteractiveTestHelper(_xamarinController, LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3).GetAwaiter().GetResult());
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenADFSV4InteractiveNonFederatedTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
+            _mobileTestHelper.AcquireTokenInteractiveTestHelper(_xamarinController, LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).GetAwaiter().GetResult());
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenADFSV2019InteractiveNonFederatedTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.ADFSv2019, false));
+            _mobileTestHelper.AcquireTokenInteractiveTestHelper(_xamarinController, LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, false).GetAwaiter().GetResult());
         }
 
         /// <summary>
@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenADFSV3InteractiveNonFederatedTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
+            _mobileTestHelper.AcquireTokenInteractiveTestHelper(_xamarinController, LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).GetAwaiter().GetResult());
         }
 
         private static void LogMessage(string message, StringBuilder stringBuilderMessage)

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
 using NetCoreTestApp.Experimental;
+using NetStandard;
 
 namespace NetCoreTestApp
 {
@@ -20,14 +21,12 @@ namespace NetCoreTestApp
     {
         // This app has http://localhost redirect uri registered
         private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
-        private static readonly string s_clientIdForConfidentialApp = "<enter id>";
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
-        private static IPublicClientApplication s_pca = null;
         public static readonly string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.json";
 
 
@@ -38,12 +37,10 @@ namespace NetCoreTestApp
 
         private static int s_currentTid = 0;
 
-
-
         public static void Main(string[] args)
         {
-            s_pca = CreatePca();
-            RunConsoleAppLogicAsync().Wait();
+            var pca = CreatePca();
+            RunConsoleAppLogicAsync(pca).Wait();
         }
 
         private static string GetAuthority()
@@ -58,7 +55,7 @@ namespace NetCoreTestApp
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
-                            .WithRedirectUri("https://localhost:12346") // required for DefaultOsBrowser
+                            .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();
 
             pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
@@ -79,14 +76,14 @@ namespace NetCoreTestApp
             return pca;
         }
 
-        private static async Task RunConsoleAppLogicAsync()
+        private static async Task RunConsoleAppLogicAsync(IPublicClientApplication pca)
         {
             while (true)
             {
                 Console.Clear();
 
                 Console.WriteLine("Authority: " + GetAuthority());
-                await DisplayAccountsAsync(s_pca).ConfigureAwait(false);
+                await DisplayAccountsAsync(pca).ConfigureAwait(false);
 
                 // display menu
                 Console.WriteLine(@"
@@ -96,7 +93,7 @@ namespace NetCoreTestApp
                         4. Acquire Token Interactive (via CustomWebUI)
                         5. Acquire Token Interactive 
                         6. Acquire Token Silently
-                        7. Confidential Client with Certificate (needs extra config)
+                        7. Acquire Interactive (logic in netstandard, default authority)
                         8. Clear cache
                         9. Rotate Tenant ID
                         0. Exit App
@@ -110,73 +107,80 @@ namespace NetCoreTestApp
                     switch (selection)
                     {
                     case 1: // acquire token
-                        authTask = s_pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                     case 2: // acquire token u/p
                         SecureString password = GetPasswordFromConsole();
-                        authTask = s_pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                     case 3:
-                        authTask = s_pca.AcquireTokenWithDeviceCode(
+                        authTask = pca.AcquireTokenWithDeviceCode(
                             s_scopes,
                             deviceCodeResult =>
                             {
                                 Console.WriteLine(deviceCodeResult.Message);
                                 return Task.FromResult(0);
                             }).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
-                    case 4: // acquire token interactive
+                    case 4: // acquire token interactive with custom web ui
 
-                        authTask = s_pca.AcquireTokenInteractive(s_scopes)
+                        authTask = pca.AcquireTokenInteractive(s_scopes)
                             .WithCustomWebUi(new DefaultOsBrowserWebUi()) // make sure you've configured a redirect uri of "http://localhost" or "http://localhost:1234" in the _pca builder
                             .ExecuteAsync(CancellationToken.None);
 
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                     case 5: // acquire token interactive
 
-                        CancellationTokenSource cts = new CancellationTokenSource();
-                        authTask = s_pca.AcquireTokenInteractive(s_scopes)
+                        var options = new SystemWebViewOptions()
+                        {
+                            BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
+                        };
+
+                        var cts = new CancellationTokenSource();
+                        authTask = pca.AcquireTokenInteractive(s_scopes)
+                            .WithSystemWebViewOptions(options)
                             .ExecuteAsync(cts.Token);
 
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                     case 6: // acquire token silent
-                        IAccount account = s_pca.GetAccountsAsync().Result.FirstOrDefault();
+                        IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
                         if (account == null)
                         {
                             Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
                         }
 
-                        authTask = s_pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(s_pca, authTask).ConfigureAwait(false);
+                        authTask = pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
+                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                         break;
                     case 7:
-                        RunClientCredentialWithCertificate();
+                        CancellationTokenSource cts2 = new CancellationTokenSource();
+                        NetStandardAuthenticator authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
+                        await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
                         break;
                     case 8:
-                        var accounts = await s_pca.GetAccountsAsync().ConfigureAwait(false);
+                        var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                         foreach (var acc in accounts)
                         {
-                            await s_pca.RemoveAsync(acc).ConfigureAwait(false);
+                            await pca.RemoveAsync(acc).ConfigureAwait(false);
                         }
 
                         break;
                     case 9:
 
                         s_currentTid = (s_currentTid + 1) % s_tids.Length;
-                        s_pca = CreatePca();
-
-                        RunConsoleAppLogicAsync().Wait();
+                        pca = CreatePca();
+                        RunConsoleAppLogicAsync(pca).Wait();
                         break;
 
 
@@ -198,7 +202,7 @@ namespace NetCoreTestApp
             }
         }
 
-        private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication _pca, Task<AuthenticationResult> authTask)
+        private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
             await authTask.ConfigureAwait(false);
 
@@ -208,35 +212,13 @@ namespace NetCoreTestApp
 
 
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
-            await DisplayAccountsAsync(_pca).ConfigureAwait(false);
+            await DisplayAccountsAsync(pca).ConfigureAwait(false);
             var callGraphTask = CallGraphAsync(authTask.Result.AccessToken);
             callGraphTask.Wait();
             Console.WriteLine("Result from calling the ME endpoint of the graph: " + callGraphTask.Result);
             Console.ResetColor();
         }
 
-        private static void RunClientCredentialWithCertificate()
-        {
-            var app = ConfidentialClientApplicationBuilder
-                .Create(s_clientIdForConfidentialApp)
-                .WithRedirectUri("http://localhost")
-                .WithCertificate(GetCertificateByThumbprint("<THUMBPRINT>"))
-                .Build();
-
-            try
-            {
-                AuthenticationResult result = app
-                    .AcquireTokenForClient(new string[] { "User.Read.All" })
-                    .WithForceRefresh(true)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-            }
-            catch (Exception exc)
-            {
-                Console.WriteLine(exc.Message);
-            }
-            finally { Console.ReadKey(); }
-        }
 
         private static X509Certificate2 GetCertificateByThumbprint(string thumbprint)
         {
@@ -253,15 +235,15 @@ namespace NetCoreTestApp
         }
 
 
-        private static async Task DisplayAccountsAsync(IPublicClientApplication _pca)
+        private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
         {
-            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
             Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "For the public client, the tokenCache contains {0} token(s)", accounts.Count()));
 
             foreach (var account in accounts)
             {
-                Console.WriteLine("_pca account for: " + account.Username + "\n");
+                Console.WriteLine("Account for: " + account.Username + "\n");
             }
         }
 

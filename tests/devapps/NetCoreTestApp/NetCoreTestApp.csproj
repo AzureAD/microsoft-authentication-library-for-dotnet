@@ -24,5 +24,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
     <ProjectReference Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''" Include="..\AriaTelemetryProvider\AriaTelemetryProvider.csproj" />
+    <ProjectReference Include="..\NetStandardShared\NetStandard\NetStandardLib.csproj" />
   </ItemGroup>
 </Project>

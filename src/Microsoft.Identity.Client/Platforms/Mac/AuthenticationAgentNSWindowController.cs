@@ -9,8 +9,8 @@ using Foundation;
 using AppKit;
 using WebKit;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Platforms.AppleShared;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Platforms.Shared.Apple;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {

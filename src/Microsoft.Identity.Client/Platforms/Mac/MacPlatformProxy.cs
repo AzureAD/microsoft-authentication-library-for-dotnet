@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
            () => NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
                                  .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault());
 
-        public override bool IsSystemWebViewAvailable => false;
+
 
         /// <summary>
         /// Considered PII. Please ensure that it is hashed.

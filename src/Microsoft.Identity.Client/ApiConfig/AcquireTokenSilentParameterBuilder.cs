@@ -91,6 +91,8 @@ namespace Microsoft.Identity.Client
 
         internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenSilent;
 
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+
         /// <summary>
         /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
         /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
@@ -108,6 +110,8 @@ namespace Microsoft.Identity.Client
             Parameters.SendX5C = withSendX5C;
             return this;
         }
+
+#endif
 
         /// <summary>
         /// 
