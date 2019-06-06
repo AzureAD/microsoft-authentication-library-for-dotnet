@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Type containing an assertion representing a clients's credentials. This type is used to allow specific claims to be added to the authentication request.<c>UserAssertion</c>
-    /// See https://aka.ms/msal-net-on-behalf-of
+    /// See https://aka.ms/msal-net-client-credentials
     /// </summary>
     public sealed class ClientAssertion
     {
