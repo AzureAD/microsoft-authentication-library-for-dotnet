@@ -29,7 +29,24 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal void SetItemIfValueNotNull(JObject json, string key, JToken value)
         {
-            if (!value.IsNullOrEmpty())
+            bool shouldSetValue = true;
+
+            object asObj = value.ToObject<object>();
+
+            if (asObj == null)
+            {
+                shouldSetValue = false;
+            }
+            else
+            {
+                string asString = asObj as string;
+                if (asString != null)
+                {
+                    shouldSetValue = !string.IsNullOrEmpty(asString);
+                }
+            }
+
+            if (shouldSetValue)
             {
                 json[key] = value;
             }

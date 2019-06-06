@@ -3,7 +3,6 @@
     "my-uid.my-utid-env_1-accesstoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-the_tenant_id-r1/scope1 r1/scope2": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_1",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "AccessToken",
@@ -18,7 +17,6 @@
     "my-uid.my-utid-env_2-accesstoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-the_tenant_id-r1/scope1 r1/scope2": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_2",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "AccessToken",
@@ -33,7 +31,6 @@
     "my-uid.my-utid-env_3-accesstoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-the_tenant_id-r1/scope1 r1/scope2": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_3",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "AccessToken",
@@ -48,7 +45,6 @@
     "my-uid.my-utid-env_4-accesstoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-the_tenant_id-r1/scope1 r1/scope2": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_4",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "AccessToken",
@@ -63,7 +59,6 @@
     "my-uid.my-utid-env_5-accesstoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-the_tenant_id-r1/scope1 r1/scope2": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_5",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "AccessToken",
@@ -80,34 +75,27 @@
     "my-uid.my-utid-env_1-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_1",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "RefreshToken",
-      "family_id": null
     },
     "my-uid.my-utid-env_2-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_2",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "RefreshToken",
-      "family_id": null
     },
     "my-uid.my-utid-env_3-refreshtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3--": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_3",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "RefreshToken",
-      "family_id": null
     },
     "my-uid.my-utid-env-refreshtoken-1--": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "RefreshToken",
@@ -118,7 +106,6 @@
     "my-uid.my-utid-env_1-idtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-the_tenant_id-": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_1",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "IdToken",
@@ -127,7 +114,6 @@
     "my-uid.my-utid-env_2-idtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-the_tenant_id-": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_2",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "IdToken",
@@ -136,7 +122,6 @@
     "my-uid.my-utid-env_3-idtoken-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-the_tenant_id-": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_3",
-      "client_info": null,
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
       "secret": "access_token_secret",
       "credential_type": "IdToken",
@@ -147,7 +132,6 @@
     "my-uid.my-utid-env_1-the_tenant_id": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_1",
-      "client_info": null,
       "username": "joe@localhost.com",
       "name": "First Last",
       "given_name": "Joe",
@@ -159,7 +143,6 @@
     "my-uid.my-utid-env_2-the_tenant_id": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_2",
-      "client_info": null,
       "username": "joe@localhost.com",
       "name": "First Last",
       "given_name": "Joe",
@@ -171,7 +154,6 @@
     "my-uid.my-utid-env_3-the_tenant_id": {
       "home_account_id": "my-uid.my-utid",
       "environment": "env_3",
-      "client_info": null,
       "username": "joe@localhost.com",
       "name": "First Last",
       "given_name": "Joe",
@@ -190,7 +172,6 @@
     "appmetadata-env_2-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3": {
       "environment": "env_2",
       "client_id": "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3",
-      "family_id": ""
     },
     "appmetadata-env_1-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa": {
       "environment": "env_1",

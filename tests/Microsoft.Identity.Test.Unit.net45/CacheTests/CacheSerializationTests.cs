@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 NormalizedScopes = MsalTestConstants.ScopeStr,
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
-                RawClientInfo = null, // todo(cache): what should this be?
+                RawClientInfo = string.Empty, // todo(cache): what should this be?
                 UserAssertionHash = "assertion hash", // todo(cache): what should this be
             };
         }
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Environment = "env",
                 HomeAccountId = MsalTestConstants.HomeAccountId,
                 Secret = "access_token_secret",
-                RawClientInfo = null, // todo(cache): what should this be?
+                RawClientInfo = string.Empty, // todo(cache): what should this be?
             };
         }
 
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 HomeAccountId = MsalTestConstants.HomeAccountId,
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
-                RawClientInfo = null, // todo(cache): what should this be?
+                RawClientInfo = string.Empty, // todo(cache): what should this be?
             };
         }
 
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 HomeAccountId = MsalTestConstants.HomeAccountId,
                 TenantId = "the_tenant_id",
                 AuthorityType = "authority type", // todo(cache): what should this be?
-                RawClientInfo = null, // "raw client info", // todo(cache): what should this be?
+                RawClientInfo = string.Empty, // "raw client info", // todo(cache): what should this be?
                 LocalAccountId = MsalTestConstants.LocalAccountId,
                 Name = MsalTestConstants.Name,
                 GivenName = MsalTestConstants.GivenName,
@@ -687,7 +687,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void AddBaseJObjectFields(List<string> fields)
         {
-            fields.AddRange(new List<string> { "home_account_id", "environment", "client_info" });
+            fields.AddRange(new List<string> { "home_account_id", "environment" });
         }
 
         private void AddBaseCredentialJObjectFields(List<string> fields)
