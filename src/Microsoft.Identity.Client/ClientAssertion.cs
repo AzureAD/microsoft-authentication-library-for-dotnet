@@ -11,12 +11,13 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
+    /// Type containing an assertion representing a clients's credentials. This type is used to allow specific claims to be added to the authentication request.<c>UserAssertion</c>
+    /// See https://aka.ms/msal-net-on-behalf-of
     /// </summary>
     public sealed class ClientAssertion
     {
         /// <summary>
-        /// 
+        /// Constructor from an X509Certificate2 certificate previously registered in AAD and specific claims.
         /// </summary>
         /// <param name="certificate"></param>
         /// <param name="claims"></param>
@@ -41,15 +42,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string Assertion { get; private set; }
 
-        internal string AssertionHash { get; set; }
-
         /// <summary>
-        /// 
+        /// Gets the claims
         /// </summary>
         public Dictionary<string, string> Claims { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets the certificate
         /// </summary>
         public X509Certificate2 Certificate { get; set; }
     }
