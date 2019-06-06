@@ -48,8 +48,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 NormalizedScopes = MsalTestConstants.ScopeStr,
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
-                RawClientInfo = string.Empty, // todo(cache): what should this be?
-                UserAssertionHash = "assertion hash", // todo(cache): what should this be
+                RawClientInfo = string.Empty, 
+                UserAssertionHash = "assertion hash",
             };
         }
 
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Environment = "env",
                 HomeAccountId = MsalTestConstants.HomeAccountId,
                 Secret = "access_token_secret",
-                RawClientInfo = string.Empty, // todo(cache): what should this be?
+                RawClientInfo = string.Empty, 
             };
         }
 
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 HomeAccountId = MsalTestConstants.HomeAccountId,
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
-                RawClientInfo = string.Empty, // todo(cache): what should this be?
+                RawClientInfo = string.Empty,
             };
         }
 
@@ -85,8 +85,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Environment = "env",
                 HomeAccountId = MsalTestConstants.HomeAccountId,
                 TenantId = "the_tenant_id",
-                AuthorityType = "authority type", // todo(cache): what should this be?
-                RawClientInfo = string.Empty, // "raw client info", // todo(cache): what should this be?
+                AuthorityType = "authority type",
+                RawClientInfo = string.Empty,
                 LocalAccountId = MsalTestConstants.LocalAccountId,
                 Name = MsalTestConstants.Name,
                 GivenName = MsalTestConstants.GivenName,
@@ -412,8 +412,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var s1 = new TokenCacheDictionarySerializer(accessor);
             byte[] bytes = s1.Serialize(null);
             string json = new UTF8Encoding().GetString(bytes);
-
-            // TODO(cache): assert json value?  or look at JObject?
 
             var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheDictionarySerializer(otherAccessor);
