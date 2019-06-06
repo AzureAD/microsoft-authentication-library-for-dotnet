@@ -51,7 +51,23 @@ namespace Microsoft.Identity.Client.Internal
             Secret = secret;
         }
 
+        public ClientCredentialWrapper(ClientAssertion clientAssertion)
+        {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
+            if (clientAssertion == null)
+            {
+                throw new ArgumentNullException(nameof(clientAssertion));
+            }
+
+            Certificate = new ClientAssertionCertificateWrapper(clientAssertion.Certificate);
+
+            UserProvidedClientAssertion = clientAssertion;
+        }
+
         internal string Secret { get; private set; }
+
+        internal ClientAssertion UserProvidedClientAssertion { get; set; }
     }
 #endif
 }

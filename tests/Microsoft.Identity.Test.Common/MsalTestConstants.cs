@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
         public const string Uid = "my-uid";
         public const string Utid = "my-utid";
+        public static readonly Dictionary<string, string> ClientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
 
         public const string HomeAccountId = Uid + "." + Utid;
 

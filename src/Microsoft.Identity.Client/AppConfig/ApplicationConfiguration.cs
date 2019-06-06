@@ -60,6 +60,9 @@ namespace Microsoft.Identity.Client
 
         public ClientCredentialWrapper ClientCredential { get; internal set; }
         public string ClientSecret { get; internal set; }
+
+        public ClientAssertion ClientAssertion { get; internal set; }
+
         public X509Certificate2 ClientCredentialCertificate { get; internal set; }
 #endif
         /// <summary>

@@ -4,6 +4,7 @@
 
 #if !ANDROID && !iOS && !WINDOWS_APP 
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -96,10 +97,11 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority),true)
+                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(MsalTestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate).BuildConcrete();
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
 
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));

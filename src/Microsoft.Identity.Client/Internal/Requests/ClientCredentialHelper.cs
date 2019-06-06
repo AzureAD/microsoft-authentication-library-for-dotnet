@@ -65,9 +65,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         if (!ValidateClientAssertion(clientCredential, endpoints, sendX5C))
                         {
                             logger.Info("Client Assertion does not exist or near expiry.");
-                            var jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience);
+                            JsonWebToken jwtToken;
+                            
+                            if (clientCredential.UserProvidedClientAssertion != null)
+                            {
+                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience, clientCredential.UserProvidedClientAssertion);
+                            }
+                            else
+                            {
+                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience);
+                            }
                             clientCredential.Assertion = jwtToken.Sign(clientCredential.Certificate, sendX5C);
-                            clientCredential.ValidTo = jwtToken.Payload.ValidTo;
+                            clientCredential.ValidTo = jwtToken.ValidTo;
                             clientCredential.ContainsX5C = sendX5C;
                             clientCredential.Audience = endpoints?.SelfSignedJwtAudience;
                         }

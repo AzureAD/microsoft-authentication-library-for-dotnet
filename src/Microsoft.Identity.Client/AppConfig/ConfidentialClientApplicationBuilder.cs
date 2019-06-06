@@ -72,6 +72,17 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Sets the application client assertion
+        /// </summary>
+        /// <param name="clientAssertion">The client assertion used as credentials to prove the identity of the application to Azure AD</param>
+        /// <returns></returns>
+        public ConfidentialClientApplicationBuilder WithClientAssertion(ClientAssertion clientAssertion)
+        {
+            Config.ClientAssertion = clientAssertion;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override void Validate()
         {
@@ -94,6 +105,11 @@ namespace Microsoft.Identity.Client
                 countOfCredentialTypesSpecified++;
             }
 
+            if (Config.ClientAssertion != null)
+            {
+                countOfCredentialTypesSpecified++;
+            }
+
             if (countOfCredentialTypesSpecified > 1)
             {
                 throw new InvalidOperationException(MsalErrorMessage.ClientSecretAndCertificateAreMutuallyExclusive);
@@ -107,6 +123,11 @@ namespace Microsoft.Identity.Client
             if (Config.ClientCredentialCertificate != null)
             {
                 Config.ClientCredential = new ClientCredentialWrapper(new ClientAssertionCertificateWrapper(Config.ClientCredentialCertificate));
+            }
+
+            if (Config.ClientAssertion != null)
+            {
+                Config.ClientCredential = new ClientCredentialWrapper(Config.ClientAssertion);
             }
 
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))

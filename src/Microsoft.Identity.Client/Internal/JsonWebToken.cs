@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -46,6 +47,8 @@ namespace Microsoft.Identity.Client.Internal
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
         private const int MaxTokenLength = 65536;
         public readonly JWTPayload Payload;
+        public readonly ClientAssertion ClientAssertion;
+        public readonly long ValidTo;
         private readonly ICryptographyManager _cryptographyManager;
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
@@ -53,17 +56,26 @@ namespace Microsoft.Identity.Client.Internal
             _cryptographyManager = cryptographyManager;
             DateTime validFrom = DateTime.UtcNow;
 
-            DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
-
+            ValidTo = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds));
             Payload = new JWTPayload
             {
                 Audience = audience,
                 Issuer = clientId,
                 ValidFrom = ConvertToTimeT(validFrom),
-                ValidTo = ConvertToTimeT(validTo),
+                ValidTo = ValidTo,
                 Subject = clientId,
                 JwtIdentifier = Guid.NewGuid().ToString()
             };
+        }
+
+        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, ClientAssertion assertion)
+        {
+            _cryptographyManager = cryptographyManager;
+            DateTime validFrom = DateTime.UtcNow;
+
+            ValidTo = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds));
+
+            ClientAssertion = assertion;
         }
 
         public string Sign(ClientAssertionCertificateWrapper credential, bool sendCertificate)
@@ -109,9 +121,17 @@ namespace Microsoft.Identity.Client.Internal
             string jsonHeader = EncodeHeaderToJson(credential, sendCertificate);
 
             string encodedHeader = EncodeSegment(jsonHeader);
+            string jsonPayload;
 
             // Payload segment
-            string jsonPayload = JsonHelper.SerializeToJson(Payload);
+            if (ClientAssertion != null)
+            {
+                jsonPayload = JsonHelper.SerializeToJson(ClientAssertion.Claims);
+            }
+            else
+            {
+                jsonPayload = JsonHelper.SerializeToJson(Payload);
+            }
 
             string encodedPayload = EncodeSegment(jsonPayload);
 
