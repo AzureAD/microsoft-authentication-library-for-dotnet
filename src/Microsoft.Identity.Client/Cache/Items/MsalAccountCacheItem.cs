@@ -126,14 +126,16 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var json = base.ToJObject();
 
-            json[StorageJsonKeys.Username] = PreferredUsername;
-            json[StorageJsonKeys.Name] = Name;
-            json[StorageJsonKeys.GivenName] = GivenName;
-            json[StorageJsonKeys.FamilyName] = FamilyName;
+            SetItemIfValueNotNull(json, StorageJsonKeys.Username, PreferredUsername);
+            SetItemIfValueNotNull(json, StorageJsonKeys.Name, Name);
+            SetItemIfValueNotNull(json, StorageJsonKeys.GivenName, GivenName);
+            SetItemIfValueNotNull(json, StorageJsonKeys.FamilyName, FamilyName);
+            SetItemIfValueNotNull(json, StorageJsonKeys.LocalAccountId, LocalAccountId);
+            SetItemIfValueNotNull(json, StorageJsonKeys.AuthorityType, AuthorityType);
+            SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
+
             // todo(cache): we don't support middle name json[StorageJsonKeys.MiddleName] = MiddleName;
-            json[StorageJsonKeys.LocalAccountId] = LocalAccountId;
-            json[StorageJsonKeys.AuthorityType] = AuthorityType;
-            json[StorageJsonKeys.Realm] = TenantId;
+            // SetItemIfValueNotNull(json, StorageJsonKeys.MiddleName, MiddleName);
 
             return json;
         }

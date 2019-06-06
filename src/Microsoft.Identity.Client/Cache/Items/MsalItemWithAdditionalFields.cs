@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
@@ -26,6 +25,14 @@ namespace Microsoft.Identity.Client.Cache.Items
             var json = string.IsNullOrWhiteSpace(AdditionalFieldsJson) ? new JObject() : JObject.Parse(AdditionalFieldsJson);
 
             return json;
+        }
+
+        internal void SetItemIfValueNotNull(JObject json, string key, JToken value)
+        {
+            if (!value.IsNullOrEmpty())
+            {
+                json[key] = value;
+            }
         }
     }
 }

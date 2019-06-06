@@ -4,13 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
     internal class CacheSerializationContract
     {
-        private static readonly IEnumerable<string> KnownPropertyNames = new[] {
+        private static readonly IEnumerable<string> s_knownPropertyNames = new[] {
                 StorageJsonValues.CredentialTypeAccessToken,
                 StorageJsonValues.CredentialTypeRefreshToken,
                 StorageJsonValues.CredentialTypeIdToken,
@@ -121,7 +122,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         private static IDictionary<string, JToken> ExtractUnkownNodes(JObject root)
         {
             return (root as IDictionary<string, JToken>)
-                .Where(kvp => !KnownPropertyNames.Any(p => string.Equals(kvp.Key, p, StringComparison.OrdinalIgnoreCase)))
+                .Where(kvp => !s_knownPropertyNames.Any(p => string.Equals(kvp.Key, p, StringComparison.OrdinalIgnoreCase)))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
@@ -180,7 +181,13 @@ namespace Microsoft.Identity.Client.Cache.Items
                 root[kvp.Key] = kvp.Value;
             }
 
-            return root.ToString();
+            return JsonConvert.SerializeObject(
+                root,
+                Formatting.Indented,
+                new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Include
+                });
         }
     }
 }

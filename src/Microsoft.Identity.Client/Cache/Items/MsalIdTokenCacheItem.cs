@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal override JObject ToJObject()
         {
             var json = base.ToJObject();
-            json[StorageJsonKeys.Realm] = TenantId;
+            SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             return json;
         }
 

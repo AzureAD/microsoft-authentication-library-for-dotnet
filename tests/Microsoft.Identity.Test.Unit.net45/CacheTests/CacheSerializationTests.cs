@@ -11,6 +11,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -483,6 +484,24 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes2 = s2.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
+        }
+
+        [TestMethod]
+        public void TestSerializeContainsNoNulls()
+        {
+            var accessor = CreateTokenCacheAccessor();
+
+            // Create a refresh token with a null family id in it
+            var item = CreateRefreshTokenItem();
+            item.FamilyId = null;
+            item.Environment = item.Environment + $"_SOMERANDOMPREFIX"; // ensure we get unique cache keys
+            accessor.SaveRefreshToken(item);
+
+            var s1 = new TokenCacheJsonSerializer(accessor);
+            byte[] bytes = s1.Serialize(null);
+            string json = CoreHelpers.ByteArrayToString(bytes);
+            Console.WriteLine(json);
+            Assert.IsFalse(json.ToLowerInvariant().Contains("null"));
         }
 
         [TestMethod]
