@@ -21,6 +21,12 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// </summary>
         ClientCredentialWrapper ClientCredential { get; }
+
+        /// <summary>
+        /// Callback used for sending telemetry about MSAL.NET out of your app. It was set by a call
+        /// to <see cref="AbstractApplicationBuilder{T}.WithTelemetry(TelemetryCallback)"/>
+        /// </summary>
+        TelemetryCallback TelemetryCallback { get; }
 #endif
     }
 }

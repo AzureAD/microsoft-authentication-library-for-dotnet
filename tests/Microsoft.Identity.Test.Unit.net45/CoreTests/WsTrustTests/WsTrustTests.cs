@@ -17,14 +17,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
     [TestClass]
     [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
-    public class WsTrustTests
+    public class WsTrustTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         [Description("WS-Trust Request Test")]
         public async Task WsTrustRequestTestAsync()
@@ -32,7 +26,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
             string wsTrustAddress = "https://some/address/usernamemixed";
             var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -46,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         }
                     });
 
-                var requestContext = RequestContext.CreateForTest(harness.ServiceBundle);
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
                 var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
                 var wsTrustResponse = await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext)
                                                    .ConfigureAwait(false);
@@ -62,11 +56,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
             string uri = "https://some/address/usernamemixed";
             var endpoint = new WsTrustEndpoint(new Uri(uri), WsTrustVersion.WsTrust13);
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: uri);
 
-                var requestContext = RequestContext.CreateForTest(harness.ServiceBundle);
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
                 try
                 {
                     var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");

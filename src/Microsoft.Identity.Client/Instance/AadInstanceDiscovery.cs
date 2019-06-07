@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -47,7 +49,10 @@ namespace Microsoft.Identity.Client.Instance
             Uri authority,
             RequestContext requestContext)
         {
-            if (!TryGetValue(authority.Host, out var entry))
+            bool foundInCache = TryGetValue(authority.Host, out var entry);
+            TraceWrapper.WriteLine("GetMetadataEntryAsync - response from cache? " + foundInCache);
+
+            if (!foundInCache)
             {
                 await DoInstanceDiscoveryAndCacheAsync(authority, requestContext).ConfigureAwait(false);
                 TryGetValue(authority.Host, out entry);

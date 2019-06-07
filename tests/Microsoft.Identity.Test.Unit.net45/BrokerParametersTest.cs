@@ -8,25 +8,20 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client;
+using System;
 
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
-    public class BrokerParametersTest
+    public class BrokerParametersTest : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         public static readonly string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(MsalTestConstants.AuthorityTestTenant));
 
         [TestMethod]
         [Description("Test setting of the broker parameters in the BrokerInteractiveRequest constructor.")]
         public void BrokerInteractiveRequest_CreateBrokerParametersTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 // Arrange
                 var parameters = harness.CreateAuthenticationRequestParameters(
@@ -47,7 +42,8 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalTestConstants.ScopeStr, brokerInteractiveRequest._brokerPayload[BrokerParameter.RequestScopes]);
                 Assert.AreEqual(MsalTestConstants.ClientId, brokerInteractiveRequest._brokerPayload[BrokerParameter.ClientId]);
 
-                Assert.AreEqual(harness.ServiceBundle.DefaultLogger.CorrelationId.ToString(), brokerInteractiveRequest._brokerPayload[BrokerParameter.CorrelationId]);
+                Assert.IsFalse(String.IsNullOrEmpty(brokerInteractiveRequest._brokerPayload[BrokerParameter.CorrelationId]));
+                Assert.AreNotEqual(Guid.Empty.ToString(), brokerInteractiveRequest._brokerPayload[BrokerParameter.CorrelationId]);
                 Assert.AreEqual(MsalIdHelper.GetMsalVersion(), brokerInteractiveRequest._brokerPayload[BrokerParameter.ClientVersion]);
                 Assert.AreEqual("NO", brokerInteractiveRequest._brokerPayload[BrokerParameter.Force]);
                 Assert.AreEqual(string.Empty, brokerInteractiveRequest._brokerPayload[BrokerParameter.Username]);

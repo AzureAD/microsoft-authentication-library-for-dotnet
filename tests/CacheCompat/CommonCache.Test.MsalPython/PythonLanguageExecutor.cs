@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,31 +19,19 @@ namespace CommonCache.Test.MsalPython
         public string PythonScriptPath { get; }
 
         public async Task<ProcessRunResults> ExecuteAsync(
-            string clientId,
-            string authority,
-            string scope,
-            string username,
-            string password,
-            string cacheFilePath,
+            string arguments,
             CancellationToken cancellationToken)
         {
             var sb = new StringBuilder();
             sb.Append($"{PythonScriptPath.EncloseQuotes()} ");
-            sb.Append($"{clientId} ");
-            sb.Append($"{authority} ");
-            sb.Append($"{scope} ");
-            sb.Append($"{username} ");
-            sb.Append($"{password} ");
-            sb.Append($"{cacheFilePath.EncloseQuotes()} ");
-            string arguments = sb.ToString();
+            sb.Append(arguments);
+            string finalArguments = sb.ToString();
 
             string executablePath = "python.exe";
 
-            Console.WriteLine($"Calling:  {executablePath} {arguments}");
-
+            Console.WriteLine($"Calling:  {executablePath} {finalArguments}");
             var processUtils = new ProcessUtils();
-
-            var processRunResults = await processUtils.RunProcessAsync(executablePath, arguments, cancellationToken).ConfigureAwait(false);
+            var processRunResults = await processUtils.RunProcessAsync(executablePath, finalArguments, cancellationToken).ConfigureAwait(false);
             return processRunResults;
         }
     }

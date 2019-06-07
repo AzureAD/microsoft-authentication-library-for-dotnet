@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new MsalServiceException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription, null);
             }
 
-            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
         private Dictionary<string, string> GetBodyParameters(string refreshTokenSecret)

@@ -28,14 +28,14 @@ namespace Microsoft.Identity.Client.Cache
             return TokenCacheInternal.FindAccessTokenAsync(_requestParams);
         }
 
-        public Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveTokenResponse(MsalTokenResponse tokenResponse)
+        public Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
         {
-            return TokenCacheInternal.SaveTokenResponse(_requestParams, tokenResponse);
+            return TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse);
         }
 
-        public MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey idTokenCacheKey)
+        public Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalIdTokenCacheKey idTokenCacheKey)
         {
-            return TokenCacheInternal.GetIdTokenCacheItem(idTokenCacheKey, _requestParams.RequestContext);
+            return TokenCacheInternal.GetIdTokenCacheItemAsync(idTokenCacheKey, _requestParams.RequestContext);
         }
 
         public Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)

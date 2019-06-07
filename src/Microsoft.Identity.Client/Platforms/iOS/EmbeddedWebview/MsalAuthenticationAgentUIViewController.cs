@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using Foundation;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.AppleShared;
+using Microsoft.Identity.Client.Platforms.Shared.Apple;
 using Microsoft.Identity.Client.UI;
 using UIKit;
 using WebKit;
@@ -14,21 +14,23 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
     [Foundation.Register("MsalAuthenticationAgentUIViewController")]
     internal class MsalAuthenticationAgentUIViewController : UIViewController
     {
-        private readonly string url;
-        public readonly string callback;
-        private WKWebView wkWebView;
-
-        public readonly ReturnCodeCallback callbackMethod;
-
-        public delegate void ReturnCodeCallback(AuthorizationResult result);
+        private readonly string _url;
+        private WKWebView _wkWebView;
 
         public MsalAuthenticationAgentUIViewController(string url, string callback, ReturnCodeCallback callbackMethod)
         {
-            this.url = url;
-            this.callback = callback;
-            this.callbackMethod = callbackMethod;
+            _url = url;
+            Callback = callback;
+            CallbackMethod = callbackMethod;
             NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(CoreCustomUrlProtocol)));
         }
+
+        public delegate void ReturnCodeCallback(AuthorizationResult result);
+
+        public ReturnCodeCallback CallbackMethod { get; }
+
+        public string Callback { get; }
+
 
         public override void ViewDidLoad()
         {
@@ -36,37 +38,37 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 
             View.BackgroundColor = UIColor.White;
 
-            wkWebView = PrepareWKWebView();
+            _wkWebView = PrepareWKWebView();
 
             EvaluateJava();
 
-            this.View.AddSubview(wkWebView);
+            this.View.AddSubview(_wkWebView);
 
             this.NavigationItem.LeftBarButtonItem = new UIBarButtonItem(UIBarButtonSystemItem.Cancel,
                 CancelAuthentication);
 
-            wkWebView.LoadRequest(new NSUrlRequest(new NSUrl(this.url)));
+            _wkWebView.LoadRequest(new NSUrlRequest(new NSUrl(this._url)));
         }
 
         protected WKWebView PrepareWKWebView()
         {
             WKWebViewConfiguration wkconfg = new WKWebViewConfiguration() { };
 
-            wkWebView = new WKWebView(View.Bounds, wkconfg)
+            _wkWebView = new WKWebView(View.Bounds, wkconfg)
             {
                 UIDelegate = new WKWebNavigationDelegate.WKWebViewUIDelegate(this),
                 NavigationDelegate = new WKWebNavigationDelegate(this),
                 AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
             };
 
-            return wkWebView;
+            return _wkWebView;
         }
 
         private void EvaluateJava()
         {
             WKJavascriptEvaluationResult handler = HandleWKJavascriptEvaluationResult;
 
-            wkWebView.EvaluateJavaScript((NSString)@"navigator.userAgent", handler);
+            _wkWebView.EvaluateJavaScript((NSString)@"navigator.userAgent", handler);
         }
 
         private static void HandleWKJavascriptEvaluationResult(NSObject result, NSError err)
@@ -85,7 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         public void CancelAuthentication(object sender, EventArgs e)
         {
             this.DismissViewController(true, () =>
-                    callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null)));
+                    CallbackMethod(AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel)));
         }
 
         public override void DismissViewController(bool animated, Action completionHandler)

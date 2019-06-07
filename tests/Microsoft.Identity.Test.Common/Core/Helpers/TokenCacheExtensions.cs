@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -14,9 +15,14 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     {
         public static void AddAccessTokenCacheItem(this ITokenCacheInternal tokenCache, MsalAccessTokenCacheItem accessTokenItem)
         {
-            lock (tokenCache.LockObject)
+            tokenCache.Semaphore.Wait();
+            try
             {
                 tokenCache.Accessor.SaveAccessToken(accessTokenItem);
+            }
+            finally
+            {
+                tokenCache.Semaphore.Release();
             }
         }
 
@@ -26,52 +32,37 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
-            lock (tokenCache.LockObject)
+            tokenCache.Semaphore.Wait();
+            try
             {
                 tokenCache.Accessor.SaveRefreshToken(refreshTokenItem);
+            }
+            finally
+            {
+                tokenCache.Semaphore.Release();
             }
         }
 
         public static void DeleteAccessToken(
             this ITokenCacheInternal tokenCache,
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem,
-            RequestContext requestContext)
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            lock (tokenCache.LockObject)
+            tokenCache.Semaphore.Wait();
+            try
             {
                 tokenCache.Accessor.DeleteAccessToken(msalAccessTokenCacheItem.GetKey());
             }
-        }
-
-        public static void SaveRefreshTokenCacheItem(
-            this ITokenCacheInternal tokenCache,
-            MsalRefreshTokenCacheItem msalRefreshTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem)
-        {
-            lock (tokenCache.LockObject)
+            finally
             {
-                tokenCache.Accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                tokenCache.Semaphore.Release();
             }
         }
 
-        public static void SaveAccessTokenCacheItem(
+        public static async Task<MsalAccountCacheItem> GetAccountAsync(
             this ITokenCacheInternal tokenCache,
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem)
+            MsalRefreshTokenCacheItem refreshTokenCacheItem)
         {
-            lock (tokenCache.LockObject)
-            {
-                tokenCache.Accessor.SaveAccessToken(msalAccessTokenCacheItem);
-            }
-        }
-
-        public static MsalAccountCacheItem GetAccount(
-            this ITokenCacheInternal tokenCache,
-            MsalRefreshTokenCacheItem refreshTokenCacheItem,
-            RequestContext requestContext)
-        {
-            IEnumerable<MsalAccountCacheItem> accounts = tokenCache.GetAllAccounts();
+            IEnumerable<MsalAccountCacheItem> accounts = await tokenCache.GetAllAccountsAsync().ConfigureAwait(false);
 
             foreach (var account in accounts)
             {

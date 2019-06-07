@@ -14,8 +14,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
 
-    <Compile Remove="..\Microsoft.Identity.Test.Unit.net45\CoreTests\WsTrustTests\WsTrustBuilderTests.cs" />
-
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />

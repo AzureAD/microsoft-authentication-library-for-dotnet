@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Linq;
 using System;
 
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return accounts.First();
         }
 
-        private async Task<IAccount>  GetAccountFromParamsOrLoginHintAsync(AcquireTokenSilentParameters silentParameters)
+        private async Task<IAccount> GetAccountFromParamsOrLoginHintAsync(AcquireTokenSilentParameters silentParameters)
         {
             if (silentParameters.Account != null)
             {
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (msalAccessTokenItem != null)
                 {
-                    var msalIdTokenItem = CacheManager.GetIdTokenCacheItem(msalAccessTokenItem.GetIdTokenItemKey());
+                    var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
                     return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
                 }
             }
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse = await RefreshAccessTokenAsync(appRefreshToken, cancellationToken)
                     .ConfigureAwait(false);
             }
-            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
         private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)

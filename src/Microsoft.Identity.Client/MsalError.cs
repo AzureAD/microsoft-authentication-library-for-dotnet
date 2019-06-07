@@ -397,12 +397,12 @@ namespace Microsoft.Identity.Client
         public const string CannotInvokeBroker = "cannot_invoke_broker";
 
         /// <summary>
-        /// Error code used when the http response returns HttpStatusCode.NotFound
+        /// Error code used when the HTTP response returns HttpStatusCode.NotFound
         /// </summary>
         public const string HttpStatusNotFound = "not_found";
 
         /// <summary>
-        /// ErrorCode used when the http response returns something different from 200 (OK)
+        /// ErrorCode used when the HTTP response returns something different from 200 (OK)
         /// </summary>
         /// <remarks>
         /// HttpStatusCode.NotFound have a specific error code. <see cref="MsalError.HttpStatusNotFound"/>
@@ -416,12 +416,10 @@ namespace Microsoft.Identity.Client
         public const string CustomWebUiReturnedInvalidUri = "custom_webui_returned_invalid_uri";
 
         /// <summary>
-        /// Error code used when the CustomWebUI has returned an uri, but it does not match the Authroity and AbsolutePath of
+        /// Error code used when the CustomWebUI has returned an uri, but it does not match the Authority and AbsolutePath of
         /// the configured redirect uri.
         /// </summary>
         public const string CustomWebUiRedirectUriMismatch = "custom_webui_invalid_mismatch";
-
-        // TODO: does not seem to be used?
 
         /// <summary>
         /// Access denied.
@@ -450,16 +448,16 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Multiple Tokens were matched.
-        /// <para>What happens?</para>This exception happens in the case of applications managing several identitities,
+        /// <para>What happens?</para>This exception happens in the case of applications managing several identities,
         /// when calling <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
-        /// or one of its overrides and the user token cache contains multiple tokens for this client application and the the specified Account, but from different authorities.
+        /// or one of its overrides and the user token cache contains multiple tokens for this client application and the specified Account, but from different authorities.
         /// <para>Mitigation [App Development]</para>specify the authority to use in the acquire token operation
         /// </summary>
         public const string MultipleTokensMatchedError = "multiple_matching_tokens_detected";
 
         /// <summary>
         /// Non HTTPS redirects are not supported
-        /// <para>What happens?</para>This error happens when you have registered a non-https redirect URI for the
+        /// <para>What happens?</para>This error happens when you have registered a non-HTTPS redirect URI for the
         /// public client application other than <c>urn:ietf:wg:oauth:2.0:oob</c>
         /// <para>Mitigation [App registration and development]</para>Register in the application a Reply URL starting with "https://"
         /// </summary>
@@ -510,7 +508,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// JSON parsing failed.
-        /// <para>What happens?</para>A Json blob read from the token cache or received from the STS was not parseable.
+        /// <para>What happens?</para>A JSON blob read from the token cache or received from the STS was not parseable.
         /// This can happen when reading the token cache, or receiving an IDToken from the STS.
         /// <para>Mitigation</para>Make sure that the token cache was not tampered
         /// </summary>
@@ -534,7 +532,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Tenant discovery failed.
-        /// <para>What happens?</para>While reading the openid configuration associated with the authority, the Authorize endpoint,
+        /// <para>What happens?</para>While reading the OpenId configuration associated with the authority, the Authorize endpoint,
         /// or Token endpoint, or the Issuer was not found
         /// <para>Mitigation</para>This indicates and authority which is not Open ID Connect compliant. Specify a different authority
         /// in the constructor of the application, or the token acquisition override
@@ -545,6 +543,45 @@ namespace Microsoft.Identity.Client
         /// The library is loaded on a platform which is not supported.
         /// </summary>
         public const string PlatformNotSupported = "platform_not_supported";
+
+        /// <summary>
+        /// An authorization Uri has been intercepted, but it cannot be parsed. See the log for more details.
+        /// </summary>
+        public const string InvalidAuthorizationUri = "invalid_authorization_uri";
+
+        /// <summary>
+        /// <para>What happens?</para>The current redirect Url is not a loopback Url.
+        /// <para>Mitigation</para> To use the OS browser, a loopback url, with or without a port, must be configured both during app registration and when initializing the IPublicClientApplication object. See https://aka.ms/msal-net-os-browser for details.
+        /// </summary>
+        public const string LoopbackRedirectUri = "loopback_redirect_uri";
+
+        /// <summary>
+        /// <para>What happens?</para>MSAL has intercepted a Uri possibly containing an authorization code, but it does not match 
+        /// the configured redirect url.
+        /// <para>Mitigation</para>If you are using an ICustomWebUi implementation, make sure the
+        /// redirect url matches the url containing the auth code. If you are not using an ICustomWebUI,
+        /// this could be a man-in-the middle attack.
+        /// </summary>
+        public const string LoopbackResponseUriMismatch = "loopback_response_uri_mismatch";
+
+        /// <summary>
+        /// <para>What happens?</para>MSAL tried to open the browser on Linux using the xdg-open tool, but failed.
+        /// <para>Mitigation</para>Make sure you can open a page using xdg-open tool. See https://aka.ms/msal-net-os-browser for details.
+        /// </summary>
+        public const string LinuxXdgOpen = "linux_xdg_open_failed";
+
+        /// <summary>
+        /// The selected webview is not available on this platform. You can switch to a different webview using <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/>. See https://aka.ms/msal-net-os-browser for details
+        /// </summary>
+        public const string WebviewUnavailable = "no_system_webview";
+
+        /// <summary>
+        /// <para>What happens?</para>You configured MSAL interactive authentication to use an embedded webview and you also configured <see cref="SystemWebViewOptions"/>.
+        /// These are mutually exclusive.
+        /// <para>Mitigation</para>Either set <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to true or do not use
+        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/>
+        /// </summary>
+        public const string SystemWebviewOptionsNotApplicable = "embedded_webview_not_compatible_default_browser";
 
 #if iOS
         /// <summary>

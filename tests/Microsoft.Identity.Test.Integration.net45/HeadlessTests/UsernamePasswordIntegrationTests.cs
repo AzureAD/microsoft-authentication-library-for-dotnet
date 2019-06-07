@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
+using System.Globalization;
 using System.Net;
 using System.Security;
 using System.Threading;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -36,43 +38,69 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ROPC_AAD_Async()
         {
-            var labResponse = LabUserHelper.GetDefaultUser();
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv4Federated_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, true);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv4Managed_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv3Federated_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3, true);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv3Managed_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3, false);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, false).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ROPC_ADFSv2Fderated_Async()
         {
-            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV2, true);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV2, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [TestCategory("UsernamePasswordIntegrationTests")]
+        public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
+        {
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.ADFSv2019,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = true
+            };
+
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+
+
+            var user = labResponse.User;
+
+            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+
+            var msalPublicClient = PublicClientApplicationBuilder.Create(Adfs2019LabConstants.PublicClientId).WithAdfsAuthority(Adfs2019LabConstants.Authority).Build();
+            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword).ExecuteAsync().ConfigureAwait(false);
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
         }
 
         #endregion
@@ -80,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {
-            var labResponse = LabUserHelper.GetDefaultUser();
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();
@@ -110,7 +138,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public void AcquireTokenWithFederatedUsernameIncorrectPassword()
+        public async Task AcquireTokenWithFederatedUsernameIncorrectPasswordAsync()
         {
             UserQuery query = new UserQuery
             {
@@ -120,7 +148,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IsFederatedUser = false
             };
 
-            var labResponse = LabUserHelper.GetLabUserData(query);
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();

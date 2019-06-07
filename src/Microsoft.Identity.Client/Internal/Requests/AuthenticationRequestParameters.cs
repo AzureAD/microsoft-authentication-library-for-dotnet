@@ -9,7 +9,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -17,6 +17,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class AuthenticationRequestParameters
     {
         private readonly AcquireTokenCommonParameters _commonParameters;
+        private string _loginHint;
 
         public AuthenticationRequestParameters(
             IServiceBundle serviceBundle,
@@ -84,7 +85,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
-        public string LoginHint { get; set; }
+        public string LoginHint
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(_loginHint) && Account != null)
+                {
+                    return Account.Username;
+                }
+
+                return _loginHint;
+            }
+
+            set => _loginHint = value;
+        }
         public IAccount Account { get; set; }
 
         public bool IsClientCredentialRequest { get; set; }

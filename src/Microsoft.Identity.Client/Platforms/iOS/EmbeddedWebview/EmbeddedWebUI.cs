@@ -73,9 +73,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             SetAuthorizationResult(result);
         }
 
-        public override void ValidateRedirectUri(Uri redirectUri)
+        public override Uri UpdateRedirectUri(Uri redirectUri)
         {
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+            return redirectUri;
         }
 
     }

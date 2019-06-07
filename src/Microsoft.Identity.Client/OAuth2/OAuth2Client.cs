@@ -4,7 +4,7 @@
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using System;
@@ -87,12 +87,12 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 if (method == HttpMethod.Post)
                 {
-                    response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext)
+                    response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
                                                 .ConfigureAwait(false);
                 }
                 else
                 {
-                    response = await _httpManager.SendGetAsync(endpointUri, _headers, requestContext).ConfigureAwait(false);
+                    response = await _httpManager.SendGetAsync(endpointUri, _headers, requestContext.Logger).ConfigureAwait(false);
                 }
 
                 httpEvent.HttpResponseStatus = (int)response.StatusCode;
@@ -109,7 +109,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 if (headersAsDictionary.ContainsKey("x-ms-clitelem") &&
                     headersAsDictionary["x-ms-clitelem"] != null)
                 {
-                    XmsCliTelemInfo xmsCliTeleminfo = new XmsCliTelemInfoParser().ParseXMsTelemHeader(headersAsDictionary["x-ms-clitelem"], requestContext);
+                    XmsCliTelemInfo xmsCliTeleminfo = new XmsCliTelemInfoParser().ParseXMsTelemHeader(
+                        headersAsDictionary["x-ms-clitelem"],
+                        requestContext.Logger);
+
                     if (xmsCliTeleminfo != null)
                     {
                         httpEvent.TokenAge = xmsCliTeleminfo.TokenAge;

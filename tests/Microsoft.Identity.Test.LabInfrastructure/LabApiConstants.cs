@@ -19,8 +19,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string B2CLocal = "local";
         public const string B2CFacebook = "facebook";
         public const string B2CGoogle = "google";
+        public const string B2CMSA = "msa";
         public const string UserContains = "usercontains";
         public const string AppName = "AppName";
+        public const string MSAOutlookAccount = "MSIDLAB4_Outlook";
+        public const string MSAOutlookAccountClientID = "9668f2bd-6103-4292-9024-84fa2d1b6fb2";
         public const string Upn = "upn";
 
         public const string True = "true";
@@ -28,5 +31,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public const string BetaEndpoint = "http://api.msidlab.com/api/userbeta";
         public const string LabEndpoint = "http://api.msidlab.com/api/user";
+        public const string CreateLabUser = "https://request.msidlab.com/api/CreateLabUser";
     }
 }

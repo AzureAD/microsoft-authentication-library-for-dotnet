@@ -11,7 +11,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
            () => NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
                                  .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault());
 
-        public override bool IsSystemWebViewAvailable => false;
+
 
         /// <summary>
         /// Considered PII. Please ensure that it is hashed.

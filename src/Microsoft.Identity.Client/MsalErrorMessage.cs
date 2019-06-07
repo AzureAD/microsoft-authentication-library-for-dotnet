@@ -185,6 +185,7 @@ namespace Microsoft.Identity.Client
             "The application does not have keychain access groups enabled in the Entitlements.plist. " +
             "As a result, there was a failure to save to the iOS keychain. " +
             "The keychain access group '{0}' is not enabled in the Entitlements.plist. " +
+            "Also, use the WithIosKeychainSecurityGroup api to set the keychain access group. " +
             "See https://aka.ms/msal-net-enable-keychain-groups for more details on enabling keychain access groups and entitlements.";
 
         public const string AndroidActivityNotFound = "The Activity cannot be found to launch the given Intent. To ensure authentication, a browser with custom tab support " +
@@ -239,7 +240,7 @@ namespace Microsoft.Identity.Client
 
         public const string CustomWebUiReturnedInvalidUri = "ICustomWebUi returned an invalid uri - it is empty or has no query.";
 
-        public static string CustomWebUiRedirectUriMismatch(string expectedUri, string actualUri)
+        public static string RedirectUriMismatch(string expectedUri, string actualUri)
         {
             return string.Format(CultureInfo.InvariantCulture, "Redirect Uri mismatch.  Expected ({0}) Actual ({1})", expectedUri, actualUri);
         }
@@ -257,10 +258,16 @@ namespace Microsoft.Identity.Client
 
         public const string MsalExceptionFailedToParse = "Attempted to deserialize an MsalException but the type was unknown.";
 
+        public const string AdfsDeviceFlowNotSupported = "Device Code Flow is not currently supported for ADFS.";
         public const string MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously = "MATS cannot be configured at the same time as a TelemetryCallback is provided. These are mututally exclusive.";
         public const string AkaMsmsalnet3BreakingChanges = "See https://aka.ms/msal-net-3-breaking-changes";
 
         public const string B2CAuthorityHostMisMatch = "The B2C authority host that was used when creating the client application is not the same authority host used in the AcquireToken call. " +
            "See https://aka.ms/msal-net-b2c for details. ";
+
+        public const string TokenCacheSetCallbackFunctionalityNotAvailableFromWithinCallback = "You cannot set a tokencache callback method from within the callback itself.";
+
+        public const string EmbeddedWebviewDefaultBrowser = "You configured MSAL interactive authentication to use an embedded WebView " +
+            "and you also configured system WebView options. These are mutually exclusive. See https://aka.ms/msal-net-os-browser";
     }
 }

@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.AppleShared
 
         public override void StopLoading()
         {
-            this.connection.Cancel();
+            this.connection?.Cancel();
         }
 
         private class CoreCustomConnectionDelegate : NSUrlConnectionDataDelegate

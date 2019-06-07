@@ -9,8 +9,8 @@ using Foundation;
 using AppKit;
 using WebKit;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Platforms.AppleShared;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Platforms.Shared.Apple;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         public delegate void ReturnCodeCallback(AuthorizationResult result);
 
         public AuthenticationAgentNSWindowController(string url, string callback, ReturnCodeCallback callbackMethod)
-            : base ("PlaceholderNibNameToForceWindowLoad")
+            : base("PlaceholderNibNameToForceWindowLoad")
         {
             _url = url;
             _callback = callback;
@@ -182,11 +182,10 @@ namespace Microsoft.Identity.Client.Platforms.Mac
 
             if (requestUrlString.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                var result = new AuthorizationResult(AuthorizationStatus.ProtocolError)
-                {
-                    Error = "Unsupported request",
-                    ErrorDescription = "Server is redirecting client to browser. This behavior is not yet defined on Mac OS X."
-                };
+                var result = AuthorizationResult.FromStatus(
+                    AuthorizationStatus.ProtocolError,
+                    "Unsupported request",
+                    "Server is redirecting client to browser. This behavior is not yet defined on Mac OS X.");
                 _callbackMethod(result);
                 WebView.DecideIgnore(decisionToken);
                 Close();
@@ -196,7 +195,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             if (requestUrlString.ToLower(CultureInfo.InvariantCulture).StartsWith(_callback.ToLower(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase) ||
                 requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                _callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, request.Url.ToString()));
+                _callbackMethod(AuthorizationResult.FromUri(request.Url.ToString()));
                 WebView.DecideIgnore(decisionToken);
                 Close();
                 return;
@@ -225,9 +224,11 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             if (!request.Url.AbsoluteString.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) &&
                 !request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {
-                var result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
-                result.Error = MsalError.NonHttpsRedirectNotSupported;
-                result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
+                var result = AuthorizationResult.FromStatus(
+                    AuthorizationStatus.ErrorHttp,
+                    MsalError.NonHttpsRedirectNotSupported,
+                    MsalErrorMessage.NonHttpsRedirectNotSupported);
+
                 _callbackMethod(result);
                 WebView.DecideIgnore(decisionToken);
                 Close();
@@ -247,7 +248,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
 
         void CancelAuthentication()
         {
-            _callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
+            _callbackMethod(AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel));
         }
 
         [Export("windowShouldClose:")]

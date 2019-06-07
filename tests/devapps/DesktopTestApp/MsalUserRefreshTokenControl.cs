@@ -2,12 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace DesktopTestApp
@@ -17,12 +16,12 @@ namespace DesktopTestApp
         private readonly ITokenCacheInternal _cache;
         private readonly PublicClientApplication _publicClient;
         private readonly MsalRefreshTokenCacheItem _rtItem;
-        private readonly MsalAccountCacheItem accountItem;
-        public delegate void RefreshView();
+        private readonly MsalAccountCacheItem _accountItem;
+        public delegate Task RefreshViewAsync();
 
         private const string GarbageRtValue = "garbage-refresh-token";
 
-        public RefreshView RefreshViewDelegate { get; set; }
+        public RefreshViewAsync RefreshViewAsyncDelegate { get; set; }
 
         internal MsalUserRefreshTokenControl(PublicClientApplication publicClient, MsalRefreshTokenCacheItem rtItem) : this()
         {
@@ -30,8 +29,8 @@ namespace DesktopTestApp
             _cache = publicClient.UserTokenCacheInternal;
             _rtItem = rtItem;
 
-            accountItem = _cache.GetAccount(_rtItem, RequestContext.CreateForTest());
-            upnLabel.Text = accountItem.PreferredUsername;
+            _accountItem = _cache.GetAccountAsync(_rtItem).GetAwaiter().GetResult(); // todo: yuck
+            upnLabel.Text = _accountItem.PreferredUsername;
 
             invalidateRefreshTokenBtn.Enabled = !_rtItem.Secret.Equals(GarbageRtValue, StringComparison.OrdinalIgnoreCase);
         }
@@ -58,7 +57,7 @@ namespace DesktopTestApp
                 accounts = await _publicClient.GetAccountsAsync().ConfigureAwait(false);
             }
 
-            RefreshViewDelegate?.Invoke();
+            RefreshViewAsyncDelegate?.Invoke();
         }
     }
 }

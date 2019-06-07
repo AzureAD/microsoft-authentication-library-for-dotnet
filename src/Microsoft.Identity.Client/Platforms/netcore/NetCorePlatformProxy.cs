@@ -2,12 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.Platforms.Shared.NetStdCore;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
@@ -23,8 +26,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             : base(logger)
         {
         }
-
-        public override bool IsSystemWebViewAvailable => false;
 
         /// <summary>
         /// Get the user logged in
@@ -123,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return new InMemoryTokenCacheAccessor();
         }
 
-        protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
+        protected override IWebUIFactory CreateWebUiFactory() => new NetStandardWebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetCoreCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
@@ -151,5 +152,13 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return MatsConverter.AsInt(OsPlatform.Win32);
         }
         protected override IFeatureFlags CreateFeatureFlags() => new NetCoreFeatureFlags();
+
+        public override Task StartDefaultOsBrowserAsync(string url)
+        {
+            PlatformProxyShared.StartDefaultOsBrowser(url);
+            return Task.FromResult(0);
+        }
+
+        public override bool UseEmbeddedWebViewDefault => false;
     }
 }

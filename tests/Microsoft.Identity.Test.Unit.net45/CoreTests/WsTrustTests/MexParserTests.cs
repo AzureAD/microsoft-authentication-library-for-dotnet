@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -16,18 +17,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
     [TestClass]
     [DeploymentItem(@"Resources\TestMex2005.xml")]
-    public class MexParserTests
+    public class MexParserTests : TestBase
     {
-        private RequestContext _requestContext;
-        public TestContext TestContext { get; set; }
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-            _requestContext = RequestContext.CreateForTest();
-        }
-
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
         public void WsTrust2005AddressExtractionTest()
@@ -59,13 +50,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         public async Task MexEndpointFailsToResolveTestAsync()
         {
             // TODO: should we move this into a separate test class for WsTrustWebRequestManager?
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get);
 
                 try
                 {
-                    await harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync("http://somehost", _requestContext).ConfigureAwait(false);
+                    await harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync("http://somehost",
+                                            new RequestContext(harness.ServiceBundle, Guid.NewGuid())
+
+                        ).ConfigureAwait(false);
                     Assert.Fail("We expect an exception to be thrown here");
                 }
                 catch (MsalException ex)

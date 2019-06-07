@@ -17,19 +17,13 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using System.Threading;
 using Microsoft.Identity.Client.Instance;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class UnifiedCacheTests
-    {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
-#if !NET_CORE
+    public class UnifiedCacheTests : TestBase
+    {    
         [TestMethod]
         [Description("Test unified token cache")]
         public void UnifiedCache_MsalStoresToAndReadRtFromAdalCache()
@@ -41,14 +35,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .WithUserTokenLegacyCachePersistenceForTest(
                                                             new TestLegacyCachePersistance())
                                                         .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success,
-                    app.AppConfig.RedirectUri + "?code=some-code"));
+                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
@@ -61,12 +55,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
-                var requestContext = RequestContext.CreateForTest(app.ServiceBundle);
+                var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid());
                 var accounts = app.UserTokenCacheInternal.GetAccountsAsync(
                     MsalTestConstants.AuthorityCommonTenant, requestContext).Result;
                 foreach (IAccount account in accounts)
                 {
-                    app.UserTokenCacheInternal.RemoveMsalAccount(account, requestContext);
+                    app.UserTokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
                 }
 
                 httpManager.AddMockHandler(
@@ -107,6 +101,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 app.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
@@ -122,8 +117,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success,
-                    app.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
@@ -142,14 +136,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId2)
                                                          .WithHttpManager(httpManager)
+                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                          .WithAuthority(
                                                              new Uri(ClientApplicationBase.DefaultAuthority),
                                                              true).BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app1.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success,
-                    app1.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 app1.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
                 {
@@ -187,17 +181,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.AreEqual(1, app1.GetAccountsAsync().Result.Count());
             }
         }
-#endif
 
         [TestMethod]
         [Description("Test for duplicate key in ADAL cache")]
         public void UnifiedCache_ProcessAdalDictionaryForDuplicateKeyTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 var app = PublicClientApplicationBuilder
-                          .Create(MsalTestConstants.ClientId).WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                          .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance()).BuildConcrete();
+                          .Create(MsalTestConstants.ClientId)
+                          .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                          .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
+                          .WithTelemetry(new TraceTelemetryConfig())
+                          .BuildConcrete();
 
                 CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, MsalTestConstants.Scope.ToString());
 

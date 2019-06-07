@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
@@ -103,10 +103,22 @@ namespace Microsoft.Identity.Client
             return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public new Task<Uri> ExecuteAsync()
+        {
+            // This method is marked "public new" because it only differs in return type from the base class
+            // ExecuteAsync() and we need this one to return Uri and not AuthenticationResult.
+
+            return ExecuteAsync(CancellationToken.None);
+        }
+
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return ApiEvent.ApiIds.None;
+            return ApiEvent.ApiIds.GetAuthorizationRequestUrl;
         }
     }
 #endif

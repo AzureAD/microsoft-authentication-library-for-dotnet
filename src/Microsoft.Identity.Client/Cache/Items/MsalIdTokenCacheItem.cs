@@ -21,13 +21,16 @@ namespace Microsoft.Identity.Client.Cache.Items
             string environment,
             string clientId,
             MsalTokenResponse response,
-            string tenantId)
+            string tenantId,
+            string userId=null
+            )
             : this(
                 environment,
                 clientId,
                 response.IdToken,
                 response.ClientInfo,
-                tenantId)
+                tenantId,
+                userId)
         {
         }
 
@@ -36,7 +39,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             string clientId,
             string secret,
             string rawClientInfo,
-            string tenantId)
+            string tenantId,
+            string userId=null
+            )
             : this()
         {
             Environment = environment;
@@ -45,13 +50,18 @@ namespace Microsoft.Identity.Client.Cache.Items
             Secret = secret;
             RawClientInfo = rawClientInfo;
 
+            //Adfs does not send back client info, so HomeAccountId must be explicitly set
+            HomeAccountId = userId;
             InitUserIdentifier();
         }
 
+    
+        internal bool IsAdfs { get; set; }
         internal string TenantId { get; set; }
 
         internal string Authority =>
-            string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
+                                    IsAdfs ? string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, "adfs") :
+                                    string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
 
         internal IdToken IdToken => IdToken.Parse(Secret);
 

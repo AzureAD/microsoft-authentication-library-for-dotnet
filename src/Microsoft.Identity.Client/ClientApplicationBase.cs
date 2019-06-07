@@ -113,15 +113,13 @@ namespace Microsoft.Identity.Client
         /// Removes all tokens in the cache for the specified account.
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>
-        public Task RemoveAsync(IAccount account)
+        public async Task RemoveAsync(IAccount account)
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-            if (account != null)
+            if (account != null && UserTokenCacheInternal != null)
             {
-                UserTokenCacheInternal?.RemoveAccount(account, requestContext);
+                await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
             }
-
-            return Task.FromResult(0);
         }
 
         internal static Authority GetAuthority(IServiceBundle serviceBundle, IAccount account)
@@ -155,7 +153,7 @@ namespace Microsoft.Identity.Client
         // For service calls, the request context should be created in the **Executor classes as part of request execution.
         private RequestContext CreateRequestContext(Guid telemetryCorrelationId)
         {
-            return new RequestContext(AppConfig.ClientId, MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config), telemetryCorrelationId);
+            return new RequestContext(ServiceBundle, telemetryCorrelationId);
         }
 
         /// <summary>
@@ -163,9 +161,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="account">Account for which the token is requested. This parameter is optional.
-        /// If nothing is passed and no Account or LoginHint are provided, then, if one, and only
-        /// one, account is in the cache, that account is used.  Otherwise, an exception will be thrown.  <see cref="IAccount"/></param>
+        /// <param name="account">Account for which the token is requested.</param>
         /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
         /// parameters</returns>
         /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,

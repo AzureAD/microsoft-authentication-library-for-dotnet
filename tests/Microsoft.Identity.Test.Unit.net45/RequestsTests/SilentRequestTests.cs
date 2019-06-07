@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void ExpiredTokenRefreshFlowTest()
+        public async Task ExpiredTokenRefreshFlowTestAsync()
         {
             IDictionary<string, string> extraQueryParamsAndClaims =
                MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 };
 
                 // set access tokens as expired
-                foreach (var accessItem in harness.Cache.GetAllAccessTokens(true))
+                foreach (var accessItem in (await harness.Cache.GetAllAccessTokensAsync(true).ConfigureAwait(false)))
                 {
                     accessItem.ExpiresOnUnixTimestamp =
                         ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ServiceBundle,
                     cache,
                     commonParameters,
-                    RequestContext.CreateForTest(ServiceBundle))
+                    new RequestContext(ServiceBundle, Guid.NewGuid()))
                 {
                     Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
                 };

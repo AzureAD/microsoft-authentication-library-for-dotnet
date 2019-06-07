@@ -20,7 +20,7 @@ namespace CommonCache.Test.MsalV2
         private class MsalV2CacheExecutor : AbstractCacheExecutor
         {
             /// <inheritdoc />
-            protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
+            protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
                 var v1App = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;
@@ -34,12 +34,11 @@ namespace CommonCache.Test.MsalV2
                     Console.WriteLine("{0}: {1}", level, message);
                 };
 
-                CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
                 var tokenCache = new TokenCache();
 
                 FileBasedTokenCacheHelper.ConfigureUserCache(
-                    options.CacheStorageType,
+                    testInputData.StorageType,
                     tokenCache,
                     CommonCacheTestUtils.AdalV3CacheFilePath,
                     CommonCacheTestUtils.MsalV2CacheFilePath);
@@ -50,18 +49,42 @@ namespace CommonCache.Test.MsalV2
                 };
 
                 IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
-                try
+                var results = new List<CacheExecutorAccountResult>();
+
+                foreach (var labUserData in testInputData.LabUserDatas)
                 {
-                    var result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault(), app.Authority, false).ConfigureAwait(false);
-                    Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
-                    return new CacheExecutorResults(result.Account.Username, true);
+                    IAccount accountToReference = accounts.FirstOrDefault(x => x.Username.Equals(labUserData.Upn, StringComparison.OrdinalIgnoreCase));
+                    try
+                    {
+                        var result = await app.AcquireTokenSilentAsync(
+                            scopes,
+                            accountToReference,
+                            app.Authority,
+                            false).ConfigureAwait(false);
+
+                        Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
+                        results.Add(new CacheExecutorAccountResult(labUserData.Upn, result.Account.Username, true));
+                    }
+                    catch (MsalUiRequiredException)
+                    {
+                        var result = await app.AcquireTokenByUsernamePasswordAsync(
+                            scopes,
+                            labUserData.Upn,
+                            labUserData.Password.ToSecureString()).ConfigureAwait(false);
+
+                        if (string.IsNullOrWhiteSpace(result.AccessToken))
+                        {
+                            results.Add(new CacheExecutorAccountResult(labUserData.Upn, string.Empty, false));
+                        }
+                        else
+                        {
+                            Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
+                            results.Add(new CacheExecutorAccountResult(labUserData.Upn, result.Account.Username, false));
+                        }
+                    }
                 }
-                catch (MsalUiRequiredException)
-                {
-                    var result = await app.AcquireTokenByUsernamePasswordAsync(scopes, options.Username, options.UserPassword.ToSecureString()).ConfigureAwait(false);
-                    Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
-                    return new CacheExecutorResults(result.Account.Username, false);
-                }
+
+                return results;
             }
         }
     }

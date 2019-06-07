@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
     {
         bool IsSystemWebViewAvailable { get; }
 
+        bool UseEmbeddedWebViewDefault { get; }
+
         /// <summary>
         /// Gets the device model. On some TFMs this is not returned for security reasonons.
         /// </summary>
@@ -94,5 +96,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         IFeatureFlags GetFeatureFlags();
 
         void /* for test */ SetFeatureFlags(IFeatureFlags featureFlags);
+
+        /// <summary>
+        /// Go to a Url using the OS default browser. 
+        /// </summary>
+        Task StartDefaultOsBrowserAsync(string url);
     }
 }

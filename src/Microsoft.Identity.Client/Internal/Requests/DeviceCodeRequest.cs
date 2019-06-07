@@ -28,6 +28,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+
+            //Adfs device code flow not currently supported
+            if(ServiceBundle.Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
+            {
+                throw new InvalidOperationException(MsalErrorMessage.AdfsDeviceFlowNotSupported);
+            }
+
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
 
             var client = new OAuth2Client(ServiceBundle.DefaultLogger, ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
@@ -64,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await _deviceCodeParameters.DeviceCodeResultCallback(deviceCodeResult).ConfigureAwait(false);
 
             var msalTokenResponse = await WaitForTokenResponseAsync(deviceCodeResult, cancellationToken).ConfigureAwait(false);
-            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
         private async Task<MsalTokenResponse> WaitForTokenResponseAsync(

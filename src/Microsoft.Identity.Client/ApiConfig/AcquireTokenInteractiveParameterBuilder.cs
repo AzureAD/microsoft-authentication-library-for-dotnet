@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 #if iOS
 using UIKit;
@@ -76,10 +77,45 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
+#if NET_CORE || NETSTANDARD
+            if (useEmbeddedWebView)
+            {
+                throw new MsalClientException(MsalError.WebviewUnavailable, "An embedded webview is not available on this platform. " +
+                    "Please use WithUseEmbeddedWebView(false) or leave the default. " +
+                    "See https://aka.ms/msal-net-os-browser for details about the system webview.");
+            }
+#elif WINDOWS_APP
+            if (!useEmbeddedWebView)
+            {
+                throw new MsalClientException(
+                   MsalError.WebviewUnavailable,
+                   "On UWP, MSAL does not offer a system webview out of the box. Please set .WithUseEmbeddedWebview to true or leave the default. " +
+                   "To use the UWP Web Authentication Manager (WAM) see https://aka.ms/msal-net-uwp-wam");
+            }
+#endif
+
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithEmbeddedWebView);
-            Parameters.UseEmbeddedWebView = useEmbeddedWebView;
+            Parameters.UseEmbeddedWebView = useEmbeddedWebView ?
+                WebViewPreference.Embedded :
+                WebViewPreference.System;
             return this;
         }
+
+        // Default browser WebUI is not available on mobile (Android, iOS, UWP), but allow it at runtime
+        // to avoid MissingMethodException
+#if NET_CORE || NETSTANDARD || DESKTOP || RUNTIME
+        /// <summary>
+        /// Specifies options for using the system OS browser handle interactive authentication.
+        /// </summary>
+        /// <param name="options">Data object with options</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenInteractiveParameterBuilder WithSystemWebViewOptions(SystemWebViewOptions options)
+        {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSystemBrowserOptions);
+            Parameters.UiParent.SystemWebViewOptions = options;
+            return this;
+        }
+#endif
 
         /// <summary>
         /// Sets the <paramref name="loginHint"/>, in order to avoid select account
@@ -142,7 +178,7 @@ namespace Microsoft.Identity.Client
          * since Activity, ViewController etc. do not exist in NetStandard.
          */
 
-#if RUNTIME || NETSTANDARD_BUILDTIME 
+#if RUNTIME || NETSTANDARD_BUILDTIME
         /// <summary>
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
@@ -296,6 +332,20 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.ActivityRequiredForParentObjectAndroid);
             }
 #endif
+            if (Parameters.UiParent.SystemWebViewOptions != null &&
+                Parameters.UseEmbeddedWebView == WebViewPreference.Embedded)
+            {
+                throw new MsalClientException(
+                    MsalError.SystemWebviewOptionsNotApplicable,
+                    MsalErrorMessage.EmbeddedWebviewDefaultBrowser);
+            }
+
+            if (Parameters.UiParent.SystemWebViewOptions != null &&
+               Parameters.UseEmbeddedWebView == WebViewPreference.NotSpecified)
+            {
+                WithUseEmbeddedWebView(false);
+            }
+
             Parameters.LoginHint = string.IsNullOrWhiteSpace(Parameters.LoginHint)
                                           ? Parameters.Account?.Username
                                           : Parameters.LoginHint;
@@ -309,17 +359,7 @@ namespace Microsoft.Identity.Client
 
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenWithScope;
-            if (Parameters.Account != null)
-            {
-                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser;
-            }
-            else if (!string.IsNullOrWhiteSpace(Parameters.LoginHint))
-            {
-                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
-            }
-
-            return apiId;
+            return ApiEvent.ApiIds.AcquireTokenInteractive;
         }
     }
 }

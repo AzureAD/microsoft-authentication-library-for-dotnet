@@ -1,20 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Mats.Internal.Constants;
-using Microsoft.Identity.Client.Mats.Internal.Events;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -23,23 +9,32 @@ using System.Net.Http;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
-    public class PublicClientApplicationTests
+    public class PublicClientApplicationTests : TestBase
     {
         private TokenCacheHelper _tokenCacheHelper;
 
         [TestInitialize]
-        public void TestInitialize()
+        public override void TestInitialize()
         {
-            TestCommon.ResetInternalStaticCaches();
-
+            base.TestInitialize();
             _tokenCacheHelper = new TokenCacheHelper();
         }
 
-#if !NET_CORE
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         [Description("Tests the public interfaces can be mocked")]
@@ -130,6 +125,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
+
+            //app = new PublicClientApplication(MsalTestConstants.ClientId, MsalTestConstants.OnPremiseAuthority);
+            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithAuthority(MsalTestConstants.OnPremiseAuthority).BuildConcrete();
+            Assert.IsNotNull(app);
+            Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
+            Assert.AreEqual(MsalTestConstants.ClientId, app.AppConfig.ClientId);
+            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
+            
         }
 
         [TestMethod]
@@ -138,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var receiver = new MyReceiver();
 
-            using (var harness = new MockHttpAndServiceBundle(telemetryCallback: receiver.HandleTelemetryEvents))
+            using (var harness = CreateTestHarness(telemetryCallback: receiver.HandleTelemetryEvents))
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -152,9 +155,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 MockWebUI ui = new MockWebUI()
                 {
                     AddStateInAuthorizationResult = false,
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
+                    MockResult = AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code")
                 };
 
                 MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
@@ -179,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "170" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1005" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "state_mismatch"));
             }
         }
@@ -190,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var receiver = new MyReceiver();
 
-            using (var harness = new MockHttpAndServiceBundle(telemetryCallback: receiver.HandleTelemetryEvents))
+            using (var harness = CreateTestHarness(telemetryCallback: receiver.HandleTelemetryEvents))
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
@@ -198,14 +199,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(harness.HttpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
                 MockWebUI ui = new MockWebUI()
                 {
                     AddStateInAuthorizationResult = false,
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code&state=mismatched")
+                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?code=some-code&state=mismatched")
                 };
 
                 MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
@@ -232,18 +232,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public async Task AcquireTokenNoClientInfoReturnedTestAsync()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
 
@@ -277,17 +278,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSameUserTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
@@ -306,7 +308,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
@@ -327,18 +329,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenAddTwoUsersTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
@@ -358,7 +361,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -406,7 +409,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
@@ -433,7 +436,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"),
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"),
                     dict);
 
                 httpManager.AddMockHandler(
@@ -468,7 +471,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "176" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey] == "1005" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "user_mismatch"));
 
                 var users = app.GetAccountsAsync().Result;
@@ -488,11 +491,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
@@ -512,7 +516,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -546,24 +550,30 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public void HttpRequestExceptionIsNotSuppressedAsync()
+        public async Task HttpRequestExceptionIsNotSuppressedAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
+
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(httpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 // add mock response bigger than 1MB for Http Client
                 httpManager.AddFailingRequest(new InvalidOperationException());
 
-                AssertException.TaskThrows<InvalidOperationException>(
+                await AssertException.TaskThrowsAsync<InvalidOperationException>(
                     () => app
-                        .AcquireTokenInteractive(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None));
+                        .AcquireTokenInteractive(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
             }
         }
 
@@ -578,6 +588,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
@@ -615,7 +626,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public void GetAccountTests()
         {
-            var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
+            var app = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithTelemetry(new TraceTelemetryConfig())
+                .BuildConcrete();
+
             var accounts = app.GetAccountsAsync().Result;
             Assert.IsTrue(!accounts.Any());
 
@@ -666,11 +681,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 // Interactive call and user cancels authentication
-                MockWebUI ui = new MockWebUI()
+                var ui = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.UserCancel,
-                        MsalTestConstants.AuthorityHomeTenant + "?error=user_canceled")
+                    MockResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel)
                 };
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
@@ -719,9 +732,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Interactive call and authentication fails with access denied
                 MockWebUI ui = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.ProtocolError,
-                        MsalTestConstants.AuthorityHomeTenant + "?error=access_denied")
+                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?error=access_denied")
                 };
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
@@ -734,7 +745,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }
-                catch (MsalServiceException exc)
+                catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual("access_denied", exc.ErrorCode);
@@ -754,7 +765,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [Description("ClientApplicationBase.GetAuthoriy tests")]
         public void GetAuthority_AccountWithNullIdPassed_CommonAuthorityReturned()
         {
-            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
+            PublicClientApplication app = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithTelemetry(new TraceTelemetryConfig())
+                .BuildConcrete();
 
             var authoriy = ClientApplicationBase.GetAuthority(app.ServiceBundle, new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.AuthorityInfo.CanonicalAuthority);
@@ -764,7 +778,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [Description("ClientApplicationBase.GetAuthoriy tests")]
         public void GetAuthority_AccountWithIdPassed_TenantedAuthorityUsed()
         {
-            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
+            PublicClientApplication app = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithTelemetry(new TraceTelemetryConfig())
+                .BuildConcrete();
 
             var authority = ClientApplicationBase.GetAuthority(
                 app.ServiceBundle,
@@ -779,7 +796,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public async Task AcquireTokenSilentNullAccountErrorTestAsync()
         {
-            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
+            PublicClientApplication app = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithTelemetry(new TraceTelemetryConfig())
+                .BuildConcrete();
 
             try
             {
@@ -805,11 +825,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CLoginAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
@@ -833,11 +854,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.B2CAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CAuthority);
@@ -861,18 +883,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 var ui = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        MsalTestConstants.B2CLoginAuthority + "?code=some-code")
+                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.B2CLoginAuthority + "?code=some-code")
                 };
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CLoginAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
@@ -896,11 +917,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.B2CCustomDomain), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CCustomDomain);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CCustomDomain);
@@ -924,6 +946,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 try
                 {
@@ -948,7 +971,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("B2C")]
         public void B2CAcquireTokenWithB2CLoginAuthorityTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = CreateTestHarness())
             {
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CAuthority);
                 ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthority);
@@ -1066,8 +1089,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             const string tokenCacheFile = "MultiTenantTokenCache.json";
 
             var pcaBuilder = PublicClientApplicationBuilder
-             .Create(clientIdInFile)
-             .WithHttpManager(httpManager);
+                .Create(clientIdInFile)
+                .WithTelemetry(new TraceTelemetryConfig())
+                .WithHttpManager(httpManager);
 
             if (authority != null)
             {
@@ -1090,9 +1114,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var ui = new MockWebUI()
             {
-                MockResult = new AuthorizationResult(
-                    AuthorizationStatus.Success,
-                    authority + "?code=some-code")
+                MockResult = AuthorizationResult.FromUri(authority + "?code=some-code")
             };
 
             MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
@@ -1110,9 +1132,83 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenFromAdfs()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAdfsAuthority(MsalTestConstants.OnPremiseAuthority, true)
+                    .WithHttpManager(httpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
+                    .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                                app.ServiceBundle.PlatformProxy,
+                                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+
+                httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = "https://fs.contoso.com/.well-known/webfinger",
+                    ExpectedQueryParams = new Dictionary<string, string>
+                    {
+                            {"resource", "https://fs.contoso.com"},
+                            {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
+                    },
+                    ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.contoso.com")
+                });
+
+                //add mock response for tenant endpoint discovery
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                });
+
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateAdfsSuccessTokenResponseMessage()
+                });
+
+                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync().Result;
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+                Assert.AreEqual(MsalTestConstants.OnPremiseUniqueId, result.UniqueId);
+                Assert.AreEqual(new AccountId(MsalTestConstants.OnPremiseUniqueId), result.Account.HomeAccountId);
+                Assert.AreEqual(MsalTestConstants.OnPremiseDisplayableId, result.Account.Username);
+
+                //Find token in cache now
+
+                AuthenticationResult cachedAuth = null;
+                try
+                {
+                    cachedAuth = app.AcquireTokenSilent(MsalTestConstants.Scope, result.Account).ExecuteAsync().Result;
+                }
+                catch
+                {
+                    Assert.Fail("Did not find access token");
+                }
+                Assert.IsNotNull(cachedAuth);
+                Assert.IsNotNull(cachedAuth.Account);
+                Assert.AreEqual(MsalTestConstants.OnPremiseUniqueId, cachedAuth.UniqueId);
+                Assert.AreEqual(new AccountId(MsalTestConstants.OnPremiseUniqueId), cachedAuth.Account.HomeAccountId);
+                Assert.AreEqual(MsalTestConstants.OnPremiseDisplayableId, cachedAuth.Account.Username);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
         public void EnsurePublicApiSurfaceExistsOnInterface()
         {
-            IPublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            IPublicClientApplication app = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithTelemetry(new TraceTelemetryConfig())
+                .Build();
 
             // This test is to ensure that the methods we want/need on the IPublicClientApplication exist and compile.  This isn't testing functionality, that's done elsewhere.
             // It's solely to ensure we know that the methods we want/need are available where we expect them since we tend to do most testing on the concrete types.
@@ -1121,8 +1217,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                .WithAccount(MsalTestConstants.User)
                .WithExtraScopesToConsent(MsalTestConstants.Scope)
                .WithLoginHint("loginhint")
-               .WithPrompt(Prompt.ForceLogin)
-               .WithUseEmbeddedWebView(true);
+               .WithPrompt(Prompt.ForceLogin);
+
+#if DESKTOP
+            interactiveBuilder = interactiveBuilder.WithUseEmbeddedWebView(true);
+#endif
             CheckBuilderCommonMethods(interactiveBuilder);
 
             var iwaBuilder = app.AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
@@ -1149,56 +1248,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             CheckBuilderCommonMethods(byRefreshTokenBuilder);
         }
 
-#endif
-
-#if NET_CORE
-
-        [TestMethod]
-        public void NetCore_AcquireToken_ThrowsPlatformNotSupported()
-        {
-            // Arrange
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
-            var account = new Account("a.b", null, null);
-
-            // All interactive auth overloads
-            IEnumerable<Func<Task<AuthenticationResult>>> acquireTokenInteractiveMethods = new List<Func<Task<AuthenticationResult>>>
-            {
-                // without UI Parent
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithLoginHint("login hint").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithAccount(account).ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithLoginHint("login hint").WithPrompt(Prompt.Consent).WithExtraQueryParameters("extra_query_params").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope).WithAccount(account).WithPrompt(Prompt.Consent).WithExtraQueryParameters("extra_query_params").ExecuteAsync(CancellationToken.None).ConfigureAwait(false),
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .WithLoginHint("login hint")
-                    .WithPrompt(Prompt.Consent)
-                    .WithExtraQueryParameters("extra_query_params")
-                    .WithExtraScopesToConsent(new[] {"extra scopes" })
-                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false),
-
-                async () => await pca.AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .WithAccount(account)
-                    .WithPrompt(Prompt.Consent)
-                    .WithExtraQueryParameters("extra_query_params")
-                    .WithExtraScopesToConsent(new[] {"extra scopes" })
-                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false),
-
-                async () => await pca.AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)
-
-            };
-
-            // Act and Assert
-            foreach (var acquireTokenInteractiveMethod in acquireTokenInteractiveMethods)
-            {
-                AssertException.TaskThrows<PlatformNotSupportedException>(acquireTokenInteractiveMethod);
-            }
-        }
-
-#endif
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {
             builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)

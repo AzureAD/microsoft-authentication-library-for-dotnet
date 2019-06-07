@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -12,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
-        public override bool IsSystemWebViewAvailable => false;
+
 
         /// <summary>
         ///     Get the user logged in to Windows or throws
@@ -272,5 +273,26 @@ namespace Microsoft.Identity.Client.Platforms.net45
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
         protected override IFeatureFlags CreateFeatureFlags() => new NetDesktopFeatureFlags();
+
+        public override Task StartDefaultOsBrowserAsync(string url)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                url = url.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            }
+
+            return Task.FromResult(0);
+        }
     }
 }

@@ -7,16 +7,30 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IApplicationConfiguration
     {
+        public const string DefaultClientName = "UnknownClient";
+        public const string DefaultClientVersion = "0.0.0.0";
+
         // For telemetry, the ClientName of the application.
-        public string ClientName { get; internal set; }
+        private string _clientName = DefaultClientName;
+        public string ClientName
+        {
+            get => _clientName;
+            internal set { _clientName = string.IsNullOrWhiteSpace(value) ? DefaultClientName : value; }
+        }
 
         // For telemetry, the ClientVersion of the application.
-        public string ClientVersion { get; internal set; }
+        private string _clientVersion = DefaultClientVersion;
+        public string ClientVersion
+        {
+            get => _clientVersion;
+            internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? DefaultClientVersion : value; }
+        }
 
         public bool EnableWam { get; internal set; }
 
@@ -25,9 +39,12 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
-        public IMatsConfig MatsConfig { get; internal set; }
+        public ITelemetryConfig TelemetryConfig { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
+
+        public IPlatformProxy PlatformProxy { get; internal set; }
+
         public AuthorityInfo AuthorityInfo { get; internal set; }
         public string ClientId { get; internal set; }
         public string TenantId { get; internal set; }

@@ -5,7 +5,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.Platforms.Shared.NetStdCore;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
@@ -21,8 +22,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             : base(logger)
         {
         }
-
-        public override bool IsSystemWebViewAvailable => false;
 
         /// <summary>
         /// Get the user logged in
@@ -149,6 +148,16 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             // TODO(mats): need to detect operating system and switch on it to determine proper enum
             return MatsConverter.AsInt(OsPlatform.Win32);
         }
+
         protected override IFeatureFlags CreateFeatureFlags() => new NetStandardFeatureFlags();
+
+        public override Task StartDefaultOsBrowserAsync(string url)
+        {
+            PlatformProxyShared.StartDefaultOsBrowser(url);
+            return Task.FromResult(0);
+        }
+
+        public override bool UseEmbeddedWebViewDefault => false;
+
     }
 }

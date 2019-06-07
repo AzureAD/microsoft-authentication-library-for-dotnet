@@ -25,16 +25,15 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, pca.AppConfig.LogLevel);
             Assert.AreEqual(MsalTestConstants.ClientId, pca.AppConfig.ClientId);
-            Assert.IsNull(pca.AppConfig.ClientName);
-            Assert.IsNull(pca.AppConfig.ClientVersion);
+            Assert.IsNotNull(pca.AppConfig.ClientName);
+            Assert.IsNotNull(pca.AppConfig.ClientVersion);
             Assert.IsFalse(pca.AppConfig.EnablePiiLogging);
             Assert.IsNull(pca.AppConfig.HttpClientFactory);
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(pca.AppConfig.LoggingCallback);
             Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
-            Assert.IsNull(pca.AppConfig.TelemetryCallback);
             Assert.IsNull(pca.AppConfig.TenantId);
-            // todo(mats): Assert.IsNull(pca.AppConfig.MatsConfig);
+            Assert.IsNull(pca.AppConfig.TelemetryConfig);
         }
 
         [TestMethod]
@@ -206,21 +205,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                     .Build();
 
             Assert.AreEqual(TenantId, pca.AppConfig.TenantId);
-        }
-
-        [TestMethod]
-        public void TestConstructor_WithTelemetry()
-        {
-            void Callback(List<Dictionary<string, string>> events)
-            {
-            }
-
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithTelemetry(Callback)
-                                                    .Build();
-
-            Assert.IsNotNull(pca.AppConfig.TelemetryCallback);
-            Assert.AreEqual((TelemetryCallback)Callback, pca.AppConfig.TelemetryCallback);
         }
 
         [TestMethod]
@@ -418,7 +402,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                     .WithTelemetry((List<Dictionary<string, string>> events) => {})
-                    .WithMatsTelemetry(new MatsConfig())
+                    .WithTelemetry(new TelemetryConfig())
                     .Build();
                 Assert.Fail("Should not reach here, exception should be thrown");
             }
@@ -432,19 +416,17 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void MatsCanBeProperlyConfigured()
         {
-            var matsConfig = new MatsConfig
+            var telemetryConfig = new TelemetryConfig
             {
                 SessionId = "some session id"
             };
 
             var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                .WithMatsTelemetry(matsConfig)
+                .WithTelemetry(telemetryConfig)
                 .Build();
 
-            // todo(mats):
-            //Assert.IsNotNull(app.AppConfig.MatsConfig);
-
-            //Assert.AreEqual<string>(matsConfig.SessionId, app.AppConfig.MatsConfig.SessionId);
+            Assert.IsNotNull(app.AppConfig.TelemetryConfig);
+            Assert.AreEqual<string>(telemetryConfig.SessionId, app.AppConfig.TelemetryConfig.SessionId);
         }
     }
 }

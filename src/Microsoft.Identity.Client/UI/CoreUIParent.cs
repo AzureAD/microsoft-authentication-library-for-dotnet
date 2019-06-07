@@ -25,6 +25,8 @@ namespace Microsoft.Identity.Client.UI
         internal bool UseEmbeddedWebview { get; set; }
         internal SynchronizationContext SynchronizationContext { get; set; }
 
+        internal SystemWebViewOptions SystemWebViewOptions { get; set; }
+
 #if MAC
         /// <summary>
         /// Initializes an instance for a provided caller window.
@@ -56,26 +58,26 @@ namespace Microsoft.Identity.Client.UI
         /// </summary>
         public UIViewController CallerViewController { get; set; }
 
-        internal static UIViewController FindCurrentViewController(UIViewController CallerViewController)
+        internal static UIViewController FindCurrentViewController(UIViewController callerViewController)
         {
-            if (CallerViewController is UITabBarController)
+            if (callerViewController is UITabBarController)
             {
-                UITabBarController tabBarController = (UITabBarController)CallerViewController;
+                UITabBarController tabBarController = (UITabBarController)callerViewController;
                 return FindCurrentViewController(tabBarController.SelectedViewController);
             }
-            else if (CallerViewController is UINavigationController)
+            else if (callerViewController is UINavigationController)
             {
-                UINavigationController navigationController = (UINavigationController)CallerViewController;
+                UINavigationController navigationController = (UINavigationController)callerViewController;
                 return FindCurrentViewController(navigationController.VisibleViewController);
             }
-            else if (CallerViewController.PresentedViewController != null)
+            else if (callerViewController.PresentedViewController != null)
             {
-                UIViewController presentedViewController = CallerViewController.PresentedViewController;
+                UIViewController presentedViewController = callerViewController.PresentedViewController;
                 return FindCurrentViewController(presentedViewController);
             }
             else
             {
-                return CallerViewController;
+                return callerViewController;
             }
         }
 

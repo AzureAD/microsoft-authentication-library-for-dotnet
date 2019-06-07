@@ -15,7 +15,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
     [TestClass]
     public class XmsCliTelemTests
     {
-        private RequestContext _requestContext;
         private ICoreLogger _coreLogger;
 
         [TestInitialize]
@@ -25,7 +24,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
 
             // Methods in XmsCliTelemTests log errors when parsing response headers;
             _coreLogger = Substitute.For<ICoreLogger>();
-            _requestContext = new RequestContext(null, _coreLogger, Guid.Empty);
         }
 
         [TestMethod]
@@ -39,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
             };
 
             var xmsCliTeleminfo =
-                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], _requestContext);
+                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], _coreLogger);
 
             // Assert
             Assert.AreEqual(xmsCliTeleminfo.Version, "1");
@@ -60,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
             };
 
             var xmsCliTeleminfo =
-                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], _requestContext);
+                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], _coreLogger);
 
             // Assert
             _coreLogger.Received().Warning(
@@ -82,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
             };
 
             var xmsCliTeleminfo =
-                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], _requestContext);
+                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], _coreLogger);
 
             // Assert
             _coreLogger.Received().Warning(

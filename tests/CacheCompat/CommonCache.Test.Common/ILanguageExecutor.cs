@@ -9,12 +9,7 @@ namespace CommonCache.Test.Common
     public interface ILanguageExecutor
     {
         Task<ProcessRunResults> ExecuteAsync(
-            string clientId,
-            string authority,
-            string scope,
-            string username,
-            string password,
-            string cacheFilePath,
+            string arguments,
             CancellationToken cancellationToken);
     }
 }

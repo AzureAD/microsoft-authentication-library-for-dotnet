@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                 // The authorizationResult is set on the class and sent back to the InteractiveRequest
                 // There it's processed in VerifyAuthorizationResult() and an MsalClientException
                 // will be thrown.
-                authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                authorizationResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
                 returnedUriReady.Release();
             }
         }
@@ -145,14 +145,15 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 
             if (returnedUriReady != null)
             {
-                authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+                authorizationResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
                 returnedUriReady.Release();
             }
         }
 
-        public override void ValidateRedirectUri(Uri redirectUri)
+        public override Uri UpdateRedirectUri(Uri redirectUri)
         {
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: true);
+            return redirectUri;
         }
     }
 }

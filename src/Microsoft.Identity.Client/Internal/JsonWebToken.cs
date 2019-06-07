@@ -194,10 +194,10 @@ namespace Microsoft.Identity.Client.Internal
                     return;
                 }
 
-#if NETSTANDARD
-                X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
-#elif DESKTOP
+#if DESKTOP
                 X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
+#else                
+                X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
 #endif
             }
 

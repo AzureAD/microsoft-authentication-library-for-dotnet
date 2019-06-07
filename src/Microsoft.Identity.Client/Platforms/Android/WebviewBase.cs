@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Android
@@ -14,7 +15,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         protected static SemaphoreSlim returnedUriReady;
         protected static AuthorizationResult authorizationResult;
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, RequestContext requestContext)
+        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, ICoreLogger logger)
         {
             if (returnedUriReady != null)
             {
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             else
             {
-                requestContext.Logger.Info("No pending request for response from web ui.");
+                logger.Info("No pending request for response from web ui.");
             }
         }
 
@@ -39,6 +40,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
             RequestContext requestContext,
             CancellationToken cancellationToken);
 
-        public abstract void ValidateRedirectUri(Uri redirectUri);
+        public abstract Uri UpdateRedirectUri(Uri redirectUri);
     }
 }

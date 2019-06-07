@@ -11,11 +11,12 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.Mats.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Test.Unit.PublicApiTests;
@@ -24,12 +25,34 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class InteractiveRequestTests
+    public class InteractiveRequestTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
+        [TestMethod]
+        public void NullArgs()
         {
-            TestCommon.ResetInternalStaticCaches();
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                var bundle = harness.ServiceBundle;
+
+                AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
+                    MsalTestConstants.AuthorityHomeTenant,
+                    MsalTestConstants.Scope);
+
+                var interactiveParameters = new AcquireTokenInteractiveParameters
+                {
+                    Prompt = Prompt.SelectAccount,
+                    ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                };
+
+                var webUi = NSubstitute.Substitute.For<IWebUI>();
+
+                AssertException.Throws<ArgumentNullException>(() =>
+                    new InteractiveRequest(null, requestParams, interactiveParameters, webUi));
+                AssertException.Throws<ArgumentNullException>(() =>
+                    new InteractiveRequest(bundle, null, interactiveParameters, webUi));
+                AssertException.Throws<ArgumentNullException>(() =>
+                    new InteractiveRequest(bundle, requestParams, null, webUi));
+            }
         }
 
         [TestMethod]
@@ -41,15 +64,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
             extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
 
-            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 var cache = new TokenCache(harness.ServiceBundle);
 
                 var ui = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code"),
+                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?code=some-code"),
                     QueryParamsToValidate = MsalTestConstants.ExtraQueryParams
                 };
 
@@ -100,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             MyReceiver myReceiver = new MyReceiver();
 
-            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle(telemetryCallback: myReceiver.HandleTelemetryEvents))
+            using (MockHttpAndServiceBundle harness = CreateTestHarness(telemetryCallback: myReceiver.HandleTelemetryEvents))
             {
                 TokenCache cache = new TokenCache(harness.ServiceBundle);
 
@@ -120,9 +141,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 MockWebUI ui = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
+                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
                 };
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
@@ -183,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             try
             {
-                using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
+                using (MockHttpAndServiceBundle harness = CreateTestHarness())
                 {
                     AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                         MsalTestConstants.AuthorityHomeTenant,
@@ -220,15 +239,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void VerifyAuthorizationResultTest()
         {
-            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
                 MockWebUI webUi = new MockWebUI()
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.ErrorHttp,
-                        MsalTestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired)
+                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired),
                 };
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
@@ -265,8 +282,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 webUi = new MockWebUI
                 {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.ErrorHttp,
+                    MockResult = AuthorizationResult.FromUri(
                         MsalTestConstants.AuthorityHomeTenant + "?error=invalid_request&error_description=some error description")
                 };
 
@@ -294,7 +310,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void DuplicateQueryParameterErrorTest()
         {
-            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -426,7 +427,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [DeploymentItem(@"Resources\CacheFromTheFuture.json")]
-        public void UnkownNodesTest()
+        public async Task UnknownNodesTestAsync()
         {
             string jsonFilePath = ResourceHelper.GetTestResourceRelativePath("CacheFromTheFuture.json");
             string jsonContent = File.ReadAllText(jsonFilePath);
@@ -442,15 +443,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache = notificationArgs.TokenCache.SerializeMsalV3();
             });
 
-            var notification = new TokenCacheNotificationArgs() { TokenCache = tokenCache };
-            tokenCache.OnBeforeAccess(notification);
-            tokenCache.OnAfterAccess(notification);
+            var notification = new TokenCacheNotificationArgs(tokenCache, null, null, false);
+            await tokenCache.OnBeforeAccessAsync(notification).ConfigureAwait(false);
+            await tokenCache.OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
-            tokenCache.OnBeforeAccess(notification);
+            await tokenCache.OnBeforeAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
-            tokenCache.OnAfterAccess(notification);
+            await tokenCache.OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
             var finalJson = JObject.Parse(Encoding.UTF8.GetString(cache));

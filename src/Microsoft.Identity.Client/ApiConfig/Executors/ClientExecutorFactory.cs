@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (IsMatsEnabled(publicClientApplication))
             {
-                executor = new MatsPublicClientExecutor(executor, publicClientApplication.ServiceBundle.Mats);
+                executor = new TelemetryPublicClientExecutor(executor, publicClientApplication.ServiceBundle.Mats);
             }
 
             return executor;
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (IsMatsEnabled(confidentialClientApplication))
             {
-                executor = new MatsConfidentialClientExecutor(executor, confidentialClientApplication.ServiceBundle.Mats);
+                executor = new TelemetryConfidentialClientExecutor(executor, confidentialClientApplication.ServiceBundle.Mats);
             }
 
             return executor;
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (IsMatsEnabled(clientApplicationBase))
             {
-                executor = new MatsClientApplicationBaseExecutor(executor, clientApplicationBase.ServiceBundle.Mats);
+                executor = new TelemetryClientApplicationBaseExecutor(executor, clientApplicationBase.ServiceBundle.Mats);
             }
 
             return executor;

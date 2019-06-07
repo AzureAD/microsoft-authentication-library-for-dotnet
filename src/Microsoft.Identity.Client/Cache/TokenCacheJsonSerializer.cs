@@ -9,7 +9,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal class TokenCacheJsonSerializer : ITokenCacheSerializer
+    internal class TokenCacheJsonSerializer : ITokenCacheSerializable
     {
         private readonly ITokenCacheAccessor _accessor;
 

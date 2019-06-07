@@ -36,7 +36,21 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _platformLogger = new Lazy<IPlatformLogger>(InternalGetPlatformLogger);
         }
 
-        public abstract bool IsSystemWebViewAvailable { get; }
+        public virtual bool IsSystemWebViewAvailable
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public virtual bool UseEmbeddedWebViewDefault
+        {
+            get
+            {
+                return true;
+            }
+        }
 
         protected IWebUIFactory OverloadWebUiFactory { get; set; }
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
@@ -141,7 +155,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
         {
-            return new NullTokenCacheBlobStorage();
+            return null;
         }
 
         // MATS properties
@@ -157,6 +171,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public void SetFeatureFlags(IFeatureFlags featureFlags)
         {
             OverloadFeatureFlags = featureFlags;
+        }
+
+        public virtual Task StartDefaultOsBrowserAsync(string url)
+        {
+            throw new NotImplementedException();
         }
     }
 }

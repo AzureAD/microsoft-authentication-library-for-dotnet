@@ -16,15 +16,15 @@ namespace Microsoft.Identity.Client.Platforms.uap
 {
     internal class WebUI : IWebUI
     {
-        private readonly bool useCorporateNetwork;
-        private readonly bool silentMode;
+        private readonly bool _useCorporateNetwork;
+        private readonly bool _silentMode;
 
         public RequestContext RequestContext { get; set; }
 
         public WebUI(CoreUIParent parent, RequestContext requestContext)
         {
-            useCorporateNetwork = parent.UseCorporateNetwork;
-            silentMode = parent.UseHiddenBrowser;
+            _useCorporateNetwork = parent.UseCorporateNetwork;
+            _silentMode = parent.UseHiddenBrowser;
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
@@ -36,13 +36,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
             bool ssoMode = string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase);
 
             WebAuthenticationResult webAuthenticationResult;
-            WebAuthenticationOptions options = (useCorporateNetwork &&
+            WebAuthenticationOptions options = (_useCorporateNetwork &&
                                                 (ssoMode || redirectUri.Scheme == Constants.MsAppScheme))
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
 
             ThrowOnNetworkDown();
-            if (silentMode)
+            if (_silentMode)
             {
                 options |= WebAuthenticationOptions.SilentMode;
             }
@@ -100,28 +100,28 @@ namespace Microsoft.Identity.Client.Platforms.uap
             AuthorizationResult result;
             switch (webAuthenticationResult.ResponseStatus)
             {
-                case WebAuthenticationStatus.Success:
-                    result = new AuthorizationResult(AuthorizationStatus.Success, webAuthenticationResult.ResponseData);
-                    break;
-                case WebAuthenticationStatus.ErrorHttp:
-                    result = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
-                        webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture));
-                    break;
-                case WebAuthenticationStatus.UserCancel:
-                    result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
-                    break;
-                default:
-                    result = new AuthorizationResult(AuthorizationStatus.UnknownError, null);
-                    break;
+            case WebAuthenticationStatus.Success:
+                result = AuthorizationResult.FromUri(webAuthenticationResult.ResponseData);
+                break;
+            case WebAuthenticationStatus.ErrorHttp:
+                result = AuthorizationResult.FromStatus(AuthorizationStatus.ErrorHttp);
+                result.Code = webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture);
+                break;
+            case WebAuthenticationStatus.UserCancel:
+                result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
+                break;
+            default:
+                result = AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
+                break;
             }
 
             return result;
         }
 
-
-        public void ValidateRedirectUri(Uri redirectUri)
+        public Uri UpdateRedirectUri(Uri redirectUri)
         {
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+            return redirectUri;
         }
     }
 }

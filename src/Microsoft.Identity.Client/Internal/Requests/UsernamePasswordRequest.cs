@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
             var msalTokenResponse =
                 await SendTokenRequestAsync(GetAdditionalBodyParameters(userAssertion), cancellationToken).ConfigureAwait(false);
-            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()

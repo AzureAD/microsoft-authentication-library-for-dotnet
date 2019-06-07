@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
@@ -16,6 +18,8 @@ namespace Microsoft.Identity.Test.Unit
     {
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
         public const string ScopeStr = "r1/scope1 r1/scope2";
+        public static readonly string[] GraphScopes = new[] { "user.read" };
+
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly SortedSet<string> CacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
         public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
@@ -72,6 +76,25 @@ namespace Microsoft.Identity.Test.Unit
         public const string GivenName = "Joe";
         public const string FamilyName = "Doe";
         public const string Username = "joe@localhost.com";
+
+        //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
+        public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj
+IxMTIyWhcNMzAwNTIyMDcwMDAwWjAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCh7HjK
+YyVMDZDT64OgtcGKWxHmK2wqzi2LJb65KxGdNfObWGxh5HQtjzrgHDkACPsgyYseqxhGxHh8I/TR6wBKx/AAKuPHE8jB4hJ1W6FczPfb7FaMV9xP0qNQrbNGZU
+YbCdy7U5zIw4XrGq22l6yTqpCAh59DLufd4d7x8fCgUDV3l1ZwrncF0QrBRzns/O9Ex9pXsi2DzMa1S1PKR81D9q5QSW7LZkCgSSqI6W0b5iodx/a3RBvW3l7d
+noW2fPqkZ4iMcntGNqgsSGtbXPvUR3fFdjmg+xq9FfqWyNxShlZg4U+wE1v4+kzTJxd9sgD1V0PKgW57zyzdOmTyFPJFAgMBAAGjVTBTMFEGA1UdAQRKMEiAEM
+9qihCt+12P5FrjVMAEYjShIjAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGWCEDOjRWDQSfa3ToivgvdWcxQwDQYJKoZIhvcNAQELBQADggEBAIm6
+gBOkSdYjXgOvcJGgE4FJkKAMQzAhkdYq5+stfUotG6vZNL3nVOOA6aELMq/ENhrJLC3rTwLOIgj4Cy+B7BxUS9GxTPphneuZCBzjvqhzP5DmLBs8l8qu10XAsh
+y1NFZmB24rMoq8C+HPOpuVLzkwBr+qcCq7ry2326auogvVMGaxhHlwSLR4Q1OhRjKs8JctCk2+5Qs1NHfawa7jWHxdAK6cLm7Rv/c0ig2Jow7wRaI5ciAcEjX7
+m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgFnDzVtItOnhuFTa0=";
+
+        public static string Defaultx5cValue
+        {
+            get
+            {
+                return Regex.Replace(_defaultx5cValue, @"\r\n?|\n", String.Empty);
+            }
+        }
 
         public static readonly IDictionary<string, string> ExtraQueryParams
             = new Dictionary<string, string>()
@@ -148,5 +171,16 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
         public static readonly ClientCredentialWrapper CredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
 #endif
+    }
+
+    internal static class Adfs2019LabConstants
+    {
+        public const string Authority = "https://fs.msidlab8.com/adfs";
+        public const string AppId = "TestAppIdentifier";
+        public const string PublicClientId = "PublicClientId";
+        public const string ConfidentialClientId = "ConfidentialClientId";
+        public const string ClientRedirectUri = "http://localhost:8080";
+        public static readonly SortedSet<string> SupportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" });
+        public const string ADFS2019ClientSecretURL = "https://buildautomation.vault.azure.net/secrets/ADFS2019ClientCredSecret/c55ec1128f32493da85b7643ede6eb80";
     }
 }
