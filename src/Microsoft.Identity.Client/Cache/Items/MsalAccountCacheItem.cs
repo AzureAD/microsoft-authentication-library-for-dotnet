@@ -134,9 +134,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.AuthorityType, AuthorityType);
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
 
-            // todo(cache): we don't support middle name json[StorageJsonKeys.MiddleName] = MiddleName;
-            // SetItemIfValueNotNull(json, StorageJsonKeys.MiddleName, MiddleName);
-
             return json;
         }
 

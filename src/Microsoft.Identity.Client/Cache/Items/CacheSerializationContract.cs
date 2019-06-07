@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             return JsonConvert.SerializeObject(
                 root,
-                Formatting.Indented,
+                Formatting.None,
                 new JsonSerializerSettings
                 {
                     NullValueHandling = NullValueHandling.Include
