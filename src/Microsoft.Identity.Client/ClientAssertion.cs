@@ -38,11 +38,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets the assertion.
-        /// </summary>
-        public string Assertion { get; private set; }
-
-        /// <summary>
         /// Gets the claims
         /// </summary>
         public Dictionary<string, string> Claims { get; set; }

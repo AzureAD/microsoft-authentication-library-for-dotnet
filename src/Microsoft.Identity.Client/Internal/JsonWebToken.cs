@@ -69,12 +69,8 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, ClientAssertion assertion)
+            :this(cryptographyManager, clientId, audience)
         {
-            _cryptographyManager = cryptographyManager;
-            DateTime validFrom = DateTime.UtcNow;
-
-            ValidTo = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds));
-
             ClientAssertion = assertion;
         }
 
