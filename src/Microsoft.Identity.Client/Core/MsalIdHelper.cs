@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client.Core
@@ -44,7 +43,7 @@ namespace Microsoft.Identity.Client.Core
     /// </summary>
     internal static class MsalIdHelper
     {
-        private static readonly Lazy<string> MsalVersion = new Lazy<string>(
+        private static readonly Lazy<string> s_msalVersion = new Lazy<string>(
             () =>
             {
                 string fullVersion = typeof(MsalIdHelper).GetTypeInfo().Assembly.FullName;
@@ -103,7 +102,7 @@ namespace Microsoft.Identity.Client.Core
 
         public static string GetMsalVersion()
         {
-            return MsalVersion.Value;
+            return s_msalVersion.Value;
         }
     }
 }
