@@ -139,16 +139,16 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var json = base.ToJObject();
 
-            json[StorageJsonKeys.Realm] = TenantId;
-            json[StorageJsonKeys.Target] = NormalizedScopes;
-            json[StorageJsonKeys.UserAssertionHash] = UserAssertionHash;
-            json[StorageJsonKeys.CachedAt] = CachedAt;
-            json[StorageJsonKeys.ExpiresOn] = ExpiresOnUnixTimestamp;
-            json[StorageJsonKeys.ExtendedExpiresOn] = ExtendedExpiresOnUnixTimestamp;
+            SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
+            SetItemIfValueNotNull(json, StorageJsonKeys.Target, NormalizedScopes);
+            SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, UserAssertionHash);
+            SetItemIfValueNotNull(json, StorageJsonKeys.CachedAt, CachedAt);
+            SetItemIfValueNotNull(json, StorageJsonKeys.ExpiresOn, ExpiresOnUnixTimestamp);
+            SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn, ExtendedExpiresOnUnixTimestamp);
 
             // previous versions of msal used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compat
-            json[StorageJsonKeys.ExtendedExpiresOn_MsalCompat] = ExtendedExpiresOnUnixTimestamp;
+            SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn_MsalCompat, ExtendedExpiresOnUnixTimestamp);
 
             return json;
         }

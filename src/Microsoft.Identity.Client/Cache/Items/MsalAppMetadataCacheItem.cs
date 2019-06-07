@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -21,9 +20,9 @@ namespace Microsoft.Identity.Client.Cache.Items
     {
         public MsalAppMetadataCacheItem(string clientId, string env, string familyId)
         {
-            this.ClientId = clientId;
-            this.Environment = env;
-            this.FamilyId = familyId;
+            ClientId = clientId;
+            Environment = env;
+            FamilyId = familyId;
         }
 
         /// <remarks>mandatory</remarks>
@@ -77,9 +76,9 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var json = base.ToJObject();
 
-            json[StorageJsonKeys.Environment] = Environment;
-            json[StorageJsonKeys.ClientId] = ClientId;
-            json[StorageJsonKeys.FamilyId] = FamilyId;
+            SetItemIfValueNotNull(json, StorageJsonKeys.Environment, Environment);
+            SetItemIfValueNotNull(json, StorageJsonKeys.ClientId, ClientId);
+            SetItemIfValueNotNull(json, StorageJsonKeys.FamilyId, FamilyId);
 
             return json;
         }
