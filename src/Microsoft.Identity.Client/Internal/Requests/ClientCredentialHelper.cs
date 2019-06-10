@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
-                    if ((clientCredential.Assertion == null || clientCredential.ValidTo != 0) && String.IsNullOrEmpty(clientCredential.SignedAssertion))
+                    if ((clientCredential.Assertion == null || clientCredential.ValidTo != 0) && String.IsNullOrEmpty(clientCredential.UserProvidedClientAssertion.SignedAssertion))
                     {
                         if (!ValidateClientAssertion(clientCredential, endpoints, sendX5C))
                         {
@@ -88,9 +88,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
                     
-                    if (!String.IsNullOrEmpty(clientCredential.SignedAssertion))
+                    if (!String.IsNullOrEmpty(clientCredential.UserProvidedClientAssertion.SignedAssertion))
                     {
-                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.SignedAssertion;
+                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.UserProvidedClientAssertion.SignedAssertion;
                     }
                     else
                     {

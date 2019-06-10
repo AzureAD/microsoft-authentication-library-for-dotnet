@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client
         public X509Certificate2 Certificate { get; set; }
 
         /// <summary>
-        /// Gets the Signed Assertion
+        /// Gets the signed assertion
         /// </summary>
         public string SignedAssertion { get; set; }
     }

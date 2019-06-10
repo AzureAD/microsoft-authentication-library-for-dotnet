@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client.Internal
         internal string Audience { get; set; }
         internal string Secret { get; private set; }
         internal ClientAssertion UserProvidedClientAssertion { get; set; }
-        internal string SignedAssertion { get; set; }
 
         /// <summary>
         /// Constructor of client (application) credentials from a client secret, also known as the application password.
@@ -66,8 +65,6 @@ namespace Microsoft.Identity.Client.Internal
             Certificate = new ClientAssertionCertificateWrapper(clientAssertion.Certificate);
 
             UserProvidedClientAssertion = clientAssertion;
-
-            SignedAssertion = clientAssertion.SignedAssertion;
         }
     }
 #endif
