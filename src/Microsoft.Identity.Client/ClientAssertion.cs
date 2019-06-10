@@ -38,6 +38,20 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Constructor from a signed client assertion.
+        /// </summary>
+        /// <param name="signedAssertion"></param>
+        public ClientAssertion(string signedAssertion)
+        {
+            if (String.IsNullOrEmpty(signedAssertion))
+            {
+                throw new ArgumentNullException(nameof(signedAssertion));
+            }
+
+            SignedAssertion = signedAssertion;
+        }
+
+        /// <summary>
         /// Gets the claims
         /// </summary>
         public Dictionary<string, string> Claims { get; set; }
@@ -46,5 +60,10 @@ namespace Microsoft.Identity.Client
         /// Gets the certificate
         /// </summary>
         public X509Certificate2 Certificate { get; set; }
+
+        /// <summary>
+        /// Gets the Signed Assertion
+        /// </summary>
+        public string SignedAssertion { get; set; }
     }
 }

@@ -331,15 +331,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             X509Certificate2 cert,
             int tokenResponses,
             TelemetryCallback telemetryCallback = null,
-            Dictionary<string, string> claims = null)
+            ClientAssertion assertion = null)
         {
             ConfidentialClientApplication app;
-            if (claims != null)
+            if (assertion != null)
             {
                 app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                              .WithClientAssertion(new ClientAssertion(cert, claims))
+                                              .WithClientAssertion(assertion)
                                               .WithHttpManager(httpManager)
                                               .WithTelemetry(telemetryCallback)
                                               .BuildConcrete();
@@ -426,7 +426,62 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 3, null, MsalTestConstants.ClientAssertionClaims);
+                ClientAssertion assertion = new ClientAssertion(cert, MsalTestConstants.ClientAssertionClaims);
+                var app = CreateConfidentialClient(httpManager, cert, 3, null, assertion);
+
+                var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
+
+                // assert client credential
+
+                Assert.IsNotNull(app.ClientCredential.Assertion);
+                Assert.AreNotEqual(0, app.ClientCredential.ValidTo);
+
+                // save client assertion.
+                string cachedAssertion = app.ClientCredential.Assertion;
+                long cacheValidTo = app.ClientCredential.ValidTo;
+
+                result = await app
+                    .AcquireTokenForClient(MsalTestConstants.ScopeForAnotherResource.ToArray())
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(cacheValidTo, app.ClientCredential.ValidTo);
+                Assert.AreEqual(cachedAssertion, app.ClientCredential.Assertion);
+
+                // validate the send x5c forces a refresh of the cached client assertion
+                await app
+                      .AcquireTokenForClient(MsalTestConstants.Scope.ToArray())
+                      .WithSendX5C(true)
+                      .WithForceRefresh(true)
+                      .ExecuteAsync(CancellationToken.None)
+                      .ConfigureAwait(false);
+                Assert.AreNotEqual(cachedAssertion, app.ClientCredential.Assertion);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public async Task ConfidentialClientUsingSignedClientAssertionTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
+                ClientAssertion assertion = new ClientAssertion(MsalTestConstants.DefaultClientAssertion);
+                var app = CreateConfidentialClient(httpManager, cert, 3, null, assertion);
 
                 var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
