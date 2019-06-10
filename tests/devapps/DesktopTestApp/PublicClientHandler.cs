@@ -20,10 +20,11 @@ namespace DesktopTestApp
                 .WithClientName(_clientName)
                 .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
                 .WithLogging(logCallback, LogLevel.Verbose, true)
+                .WithEnableWam(true) // todo(wam) make this a checkbox in the UI.
 #if ARIA_TELEMETRY_ENABLED
                 .WithTelemetry((new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
 #endif
-                .BuildConcrete();
+                .Build();
 
 
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
@@ -35,7 +36,7 @@ namespace DesktopTestApp
         public string ExtraQueryParams { get; set; }
         public string LoginHint { get; set; }
         public IAccount CurrentUser { get; set; }
-        public PublicClientApplication PublicClientApplication { get; set; }
+        public IPublicClientApplication PublicClientApplication { get; set; }
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveAsync(
             IEnumerable<string> scopes,
@@ -142,9 +143,16 @@ namespace DesktopTestApp
 
         public void CreateOrUpdatePublicClientApp(string interactiveAuthority, string applicationId)
         {
+            bool withWam = true;
+
             var builder = PublicClientApplicationBuilder
-                .Create(ApplicationId)
+                .Create(applicationId)
                 .WithClientName(_clientName);
+
+            if (withWam)
+            {
+                builder = builder.WithEnableWam(true); // todo(wam) make this a checkbox in the UI.
+            }
 
             if (!string.IsNullOrWhiteSpace(interactiveAuthority))
             {
@@ -152,10 +160,13 @@ namespace DesktopTestApp
                 builder = builder.WithAuthority(new Uri(interactiveAuthority), true);
             }
 
-            PublicClientApplication = builder.BuildConcrete();
+            PublicClientApplication = builder.Build();
 
-            PublicClientApplication.UserTokenCache.SetBeforeAccess(TokenCacheHelper.BeforeAccessNotification);
-            PublicClientApplication.UserTokenCache.SetAfterAccess(TokenCacheHelper.AfterAccessNotification);
+            if (!withWam)
+            {
+                PublicClientApplication.UserTokenCache.SetBeforeAccess(TokenCacheHelper.BeforeAccessNotification);
+                PublicClientApplication.UserTokenCache.SetAfterAccess(TokenCacheHelper.AfterAccessNotification);
+            }
         }
     }
 }

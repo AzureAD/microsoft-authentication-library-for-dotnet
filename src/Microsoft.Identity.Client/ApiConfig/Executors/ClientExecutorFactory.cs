@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (wamPublicClientApplication.ServiceBundle.Mats != null)
             {
-                executor = new MatsPublicClientExecutor(executor, wamPublicClientApplication.ServiceBundle.Mats);
+                executor = new TelemetryPublicClientExecutor(executor, wamPublicClientApplication.ServiceBundle.Mats);
             }
 
             return executor;
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (wamPublicClientApplication.ServiceBundle.Mats != null)
             {
-                executor = new MatsClientApplicationBaseExecutor(executor, wamPublicClientApplication.ServiceBundle.Mats);
+                executor = new TelemetryClientApplicationBaseExecutor(executor, wamPublicClientApplication.ServiceBundle.Mats);
             }
 
             return executor;

@@ -7,23 +7,19 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.LabInfrastructure;
 
 namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        private const string PublicClientId = "6afec070-b576-4a2f-8d95-41f317b28e06";
+        private const string PublicClientId = "8787cfc0-a723-49fa-99e1-291d58cb6f81"; // todo(WAM): DON'T CHECK THIS CHANGE IN
         private string _b2CClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
         public const string B2CCustomDomainClientId = "64a88201-6bbd-49f5-ab46-9153798493fd ";
 
@@ -396,37 +392,40 @@ namespace DesktopTestApp
             var acc = _publicClientHandler.PublicClientApplication.GetAccountsAsync().Result;
             Trace.WriteLine("Accounts: " + acc.Count());
 
-            cachePageTableLayout.RowCount = 0;
-            var allRefreshTokens = await _publicClientHandler
-                .PublicClientApplication
-                .UserTokenCacheInternal
-                .GetAllRefreshTokensAsync(true)
-                .ConfigureAwait(true);
+            PublicClientApplication pcaConcrete = _publicClientHandler.PublicClientApplication as PublicClientApplication;
 
-            var allAccessTokens = await _publicClientHandler
-                .PublicClientApplication
-                .UserTokenCacheInternal
-                .GetAllAccessTokensAsync(true)
-                .ConfigureAwait(true);
-
-            foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
+            if (pcaConcrete != null)
             {
-                AddControlToCachePageTableLayout(
-                    new MsalUserRefreshTokenControl(_publicClientHandler.PublicClientApplication, rtItem)
-                    {
-                        RefreshViewAsyncDelegate = LoadCacheTabPageAsync
-                    });
+                cachePageTableLayout.RowCount = 0;
+                var allRefreshTokens = await pcaConcrete
+                    .UserTokenCacheInternal
+                    .GetAllRefreshTokensAsync(true)
+                    .ConfigureAwait(true);
 
-                foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
+                var allAccessTokens = await pcaConcrete
+                    .UserTokenCacheInternal
+                    .GetAllAccessTokensAsync(true)
+                    .ConfigureAwait(true);
+
+                foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
                 {
-                    if (atItem.HomeAccountId.Equals(rtItem.HomeAccountId, StringComparison.OrdinalIgnoreCase))
+                    AddControlToCachePageTableLayout(
+                        new MsalUserRefreshTokenControl(pcaConcrete, rtItem)
+                        {
+                            RefreshViewAsyncDelegate = LoadCacheTabPageAsync
+                        });
+
+                    foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
                     {
-                        AddControlToCachePageTableLayout(
-                            new MsalUserAccessTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCacheInternal,
-                                atItem)
-                            {
-                                RefreshViewAsyncDelegate = LoadCacheTabPageAsync
-                            });
+                        if (atItem.HomeAccountId.Equals(rtItem.HomeAccountId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            AddControlToCachePageTableLayout(
+                                new MsalUserAccessTokenControl(pcaConcrete.UserTokenCacheInternal,
+                                    atItem)
+                                {
+                                    RefreshViewAsyncDelegate = LoadCacheTabPageAsync
+                                });
+                        }
                     }
                 }
             }

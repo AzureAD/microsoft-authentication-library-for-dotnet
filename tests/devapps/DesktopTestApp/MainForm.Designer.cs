@@ -647,7 +647,7 @@ namespace DesktopTestApp
             this.authority.Name = "authority";
             this.authority.Size = new System.Drawing.Size(700, 31);
             this.authority.TabIndex = 16;
-            this.authority.Text = "https://login.microsoftonline.com/common";
+            this.authority.Text = "https://login.microsoftonline.com/organizations"; // TODO(WAM): DO NOT CHECK THIS CHANGE IN.
             this.authority.Leave += new System.EventHandler(this.authority_FocusLeave);
             // 
             // scopes
