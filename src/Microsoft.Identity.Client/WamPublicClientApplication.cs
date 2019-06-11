@@ -63,13 +63,14 @@ namespace Microsoft.Identity.Client
         public Task<IEnumerable<IAccount>> GetAccountsAsync() => throw new NotImplementedException();
         public Task RemoveAsync(IAccount account) => throw new NotImplementedException();
 
-#region Unsupported With WAM
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(IEnumerable<string> scopes) => throw new NotImplementedException();
         public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, SecureString password) => throw new NotImplementedException();
-        public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(IEnumerable<string> scopes, Func<DeviceCodeResult, Task> deviceCodeResultCallback) => throw new NotImplementedException();
-#endregion
 
-#region obsolete
+        #region Unsupported With WAM
+        public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(IEnumerable<string> scopes, Func<DeviceCodeResult, Task> deviceCodeResultCallback) => throw new NotImplementedException();
+        #endregion
+
+        #region obsolete
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
@@ -159,7 +160,7 @@ namespace Microsoft.Identity.Client
         public IUser GetUser(string identifier) => throw new NotImplementedException();
         [Obsolete]
         public void Remove(IUser user) => throw new NotImplementedException();
-#endregion
+        #endregion
     }
 }
 
