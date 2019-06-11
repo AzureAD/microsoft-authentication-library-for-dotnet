@@ -43,7 +43,7 @@ From the moment MSAL.NET became Generally Available (MSAL.NET 3.0.8):
 
 ## Where do I file issues
 
-This is the correct repo to file [issues](issues)
+This is the correct repo to file [issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues)
 
 ## Requirements
 
