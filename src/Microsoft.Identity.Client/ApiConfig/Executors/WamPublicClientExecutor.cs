@@ -1,20 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if SUPPORTS_WAM
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
-
-using Windows.Security.Credentials;
 using Windows.Security.Authentication.Web.Core;
-using Windows.Foundation;
-using Microsoft.Identity.Client.Wam;
-using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
@@ -28,11 +23,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             _wamPublicClientApplication = wamPublicClientApplication;
         }
 
-        private IWebAuthenticationCoreManagerInterop GetWAMDesktopUI()
-        {
-            return (IWebAuthenticationCoreManagerInterop)WindowsRuntimeMarshal.GetActivationFactory(typeof(WebAuthenticationCoreManager));
-        }
-
         public async Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
             AcquireTokenInteractiveParameters interactiveParameters,
@@ -40,17 +30,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            Guid returnInterface = typeof(IAsyncOperation<WebTokenRequestResult>).GUID;
             WebAccountProvider provider = await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "organizations");
 
-            //            WebTokenRequest request = new WebTokenRequest(provider, scope: scope.Text, clientId: clientId.Text);
             WebTokenRequest request = new WebTokenRequest(provider, "", clientId: requestContext.ServiceBundle.Config.ClientId);
             request.CorrelationId = Guid.NewGuid().ToString();
-            request.Properties["resource"] = resource.Text;
-
-            // GetWAMDesktopUI needed only for Desktop applications, UWP applications should use WebAuthenticationCoreManager.RequestToken directly.
-            // We have separate interop interface only for desktopUI as it require passing window handle which not needed for UWPs.
-            IWebAuthenticationCoreManagerInterop desktopUI = GetWAMDesktopUI();
+            //request.Properties["resource"] = resource.Text;
 
             WebTokenRequestResult result;
             WebAccount webAccount = null;
@@ -61,21 +45,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             //    webAccount = await WebAuthenticationCoreManager.FindAccountAsync(provider, accountId.Text);
             //}
 
-            IntPtr windowHandle = (IntPtr)interactiveParameters.UiParent.OwnerWindow;
-
             if (webAccount != null)
             {
-                // we have web account, we don't need to guess, which one to use.
-                result = desktopUI.RequestTokenWithWebAccountForWindowAsync(windowHandle, request, webAccount, ref returnInterface);
+                result = await WebAuthenticationCoreManager.RequestTokenAsync(request, webAccount);
             }
             else
             {
-                // we don't have web account, WAM will try to use default, and prompt for user if it not able to find.
-                result = await desktopUI.RequestTokenForWindowAsync(windowHandle, request, ref returnInterface);
+                result = await WebAuthenticationCoreManager.RequestTokenAsync(request);
             }
 
-            WAMSample.HandleResult output = new WAMSample.HandleResult((string trace) => this.output.AppendText(trace + "\r\n"));
-            await output.ParseResult(result);
+            //HandleResult output = new HandleResult((string trace) => this.output.AppendText(trace + "\r\n"));
+            //await output.ParseResult(result);
 
             switch (result.ResponseStatus)
             {
@@ -101,6 +81,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 break;
 
             }
+
+            throw new NotImplementedException();
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -136,3 +118,5 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         #endregion
     }
 }
+
+#endif // SUPPORTS_WAM

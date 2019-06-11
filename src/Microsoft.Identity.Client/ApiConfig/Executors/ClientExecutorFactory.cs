@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return executor;
         }
 
+#if SUPPORTS_WAM
         public static IPublicClientApplicationExecutor CreateWamPublicClientExecutor(
             WamPublicClientApplication wamPublicClientApplication)
         {
@@ -54,6 +55,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             return executor;
         }
+#endif // SUPPORTS_WAM
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         public static IConfidentialClientApplicationExecutor CreateConfidentialClientExecutor(

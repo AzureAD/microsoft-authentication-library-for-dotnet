@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
                 //OutputTokenResult(webTokenRequestResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //rootPage.NotifyUser("Web Token request failed: " + ex.Message, NotifyType.ErrorMessage);
             }

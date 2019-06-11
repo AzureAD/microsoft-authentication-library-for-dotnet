@@ -64,6 +64,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+#if SUPPORTS_WAM
         /// <summary>
         /// 
         /// </summary>
@@ -75,6 +76,7 @@ namespace Microsoft.Identity.Client
             Config.EnableWam = enableWam;
             return this;
         }
+#endif // SUPPORTS_WAM
 
         /// <summary>
         ///
@@ -109,11 +111,13 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public IPublicClientApplication Build()
         {
+#if SUPPORTS_WAM
             if (Config.EnableWam)
             {
                 return BuildWamConcrete();
             }
             else
+#endif // SUPPORTS_WAM
             {
                 return BuildConcrete();
             }
@@ -127,10 +131,12 @@ namespace Microsoft.Identity.Client
             return new PublicClientApplication(BuildConfiguration());
         }
 
+#if SUPPORTS_WAM
         internal WamPublicClientApplication BuildWamConcrete()
         {
             return new WamPublicClientApplication(BuildConfiguration());
         }
+#endif // SUPPORTS_WAM
 
         /// <inheritdoc />
         internal override void Validate()

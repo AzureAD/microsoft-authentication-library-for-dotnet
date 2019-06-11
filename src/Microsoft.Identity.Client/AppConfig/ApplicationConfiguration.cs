@@ -32,7 +32,9 @@ namespace Microsoft.Identity.Client
             internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? DefaultClientVersion : value; }
         }
 
+#if SUPPORTS_WAM
         public bool EnableWam { get; internal set; }
+#endif // SUPPORTS_WAM
 
         public bool UseCorporateNetwork { get; internal set; }
         public string IosKeychainSecurityGroup { get; internal set; }
