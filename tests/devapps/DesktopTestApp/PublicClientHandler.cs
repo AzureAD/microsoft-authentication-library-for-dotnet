@@ -20,7 +20,6 @@ namespace DesktopTestApp
                 .WithClientName(_clientName)
                 .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
                 .WithLogging(logCallback, LogLevel.Verbose, true)
-                .WithEnableWam(true) // todo(wam) make this a checkbox in the UI.
 #if ARIA_TELEMETRY_ENABLED
                 .WithTelemetry((new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
 #endif
@@ -149,10 +148,6 @@ namespace DesktopTestApp
                 .Create(applicationId)
                 .WithClientName(_clientName);
 
-            if (withWam)
-            {
-                builder = builder.WithEnableWam(true); // todo(wam) make this a checkbox in the UI.
-            }
 
             if (!string.IsNullOrWhiteSpace(interactiveAuthority))
             {
@@ -162,11 +157,8 @@ namespace DesktopTestApp
 
             PublicClientApplication = builder.Build();
 
-            if (!withWam)
-            {
-                PublicClientApplication.UserTokenCache.SetBeforeAccess(TokenCacheHelper.BeforeAccessNotification);
-                PublicClientApplication.UserTokenCache.SetAfterAccess(TokenCacheHelper.AfterAccessNotification);
-            }
+            PublicClientApplication.UserTokenCache.SetBeforeAccess(TokenCacheHelper.BeforeAccessNotification);
+            PublicClientApplication.UserTokenCache.SetAfterAccess(TokenCacheHelper.AfterAccessNotification);
         }
     }
 }

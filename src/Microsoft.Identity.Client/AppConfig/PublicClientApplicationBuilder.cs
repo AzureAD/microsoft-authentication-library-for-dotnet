@@ -64,33 +64,25 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#if SUPPORTS_WAM
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="enableWam"></param>
-        /// <returns></returns>
-        internal PublicClientApplicationBuilder WithEnableWam(bool enableWam)
-        {
-            // TODO: should this just be "WithBroker" when running on Windows 10?  Need to determine how to configure this.
-            Config.EnableWam = enableWam;
-            return this;
-        }
-#endif // SUPPORTS_WAM
+#endif // !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="enableBroker"></param>
         /// <returns></returns>
-        private PublicClientApplicationBuilder WithBroker(bool enableBroker)
+#if SUPPORTS_WAM
+        public
+#else
+        private
+#endif
+            PublicClientApplicationBuilder WithBroker(bool enableBroker)
         {
-#if iOS
+#if iOS || SUPPORTS_WAM
             Config.IsBrokerEnabled = enableBroker;
 #endif // iOS
             return this;
         }
-#endif // !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
 
 #if WINDOWS_APP
         /// <summary>
@@ -112,7 +104,7 @@ namespace Microsoft.Identity.Client
         public IPublicClientApplication Build()
         {
 #if SUPPORTS_WAM
-            if (Config.EnableWam)
+            if (Config.IsBrokerEnabled)
             {
                 return BuildWamConcrete();
             }

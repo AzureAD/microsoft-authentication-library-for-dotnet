@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client
                 loginHint);
         }
 
+        // TODO(WAM): implement these
         public Task<IAccount> GetAccountAsync(string identifier) => throw new NotImplementedException();
         public Task<IEnumerable<IAccount>> GetAccountsAsync() => throw new NotImplementedException();
         public Task RemoveAsync(IAccount account) => throw new NotImplementedException();

@@ -20,7 +20,9 @@ namespace UWP
     public sealed partial class MainPage : Page
     {
         private readonly IPublicClientApplication _pca;
-        private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
+        // private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
+        private static readonly string s_clientID = "8787cfc0-a723-49fa-99e1-291d58cb6f81"; // todo(wam): DO NOT CHECK THIS IN
+        
         private static readonly string s_authority = "https://login.microsoftonline.com/common/";
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";
@@ -68,21 +70,64 @@ namespace UWP
 #endif
         }
 
-        private async void AcquireTokenIWA_ClickAsync(object sender, RoutedEventArgs e)
+        private IPublicClientApplication CreateWamPublicClientApplication()
         {
-            AuthenticationResult result = null;
+            return PublicClientApplicationBuilder.Create(s_clientID).WithBroker(true).WithAuthority(s_authority).Build();
+        }
+
+        private async void AcquireTokenWAMInteractive_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var pca = CreateWamPublicClientApplication();
+
             try
             {
-                result = await _pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                var result = await pca
+                    .AcquireTokenInteractive(s_scopes)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                await DisplayResultAsync(result).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 await DisplayErrorAsync(ex).ConfigureAwait(false);
-                return;
             }
+        }
 
-            await DisplayResultAsync(result).ConfigureAwait(false);
+        private async void AcquireTokenWAMSilent_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var pca = CreateWamPublicClientApplication();
 
+            IEnumerable<IAccount> accounts = await pca
+                .GetAccountsAsync()
+                .ConfigureAwait(false);
+
+            try
+            {
+                var result = await pca
+                    .AcquireTokenSilent(s_scopes, accounts.FirstOrDefault())
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                await DisplayResultAsync(result).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(false);
+            }
+        }
+
+        private async void AcquireTokenIWA_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var result = await _pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                await DisplayResultAsync(result).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(false);
+            }
         }
 
         private async void ShowCacheCountAsync(object sender, RoutedEventArgs e)
@@ -94,7 +139,6 @@ namespace UWP
                 string.Join(", ", accounts.Select(a => a.Username));
 
             await DisplayMessageAsync(message).ConfigureAwait(false); ;
-
         }
 
         private async void ClearCacheAsync(object sender, RoutedEventArgs e)
@@ -119,42 +163,36 @@ namespace UWP
         {
             IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
 
-            AuthenticationResult result = null;
             try
             {
-                result = await _pca
+                var result = await _pca
                     .AcquireTokenSilent(s_scopes, accounts.FirstOrDefault())
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+                await DisplayResultAsync(result).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 await DisplayErrorAsync(ex).ConfigureAwait(false);
-                return;
             }
-
-            await DisplayResultAsync(result).ConfigureAwait(false);
         }
 
         private async void AccessTokenButton_ClickAsync(object sender, RoutedEventArgs e)
         {
-            AuthenticationResult result = null;
             try
             {
                 IEnumerable<IAccount> users = await _pca.GetAccountsAsync().ConfigureAwait(false);
                 IAccount user = users.FirstOrDefault();
 
-                result = await _pca.AcquireTokenInteractive(s_scopes)
+                var result = await _pca.AcquireTokenInteractive(s_scopes)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+                await DisplayResultAsync(result).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 await DisplayErrorAsync(ex).ConfigureAwait(false);
-                return;
             }
-
-            await DisplayResultAsync(result).ConfigureAwait(false);
         }
 
         private async Task DisplayErrorAsync(Exception ex)
@@ -167,14 +205,14 @@ namespace UWP
             await DisplayMessageAsync("Signed in User - " + result.Account.Username + "\nAccessToken: \n" + result.AccessToken).ConfigureAwait(false);
         }
 
-
         private async Task DisplayMessageAsync(string message)
         {
-            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
-                   () =>
-                   {
-                       AccessToken.Text = message;
-                   });
+            await Dispatcher.RunAsync(
+                Windows.UI.Core.CoreDispatcherPriority.Normal,
+                () =>
+                {
+                    AccessToken.Text = message;
+                });
         }
     }
 }

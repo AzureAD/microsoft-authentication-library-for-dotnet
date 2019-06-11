@@ -8,16 +8,26 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Button Content="Acquire Token Interactive" HorizontalAlignment="Center" Margin="0,100,0,0" VerticalAlignment="Top" Click="AccessTokenButton_ClickAsync"/>
-        <Button Content="Acquire Token Silent" HorizontalAlignment="Center" Margin="0,150,0,0" VerticalAlignment="Top" Click="AccessTokenSilentButton_ClickAsync"/>
+    <StackPanel Orientation="Vertical" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Button Content="Acquire Token Interactive" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AccessTokenButton_ClickAsync"/>
+            <Button Content="Acquire Token Silent" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AccessTokenSilentButton_ClickAsync"/>
+            <Button Content="Acquire Token Integrated Windows Auth" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AcquireTokenIWA_ClickAsync"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Button Content="Acquire Token WAM Interactive" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AcquireTokenWAMInteractive_ClickAsync"/>
+            <Button Content="Acquire Token WAM Silent" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AcquireTokenWAMSilent_ClickAsync"/>
+        </StackPanel>
 
-        <Button Content="Clear Cache" HorizontalAlignment="Left" Margin="636,354,0,0" VerticalAlignment="Top" Click="ClearCacheAsync"/>
-        <Button Content="Clear First Account" HorizontalAlignment="Left" Margin="750,354,0,0" VerticalAlignment="Top" Click="ClearFirstAccountAsync"/>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Button Content="Clear Cache" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="ClearCacheAsync"/>
+            <Button Content="Clear First Account" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="ClearFirstAccountAsync"/>
+            <Button Content="Show Cache Size" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="ShowCacheCountAsync"/>
+        </StackPanel>
 
-        <Button Content="Show Cache Size" HorizontalAlignment="Center" Margin="0,407,0,0" VerticalAlignment="Top" Click="ShowCacheCountAsync"/>
-        <TextBlock HorizontalAlignment="Center" Margin="0,469,0,0" Height="450" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="AccessToken"/>
-        <Button Content="Acquire Token Integrated Windows Auth" HorizontalAlignment="Center" Margin="0,200,0,0" VerticalAlignment="Top" Click="AcquireTokenIWA_ClickAsync"/>
+        <StackPanel Orientation="Vertical" Background="DarkGray" Margin="100,20,100,20">
+            <TextBlock HorizontalAlignment="Center" Margin="0,10,0,10" Height="450" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="AccessToken"/>
+        </StackPanel>
 
-    </Grid>
+    </StackPanel>
 </Page>
