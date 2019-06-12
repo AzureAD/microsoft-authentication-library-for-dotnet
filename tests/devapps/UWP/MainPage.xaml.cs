@@ -23,7 +23,7 @@ namespace UWP
         // private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
         private static readonly string s_clientID = "8787cfc0-a723-49fa-99e1-291d58cb6f81"; // todo(wam): DO NOT CHECK THIS IN
         
-        private static readonly string s_authority = "https://login.microsoftonline.com/common/";
+        private static readonly string s_authority = "https://login.microsoftonline.com/organizations/";  // todo(wam): wam not working with common yet, so pushing this to organizations.
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";
 
@@ -84,13 +84,13 @@ namespace UWP
                 var result = await pca
                     .AcquireTokenInteractive(s_scopes)
                     .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(true);
 
-                await DisplayResultAsync(result).ConfigureAwait(false);
+                await DisplayResultAsync(result).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
-                await DisplayErrorAsync(ex).ConfigureAwait(false);
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
             }
         }
 
@@ -100,7 +100,7 @@ namespace UWP
 
             IEnumerable<IAccount> accounts = await pca
                 .GetAccountsAsync()
-                .ConfigureAwait(false);
+                .ConfigureAwait(true);
 
             try
             {
@@ -109,11 +109,11 @@ namespace UWP
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                await DisplayResultAsync(result).ConfigureAwait(false);
+                await DisplayResultAsync(result).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
-                await DisplayErrorAsync(ex).ConfigureAwait(false);
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
             }
         }
 
@@ -197,7 +197,7 @@ namespace UWP
 
         private async Task DisplayErrorAsync(Exception ex)
         {
-            await DisplayMessageAsync(ex.Message).ConfigureAwait(false);
+            await DisplayMessageAsync($"{ex.Message}{Environment.NewLine}{ex.StackTrace}").ConfigureAwait(false);
         }
 
         private async Task DisplayResultAsync(AuthenticationResult result)

@@ -10,7 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.WsTrust;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
@@ -31,12 +32,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             WebTokenResponse tokenResponse = result.ResponseData[0];
             WebAccount webAccount = tokenResponse.WebAccount;
 
-            long tokenExpiresOn = long.Parse(tokenResponse.Properties["TokenExpiresOn"], CultureInfo.InvariantCulture);
-
             string uniqueId = string.Empty;
-            DateTime expiresOn = new DateTime(tokenExpiresOn);  // TODO(WAM): verify the tokenExpiresOn value is in TICKS.  If not, change constructor.
+
+            // TokenExpiresOn is seconds since January 1, 1601 00:00:00 (Gregorian calendar)
+            long tokenExpiresOn = long.Parse(tokenResponse.Properties["TokenExpiresOn"], CultureInfo.InvariantCulture);
+            DateTime expiresOn = new DateTime(1601, 1, 1).AddTicks(tokenExpiresOn);
+
             string tenantId = tokenResponse.Properties["TenantId"];
-            var account = new Account(webAccount.Id, webAccount.UserName, environment: string.Empty);
+            var account = WamUtils.CreateMsalAccountFromWebAccount(webAccount);            
             string idToken = string.Empty;
             var returnedScopes = new List<string>();
 
@@ -52,22 +55,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 returnedScopes);
         }
 
-        private async Task<WebAccountProvider> FindAccountProviderForAuthorityAsync(
+        private Task<WebAccountProvider> FindAccountProviderForAuthorityAsync(
             RequestContext requestContext,
             AcquireTokenCommonParameters commonParameters)
         {
-            var authority = commonParameters.AuthorityOverride == null
-                ? Authority.CreateAuthority(requestContext.ServiceBundle)
-                : Authority.CreateAuthorityWithOverride(requestContext.ServiceBundle, commonParameters.AuthorityOverride);
-
-            // TODO(wam): WAM does not like https://login.microsoftonline.com for provider or common for authority
-            Uri uri = new Uri(authority.AuthorityInfo.CanonicalAuthority);
-            string providerId = $"{uri.Scheme}://{uri.Host}";
-            string authorityVal = uri.AbsolutePath.Replace("/", string.Empty);
-            // WebAccountProvider provider = await WebAuthenticationCoreManager.FindAccountProviderAsync(providerId, authorityVal);
-
-            WebAccountProvider provider = await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "organizations");
-            return provider;
+            return WamUtils.FindAccountProviderForAuthorityAsync(requestContext.ServiceBundle, commonParameters.AuthorityOverride);
         }
 
         private async Task<WebAccount> GetWebAccountFromMsalAccountAsync(WebAccountProvider webAccountProvider, IAccount account)
@@ -83,19 +75,32 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         private WebTokenRequest CreateWebTokenRequest(
             WebAccountProvider provider,
             AcquireTokenCommonParameters commonParameters,
-            RequestContext requestContext)
+            RequestContext requestContext,
+            bool forceAuthentication = false )
         {
             string scope = string.Empty;
-            WebTokenRequest request = new WebTokenRequest(provider, scope, clientId: requestContext.ServiceBundle.Config.ClientId)
+            WebTokenRequest request = forceAuthentication
+                ? new WebTokenRequest(provider, scope: scope, clientId: requestContext.ServiceBundle.Config.ClientId, promptType: WebTokenRequestPromptType.ForceAuthentication)
+                : new WebTokenRequest(provider, scope: scope, clientId: requestContext.ServiceBundle.Config.ClientId);
+
+            // Populate extra query parameters.  Any parameter unknown to WAM will be forwarded to server.
+            if (commonParameters.ExtraQueryParameters != null)
             {
-                CorrelationId = commonParameters.TelemetryCorrelationId.ToString("N")
-            };
-            request.Properties["resource"] = "https://graph.microsoft.com";  // todo(wam): how to take scopes and convert them to proper values for WAM?
+                foreach (var kvp in commonParameters.ExtraQueryParameters)
+                {
+                    request.Properties[kvp.Key] = kvp.Value;
+                }
+            }
+
+            request.CorrelationId = commonParameters.TelemetryCorrelationId.ToString("N");
+
+            // todo(wam): how to take scopes and convert them to proper values for WAM?
+            request.Properties["resource"] = "https://graph.microsoft.com";  
 
             if (Windows.Foundation.Metadata.ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 6))
             {
-                // this feature works correctly since windows RS4, aka 1803
-                request.Properties["prompt"] = "select_account"; // to avoid user to eneter credentials
+                // This feature works correctly since windows RS4, aka 1803
+                request.Properties["prompt"] = "select_account";
             }
 
             return request;
@@ -106,16 +111,77 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            // TODO(WAM): How to force Account Selection / UI Interaction?  AcquireTokenInteractive should always prompt.
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
             WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(false);
             WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(provider, interactiveParameters.Account).ConfigureAwait(false);
+            WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext, forceAuthentication: true);
+
+            WebTokenRequestResult result;
+
+            if (webAccount == null)
+            {
+                if (!string.IsNullOrWhiteSpace(interactiveParameters.LoginHint))
+                {
+                    request.Properties["LoginHint"] = interactiveParameters.LoginHint;
+                }
+
+                result = await WebAuthenticationCoreManager.RequestTokenAsync(request);
+            }
+            else
+            {
+                result = await WebAuthenticationCoreManager.RequestTokenAsync(request, webAccount);
+            }
+
+            return HandleWebTokenRequestResult(result);
+        }
+
+        public async Task<AuthenticationResult> ExecuteAsync(
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenSilentParameters silentParameters,
+            CancellationToken cancellationToken)
+        {
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+
+            WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(false);
+            WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(provider, silentParameters.Account).ConfigureAwait(false);
             WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext);
 
             WebTokenRequestResult result = webAccount == null
-                ? await WebAuthenticationCoreManager.RequestTokenAsync(request)
-                : await WebAuthenticationCoreManager.RequestTokenAsync(request, webAccount);
+                ? await WebAuthenticationCoreManager.GetTokenSilentlyAsync(request)
+                : await WebAuthenticationCoreManager.GetTokenSilentlyAsync(request, webAccount);
+
+            return HandleWebTokenRequestResult(result);
+        }
+
+        public async Task<AuthenticationResult> ExecuteAsync(
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
+            CancellationToken cancellationToken)
+        {
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+
+            WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(false);
+            WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext, forceAuthentication: true);
+            WebTokenRequestResult result = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(request);
+
+            return HandleWebTokenRequestResult(result);
+        }
+
+        public async Task<AuthenticationResult> ExecuteAsync(
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
+            CancellationToken cancellationToken)
+        {
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+
+            WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(false);
+            WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext, forceAuthentication: true);
+
+            request.Properties["Username"] = usernamePasswordParameters.Username;
+            request.Properties["Password"] = new string(usernamePasswordParameters.Password.PasswordToCharArray());
+
+            WebTokenRequestResult result = await WebAuthenticationCoreManager.RequestTokenAsync(request);
 
             return HandleWebTokenRequestResult(result);
         }
@@ -124,8 +190,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             switch (result.ResponseStatus)
             {
-            case WebTokenRequestStatus.Success: // success, account is the same, or was never passed.
-            case WebTokenRequestStatus.AccountSwitch: // success, but account switch happended. There was a prompt and user typed diffrent acount from original.
+            case WebTokenRequestStatus.Success:
+            // success, account is the same, or was never passed.
+            case WebTokenRequestStatus.AccountSwitch:
+                // success, but account switch happended. There was a prompt and user typed diffrent acount from original.
                 return CreateAuthenticationResultFromWebTokenRequestResult(result);
 
             // TODO(WAM): proper error data conversion for exceptions
@@ -150,35 +218,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 throw new InvalidOperationException($"Unknown ResponseStatus: {result.ResponseStatus}");
             }
         }
-
-        public async Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenSilentParameters silentParameters,
-            CancellationToken cancellationToken)
-        {
-            // TODO(WAM): How to ensure this will NEVER prompt and throw MsalUiRequiredException if it fails?
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
-
-            WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(false);
-            WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(provider, silentParameters.Account).ConfigureAwait(false);
-            WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext);
-
-            WebTokenRequestResult result = webAccount == null
-                ? await WebAuthenticationCoreManager.RequestTokenAsync(request)
-                : await WebAuthenticationCoreManager.RequestTokenAsync(request, webAccount);
-
-            return HandleWebTokenRequestResult(result);
-        }
-
-        public Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken) => throw new NotImplementedException();
-
-        public Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
-            CancellationToken cancellationToken) => throw new NotImplementedException();
 
         #region Not Relevant For WAM
 

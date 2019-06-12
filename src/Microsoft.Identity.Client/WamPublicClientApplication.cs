@@ -12,6 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
+using Windows.Security.Authentication.Web.Core;
 
 namespace Microsoft.Identity.Client
 {
@@ -58,13 +60,49 @@ namespace Microsoft.Identity.Client
                 loginHint);
         }
 
-        // TODO(WAM): implement these
-        public Task<IAccount> GetAccountAsync(string identifier) => throw new NotImplementedException();
-        public Task<IEnumerable<IAccount>> GetAccountsAsync() => throw new NotImplementedException();
-        public Task RemoveAsync(IAccount account) => throw new NotImplementedException();
+        public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
+            IEnumerable<string> scopes)
+        {
+            return AcquireTokenByIntegratedWindowsAuthParameterBuilder.Create(
+                ClientExecutorFactory.CreateWamPublicClientExecutor(this),
+                scopes);
+        }
 
-        public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(IEnumerable<string> scopes) => throw new NotImplementedException();
-        public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, SecureString password) => throw new NotImplementedException();
+        public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
+            IEnumerable<string> scopes,
+            string username,
+            SecureString password)
+        {
+            return AcquireTokenByUsernamePasswordParameterBuilder.Create(
+                ClientExecutorFactory.CreateWamPublicClientExecutor(this),
+                scopes,
+                username,
+                password);
+        }
+
+        public async Task<IAccount> GetAccountAsync(string identifier)
+        {
+            var provider = await WamUtils.FindAccountProviderForAuthorityAsync(ServiceBundle, null).ConfigureAwait(false);
+            var webAccount = await WebAuthenticationCoreManager.FindAccountAsync(provider, identifier);
+            return WamUtils.CreateMsalAccountFromWebAccount(webAccount);
+        }
+
+        public async Task<IEnumerable<IAccount>> GetAccountsAsync()
+        {
+            var provider = await WamUtils.FindAccountProviderForAuthorityAsync(ServiceBundle, null).ConfigureAwait(false);
+            var findAllAccountsResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider);
+
+            var accounts = new List<IAccount>();
+
+            foreach (var webAccount in findAllAccountsResult.Accounts)
+            {
+                accounts.Add(WamUtils.CreateMsalAccountFromWebAccount(webAccount));
+            }
+
+            return accounts;
+        }
+
+        public Task RemoveAsync(IAccount account) => throw new InvalidOperationException("MSAL cannot remove accounts associated with WAM");
 
         #region Unsupported With WAM
         public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(IEnumerable<string> scopes, Func<DeviceCodeResult, Task> deviceCodeResultCallback) => throw new NotImplementedException();
