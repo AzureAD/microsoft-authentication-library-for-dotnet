@@ -37,7 +37,7 @@ namespace CommonCache.Test.Common
                 File.WriteAllText(inputFilePath, inputDataJson);
 
                 var sb = new StringBuilder();
-                sb.Append($"--inputPath {inputFilePath.EncloseQuotes()} ");
+                sb.Append($"--inputPath {inputFilePath} ");
                 string arguments = sb.ToString();
 
                 var processRunResults = await languageExecutor.ExecuteAsync(arguments, cancellationToken).ConfigureAwait(false);

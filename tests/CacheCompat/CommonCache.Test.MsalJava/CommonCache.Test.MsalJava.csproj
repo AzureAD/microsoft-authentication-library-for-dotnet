@@ -22,4 +22,19 @@
     <PackageReference Include="System.Runtime" version="4.1.0" />
     <PackageReference Include="System.Runtime.Extensions" version="4.1.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="pom.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="src\main\java\TestConsoleApp.java">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="src\main\java\TestInput.java">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="src\main\java\TestOutput.java">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
