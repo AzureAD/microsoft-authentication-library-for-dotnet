@@ -154,9 +154,11 @@ namespace CommonCache.Test.Unit
 
         [DataTestMethod]
         [DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalV3 msal v3 cache")]
-        //[DataRow(CacheProgramType.MsalJava, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalJava->AdalV5 msal v3 cache")]
-        //[DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalJava msal v3 cache")] 
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalJava msal v3 cache")] 
+        [DataRow(CacheProgramType.MsalJava, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalJava->AdalV5 msal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalJava msal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalJava msal v3 cache")]
+        [DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalPython msal v3 cache")]
+        [DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalJava msal v3 cache")]
         public async Task TestMsalJavaCacheCompatibilityAsync(
             CacheProgramType interactiveType,
             CacheProgramType silentType,
