@@ -169,8 +169,8 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string BrokerClaims = "testClaims";
 
 #if !ANDROID && !iOS && !WINDOWS_APP
-        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
-        public static readonly ClientCredentialWrapper CredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
+        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
+        public static readonly ClientCredentialWrapper CredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
 #endif
     }
 

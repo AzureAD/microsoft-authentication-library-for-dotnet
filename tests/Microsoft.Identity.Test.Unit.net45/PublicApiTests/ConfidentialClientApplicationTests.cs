@@ -326,34 +326,42 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        private enum CredentialType
+        {
+            Certificate,
+            CertificateAndClaims,
+            SignedAssertion
+        }
+
         private ConfidentialClientApplication CreateConfidentialClient(
             MockHttpManager httpManager,
             X509Certificate2 cert,
             int tokenResponses,
-            TelemetryCallback telemetryCallback = null,
-            ClientAssertion assertion = null)
+            CredentialType credentialType = CredentialType.Certificate,
+            TelemetryCallback telemetryCallback = null)
         {
-            ConfidentialClientApplication app;
-            if (assertion != null)
+            var builder = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                              .WithRedirectUri(MsalTestConstants.RedirectUri)
+                              .WithHttpManager(httpManager)
+                              .WithTelemetry(telemetryCallback);
+
+            switch (credentialType)
             {
-                app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                              .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                              .WithClientAssertion(assertion)
-                                              .WithHttpManager(httpManager)
-                                              .WithTelemetry(telemetryCallback)
-                                              .BuildConcrete();
+            case CredentialType.CertificateAndClaims:
+                builder = builder.WithCertificate(cert, MsalTestConstants.ClientAssertionClaims);
+                break;
+            case CredentialType.SignedAssertion:
+                builder = builder.WithClientAssertion(MsalTestConstants.DefaultClientAssertion);
+                break;
+            case CredentialType.Certificate:
+            default:
+                builder = builder.WithCertificate(cert);
+                break;
             }
-            else
-            {
-                app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                              .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                                              .WithCertificate(cert)
-                                                              .WithHttpManager(httpManager)
-                                                              .WithTelemetry(telemetryCallback)
-                                                              .BuildConcrete();
-            }
+
+            var app = builder.BuildConcrete();
+
             httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
 
             for (int i = 0; i < tokenResponses; i++)
@@ -419,15 +427,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
-        public async Task ConfidentialClientUsingClientAssertionTestAsync()
+        public async Task ConfidentialClientUsingClientAssertionClaimsTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                ClientAssertion assertion = new ClientAssertion(cert, MsalTestConstants.ClientAssertionClaims);
-                var app = CreateConfidentialClient(httpManager, cert, 3, null, assertion);
+                var app = CreateConfidentialClient(httpManager, cert, 3, CredentialType.CertificateAndClaims);
 
                 var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -480,8 +487,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                ClientAssertion assertion = new ClientAssertion(MsalTestConstants.DefaultClientAssertion);
-                var app = CreateConfidentialClient(httpManager, cert, 3, null, assertion);
+                var app = CreateConfidentialClient(httpManager, cert, 3, CredentialType.SignedAssertion);
 
                 var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -536,7 +542,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 1, receiver.HandleTelemetryEvents);
+                var app = CreateConfidentialClient(httpManager, cert, 1, CredentialType.Certificate, receiver.HandleTelemetryEvents);
                 var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(

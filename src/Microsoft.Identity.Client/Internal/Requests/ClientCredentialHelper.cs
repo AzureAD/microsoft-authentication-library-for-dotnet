@@ -60,16 +60,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
-                    if ((clientCredential.Assertion == null || clientCredential.ValidTo != 0) && String.IsNullOrEmpty(clientCredential.UserProvidedClientAssertion.SignedAssertion))
+                    if ((clientCredential.Assertion == null || clientCredential.ValidTo != 0) && String.IsNullOrWhiteSpace(clientCredential.SignedAssertion))
                     {
                         if (!ValidateClientAssertion(clientCredential, endpoints, sendX5C))
                         {
                             logger.Info("Client Assertion does not exist or near expiry.");
                             JsonWebToken jwtToken;
                             
-                            if (clientCredential.UserProvidedClientAssertion != null)
+                            if (clientCredential.Certificate.ClaimsToSign != null && clientCredential.Certificate.ClaimsToSign.Count > 0)
                             {
-                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience, clientCredential.UserProvidedClientAssertion);
+                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience, clientCredential.Certificate.ClaimsToSign);
                             }
                             else
                             {
@@ -88,9 +88,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
                     
-                    if (!String.IsNullOrEmpty(clientCredential.UserProvidedClientAssertion.SignedAssertion))
+                    if (!String.IsNullOrEmpty(clientCredential.SignedAssertion))
                     {
-                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.UserProvidedClientAssertion.SignedAssertion;
+                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.SignedAssertion;
                     }
                     else
                     {

@@ -17,15 +17,42 @@ namespace Microsoft.Identity.Client.Internal
     /// </summary>
     internal sealed class ClientCredentialWrapper
     {
-        /// <summary>
-        /// Constructor of client (application) credentials from a <see cref="ClientAssertionCertificateWrapper"/>
-        /// </summary>
-        /// <param name="certificate">contains information about the certificate previously shared with AAD at application
-        /// registration to prove the identity of the application (the client) requesting the tokens.</param>
-        public ClientCredentialWrapper(ClientAssertionCertificateWrapper certificate)
+        public static ClientCredentialWrapper CreateWithCertificate(ClientAssertionCertificateWrapper certificate)
+        {
+           return new ClientCredentialWrapper(certificate);
+        }
+        public static ClientCredentialWrapper CreateWithSecret(string secret)
+        {
+            return new ClientCredentialWrapper(secret, false);
+        }
+        public static ClientCredentialWrapper CreateWithSignedClientAssertion(string signedClientAssertion)
+        {
+            return new ClientCredentialWrapper(signedClientAssertion, true);
+        }
+
+        private ClientCredentialWrapper(ClientAssertionCertificateWrapper certificate)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
             Certificate = certificate;
+        }
+
+        private ClientCredentialWrapper(string secretOrAssertion, bool isSignedAssertion)
+        {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
+            if (string.IsNullOrWhiteSpace(secretOrAssertion))
+            {
+                throw new ArgumentNullException(nameof(secretOrAssertion));
+            }
+
+            if (isSignedAssertion)
+            {
+                SignedAssertion = secretOrAssertion;
+            }
+            else
+            {
+                Secret = secretOrAssertion;
+            }
         }
 
         internal ClientAssertionCertificateWrapper Certificate { get; private set; }
@@ -34,38 +61,7 @@ namespace Microsoft.Identity.Client.Internal
         internal bool ContainsX5C { get; set; }
         internal string Audience { get; set; }
         internal string Secret { get; private set; }
-        internal ClientAssertion UserProvidedClientAssertion { get; set; }
-
-        /// <summary>
-        /// Constructor of client (application) credentials from a client secret, also known as the application password.
-        /// </summary>
-        /// <param name="secret">Secret string previously shared with AAD at application registration to prove the identity
-        /// of the application (the client) requesting the tokens.</param>
-        public ClientCredentialWrapper(string secret)
-        {
-            ConfidentialClientApplication.GuardMobileFrameworks();
-
-            if (string.IsNullOrWhiteSpace(secret))
-            {
-                throw new ArgumentNullException(nameof(secret));
-            }
-
-            Secret = secret;
-        }
-
-        public ClientCredentialWrapper(ClientAssertion clientAssertion)
-        {
-            ConfidentialClientApplication.GuardMobileFrameworks();
-
-            if (clientAssertion == null)
-            {
-                throw new ArgumentNullException(nameof(clientAssertion));
-            }
-
-            Certificate = new ClientAssertionCertificateWrapper(clientAssertion.Certificate);
-
-            UserProvidedClientAssertion = clientAssertion;
-        }
+        internal string SignedAssertion { get; set; }
     }
 #endif
 }

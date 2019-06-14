@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -26,7 +27,8 @@ namespace Microsoft.Identity.Client.Internal
         /// to instantiate a <see cref="ClientCredential"/> used in the constructors of <see cref="ConfidentialClientApplication"/>
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        public ClientAssertionCertificateWrapper(X509Certificate2 certificate)
+        /// <param name="claimsToSign">Claims to sign with the certificate.</param>
+        public ClientAssertionCertificateWrapper(X509Certificate2 certificate, Dictionary<string, string> claimsToSign)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
@@ -39,8 +41,21 @@ namespace Microsoft.Identity.Client.Internal
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
                         MinKeySizeInBits));
             }
+
+            if (claimsToSign != null && claimsToSign.Count > 0)
+            {
+                ClaimsToSign = claimsToSign;
+            }
 #endif
         }
+
+        /// <summary>
+        /// Constructor to create certificate information used in <see cref="ClientCredential"/>
+        /// to instantiate a <see cref="ClientCredential"/> used in the constructors of <see cref="ConfidentialClientApplication"/>
+        /// </summary>
+        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        public ClientAssertionCertificateWrapper(X509Certificate2 certificate) : this(certificate, null)
+        { }
 
         /// <summary>
         /// Gets minimum X509 certificate key size in bits
@@ -51,6 +66,8 @@ namespace Microsoft.Identity.Client.Internal
         /// Gets the X509 certificate used as credentials to prove the identity of the application to Azure AD.
         /// </summary>
         public X509Certificate2 Certificate { get; }
+
+        public Dictionary<string, string> ClaimsToSign { get; }
 
         internal byte[] Sign(ICryptographyManager cryptographyManager, string message)
         {

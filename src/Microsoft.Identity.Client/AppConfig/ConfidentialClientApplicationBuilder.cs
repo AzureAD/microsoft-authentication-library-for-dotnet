@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -61,6 +62,18 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Sets the certificate associated with the application
+        /// </summary>
+        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, Dictionary<string, string> claimsToSign)
+        {
+            Config.ClientCredentialCertificate = certificate;
+            Config.ClaimsToSign = claimsToSign;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the application secret
         /// </summary>
         /// <param name="clientSecret">Secret string previously shared with AAD at application registration to prove the identity
@@ -75,11 +88,11 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Sets the application client assertion
         /// </summary>
-        /// <param name="clientAssertion">The client assertion used as credentials to prove the identity of the application to Azure AD</param>
+        /// <param name="signedClientAssertion">The client assertion used to prove the identity of the application to Azure AD</param>
         /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithClientAssertion(ClientAssertion clientAssertion)
+        public ConfidentialClientApplicationBuilder WithClientAssertion(string signedClientAssertion)
         {
-            Config.ClientAssertion = clientAssertion;
+            Config.SignedClientAssertion = signedClientAssertion;
             return this;
         }
 
@@ -105,7 +118,7 @@ namespace Microsoft.Identity.Client
                 countOfCredentialTypesSpecified++;
             }
 
-            if (Config.ClientAssertion != null)
+            if (!string.IsNullOrWhiteSpace(Config.SignedClientAssertion))
             {
                 countOfCredentialTypesSpecified++;
             }
@@ -117,17 +130,17 @@ namespace Microsoft.Identity.Client
 
             if (!string.IsNullOrWhiteSpace(Config.ClientSecret))
             {
-                Config.ClientCredential = new ClientCredentialWrapper(Config.ClientSecret);
+                Config.ClientCredential = ClientCredentialWrapper.CreateWithSecret(Config.ClientSecret);
             }
 
             if (Config.ClientCredentialCertificate != null)
             {
-                Config.ClientCredential = new ClientCredentialWrapper(new ClientAssertionCertificateWrapper(Config.ClientCredentialCertificate));
+                Config.ClientCredential = ClientCredentialWrapper.CreateWithCertificate(new ClientAssertionCertificateWrapper(Config.ClientCredentialCertificate));
             }
 
-            if (Config.ClientAssertion != null)
+            if (!string.IsNullOrWhiteSpace(Config.SignedClientAssertion))
             {
-                Config.ClientCredential = new ClientCredentialWrapper(Config.ClientAssertion);
+                Config.ClientCredential = ClientCredentialWrapper.CreateWithSignedClientAssertion(Config.SignedClientAssertion);
             }
 
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))

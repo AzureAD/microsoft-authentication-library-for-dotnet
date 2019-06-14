@@ -47,31 +47,30 @@ namespace Microsoft.Identity.Client.Internal
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
         private const int MaxTokenLength = 65536;
         public readonly JWTPayload Payload;
-        public readonly ClientAssertion ClientAssertion;
-        public readonly long ValidTo;
-        private readonly ICryptographyManager _cryptographyManager;
+        public Dictionary<string, string> ClaimsToSign { get; private set; }
+        public long ValidTo { get { return Payload.ValidTo; }}
+private readonly ICryptographyManager _cryptographyManager;
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
         {
             _cryptographyManager = cryptographyManager;
             DateTime validFrom = DateTime.UtcNow;
 
-            ValidTo = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds));
             Payload = new JWTPayload
             {
                 Audience = audience,
                 Issuer = clientId,
                 ValidFrom = ConvertToTimeT(validFrom),
-                ValidTo = ValidTo,
+                ValidTo = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds)),
                 Subject = clientId,
                 JwtIdentifier = Guid.NewGuid().ToString()
             };
         }
 
-        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, ClientAssertion assertion)
+        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, Dictionary<string, string> claimsToSign)
             :this(cryptographyManager, clientId, audience)
         {
-            ClientAssertion = assertion;
+            ClaimsToSign = claimsToSign;
         }
 
         public string Sign(ClientAssertionCertificateWrapper credential, bool sendCertificate)
@@ -120,9 +119,9 @@ namespace Microsoft.Identity.Client.Internal
             string jsonPayload;
 
             // Payload segment
-            if (ClientAssertion != null)
+            if (ClaimsToSign != null && ClaimsToSign.Count > 0)
             {
-                jsonPayload = JsonHelper.SerializeToJson(ClientAssertion.Claims);
+                jsonPayload = JsonHelper.SerializeToJson(ClaimsToSign);
             }
             else
             {
