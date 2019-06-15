@@ -32,12 +32,13 @@ public class TestConsoleApp {
     public static void main(String args[]) throws Exception {
         String pathToInputConfiguration = args[1];
 
-        System.out.println("pathToInputConfiguration - " + pathToInputConfiguration);
+        System.out.println("Java app, pathToInputConfiguration - " + pathToInputConfiguration);
 
         TestInput testInput = new Gson().fromJson(readFile(pathToInputConfiguration), TestInput.class);
 
-        System.out.println("CacheFilePath - " + testInput.cacheFilePath);
-        System.out.println("ResultsFilePath - " + testInput.resultsFilePath);
+        System.out.println("Java app, CacheFilePath - " + testInput.cacheFilePath);
+        System.out.println("Java app, ResultsFilePath - " + testInput.resultsFilePath);
+        System.out.println("Java app, testInput.clientId - " + testInput.clientId);
 
         IPublicClientApplication app = PublicClientApplication.builder(testInput.clientId)
                 .authority(testInput.authority)
@@ -63,12 +64,17 @@ public class TestConsoleApp {
         TestOutput testOutput = new TestOutput();
 
         for (TestInput.LabUserData user : testInput.users) {
+            System.out.println("Java app, process user - " + user.upn);
+
             IAccount account = getAccount(app, user.upn);
 
             IAuthenticationResult result = null;
             Set<String> scopes = Collections.singleton(testInput.scope);
 
             if (account != null) {
+                System.out.println("Java app, found account for user - " + user.upn);
+                System.out.println("Java app, account.username() - " + account.username());
+
                 result = app.acquireTokenSilently(SilentParameters.builder(scopes, account)
                         .build())
                         .join();
@@ -80,8 +86,10 @@ public class TestConsoleApp {
                 }
             }
 
-            if (result != null) {
+            if (result == null) {
                 try {
+                   System.out.println("Java app, acquire token interectively for user.upn - " + user.upn);
+
                     result = app.acquireToken(UserNamePasswordParameters.builder
                             (scopes, user.upn, user.password.toCharArray()).build()).join();
 
@@ -98,6 +106,9 @@ public class TestConsoleApp {
                 }
             }
         }
+       System.out.println("Java app, write output to - " + testInput.resultsFilePath);
+       System.out.println("Java app, outputy - " + new Gson().toJson(testOutput));
+
         writeFile(testInput.resultsFilePath, new Gson().toJson(testOutput));
     }
 }
