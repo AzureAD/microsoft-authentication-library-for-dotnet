@@ -25,7 +25,7 @@ MSAL.NET roadmap is available from [Roadmap](wiki#roadmap) in the [Wiki pages](h
 
 ### Support SLA
 
-From the moment MSAL.NET became Generally Available (MSAL.NET 3.0.8):
+MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to 4.x
 
 - Major versions are supported for twelve months after the release of the next major version.
 - Minor versions older than N-1 are not supported.
@@ -43,7 +43,7 @@ From the moment MSAL.NET became Generally Available (MSAL.NET 3.0.8):
 
 ## Where do I file issues
 
-This is the correct repo to file [issues](issues)
+This is the correct repo to file [issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues)
 
 ## Requirements
 

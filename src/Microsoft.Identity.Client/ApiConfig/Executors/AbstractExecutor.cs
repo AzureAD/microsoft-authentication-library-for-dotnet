@@ -27,11 +27,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             requestContext.Logger.Info(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}'. TelemetryCorrelationId({4})",
+                    "MSAL {0} with assembly version '{1}'. TelemetryCorrelationId({2})",
                     ServiceBundle.PlatformProxy.GetProductName(),
                     MsalIdHelper.GetMsalVersion(),
-                    AssemblyUtils.GetAssemblyFileVersionAttribute(),
-                    AssemblyUtils.GetAssemblyInformationalVersion(),
                     requestContext.TelemetryCorrelationId));
 
             return requestContext;

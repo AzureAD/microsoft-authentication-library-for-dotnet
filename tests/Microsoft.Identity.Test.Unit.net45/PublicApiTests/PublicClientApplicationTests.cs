@@ -1147,33 +1147,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                 app.ServiceBundle.PlatformProxy,
                                 AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
-
-                httpManager.AddMockHandler(
-                new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Get,
-                    ExpectedUrl = "https://fs.contoso.com/.well-known/webfinger",
-                    ExpectedQueryParams = new Dictionary<string, string>
-                    {
-                            {"resource", "https://fs.contoso.com"},
-                            {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
-                    },
-                    ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.contoso.com")
-                });
-
-                //add mock response for tenant endpoint discovery
-                httpManager.AddMockHandler(new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
-                });
-
-                httpManager.AddMockHandler(new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = MockHelpers.CreateAdfsSuccessTokenResponseMessage()
-                });
+                MockHttpManagerExtensions.AddAdfs2019MockHandler(httpManager);
 
                 AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync().Result;
                 Assert.IsNotNull(result);
@@ -1198,6 +1172,45 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.OnPremiseUniqueId, cachedAuth.UniqueId);
                 Assert.AreEqual(new AccountId(MsalTestConstants.OnPremiseUniqueId), cachedAuth.Account.HomeAccountId);
                 Assert.AreEqual(MsalTestConstants.OnPremiseDisplayableId, cachedAuth.Account.Username);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenFromAdfsWithNoLoginHintWithAccountInCacheTest()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAdfsAuthority(MsalTestConstants.OnPremiseAuthority, true)
+                    .WithHttpManager(httpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
+                    .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                                app.ServiceBundle.PlatformProxy,
+                                AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                MockHttpManagerExtensions.AddAdfs2019MockHandler(httpManager);
+
+                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync().Result;
+                Assert.IsNotNull(result);
+
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateAdfsSuccessTokenResponseMessage()
+                });
+
+                // Complete AT call again w/no login hint w/account already in cache
+                AuthenticationResult result2 = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync().Result;
+                Assert.IsNotNull(result2);
+                Assert.IsNotNull(result2.Account);
+                Assert.AreEqual(MsalTestConstants.OnPremiseUniqueId, result2.UniqueId);
+                Assert.AreEqual(new AccountId(MsalTestConstants.OnPremiseUniqueId), result2.Account.HomeAccountId);
+                Assert.AreEqual(MsalTestConstants.OnPremiseDisplayableId, result2.Account.Username);
+                Assert.AreEqual(app.UserTokenCacheInternal.Semaphore.CurrentCount, 1);
             }
         }
 

@@ -34,7 +34,7 @@ if (-Not (Test-IsChocolateyInstalled)) {
   Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 }
 
-$ChocoPackages = 'chromedriver', 'vswhere', 'python3'
+$ChocoPackages = 'chromedriver', 'vswhere', 'python3', 'openjdk11', 'maven'
 
 ForEach ($PackageName in $ChocoPackages) {
   if (-Not (Test-ChocolateyPackageInstalled($PackageName))) {
