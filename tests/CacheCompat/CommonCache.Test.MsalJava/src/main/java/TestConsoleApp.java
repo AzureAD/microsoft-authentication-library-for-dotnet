@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. 
+
 import com.google.gson.Gson;
 import com.microsoft.aad.msal4j.*;
 
