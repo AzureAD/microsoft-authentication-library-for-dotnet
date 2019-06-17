@@ -26,7 +26,20 @@ namespace CommonCache.Test.Unit.Utils
 
         public static CacheProgramResults CreateFromResultsFile(string resultsFilePath, ProcessRunResults processRunResults)
         {
-            var executionResults = JsonConvert.DeserializeObject<ExecutionContent>(File.ReadAllText(resultsFilePath));
+            ExecutionContent executionResults;
+            if (File.Exists(resultsFilePath))
+            {
+                executionResults = JsonConvert.DeserializeObject<ExecutionContent>(File.ReadAllText(resultsFilePath));
+            }
+            else
+            {
+                executionResults = new ExecutionContent
+                {
+                    IsError = true,
+                    ErrorMessage = $"ResultsFilePath does not exist: {resultsFilePath}"
+                };
+            }
+
             return new CacheProgramResults(executionResults, false, 0, processRunResults.StandardOut, processRunResults.StandardError);
         }
 

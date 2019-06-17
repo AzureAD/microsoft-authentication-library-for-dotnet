@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,28 +13,38 @@ namespace CommonCache.Test.MsalJava
 {
     public class JavaLanguageExecutor : ILanguageExecutor
     {
-        public JavaLanguageExecutor(string javaClassPath)
+        public JavaLanguageExecutor(string className)
         {
-            JavaClassPath = javaClassPath;
+            ClassName = className;
         }
 
-        // Path to java class with a public static void main() function to execute
-        public string JavaClassPath { get; }
+        public string ClassName { get; }
 
         public async Task<ProcessRunResults> ExecuteAsync(
             string arguments,
             CancellationToken cancellationToken)
         {
-            var sb = new StringBuilder();
-            sb.Append($"{JavaClassPath.EncloseQuotes()} ");
-            sb.Append(arguments);
-            string finalArguments = sb.ToString();
-
-            string executablePath = "java.exe";
-
-            Console.WriteLine($"Calling:  {executablePath} {finalArguments}");
             var processUtils = new ProcessUtils();
-            var processRunResults = await processUtils.RunProcessAsync(executablePath, finalArguments, cancellationToken).ConfigureAwait(false);
+            string executablePath = "mvn.exe";
+
+            string pomFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "pom.xml");
+
+            try
+            {
+                string compileArguments = $"-f \"{pomFilePath}\" compile";
+                Console.WriteLine($"Calling:  {executablePath} {compileArguments}");
+                var compileResults = await processUtils.RunProcessAsync(executablePath, compileArguments, cancellationToken).ConfigureAwait(false);
+            }
+            catch (ProcessRunException ex)
+            {
+                Console.WriteLine(ex.ProcessStandardOutput);
+                throw;
+            }
+
+            string executeArguments = $"-f \"{pomFilePath}\" exec:java \"-Dexec.mainClass={ClassName}\" \"-Dexec.args={arguments}\"";
+
+            Console.WriteLine($"Calling:  {executablePath} {executeArguments}");
+            var processRunResults = await processUtils.RunProcessAsync(executablePath, executeArguments, cancellationToken).ConfigureAwait(false);
             return processRunResults;
         }
     }
