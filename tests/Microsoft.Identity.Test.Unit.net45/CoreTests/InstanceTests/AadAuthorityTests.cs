@@ -271,5 +271,31 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             authority = Authority.CreateAuthority(serviceBundle, UriCustomPort);
             Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
         }
+
+        [TestMethod]
+        public void TenantAuthorityDoesNotChange()
+        {
+            // no change because initial authority is tenanted
+            AuthorityTestHelper.AuthorityDoesNotUpdateTenant(
+                MsalTestConstants.AuthorityUtidTenant, MsalTestConstants.Utid);
+        
+        }
+
+        [TestMethod]
+        public void TenantlessAuthorityChanges()
+        {
+            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(
+                MsalTestConstants.AuthorityCommonTenant);
+
+            Assert.AreEqual("common", authority.GetTenantId());
+
+            string updatedAuthority = authority.GetTenantedAuthority(MsalTestConstants.Utid);
+            Assert.AreEqual(MsalTestConstants.AuthorityUtidTenant, updatedAuthority);
+            Assert.AreEqual(updatedAuthority, MsalTestConstants.AuthorityUtidTenant);
+
+            authority.UpdateWithTenant(MsalTestConstants.Utid);
+            Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, MsalTestConstants.AuthorityUtidTenant);
+        }
+
     }
 }

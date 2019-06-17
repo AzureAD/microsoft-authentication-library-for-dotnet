@@ -43,10 +43,6 @@ namespace Microsoft.Identity.Client.Instance
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
             string path = authorityUri.AbsolutePath.Substring(1);
             string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            bool isTenantless = Authority.TenantlessTenantNames.Contains(tenant);
-
-            // TODO: where is the value in this log message?  we have a bunch of code supporting printing just this out...
-            requestContext.Logger.Info("Is Authority tenantless? - " + isTenantless);
 
             var endpointManager = OpenIdConfigurationEndpointManagerFactory.Create(authorityInfo, _serviceBundle);
 

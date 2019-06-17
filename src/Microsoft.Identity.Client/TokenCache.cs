@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -117,7 +118,7 @@ namespace Microsoft.Identity.Client
 
         private void DeleteAccessTokensWithIntersectingScopes(
             AuthenticationRequestParameters requestParams,
-            ISet<string> environmentAliases,
+            IEnumerable<string> environmentAliases,
             string tenantId,
             SortedSet<string> scopeSet,
             string homeAccountId)
@@ -204,78 +205,6 @@ namespace Microsoft.Identity.Client
                 msalAccessTokenCacheItem.ExtendedExpiresOn);
         }
 
-        // TODO: TokenCache should not be responsible for knowing when to do instance dicovery or not
-        // there should be an InstanceDiscoveryManager that encapsulates all the logic
-        private async Task<InstanceDiscoveryMetadataEntry> GetCachedOrDiscoverAuthorityMetaDataAsync(
-            string authority,
-            RequestContext requestContext)
-        {
-            if (SupportsInstanceDicovery(authority))
-            {
-                var instanceDiscoveryMetadata = await ServiceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
-                    new Uri(authority),
-                    requestContext).ConfigureAwait(false);
-                return instanceDiscoveryMetadata;
-            }
-
-            return null;
-        }
-
-        private bool SupportsInstanceDicovery(string authority)
-        {
-            var authorityType = Authority.GetAuthorityType(authority);
-            return authorityType == AuthorityType.Aad ||
-                // TODO: Not all discovery logic checks for this condition, this is a bug simialar to
-                // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1037
-                (authorityType == AuthorityType.B2C &&
-                    Authority.GetEnviroment(authority).Equals(AzurePublicEnv));
-        }
-
-        private InstanceDiscoveryMetadataEntry GetCachedAuthorityMetaData(string authority)
-        {
-            if (ServiceBundle?.AadInstanceDiscovery == null)
-            {
-                return null;
-            }
-
-            InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata = null;
-            var authorityType = Authority.GetAuthorityType(authority);
-            if (authorityType == AuthorityType.Aad || authorityType == AuthorityType.B2C)
-            {
-                ServiceBundle.AadInstanceDiscovery.TryGetValue(new Uri(authority).Host, out instanceDiscoveryMetadata);
-            }
-            return instanceDiscoveryMetadata;
-        }
-
-        private ISet<string> GetEnvironmentAliases(string authority, InstanceDiscoveryMetadataEntry metadata)
-        {
-            ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                new Uri(authority).Host
-            };
-
-            if (metadata != null)
-            {
-                foreach (string environmentAlias in metadata.Aliases ?? Enumerable.Empty<string>())
-                {
-                    environmentAliases.Add(environmentAlias);
-                }
-            }
-
-            return environmentAliases;
-        }
-
-        private string GetPreferredEnvironmentHost(string environmentHost, InstanceDiscoveryMetadataEntry metadata)
-        {
-            string preferredEnvironmentHost = environmentHost;
-
-            if (metadata != null)
-            {
-                preferredEnvironmentHost = metadata.PreferredCache;
-            }
-
-            return preferredEnvironmentHost;
-        }
 
         private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account)
         {
@@ -293,7 +222,7 @@ namespace Microsoft.Identity.Client
         /// If the list becomes stale (i.e. new env is introduced), GetAccounts will perform InstanceDiscovery
         /// The list of known envs should not be used in any other scenario!
         /// </summary>
-        private async Task<IEnumerable<string>> GetEnvAliasesTryAvoidNetworkCallAsync(
+        private async Task<IEnumerable<string>> GetEnvironmentAliasesTryAvoidNetworkCallAsync( //TODO bogavril: completely refactory this
             string authority,
             ISet<string> msalEnvs,
             ISet<string> adalEnvs,
@@ -322,10 +251,11 @@ namespace Microsoft.Identity.Client
                 return await Task.FromResult(aliases).ConfigureAwait(false);
             }
 
-            var instanceDiscoveryResult = await GetCachedOrDiscoverAuthorityMetaDataAsync(authority, requestContext)
+            var instanceDiscoveryResult = await ServiceBundle.InstanceDiscoveryManager
+                .GetMetadataEntryAsync(new Uri(authority), requestContext)
                 .ConfigureAwait(false);
 
-            return instanceDiscoveryResult?.Aliases ?? new[] { envFromRequest };
+            return instanceDiscoveryResult?.Aliases ??  new[] { envFromRequest };
         }
 
         private static List<IAccount> UpdateWithAdalAccounts(

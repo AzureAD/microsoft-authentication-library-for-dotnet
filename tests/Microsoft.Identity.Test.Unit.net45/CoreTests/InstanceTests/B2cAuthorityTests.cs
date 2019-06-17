@@ -45,6 +45,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public void TenantTest()
+        {
+            AuthorityTestHelper.AuthorityDoesNotUpdateTenant(
+                "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/",
+                "sometenantid");
+
+            AuthorityTestHelper.AuthorityDoesNotUpdateTenant(
+                "https://catsareamazing.com/tfp/catsareamazing/policy/",
+                "catsareamazing");
+
+            AuthorityTestHelper.AuthorityDoesNotUpdateTenant(
+              "https://sometenantid.b2clogin.de/tfp/tid/policy/",
+              "tid");
+        }
+
+        [TestMethod]
         [TestCategory("B2CAuthorityTests")]
         public void B2CLoginAuthorityCreateAuthority()
         {

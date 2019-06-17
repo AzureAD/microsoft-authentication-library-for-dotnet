@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -237,7 +234,7 @@ namespace Microsoft.Identity.Client.Cache
         public static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
-            ISet<string> environmentAliases,
+            IEnumerable<string> environmentAliases,
             string clientId,
             string upn,
             string uniqueId)
@@ -300,12 +297,18 @@ namespace Microsoft.Identity.Client.Cache
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
             string preferredEnvironment,
-            ISet<string> environmentAliases,
+            IEnumerable<string> environmentAliases,
             string clientId,
             string upn,
             string uniqueId)
         {
-            var adalRts = GetAllAdalEntriesForMsal(logger, legacyCachePersistence, environmentAliases, clientId, upn, uniqueId);
+            List<MsalRefreshTokenCacheItem> adalRts = GetAllAdalEntriesForMsal(
+                logger, 
+                legacyCachePersistence, 
+                environmentAliases, 
+                clientId, 
+                upn, 
+                uniqueId);
 
             List<MsalRefreshTokenCacheItem> filteredByPrefEnv = adalRts.Where
                 (rt => rt.Environment.Equals(preferredEnvironment, StringComparison.OrdinalIgnoreCase)).ToList();

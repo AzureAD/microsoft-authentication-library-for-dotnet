@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -43,7 +44,7 @@ namespace Microsoft.Identity.Client.Core
                 TelemetryManager = new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
             }
 
-            AadInstanceDiscovery = new AadInstanceDiscovery(DefaultLogger, HttpManager, TelemetryManager, shouldClearCaches);
+            InstanceDiscoveryManager = new InstanceDiscoveryManager(HttpManager, TelemetryManager, shouldClearCaches);
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
         }
@@ -56,8 +57,7 @@ namespace Microsoft.Identity.Client.Core
         /// <inheritdoc />
         public ITelemetryManager TelemetryManager { get; }
 
-        /// <inheritdoc />
-        public IAadInstanceDiscovery AadInstanceDiscovery { get; }
+        public IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
 
         /// <inheritdoc />
         public IWsTrustWebRequestManager WsTrustWebRequestManager { get; }

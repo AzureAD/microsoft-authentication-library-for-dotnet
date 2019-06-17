@@ -4,7 +4,7 @@
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Client.Instance
+namespace Microsoft.Identity.Client.Instance.Discovery
 {
     [DataContract]
     internal sealed class InstanceDiscoveryResponse : OAuth2ResponseBase

@@ -5,9 +5,13 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Common
 {
@@ -16,7 +20,10 @@ namespace Microsoft.Identity.Test.Common
         public static void ResetInternalStaticCaches()
         {
             // This initializes the classes so that the statics inside them are fully initialized, and clears any cached content in them.
-            new AadInstanceDiscovery(null, null, null, true);
+            new InstanceDiscoveryManager(
+                Substitute.For<IHttpManager>(),
+                Substitute.For<ITelemetryManager>(),
+                true);
             new AuthorityEndpointResolutionManager(null, true);
         }
 

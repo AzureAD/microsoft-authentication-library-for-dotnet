@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -700,29 +701,32 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void CacheAdfsTokenTest()
         {
-            var serviceBundle = TestCommon.CreateDefaultAdfsServiceBundle();
-            ITokenCacheInternal adfsCache = new TokenCache(serviceBundle);
-            var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.OnPremiseAuthority);
+            using (var harness = CreateTestHarness())
+            {
+                var serviceBundle = harness.ServiceBundle;
+                ITokenCacheInternal adfsCache = new TokenCache(serviceBundle);
+                var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.OnPremiseAuthority);
 
-            MsalTokenResponse response = new MsalTokenResponse();
-            
-            response.IdToken = MockHelpers.CreateIdToken(String.Empty, MsalTestConstants.FabrikamDisplayableId, null);
-            response.ClientInfo = null;
-            response.AccessToken = "access-token";
-            response.ExpiresIn = 3599; 
-            response.CorrelationId = "correlation-id";
-            response.RefreshToken = "refresh-token";
-            response.Scope = MsalTestConstants.Scope.AsSingleString();
-            response.TokenType = "Bearer";
+                MsalTokenResponse response = new MsalTokenResponse();
 
-            RequestContext requestContext = new RequestContext(serviceBundle, new Guid());
-            var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
-            requestParams.TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant;
+                response.IdToken = MockHelpers.CreateIdToken(String.Empty, MsalTestConstants.FabrikamDisplayableId, null);
+                response.ClientInfo = null;
+                response.AccessToken = "access-token";
+                response.ExpiresIn = 3599;
+                response.CorrelationId = "correlation-id";
+                response.RefreshToken = "refresh-token";
+                response.Scope = MsalTestConstants.Scope.AsSingleString();
+                response.TokenType = "Bearer";
 
-            adfsCache.SaveTokenResponseAsync(requestParams, response);
+                RequestContext requestContext = new RequestContext(serviceBundle, new Guid());
+                var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
+                requestParams.TenantUpdatedCanonicalAuthority = authority.AuthorityInfo.CanonicalAuthority;
 
-            Assert.AreEqual(1, adfsCache.Accessor.GetAllRefreshTokens().Count());
-            Assert.AreEqual(1, adfsCache.Accessor.GetAllAccessTokens().Count());
+                adfsCache.SaveTokenResponseAsync(requestParams, response);
+
+                Assert.AreEqual(1, adfsCache.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, adfsCache.Accessor.GetAllAccessTokens().Count());
+            }
         }
 
         private void AfterAccessChangedNotification(TokenCacheNotificationArgs args)
@@ -867,25 +871,28 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void CacheB2CTokenTest()
         {
-            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            using (var harness = CreateTestHarness())
+            {
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
-            string tenantID = "someTenantID";
-            var authority = Authority.CreateAuthority(
-                serviceBundle,
-                $"https://login.microsoftonline.com/tfp/{tenantID}/somePolicy/oauth2/v2.0/authorize");
+                string tenantID = "someTenantID";
+                Authority authority = Authority.CreateAuthority(
+                    harness.ServiceBundle,
+                    $"https://login.microsoftonline.com/tfp/{tenantID}/somePolicy/oauth2/v2.0/authorize");
 
-            // creating IDToken with empty tenantID and displayableID/PreferredUserName for B2C scenario
-            MsalTokenResponse response = MsalTestConstants.CreateMsalTokenResponse();
+                // creating IDToken with empty tenantID and displayableID/PreferredUserName for B2C scenario
+                MsalTokenResponse response = MsalTestConstants.CreateMsalTokenResponse();
 
-            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
-            var requestParams = CreateAuthenticationRequestParameters(serviceBundle, authority, requestContext: requestContext);
-            requestParams.TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant;
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+                var requestParams = CreateAuthenticationRequestParameters(harness.ServiceBundle, authority, requestContext: requestContext);
+                authority.UpdateWithTenant(MsalTestConstants.Utid);
+                requestParams.TenantUpdatedCanonicalAuthority = authority.AuthorityInfo.CanonicalAuthority;
 
-            cache.SaveTokenResponseAsync(requestParams, response);
+                cache.SaveTokenResponseAsync(requestParams, response);
 
-            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
-            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+            }
         }
 
         private AuthenticationRequestParameters CreateAuthenticationRequestParameters(
@@ -1004,17 +1011,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)
         {
-            serviceBundle.AadInstanceDiscovery.TryAddValue(
-                host,
-                new InstanceDiscoveryMetadataEntry
-                {
-                    PreferredNetwork = host,
-                    PreferredCache = host,
-                    Aliases = new string[]
+            (serviceBundle.InstanceDiscoveryManager as InstanceDiscoveryManager)
+                .AddTestValue(
+                    host,
+                    new InstanceDiscoveryMetadataEntry
                     {
-                        host
-                    }
-                });
+                        PreferredNetwork = host,
+                        PreferredCache = host,
+                        Aliases = new string[]
+                        {
+                            host
+                        }
+                    });
         }
     }
 }
