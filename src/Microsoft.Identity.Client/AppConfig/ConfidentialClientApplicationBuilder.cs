@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
@@ -57,17 +58,33 @@ namespace Microsoft.Identity.Client
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
         {
+            if (certificate == null)
+            {
+                throw new ArgumentNullException(nameof(certificate));
+            }
+
             Config.ClientCredentialCertificate = certificate;
             return this;
         }
 
         /// <summary>
-        /// Sets the certificate associated with the application
+        /// Sets the certificate associated with the application along with the specific claims to sign.
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, Dictionary<string, string> claimsToSign)
+        public ConfidentialClientApplicationBuilder WithClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign)
         {
+            if (certificate == null)
+            {
+                throw new ArgumentNullException(nameof(certificate));
+            }
+
+            if (!claimsToSign.Any())
+            {
+                throw new ArgumentNullException(nameof(claimsToSign));
+            }
+
             Config.ClientCredentialCertificate = certificate;
             Config.ClaimsToSign = claimsToSign;
             return this;
@@ -81,6 +98,11 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithClientSecret(string clientSecret)
         {
+            if (string.IsNullOrWhiteSpace(clientSecret))
+            {
+                throw new ArgumentNullException(nameof(clientSecret));
+            }
+
             Config.ClientSecret = clientSecret;
             return this;
         }
@@ -88,10 +110,15 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Sets the application client assertion
         /// </summary>
-        /// <param name="signedClientAssertion">The client assertion used to prove the identity of the application to Azure AD</param>
+        /// <param name="signedClientAssertion">The client assertion used to prove the identity of the application to Azure AD. This is a Base-64 encoded JWT.</param>
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithClientAssertion(string signedClientAssertion)
         {
+            if (string.IsNullOrWhiteSpace(signedClientAssertion))
+            {
+                throw new ArgumentNullException(nameof(signedClientAssertion));
+            }
+
             Config.SignedClientAssertion = signedClientAssertion;
             return this;
         }
@@ -101,47 +128,7 @@ namespace Microsoft.Identity.Client
         {
             base.Validate();
 
-            int countOfCredentialTypesSpecified = 0;
-
-            if (!string.IsNullOrWhiteSpace(Config.ClientSecret))
-            {
-                countOfCredentialTypesSpecified++;
-            }
-
-            if (Config.ClientCredentialCertificate != null)
-            {
-                countOfCredentialTypesSpecified++;
-            }
-
-            if (Config.ClientCredential != null)
-            {
-                countOfCredentialTypesSpecified++;
-            }
-
-            if (!string.IsNullOrWhiteSpace(Config.SignedClientAssertion))
-            {
-                countOfCredentialTypesSpecified++;
-            }
-
-            if (countOfCredentialTypesSpecified > 1)
-            {
-                throw new InvalidOperationException(MsalErrorMessage.ClientSecretAndCertificateAreMutuallyExclusive);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Config.ClientSecret))
-            {
-                Config.ClientCredential = ClientCredentialWrapper.CreateWithSecret(Config.ClientSecret);
-            }
-
-            if (Config.ClientCredentialCertificate != null)
-            {
-                Config.ClientCredential = ClientCredentialWrapper.CreateWithCertificate(new ClientAssertionCertificateWrapper(Config.ClientCredentialCertificate));
-            }
-
-            if (!string.IsNullOrWhiteSpace(Config.SignedClientAssertion))
-            {
-                Config.ClientCredential = ClientCredentialWrapper.CreateWithSignedClientAssertion(Config.SignedClientAssertion);
-            }
+            Config.ClientCredential = new ClientCredentialWrapper(Config);
 
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {

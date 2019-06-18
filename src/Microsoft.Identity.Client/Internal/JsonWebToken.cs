@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Linq;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
@@ -47,9 +49,9 @@ namespace Microsoft.Identity.Client.Internal
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
         private const int MaxTokenLength = 65536;
         public readonly JWTPayload Payload;
-        public Dictionary<string, string> ClaimsToSign { get; private set; }
+        public IDictionary<string, string> ClaimsToSign { get; private set; }
         public long ValidTo { get { return Payload.ValidTo; }}
-private readonly ICryptographyManager _cryptographyManager;
+        private readonly ICryptographyManager _cryptographyManager;
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
         {
@@ -67,13 +69,13 @@ private readonly ICryptographyManager _cryptographyManager;
             };
         }
 
-        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, Dictionary<string, string> claimsToSign)
+        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, IDictionary<string, string> claimsToSign)
             :this(cryptographyManager, clientId, audience)
         {
             ClaimsToSign = claimsToSign;
         }
 
-        public string Sign(ClientAssertionCertificateWrapper credential, bool sendCertificate)
+        public string Sign(ClientCredentialWrapper credential, bool sendCertificate)
         {
             // Base64Url encoded header and claims
             string token = Encode(credential, sendCertificate);
@@ -97,7 +99,7 @@ private readonly ICryptographyManager _cryptographyManager;
             return Base64UrlHelpers.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(ClientAssertionCertificateWrapper credential, bool sendCertificate)
+        private static string EncodeHeaderToJson(ClientCredentialWrapper credential, bool sendCertificate)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential, sendCertificate);
             return JsonHelper.SerializeToJson(header);
@@ -110,7 +112,7 @@ private readonly ICryptographyManager _cryptographyManager;
             return (long)diff.TotalSeconds;
         }
 
-        private string Encode(ClientAssertionCertificateWrapper credential, bool sendCertificate)
+        private string Encode(ClientCredentialWrapper credential, bool sendCertificate)
         {
             // Header segment
             string jsonHeader = EncodeHeaderToJson(credential, sendCertificate);
@@ -119,9 +121,27 @@ private readonly ICryptographyManager _cryptographyManager;
             string jsonPayload;
 
             // Payload segment
-            if (ClaimsToSign != null && ClaimsToSign.Count > 0)
+            if (ClaimsToSign != null && ClaimsToSign.Any())
             {
-                jsonPayload = JsonHelper.SerializeToJson(ClaimsToSign);
+                //add opening bracket
+                jsonPayload = "{";
+                foreach(KeyValuePair<string, string> claim in ClaimsToSign)
+                {
+
+                    jsonPayload = jsonPayload + string.Format(CultureInfo.InvariantCulture, "\"{0}\":\"{1}\",",
+#if WINDOWS_APP || NETSTANDARD1_3
+                                                claim.Key.ToString(),
+                                                claim.Value.ToString());
+#else
+                                                claim.Key.ToString(CultureInfo.InvariantCulture),
+                                                claim.Value.ToString(CultureInfo.InvariantCulture));
+#endif
+                }
+
+                //remove last comma
+                jsonPayload = jsonPayload.Substring(0, jsonPayload.Length - 1);
+                //add closing bracket
+                jsonPayload = jsonPayload + "}";
             }
             else
             {
@@ -133,15 +153,17 @@ private readonly ICryptographyManager _cryptographyManager;
             return string.Concat(encodedHeader, ".", encodedPayload);
         }
 
+
+
         [DataContract]
         internal class JWTHeader
         {
-            public JWTHeader(ClientAssertionCertificateWrapper credential)
+            public JWTHeader(ClientCredentialWrapper credential)
             {
                 Credential = credential;
             }
 
-            protected ClientAssertionCertificateWrapper Credential { get; }
+            protected ClientCredentialWrapper Credential { get; }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
@@ -198,7 +220,7 @@ private readonly ICryptographyManager _cryptographyManager;
         [DataContract]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(ClientAssertionCertificateWrapper credential, bool sendCertificate)
+            public JWTHeaderWithCertificate(ClientCredentialWrapper credential, bool sendCertificate)
                 : base(credential)
             {
                 X509CertificateThumbprint = Credential.Thumbprint;
@@ -211,7 +233,7 @@ private readonly ICryptographyManager _cryptographyManager;
 
 #if DESKTOP
                 X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
-#else                
+#else
                 X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
 #endif
             }
@@ -224,4 +246,4 @@ private readonly ICryptographyManager _cryptographyManager;
         }
     }
 #endif
-}
+                }

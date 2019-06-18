@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -14,6 +15,8 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.net45;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -82,15 +85,9 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         {
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
-            X509Certificate2 cert;
+            X509Certificate2 cert = GetCertificate();
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
 
-            cert = CertificateHelper.FindCertificateByThumbprint("79fbcbeb5cd28994e50daff8035bacf764b14306");
-            if (cert == null)
-            {
-                throw new InvalidOperationException(
-                    "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
-            }
 
             confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
@@ -124,6 +121,95 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
                 .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
+        }
+
+        [TestMethod]
+        public async Task ConfidentialClientWithClaimsTestAsync()
+        {
+            var keyvault = new KeyVaultSecretsProvider();
+            var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
+            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+
+            X509Certificate2 cert = GetCertificate();
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(ConfidentialClientID)
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClaims(cert, GetClaims())
+                .Build();
+
+            var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult);
+        }
+
+        [TestMethod]
+        public async Task ConfidentialClientWithSignedAssertionTestAsync()
+        {
+            var keyvault = new KeyVaultSecretsProvider();
+            var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
+            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+
+            X509Certificate2 cert = GetCertificate();
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(ConfidentialClientID)
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientAssertion(GetSignedClientAssertion(ConfidentialClientID))
+                .Build();
+
+            var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult);
+        }
+
+        internal static long ConvertToTimeT(DateTime time)
+        {
+            var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            TimeSpan diff = time - startTime;
+            return (long)diff.TotalSeconds;
+        }
+
+        private static IDictionary<string, string> GetClaims()
+        {
+            DateTime validFrom = DateTime.UtcNow;
+            var nbf = ConvertToTimeT(validFrom);
+            var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(MsalTestConstants.JwtToAadLifetimeInSeconds));
+
+            return new Dictionary<string, string>()
+            {
+                { "aud", MsalTestConstants.ClientCredentialAudience },
+                { "exp", exp.ToString(CultureInfo.InvariantCulture) },
+                { "iss", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
+                { "jti", Guid.NewGuid().ToString() },
+                { "nbf", nbf.ToString(CultureInfo.InvariantCulture) },
+                { "sub", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) }
+            };
+        }
+
+        private static string GetSignedClientAssertion(string clientId)
+        {
+            var manager = new NetDesktopCryptographyManager();
+            var jwtToken = new JsonWebToken(manager, clientId, MsalTestConstants.ClientCredentialAudience);
+
+            var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate());
+            return jwtToken.Sign(clientCredential, false);
+        }
+
+        private static X509Certificate2 GetCertificate()
+        {
+            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint("79fbcbeb5cd28994e50daff8035bacf764b14306");
+            if (cert == null)
+            {
+                throw new InvalidOperationException(
+                    "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
+            }
+
+            return cert;
         }
 
         [TestMethod]

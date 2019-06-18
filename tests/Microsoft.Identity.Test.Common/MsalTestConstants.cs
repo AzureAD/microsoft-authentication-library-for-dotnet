@@ -19,13 +19,15 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
         public const string ScopeStr = "r1/scope1 r1/scope2";
         public static readonly string[] GraphScopes = new[] { "user.read" };
+        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
+        public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
 
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly SortedSet<string> CacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
         public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
         public const string Uid = "my-uid";
         public const string Utid = "my-utid";
-        public static readonly Dictionary<string, string> ClientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
+        public static readonly IDictionary<string, string> ClientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
 
         public const string HomeAccountId = Uid + "." + Utid;
 

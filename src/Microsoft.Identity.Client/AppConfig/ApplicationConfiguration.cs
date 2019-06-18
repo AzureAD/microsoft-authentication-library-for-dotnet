@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
         public string ClientSecret { get; internal set; }
         public string SignedClientAssertion { get; internal set; }
         public X509Certificate2 ClientCredentialCertificate { get; internal set; }
-        public Dictionary<string, string> ClaimsToSign { get; internal set; }
+        public IDictionary<string, string> ClaimsToSign { get; internal set; }
 #endif
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions

@@ -68,11 +68,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            if (certificate.PublicKey.Key.KeySize < ClientAssertionCertificateWrapper.MinKeySizeInBits)
+            if (certificate.PublicKey.Key.KeySize < ClientCredentialWrapper.MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException(nameof(certificate),
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
-                        ClientAssertionCertificateWrapper.MinKeySizeInBits));
+                        ClientCredentialWrapper.MinKeySizeInBits));
             }
 
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);

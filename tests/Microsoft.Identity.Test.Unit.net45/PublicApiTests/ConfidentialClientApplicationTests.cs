@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(app.ClientCredential.Secret);
             Assert.AreEqual(MsalTestConstants.ClientSecret, app.ClientCredential.Secret);
             Assert.IsNull(app.ClientCredential.Certificate);
-            Assert.IsNull(app.ClientCredential.Assertion);
+            Assert.IsNull(app.ClientCredential.CachedAssertion);
 
             app = ConfidentialClientApplicationBuilder
                 .Create(MsalTestConstants.ClientId)
@@ -349,7 +349,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             switch (credentialType)
             {
             case CredentialType.CertificateAndClaims:
-                builder = builder.WithCertificate(cert, MsalTestConstants.ClientAssertionClaims);
+                builder = builder.WithClaims(cert, MsalTestConstants.ClientAssertionClaims);
                 break;
             case CredentialType.SignedAssertion:
                 builder = builder.WithClientAssertion(MsalTestConstants.DefaultClientAssertion);
@@ -398,11 +398,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // assert client credential
 
-                Assert.IsNotNull(app.ClientCredential.Assertion);
+                Assert.IsNotNull(app.ClientCredential.CachedAssertion);
                 Assert.AreNotEqual(0, app.ClientCredential.ValidTo);
 
                 // save client assertion.
-                string cachedAssertion = app.ClientCredential.Assertion;
+                string cachedAssertion = app.ClientCredential.CachedAssertion;
                 long cacheValidTo = app.ClientCredential.ValidTo;
 
                 result = await app
@@ -412,7 +412,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(cacheValidTo, app.ClientCredential.ValidTo);
-                Assert.AreEqual(cachedAssertion, app.ClientCredential.Assertion);
+                Assert.AreEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
 
                 // validate the send x5c forces a refresh of the cached client assertion
                 await app
@@ -421,7 +421,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                       .WithForceRefresh(true)
                       .ExecuteAsync(CancellationToken.None)
                       .ConfigureAwait(false);
-                Assert.AreNotEqual(cachedAssertion, app.ClientCredential.Assertion);
+                Assert.AreNotEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
             }
         }
 
@@ -451,11 +451,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // assert client credential
 
-                Assert.IsNotNull(app.ClientCredential.Assertion);
+                Assert.IsNotNull(app.ClientCredential.CachedAssertion);
                 Assert.AreNotEqual(0, app.ClientCredential.ValidTo);
 
                 // save client assertion.
-                string cachedAssertion = app.ClientCredential.Assertion;
+                string cachedAssertion = app.ClientCredential.CachedAssertion;
                 long cacheValidTo = app.ClientCredential.ValidTo;
 
                 result = await app
@@ -465,7 +465,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(cacheValidTo, app.ClientCredential.ValidTo);
-                Assert.AreEqual(cachedAssertion, app.ClientCredential.Assertion);
+                Assert.AreEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
 
                 // validate the send x5c forces a refresh of the cached client assertion
                 await app
@@ -474,7 +474,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                       .WithForceRefresh(true)
                       .ExecuteAsync(CancellationToken.None)
                       .ConfigureAwait(false);
-                Assert.AreNotEqual(cachedAssertion, app.ClientCredential.Assertion);
+                Assert.AreNotEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
             }
         }
 
@@ -487,7 +487,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 3, CredentialType.SignedAssertion);
+                var app = CreateConfidentialClient(httpManager, cert, 1, CredentialType.SignedAssertion);
 
                 var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -504,30 +504,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // assert client credential
 
-                Assert.IsNotNull(app.ClientCredential.Assertion);
-                Assert.AreNotEqual(0, app.ClientCredential.ValidTo);
+                Assert.IsNotNull(app.ClientCredential.SignedAssertion);
 
-                // save client assertion.
-                string cachedAssertion = app.ClientCredential.Assertion;
-                long cacheValidTo = app.ClientCredential.ValidTo;
-
-                result = await app
-                    .AcquireTokenForClient(MsalTestConstants.ScopeForAnotherResource.ToArray())
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(cacheValidTo, app.ClientCredential.ValidTo);
-                Assert.AreEqual(cachedAssertion, app.ClientCredential.Assertion);
-
-                // validate the send x5c forces a refresh of the cached client assertion
-                await app
-                      .AcquireTokenForClient(MsalTestConstants.Scope.ToArray())
-                      .WithSendX5C(true)
-                      .WithForceRefresh(true)
-                      .ExecuteAsync(CancellationToken.None)
-                      .ConfigureAwait(false);
-                Assert.AreNotEqual(cachedAssertion, app.ClientCredential.Assertion);
             }
         }
 

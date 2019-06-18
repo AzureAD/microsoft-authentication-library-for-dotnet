@@ -246,12 +246,12 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(header.X509CertificateThumbprint);
         }
 
-        private ClientAssertionCertificateWrapper GenerateClientAssertionCredential()
+        private ClientCredentialWrapper GenerateClientAssertionCredential()
         {
             var cert = new X509Certificate2(
             ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
 
-            var credential = new ClientAssertionCertificateWrapper(cert);
+            var credential = ClientCredentialWrapper.CreateWithCertificate(cert);
             return credential;
         }
     }

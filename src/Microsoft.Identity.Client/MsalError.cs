@@ -583,6 +583,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string SystemWebviewOptionsNotApplicable = "embedded_webview_not_compatible_default_browser";
 
+        /// <summary>
+        /// <para>What happens?</para>You configured MSAL confidential client authentication with more than one authentication type (Certificate, Secret, Client Assertion)
+        /// </summary>
+        public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "Client_Credential_Authentication_Types_Are_Mutually_Exclusive";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
