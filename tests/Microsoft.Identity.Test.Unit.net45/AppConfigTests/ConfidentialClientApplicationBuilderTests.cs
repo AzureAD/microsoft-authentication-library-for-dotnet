@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Drawing.Text;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Permissions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Test.Common;
@@ -38,6 +40,55 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNull(cca.AppConfig.LoggingCallback);
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
             Assert.AreEqual(null, cca.AppConfig.TenantId);
+        }
+
+        private ConfidentialClientApplicationOptions CreateConfidentialClientApplicationOptions()
+        {
+            return new ConfidentialClientApplicationOptions
+            {
+                ClientId = MsalTestConstants.ClientId,
+                ClientSecret = "the_client_secret",
+                TenantId = "the_tenant_id",
+            };
+        }
+
+        private void TestBuildConfidentialClientFromOptions(ConfidentialClientApplicationOptions options)
+        {
+            var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
+            var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.AuthorityInfo;
+            Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authorityInfo.CanonicalAuthority);
+        }
+
+        [TestMethod]
+        public void TestBuildWithInstanceWithTrailingSlash()
+        {
+            var options = CreateConfidentialClientApplicationOptions();
+            options.Instance = "https://login.microsoftonline.com/";
+            TestBuildConfidentialClientFromOptions(options);
+        }
+
+        [TestMethod]
+        public void TestBuildWithInstanceWithoutTrailingSlash()
+        {
+            var options = CreateConfidentialClientApplicationOptions();
+            options.Instance = "https://login.microsoftonline.com";
+            TestBuildConfidentialClientFromOptions(options);
+        }
+
+        [TestMethod]
+        public void TestBuildWithNullInstance()
+        {
+            var options = CreateConfidentialClientApplicationOptions();
+            options.Instance = null;
+            TestBuildConfidentialClientFromOptions(options);
+        }
+
+        [TestMethod]
+        public void TestBuildWithEmptyInstance()
+        {
+            var options = CreateConfidentialClientApplicationOptions();
+            options.Instance = string.Empty;
+            TestBuildConfidentialClientFromOptions(options);
         }
 
         [TestMethod]
@@ -86,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithLogging()
         {
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithLogging(((level, message, pii) => { })).Build();
+                      .Create(MsalTestConstants.ClientId).WithLogging((level, message, pii) => { }).Build();
 
             Assert.IsNotNull(cca.AppConfig.LoggingCallback);
         }
