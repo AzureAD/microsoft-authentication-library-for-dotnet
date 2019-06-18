@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
+using Windows.UI.Core;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {

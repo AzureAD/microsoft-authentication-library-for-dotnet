@@ -1,4 +1,7 @@
-﻿using Microsoft.Identity.Client;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +26,7 @@ namespace UWP
         // private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
         private static readonly string s_clientID = "8787cfc0-a723-49fa-99e1-291d58cb6f81"; // todo(wam): DO NOT CHECK THIS IN
         
-        private static readonly string s_authority = "https://login.microsoftonline.com/organizations/";  // todo(wam): wam not working with common yet, so pushing this to organizations.
+        private static readonly string s_authority = "https://login.microsoftonline.com/organizations";  // todo(wam): wam not working with common yet, so pushing this to organizations.
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";
 
@@ -46,19 +49,19 @@ namespace UWP
                     byte[] blob = tokenCacheNotifcation.TokenCache.SerializeMsalV3();
                     IBuffer buffer = DpApiProxy.SampleProtectAsync(blob, "LOCAL=user").GetAwaiter().GetResult();
 
-                    FileIO.WriteBufferAsync(cacheFile, buffer).AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
+                    FileIO.WriteBufferAsync(cacheFile, buffer).AsTask().ConfigureAwait(true).GetAwaiter().GetResult();
                 }
             });
 
             _pca.UserTokenCache.SetBeforeAccess((tokenCacheNotifcation) =>
             {
                 IStorageFile cacheFile = (ApplicationData.Current.LocalFolder.TryGetItemAsync(CacheFileName)
-                    .AsTask().ConfigureAwait(false).GetAwaiter().GetResult()) as IStorageFile;
+                    .AsTask().ConfigureAwait(true).GetAwaiter().GetResult()) as IStorageFile;
 
                 if (cacheFile != null)
                 {
-                    IBuffer contents = FileIO.ReadBufferAsync(cacheFile).AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
-                    var result = DpApiProxy.SampleUnprotectDataAsync(contents).ConfigureAwait(false).GetAwaiter().GetResult();
+                    IBuffer contents = FileIO.ReadBufferAsync(cacheFile).AsTask().ConfigureAwait(true).GetAwaiter().GetResult();
+                    var result = DpApiProxy.SampleUnprotectDataAsync(contents).ConfigureAwait(true).GetAwaiter().GetResult();
 
                     tokenCacheNotifcation.TokenCache.DeserializeMsalV3(result);
                 }
@@ -107,7 +110,7 @@ namespace UWP
                 var result = await pca
                     .AcquireTokenSilent(s_scopes, accounts.FirstOrDefault())
                     .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(true);
 
                 await DisplayResultAsync(result).ConfigureAwait(true);
             }
@@ -121,59 +124,59 @@ namespace UWP
         {
             try
             {
-                var result = await _pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                await DisplayResultAsync(result).ConfigureAwait(false);
+                var result = await _pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(true);
+                await DisplayResultAsync(result).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
-                await DisplayErrorAsync(ex).ConfigureAwait(false);
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
             }
         }
 
         private async void ShowCacheCountAsync(object sender, RoutedEventArgs e)
         {
-            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(true);
             string message =
                 $"There are {accounts.Count()} in the MSAL token cache. " +
                 Environment.NewLine +
                 string.Join(", ", accounts.Select(a => a.Username));
 
-            await DisplayMessageAsync(message).ConfigureAwait(false); ;
+            await DisplayMessageAsync(message).ConfigureAwait(true); ;
         }
 
         private async void ClearCacheAsync(object sender, RoutedEventArgs e)
         {
-            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(true);
             foreach (IAccount account in accounts)
             {
-                await _pca.RemoveAsync(account).ConfigureAwait(false);
+                await _pca.RemoveAsync(account).ConfigureAwait(true);
             }
         }
 
         private async void ClearFirstAccountAsync(object sender, RoutedEventArgs e)
         {
-            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(true);
             if (accounts.Any())
             {
-                await _pca.RemoveAsync(accounts.First()).ConfigureAwait(false);
+                await _pca.RemoveAsync(accounts.First()).ConfigureAwait(true);
             }
         }
 
         private async void AccessTokenSilentButton_ClickAsync(object sender, RoutedEventArgs e)
         {
-            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync().ConfigureAwait(true);
 
             try
             {
                 var result = await _pca
                     .AcquireTokenSilent(s_scopes, accounts.FirstOrDefault())
                     .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-                await DisplayResultAsync(result).ConfigureAwait(false);
+                    .ConfigureAwait(true);
+                await DisplayResultAsync(result).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
-                await DisplayErrorAsync(ex).ConfigureAwait(false);
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
             }
         }
 
@@ -181,28 +184,28 @@ namespace UWP
         {
             try
             {
-                IEnumerable<IAccount> users = await _pca.GetAccountsAsync().ConfigureAwait(false);
+                IEnumerable<IAccount> users = await _pca.GetAccountsAsync().ConfigureAwait(true);
                 IAccount user = users.FirstOrDefault();
 
                 var result = await _pca.AcquireTokenInteractive(s_scopes)
                     .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-                await DisplayResultAsync(result).ConfigureAwait(false);
+                    .ConfigureAwait(true);
+                await DisplayResultAsync(result).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
-                await DisplayErrorAsync(ex).ConfigureAwait(false);
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
             }
         }
 
         private async Task DisplayErrorAsync(Exception ex)
         {
-            await DisplayMessageAsync($"{ex.Message}{Environment.NewLine}{ex.StackTrace}").ConfigureAwait(false);
+            await DisplayMessageAsync($"{ex.Message}{Environment.NewLine}{ex.StackTrace}").ConfigureAwait(true);
         }
 
         private async Task DisplayResultAsync(AuthenticationResult result)
         {
-            await DisplayMessageAsync("Signed in User - " + result.Account.Username + "\nAccessToken: \n" + result.AccessToken).ConfigureAwait(false);
+            await DisplayMessageAsync("Signed in User - " + result.Account.Username + "\nAccessToken: \n" + result.AccessToken).ConfigureAwait(true);
         }
 
         private async Task DisplayMessageAsync(string message)
