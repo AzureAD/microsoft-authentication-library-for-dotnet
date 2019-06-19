@@ -2,8 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client
 {
@@ -50,7 +54,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Allows developers to implement their own logic for starting a browser and navigating to a specific Uri. MSAL
-        /// will use this when opening the browser. Leave it null and the user configured browser will be used. 
+        /// will use this when opening the browser. Leave it null and the user configured browser will be used.
+        /// Consider using the static helpers OpenWithEdgeBrowserAsync and OpenWithChromeEdgeBrowserAsync
         /// </summary>
         /// <remarks>This property is experimental and the signature may change without a major version increment.</remarks>
         public Func<Uri, Task> OpenBrowserAsync { get; set; }
@@ -68,5 +73,85 @@ namespace Microsoft.Identity.Client
             logger.InfoPii("BrowserRedirectError " + BrowserRedirectError,
                "BrowserRedirectError? " + (BrowserRedirectError != null));
         }
+
+#if NET_CORE || DESKTOP || NETSTANDARD
+
+        /// <summary>
+        /// Use Microsoft Edge to navigate to the given uri. On non-windows platforms it uses 
+        /// whatever browser is the default
+        /// </summary>
+        /// <remarks>This helper is experimental and the signature may change without a major version increment.</remarks>
+        public static async Task OpenWithEdgeBrowserAsync(Uri uri)
+        {
+            if (uri == null)
+            {
+                throw new ArgumentNullException(nameof(uri));
+            }
+
+            string url = uri.AbsoluteUri;
+
+#if DESKTOP
+            url = url.Replace("&", "^&");
+            Process.Start(new ProcessStartInfo("cmd", $"/c start microsoft-edge:{url}") { CreateNoWindow = true });
+            await Task.FromResult(0).ConfigureAwait(false);
+#else
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                url = url.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo("cmd", $"/c start microsoft-edge:{url}") { CreateNoWindow = true });
+            }
+            else
+            {
+                var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
+                await proxy.StartDefaultOsBrowserAsync(url).ConfigureAwait(false);
+            }
+#endif
+        }
+
+
+
+        /// <summary>
+        /// Use Microsoft Edge Chromium to navigate to the given uri. Requires the browser to be installed.
+        /// On Linux, uses the default system browser instead, as Edge is not available.
+        /// </summary>
+        /// <remarks>This helper is experimental and the signature may change without a major version increment.</remarks>
+        public static async Task OpenWithChromeEdgeBrowserAsync(Uri uri)
+        {
+            if (uri == null)
+            {
+                throw new ArgumentNullException(nameof(uri));
+            }
+
+            string url = uri.AbsoluteUri;
+
+#if DESKTOP
+            url = url.Replace("&", "^&");
+            Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
+            await Task.FromResult(0).ConfigureAwait(false);
+#else
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                url = url.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
+                await proxy.StartDefaultOsBrowserAsync(url).ConfigureAwait(false);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("msedge", url);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException(RuntimeInformation.OSDescription);
+            }
+#endif
+
+        }
+#endif
     }
 }

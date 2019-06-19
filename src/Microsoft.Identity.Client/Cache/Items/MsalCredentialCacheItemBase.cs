@@ -26,9 +26,10 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal override JObject ToJObject()
         {
             var json = base.ToJObject();
-            json[StorageJsonKeys.ClientId] = ClientId;
-            json[StorageJsonKeys.Secret] = Secret;
-            json[StorageJsonKeys.CredentialType] = CredentialType;
+
+            SetItemIfValueNotNull(json, StorageJsonKeys.ClientId, ClientId);
+            SetItemIfValueNotNull(json, StorageJsonKeys.Secret, Secret);
+            SetItemIfValueNotNull(json, StorageJsonKeys.CredentialType, CredentialType);
 
             return json;
         }

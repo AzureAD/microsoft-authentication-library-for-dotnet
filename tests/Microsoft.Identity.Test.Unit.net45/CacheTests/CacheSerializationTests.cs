@@ -11,6 +11,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -47,8 +48,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 NormalizedScopes = MsalTestConstants.ScopeStr,
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
-                RawClientInfo = null, // todo(cache): what should this be?
-                UserAssertionHash = "assertion hash", // todo(cache): what should this be
+                RawClientInfo = string.Empty, 
+                UserAssertionHash = "assertion hash",
             };
         }
 
@@ -60,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Environment = "env",
                 HomeAccountId = MsalTestConstants.HomeAccountId,
                 Secret = "access_token_secret",
-                RawClientInfo = null, // todo(cache): what should this be?
+                RawClientInfo = string.Empty, 
             };
         }
 
@@ -73,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 HomeAccountId = MsalTestConstants.HomeAccountId,
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
-                RawClientInfo = null, // todo(cache): what should this be?
+                RawClientInfo = string.Empty,
             };
         }
 
@@ -84,8 +85,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Environment = "env",
                 HomeAccountId = MsalTestConstants.HomeAccountId,
                 TenantId = "the_tenant_id",
-                AuthorityType = "authority type", // todo(cache): what should this be?
-                RawClientInfo = null, // "raw client info", // todo(cache): what should this be?
+                AuthorityType = "authority type",
+                RawClientInfo = string.Empty,
                 LocalAccountId = MsalTestConstants.LocalAccountId,
                 Name = MsalTestConstants.Name,
                 GivenName = MsalTestConstants.GivenName,
@@ -412,8 +413,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string json = new UTF8Encoding().GetString(bytes);
 
-            // TODO(cache): assert json value?  or look at JObject?
-
             var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheDictionarySerializer(otherAccessor);
             s2.Deserialize(bytes, false);
@@ -483,6 +482,24 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes2 = s2.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
+        }
+
+        [TestMethod]
+        public void TestSerializeContainsNoNulls()
+        {
+            var accessor = CreateTokenCacheAccessor();
+
+            // Create a refresh token with a null family id in it
+            var item = CreateRefreshTokenItem();
+            item.FamilyId = null;
+            item.Environment = item.Environment + $"_SOMERANDOMPREFIX"; // ensure we get unique cache keys
+            accessor.SaveRefreshToken(item);
+
+            var s1 = new TokenCacheJsonSerializer(accessor);
+            byte[] bytes = s1.Serialize(null);
+            string json = CoreHelpers.ByteArrayToString(bytes);
+            Console.WriteLine(json);
+            Assert.IsFalse(json.ToLowerInvariant().Contains("null"));
         }
 
         [TestMethod]
@@ -668,7 +685,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void AddBaseJObjectFields(List<string> fields)
         {
-            fields.AddRange(new List<string> { "home_account_id", "environment", "client_info" });
+            fields.AddRange(new List<string> { "home_account_id", "environment" });
         }
 
         private void AddBaseCredentialJObjectFields(List<string> fields)

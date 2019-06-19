@@ -103,10 +103,13 @@ namespace Microsoft.Identity.Client.Instance
                 return true;
             }
 
-            if (!cacheEntry.ValidForDomainsList.Contains(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName)))
+            if( !string.IsNullOrEmpty(userPrincipalName))
             {
-                return false;
-            }
+                if (!cacheEntry.ValidForDomainsList.Contains(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName)))
+                {
+                    return false;
+                }
+            }           
 
             endpoints = cacheEntry.Endpoints;
             return true;

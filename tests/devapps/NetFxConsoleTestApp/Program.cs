@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -140,13 +140,14 @@ namespace NetFx
                                 //BrowserRedirectSuccess = new Uri("https://www.google.com"),
                                      HtmlMessageSuccess = "All good, close the browser!",
 
-                                OpenBrowserAsync = (Uri u) =>
-                                {
-                                    string url = u.AbsoluteUri;
-                                    url = url.Replace("&", "^&");
-                                    Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
-                                    return Task.FromResult(0);
-                                }
+                                //OpenBrowserAsync = (Uri u) =>
+                                //{
+                                //    string url = u.AbsoluteUri;
+                                //    url = url.Replace("&", "^&");
+                                //    Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
+                                //    return Task.FromResult(0);
+                                //}
+                                OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
                             })
                             .ExecuteAsync(cts.Token);
 
@@ -216,8 +217,6 @@ namespace NetFx
             await DisplayAccountsAsync(pca).ConfigureAwait(false);
             Console.ResetColor();
         }
-
-
 
         private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
         {
