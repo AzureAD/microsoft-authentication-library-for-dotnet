@@ -16,13 +16,13 @@ using System.Web;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.net45;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IdentityModel.Tokens.Jwt;
 using NSubstitute;
 
 namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
@@ -129,18 +129,21 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             var keyvault = new KeyVaultSecretsProvider();
             var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            var claims = GetClaims();
 
             X509Certificate2 cert = GetCertificate();
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithClaims(cert, GetClaims())
+                .WithClaims(cert, claims)
                 .Build();
 
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+
+            ValidateClaimsInAssertion(claims, ((ConfidentialClientApplication)confidentialApp).ClientCredential.CachedAssertion);
 
             MsalAssert.AssertAuthResult(authResult);
         }
@@ -151,20 +154,37 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             var keyvault = new KeyVaultSecretsProvider();
             var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            var claims = GetClaims();
 
             X509Certificate2 cert = GetCertificate();
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithClientAssertion(GetSignedClientAssertion(ConfidentialClientID))
+                .WithClientAssertion(GetSignedClientAssertion(ConfidentialClientID, claims))
                 .Build();
 
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
+            ValidateClaimsInAssertion(claims, ((ConfidentialClientApplication)confidentialApp).ClientCredential.SignedAssertion);
+
             MsalAssert.AssertAuthResult(authResult);
+        }
+
+        private void ValidateClaimsInAssertion(IDictionary<string, string> claims, string assertion)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadJwtToken(assertion);
+
+            Assert.AreEqual(jsonToken.Claims.Count(), claims.Count);
+
+            foreach (KeyValuePair<string, string> claim in claims)
+            {
+                var validClaim = claims.Where(x => x.Key == claim.Key && x.Value == claim.Value).FirstOrDefault();
+                Assert.IsNotNull(validClaim);
+            }
         }
 
         internal static long ConvertToTimeT(DateTime time)
@@ -187,22 +207,26 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
                 { "iss", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
                 { "jti", Guid.NewGuid().ToString() },
                 { "nbf", nbf.ToString(CultureInfo.InvariantCulture) },
-                { "sub", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) }
+                { "sub", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
+                { "ip", "192.168.2.1" }
             };
         }
 
-        private static string GetSignedClientAssertion(string clientId)
+        private static string GetSignedClientAssertion(string clientId, IDictionary<string, string> claims)
         {
-            var manager = new NetDesktopCryptographyManager();
-            var jwtToken = new JsonWebToken(manager, clientId, MsalTestConstants.ClientCredentialAudience);
-
-            var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate());
+#if DESKTOP
+            var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
+#elif NET_CORE
+            var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
+#endif
+            var jwtToken = new JsonWebToken(manager, clientId, MsalTestConstants.ClientCredentialAudience, claims);
+            var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
             return jwtToken.Sign(clientCredential, false);
         }
 
         private static X509Certificate2 GetCertificate()
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint("79fbcbeb5cd28994e50daff8035bacf764b14306");
+            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(MsalTestConstants.AutomationTestThumbprint);
             if (cert == null)
             {
                 throw new InvalidOperationException(
@@ -221,7 +245,6 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
-
             await RunOnBehalfOfTestAsync(await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019).ConfigureAwait(false)).ConfigureAwait(false);
         }
 

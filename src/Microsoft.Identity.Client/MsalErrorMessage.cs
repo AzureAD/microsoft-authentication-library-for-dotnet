@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Client
         public const string ConfidentialClientDoesntImplementIConfidentialClientApplicationExecutor =
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
 
-        public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "ClientSecret, Certificate and ClientAssertion are mutually exclusive properties.  Only specify one. See ";
+        public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "ClientSecret, Certificate and ClientAssertion are mutually exclusive properties.  Only specify one. See https://aka.ms/msal-net-client-credentials";
         public const string ClientIdMustBeAGuid = "Error: ClientId is not a Guid.";
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)

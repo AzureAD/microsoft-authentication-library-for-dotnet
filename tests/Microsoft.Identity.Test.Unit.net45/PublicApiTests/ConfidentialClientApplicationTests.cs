@@ -45,7 +45,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         [Description("Tests the public interfaces can be mocked")]
         [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
         public void MockConfidentialClientApplication_AcquireToken()
@@ -81,7 +80,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         [Description("Tests the public interfaces can be mocked")]
         public void MockConfidentialClientApplication_Users()
         {
@@ -111,7 +109,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         [Description("Tests the public application interfaces can be mocked to throw MSAL exceptions")]
         [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
         public void MockConfidentialClientApplication_Exception()
@@ -132,7 +129,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public void ConstructorsTest()
         {
             var app = ConfidentialClientApplicationBuilder
@@ -174,7 +170,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public void TestConstructorWithNullRedirectUri()
         {
             var app = ConfidentialClientApplicationBuilder
@@ -188,7 +183,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ConfidentialClientUsingSecretNoCacheProvidedTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -216,7 +210,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ConfidentialClientUsingSecretTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -263,7 +256,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ConfidentialClientUsingAdfsAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -373,7 +365,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ConfidentialClientUsingCertificateTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -426,7 +417,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ConfidentialClientUsingClientAssertionClaimsTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -479,7 +469,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ConfidentialClientUsingSignedClientAssertionTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -510,7 +499,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ConfidentialClientUsingCertificateTelemetryTestAsync()
         {
             var receiver = new MyReceiver();
@@ -541,7 +529,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task GetAuthorizationRequestUrlNoRedirectUriTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -571,7 +558,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task GetAuthorizationRequestUrlB2CTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -612,7 +598,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task GetAuthorizationRequestUrlDuplicateParamsTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -652,7 +637,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public void GetAuthorizationRequestUrlCustomRedirectUriTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -712,7 +696,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task HttpRequestExceptionIsNotSuppressedAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -735,7 +718,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ForceRefreshParameterFalseTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -772,7 +754,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ForceRefreshParameterTrueTestAsync()
         {
             var receiver = new MyReceiver();
@@ -828,7 +809,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         [Ignore] // This B2C scenario needs some rethinking
         public async Task AuthorizationCodeRequestTestAsync()
         {
@@ -873,7 +853,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task AcquireTokenByRefreshTokenTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -915,7 +894,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("ConfidentialClientApplicationTests")]
         public void EnsurePublicApiSurfaceExistsOnInterface()
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)

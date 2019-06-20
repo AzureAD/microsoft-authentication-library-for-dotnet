@@ -64,6 +64,7 @@ namespace Microsoft.Identity.Client
             }
 
             Config.ClientCredentialCertificate = certificate;
+            Config.ConfidentialClientCredentialCount++;
             return this;
         }
 
@@ -80,13 +81,14 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(certificate));
             }
 
-            if (!claimsToSign.Any())
+            if (claimsToSign == null || !claimsToSign.Any())
             {
                 throw new ArgumentNullException(nameof(claimsToSign));
             }
 
             Config.ClientCredentialCertificate = certificate;
             Config.ClaimsToSign = claimsToSign;
+            Config.ConfidentialClientCredentialCount++;
             return this;
         }
 
@@ -104,6 +106,7 @@ namespace Microsoft.Identity.Client
             }
 
             Config.ClientSecret = clientSecret;
+            Config.ConfidentialClientCredentialCount++;
             return this;
         }
 
@@ -120,6 +123,7 @@ namespace Microsoft.Identity.Client
             }
 
             Config.SignedClientAssertion = signedClientAssertion;
+            Config.ConfidentialClientCredentialCount++;
             return this;
         }
 

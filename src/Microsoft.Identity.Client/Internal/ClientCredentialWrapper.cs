@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -48,28 +47,41 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        #region TestConstructors
-        //The following constructors are inteded for testing
-        public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate)
+        #region TestBuilders
+        //The following builders methods are inteded for testing
+        public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
         {
-            return new ClientCredentialWrapper(certificate);
+            return new ClientCredentialWrapper(certificate, claimsToSign);
         }
 
         public static ClientCredentialWrapper CreateWithSecret(string secret)
         {
-            return new ClientCredentialWrapper(secret, ConfidentialClientAuthenticationType.ClientSecret);
+            var app = new ClientCredentialWrapper(secret, ConfidentialClientAuthenticationType.ClientSecret);
+            app.AuthenticationType = ConfidentialClientAuthenticationType.ClientSecret;
+            return app;
         }
 
         public static ClientCredentialWrapper CreateWithSignedClientAssertion(string signedClientAssertion)
         {
-            return new ClientCredentialWrapper(signedClientAssertion, ConfidentialClientAuthenticationType.SignedClientAssertion);
+            var app = new ClientCredentialWrapper(signedClientAssertion, ConfidentialClientAuthenticationType.SignedClientAssertion);
+            app.AuthenticationType = ConfidentialClientAuthenticationType.SignedClientAssertion;
+            return app;
         }
 
-        private ClientCredentialWrapper(X509Certificate2 certificate)
+        private ClientCredentialWrapper(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
             Certificate = certificate;
+
+            if (claimsToSign != null && claimsToSign.Any())
+            {
+                ClaimsToSign = claimsToSign;
+                AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificateWithClaims;
+                return;
+            }
+
+            AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificate;
         }
 
         private ClientCredentialWrapper(string secretOrAssertion, ConfidentialClientAuthenticationType authType)
@@ -85,9 +97,13 @@ namespace Microsoft.Identity.Client.Internal
                 Secret = secretOrAssertion;
             }
         }
-        #endregion TestConstructors
+
+        #endregion TestBuilders
         private void CheckCertificateKeySize(X509Certificate2 cert)
         {
+            //Currently, the min key size is enforced on desktop (net 45) as 2048 as it is the current industry standard.
+            //This is not enforced on netCore unfortunalty and adding this enforcement may break customers on netCore.
+            //NetCore can only enforce a min key size of 512 since it is enforced by the portal already.
 #if DESKTOP
             if (cert.PublicKey.Key.KeySize < MinKeySizeInBits)
             {
@@ -100,24 +116,7 @@ namespace Microsoft.Identity.Client.Internal
 
         private void ValidateCredentialParameters(ApplicationConfiguration config)
         {
-            int countOfCredentialTypesSpecified = 0;
-
-            if (!string.IsNullOrWhiteSpace(config.ClientSecret))
-            {
-                countOfCredentialTypesSpecified++;
-            }
-
-            if (config.ClientCredentialCertificate != null)
-            {
-                countOfCredentialTypesSpecified++;
-            }
-
-            if (!string.IsNullOrWhiteSpace(config.SignedClientAssertion))
-            {
-                countOfCredentialTypesSpecified++;
-            }
-
-            if (countOfCredentialTypesSpecified > 1)
+            if (config.ConfidentialClientCredentialCount > 1)
             {
                 throw new MsalClientException(MsalError.ClientCredentialAuthenticationTypesAreMutuallyExclusive, MsalErrorMessage.ClientCredentialAuthenticationTypesAreMutuallyExclusive);
             }
@@ -153,7 +152,7 @@ namespace Microsoft.Identity.Client.Internal
         private static readonly int s_minKeySizeInBits = 2048;
         public static int MinKeySizeInBits { get { return s_minKeySizeInBits; } }
         internal string Thumbprint { get { return Base64UrlHelpers.Encode(Certificate.GetCertHash()); } }
-        internal X509Certificate2 Certificate { get; }
+        internal X509Certificate2 Certificate { get; private set; }
         // The cached assertion created from the JWT signing operation
         internal string CachedAssertion { get; set; }
         internal long ValidTo { get; set; }
@@ -161,9 +160,9 @@ namespace Microsoft.Identity.Client.Internal
         internal string Audience { get; set; }
         internal string Secret { get; private set; }
         // The signed assertion passed in by the user
-        internal string SignedAssertion { get; set; }
+        internal string SignedAssertion { get; private set; }
         internal ConfidentialClientAuthenticationType AuthenticationType { get; private set; }
-        internal IDictionary<string, string> ClaimsToSign { get; }
+        internal IDictionary<string, string> ClaimsToSign { get; private set; }
     }
 
     internal enum ConfidentialClientAuthenticationType

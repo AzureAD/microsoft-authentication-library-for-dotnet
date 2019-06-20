@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
-                /// <summary>
+        /// <summary>
         /// Create a <see cref="RSACryptoServiceProvider"/> using the private key from the given <see cref="X509Certificate2"/>.
         /// </summary>
         /// <param name="certificate">Certificate including private key with which to initialize the <see cref="RSACryptoServiceProvider"/> with</param>

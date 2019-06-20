@@ -14,43 +14,13 @@ namespace Microsoft.Identity.Client.Internal
 {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
-    internal class JsonWebTokenConstants
-    {
-        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-        public const string HeaderType = "JWT";
-
-        internal class Algorithms
-        {
-            public const string RsaSha256 = "RS256";
-            public const string None = "none";
-        }
-
-        internal class ReservedClaims
-        {
-            public const string Audience = "aud";
-            public const string Issuer = "iss";
-            public const string Subject = "sub";
-            public const string NotBefore = "nbf";
-            public const string ExpiresOn = "exp";
-            public const string JwtIdentifier = "jti";
-        }
-
-        internal class ReservedHeaderParameters
-        {
-            public const string Algorithm = "alg";
-            public const string Type = "typ";
-            public const string X509CertificateThumbprint = "kid";
-            public const string X509CertificatePublicCertValue = "x5c";
-        }
-    }
-
     internal class JsonWebToken
     {
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
         private const int MaxTokenLength = 65536;
         public readonly JWTPayload Payload;
         public IDictionary<string, string> ClaimsToSign { get; private set; }
-        public long ValidTo { get { return Payload.ValidTo; }}
+        public long ValidTo { get { return Payload.ValidTo; } }
         private readonly ICryptographyManager _cryptographyManager;
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
@@ -70,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, IDictionary<string, string> claimsToSign)
-            :this(cryptographyManager, clientId, audience)
+            : this(cryptographyManager, clientId, audience)
         {
             ClaimsToSign = claimsToSign;
         }
@@ -125,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal
             {
                 //add opening bracket
                 jsonPayload = "{";
-                foreach(KeyValuePair<string, string> claim in ClaimsToSign)
+                foreach (KeyValuePair<string, string> claim in ClaimsToSign)
                 {
 
                     jsonPayload = jsonPayload + string.Format(CultureInfo.InvariantCulture, "\"{0}\":\"{1}\",",
@@ -152,8 +122,6 @@ namespace Microsoft.Identity.Client.Internal
 
             return string.Concat(encodedHeader, ".", encodedPayload);
         }
-
-
 
         [DataContract]
         internal class JWTHeader
@@ -246,4 +214,4 @@ namespace Microsoft.Identity.Client.Internal
         }
     }
 #endif
-                }
+}
