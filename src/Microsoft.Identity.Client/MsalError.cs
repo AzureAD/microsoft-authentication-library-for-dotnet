@@ -575,6 +575,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string WebviewUnavailable = "no_system_webview";
 
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <summary>
         /// <para>What happens?</para>You configured MSAL interactive authentication to use an embedded webview and you also configured <see cref="SystemWebViewOptions"/>.
         /// These are mutually exclusive.
@@ -582,6 +583,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/>
         /// </summary>
         public const string SystemWebviewOptionsNotApplicable = "embedded_webview_not_compatible_default_browser";
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
 #if iOS
         /// <summary>

@@ -345,6 +345,7 @@ namespace Microsoft.Identity.Client
 
             if (!string.IsNullOrWhiteSpace(Config.Instance))
             {
+                Config.Instance = Config.Instance.TrimEnd(' ', '/');
                 return Config.Instance;
             }
 

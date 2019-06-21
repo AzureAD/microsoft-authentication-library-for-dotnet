@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         bool IsSystemWebViewAvailable { get; }
 
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <summary>
         /// Interactive request to acquire a token for the specified scopes. The interactive window will be parented to the specified
         /// window. The user will be required to select an account
@@ -47,6 +48,7 @@ namespace Microsoft.Identity.Client
         /// of the known authorities added to the application construction.
         /// </remarks>
         AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(IEnumerable<string> scopes);
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
