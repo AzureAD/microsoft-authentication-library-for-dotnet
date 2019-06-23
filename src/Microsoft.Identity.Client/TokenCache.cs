@@ -159,7 +159,9 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private static List<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(AuthenticationRequestParameters requestParams, List<MsalAccessTokenCacheItem> tokenCacheItems)
+        private static IEnumerable<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(
+            AuthenticationRequestParameters requestParams, 
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
         {
             // this is OBO flow. match the cache entry with assertion hash,
             // Authority, ScopeSet and client Id.
@@ -216,48 +218,7 @@ namespace Microsoft.Identity.Client
             return homeAccIdMatch && clientIdMatch;
         }
 
-        /// <summary>
-        /// Tries to get the env aliases of the authority for selecting accounts.
-        /// This can be done without network discovery if all the accounts belong to known envs.
-        /// If the list becomes stale (i.e. new env is introduced), GetAccounts will perform InstanceDiscovery
-        /// The list of known envs should not be used in any other scenario!
-        /// </summary>
-        private async Task<IEnumerable<string>> GetEnvironmentAliasesTryAvoidNetworkCallAsync( //TODO bogavril: completely refactory this
-            string authority,
-            ISet<string> msalEnvs,
-            ISet<string> adalEnvs,
-            RequestContext requestContext)
-        {
-            var knownAadAliases = new List<HashSet<string>>()
-            {
-                new HashSet<string>(new[] { AzurePublicEnv, "login.windows.net", "login.microsoft.com", "sts.windows.net" }),
-                new HashSet<string>(new[] { "login.partner.microsoftonline.cn", "login.chinacloudapi.cn" }),
-                new HashSet<string>(new[] { "login.microsoftonline.de" }),
-                new HashSet<string>(new[] { "login.microsoftonline.us", "login.usgovcloudapi.net" }),
-                new HashSet<string>(new[] { "login-us.microsoftonline.com" }),
-            };
-
-            var envFromRequest = Authority.GetEnviroment(authority);
-            var aliases = knownAadAliases
-                .FirstOrDefault(cloudAliases => cloudAliases.ContainsOrdinalIgnoreCase(envFromRequest));
-
-            bool canAvoidInstanceDiscovery =
-                 aliases != null &&
-                 (msalEnvs?.All(env => aliases.ContainsOrdinalIgnoreCase(env)) ?? true) &&
-                 (adalEnvs?.All(env => aliases.ContainsOrdinalIgnoreCase(env)) ?? true);
-
-            if (canAvoidInstanceDiscovery)
-            {
-                return await Task.FromResult(aliases).ConfigureAwait(false);
-            }
-
-            var instanceDiscoveryResult = await ServiceBundle.InstanceDiscoveryManager
-                .GetMetadataEntryAsync(new Uri(authority), requestContext)
-                .ConfigureAwait(false);
-
-            return instanceDiscoveryResult?.Aliases ??  new[] { envFromRequest };
-        }
-
+      
         private static List<IAccount> UpdateWithAdalAccounts(
             string envFromRequest,
             IEnumerable<string> envAliases,

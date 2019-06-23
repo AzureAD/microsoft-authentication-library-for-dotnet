@@ -722,8 +722,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 var app = ConfidentialClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)

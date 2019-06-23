@@ -37,6 +37,9 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
 
+        public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
+        public const string AuthorityNotKnownTenanted = "https://sts.access.edu/" + Utid + "/";
+
         public const string SovereignNetworkEnvironment = "login.microsoftonline.de";
         public const string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/home/";
         public const string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
@@ -122,10 +125,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
 
         public static readonly string UserIdentifier = CreateUserIdentifier();
 
-        public static string GetDiscoveryEndpoint(string authority)
-        {
-            return authority + DiscoveryEndPoint;
-        }
+       
 
         public static string CreateUserIdentifier()
         {
@@ -173,10 +173,45 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2";
         public const string BrokerClaims = "testClaims";
 
-#if !ANDROID && !iOS && !WINDOWS_APP
-        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
-        public static readonly ClientCredentialWrapper CredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
-#endif
+        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
+        public static readonly ClientCredentialWrapper CredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
+
+        public const string DiscoveryJsonResponse = @"{
+                        ""tenant_discovery_endpoint"":""https://login.microsoftonline.com/tenant/.well-known/openid-configuration"",
+                        ""api-version"":""1.1"",
+                        ""metadata"":[
+                            {
+                            ""preferred_network"":""login.microsoftonline.com"",
+                            ""preferred_cache"":""login.windows.net"",
+                            ""aliases"":[
+                                ""login.microsoftonline.com"", 
+                                ""login.windows.net"",
+                                ""login.microsoft.com"",
+                                ""sts.windows.net""]},
+                            {
+                            ""preferred_network"":""login.partner.microsoftonline.cn"",
+                            ""preferred_cache"":""login.partner.microsoftonline.cn"",
+                            ""aliases"":[
+                                ""login.partner.microsoftonline.cn"",
+                                ""login.chinacloudapi.cn""]},
+                            {
+                            ""preferred_network"":""login.microsoftonline.de"",
+                            ""preferred_cache"":""login.microsoftonline.de"",
+                            ""aliases"":[
+                                    ""login.microsoftonline.de""]},
+                            {
+                            ""preferred_network"":""login.microsoftonline.us"",
+                            ""preferred_cache"":""login.microsoftonline.us"",
+                            ""aliases"":[
+                                ""login.microsoftonline.us"",
+                                ""login.usgovcloudapi.net""]},
+                            {
+                            ""preferred_network"":""login-us.microsoftonline.com"",
+                            ""preferred_cache"":""login-us.microsoftonline.com"",
+                            ""aliases"":[
+                                ""login-us.microsoftonline.com""]}
+                        ]
+                }";
     }
 
     internal static class Adfs2019LabConstants

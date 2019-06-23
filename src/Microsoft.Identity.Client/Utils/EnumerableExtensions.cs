@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Core;
@@ -30,15 +31,15 @@ namespace Microsoft.Identity.Client.Utils
             return set.Any(el => el.Equals(toLookFor, System.StringComparison.OrdinalIgnoreCase));
         }
 
-        internal static List<T> FilterWithLogging<T>(
-            this List<T> list,
+        internal static IEnumerable<T> FilterWithLogging<T>(
+            this IEnumerable<T> list,
             Func<T, bool> predicate,
             ICoreLogger logger,
             string logPrefix)
         {
-            int numberBefore = list.Count;
+            int numberBefore = list.Count();
             list = list.Where(predicate).ToList();
-            int numberAfter = list.Count;
+            int numberAfter = list.Count();
 
             logger.Info($"{logPrefix} item count before {numberBefore} after {numberAfter}");
 
