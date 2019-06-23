@@ -40,5 +40,30 @@ namespace Microsoft.Identity.Client.Cache.Keys
         public int iOSType => (int)MsalCacheKeys.iOSCredentialAttrType.AppMetadata;
 
         #endregion
+
+        #region Equals and GetHashCode
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            var other = obj as MsalAppMetadataCacheKey;
+
+            return string.Equals(
+                this.ToString(),
+                other.ToString(),
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        // override object.GetHashCode
+        public override int GetHashCode()
+        {
+
+            return this.ToString().GetHashCode();
+        }
+        #endregion
+
     }
 }
