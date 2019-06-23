@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
@@ -11,8 +11,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     /// </summary>
     internal interface IInstanceDiscoveryManager
     {
-        Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
-            Uri authority,
+        Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryTryAvoidNetworkAsync(
+            string authority,
+            IEnumerable<string> existingEnviromentsInCache,
             RequestContext requestContext);
+
+        Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
+           string authority,
+           RequestContext requestContext);
+
     }
 }

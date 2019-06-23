@@ -2,63 +2,123 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
     internal class InstanceDiscoveryManager : IInstanceDiscoveryManager
     {
-        // TODO: move caching to a different class
-        private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> s_cache =
-            new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
-
         private readonly IHttpManager _httpManager;
         private readonly ITelemetryManager _telemetryManager;
 
-        public InstanceDiscoveryManager(IHttpManager httpManager, ITelemetryManager telemetryManager, bool shouldClearCaches)
+        private readonly IKnownMetadataProvider _knownMetadataProvider;
+        private readonly IStaticMetadataProvider _staticMetadataProvider;
+        private readonly INetworkMetadataProvider _networkMetadataProvider;
+
+        public InstanceDiscoveryManager(
+            IHttpManager httpManager,
+            ITelemetryManager telemetryManager,
+            bool shouldClearCaches,
+            IKnownMetadataProvider knownMetadataProvider = null,
+            IStaticMetadataProvider staticMetadataProvider = null,
+            INetworkMetadataProvider networkMetadataProvider = null)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
 
+            _knownMetadataProvider = knownMetadataProvider ?? new KnownMetadataProvider();
+            _staticMetadataProvider = staticMetadataProvider ?? new StaticMetadataProvider();
+            _networkMetadataProvider = networkMetadataProvider ?? new NetworkMetadataProvider(_httpManager, _telemetryManager);
+
             if (shouldClearCaches)
-                s_cache.Clear();
+            {
+                _staticMetadataProvider.Clear();
+            }
         }
 
-        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(Uri authority, RequestContext requestContext)
+        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryTryAvoidNetworkAsync(
+            string authority,
+            IEnumerable<string> existingEnviromentsInCache,
+            RequestContext requestContext)
         {
-            AuthorityType type = Authority.GetAuthorityType(authority.AbsoluteUri);
+            AuthorityType type = Authority.GetAuthorityType(authority);
+            Uri authorityUri = new Uri(authority);
+            string environment = authorityUri.Host;
 
             switch (type)
             {
                 case AuthorityType.Aad:
-                    bool foundInCache = s_cache.TryGetValue(authority.Host, out InstanceDiscoveryMetadataEntry entry);
+                    InstanceDiscoveryMetadataEntry entry = _staticMetadataProvider.GetMetadata(environment);
 
-                    if (!foundInCache)
+                    if (entry != null)
                     {
-                        await DoInstanceDiscoveryAndCacheAsync(authority, requestContext).ConfigureAwait(false);
-                        s_cache.TryGetValue(authority.Host, out entry);
+                        return entry;
                     }
 
-                    return entry ?? CreateEntryForSingleAuthority(authority);
+                    entry = _knownMetadataProvider.GetMetadata(environment, existingEnviromentsInCache);
 
-                // ADFS and B2C do not support instance discovery 
+                    if (entry != null)
+                    {
+                        return entry;
+                    }
+
+                    return await GetMetadataEntryAsync(authority, requestContext).ConfigureAwait(false);
+
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:
 
-                    return CreateEntryForSingleAuthority(authority);
+                    return await GetMetadataEntryAsync(authority, requestContext).ConfigureAwait(false);
 
                 default:
                     throw new InvalidOperationException("Unexpected authority type " + type);
             }
         }
+
+        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(string authority, RequestContext requestContext)
+        {
+            AuthorityType type = Authority.GetAuthorityType(authority);
+            Uri authorityUri = new Uri(authority);
+            string environment = authorityUri.Host;
+
+            switch (type)
+            {
+                case AuthorityType.Aad:
+                    InstanceDiscoveryMetadataEntry entry = _staticMetadataProvider.GetMetadata(environment);
+
+                    if (entry != null)
+                    {
+                        return entry;
+                    }
+
+                    InstanceDiscoveryResponse instanceDiscoveryResponse =
+                        await _networkMetadataProvider.FetchAllDiscoveryMetadataAsync(authorityUri, requestContext).ConfigureAwait(false);
+                    CacheInstanceDiscoveryMetadata(instanceDiscoveryResponse);
+                    entry = _staticMetadataProvider.GetMetadata(environment);
+
+                    return entry ?? CreateEntryForSingleAuthority(authorityUri);
+
+                // ADFS and B2C do not support instance discovery 
+                case AuthorityType.Adfs:
+                case AuthorityType.B2C:
+
+                    return CreateEntryForSingleAuthority(authorityUri);
+
+                default:
+                    throw new InvalidOperationException("Unexpected authority type " + type);
+            }
+        }
+
+
+        internal void AddTestValueToStaticProvider(string environment, InstanceDiscoveryMetadataEntry entry)
+        {
+            _staticMetadataProvider.AddMetadata(environment, entry);
+        }
+
 
         private static InstanceDiscoveryMetadataEntry CreateEntryForSingleAuthority(Uri authority)
         {
@@ -70,66 +130,16 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             };
         }
 
-        private async Task<InstanceDiscoveryResponse> DoInstanceDiscoveryAndCacheAsync(
-          Uri authority,
-          RequestContext requestContext)
-        {
-            InstanceDiscoveryResponse discoveryResponse = await SendInstanceDiscoveryRequestAsync(authority, requestContext).ConfigureAwait(false);
-            CacheInstanceDiscoveryMetadata(discoveryResponse);
-            return discoveryResponse;
-        }
-
-        private async Task<InstanceDiscoveryResponse> SendInstanceDiscoveryRequestAsync(
-          Uri authority,
-          RequestContext requestContext)
-        {
-            var client = new OAuth2Client(requestContext.Logger, _httpManager, _telemetryManager);
-
-            client.AddQueryParameter("api-version", "1.1");
-            client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority.Host, GetTenant(authority)));
-
-            string discoveryHost = AadAuthority.IsInTrustedHostList(authority.Host)
-                                       ? authority.Host
-                                       : AadAuthority.DefaultTrustedHost;
-
-            string instanceDiscoveryEndpoint = BuildInstanceDiscoveryEndpoint(discoveryHost);
-
-            InstanceDiscoveryResponse discoveryResponse = await client.DiscoverAadInstanceAsync(new Uri(instanceDiscoveryEndpoint), requestContext)
-                                                .ConfigureAwait(false);
-
-            return discoveryResponse;
-        }
-
-        private static string BuildAuthorizeEndpoint(string host, string tenant)
-        {
-            return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/v2.0/authorize", host, tenant);
-        }
-
-        private static string GetTenant(Uri uri)
-        {
-            return uri.AbsolutePath.Split('/')[1];
-        }
-
-        public static string BuildInstanceDiscoveryEndpoint(string host)
-        {
-            return string.Format(CultureInfo.InvariantCulture, "https://{0}/common/discovery/instance", host);
-        }
-
         private void CacheInstanceDiscoveryMetadata(InstanceDiscoveryResponse instanceDiscoveryResponse)
         {
             foreach (InstanceDiscoveryMetadataEntry entry in instanceDiscoveryResponse.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
-                foreach (string aliasedAuthority in entry.Aliases ?? Enumerable.Empty<string>())
+                foreach (string aliasedEnvironment in entry.Aliases ?? Enumerable.Empty<string>())
                 {
-                    s_cache.TryAdd(aliasedAuthority, entry);
+                    _staticMetadataProvider.AddMetadata(aliasedEnvironment, entry);
                 }
             }
         }
 
-        // TODO bogavril - refactor this
-        public bool AddTestValue(string host, InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry)
-        {
-            return s_cache.TryAdd(host, instanceDiscoveryMetadataEntry);
-        }
     }
 }

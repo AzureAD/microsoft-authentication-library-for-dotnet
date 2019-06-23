@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public virtual void TestCleanup()
         {
             Trace.WriteLine("Test finished " + TestContext.TestName);
         }
