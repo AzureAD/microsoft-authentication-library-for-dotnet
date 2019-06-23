@@ -33,10 +33,14 @@ namespace Microsoft.Identity.Test.Unit
         public static void InitializeTokenCacheFromFile(this IPublicClientApplication pca, string resourceFile, bool updateATExpiry = false)
         {
             string tokenCacheAsString = File.ReadAllText(resourceFile);
+            InitializeTokenCacheFromString(pca, tokenCacheAsString, updateATExpiry);
+        }
 
+        public static void InitializeTokenCacheFromString(this IPublicClientApplication pca, string content, bool updateATExpiry = false)
+        {
             if (updateATExpiry)
             {
-                var cacheJson = JObject.Parse(tokenCacheAsString);
+                var cacheJson = JObject.Parse(content);
 
                 JEnumerable<JToken> tokens = cacheJson["AccessToken"].Children();
                 foreach (JToken token in tokens)
@@ -47,14 +51,13 @@ namespace Microsoft.Identity.Test.Unit
                     obj["extended_expires_on"] = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
                 }
 
-                tokenCacheAsString = cacheJson.ToString();
-            
+                content = cacheJson.ToString();
+
             }
 
 
-            byte[] tokenCacheBlob = new UTF8Encoding().GetBytes(tokenCacheAsString);
+            byte[] tokenCacheBlob = new UTF8Encoding().GetBytes(content);
             ((ITokenCacheSerializer)pca.UserTokenCache).DeserializeMsalV3(tokenCacheBlob);
         }
-
     }
 }

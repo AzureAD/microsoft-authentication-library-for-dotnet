@@ -33,9 +33,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     {
         private void Init(MockHttpManager httpManager)
         {
-            httpManager.AddMockHandler(
-            MockHelpers.CreateInstanceDiscoveryMockHandler(
-                MsalTestConstants.GetDiscoveryEndpoint(MsalTestConstants.AuthorityCommonTenant)));
+            httpManager.AddInstanceDiscoveryMockHandler();
         }
 
         private string _clientId;

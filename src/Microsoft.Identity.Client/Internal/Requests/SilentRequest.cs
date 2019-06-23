@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return null;
             }
 
-            logger.Verbose("[FOCI] App is part of the family or unkown, looking for FRT");
+            logger.Verbose("[FOCI] App is part of the family or unknown, looking for FRT");
             var familyRefreshToken = await CacheManager.FindFamilyRefreshTokenAsync(TheOnlyFamilyId).ConfigureAwait(false);
             logger.Verbose("[FOCI] FRT found? " + (familyRefreshToken != null));
 
