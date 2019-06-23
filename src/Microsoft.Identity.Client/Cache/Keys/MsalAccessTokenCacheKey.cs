@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Cache.Keys
@@ -54,6 +55,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 _normalizedScopes);
         }
 
+     
         #region iOS
 
         public string iOSAccount => MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
@@ -64,6 +66,29 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         public int iOSType => (int)MsalCacheKeys.iOSCredentialAttrType.AccessToken;
 
+        #endregion
+
+        #region Equals and GetHashCode
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            var other = obj as MsalAccessTokenCacheKey;
+
+            return string.Equals(
+                this.ToString(),
+                other.ToString(),
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        // override object.GetHashCode
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
+        }
         #endregion
     }
 }
