@@ -20,6 +20,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -770,7 +771,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
-            var authoriy = ClientApplicationBase.GetAuthority(app.ServiceBundle, new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
+            var authoriy = Authority.CreateAuthorityWithAccountTenant(app.ServiceBundle, new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.AuthorityInfo.CanonicalAuthority);
         }
 
@@ -783,7 +784,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
-            var authority = ClientApplicationBase.GetAuthority(
+            var authority = Authority.CreateAuthorityWithAccountTenant(
                 app.ServiceBundle,
                 new Account(
                     "objectId." + MsalTestConstants.Utid,

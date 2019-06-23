@@ -25,9 +25,10 @@ namespace Microsoft.Identity.Client.Instance
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
             if (authorityInfo.ValidateAuthority && !AadAuthority.IsInTrustedHostList(authorityUri.Host))
             {
-               await _serviceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
-                                            authorityUri,
-                                            requestContext).ConfigureAwait(false);
+                // MSAL will throw if the instance discovery URI does not respond with a valid json
+                await _serviceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
+                                             authorityUri,
+                                             requestContext).ConfigureAwait(false);
             }
 
             return authorityInfo.CanonicalAuthority + Constants.OpenIdConfigurationEndpoint;

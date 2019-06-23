@@ -18,10 +18,10 @@ namespace Microsoft.Identity.Client.Cache.Items
     /// </summary>
     internal class MsalAppMetadataCacheItem : MsalItemWithAdditionalFields, IEquatable<MsalAppMetadataCacheItem>
     {
-        public MsalAppMetadataCacheItem(string clientId, string env, string familyId)
+        public MsalAppMetadataCacheItem(string clientId, string preferredCacheEnv, string familyId)
         {
             ClientId = clientId;
-            Environment = env;
+            Environment = preferredCacheEnv;
             FamilyId = familyId;
         }
 

@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance
 {
     internal abstract class Authority
     {
-        internal static readonly HashSet<string> TenantlessTenantNames = new HashSet<string>(
+        protected static readonly HashSet<string> TenantlessTenantNames = new HashSet<string>(
             new[]
             {
                 "common",
@@ -33,20 +32,20 @@ namespace Microsoft.Identity.Client.Instance
         {
             switch (authorityInfo.AuthorityType)
             {
-            case AuthorityType.Adfs:
-                return new AdfsAuthority(serviceBundle, authorityInfo);
+                case AuthorityType.Adfs:
+                    return new AdfsAuthority(serviceBundle, authorityInfo);
 
-            case AuthorityType.B2C:
-                CheckB2CAuthorityHost(serviceBundle, authorityInfo);
-                return new B2CAuthority(serviceBundle, authorityInfo);
+                case AuthorityType.B2C:
+                    CheckB2CAuthorityHost(serviceBundle, authorityInfo);
+                    return new B2CAuthority(serviceBundle, authorityInfo);
 
-            case AuthorityType.Aad:
-                return new AadAuthority(serviceBundle, authorityInfo);
+                case AuthorityType.Aad:
+                    return new AadAuthority(serviceBundle, authorityInfo);
 
-            default:
-                throw new MsalClientException(
-                    MsalError.InvalidAuthorityType,
-                    "Unsupported authority type");
+                default:
+                    throw new MsalClientException(
+                        MsalError.InvalidAuthorityType,
+                        "Unsupported authority type");
             }
         }
 
@@ -62,9 +61,15 @@ namespace Microsoft.Identity.Client.Instance
             return CreateAuthorityWithOverride(serviceBundle, serviceBundle.Config.AuthorityInfo);
         }
 
-        internal virtual Task UpdateCanonicalAuthorityAsync(RequestContext requestContext)
+        /// <summary>
+        /// Creates a tenanted authority, using account tenantId, if the one from the service bundle is tenantless
+        /// </summary>
+        public static Authority CreateAuthorityWithAccountTenant(IServiceBundle serviceBundle, IAccount account)
         {
-            return Task.FromResult(0);
+            var authority = CreateAuthority(serviceBundle);
+            authority.UpdateWithTenant(account?.HomeAccountId?.TenantId);
+
+            return authority;
         }
 
         internal static string GetFirstPathSegment(string authority)
@@ -97,22 +102,26 @@ namespace Microsoft.Identity.Client.Instance
 
         internal abstract string GetTenantId();
 
-        internal abstract void UpdateTenantId(string tenantId);
+        /// <summary>
+        /// Gets a tenanted authority if the current authority is tenantless. 
+        /// Returns the original authority on B2C and ADFS
+        /// </summary>
+        internal abstract string GetTenantedAuthority(string tenantId);
 
-        internal bool IsTenantless
+        /// <summary>
+        /// Updates a tenantless authority with a tenant Id. NO-OP for B2C and ADFS.
+        /// </summary>
+        /// <param name="tenantId"></param>
+        internal void UpdateWithTenant(string tenantId)
         {
-            get
-            {
-                string tenantId = GetTenantId();
-                return TenantlessTenantNames.Contains(tenantId);
-            }
+            AuthorityInfo.CanonicalAuthority = GetTenantedAuthority(tenantId);
         }
 
-        internal static string CreateAuthorityUriWithHost(string authority, string host)
+        internal static string CreateAuthorityWithEnvironment(string authority, string environment)
         {
             var uriBuilder = new UriBuilder(authority)
             {
-                Host = host
+                Host = environment
             };
 
             return uriBuilder.Uri.AbsoluteUri;

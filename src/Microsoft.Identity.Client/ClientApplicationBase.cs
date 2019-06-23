@@ -122,20 +122,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal static Authority GetAuthority(IServiceBundle serviceBundle, IAccount account)
-        {
-            var authority = Instance.Authority.CreateAuthority(serviceBundle);
-            var tenantId = authority.GetTenantId();
-
-            if (Instance.Authority.TenantlessTenantNames.Contains(tenantId)
-                && account.HomeAccountId?.TenantId != null)
-            {
-                authority.UpdateTenantId(account.HomeAccountId.TenantId);
-            }
-
-            return authority;
-        }
-
         internal virtual AuthenticationRequestParameters CreateRequestParameters(
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,

@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Linq;
 using System;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -73,7 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.Account = account;
 
             AuthenticationRequestParameters.Authority = AuthenticationRequestParameters.AuthorityOverride == null
-                ? ClientApplicationBase.GetAuthority(ServiceBundle, account)
+                ? Authority.CreateAuthorityWithAccountTenant(ServiceBundle, account)
                 : Instance.Authority.CreateAuthorityWithOverride(
                     ServiceBundle,
                     AuthenticationRequestParameters.AuthorityOverride);

@@ -25,12 +25,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\drs-response.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-OnPremise.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-OnPremise.json")]
-    [Ignore] // disable until we support ADFS
     public class AdfsAuthorityTests : TestBase
     {
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
+        [Ignore]
         public void SuccessfulValidationUsingOnPremiseDrsTest()
         {
             using (var harness = CreateTestHarness())
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AdfsAuthorityTests")]
+        [Ignore]
         public void SuccessfulValidationUsingCloudDrsFallbackTest()
         {
             using (var harness = CreateTestHarness())
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AdfsAuthorityTests")]
+        [Ignore]
         public void ValidationOffSuccessTest()
         {
             using (var harness = CreateTestHarness())
@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AdfsAuthorityTests")]
+        [Ignore]
         public void FailedValidationTest()
         {
             using (var harness = CreateTestHarness())
@@ -272,7 +272,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AdfsAuthorityTests")]
+        [Ignore]
         public void FailedValidationResourceNotInTrustedRealmTest()
         {
             using (var harness = CreateTestHarness())
@@ -327,7 +327,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AdfsAuthorityTests")]
+        [Ignore]
         public void FailedValidationMissingFieldsInDrsResponseTest()
         {
             using (var harness = CreateTestHarness())
@@ -369,6 +369,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
+        [Ignore]
         public void FailedTenantDiscoveryMissingEndpointsTest()
         {
             using (var harness = CreateTestHarness())
@@ -401,6 +402,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     Assert.AreEqual(MsalError.TenantDiscoveryFailedError, exc.ErrorCode);
                 }
             }
+        }
+
+        [TestMethod]
+        public void TenantTest()
+        {
+            AuthorityTestHelper.AuthorityDoesNotUpdateTenant(
+                MsalTestConstants.ADFSAuthority, null);
         }
     }
 }

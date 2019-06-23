@@ -18,14 +18,14 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
         internal MsalIdTokenCacheItem(
-            string environment,
+            string preferredCacheEnv,
             string clientId,
             MsalTokenResponse response,
             string tenantId,
             string userId=null
             )
             : this(
-                environment,
+                preferredCacheEnv,
                 clientId,
                 response.IdToken,
                 response.ClientInfo,
@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
         internal MsalIdTokenCacheItem(
-            string environment,
+            string preferredCacheEnv,
             string clientId,
             string secret,
             string rawClientInfo,
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             )
             : this()
         {
-            Environment = environment;
+            Environment = preferredCacheEnv;
             TenantId = tenantId;
             ClientId = clientId;
             Secret = secret;
