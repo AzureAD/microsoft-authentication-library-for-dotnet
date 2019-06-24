@@ -71,6 +71,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj">
+      <Project>{18559d36-c735-4933-aa86-398c8222d4f6}</Project>
+      <Name>Microsoft.Identity.Test.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj">
       <Project>{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}</Project>
       <Name>Microsoft.Identity.Test.UIAutomation.Infrastructure</Name>

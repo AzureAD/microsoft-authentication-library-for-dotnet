@@ -38,7 +38,6 @@
                             <x:String>b2clogin.com</x:String>
                             <x:String>Edit profile policy authority</x:String>
                             <x:String>ROPC</x:String>
-                            <x:String>non-b2c authority</x:String>
                         </x:Array>
                     </Picker.ItemsSource>
                 </Picker>
