@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         }
 
         /// <inheritdoc />
-        public override string GetDefaultRedirectUri(string clientId)
+        public override string GetDefaultRedirectUri(string clientId, bool useNewRedirectURI = false)
         {
             return Constants.DefaultRedirectUri;
         }

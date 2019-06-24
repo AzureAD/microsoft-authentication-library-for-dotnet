@@ -14,6 +14,8 @@ namespace Microsoft.Identity.Client.Core
 
         public const string UapWEBRedirectUri = "https://sso"; // only ADAL supports WEB
         public const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        public const string DefaultDesktopRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
+        public const string DefaultNetCoreRedirectUri = "https://localhost";
         public const string DefaultConfidentialClientRedirectUri = "https://replyUrlNotSet";
 
         public const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";

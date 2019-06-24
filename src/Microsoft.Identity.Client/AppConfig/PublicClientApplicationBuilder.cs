@@ -50,6 +50,20 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Sets the public client application to use the latest default redirect URI. 
+        /// This URI is platform specific: 
+        /// Desktop = https://login.microsoftonline.com/common/oauth2/nativeclient
+        /// UWP = value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri()
+        /// .NET Core = https://localhost
+        /// </summary>
+        /// <returns></returns>
+        public PublicClientApplicationBuilder WithDefaultRedirectUri()
+        {
+            Config.UseNewDefaultRedirectUri = true;
+            return this;
+        }
+
 #if !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
         ///
@@ -116,7 +130,7 @@ namespace Microsoft.Identity.Client
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
-                                                         .GetDefaultRedirectUri(Config.ClientId);
+                                                         .GetDefaultRedirectUri(Config.ClientId, Config.UseNewDefaultRedirectUri);
             }
 
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))

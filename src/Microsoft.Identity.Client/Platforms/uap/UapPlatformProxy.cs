@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
+using Windows.Security.Authentication.Web;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -140,8 +141,12 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <inheritdoc />
-        public override string GetDefaultRedirectUri(string correlationId)
+        public override string GetDefaultRedirectUri(string clientId, bool useNewRedirectURI = false)
         {
+            if (useNewRedirectURI)
+            {
+                return WebAuthenticationBroker.GetCurrentApplicationCallbackUri().ToString();
+            }
             return Constants.DefaultRedirectUri;
         }
 
