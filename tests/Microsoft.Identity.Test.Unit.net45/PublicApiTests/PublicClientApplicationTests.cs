@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .BuildConcrete();
-                //Validate legacy default URI
+                //Validate legacy default uri
                 Assert.AreEqual(app.AppConfig.RedirectUri, "urn:ietf:wg:oauth:2.0:oob");
 
                 app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithDefaultRedirectUri()
                                                                             .BuildConcrete();
 
-                //Validate redirect uri
+                //Validate new default redirect uri
 #if DESKTOP
                 Assert.AreEqual(app.AppConfig.RedirectUri, "https://login.microsoftonline.com/common/oauth2/nativeclient");
 #elif NET_CORE

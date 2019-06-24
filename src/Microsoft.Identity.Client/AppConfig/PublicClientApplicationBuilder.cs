@@ -51,13 +51,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the public client application to use the latest default redirect URI. 
+        /// Sets the public client application to use the latest default redirect URI as opposed to urn:ietf:wg:oauth:2.0:oob. 
         /// This URI is platform specific: 
         /// Desktop = https://login.microsoftonline.com/common/oauth2/nativeclient
         /// UWP = value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri()
         /// .NET Core = https://localhost
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithDefaultRedirectUri()
         {
             Config.UseNewDefaultRedirectUri = true;
