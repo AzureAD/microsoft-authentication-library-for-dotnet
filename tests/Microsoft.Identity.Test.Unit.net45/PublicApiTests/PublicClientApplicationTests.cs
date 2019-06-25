@@ -331,7 +331,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                //harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .BuildConcrete();
