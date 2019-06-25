@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority.Host, GetTenant(authority)));
 
-            string discoveryHost = AadAuthority.IsInTrustedHostList(authority.Host)
+            string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authority.Host)
                                        ? authority.Host
                                        : AadAuthority.DefaultTrustedHost;
 

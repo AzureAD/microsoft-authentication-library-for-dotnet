@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 GetType().Name);
 
             if (authenticationRequestParameters.AuthorityInfo != null &&
-                AadAuthority.IsInTrustedHostList(authenticationRequestParameters.AuthorityInfo?.Host))
+                KnownMetadataProvider.IsKnownEnvironment(authenticationRequestParameters.AuthorityInfo?.Host))
             {
                 messageWithoutPii += string.Format(
                     CultureInfo.CurrentCulture,

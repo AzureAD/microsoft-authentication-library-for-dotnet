@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             result = knownMetadataProvider.GetMetadata(
                 "login.microsoftonline.com", new[] { "login.windows.net", "login.microsoft.com", "login.partner.microsoftonline.cn" });
-                Assert.IsNotNull(result);
+            Assert.IsNotNull(result);
 
             result = knownMetadataProvider.GetMetadata(
                 "login.partner.microsoftonline.cn", new[] { "login.windows.net", "login.microsoft.com", "login.partner.microsoftonline.cn" });
@@ -69,6 +69,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             result = knownMetadataProvider.GetMetadata(
                 "bogus", new[] { "login.windows.net", "login.microsoft.com", "login.partner.microsoftonline.cn" });
             Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void KnownMetadataProvider_IsKnown()
+        {
+            Assert.IsFalse(KnownMetadataProvider.IsKnownEnvironment(null));
+            Assert.IsFalse(KnownMetadataProvider.IsKnownEnvironment(""));
+            Assert.IsFalse(KnownMetadataProvider.IsKnownEnvironment("bogus"));
+
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.microsoftonline.de"));
+            Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.microsoftonline.de"));
         }
     }
 }

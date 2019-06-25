@@ -8,6 +8,7 @@ using System.Globalization;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
+using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             {
                 throw new ArgumentException("Requires an absolute uri");
             }
-            if (!AadAuthority.IsInTrustedHostList(uri.Host)) // only collect telemetry for well-known hosts
+            if (!KnownMetadataProvider.IsKnownEnvironment(uri.Host)) // only collect telemetry for well-known hosts
             {
                 return null;
             }

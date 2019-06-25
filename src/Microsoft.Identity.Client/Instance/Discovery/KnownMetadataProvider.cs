@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Utils;
@@ -13,7 +14,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private static readonly IDictionary<string, InstanceDiscoveryMetadataEntry> s_knownEntries =
             new Dictionary<string, InstanceDiscoveryMetadataEntry>();
 
-        private static readonly ISet<string> s_knownEnvironments = new HashSet<string>();
+        private static readonly ISet<string> s_knownEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         static KnownMetadataProvider()
         {
@@ -84,6 +85,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
 
             return null;
+        }
+
+        public static bool IsKnownEnvironment(string environment)
+        {
+            return s_knownEnvironments.Contains(environment);
         }
     }
 }
