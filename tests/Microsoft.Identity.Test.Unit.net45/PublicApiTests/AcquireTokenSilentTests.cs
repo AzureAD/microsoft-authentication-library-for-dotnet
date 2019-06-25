@@ -5,6 +5,7 @@
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -233,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 if (expectNetworkDiscovery)
                 {
                     string host = new Uri(authority).Host;
-                    string discoveryHost = AadAuthority.IsInTrustedHostList(host)
+                    string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(host)
                                                ? host
                                                : AadAuthority.DefaultTrustedHost;
 

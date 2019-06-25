@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Client.Instance
             RequestContext requestContext)
         {
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
-            if (authorityInfo.ValidateAuthority && !AadAuthority.IsInTrustedHostList(authorityUri.Host))
+            if (authorityInfo.ValidateAuthority && !KnownMetadataProvider.IsKnownEnvironment(authorityUri.Host))
             {
                 // MSAL will throw if the instance discovery URI does not respond with a valid json
                 await _serviceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(

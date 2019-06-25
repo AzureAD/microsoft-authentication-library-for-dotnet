@@ -14,23 +14,6 @@ namespace Microsoft.Identity.Client.Instance
         public const string DefaultTrustedHost = "login.microsoftonline.com";
         public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
 
-        // TODO: bogavril consolidate well known / trusted hosts
-        private static readonly HashSet<string> s_trustedHostList = new HashSet<string>()
-        {
-            "login.partner.microsoftonline.cn", // Microsoft Azure China
-            "login.chinacloudapi.cn",
-            "login.microsoftonline.de", // Microsoft Azure Blackforest
-            "login-us.microsoftonline.com", // Microsoft Azure US Government - Legacy
-            "login.microsoftonline.us", // Microsoft Azure US Government
-             DefaultTrustedHost, // Microsoft Azure Worldwide
-            "login.windows.net"
-        };
-
-        internal static bool IsInTrustedHostList(string host)
-        {
-            return s_trustedHostList.ContainsOrdinalIgnoreCase(host);
-        }
-
         internal AadAuthority(
             IServiceBundle serviceBundle,
             AuthorityInfo authorityInfo) : base(serviceBundle, authorityInfo)
