@@ -39,14 +39,15 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority.Host, GetTenant(authority)));
 
-            string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authority.Host)
-                                       ? authority.Host
-                                       : AadAuthority.DefaultTrustedHost;
+            string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authority.Host) ? 
+                authority.Host : 
+                AadAuthority.DefaultTrustedHost;
 
             string instanceDiscoveryEndpoint = BuildInstanceDiscoveryEndpoint(discoveryHost);
 
-            InstanceDiscoveryResponse discoveryResponse = await client.DiscoverAadInstanceAsync(new Uri(instanceDiscoveryEndpoint), requestContext)
-                                                .ConfigureAwait(false);
+            InstanceDiscoveryResponse discoveryResponse = await client
+                .DiscoverAadInstanceAsync(new Uri(instanceDiscoveryEndpoint), requestContext)
+                .ConfigureAwait(false);
 
             return discoveryResponse;
         }

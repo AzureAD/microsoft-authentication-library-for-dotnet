@@ -134,7 +134,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             await ValidateGetAccountsWithDiscoveryAsync(tokenCacheAsString).ConfigureAwait(false);
         }
 
-
         [TestMethod]
         [DeploymentItem(@"Resources\MultiCloudTokenCache.json")]
         public async Task GetAccounts_PerformsNetworkInstanceDiscovery_IfUnknownRtEnvironment_Async()
@@ -162,7 +161,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             await ValidateGetAccountsWithDiscoveryAsync(tokenCacheAsString).ConfigureAwait(false);
         }
-
 
         // Bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1030
         [TestMethod]

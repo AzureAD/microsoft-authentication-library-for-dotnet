@@ -14,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client
 {
@@ -395,7 +395,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<MsalAppMetadataCacheItem> allAppMetadata = Enumerable.Empty<MsalAppMetadataCacheItem>();
             await LoadFromCacheAsync(
                     requestParams.RequestContext.TelemetryCorrelationId,
-                    CacheEvent.TokenTypes.APPMETADATA,
+                    CacheEvent.TokenTypes.AppMetadata,
                     requestParams.Account,
                     () => allAppMetadata = _accessor.GetAllAppMetadata())
                 .ConfigureAwait(false);
@@ -411,6 +411,9 @@ namespace Microsoft.Identity.Client
                 .Select(env => _accessor.GetAppMetadata(new MsalAppMetadataCacheKey(ClientId, env)))
                 .FirstOrDefault(item => item != null);
 
+            // From a FOCI perspective, an app has 3 states - in the family, not in the family or unknown
+            // Unknown is a valid state, where we never fetched tokens for that app or when we used an older 
+            // version of MSAL which did not record app metadata. 
             if (appMetadata == null)
             {
                 logger.Warning("No app metadata found. Returning unknown");
@@ -476,7 +479,8 @@ namespace Microsoft.Identity.Client
 
         /// <remarks>
         /// Get accounts should not make a network call, if possible. This can be achieved if 
-        /// all the environments in the token cache are known to MSAL.
+        /// all the environments in the token cache are known to MSAL, as MSAL keeps a list of 
+        /// known environments in <see cref="KnownMetadataProvider"/>
         /// </remarks>
         // TODO: No telemetry is emitted
         async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(string authority, RequestContext requestContext)

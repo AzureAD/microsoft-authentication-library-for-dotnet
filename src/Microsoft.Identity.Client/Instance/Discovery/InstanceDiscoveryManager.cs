@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         public InstanceDiscoveryManager(
             IHttpManager httpManager,
             ITelemetryManager telemetryManager,
-            bool shouldClearCaches,
+            bool /* for test */ shouldClearCaches,
             IKnownMetadataProvider knownMetadataProvider = null,
             IStaticMetadataProvider staticMetadataProvider = null,
             INetworkMetadataProvider networkMetadataProvider = null)
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryTryAvoidNetworkAsync(
             string authority,
-            IEnumerable<string> existingEnviromentsInCache,
+            IEnumerable<string> existingEnvironmentsInCache,
             RequestContext requestContext)
         {
             AuthorityType type = Authority.GetAuthorityType(authority);
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                         return entry;
                     }
 
-                    entry = _knownMetadataProvider.GetMetadata(environment, existingEnviromentsInCache);
+                    entry = _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache);
 
                     if (entry != null)
                     {
