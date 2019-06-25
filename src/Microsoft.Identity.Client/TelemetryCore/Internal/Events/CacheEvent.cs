@@ -25,8 +25,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             AT,
             RT,
             ID,
-            ACCOUNT, 
-            APPMETADATA
+            Account, 
+            AppMetadata
         };
 
         public TokenTypes TokenType
@@ -38,8 +38,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
                     {TokenTypes.AT, "at"},
                     {TokenTypes.RT, "rt"},
                     {TokenTypes.ID, "id"},
-                    {TokenTypes.ACCOUNT, "account"},
-                    {TokenTypes.APPMETADATA, "appmetadata"}
+                    {TokenTypes.Account, "account"},
+                    {TokenTypes.AppMetadata, "appmetadata"}
                 };
                 this[TokenTypeKey] = types[value];
             }

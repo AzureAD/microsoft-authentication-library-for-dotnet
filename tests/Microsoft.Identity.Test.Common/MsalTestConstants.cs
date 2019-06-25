@@ -173,8 +173,8 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2";
         public const string BrokerClaims = "testClaims";
 
-        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
-        public static readonly ClientCredentialWrapper CredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
+        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
+        public static readonly ClientCredentialWrapper CredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
 
         public const string DiscoveryJsonResponse = @"{
                         ""tenant_discovery_endpoint"":""https://login.microsoftonline.com/tenant/.well-known/openid-configuration"",

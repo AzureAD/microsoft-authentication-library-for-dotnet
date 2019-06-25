@@ -6,6 +6,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 {
     internal interface IKnownMetadataProvider
     {
-        InstanceDiscoveryMetadataEntry GetMetadata(string environment, IEnumerable<string> existingEnviromentsInCache);
+        InstanceDiscoveryMetadataEntry GetMetadata(string environment, IEnumerable<string> existingEnvironmentsInCache);
     }
 }

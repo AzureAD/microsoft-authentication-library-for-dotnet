@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     {
         Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryTryAvoidNetworkAsync(
             string authority,
-            IEnumerable<string> existingEnviromentsInCache,
+            IEnumerable<string> existingEnvironmentsInCache,
             RequestContext requestContext);
 
         Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(

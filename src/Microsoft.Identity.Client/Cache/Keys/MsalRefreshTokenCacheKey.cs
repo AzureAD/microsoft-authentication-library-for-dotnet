@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
         public override string ToString()
         {
             // FRT
-            if (!String.IsNullOrWhiteSpace(_familyId))
+            if (!string.IsNullOrWhiteSpace(_familyId))
             {
                 string d = MsalCacheKeys.CacheKeyDelimiter;
                 return $"{_homeAccountId}{d}{_environment}{d}{StorageJsonValues.CredentialTypeRefreshToken}{d}{_familyId}{d}{d}".ToLowerInvariant();
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             get
             {
                 // FRT
-                if (!String.IsNullOrWhiteSpace(_familyId))
+                if (!string.IsNullOrWhiteSpace(_familyId))
                 {
                     return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{_familyId}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
                 }
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             get
             {
                 // FRT
-                if (!String.IsNullOrWhiteSpace(_familyId))
+                if (!string.IsNullOrWhiteSpace(_familyId))
                 {
                     return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{_familyId}{MsalCacheKeys.CacheKeyDelimiter}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
                 }
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             var other = obj as MsalRefreshTokenCacheKey;
 
             return string.Equals(
-                this.ToString(),
+                ToString(),
                 other.ToString(),
                 StringComparison.OrdinalIgnoreCase);
         }
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
         // override object.GetHashCode
         public override int GetHashCode()
         {
-            return this.ToString().GetHashCode();
+            return ToString().GetHashCode();
         }
         #endregion
 

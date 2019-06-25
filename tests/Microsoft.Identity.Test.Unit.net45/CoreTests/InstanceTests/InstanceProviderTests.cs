@@ -14,6 +14,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class InstanceProviderTests : TestBase
     {
+        private const string LoginMicrosoftOnlineCom = "login.microsoftonline.com";
+
         [TestMethod]
         public void StaticProviderPreservesStateAcrossInstances()
         {
@@ -39,23 +41,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             KnownMetadataProvider knownMetadataProvider = new KnownMetadataProvider();
 
             var result = knownMetadataProvider.GetMetadata(
-                 "login.microsoftonline.com", null);
+                 LoginMicrosoftOnlineCom, null);
             Assert.IsNotNull(result);
 
             result = knownMetadataProvider.GetMetadata(
-                "login.microsoftonline.com", Enumerable.Empty<string>());
+                LoginMicrosoftOnlineCom, Enumerable.Empty<string>());
             Assert.IsNotNull(result);
 
             result = knownMetadataProvider.GetMetadata(
-                "login.microsoftonline.com", new[] { "login.microsoftonline.com" });
+                LoginMicrosoftOnlineCom, new[] { LoginMicrosoftOnlineCom });
             Assert.IsNotNull(result);
 
             result = knownMetadataProvider.GetMetadata(
-                "login.microsoftonline.com", new[] { "login.microsoftonline.com" });
+                LoginMicrosoftOnlineCom, new[] { LoginMicrosoftOnlineCom });
             Assert.IsNotNull(result);
 
             result = knownMetadataProvider.GetMetadata(
-                "login.microsoftonline.com", new[] { "login.windows.net", "login.microsoft.com", "login.partner.microsoftonline.cn" });
+                LoginMicrosoftOnlineCom, new[] { "login.windows.net", "login.microsoft.com", "login.partner.microsoftonline.cn" });
             Assert.IsNotNull(result);
 
             result = knownMetadataProvider.GetMetadata(
@@ -63,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsNotNull(result);
 
             result = knownMetadataProvider.GetMetadata(
-               "login.microsoftonline.com", new[] { "login.windows.net", "bogus", "login.partner.microsoftonline.cn" });
+               LoginMicrosoftOnlineCom, new[] { "login.windows.net", "bogus", "login.partner.microsoftonline.cn" });
             Assert.IsNull(result);
 
             result = knownMetadataProvider.GetMetadata(

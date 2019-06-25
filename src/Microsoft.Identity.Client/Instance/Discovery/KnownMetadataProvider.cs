@@ -18,21 +18,30 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         static KnownMetadataProvider()
         {
+            void AddToKnownCache(InstanceDiscoveryMetadataEntry entry)
+            {
+                foreach (string alias in entry.Aliases)
+                {
+                    s_knownEntries[alias] = entry;
+                    s_knownEnvironments.Add(alias);
+                }
+            }
+
             InstanceDiscoveryMetadataEntry publicCloudEntry = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { "login.microsoftonline.com", "login.windows.net", "login.microsoft.com", "sts.windows.net" },
                 PreferredNetwork = "login.microsoftonline.com",
-                PreferredCache = "sts.windows.net"
+                PreferredCache = "login.windows.net"
             };
 
-            InstanceDiscoveryMetadataEntry cnCloudEntry = new InstanceDiscoveryMetadataEntry()
+            InstanceDiscoveryMetadataEntry cloudEntryChina = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { "login.partner.microsoftonline.cn", "login.chinacloudapi.cn" },
                 PreferredNetwork = "login.partner.microsoftonline.cn",
                 PreferredCache = "login.partner.microsoftonline.cn"
             };
 
-            InstanceDiscoveryMetadataEntry deCloudEntry = new InstanceDiscoveryMetadataEntry()
+            InstanceDiscoveryMetadataEntry cloudEntryGermanay = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { "login.microsoftonline.de" },
                 PreferredNetwork = "login.microsoftonline.de",
@@ -54,29 +63,20 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             };
 
             AddToKnownCache(publicCloudEntry);
-            AddToKnownCache(cnCloudEntry);
-            AddToKnownCache(deCloudEntry);
+            AddToKnownCache(cloudEntryChina);
+            AddToKnownCache(cloudEntryGermanay);
             AddToKnownCache(usGovCloudEntry);
             AddToKnownCache(usCloudEntry);
         }
 
-        private static void AddToKnownCache(InstanceDiscoveryMetadataEntry entry)
+        public InstanceDiscoveryMetadataEntry GetMetadata(string environment, IEnumerable<string> existingEnvironmentsInCache)
         {
-            foreach (string alias in entry.Aliases)
+            if (existingEnvironmentsInCache == null)
             {
-                s_knownEntries[alias] = entry;
-                s_knownEnvironments.Add(alias);
-            }
-        }
-
-        public InstanceDiscoveryMetadataEntry GetMetadata(string environment, IEnumerable<string> existingEnviromentsInCache)
-        {
-            if (existingEnviromentsInCache == null)
-            {
-                existingEnviromentsInCache = Enumerable.Empty<string>();
+                existingEnvironmentsInCache = Enumerable.Empty<string>();
             }
 
-            bool canUseProvider = existingEnviromentsInCache.All(e => s_knownEnvironments.ContainsOrdinalIgnoreCase(e));
+            bool canUseProvider = existingEnvironmentsInCache.All(e => s_knownEnvironments.ContainsOrdinalIgnoreCase(e));
 
             if (canUseProvider)
             {
@@ -90,6 +90,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         public static bool IsKnownEnvironment(string environment)
         {
             return s_knownEnvironments.Contains(environment);
+        }
+
+        public static IDictionary<string, InstanceDiscoveryMetadataEntry> GetAllEntriesForTest()
+        {
+            return s_knownEntries;
         }
     }
 }

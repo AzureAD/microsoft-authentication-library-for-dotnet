@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit
 
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
 
                 var authorityUri = new Uri(
                     string.Format(
@@ -47,7 +46,9 @@ namespace Microsoft.Identity.Test.Unit
                         "https://{0}/common",
                         MsalTestConstants.ProductionNotPrefEnvironmentAlias));
 
-                var app = PublicClientApplicationBuilder
+                httpManager.AddInstanceDiscoveryMockHandler(authorityUri.AbsoluteUri);
+
+                PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
                           .WithAuthority(authorityUri, true)
                           .WithHttpManager(httpManager)
@@ -152,27 +153,27 @@ namespace Microsoft.Identity.Test.Unit
 
         private async Task ValidateCacheEntitiesEnvironmentAsync(ITokenCacheInternal cache, string expectedEnvironment)
         {
-            var logger = Substitute.For<ICoreLogger>();
-            var accessTokens = await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
-            foreach (var at in accessTokens)
+            ICoreLogger logger = Substitute.For<ICoreLogger>();
+            IEnumerable<Client.Cache.Items.MsalAccessTokenCacheItem> accessTokens = await cache.GetAllAccessTokensAsync(true).ConfigureAwait(false);
+            foreach (Client.Cache.Items.MsalAccessTokenCacheItem at in accessTokens)
             {
                 Assert.AreEqual(expectedEnvironment, at.Environment);
             }
 
-            var refreshTokens = await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
-            foreach (var rt in refreshTokens)
+            IEnumerable<Client.Cache.Items.MsalRefreshTokenCacheItem> refreshTokens = await cache.GetAllRefreshTokensAsync(true).ConfigureAwait(false);
+            foreach (Client.Cache.Items.MsalRefreshTokenCacheItem rt in refreshTokens)
             {
                 Assert.AreEqual(expectedEnvironment, rt.Environment);
             }
 
-            var idTokens = await cache.GetAllIdTokensAsync(true).ConfigureAwait(false);
-            foreach (var id in idTokens)
+            IEnumerable<Client.Cache.Items.MsalIdTokenCacheItem> idTokens = await cache.GetAllIdTokensAsync(true).ConfigureAwait(false);
+            foreach (Client.Cache.Items.MsalIdTokenCacheItem id in idTokens)
             {
                 Assert.AreEqual(expectedEnvironment, id.Environment);
             }
 
-            var accounts = await cache.GetAllAccountsAsync().ConfigureAwait(false);
-            foreach (var account in accounts)
+            IEnumerable<Client.Cache.Items.MsalAccountCacheItem> accounts = await cache.GetAllAccountsAsync().ConfigureAwait(false);
+            foreach (Client.Cache.Items.MsalAccountCacheItem account in accounts)
             {
                 Assert.AreEqual(expectedEnvironment, account.Environment);
             }

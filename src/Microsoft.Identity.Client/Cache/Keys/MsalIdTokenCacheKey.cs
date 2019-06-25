@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             var other = obj as MsalIdTokenCacheKey;
 
             return string.Equals(
-                this.ToString(),
+                ToString(),
                 other.ToString(),
                 StringComparison.OrdinalIgnoreCase);
         }
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
         public override int GetHashCode()
         {
 
-            return this.ToString().GetHashCode();
+            return ToString().GetHashCode();
         }
         #endregion
 
