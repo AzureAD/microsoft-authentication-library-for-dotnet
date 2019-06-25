@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.UIAutomationTests
                 AcquireTokenTest,
                 AcquireTokenSilentTest,
 
-                PromptBehaviorConsentSelectAccount,
+                //PromptBehaviorConsentSelectAccount,
 
                 AcquireTokenADFSV3InteractiveFederatedTest,
                 AcquireTokenADFSV3InteractiveNonFederatedTest,
@@ -124,6 +124,7 @@ namespace Microsoft.Identity.Test.UIAutomationTests
         /// Runs through the standard acquire token flow
         /// </summary>
         [Test]
+        [Ignore("needs some work")]
         public void PromptBehaviorConsentSelectAccount()
         {
             TestCommon.ResetInternalStaticCaches();
