@@ -77,9 +77,9 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         }
 
         /// <inheritdoc />
-        public override string GetDefaultRedirectUri(string clientId, bool useNewRedirectURI = false)
+        public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectURI = false)
         {
-            if (useNewRedirectURI)
+            if (useRecommendedRedirectURI)
             {
                 return Constants.DefaultNetCoreRedirectUri;
             }

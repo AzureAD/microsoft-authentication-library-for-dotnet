@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// <summary>
         /// Gets the default redirect uri for the platform, which sometimes includes the clientId
         /// </summary>
-        string GetDefaultRedirectUri(string clientId, bool useNewRedirectURI = false);
+        string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectURI = false);
 
         string GetProductName();
 

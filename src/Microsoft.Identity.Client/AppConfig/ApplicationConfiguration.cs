@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
         public LogCallback LoggingCallback { get; internal set; }
         public string Component { get; internal set; }
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
-        public bool UseNewDefaultRedirectUri { get; internal set; }
+        public bool UseRecommendedDefaultRedirectUri { get; internal set; }
 
         internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
         internal ILegacyCachePersistence AppTokenLegacyCachePersistenceForTest { get; set; }

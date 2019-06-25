@@ -141,9 +141,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <inheritdoc />
-        public override string GetDefaultRedirectUri(string clientId, bool useNewRedirectURI = false)
+        public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectURI = false)
         {
-            if (useNewRedirectURI)
+            if (useRecommendedRedirectURI)
             {
                 return WebAuthenticationBroker.GetCurrentApplicationCallbackUri().ToString();
             }

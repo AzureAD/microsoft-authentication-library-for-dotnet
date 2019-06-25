@@ -351,19 +351,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #elif NET_CORE
                 Assert.AreEqual(app.AppConfig.RedirectUri, "https://localhost");
 #endif
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
-
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(MsalTestConstants.Scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-
-                Assert.IsNotNull(result);
             }
         }
 

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
 
         /// <inheritdoc />
-        public override string GetDefaultRedirectUri(string clientId, bool useNewRedirectURI = false)
+        public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectURI = false)
         {
             return Constants.DefaultRedirectUri;
         }
