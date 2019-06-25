@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.UIAutomation.Infrastructure;
+using Microsoft.Identity.Test.UIAutomation;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponseDefault.AppId).BuildConcrete();
 
-            AuthenticationResult authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, defaultAccountResult.Account)
+            AuthenticationResult authResult = await pca.AcquireTokenSilent(new[] { UITestConstants.DefaultScope }, defaultAccountResult.Account)
                                                        .ExecuteAsync()
                                                        .ConfigureAwait(false);
             Assert.IsNotNull(authResult);
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             pca = PublicClientApplicationBuilder.Create(labResponseFederated.AppId).BuildConcrete();
 
-            authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, federatedAccountResult.Account)
+            authResult = await pca.AcquireTokenSilent(new[] { UITestConstants.DefaultScope }, federatedAccountResult.Account)
                                   .ExecuteAsync()
                                   .ConfigureAwait(false);
             Assert.IsNotNull(authResult);
@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             pca = PublicClientApplicationBuilder.Create(LabApiConstants.MSAOutlookAccountClientID).BuildConcrete();
 
-            authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, msaAccountResult.Account)
+            authResult = await pca.AcquireTokenSilent(new[] { UITestConstants.DefaultScope }, msaAccountResult.Account)
                                   .ExecuteAsync()
                                   .ConfigureAwait(false);
             Assert.IsNotNull(authResult);

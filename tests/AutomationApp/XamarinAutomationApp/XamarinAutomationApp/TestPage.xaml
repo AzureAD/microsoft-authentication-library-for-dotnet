@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="XamarinAutomationApp.TestPage">
+    
+    <ContentPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness">
+            <On Platform ="iOS" Value="0,20,0,0" />
+        </OnPlatform>
+    </ContentPage.Padding>
+
+    <ScrollView>
+        <StackLayout Padding="10,0">
+            <Label Text="Select a UI Test to run: " HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
+            <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                <Picker x:Name="uiTestPicker" Title="Select a test to run" SelectedIndexChanged="OnPickerSelectedIndexChanged" AutomationId="uiTestPicker">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Acquire Token Interactive</x:String>
+                            <x:String>Acquire Token Silent</x:String>
+                            <x:String>Prompt Behavior Consent with Select Account</x:String>
+                            <x:String>ADFSv3 Federated</x:String>
+                            <x:String>ADFSv3 NonFederated</x:String>
+                            <x:String>ADFSv4 Federated</x:String>
+                            <x:String>ADFSv4 NonFederated</x:String>
+                            <x:String>ADFSv2019 Federated</x:String>
+                            <x:String>ADFSv2019 NonFederated</x:String>
+                            <x:String>B2C Facebook b2clogin.com</x:String>
+                            <x:String>B2C Facebook b2clogin.com edit profile</x:String>
+                            <x:String>B2C Facebook microsoftonline.com</x:String>
+                            <x:String>B2C Local b2clogin.com</x:String>
+                            <x:String>B2C Local microsoftonline.com</x:String>
+                            <x:String>B2C Google b2clogin.com</x:String>
+                            <x:String>B2C Google microsoftonline.com</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+                <Label Text="{Binding Source={x:Reference uiTestPicker}, Path=SelectedItem}" />
+            </StackLayout>
+
+            <StackLayout Padding="5,10">
+                <Label x:Name="acquireResponseTitleLabel" Text="Result:" Font="Bold,15"  AutomationId="testResult"/>
+
+                <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
+                    <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
+                        <Frame OutlineColor="Black" Padding="5">
+                            <Label x:Name="acquireResponseLabel" Text=""/>
+                        </Frame>
+                    </StackLayout>
+                </ScrollView>
+            </StackLayout>
+
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

@@ -9,7 +9,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System.Diagnostics;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.UIAutomation.Infrastructure;
+using Microsoft.Identity.Test.UIAutomation;
 using System.Linq;
 using Microsoft.Identity.Client;
 
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             if (adfsOnly && !withLoginHint)
             {
                 Trace.WriteLine("Logging in ... Entering username");
-                driver.FindElement(By.Id(CoreUiTestConstants.AdfsV4UsernameInputdId)).SendKeys(user.Upn);
+                driver.FindElement(By.Id(UITestConstants.AdfsV4UsernameInputdId)).SendKeys(user.Upn);
             }
             else
             {
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 if (user.FederationProvider == FederationProvider.AdfsV2 && user.IsFederated)
                 {
                     Trace.WriteLine("Logging in ... AFDSv2 - Entering the username again, this time in the ADFSv2 form");
-                    driver.FindElementById(CoreUiTestConstants.AdfsV2WebUsernameInputId).SendKeys(user.Upn);
+                    driver.FindElementById(UITestConstants.AdfsV2WebUsernameInputId).SendKeys(user.Upn);
                 }
             }
 
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             if (user.HomeUPN.Contains("outlook.com"))
             {
                 Trace.WriteLine("Logging in ... clicking accept prompts for outlook.com MSA user");
-                driver.WaitForElementToBeVisibleAndEnabled(By.Id(CoreUiTestConstants.ConsentAcceptId)).Click();
+                driver.WaitForElementToBeVisibleAndEnabled(By.Id(UITestConstants.ConsentAcceptId)).Click();
             }
 
             if (prompt == Prompt.Consent)
