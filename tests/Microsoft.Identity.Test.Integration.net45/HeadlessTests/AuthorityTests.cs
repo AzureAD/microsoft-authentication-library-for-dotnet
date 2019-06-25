@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
@@ -46,6 +47,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(authResult.AccessToken);
+        }
+
+        [TestMethod]
+        public async Task FailedAuthorityValidationTestAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            var user = labResponse.User;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+                .Create(labResponse.AppId)
+                .WithAuthority("https://bogus.microsoft.com/common")
+                .Build();
+
+            Trace.WriteLine("Acquire a token using a not so common authority alias");
+
+            MsalServiceException exception = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                 pca.AcquireTokenByUsernamePassword(
+                    s_scopes,
+                     user.Upn,
+                     new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
+                     .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.IsTrue(exception.Message.Contains("AADSTS50049"));
+            Assert.AreEqual("invalid_instance", exception.ErrorCode);
         }
     }
 }
