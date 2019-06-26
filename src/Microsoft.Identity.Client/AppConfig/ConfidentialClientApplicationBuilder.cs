@@ -70,11 +70,12 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Sets the certificate associated with the application along with the specific claims to sign.
+        /// The required set of claims will need to be provided as well for a succsesfull authentication.
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign)
+        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign)
         {
             if (certificate == null)
             {
@@ -88,6 +89,32 @@ namespace Microsoft.Identity.Client
 
             Config.ClientCredentialCertificate = certificate;
             Config.ClaimsToSign = claimsToSign;
+            Config.ConfidentialClientCredentialCount++;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the certificate associated with the application along with the specific additional claims to sign. 
+        /// The required set of claims will be appended to the authentication request.
+        /// </summary>
+        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
+        /// <param name="additionalClaimsToSign">The claims to be signed by the provided certificate.</param>
+        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
+        public ConfidentialClientApplicationBuilder WithAdditionalClientClaims(X509Certificate2 certificate, IDictionary<string, string> additionalClaimsToSign)
+        {
+            if (certificate == null)
+            {
+                throw new ArgumentNullException(nameof(certificate));
+            }
+
+            if (additionalClaimsToSign == null || !additionalClaimsToSign.Any())
+            {
+                throw new ArgumentNullException(nameof(additionalClaimsToSign));
+            }
+
+            Config.ClientCredentialCertificate = certificate;
+            Config.ClaimsToSign = additionalClaimsToSign;
+            Config.AppendDefaultClaims = true;
             Config.ConfidentialClientCredentialCount++;
             return this;
         }

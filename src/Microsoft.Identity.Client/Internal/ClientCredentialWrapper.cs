@@ -131,6 +131,7 @@ namespace Microsoft.Identity.Client.Internal
                 if (config.ClaimsToSign != null && config.ClaimsToSign.Any())
                 {
                     AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificateWithClaims;
+                    AppendDefaultClaims = config.AppendDefaultClaims;
                 }
                 else
                 {
@@ -161,6 +162,7 @@ namespace Microsoft.Identity.Client.Internal
         internal string Secret { get; private set; }
         // The signed assertion passed in by the user
         internal string SignedAssertion { get; private set; }
+        internal bool AppendDefaultClaims { get; private set; }
         internal ConfidentialClientAuthenticationType AuthenticationType { get; private set; }
         internal IDictionary<string, string> ClaimsToSign { get; private set; }
     }

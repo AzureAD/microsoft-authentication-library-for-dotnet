@@ -9,6 +9,7 @@ using System.Text;
 using System.Linq;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -22,6 +23,7 @@ namespace Microsoft.Identity.Client.Internal
         public IDictionary<string, string> ClaimsToSign { get; private set; }
         public long ValidTo { get { return Payload.ValidTo; } }
         private readonly ICryptographyManager _cryptographyManager;
+        private bool _appendDefaultClaims;
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
         {
@@ -39,10 +41,11 @@ namespace Microsoft.Identity.Client.Internal
             };
         }
 
-        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, IDictionary<string, string> claimsToSign)
+        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, IDictionary<string, string> claimsToSign, bool appendDefaultClaims = false)
             : this(cryptographyManager, clientId, audience)
         {
             ClaimsToSign = claimsToSign;
+            _appendDefaultClaims = appendDefaultClaims;
         }
 
         public string Sign(ClientCredentialWrapper credential, bool sendCertificate)
@@ -93,25 +96,17 @@ namespace Microsoft.Identity.Client.Internal
             // Payload segment
             if (ClaimsToSign != null && ClaimsToSign.Any())
             {
-                //add opening bracket
-                jsonPayload = "{";
-                foreach (KeyValuePair<string, string> claim in ClaimsToSign)
+                if (_appendDefaultClaims)
                 {
-
-                    jsonPayload = jsonPayload + string.Format(CultureInfo.InvariantCulture, "\"{0}\":\"{1}\",",
-#if WINDOWS_APP || NETSTANDARD1_3
-                                                claim.Key.ToString(),
-                                                claim.Value.ToString());
-#else
-                                                claim.Key.ToString(CultureInfo.InvariantCulture),
-                                                claim.Value.ToString(CultureInfo.InvariantCulture));
-#endif
+                    JObject json = JObject.FromObject(ClaimsToSign);
+                    json.Merge(JObject.FromObject(Payload));
+                    jsonPayload = json.ToString();
                 }
-
-                //remove last comma
-                jsonPayload = jsonPayload.Substring(0, jsonPayload.Length - 1);
-                //add closing bracket
-                jsonPayload = jsonPayload + "}";
+                else
+                {
+                    JObject json = JObject.FromObject(ClaimsToSign);
+                    jsonPayload = json.ToString();
+                }
             }
             else
             {

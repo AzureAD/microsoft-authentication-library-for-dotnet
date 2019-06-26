@@ -24,6 +24,7 @@ using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens.Jwt;
 using NSubstitute;
+using System.Security.Claims;
 
 namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
 {
@@ -136,7 +137,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithClaims(cert, claims)
+                .WithClientClaims(cert, claims)
                 .Build();
 
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
@@ -144,6 +145,36 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
                 .ConfigureAwait(false);
 
             ValidateClaimsInAssertion(claims, ((ConfidentialClientApplication)confidentialApp).ClientCredential.CachedAssertion);
+
+            MsalAssert.AssertAuthResult(authResult);
+        }
+
+        [TestMethod]
+        public async Task ConfidentialClientWithAdditionalClaimsTestAsync()
+        {
+            var keyvault = new KeyVaultSecretsProvider();
+            var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
+            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            var claims = GetClaims(false);
+
+            X509Certificate2 cert = GetCertificate();
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(ConfidentialClientID)
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithAdditionalClientClaims(cert, claims)
+                .Build();
+
+            var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadJwtToken(((ConfidentialClientApplication)confidentialApp).ClientCredential.CachedAssertion);
+
+            //checked if additional claim is in signed assertion
+            var validClaim = claims.Where(x => x.Key == claims.FirstOrDefault().Key && x.Value == claims.FirstOrDefault().Value).FirstOrDefault();
+            Assert.IsNotNull(validClaim);
 
             MsalAssert.AssertAuthResult(authResult);
         }
@@ -182,8 +213,11 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
 
             foreach (KeyValuePair<string, string> claim in claims)
             {
-                var validClaim = claims.Where(x => x.Key == claim.Key && x.Value == claim.Value).FirstOrDefault();
-                Assert.IsNotNull(validClaim);
+                foreach (Claim assertionClaim in jsonToken.Claims)
+                {
+                    var validClaim = claims.Where(x => x.Key == assertionClaim.Type && x.Value == assertionClaim.Value).FirstOrDefault();
+                    Assert.IsNotNull(validClaim);
+                }
             }
         }
 
@@ -194,14 +228,16 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             return (long)diff.TotalSeconds;
         }
 
-        private static IDictionary<string, string> GetClaims()
+        private static IDictionary<string, string> GetClaims(bool useDefaultClaims = true)
         {
-            DateTime validFrom = DateTime.UtcNow;
-            var nbf = ConvertToTimeT(validFrom);
-            var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(MsalTestConstants.JwtToAadLifetimeInSeconds));
-
-            return new Dictionary<string, string>()
+            if(useDefaultClaims)
             {
+                DateTime validFrom = DateTime.UtcNow;
+                var nbf = ConvertToTimeT(validFrom);
+                var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(MsalTestConstants.JwtToAadLifetimeInSeconds));
+
+                return new Dictionary<string, string>()
+                {
                 { "aud", MsalTestConstants.ClientCredentialAudience },
                 { "exp", exp.ToString(CultureInfo.InvariantCulture) },
                 { "iss", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
@@ -209,7 +245,15 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
                 { "nbf", nbf.ToString(CultureInfo.InvariantCulture) },
                 { "sub", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
                 { "ip", "192.168.2.1" }
-            };
+                };
+            }
+            else
+            {
+                return new Dictionary<string, string>()
+                {
+                    { "ip", "192.168.2.1" }
+                };
+            }
         }
 
         private static string GetSignedClientAssertion(string clientId, IDictionary<string, string> claims)

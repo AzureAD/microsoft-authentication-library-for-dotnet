@@ -69,12 +69,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             
                             if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientCertificateWithClaims)
                             {
-                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience, clientCredential.ClaimsToSign);
+                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience, clientCredential.ClaimsToSign, clientCredential.AppendDefaultClaims);
                             }
                             else
                             {
                                 jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience);
                             }
+
                             clientCredential.CachedAssertion = jwtToken.Sign(clientCredential, sendX5C);
                             clientCredential.ValidTo = jwtToken.ValidTo;
                             clientCredential.ContainsX5C = sendX5C;
