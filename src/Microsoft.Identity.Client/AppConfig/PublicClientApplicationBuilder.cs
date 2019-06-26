@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Configures the pca to use the recommended redirect Uri for the platform. 
+        /// Configures the public client application to use the recommended reply URI for the platform. 
         /// If you are calling your API from a 
         /// .NET Classic app - https://login.microsoftonline.com/common/oauth2/nativeclient
         /// UWP - value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri()
