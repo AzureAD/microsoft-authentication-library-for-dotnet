@@ -341,7 +341,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             switch (credentialType)
             {
             case CredentialType.CertificateAndClaims:
-                builder = builder.WithClaims(cert, MsalTestConstants.ClientAssertionClaims);
+                builder = builder.WithClientClaims(cert, MsalTestConstants.ClientAssertionClaims);
                 break;
             case CredentialType.SignedAssertion:
                 builder = builder.WithClientAssertion(MsalTestConstants.DefaultClientAssertion);
