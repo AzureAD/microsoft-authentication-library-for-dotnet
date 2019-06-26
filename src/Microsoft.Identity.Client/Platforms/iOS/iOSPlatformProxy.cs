@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
 
         /// <inheritdoc />
-        public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectURI = false)
+        public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
             return string.Format(CultureInfo.InvariantCulture, IosDefaultRedirectUriTemplate, clientId);
         }
