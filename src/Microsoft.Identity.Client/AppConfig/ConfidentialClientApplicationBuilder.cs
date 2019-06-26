@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Sets the certificate associated with the application along with the specific claims to sign.
-        /// The required set of claims will need to be provided as well for a succsesfull authentication.
+        /// The required set of claims will need to be provided as well for a succsesful authentication request. See https://aka.ms/msal-net-client-assertion
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
