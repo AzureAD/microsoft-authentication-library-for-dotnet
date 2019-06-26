@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             var jsonToken = handler.ReadJwtToken(((ConfidentialClientApplication)confidentialApp).ClientCredential.CachedAssertion);
 
             //checked if additional claim is in signed assertion
-            var validClaim = claims.Where(x => x.Key == claims.FirstOrDefault().Key && x.Value == claims.FirstOrDefault().Value).FirstOrDefault();
+            var validClaim = claims.Where(x => x.Key == jsonToken.Claims.FirstOrDefault().Type && x.Value == jsonToken.Claims.FirstOrDefault().Value).FirstOrDefault();
             Assert.IsNotNull(validClaim);
 
             MsalAssert.AssertAuthResult(authResult);
