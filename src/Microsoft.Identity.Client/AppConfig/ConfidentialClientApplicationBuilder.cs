@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the certificate associated with the application along with the specific additional claims to sign. 
+        /// Sets the certificate associated with the application along with the specific additional claims to sign. See https://aka.ms/msal-net-client-assertion
         /// The required set of claims will be appended to the authentication request.
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the application client assertion
+        /// Sets the application client assertion. See https://aka.ms/msal-net-client-assertion
         /// </summary>
         /// <param name="signedClientAssertion">The client assertion used to prove the identity of the application to Azure AD. This is a Base-64 encoded JWT.</param>
         /// <returns></returns>
