@@ -2,71 +2,53 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Linq;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Internal
 {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
-    internal class JsonWebTokenConstants
-    {
-        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-        public const string HeaderType = "JWT";
-
-        internal class Algorithms
-        {
-            public const string RsaSha256 = "RS256";
-            public const string None = "none";
-        }
-
-        internal class ReservedClaims
-        {
-            public const string Audience = "aud";
-            public const string Issuer = "iss";
-            public const string Subject = "sub";
-            public const string NotBefore = "nbf";
-            public const string ExpiresOn = "exp";
-            public const string JwtIdentifier = "jti";
-        }
-
-        internal class ReservedHeaderParameters
-        {
-            public const string Algorithm = "alg";
-            public const string Type = "typ";
-            public const string X509CertificateThumbprint = "kid";
-            public const string X509CertificatePublicCertValue = "x5c";
-        }
-    }
 
     internal class JsonWebToken
     {
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
         private const int MaxTokenLength = 65536;
         public readonly JWTPayload Payload;
+        public IDictionary<string, string> ClaimsToSign { get; private set; }
+        public long ValidTo { get { return Payload.ValidTo; } }
         private readonly ICryptographyManager _cryptographyManager;
+        private bool _appendDefaultClaims;
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
         {
             _cryptographyManager = cryptographyManager;
             DateTime validFrom = DateTime.UtcNow;
 
-            DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
-
             Payload = new JWTPayload
             {
                 Audience = audience,
                 Issuer = clientId,
                 ValidFrom = ConvertToTimeT(validFrom),
-                ValidTo = ConvertToTimeT(validTo),
+                ValidTo = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds)),
                 Subject = clientId,
                 JwtIdentifier = Guid.NewGuid().ToString()
             };
         }
 
-        public string Sign(ClientAssertionCertificateWrapper credential, bool sendCertificate)
+        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience, IDictionary<string, string> claimsToSign, bool appendDefaultClaims = false)
+            : this(cryptographyManager, clientId, audience)
+        {
+            ClaimsToSign = claimsToSign;
+            _appendDefaultClaims = appendDefaultClaims;
+        }
+
+        public string Sign(ClientCredentialWrapper credential, bool sendCertificate)
         {
             // Base64Url encoded header and claims
             string token = Encode(credential, sendCertificate);
@@ -90,7 +72,7 @@ namespace Microsoft.Identity.Client.Internal
             return Base64UrlHelpers.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(ClientAssertionCertificateWrapper credential, bool sendCertificate)
+        private static string EncodeHeaderToJson(ClientCredentialWrapper credential, bool sendCertificate)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential, sendCertificate);
             return JsonHelper.SerializeToJson(header);
@@ -103,15 +85,33 @@ namespace Microsoft.Identity.Client.Internal
             return (long)diff.TotalSeconds;
         }
 
-        private string Encode(ClientAssertionCertificateWrapper credential, bool sendCertificate)
+        private string Encode(ClientCredentialWrapper credential, bool sendCertificate)
         {
             // Header segment
             string jsonHeader = EncodeHeaderToJson(credential, sendCertificate);
 
             string encodedHeader = EncodeSegment(jsonHeader);
+            string jsonPayload;
 
             // Payload segment
-            string jsonPayload = JsonHelper.SerializeToJson(Payload);
+            if (ClaimsToSign != null && ClaimsToSign.Any())
+            {
+                if (_appendDefaultClaims)
+                {
+                    JObject json = JObject.FromObject(ClaimsToSign);
+                    json.Merge(JObject.FromObject(Payload));
+                    jsonPayload = json.ToString();
+                }
+                else
+                {
+                    JObject json = JObject.FromObject(ClaimsToSign);
+                    jsonPayload = json.ToString();
+                }
+            }
+            else
+            {
+                jsonPayload = JsonHelper.SerializeToJson(Payload);
+            }
 
             string encodedPayload = EncodeSegment(jsonPayload);
 
@@ -121,12 +121,12 @@ namespace Microsoft.Identity.Client.Internal
         [DataContract]
         internal class JWTHeader
         {
-            public JWTHeader(ClientAssertionCertificateWrapper credential)
+            public JWTHeader(ClientCredentialWrapper credential)
             {
                 Credential = credential;
             }
 
-            protected ClientAssertionCertificateWrapper Credential { get; }
+            protected ClientCredentialWrapper Credential { get; }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Client.Internal
         [DataContract]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(ClientAssertionCertificateWrapper credential, bool sendCertificate)
+            public JWTHeaderWithCertificate(ClientCredentialWrapper credential, bool sendCertificate)
                 : base(credential)
             {
                 X509CertificateThumbprint = Credential.Thumbprint;
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client.Internal
 
 #if DESKTOP
                 X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
-#else                
+#else
                 X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
 #endif
             }

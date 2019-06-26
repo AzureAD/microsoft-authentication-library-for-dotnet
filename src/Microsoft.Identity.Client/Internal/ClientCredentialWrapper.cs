@@ -2,6 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -17,41 +23,156 @@ namespace Microsoft.Identity.Client.Internal
     /// </summary>
     internal sealed class ClientCredentialWrapper
     {
-        /// <summary>
-        /// Constructor of client (application) credentials from a <see cref="ClientAssertionCertificateWrapper"/>
-        /// </summary>
-        /// <param name="certificate">contains information about the certificate previously shared with AAD at application
-        /// registration to prove the identity of the application (the client) requesting the tokens.</param>
-        public ClientCredentialWrapper(ClientAssertionCertificateWrapper certificate)
+        public ClientCredentialWrapper(ApplicationConfiguration config)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
-            Certificate = certificate;
+
+            ValidateCredentialParameters(config);
+
+            switch (AuthenticationType)
+            {
+            case ConfidentialClientAuthenticationType.ClientCertificate:
+                Certificate = config.ClientCredentialCertificate;
+                break;
+            case ConfidentialClientAuthenticationType.ClientCertificateWithClaims:
+                Certificate = config.ClientCredentialCertificate;
+                ClaimsToSign = config.ClaimsToSign;
+                break;
+            case ConfidentialClientAuthenticationType.ClientSecret:
+                Secret = config.ClientSecret;
+                break;
+            case ConfidentialClientAuthenticationType.SignedClientAssertion:
+                SignedAssertion = config.SignedClientAssertion;
+                break;
+            }
         }
 
-        internal ClientAssertionCertificateWrapper Certificate { get; private set; }
-        internal string Assertion { get; set; }
+        #region TestBuilders
+        //The following builders methods are inteded for testing
+        public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
+        {
+            return new ClientCredentialWrapper(certificate, claimsToSign);
+        }
+
+        public static ClientCredentialWrapper CreateWithSecret(string secret)
+        {
+            var app = new ClientCredentialWrapper(secret, ConfidentialClientAuthenticationType.ClientSecret);
+            app.AuthenticationType = ConfidentialClientAuthenticationType.ClientSecret;
+            return app;
+        }
+
+        public static ClientCredentialWrapper CreateWithSignedClientAssertion(string signedClientAssertion)
+        {
+            var app = new ClientCredentialWrapper(signedClientAssertion, ConfidentialClientAuthenticationType.SignedClientAssertion);
+            app.AuthenticationType = ConfidentialClientAuthenticationType.SignedClientAssertion;
+            return app;
+        }
+
+        private ClientCredentialWrapper(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
+        {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
+            Certificate = certificate;
+
+            if (claimsToSign != null && claimsToSign.Any())
+            {
+                ClaimsToSign = claimsToSign;
+                AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificateWithClaims;
+                return;
+            }
+
+            AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificate;
+        }
+
+        private ClientCredentialWrapper(string secretOrAssertion, ConfidentialClientAuthenticationType authType)
+        {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
+            if (authType == ConfidentialClientAuthenticationType.SignedClientAssertion)
+            {
+                SignedAssertion = secretOrAssertion;
+            }
+            else
+            {
+                Secret = secretOrAssertion;
+            }
+        }
+
+        #endregion TestBuilders
+        private void CheckCertificateKeySize(X509Certificate2 cert)
+        {
+            //Currently, the min key size is enforced on desktop (net 45) as 2048 as it is the current industry standard.
+            //This is not enforced on netCore unfortunalty and adding this enforcement may break customers on netCore.
+            //NetCore can only enforce a min key size of 512 since it is enforced by the portal already.
+#if DESKTOP
+            if (cert.PublicKey.Key.KeySize < MinKeySizeInBits)
+            {
+                throw new ArgumentOutOfRangeException(nameof(cert),
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
+                        MinKeySizeInBits));
+            }
+#endif
+        }
+
+        private void ValidateCredentialParameters(ApplicationConfiguration config)
+        {
+            if (config.ConfidentialClientCredentialCount > 1)
+            {
+                throw new MsalClientException(MsalError.ClientCredentialAuthenticationTypesAreMutuallyExclusive, MsalErrorMessage.ClientCredentialAuthenticationTypesAreMutuallyExclusive);
+            }
+
+            if (!string.IsNullOrWhiteSpace(config.ClientSecret))
+            {
+                AuthenticationType = ConfidentialClientAuthenticationType.ClientSecret;
+            }
+
+            if (config.ClientCredentialCertificate != null)
+            {
+                if (config.ClaimsToSign != null && config.ClaimsToSign.Any())
+                {
+                    AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificateWithClaims;
+                    AppendDefaultClaims = config.AppendDefaultClaims;
+                }
+                else
+                {
+                    AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificate;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(config.SignedClientAssertion))
+            {
+                AuthenticationType = ConfidentialClientAuthenticationType.SignedClientAssertion;
+            }
+        }
+
+        internal byte[] Sign(ICryptographyManager cryptographyManager, string message)
+        {
+            return cryptographyManager.SignWithCertificate(message, Certificate);
+        }
+
+        private static readonly int s_minKeySizeInBits = 2048;
+        public static int MinKeySizeInBits { get { return s_minKeySizeInBits; } }
+        internal string Thumbprint { get { return Base64UrlHelpers.Encode(Certificate.GetCertHash()); } }
+        internal X509Certificate2 Certificate { get; private set; }
+        // The cached assertion created from the JWT signing operation
+        internal string CachedAssertion { get; set; }
         internal long ValidTo { get; set; }
         internal bool ContainsX5C { get; set; }
         internal string Audience { get; set; }
-
-        /// <summary>
-        /// Constructor of client (application) credentials from a client secret, also known as the application password.
-        /// </summary>
-        /// <param name="secret">Secret string previously shared with AAD at application registration to prove the identity
-        /// of the application (the client) requesting the tokens.</param>
-        public ClientCredentialWrapper(string secret)
-        {
-            ConfidentialClientApplication.GuardMobileFrameworks();
-
-            if (string.IsNullOrWhiteSpace(secret))
-            {
-                throw new ArgumentNullException(nameof(secret));
-            }
-
-            Secret = secret;
-        }
-
         internal string Secret { get; private set; }
+        // The signed assertion passed in by the user
+        internal string SignedAssertion { get; private set; }
+        internal bool AppendDefaultClaims { get; private set; }
+        internal ConfidentialClientAuthenticationType AuthenticationType { get; private set; }
+        internal IDictionary<string, string> ClaimsToSign { get; private set; }
+    }
+
+    internal enum ConfidentialClientAuthenticationType
+    {
+        ClientCertificate,
+        ClientCertificateWithClaims,
+        ClientSecret,
+        SignedClientAssertion
     }
 #endif
 }

@@ -4,6 +4,7 @@
 
 #if !ANDROID && !iOS && !WINDOWS_APP 
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -96,10 +97,11 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority),true)
+                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri(MsalTestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCertificate(certificate).BuildConcrete();
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
 
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
@@ -244,12 +246,12 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(header.X509CertificateThumbprint);
         }
 
-        private ClientAssertionCertificateWrapper GenerateClientAssertionCredential()
+        private ClientCredentialWrapper GenerateClientAssertionCredential()
         {
             var cert = new X509Certificate2(
             ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
 
-            var credential = new ClientAssertionCertificateWrapper(cert);
+            var credential = ClientCredentialWrapper.CreateWithCertificate(cert);
             return credential;
         }
     }

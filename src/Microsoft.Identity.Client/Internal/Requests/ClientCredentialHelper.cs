@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new ArgumentNullException(nameof(clientCredential));
             }
-            else if (string.IsNullOrWhiteSpace(clientCredential.Assertion))
+            else if (string.IsNullOrWhiteSpace(clientCredential.CachedAssertion))
             {
                 return false;
             }
@@ -54,20 +54,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             if (clientCredential != null)
             {
-                if (!string.IsNullOrEmpty(clientCredential.Secret))
+                if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientSecret)
                 {
                     parameters[OAuth2Parameter.ClientSecret] = clientCredential.Secret;
                 }
                 else
                 {
-                    if (clientCredential.Assertion == null || clientCredential.ValidTo != 0)
+                    if ((clientCredential.CachedAssertion == null || clientCredential.ValidTo != 0) && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertion)
                     {
                         if (!ValidateClientAssertion(clientCredential, endpoints, sendX5C))
                         {
                             logger.Info("Client Assertion does not exist or near expiry.");
-                            var jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience);
-                            clientCredential.Assertion = jwtToken.Sign(clientCredential.Certificate, sendX5C);
-                            clientCredential.ValidTo = jwtToken.Payload.ValidTo;
+                            JsonWebToken jwtToken;
+                            
+                            if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientCertificateWithClaims)
+                            {
+                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience, clientCredential.ClaimsToSign, clientCredential.AppendDefaultClaims);
+                            }
+                            else
+                            {
+                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience);
+                            }
+
+                            clientCredential.CachedAssertion = jwtToken.Sign(clientCredential, sendX5C);
+                            clientCredential.ValidTo = jwtToken.ValidTo;
                             clientCredential.ContainsX5C = sendX5C;
                             clientCredential.Audience = endpoints?.SelfSignedJwtAudience;
                         }
@@ -78,7 +88,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
 
                     parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
-                    parameters[OAuth2Parameter.ClientAssertion] = clientCredential.Assertion;
+                    
+                    if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.SignedClientAssertion)
+                    {
+                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.SignedAssertion;
+                    }
+                    else
+                    {
+                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.CachedAssertion;
+                    }
                 }
             }
             return parameters;
