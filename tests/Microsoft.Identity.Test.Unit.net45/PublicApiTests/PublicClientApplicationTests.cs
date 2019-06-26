@@ -21,6 +21,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -133,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
-            
+
         }
 
         [TestMethod]
@@ -1263,17 +1264,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void CheckUserProvidedCorrlationIDTest()
+        public void CheckUserProvidedCorrelationIDTest()
         {
             using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 var correlationId = new Guid();
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                                            .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
-                                                                            .BuildConcrete();
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
+                    .BuildConcrete();
+
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
@@ -1287,10 +1290,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
-                Assert.IsTrue(!string.IsNullOrWhiteSpace(result.CorrelationID));
-                Assert.AreEqual(correlationId.ToString(), result.CorrelationID.ToString(CultureInfo.InvariantCulture));
+                Assert.IsNotNull((result.CorrelationID));
+                Assert.AreEqual(correlationId.AsMatsCorrelationId(), result.CorrelationID.AsMatsCorrelationId());
                 Assert.IsNotNull(result);
-                Assert.IsNull(result.AccessToken);
+                Assert.IsNotNull(result.AccessToken);
             }
         }
 

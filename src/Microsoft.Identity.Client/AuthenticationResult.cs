@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">granted scope values as returned by the service</param>
         /// <param name="tenantId">identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
         /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that
-        /// <param name="correlationID">The correlation id of the authentication request</param>
+        /// <param name="correlationId">The correlation id of the authentication request</param>
         /// is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
         public AuthenticationResult(
             string accessToken,
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
             IAccount account,
             string idToken,
             IEnumerable<string> scopes,
-            string correlationID)
+            Guid correlationId)
         {
             AccessToken = accessToken;
             IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
@@ -56,14 +56,14 @@ namespace Microsoft.Identity.Client
             Account = account;
             IdToken = idToken;
             Scopes = scopes;
-            CorrelationID = correlationID;
+            CorrelationID = correlationId;
         }
 
         internal AuthenticationResult()
         {
         }
 
-        internal AuthenticationResult(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem, string correlationID)
+        internal AuthenticationResult(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem, Guid correlationID)
         {
             if (msalAccessTokenCacheItem.HomeAccountId != null)
             {
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the correlation id used for the request.
         /// </summary>
-        public string CorrelationID { get; }
+        public Guid CorrelationID { get; }
 
         /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so

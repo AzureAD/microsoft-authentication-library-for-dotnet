@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 MsalAccessTokenCacheItem msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 if (msalAccessTokenItem != null)
                 {
-                    return new AuthenticationResult(msalAccessTokenItem, null, AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId);
+                    return new AuthenticationResult(msalAccessTokenItem, null, new Guid(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId));
                 }
             }
 

@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public T WithCorrelationId(Guid correlationId)
         {
-            CommonParameters.UserProvidedTelemetryCorrelationId = correlationId;
+            CommonParameters.UserProvidedCorrelationId = correlationId;
             return (T)this;
         }
 
@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Client
             Validate();
             CommonParameters.ApiId = CalculateApiEventId();
             CommonParameters.ApiTelemId = ApiTelemetryId;
-            CommonParameters.TelemetryCorrelationId = (CommonParameters.UserProvidedTelemetryCorrelationId != null) ? CommonParameters.UserProvidedTelemetryCorrelationId : new Guid();
+            CommonParameters.TelemetryCorrelationId = (CommonParameters.UserProvidedCorrelationId != null) ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
         }
     }
 }

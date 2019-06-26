@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+using System;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -32,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 if (msalAccessTokenItem != null)
                 {
-                    return new AuthenticationResult(msalAccessTokenItem, null, AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId);
+                    return new AuthenticationResult(msalAccessTokenItem, null, new Guid(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId));
                 }
             }
 
