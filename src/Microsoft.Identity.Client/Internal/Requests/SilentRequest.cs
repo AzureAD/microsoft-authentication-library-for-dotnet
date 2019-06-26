@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
         private const string TheOnlyFamilyId = "1";
-        private const string FociClientMismatchSubError = "client_mismatch";
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -163,7 +162,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return null;
 #else
                     if (MsalError.InvalidGrantError.Equals(ex?.ErrorCode, StringComparison.OrdinalIgnoreCase) &&
-                        FociClientMismatchSubError.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
+                        OAuth2SubError.ClientMismatch.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
                     {
                         logger.Error("[FOCI] FRT refresh failed - client mismatch");
                         return null;
@@ -179,7 +178,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return null;
-
         }
 
         private async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken)

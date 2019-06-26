@@ -83,6 +83,59 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string AuthorizationPending = "authorization_pending";
     }
 
+    internal static class OAuth2SubError
+    {
+        /// <summary>
+        /// Condition can be resolved by user interaction during the interactive authentication flow.
+        /// </summary>
+        public const string BasicAction = "basic_action";
+
+        /// <summary>
+        /// Condition can be resolved by additional remedial interaction with the system, outside of the interactive authentication flow.
+        /// </summary>
+        public const string AdditionalAction = "additional_action";
+
+        /// <summary>
+        /// Condition cannot be resolved at this time. Launching interactive authentication flow will show a message explaining the condition.
+        /// </summary>
+        public const string MessageOnly = "message_only";
+
+        /// <summary>
+        /// User's password has expired.
+        /// </summary>
+        public const string UserPasswordExpired = "user_password_expired";
+
+        /// <summary>
+        /// User consent is missing, or has been revoked.
+        /// </summary>
+        public const string ConsentRequired = "consent_required	";
+
+        /// <summary>
+        /// Internal to MSALs. Indicates that no further silent calls should be made with this refresh token.
+        /// </summary>
+        public const string BadToken = "bad_token";
+
+        /// <summary>
+        /// Internal to MSALs. Indicates that no further silent calls should be made with this refresh token.
+        /// </summary>
+        public const string TokenExpired = "token_expired";
+
+        /// <summary>
+        /// Internal to MSALs. Needed in ios/android to complete the end-to-end true MAM flow. This suberror code is re-mapped to a different top level error code (IntuneAppProtectionPoliciesRequired), and not InteractionRequired
+        /// </summary>
+        public const string ProtectionPolicyRequired = "protection_policy_required";
+
+        /// <summary>
+        /// Internal to MSALs. Used in scenarios where an application is using family refresh token even though it is not part of FOCI (or vice versa). Needed to handle cases where app changes FOCI membership after being shipped. This is handled internally and doesn't need to be exposed to the calling app. Please see FOCI design document for more details.
+        /// </summary>
+        public const string ClientMismatch = "client_mismatch";
+
+        /// <summary>
+        /// Internal to MSALs. Indicates that device should be re-registered.
+        /// </summary>
+        public const string DeviceAuthenticationFailed = "device_authentication_failed";
+    }
+
     internal static class OAuth2Value
     {
         public static readonly string[] ReservedScopes = { ScopeOpenId, ScopeProfile, ScopeOfflineAccess };
