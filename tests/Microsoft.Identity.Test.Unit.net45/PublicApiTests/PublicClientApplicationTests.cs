@@ -1290,8 +1290,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
-                Assert.IsNotNull((result.CorrelationID));
-                Assert.AreEqual(correlationId.AsMatsCorrelationId(), result.CorrelationID.AsMatsCorrelationId());
+                Assert.IsNotNull((result.CorrelationId));
+                Assert.AreEqual(correlationId.AsMatsCorrelationId(), result.CorrelationId.AsMatsCorrelationId());
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
             }

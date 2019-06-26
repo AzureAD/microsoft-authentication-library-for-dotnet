@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
             Account = account;
             IdToken = idToken;
             Scopes = scopes;
-            CorrelationID = correlationId;
+            CorrelationId = correlationId;
         }
 
         internal AuthenticationResult()
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
             IdToken = msalIdTokenCacheItem?.Secret;
             Scopes = msalAccessTokenCacheItem.ScopeSet;
             IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
-            CorrelationID = correlationID;
+            CorrelationId = correlationID;
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the correlation id used for the request.
         /// </summary>
-        public Guid CorrelationID { get; }
+        public Guid CorrelationId { get; }
 
         /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so
