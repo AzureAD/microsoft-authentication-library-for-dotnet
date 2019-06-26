@@ -90,7 +90,11 @@ namespace Microsoft.Identity.Client
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
             var provider = await WamUtils.FindAccountProviderForAuthorityAsync(ServiceBundle, null).ConfigureAwait(false);
-            var findAllAccountsResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider);
+            var findAllAccountsResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider, ServiceBundle.Config.ClientId);
+            if (findAllAccountsResult.Status != FindAllWebAccountsStatus.Success)
+            {
+                throw new MsalClientException(findAllAccountsResult.ProviderError.ErrorMessage);
+            }
 
             var accounts = new List<IAccount>();
 

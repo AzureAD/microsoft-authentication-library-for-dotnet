@@ -26,7 +26,7 @@ namespace UWP
         // private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
         private static readonly string s_clientID = "8787cfc0-a723-49fa-99e1-291d58cb6f81"; // todo(wam): DO NOT CHECK THIS IN
         
-        private static readonly string s_authority = "https://login.microsoftonline.com/organizations";  // todo(wam): wam not working with common yet, so pushing this to organizations.
+        private static readonly string s_authority = "https://login.microsoftonline.com/common"; 
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";
 
@@ -55,8 +55,14 @@ namespace UWP
 
             _pca.UserTokenCache.SetBeforeAccess((tokenCacheNotifcation) =>
             {
-                IStorageFile cacheFile = (ApplicationData.Current.LocalFolder.TryGetItemAsync(CacheFileName)
-                    .AsTask().ConfigureAwait(true).GetAwaiter().GetResult()) as IStorageFile;
+                IStorageFile cacheFile = ApplicationData
+                    .Current
+                    .LocalFolder
+                    .TryGetItemAsync(CacheFileName)
+                    .AsTask()
+                    .ConfigureAwait(true)
+                    .GetAwaiter()
+                    .GetResult() as IStorageFile;
 
                 if (cacheFile != null)
                 {
@@ -101,12 +107,12 @@ namespace UWP
         {
             var pca = CreateWamPublicClientApplication();
 
-            IEnumerable<IAccount> accounts = await pca
-                .GetAccountsAsync()
-                .ConfigureAwait(true);
-
             try
             {
+                IEnumerable<IAccount> accounts = await pca
+                    .GetAccountsAsync()
+                    .ConfigureAwait(true);
+
                 var result = await pca
                     .AcquireTokenSilent(s_scopes, accounts.FirstOrDefault())
                     .ExecuteAsync(CancellationToken.None)
