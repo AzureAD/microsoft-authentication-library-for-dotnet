@@ -1262,6 +1262,38 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             CheckBuilderCommonMethods(byRefreshTokenBuilder);
         }
 
+        [TestMethod]
+        public void CheckUserProvidedCorrlationIDTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var correlationId = new Guid();
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
+
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .WithCorrelationId(correlationId)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
+                Assert.IsTrue(!string.IsNullOrWhiteSpace(result.CorrelationID));
+                Assert.AreEqual(correlationId.ToString(), result.CorrelationID.ToString(CultureInfo.InvariantCulture));
+                Assert.IsNotNull(result);
+                Assert.IsNull(result.AccessToken);
+            }
+        }
+
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {
             builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)

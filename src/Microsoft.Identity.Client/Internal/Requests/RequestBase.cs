@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
                 var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
-                return new AuthenticationResult(tuple.Item1, tuple.Item2);
+                return new AuthenticationResult(tuple.Item1, tuple.Item2, AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId);
             }
             else
             {
@@ -231,7 +231,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.AuthorityInfo.Host,
                         AuthenticationRequestParameters.ClientId,
                         msalTokenResponse,
-                        idToken?.TenantId));
+                        idToken?.TenantId),
+                        AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId
+                    );
             }
         }
 

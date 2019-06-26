@@ -64,7 +64,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     "scope1",
                     "scope2"
-                });
+                },
+                new Guid().ToString());
 
             var mockApp = Substitute.For<IConfidentialClientApplication>();
             mockApp.AcquireTokenByAuthorizationCode(null, "123").ExecuteAsync(CancellationToken.None).Returns(mockResult);
