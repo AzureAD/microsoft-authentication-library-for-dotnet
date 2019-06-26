@@ -56,6 +56,7 @@ namespace Microsoft.Identity.Client
         /// .NET Classic app - https://login.microsoftonline.com/common/oauth2/nativeclient
         /// UWP - value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri()
         /// .NET Core - https://localhost
+        /// See https://aka.ms/msal-net-default-reply-uri.
         /// </summary>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
