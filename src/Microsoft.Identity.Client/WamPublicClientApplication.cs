@@ -13,8 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Utils;
-using Windows.Security.Authentication.Web.Core;
 
 namespace Microsoft.Identity.Client
 {
@@ -98,24 +96,6 @@ namespace Microsoft.Identity.Client
                 requestContext).ConfigureAwait(false);
 
             return accounts;
-
-            // todo(wam): this is dead code.  we don't have permissions most of the time to enumerate wam accounts and we need to cache
-            // account information in the msal cache anyway to reference the proper provider information for each account for loading.
-            //var provider = await WamUtils.FindAccountProviderForAuthorityAsync(ServiceBundle, null).ConfigureAwait(false);
-            //var findAllAccountsResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider, ServiceBundle.Config.ClientId);
-            //if (findAllAccountsResult.Status != FindAllWebAccountsStatus.Success)
-            //{
-            //    throw new MsalClientException(findAllAccountsResult.ProviderError.ErrorMessage);
-            //}
-
-            //var accounts = new List<IAccount>();
-
-            //foreach (var webAccount in findAllAccountsResult.Accounts)
-            //{
-            //    accounts.Add(WamUtils.CreateMsalAccountFromWebAccount(webAccount));
-            //}
-
-            //return accounts;
         }
 
         public async Task RemoveAsync(IAccount account)
