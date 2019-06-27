@@ -22,9 +22,6 @@ namespace Microsoft.Identity.Client
         private const string CorrelationIdKey = "correlation_id";
         private const string SubErrorKey = "sub_error";
 
-        private HttpResponse _httpResponse;
-        private OAuth2ResponseBase _oauth2ResponseBase;
-
         #region Constructors
         /// <summary>
         /// Initializes a new instance of the exception class with a specified
@@ -134,33 +131,6 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
-        internal HttpResponse HttpResponse
-        {
-            get => _httpResponse;
-            set
-            {
-                _httpResponse = value;
-                ResponseBody = _httpResponse?.Body;
-                StatusCode = _httpResponse != null ? (int)_httpResponse.StatusCode : 0;
-                Headers = _httpResponse?.Headers;
-
-                // In most cases we can deserialize the body to get more details such as the suberror
-                OAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(_httpResponse?.Body);
-            }
-        }
-
-        internal OAuth2ResponseBase OAuth2Response
-        {
-            get => _oauth2ResponseBase;
-            set
-            {
-                _oauth2ResponseBase = value;
-                Claims = _oauth2ResponseBase?.Claims;
-                CorrelationId = _oauth2ResponseBase?.CorrelationId;
-                SubError = _oauth2ResponseBase?.SubError;
-            }
-        }
-
         /// <summary>
         /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c> in the inner
         /// <see cref="System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
@@ -245,6 +215,37 @@ namespace Microsoft.Identity.Client
             ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
             CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
             SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
+        }
+
+        /// <summary>
+        /// Classification of the conditional access error, enabling you to do more actions or inform the user depending on your scenario. See https://aka.ms/msal-net-uiexception for details.
+        /// </summary>
+        /// <remarks>This class <see cref="MsalUiRequiredException"/> lists most classification strings as constants. </remarks>
+        public string InvalidGrantClassification
+        {
+            get
+            {
+                switch (SubError)
+                {
+                    case Client.InvalidGrantClassification.BasicAction:
+                    case Client.InvalidGrantClassification.AdditionalAction:
+                    case Client.InvalidGrantClassification.MessageOnly:
+                    case Client.InvalidGrantClassification.ConsentRequired:
+                    case Client.InvalidGrantClassification.UserPasswordExpired:
+                        return SubError;
+
+                    case Client.InvalidGrantClassification.BadToken:
+                    case Client.InvalidGrantClassification.TokenExpired:
+                    case Client.InvalidGrantClassification.ProtectionPolicyRequired:
+                    case Client.InvalidGrantClassification.ClientMismatch:
+                    case Client.InvalidGrantClassification.DeviceAuthenticationFailed:
+                        return string.Empty;
+
+                    // Forward compatibility - new sub-errors bubble through
+                    default:
+                        return SubError;
+                }
+            }
         }
     }
 }

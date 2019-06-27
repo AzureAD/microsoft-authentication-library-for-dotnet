@@ -179,30 +179,29 @@ namespace Microsoft.Identity.Client.OAuth2
             }
             catch (SerializationException) // in the rare case we get an error response we cannot deserialize
             {
-                exceptionToThrow = new MsalServiceException(
+                exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.NonParsableOAuthError,
-                    MsalErrorMessage.NonParsableOAuthError)
-                {
-                    HttpResponse = response
-                };
+                    MsalErrorMessage.NonParsableOAuthError,
+                    response);
             }
             catch (Exception ex)
             {
-                exceptionToThrow = new MsalServiceException(MsalError.UnknownError, response.Body, ex)
-                {
-                    HttpResponse = response
-                };
+
+                exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
+                    MsalError.UnknownError,
+                    response.Body,
+                    response,
+                    ex);
             }
 
             if (exceptionToThrow == null)
             {
-                exceptionToThrow = new MsalServiceException(
+                exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
                     response.StatusCode == HttpStatusCode.NotFound
                         ? MsalError.HttpStatusNotFound
-                        : MsalError.HttpStatusCodeNotOk, httpErrorCodeMessage)
-                {
-                    HttpResponse = response
-                };
+                        : MsalError.HttpStatusCodeNotOk,
+                    httpErrorCodeMessage,
+                    response);
             }
 
             if (shouldLogAsError)
@@ -234,24 +233,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 return null;
             }
 
-            if (MsalError.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
-            {
-                exceptionToThrow = new MsalUiRequiredException(
-                    MsalError.InvalidGrantError,
-                    msalTokenResponse.ErrorDescription)
-                {
-                    HttpResponse = response
-                };
-            }
-            else
-            {
-                exceptionToThrow = new MsalServiceException(
-                    msalTokenResponse.Error,
-                    msalTokenResponse.ErrorDescription)
-                {
-                    HttpResponse = response
-                };
-            }
+            exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
+                msalTokenResponse.Error,
+                msalTokenResponse.ErrorDescription,
+                response);
 
             // For device code flow, AuthorizationPending can occur a lot while waiting
             // for the user to auth via browser and this causes a lot of error noise in the logs.
