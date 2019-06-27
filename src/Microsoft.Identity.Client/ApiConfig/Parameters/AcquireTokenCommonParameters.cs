@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public ApiEvent.ApiIds ApiId { get; set; } = ApiEvent.ApiIds.None;
         public Guid TelemetryCorrelationId { get; set; }
         public Guid UserProvidedCorrelationId { get; set; }
+        public bool UseCorrelationIdFromUser { get; set; }
         public IEnumerable<string> Scopes { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; set; }
         public string Claims { get; set; }
