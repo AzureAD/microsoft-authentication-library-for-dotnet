@@ -10,7 +10,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Serialization;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Unit
@@ -29,6 +28,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
         public const string Uid = "my-uid";
         public const string Utid = "my-utid";
+        public const string Common = "common";
+        public const string TenantId = "e56cat29e-b008-4cea-b6f0-48facatsd64a";
         public static readonly IDictionary<string, string> ClientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
 
         public const string HomeAccountId = Uid + "." + Utid;

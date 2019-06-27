@@ -34,11 +34,11 @@ namespace Microsoft.Identity.Client.Instance
         {
             if (TryGetCacheValue(authorityInfo, userPrincipalName, out var endpoints))
             {
-                requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - TRUE");
+                requestContext.Logger.Info(LogMessages.ResolvingAuthorityEndpointsTrue);
                 return endpoints;
             }
 
-            requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - FALSE");
+            requestContext.Logger.Info(LogMessages.ResolvingAuthorityEndpointsFalse);
 
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
             string path = authorityUri.AbsolutePath.Substring(1);
@@ -58,30 +58,50 @@ namespace Microsoft.Identity.Client.Instance
             {
                 throw new MsalClientException(
                     MsalError.TenantDiscoveryFailedError,
-                    "Authorize endpoint was not found in the openid configuration");
+                    MsalErrorMessage.AuthorizeEndpointWasNotFoundInTheOpenIdConfiguration);
             }
 
             if (string.IsNullOrEmpty(edr.TokenEndpoint))
             {
                 throw new MsalClientException(
                     MsalError.TenantDiscoveryFailedError,
-                    "Token endpoint was not found in the openid configuration");
+                    MsalErrorMessage.TokenEndpointWasNotFoundInTheOpenIdConfiguration);
             }
 
             if (string.IsNullOrEmpty(edr.Issuer))
             {
                 throw new MsalClientException(
                     MsalError.TenantDiscoveryFailedError,
-                    "Issuer was not found in the openid configuration");
+                    MsalErrorMessage.IssuerWasNotFoundInTheOpenIdConfiguration);
             }
 
             endpoints = new AuthorityEndpoints(
-                edr.AuthorizationEndpoint.Replace("{tenant}", tenant),
-                edr.TokenEndpoint.Replace("{tenant}", tenant),
-                edr.Issuer.Replace("{tenant}", tenant));
+                edr.AuthorizationEndpoint.Replace(Constants.Tenant, tenant),
+                edr.TokenEndpoint.Replace(Constants.Tenant, tenant),
+                ReplaceNonTenantSpecificValueWithTenant(edr, tenant));
 
             Add(authorityInfo, userPrincipalName, endpoints);
             return endpoints;
+        }
+
+        internal string ReplaceNonTenantSpecificValueWithTenant(TenantDiscoveryResponse endpoints, string tenant)
+        {
+            string selfSignedJwtAudience = endpoints.Issuer;
+
+            if (selfSignedJwtAudience.Contains(Constants.TenantId))
+            {
+                selfSignedJwtAudience = selfSignedJwtAudience.Replace(Constants.TenantId, tenant);
+                return selfSignedJwtAudience;
+            }
+            else if (selfSignedJwtAudience.Contains(Constants.Tenant))
+            {
+                selfSignedJwtAudience = selfSignedJwtAudience.Replace(Constants.Tenant, tenant);
+                return selfSignedJwtAudience;
+            }
+            else
+            {
+                return selfSignedJwtAudience;
+            }            
         }
 
         private bool TryGetCacheValue(AuthorityInfo authorityInfo, string userPrincipalName, out AuthorityEndpoints endpoints)
@@ -99,13 +119,13 @@ namespace Microsoft.Identity.Client.Instance
                 return true;
             }
 
-            if( !string.IsNullOrEmpty(userPrincipalName))
+            if (!string.IsNullOrEmpty(userPrincipalName))
             {
                 if (!cacheEntry.ValidForDomainsList.Contains(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName)))
                 {
                     return false;
                 }
-            }           
+            }
 
             endpoints = cacheEntry.Endpoints;
             return true;
@@ -127,18 +147,18 @@ namespace Microsoft.Identity.Client.Instance
                     }
                 }
 
-                if(!string.IsNullOrEmpty(userPrincipalName))
+                if (!string.IsNullOrEmpty(userPrincipalName))
                 {
                     updatedCacheEntry.ValidForDomainsList.Add(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName));
-                }    
+                }
             }
 
             s_endpointCacheEntries.TryAdd(authorityInfo.CanonicalAuthority, updatedCacheEntry);
         }
 
         private async Task<TenantDiscoveryResponse> DiscoverEndpointsAsync(
-            string openIdConfigurationEndpoint,
-            RequestContext requestContext)
+             string openIdConfigurationEndpoint,
+             RequestContext requestContext)
         {
             var client = new OAuth2Client(requestContext.Logger, _serviceBundle.HttpManager, _serviceBundle.TelemetryManager);
             return await client.ExecuteRequestAsync<TenantDiscoveryResponse>(
