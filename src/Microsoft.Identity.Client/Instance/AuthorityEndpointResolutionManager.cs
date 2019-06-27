@@ -78,13 +78,13 @@ namespace Microsoft.Identity.Client.Instance
             endpoints = new AuthorityEndpoints(
                 edr.AuthorizationEndpoint.Replace(Constants.Tenant, tenant),
                 edr.TokenEndpoint.Replace(Constants.Tenant, tenant),
-                ReplaceNonTenantSpecificValueWithCorrectTenant(edr, tenant));
+                ReplaceNonTenantSpecificValueWithTenant(edr, tenant));
 
             Add(authorityInfo, userPrincipalName, endpoints);
             return endpoints;
         }
 
-        internal string ReplaceNonTenantSpecificValueWithCorrectTenant(TenantDiscoveryResponse endpoints, string tenant)
+        internal string ReplaceNonTenantSpecificValueWithTenant(TenantDiscoveryResponse endpoints, string tenant)
         {
             string selfSignedJwtAudience = endpoints.Issuer;
 

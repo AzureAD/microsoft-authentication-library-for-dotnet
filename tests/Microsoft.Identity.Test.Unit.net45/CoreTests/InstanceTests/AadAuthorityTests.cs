@@ -349,7 +349,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             TenantDiscoveryResponse tenantDiscoveryResponse = new TenantDiscoveryResponse();
 
             tenantDiscoveryResponse.Issuer = issuer;
-            string selfSignedJwtAudience = resolver.ReplaceNonTenantSpecificValueWithCorrectTenant(tenantDiscoveryResponse, tenantId);
+            string selfSignedJwtAudience = resolver.ReplaceNonTenantSpecificValueWithTenant(tenantDiscoveryResponse, tenantId);
             Assert.AreEqual(expectedJwtAudience, selfSignedJwtAudience);
         }
     }
