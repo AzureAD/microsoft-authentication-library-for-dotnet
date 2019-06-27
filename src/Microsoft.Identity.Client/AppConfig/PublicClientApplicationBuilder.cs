@@ -52,11 +52,25 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Configures the public client application to use the recommended reply URI for the platform. 
-        /// If you are calling your API from a 
-        /// .NET Classic app - https://login.microsoftonline.com/common/oauth2/nativeclient
-        /// UWP - value of WebAuthenticationBroker.GetCurrentApplicationCallbackUri()
-        /// .NET Core - https://localhost
         /// See https://aka.ms/msal-net-default-reply-uri.
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Platform</term>
+        /// <term>Default Reply URI</term>
+        /// </listheader>
+        /// <item>
+        /// <term>.NET desktop</term>
+        /// <term><c>https://login.microsoftonline.com/common/oauth2/nativeclient</c></term>
+        /// </item>
+        /// <item>
+        /// <term>UWP</term>
+        /// <term>value of <c>WebAuthenticationBroker.GetCurrentApplicationCallbackUri()</c></term>
+        /// </item>
+        /// <item>
+        /// <term>.NET Core</term>
+        /// <term><c>https://localhost</c></term>
+        /// </item>
+        /// </list>
         /// </summary>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
