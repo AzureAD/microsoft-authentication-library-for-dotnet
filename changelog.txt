@@ -1,3 +1,14 @@
+4.1.0
+=============
+New Features:
+- **MSAL.NET now provides options to control the system web browser**. From MSAL.NET 4.0.0, you have been able to use the interactive token acquisition with .NET Core, by delegating the sign-in and consent part to the system web browser on your machine. MSAL.NET 4.1, brings improvements to this experience by helping you run a specific browser if you wish, and by giving you ways to decide what to display to the user in case of a successful authentication, and in case of failure. [More information about this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.1#improved-experience-with-the-system-web-browser-on-net-core)
+- **MSAL.NET now supports ClientAssertions**. See [issue 1188](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1188)
+
+Bug Fixes:
+- **When using the `ConfidentialClientApplicationOptions` and including, for example `Instance = "https://login.microsoftonline.com/"`, MSAL.NET was concatenating the double-slash**. MSAL.NET will now check for a trailing slash and remove it. There is no action needed on the part of the developer. See [issue 1196 for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1196).
+- **When using ADFS 2019, if no login-hint was included in the call, a null ref was thrown**. See [issue 1214 for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1214)
+- **For certain older auth libraries, there is an issue with null handlnig in json**. The json serializer in MSAL.NET no longer writes values to json for which the values are null, this is especially important for foci_id. See [issue 1189](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1189) and [issue https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1176)
+
 4.0.0
 =============
 New Features:
