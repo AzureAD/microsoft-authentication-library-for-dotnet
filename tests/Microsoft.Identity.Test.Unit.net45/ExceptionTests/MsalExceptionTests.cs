@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         [TestMethod]
         public void MsalServiceException_Classification_Only()
         {
-            ValidateClassification(null, null);
+            ValidateClassification(null, string.Empty);
             ValidateClassification(string.Empty, string.Empty);
             ValidateClassification("new_value", "new_value");
 
@@ -78,11 +78,11 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             ValidateClassification(OAuth2SubError.ConsentRequired,      MsalUiRequiredException.ConsentRequired);
             ValidateClassification(OAuth2SubError.UserPasswordExpired,  MsalUiRequiredException.UserPasswordExpired);
 
-            ValidateClassification(OAuth2SubError.BadToken, null);
-            ValidateClassification(OAuth2SubError.TokenExpired, null);
-            ValidateClassification(OAuth2SubError.ProtectionPolicyRequired, null);
-            ValidateClassification(OAuth2SubError.ClientMismatch, null);
-            ValidateClassification(OAuth2SubError.DeviceAuthenticationFailed, null);
+            ValidateClassification(OAuth2SubError.BadToken, string.Empty);
+            ValidateClassification(OAuth2SubError.TokenExpired, string.Empty);
+            ValidateClassification(OAuth2SubError.ProtectionPolicyRequired, string.Empty);
+            ValidateClassification(OAuth2SubError.ClientMismatch, string.Empty);
+            ValidateClassification(OAuth2SubError.DeviceAuthenticationFailed, string.Empty);
         }
 
         private static void ValidateClassification(string suberror, string expectedClassification)
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(ExMessage, msalException.Message);
             Assert.AreEqual("some_claims", msalException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalException.CorrelationId);
-            Assert.AreEqual(suberror, msalException.SubError ?? "");
+            Assert.AreEqual(suberror ?? "", msalException.SubError );
 
             Assert.AreEqual(expectedClassification, msalException.Classification);
         }
@@ -190,7 +190,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             Assert.IsFalse(piiMessage.Contains(ExMessage));
             Assert.IsFalse(piiMessage.Contains(innerExMsg));
-
         }
 
         [TestMethod]
@@ -214,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsNull(msalUiRequiredException.ResponseBody);
             Assert.AreEqual(ExMessage, msalUiRequiredException.Message);
             Assert.AreEqual(0, msalUiRequiredException.StatusCode);
-            Assert.AreEqual("", msalUiRequiredException.Classification);
+            Assert.AreEqual(null, msalUiRequiredException.Classification);
 
             // Act
             string piiMessage = MsalLogger.GetPiiScrubbedExceptionDetails(msalException);
@@ -331,7 +330,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsTrue(ex.ToString().Contains("MySuberror"));
             Assert.IsTrue(ex.ToString().Contains("some_claims"));
             Assert.IsTrue(ex.ToString().Contains("AADSTS90002"));
-
         }
     }
 }

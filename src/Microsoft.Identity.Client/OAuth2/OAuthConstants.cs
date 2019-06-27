@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.OAuth2
         /// <summary>
         /// User consent is missing, or has been revoked.
         /// </summary>
-        public const string ConsentRequired = "consent_required	";
+        public const string ConsentRequired = "consent_required";
 
         /// <summary>
         /// Internal to MSALs. Indicates that no further silent calls should be made with this refresh token.
