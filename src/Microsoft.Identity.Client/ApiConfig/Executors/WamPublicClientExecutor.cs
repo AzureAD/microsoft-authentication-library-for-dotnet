@@ -36,12 +36,16 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             // TokenExpiresOn is seconds since January 1, 1601 00:00:00 (Gregorian calendar)
             long tokenExpiresOn = long.Parse(tokenResponse.Properties["TokenExpiresOn"], CultureInfo.InvariantCulture);
-            DateTime expiresOn = new DateTime(1601, 1, 1).AddTicks(tokenExpiresOn);
+            DateTime expiresOn = new DateTime(1601, 1, 1).AddSeconds(tokenExpiresOn);
 
             string tenantId = tokenResponse.Properties["TenantId"];
             var account = WamUtils.CreateMsalAccountFromWebAccount(webAccount);            
             string idToken = string.Empty;
             var returnedScopes = new List<string>();
+
+            // TODO(WAM):  This should also cache account information so that we can call GetAccounts() to determine the proper information
+            // needed to do ATS later.
+            // do we ALWAYS want to do that (e.g. in case of UsernamePassword?)  or should we move the caching part out to the specific call?
 
             return new AuthenticationResult(
                 tokenResponse.Token,
@@ -64,11 +68,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         private async Task<WebAccount> GetWebAccountFromMsalAccountAsync(WebAccountProvider webAccountProvider, IAccount account)
         {
-            // TODO(WAM): We'll need to hook GetAccount(s) for PCA when WAM is available in order for normal MSAL account lookup flow to work.
             if (account != null && !string.IsNullOrWhiteSpace(account.HomeAccountId.Identifier))
             {
                 return await WebAuthenticationCoreManager.FindAccountAsync(webAccountProvider, account.HomeAccountId.Identifier);
             }
+
+            // todo(wam): should this be an exception?  should we be able to get in here with a null account?
             return null;
         }
 
@@ -76,9 +81,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             WebAccountProvider provider,
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext,
-            bool forceAuthentication = false )
+            bool forceAuthentication = false)
         {
-            string scope = string.Empty;
+            string scope = commonParameters.Scopes.AsSingleString();
             WebTokenRequest request = forceAuthentication
                 ? new WebTokenRequest(provider, scope: scope, clientId: requestContext.ServiceBundle.Config.ClientId, promptType: WebTokenRequestPromptType.ForceAuthentication)
                 : new WebTokenRequest(provider, scope: scope, clientId: requestContext.ServiceBundle.Config.ClientId);
@@ -93,9 +98,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             }
 
             request.CorrelationId = commonParameters.TelemetryCorrelationId.ToString("N");
+            
+            // TODO(WAM): verify with server team that this is the proper value
+            request.Properties["api_version"] = "2.0";
 
-            // todo(wam): how to take scopes and convert them to proper values for WAM?
-            request.Properties["resource"] = "https://graph.microsoft.com";  
+            // Since we've set api_version=2.0, we can send in scopes in the scope parameter since the WAM providers are now set to v2 protocol and token semantics.
+            // Therefore we don't need the resource parameter.
+            // request.Properties["resource"] = "https://graph.microsoft.com";  
 
             if (Windows.Foundation.Metadata.ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 6))
             {
@@ -143,13 +152,20 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(true);
-            WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(provider, silentParameters.Account).ConfigureAwait(true);
-            WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext);
+            WebAccountProvider provider = await WebAuthenticationCoreManager.FindAccountProviderAsync(
+                "https://login.microsoft.com",
+                silentParameters.Account.Environment);
 
-            WebTokenRequestResult result = webAccount == null
-                ? await WebAuthenticationCoreManager.GetTokenSilentlyAsync(request)
-                : await WebAuthenticationCoreManager.GetTokenSilentlyAsync(request, webAccount);
+            WebAccount webAccount = await WebAuthenticationCoreManager.FindAccountAsync(provider, silentParameters.Account.HomeAccountId.Identifier);
+
+            // WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(true);
+
+            // TODO(wam): might need to have this method return the provider AND the webAccount since the MSAL account will need to cache the provider info for lookup
+            // since we don't want to do HRD in ATS.
+            // WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(provider, silentParameters.Account).ConfigureAwait(true);
+
+            WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext);
+            WebTokenRequestResult result = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(request, webAccount);
 
             return HandleWebTokenRequestResult(result);
         }

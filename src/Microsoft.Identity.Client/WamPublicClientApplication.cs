@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,13 +25,16 @@ namespace Microsoft.Identity.Client
         internal WamPublicClientApplication(ApplicationConfiguration config)
         {
             ServiceBundle = Core.ServiceBundle.Create(config);
+            UserTokenCacheInternal = new TokenCache(ServiceBundle);
         }
 
         public bool IsSystemWebViewAvailable => false;
 
         public IAppConfig AppConfig => ServiceBundle.Config;
 
-        public ITokenCache UserTokenCache => throw new PlatformNotSupportedException("No UserTokenCache on WAM");
+        // TODO(WAM):  we will need one of these for account caching so we can call GetAccounts properly to avoid HRD when determining which provider to load.
+        public ITokenCache UserTokenCache => UserTokenCacheInternal;
+        internal ITokenCacheInternal UserTokenCacheInternal { get; }
 
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(IEnumerable<string> scopes)
         {
@@ -80,33 +84,50 @@ namespace Microsoft.Identity.Client
                 password);
         }
 
-        public async Task<IAccount> GetAccountAsync(string identifier)
+        public async Task<IAccount> GetAccountAsync(string accountId)
         {
-            var provider = await WamUtils.FindAccountProviderForAuthorityAsync(ServiceBundle, null).ConfigureAwait(false);
-            var webAccount = await WebAuthenticationCoreManager.FindAccountAsync(provider, identifier);
-            return WamUtils.CreateMsalAccountFromWebAccount(webAccount);
+            var accounts = await GetAccountsAsync().ConfigureAwait(false);
+            return accounts.FirstOrDefault(account => account.HomeAccountId.Identifier.Equals(accountId, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            var provider = await WamUtils.FindAccountProviderForAuthorityAsync(ServiceBundle, null).ConfigureAwait(false);
-            var findAllAccountsResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider, ServiceBundle.Config.ClientId);
-            if (findAllAccountsResult.Status != FindAllWebAccountsStatus.Success)
-            {
-                throw new MsalClientException(findAllAccountsResult.ProviderError.ErrorMessage);
-            }
-
-            var accounts = new List<IAccount>();
-
-            foreach (var webAccount in findAllAccountsResult.Accounts)
-            {
-                accounts.Add(WamUtils.CreateMsalAccountFromWebAccount(webAccount));
-            }
+            RequestContext requestContext = new RequestContext(ServiceBundle, Guid.NewGuid());
+            IEnumerable<IAccount> accounts = await UserTokenCacheInternal.GetAccountsAsync(
+                ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
+                requestContext).ConfigureAwait(false);
 
             return accounts;
+
+            // todo(wam): this is dead code.  we don't have permissions most of the time to enumerate wam accounts and we need to cache
+            // account information in the msal cache anyway to reference the proper provider information for each account for loading.
+            //var provider = await WamUtils.FindAccountProviderForAuthorityAsync(ServiceBundle, null).ConfigureAwait(false);
+            //var findAllAccountsResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider, ServiceBundle.Config.ClientId);
+            //if (findAllAccountsResult.Status != FindAllWebAccountsStatus.Success)
+            //{
+            //    throw new MsalClientException(findAllAccountsResult.ProviderError.ErrorMessage);
+            //}
+
+            //var accounts = new List<IAccount>();
+
+            //foreach (var webAccount in findAllAccountsResult.Accounts)
+            //{
+            //    accounts.Add(WamUtils.CreateMsalAccountFromWebAccount(webAccount));
+            //}
+
+            //return accounts;
         }
 
-        public Task RemoveAsync(IAccount account) => throw new InvalidOperationException("MSAL cannot remove accounts associated with WAM");
+        public async Task RemoveAsync(IAccount account)
+        {
+            // TODO(WAM): semantics are weird here.  we're removing this account from knowledge of MSAL for ATS
+            // but we're not going to be or able to be removing it from WAM itself.  So this is a bit of a lie.
+            RequestContext requestContext = new RequestContext(ServiceBundle, Guid.NewGuid());
+            if (account != null)
+            {
+                await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
+            }
+        }
 
         #region Unsupported With WAM
         public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(IEnumerable<string> scopes, Func<DeviceCodeResult, Task> deviceCodeResultCallback) => throw new NotImplementedException();

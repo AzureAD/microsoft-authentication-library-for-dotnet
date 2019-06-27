@@ -83,16 +83,7 @@ namespace Microsoft.Identity.Client
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-            IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
-            if (UserTokenCache == null)
-            {
-                requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
-            }
-            else
-            {
-                accounts = await UserTokenCacheInternal.GetAccountsAsync(Authority, requestContext).ConfigureAwait(false);
-            }
-
+            IEnumerable<IAccount> accounts = await UserTokenCacheInternal.GetAccountsAsync(Authority, requestContext).ConfigureAwait(false);
             return accounts;
         }
 
@@ -116,7 +107,7 @@ namespace Microsoft.Identity.Client
         public async Task RemoveAsync(IAccount account)
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-            if (account != null && UserTokenCacheInternal != null)
+            if (account != null)
             {
                 await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
             }

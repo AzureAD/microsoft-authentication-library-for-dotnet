@@ -65,8 +65,6 @@ namespace Microsoft.Identity.Client
                 preferredUsername = idToken.PreferredUsername;
             }
 
-
-
             var instanceDiscoveryMetadataEntry = GetCachedAuthorityMetaData(requestParams.TenantUpdatedCanonicalAuthority);
 
             var environmentAliases = GetEnvironmentAliases(
@@ -142,7 +140,7 @@ namespace Microsoft.Identity.Client
                                 preferredUsername,
                                 tenantId);
 
-                            //The ADFS direct scenrio does not return client info so the home account id is acquired from the subject
+                            // The ADFS direct scenrio does not return client info so the home account id is acquired from the subject
                             if (isAdfsAuthority && String.IsNullOrEmpty(msalAccountCacheItem.HomeAccountId))
                             {
                                 msalAccountCacheItem.HomeAccountId = idToken.Subject;

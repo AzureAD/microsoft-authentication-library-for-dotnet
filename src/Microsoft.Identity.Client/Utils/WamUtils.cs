@@ -26,7 +26,23 @@ namespace Microsoft.Identity.Client.Utils
             // How to handle to common authority applies to V1 semantics only.
             // It might be ok for now since we are prototyping but handling the V2 common authority will need to be done
             // through account control.
-            // This is one of the most difficult aspects on MSAL <->WAM integration.        
+            // This is one of the most difficult aspects on MSAL <->WAM integration.       
+
+            // 
+            // MSAL authority                                                                   WAM account provider
+            // https://login.microsoftonline.com/common/v2.0                                    Show account control if no user object is present in the request. 
+            //                                                                                  Looks at the user authority value in WAM webAccount object.
+            // 
+            // https://login.microsoftonline.com/consumers/v2.0                                 https://login.live.com - MSA
+            // 
+            // https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0      https://login.live.com - MSA
+            // This GUID is the consumer tenant. You can think of MSA being a tenant of AAD
+            // 
+            // https://login.microsoftonline.com/contoso.onmicrosoft.com/v2.0                   https://login.windows.net - AAD
+            // 
+            // https://login.microsoftonline.com/organizations/v2.0                             https://login.windows.net - AAD
+            //
+
             WebAccountProvider provider = await WebAuthenticationCoreManager.FindAccountProviderAsync(
                 "https://login.microsoft.com",
                 authority.AuthorityInfo.CanonicalAuthority);
@@ -36,6 +52,9 @@ namespace Microsoft.Identity.Client.Utils
         public static IAccount CreateMsalAccountFromWebAccount(WebAccount webAccount)
         {
             // TODO(WAM): what should environment be here?
+            // TODO(WAM):  Need to cache additional information in the WAM account for persistence so that we know what provider to load
+            // and we already have the webAccount.Id here.
+            // can we just use:  webAccount.WebAccountProvider.Authority ?
             return new Account(webAccount.Id, webAccount.UserName, environment: string.Empty);
         }
     }
