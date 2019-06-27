@@ -20,13 +20,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         private readonly long _startTimestamp;
         public const string TenantPlaceHolder = "<tenant>"; // It is used to replace the real tenant in telemetry info
 
-        public EventBase(string eventName, string telemetryCorrelationId)
+        public EventBase(string eventName, string correlationId)
         {
             this[EventNameKey] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();
             this[StartTimeKey] = _startTimestamp.ToString(CultureInfo.InvariantCulture);
             this[ElapsedTimeKey] = "-1";
-            TelemetryCorrelationId = telemetryCorrelationId;
+            CorrelationId = correlationId;
             EventId = Guid.NewGuid().AsMatsCorrelationId();  // used to uniquely identify this particular event index for start/stop matching.
         }
 
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             return CoreHelpers.DateTimeToUnixTimestampMilliseconds(DateTimeOffset.Now);
         }
 
-        public string TelemetryCorrelationId
+        public string CorrelationId
         {
             get => this[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey];
             set => this[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey] = value;

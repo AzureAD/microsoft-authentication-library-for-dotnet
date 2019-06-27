@@ -87,14 +87,14 @@ namespace Microsoft.Identity.Client.TelemetryCore
             eventToStop.Stop();
             IncrementEventCount(eventToStop);
 
-            if (CompletedEvents.TryGetValue(eventToStop.TelemetryCorrelationId, out List<EventBase> events))
+            if (CompletedEvents.TryGetValue(eventToStop.CorrelationId, out List<EventBase> events))
             {
                 events.Add(eventToStop);
             }
             else
             {
                 CompletedEvents.TryAdd(
-                    eventToStop.TelemetryCorrelationId,
+                    eventToStop.CorrelationId,
                     new List<EventBase>
                     {
                         eventToStop
@@ -105,22 +105,22 @@ namespace Microsoft.Identity.Client.TelemetryCore
             EventsInProgress.TryRemove(eventKey, out var dummy);
         }
 
-        public void Flush(string telemetryCorrelationId)
+        public void Flush(string correlationId)
         {
             if (!HasReceiver())
             {
                 return;
             }
 
-            if (!CompletedEvents.ContainsKey(telemetryCorrelationId))
+            if (!CompletedEvents.ContainsKey(correlationId))
             {
                 // No completed Events returned for RequestId
                 return;
             }
 
-            CompletedEvents[telemetryCorrelationId].AddRange(CollateOrphanedEvents(telemetryCorrelationId));
-            CompletedEvents.TryRemove(telemetryCorrelationId, out List<EventBase> eventsToFlush);
-            EventCount.TryRemove(telemetryCorrelationId, out ConcurrentDictionary<string, int> eventCountToFlush);
+            CompletedEvents[correlationId].AddRange(CollateOrphanedEvents(correlationId));
+            CompletedEvents.TryRemove(correlationId, out List<EventBase> eventsToFlush);
+            EventCount.TryRemove(correlationId, out ConcurrentDictionary<string, int> eventCountToFlush);
 
             // Check all events, and if the ApiEvent was successful, don't dispatch.
             if (_onlySendFailureTelemetry && eventsToFlush.Any(ev => ev is ApiEvent a && a.WasSuccessful))
@@ -133,16 +133,16 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 return;
             }
 
-            eventsToFlush.Insert(0, new DefaultEvent(_platformProxy, telemetryCorrelationId, _applicationConfiguration.ClientId, eventCountToFlush ?? new ConcurrentDictionary<string, int>()));
+            eventsToFlush.Insert(0, new DefaultEvent(_platformProxy, correlationId, _applicationConfiguration.ClientId, eventCountToFlush ?? new ConcurrentDictionary<string, int>()));
             Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
         }
 
-        private IEnumerable<EventBase> CollateOrphanedEvents(string telemetryCorrelationId)
+        private IEnumerable<EventBase> CollateOrphanedEvents(string correlationId)
         {
             var orphanedEvents = new List<EventBase>();
             foreach (var key in EventsInProgress.Keys)
             {
-                if (string.Compare(key.TelemetryCorrelationId, telemetryCorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(key.CorrelationId, correlationId, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     // The orphaned event already contains its own start time, we simply collect it
                     if (EventsInProgress.TryRemove(key, out var orphan))
@@ -168,14 +168,14 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 eventName = eventToIncrement[EventBase.EventNameKey];
             }
 
-            if (!EventCount.ContainsKey(eventToIncrement.TelemetryCorrelationId))
+            if (!EventCount.ContainsKey(eventToIncrement.CorrelationId))
             {
-                EventCount[eventToIncrement.TelemetryCorrelationId] = new ConcurrentDictionary<string, int>();
-                EventCount[eventToIncrement.TelemetryCorrelationId].TryAdd(eventName, 1);
+                EventCount[eventToIncrement.CorrelationId] = new ConcurrentDictionary<string, int>();
+                EventCount[eventToIncrement.CorrelationId].TryAdd(eventName, 1);
             }
             else
             {
-                EventCount[eventToIncrement.TelemetryCorrelationId].AddOrUpdate(eventName, 1, (key, count) => count + 1);
+                EventCount[eventToIncrement.CorrelationId].AddOrUpdate(eventName, 1, (key, count) => count + 1);
             }
         }
 
@@ -183,12 +183,12 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             public EventKey(EventBase eventBase)
             {
-                TelemetryCorrelationId = eventBase.TelemetryCorrelationId;
+                CorrelationId = eventBase.CorrelationId;
                 EventId = eventBase.EventId;
                 EventName = eventBase[EventBase.EventNameKey];
             }
 
-            public string TelemetryCorrelationId { get; }
+            public string CorrelationId { get; }
             public string EventId { get; }
             public string EventName { get; }
 
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
                     return true;
                 }
 
-                return string.Equals(TelemetryCorrelationId, other.TelemetryCorrelationId, StringComparison.OrdinalIgnoreCase) &&
+                return string.Equals(CorrelationId, other.CorrelationId, StringComparison.OrdinalIgnoreCase) &&
                        string.Equals(EventId, other.EventId, StringComparison.OrdinalIgnoreCase) &&
                        string.Equals(EventName, other.EventName, StringComparison.OrdinalIgnoreCase);
             }
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
                     int hash = HashingBase;
                     hash = (hash * HashingMultiplier) ^ (!Object.ReferenceEquals(null, EventId) ? EventId.GetHashCode() : 0);
-                    hash = (hash * HashingMultiplier) ^ (!Object.ReferenceEquals(null, TelemetryCorrelationId) ? TelemetryCorrelationId.GetHashCode() : 0);
+                    hash = (hash * HashingMultiplier) ^ (!Object.ReferenceEquals(null, CorrelationId) ? CorrelationId.GetHashCode() : 0);
                     hash = (hash * HashingMultiplier) ^ (!Object.ReferenceEquals(null, EventName) ? EventName.GetHashCode() : 0);
 
                     return hash;

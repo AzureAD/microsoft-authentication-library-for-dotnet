@@ -352,7 +352,7 @@ namespace Microsoft.Identity.Client
             Validate();
             CommonParameters.ApiId = CalculateApiEventId();
             CommonParameters.ApiTelemId = ApiTelemetryId;
-            CommonParameters.TelemetryCorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
+            CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
         }
     }
 }

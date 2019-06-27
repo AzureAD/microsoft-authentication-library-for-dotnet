@@ -15,6 +15,7 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -78,7 +79,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             HttpResponse response = null;
             Uri endpointUri = CreateFullEndpointUri(endPoint);
-            var httpEvent = new HttpEvent(requestContext.TelemetryCorrelationId)
+            var httpEvent = new HttpEvent(requestContext.CorrelationId.AsMatsCorrelationId())
             {
                 HttpPath = endpointUri,
                 QueryParams = endpointUri.Query

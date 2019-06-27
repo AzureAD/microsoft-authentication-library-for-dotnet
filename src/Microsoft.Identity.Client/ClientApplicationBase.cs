@@ -137,9 +137,9 @@ namespace Microsoft.Identity.Client
         // This implementation should ONLY be called for cases where we aren't participating in
         // MATS telemetry but still need a requestcontext/logger, such as "GetAccounts()".
         // For service calls, the request context should be created in the **Executor classes as part of request execution.
-        private RequestContext CreateRequestContext(Guid telemetryCorrelationId)
+        private RequestContext CreateRequestContext(Guid correlationId)
         {
-            return new RequestContext(ServiceBundle, telemetryCorrelationId);
+            return new RequestContext(ServiceBundle, correlationId);
         }
 
         /// <summary>

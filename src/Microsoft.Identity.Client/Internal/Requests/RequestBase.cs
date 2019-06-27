@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 finally
                 {
-                    ServiceBundle.TelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId);
+                    ServiceBundle.TelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
                 }
             }
         }
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ApiEvent apiEvent = new ApiEvent(
                 AuthenticationRequestParameters.RequestContext.Logger,
                 ServiceBundle.PlatformProxy.CryptographyManager,
-                AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId)
+                AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId())
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
                 ApiTelemId = AuthenticationRequestParameters.ApiTelemId,
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
                 var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
-                return new AuthenticationResult(tuple.Item1, tuple.Item2, new Guid(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId));
+                return new AuthenticationResult(tuple.Item1, tuple.Item2, AuthenticationRequestParameters.RequestContext.CorrelationId);
             }
             else
             {
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.ClientId,
                         msalTokenResponse,
                         idToken?.TenantId),
-                        new Guid(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId)
+                        AuthenticationRequestParameters.RequestContext.CorrelationId
                     );
             }
         }

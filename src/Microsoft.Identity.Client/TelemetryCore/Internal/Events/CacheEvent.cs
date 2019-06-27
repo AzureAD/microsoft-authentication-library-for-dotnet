@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public const string TokenTypeKey = EventNamePrefix + "token_type";
 
-        public CacheEvent(string eventName, string telemetryCorrelationId) : base(eventName, telemetryCorrelationId)
+        public CacheEvent(string eventName, string correlationId) : base(eventName, correlationId)
         {
         }
 

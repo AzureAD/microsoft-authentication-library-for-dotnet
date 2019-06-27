@@ -11,8 +11,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
     internal class DefaultEvent : EventBase
     {
-        public DefaultEvent(IPlatformProxy platformProxy, string telemetryCorrelationId, string clientId, IDictionary<string, int> eventCount)
-            : base(EventNamePrefix + "default_event", telemetryCorrelationId)
+        public DefaultEvent(IPlatformProxy platformProxy, string correlationId, string clientId, IDictionary<string, int> eventCount)
+            : base(EventNamePrefix + "default_event", correlationId)
         {
             this[EventNamePrefix + "client_id"] = clientId;
             this[EventNamePrefix + "sdk_platform"] = platformProxy.GetProductName()?.ToLowerInvariant();

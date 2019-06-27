@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using System.Collections;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -346,7 +347,7 @@ namespace Microsoft.Identity.Client
         {
             var cacheEvent = new CacheEvent(
                 CacheEvent.TokenCacheLookup,
-                requestParams.RequestContext.TelemetryCorrelationId)
+                requestParams.RequestContext.CorrelationId.AsMatsCorrelationId())
             {
                 TokenType = CacheEvent.TokenTypes.RT
             };

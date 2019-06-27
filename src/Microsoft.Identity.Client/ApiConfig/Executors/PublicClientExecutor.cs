@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             var requestParams = _publicClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             var requestParams = _publicClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                     "For more details see https://aka.ms/msal-net-iwa");
             }
 #endif
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             var requestParams = _publicClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             var requestParams = _publicClientApplication.CreateRequestParameters(
                 commonParameters,
