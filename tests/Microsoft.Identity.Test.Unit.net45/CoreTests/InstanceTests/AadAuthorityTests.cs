@@ -6,14 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -22,6 +18,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     [DeploymentItem("Resources\\OpenidConfiguration.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields.json")]
+    [DeploymentItem("Resources\\OpenidConfigurationCommon.json")]
     public class AadAuthorityTests : TestBase
     {
         [TestMethod]
@@ -115,6 +112,55 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     endpoints.TokenEndpoint);
                 Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
             }
+        }
+
+        [TestMethod]
+        [TestCategory("AadAuthorityTests")]
+        public void CreateEndpointsWithCommonTenantTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                // add mock response for tenant endpoint discovery
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfigurationCommon.json")))
+                    });
+
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoftonline.com/common");
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+                var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
+                var endpoints = resolver.ResolveEndpointsAsync(
+                    instance.AuthorityInfo,
+                    null,
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
+
+                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", endpoints.AuthorizationEndpoint);
+                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", endpoints.TokenEndpoint);
+                Assert.AreEqual("https://login.microsoftonline.com/common/v2.0", endpoints.SelfSignedJwtAudience);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("AadAuthorityTests")]
+        public void SelfSignedJwtAudienceEndpointValidationTest()
+        {
+            string common = MsalTestConstants.Common;
+            string tenantSpecific = MsalTestConstants.TenantId;
+            string issuerCommonWithTenant = "https://login.microsoftonline.com/{tenant}/v2.0";
+            string issuerCommonWithTenantId = "https://login.microsoftonline.com/{tenantid}/v2.0";
+            string issuerTenantSpecific = $"https://login.microsoftonline.com/{tenantSpecific}/v2.0";
+            string jwtAudienceEndpointCommon = $"https://login.microsoftonline.com/{common}/v2.0";
+
+            CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(issuerCommonWithTenant, common, jwtAudienceEndpointCommon);
+            CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(issuerCommonWithTenantId, common, jwtAudienceEndpointCommon);
+            CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(issuerTenantSpecific, common, issuerTenantSpecific);
         }
 
         [TestMethod]
@@ -278,7 +324,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // no change because initial authority is tenanted
             AuthorityTestHelper.AuthorityDoesNotUpdateTenant(
                 MsalTestConstants.AuthorityUtidTenant, MsalTestConstants.Utid);
-        
         }
 
         [TestMethod]
@@ -296,6 +341,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             authority.UpdateWithTenant(MsalTestConstants.Utid);
             Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, MsalTestConstants.AuthorityUtidTenant);
         }
+               
+        private void CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(string issuer, string tenantId, string expectedJwtAudience)
+        {
+            var resolver = new AuthorityEndpointResolutionManager(null);
 
+            TenantDiscoveryResponse tenantDiscoveryResponse = new TenantDiscoveryResponse();
+
+            tenantDiscoveryResponse.Issuer = issuer;
+            string selfSignedJwtAudience = resolver.ReplaceNonTenantSpecificValueWithCorrectTenant(tenantDiscoveryResponse, tenantId);
+            Assert.AreEqual(expectedJwtAudience, selfSignedJwtAudience);
+        }
     }
 }

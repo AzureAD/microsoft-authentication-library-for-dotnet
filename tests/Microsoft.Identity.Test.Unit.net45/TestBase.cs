@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -61,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             string traceFile = Environment.GetEnvironmentVariable("MsalTracePath");
 
-            if (!String.IsNullOrEmpty(traceFile))
+            if (!string.IsNullOrEmpty(traceFile))
             {
                 Trace.Listeners.Add(new TextWriterTraceListener(traceFile, "testListener"));
             }

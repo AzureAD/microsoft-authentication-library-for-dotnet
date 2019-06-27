@@ -9,27 +9,20 @@ namespace Microsoft.Identity.Client
     internal static class LogMessages
     {
         public const string BeginningAcquireByRefreshToken = "Begin acquire token by refresh token...";
-        public const string NoScopesProvidedForRefreshTokenRequest = "No scopes provided for acquire token by refresh token request. Using default scope instead.";
-
-        public static string UsingXScopesForRefreshTokenRequest(int numScopes)
-        {
-            return string.Format(CultureInfo.InvariantCulture, "Using {0} scopes for acquire token by refresh token request", numScopes);
-        }
+        public const string NoScopesProvidedForRefreshTokenRequest = "No scopes provided for acquire token by refresh token request. " +
+            "Using default scope instead.";      
 
         public const string CustomWebUiAcquiringAuthorizationCode = "Using CustomWebUi to acquire the authorization code";
         public const string CustomWebUiRedirectUriMatched = "Redirect Uri was matched.  Returning success from CustomWebUiHandler.";
         public const string CustomWebUiOperationCancelled = "CustomWebUi AcquireAuthorizationCode was canceled";
 
-        public static string CustomWebUiCallingAcquireAuthorizationCodePii(Uri authorizationUri, Uri redirectUri)
-        {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "calling CustomWebUi.AcquireAuthorizationCode authUri({0}) redirectUri({1})",
-                authorizationUri,
-                redirectUri);
-        }
-
         public const string CustomWebUiCallingAcquireAuthorizationCodeNoPii = "Calling CustomWebUi.AcquireAuthorizationCode";
+
+        public const string ClientAssertionDoesNotExistOrNearExpiry = "Client Assertion does not exist or near expiry. ";
+        public const string ReusingTheUnexpiredClientAssertion = "Reusing the unexpired Client Assertion...";
+
+        public const string ResolvingAuthorityEndpointsTrue = "Resolving authority endpoints... Already resolved? - TRUE";
+        public const string ResolvingAuthorityEndpointsFalse = "Resolving authority endpoints... Already resolved? - FALSE";
 
         public const string CheckMsalTokenResponseReturnedFromBroker = "Checking MsalTokenResponse returned from broker. ";
         public const string BrokerResponseContainsAccessToken = "Broker response contains access token. Access token count: ";
@@ -42,10 +35,22 @@ namespace Microsoft.Identity.Client
         public const string AuthenticationWithBrokerDidNotSucceed = "Broker authentication did not succeed, or the broker install failed. " +
             "See https://aka.ms/msal-net-brokers for more information. ";
 
-
         public static string ErrorReturnedInBrokerResponse(string error)
         {
             return string.Format(CultureInfo.InvariantCulture, "Error {0} returned in broker response. ", error);
+        }
+
+        public static string UsingXScopesForRefreshTokenRequest(int numScopes)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "Using {0} scopes for acquire token by refresh token request", numScopes);
+        }
+        public static string CustomWebUiCallingAcquireAuthorizationCodePii(Uri authorizationUri, Uri redirectUri)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "calling CustomWebUi.AcquireAuthorizationCode authUri({0}) redirectUri({1})",
+                authorizationUri,
+                redirectUri);
         }
     }
 }

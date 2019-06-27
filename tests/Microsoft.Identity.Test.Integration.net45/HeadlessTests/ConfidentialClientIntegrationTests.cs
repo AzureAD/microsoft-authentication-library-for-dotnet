@@ -2,14 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -23,8 +20,8 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IdentityModel.Tokens.Jwt;
-using NSubstitute;
 using System.Security.Claims;
+using System.Linq;
 
 namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
 {

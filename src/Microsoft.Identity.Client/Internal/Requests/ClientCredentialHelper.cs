@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
@@ -64,7 +63,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     {
                         if (!ValidateClientAssertion(clientCredential, endpoints, sendX5C))
                         {
-                            logger.Info("Client Assertion does not exist or near expiry.");
+                            logger.Info(LogMessages.ClientAssertionDoesNotExistOrNearExpiry);
+                           
                             JsonWebToken jwtToken;
                             
                             if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientCertificateWithClaims)
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         }
                         else
                         {
-                            logger.Info("Reusing the unexpired Client Assertion...");
+                            logger.Info(LogMessages.ReusingTheUnexpiredClientAssertion);
                         }
                     }
 
