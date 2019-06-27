@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
@@ -14,6 +15,37 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class MsalUiRequiredException : MsalServiceException
     {
+        /// <summary>
+        /// Condition can be resolved by user interaction during the interactive authentication flow.
+        /// See https://aka.ms/msal-net-uirequiredexception-classification for details
+        /// </summary>
+        public const string BasicAction = OAuth2SubError.BasicAction;
+
+        /// <summary>
+        /// Condition can be resolved by additional remedial interaction with the system, outside of the interactive authentication flow.
+        /// See https://aka.ms/msal-net-uirequiredexception-classification for details
+        /// </summary>
+        public const string AdditionalAction = OAuth2SubError.AdditionalAction;
+
+        /// <summary>
+        /// Condition cannot be resolved at this time. Launching interactive authentication flow will show a message explaining the condition.
+        /// See https://aka.ms/msal-net-uirequiredexception-classification for details
+        /// </summary>
+        public const string MessageOnly = OAuth2SubError.MessageOnly;
+
+        /// <summary>
+        /// User's password has expired.
+        /// See https://aka.ms/msal-net-uirequiredexception-classification for details
+        /// </summary>
+        public const string UserPasswordExpired = OAuth2SubError.UserPasswordExpired;
+
+        /// <summary>
+        /// User consent is missing, or has been revoked.
+        /// See https://aka.ms/msal-net-uirequiredexception-classification for details
+        /// </summary>
+        public const string ConsentRequired = OAuth2SubError.ConsentRequired;
+
+
         /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code and error message.
@@ -40,6 +72,38 @@ namespace Microsoft.Identity.Client
         /// <param name="innerException">Represents the root cause of the exception.</param>
         public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException) : base(errorCode, errorMessage, innerException)
         {
+           
+        }
+
+        /// <summary>
+        /// Classification of the conditional access error, enabling you to do more actions or inform the user depending on your scenario. See https://aka.ms/msal-net-uirequiredexception-classification for details.
+        /// </summary>
+        /// <remarks>This class <see cref="MsalUiRequiredException"/> lists most classification strings as constants. </remarks>
+        public string Classification
+        {
+            get
+            {
+                switch (base.SubError)
+                {
+                    case OAuth2SubError.BasicAction:
+                    case OAuth2SubError.AdditionalAction:
+                    case OAuth2SubError.MessageOnly:
+                    case OAuth2SubError.ConsentRequired:
+                    case OAuth2SubError.UserPasswordExpired:
+                        return SubError;
+
+                    case OAuth2SubError.BadToken:
+                    case OAuth2SubError.TokenExpired:
+                    case OAuth2SubError.ProtectionPolicyRequired:
+                    case OAuth2SubError.ClientMismatch:
+                    case OAuth2SubError.DeviceAuthenticationFailed:
+                        return string.Empty;
+
+                    // Forward compatibility - new sub-errors bubble through
+                    default:
+                        return SubError;
+                }
+            }
         }
     }
 }
