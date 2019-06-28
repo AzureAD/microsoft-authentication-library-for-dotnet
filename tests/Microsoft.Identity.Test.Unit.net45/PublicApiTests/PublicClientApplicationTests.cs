@@ -328,6 +328,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void AcquireTokenWithDefaultRedirectURITest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                //harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .BuildConcrete();
+                //Validate legacy default uri
+                Assert.AreEqual(app.AppConfig.RedirectUri, "urn:ietf:wg:oauth:2.0:oob");
+
+                app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .WithDefaultRedirectUri()
+                                                                            .BuildConcrete();
+
+                //Validate new default redirect uri
+#if DESKTOP
+                Assert.AreEqual(app.AppConfig.RedirectUri, "https://login.microsoftonline.com/common/oauth2/nativeclient");
+#elif NET_CORE
+                Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
+#endif
+            }
+        }
+
+        [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenAddTwoUsersTest()
         {

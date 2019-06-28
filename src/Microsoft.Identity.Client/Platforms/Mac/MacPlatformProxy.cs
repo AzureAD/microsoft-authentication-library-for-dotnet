@@ -78,8 +78,13 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         }
 
         /// <inheritdoc />
-        public override string GetDefaultRedirectUri(string clientId)
+        public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
+            if (useRecommendedRedirectUri)
+            {
+                return Constants.NativeClientRedirectUri;
+            }
+
             return Constants.DefaultRedirectUri;
         }
 

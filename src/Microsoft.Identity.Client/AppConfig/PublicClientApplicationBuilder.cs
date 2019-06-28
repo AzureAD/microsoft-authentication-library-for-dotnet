@@ -50,6 +50,38 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Configures the public client application to use the recommended reply URI for the platform. 
+        /// See https://aka.ms/msal-net-default-reply-uri.
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Platform</term>
+        /// <term>Default Reply URI</term>
+        /// </listheader>
+        /// <item>
+        /// <term>.NET desktop</term>
+        /// <term><c>https://login.microsoftonline.com/common/oauth2/nativeclient</c></term>
+        /// </item>
+        /// <item>
+        /// <term>UWP</term>
+        /// <term>value of <c>WebAuthenticationBroker.GetCurrentApplicationCallbackUri()</c></term>
+        /// </item>
+        /// <item>
+        /// <term>For system browser on .NET Core</term>
+        /// <term><c>https://localhost</c></term>
+        /// </item>
+        /// </list>
+        /// NOTE:There will be an update to the default rediect uri in the future to accomodate for system browsers on the 
+        /// .NET desktop and .NET Core platforms.
+        /// </summary>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public PublicClientApplicationBuilder WithDefaultRedirectUri()
+        {
+            Config.UseRecommendedDefaultRedirectUri = true;
+            return this;
+        }
+
 #if !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
         ///
@@ -116,7 +148,7 @@ namespace Microsoft.Identity.Client
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
-                                                         .GetDefaultRedirectUri(Config.ClientId);
+                                                         .GetDefaultRedirectUri(Config.ClientId, Config.UseRecommendedDefaultRedirectUri);
             }
 
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
