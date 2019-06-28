@@ -1269,7 +1269,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                var correlationId = new Guid();
+                var correlationId = Guid.NewGuid();
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
