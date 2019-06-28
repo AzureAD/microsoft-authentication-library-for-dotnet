@@ -7,37 +7,37 @@ using System.Collections.Generic;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Sub-errors send by AAD to indicate than user interaction is required. See https://aka.ms/msal-net-uiexception for details.
+    /// Sub-errors send by AAD to indicate than user interaction is required. See https://aka.ms/msal-net-UiRequiredExceptionfor details.
     /// </summary>
     public static class InvalidGrantClassification
     {
         /// <summary>
         /// Condition can be resolved by user interaction during the interactive authentication flow.
-        /// See https://aka.ms/msal-net-uiexception for details
+        /// See https://aka.ms/msal-net-UiRequiredExceptionfor details
         /// </summary>
         public const string BasicAction = "basic_action";
 
         /// <summary>
         /// Condition can be resolved by additional remedial interaction with the system, outside of the interactive authentication flow.
-        /// See https://aka.ms/msal-net-uiexception for details
+        /// See https://aka.ms/msal-net-UiRequiredExceptionfor details
         /// </summary>
         public const string AdditionalAction = "additional_action";
 
         /// <summary>
         /// Condition cannot be resolved at this time. Launching interactive authentication flow will show a message explaining the condition.
-        /// See https://aka.ms/msal-net-uiexception for details
+        /// See https://aka.ms/msal-net-UiRequiredExceptionfor details
         /// </summary>
         public const string MessageOnly = "message_only";
 
         /// <summary>
         /// User's password has expired.
-        /// See https://aka.ms/msal-net-uiexception for details
+        /// See https://aka.ms/msal-net-UiRequiredExceptionfor details
         /// </summary>
         public const string UserPasswordExpired = "user_password_expired";
 
         /// <summary>
         /// User consent is missing, or has been revoked.
-        /// See https://aka.ms/msal-net-uiexception for details
+        /// See https://aka.ms/msal-net-UiRequiredException for details
         /// </summary>
         public const string ConsentRequired = "consent_required";
 
@@ -66,10 +66,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal const string DeviceAuthenticationFailed = "device_authentication_failed";
 
-        private static ISet<string> s_nonUiInteractionException = new HashSet<string>(
-                new[] { ClientMismatch, ProtectionPolicyRequired  },
-                StringComparer.OrdinalIgnoreCase);
-
         internal static bool IsUiInteractionRequired(string subError)
         {
             if (string.IsNullOrEmpty(subError))
@@ -77,7 +73,32 @@ namespace Microsoft.Identity.Client
                 return true;
             }
 
-            return !s_nonUiInteractionException.Contains(subError);
+            return !string.Equals(subError, ClientMismatch, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(subError, ProtectionPolicyRequired, StringComparison.OrdinalIgnoreCase);
+        }
+
+        internal static string GetUiExceptionClassification(string subError)
+        {
+            switch (subError)
+            {
+                case BasicAction:
+                case AdditionalAction:
+                case MessageOnly:
+                case ConsentRequired:
+                case UserPasswordExpired:
+                    return subError;
+
+                case BadToken:
+                case TokenExpired:
+                case ProtectionPolicyRequired:
+                case ClientMismatch:
+                case DeviceAuthenticationFailed:
+                    return string.Empty;
+
+                // Forward compatibility - new sub-errors bubble through
+                default:
+                    return subError;
+            }
         }
     }
 }

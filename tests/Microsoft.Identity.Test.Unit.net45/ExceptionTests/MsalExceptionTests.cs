@@ -105,11 +105,12 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalException.CorrelationId);
             Assert.AreEqual(suberror ?? "", msalException.SubError );
 
-            Assert.AreEqual(expectedClassification, msalException.InvalidGrantClassification);
 
             if (expectUiRequiredException)
             {
                 Assert.IsTrue(msalException is MsalUiRequiredException);
+                Assert.AreEqual(expectedClassification, (msalException as MsalUiRequiredException).Classification);
+
             }
         }
 
@@ -204,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsNull(msalUiRequiredException.ResponseBody);
             Assert.AreEqual(ExMessage, msalUiRequiredException.Message);
             Assert.AreEqual(0, msalUiRequiredException.StatusCode);
-            Assert.AreEqual(null, msalUiRequiredException.InvalidGrantClassification);
+            Assert.AreEqual(null, msalUiRequiredException.Classification);
 
             // Act
             string piiMessage = MsalLogger.GetPiiScrubbedExceptionDetails(msalException);

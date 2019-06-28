@@ -216,36 +216,5 @@ namespace Microsoft.Identity.Client
             CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
             SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
         }
-
-        /// <summary>
-        /// Classification of the conditional access error, enabling you to do more actions or inform the user depending on your scenario. See https://aka.ms/msal-net-uiexception for details.
-        /// </summary>
-        /// <remarks>This class <see cref="MsalUiRequiredException"/> lists most classification strings as constants. </remarks>
-        public string InvalidGrantClassification
-        {
-            get
-            {
-                switch (SubError)
-                {
-                    case Client.InvalidGrantClassification.BasicAction:
-                    case Client.InvalidGrantClassification.AdditionalAction:
-                    case Client.InvalidGrantClassification.MessageOnly:
-                    case Client.InvalidGrantClassification.ConsentRequired:
-                    case Client.InvalidGrantClassification.UserPasswordExpired:
-                        return SubError;
-
-                    case Client.InvalidGrantClassification.BadToken:
-                    case Client.InvalidGrantClassification.TokenExpired:
-                    case Client.InvalidGrantClassification.ProtectionPolicyRequired:
-                    case Client.InvalidGrantClassification.ClientMismatch:
-                    case Client.InvalidGrantClassification.DeviceAuthenticationFailed:
-                        return string.Empty;
-
-                    // Forward compatibility - new sub-errors bubble through
-                    default:
-                        return SubError;
-                }
-            }
-        }
     }
 }
