@@ -349,7 +349,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #if DESKTOP
                 Assert.AreEqual(app.AppConfig.RedirectUri, "https://login.microsoftonline.com/common/oauth2/nativeclient");
 #elif NET_CORE
-                Assert.AreEqual(app.AppConfig.RedirectUri, "https://localhost");
+                Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
 #endif
             }
         }
