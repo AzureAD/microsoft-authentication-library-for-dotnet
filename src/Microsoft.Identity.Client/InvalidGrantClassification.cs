@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Sub-errors send by AAD to indicate than user interaction is required. See https://aka.ms/msal-net-UiRequiredExceptionfor details.
     /// </summary>
-    public static class InvalidGrantClassification
+    internal static class InvalidGrantClassification
     {
         /// <summary>
         /// Condition can be resolved by user interaction during the interactive authentication flow.
