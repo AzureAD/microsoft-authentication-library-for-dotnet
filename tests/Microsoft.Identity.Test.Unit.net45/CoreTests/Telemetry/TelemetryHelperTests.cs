@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
     [TestClass]
     public class TelemetryHelperTests
     {
-        private const string TelemetryCorrelationId = "thetelemetrycorrelationid";
+        private const string CorrelationId = "thetelemetrycorrelationid";
         private const string ClientId = "theclientid";
         private _TestEvent _trackingEvent;
         private TelemetryManager _telemetryManager;
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
             _testReceiver = new _TestReceiver();
             var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
             _telemetryManager = new TelemetryManager(serviceBundle.Config, serviceBundle.PlatformProxy, _testReceiver.HandleTelemetryEvents);
-            _trackingEvent = new _TestEvent("tracking event", TelemetryCorrelationId);
+            _trackingEvent = new _TestEvent("tracking event", CorrelationId);
         }
 
         private class _TestReceiver : ITelemetryReceiver
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
 
         private class _TestEvent : EventBase
         {
-            public _TestEvent(string eventName, string telemetryCorrelationId) : base(eventName, telemetryCorrelationId)
+            public _TestEvent(string eventName, string correlationId) : base(eventName, correlationId)
             {
             }
         }
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
             {
             }
 
-            _telemetryManager.Flush(TelemetryCorrelationId);
+            _telemetryManager.Flush(CorrelationId);
 
             ValidateResults(ClientId, true);
         }

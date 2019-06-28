@@ -20,17 +20,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         protected IServiceBundle ServiceBundle { get; }
 
-        protected RequestContext CreateRequestContextAndLogVersionInfo(Guid telemetryCorrelationId)
+        protected RequestContext CreateRequestContextAndLogVersionInfo(Guid correlationId)
         {
-            var requestContext = new RequestContext(ServiceBundle, telemetryCorrelationId);
+            var requestContext = new RequestContext(ServiceBundle, correlationId);
 
             requestContext.Logger.Info(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    "MSAL {0} with assembly version '{1}'. TelemetryCorrelationId({2})",
+                    "MSAL {0} with assembly version '{1}'. CorrelationId({2})",
                     ServiceBundle.PlatformProxy.GetProductName(),
                     MsalIdHelper.GetMsalVersion(),
-                    requestContext.TelemetryCorrelationId));
+                    requestContext.CorrelationId));
 
             return requestContext;
         }

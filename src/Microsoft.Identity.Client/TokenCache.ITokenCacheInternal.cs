@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -221,7 +222,7 @@ namespace Microsoft.Identity.Client
             requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = Enumerable.Empty<MsalAccessTokenCacheItem>();
             await LoadFromCacheAsync(
-                requestParams.RequestContext.TelemetryCorrelationId,
+                requestParams.RequestContext.CorrelationId.AsMatsCorrelationId(),
                 CacheEvent.TokenTypes.AT,
                 requestParams.Account,
                 () => tokenCacheItems = GetAllAccessTokensWithNoLocks(true))
@@ -330,7 +331,7 @@ namespace Microsoft.Identity.Client
 
             IEnumerable<MsalRefreshTokenCacheItem> allRts = Enumerable.Empty<MsalRefreshTokenCacheItem>();
             await LoadFromCacheAsync(
-               requestParams.RequestContext.TelemetryCorrelationId,
+               requestParams.RequestContext.CorrelationId.AsMatsCorrelationId(),
                CacheEvent.TokenTypes.AT,
                requestParams.Account,
                () => allRts = _accessor.GetAllRefreshTokens())
@@ -394,7 +395,7 @@ namespace Microsoft.Identity.Client
 
             IEnumerable<MsalAppMetadataCacheItem> allAppMetadata = Enumerable.Empty<MsalAppMetadataCacheItem>();
             await LoadFromCacheAsync(
-                    requestParams.RequestContext.TelemetryCorrelationId,
+                    requestParams.RequestContext.CorrelationId.AsMatsCorrelationId(),
                     CacheEvent.TokenTypes.AppMetadata,
                     requestParams.Account,
                     () => allAppMetadata = _accessor.GetAllAppMetadata())

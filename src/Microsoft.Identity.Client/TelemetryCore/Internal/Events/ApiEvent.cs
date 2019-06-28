@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public ApiEvent(
             ICoreLogger logger,
             ICryptographyManager cryptographyManager,
-            string telemetryCorrelationId) : base(EventNamePrefix + "api_event", telemetryCorrelationId)
+            string correlationId) : base(EventNamePrefix + "api_event", correlationId)
         {
             _logger = logger;
             _cryptographyManager = cryptographyManager;

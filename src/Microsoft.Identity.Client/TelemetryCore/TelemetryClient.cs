@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public void EndAction(MatsAction action, AuthOutcome outcome, ErrorSource errorSource, string error, string errorDescription)
         {
-            TelemetryManager.Flush(action.TelemetryCorrelationId);
+            TelemetryManager.Flush(action.CorrelationId);
             _actionStore.EndMsalAction(action, outcome, errorSource, error, errorDescription);
             _uploader.Upload(GetEventsForUpload());
         }

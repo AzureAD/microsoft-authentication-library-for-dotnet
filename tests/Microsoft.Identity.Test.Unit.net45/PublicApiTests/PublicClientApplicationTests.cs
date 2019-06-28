@@ -21,6 +21,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -133,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
-            
+
         }
 
         [TestMethod]
@@ -1256,6 +1257,40 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var byRefreshTokenBuilder = ((IByRefreshToken)app).AcquireTokenByRefreshToken(MsalTestConstants.Scope, "refreshtoken")
                                   .WithRefreshToken("refreshtoken");
             CheckBuilderCommonMethods(byRefreshTokenBuilder);
+        }
+
+        [TestMethod]
+        public void CheckUserProvidedCorrelationIDTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var correlationId = Guid.NewGuid();
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
+                    .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
+
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .WithCorrelationId(correlationId)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
+                Assert.IsNotNull((result.CorrelationId));
+                Assert.AreEqual(correlationId.AsMatsCorrelationId(), result.CorrelationId.AsMatsCorrelationId());
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+            }
         }
 
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>

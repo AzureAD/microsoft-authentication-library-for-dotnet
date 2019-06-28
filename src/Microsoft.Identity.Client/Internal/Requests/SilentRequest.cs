@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (msalAccessTokenItem != null)
                 {
                     var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
-                    return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
+                    return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem, AuthenticationRequestParameters.RequestContext.CorrelationId);
                 }
             }
 

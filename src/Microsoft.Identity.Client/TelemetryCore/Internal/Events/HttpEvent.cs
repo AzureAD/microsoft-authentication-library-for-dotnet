@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string ServerErrorCodeKey = EventNamePrefix + "server_error_code";
         public const string ServerSubErrorCodeKey = EventNamePrefix + "server_sub_error_code";
 
-        public HttpEvent(string telemetryCorrelationId) : base(EventNamePrefix + "http_event", telemetryCorrelationId) {}
+        public HttpEvent(string correlationId) : base(EventNamePrefix + "http_event", correlationId) {}
 
         public Uri HttpPath
         {

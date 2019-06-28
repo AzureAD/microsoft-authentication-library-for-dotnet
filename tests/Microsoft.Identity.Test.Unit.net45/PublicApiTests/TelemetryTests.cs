@@ -70,16 +70,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryInternalApiSample()
         {
-            var telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
+            var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
-                var e1 = new ApiEvent(_logger, _crypto, telemetryCorrelationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(_logger, _crypto, correlationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
                 _telemetryManager.StopEvent(e1);
 
-                var e2 = new HttpEvent(telemetryCorrelationId) { HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeUserAgent", QueryParams = "?a=1&b=2" };
+                var e2 = new HttpEvent(correlationId) { HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeUserAgent", QueryParams = "?a=1&b=2" };
                 _telemetryManager.StartEvent(e2);
                 // do some stuff...
                 e2.HttpResponseStatus = 200;
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(telemetryCorrelationId);
+                _telemetryManager.Flush(correlationId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -98,51 +98,51 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             _telemetryManager = new TelemetryManager(_serviceBundle.Config, _platformProxy, _myReceiver.HandleTelemetryEvents, true);
 
-            var telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
+            var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
-                var e1 = new ApiEvent(_logger, _crypto, telemetryCorrelationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(_logger, _crypto, correlationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
                 _telemetryManager.StopEvent(e1);
 
-                var e2 = new UiEvent(telemetryCorrelationId) { UserCancelled = false };
+                var e2 = new UiEvent(correlationId) { UserCancelled = false };
                 _telemetryManager.StartEvent(e2);
                 _telemetryManager.StopEvent(e2);
 
-                var e3 = new UiEvent(telemetryCorrelationId) { AccessDenied = false };
+                var e3 = new UiEvent(correlationId) { AccessDenied = false };
                 _telemetryManager.StartEvent(e3);
                 _telemetryManager.StopEvent(e3);
             }
             finally
             {
-                _telemetryManager.Flush(telemetryCorrelationId);
+                _telemetryManager.Flush(correlationId);
             }
             Assert.AreEqual(0, _myReceiver.EventsReceived.Count);
 
             _telemetryManager = new TelemetryManager(_serviceBundle.Config, _platformProxy, _myReceiver.HandleTelemetryEvents);
 
-            telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
+            correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
-                var e1 = new ApiEvent(_logger, _crypto, telemetryCorrelationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(_logger, _crypto, correlationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(e1);
                 // do some stuff...
                 e1.WasSuccessful = false;  // mimic an unsuccessful event, so that this batch should be dispatched
                 _telemetryManager.StopEvent(e1);
 
-                var e2 = new UiEvent(telemetryCorrelationId) { UserCancelled = true };
+                var e2 = new UiEvent(correlationId) { UserCancelled = true };
                 _telemetryManager.StartEvent(e2);
                 _telemetryManager.StopEvent(e2);
 
-                var e3 = new UiEvent(telemetryCorrelationId) { AccessDenied = true };
+                var e3 = new UiEvent(correlationId) { AccessDenied = true };
                 _telemetryManager.StartEvent(e3);
                 _telemetryManager.StopEvent(e3);
             }
             finally
             {
-                _telemetryManager.Flush(telemetryCorrelationId);
+                _telemetryManager.Flush(correlationId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -170,16 +170,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryContainsDefaultEventAsFirstEvent()
         {
-            var telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
+            var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
-                var anEvent = new UiEvent(telemetryCorrelationId);
+                var anEvent = new UiEvent(correlationId);
                 _telemetryManager.StartEvent(anEvent);
                 _telemetryManager.StopEvent(anEvent);
             }
             finally
             {
-                _telemetryManager.Flush(telemetryCorrelationId);
+                _telemetryManager.Flush(correlationId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived[0][EventBase.EventNameKey].EndsWith("default_event"));
             Assert.IsTrue(_myReceiver.EventsReceived[1][EventBase.EventNameKey].EndsWith("ui_event"));
@@ -190,12 +190,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryStartAnEventWithoutStoppingItLater() // Such event(s) becomes an orphaned event
         {
-            var telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
+            var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
-                var apiEvent = new ApiEvent(_logger, _crypto, telemetryCorrelationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var apiEvent = new ApiEvent(_logger, _crypto, correlationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(apiEvent);
-                var uiEvent = new UiEvent(telemetryCorrelationId);
+                var uiEvent = new UiEvent(correlationId);
                 _telemetryManager.StartEvent(uiEvent);
                 // Forgot to stop this event. A started event which never got stopped, becomes an orphan.
                 // telemetry.StopEvent(reqId, uiEvent);
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 Assert.IsFalse(_telemetryManager.CompletedEvents.IsEmpty); // There are completed event(s) inside
                 Assert.IsFalse(_telemetryManager.EventsInProgress.IsEmpty); // There is an orphaned event inside
-                _telemetryManager.Flush(telemetryCorrelationId);
+                _telemetryManager.Flush(correlationId);
                 Assert.IsTrue(_telemetryManager.CompletedEvents.IsEmpty); // Completed event(s) have been dispatched
                 Assert.IsTrue(_telemetryManager.EventsInProgress.IsEmpty); // The orphaned event is also dispatched, so there is no memory leak here.
             }
@@ -217,12 +217,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryStopAnEventWithoutStartingItBeforehand()
         {
-            var telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
+            var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
-                var apiEvent = new ApiEvent(_logger, _crypto, telemetryCorrelationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var apiEvent = new ApiEvent(_logger, _crypto, correlationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(apiEvent);
-                var uiEvent = new UiEvent(telemetryCorrelationId);
+                var uiEvent = new UiEvent(correlationId);
                 // Forgot to start this event
                 // telemetry.StartEvent(reqId, uiEvent);
                 // Now attempting to stop a never-started event
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(telemetryCorrelationId);
+                _telemetryManager.Flush(correlationId);
                 Assert.IsTrue(_telemetryManager.CompletedEvents.IsEmpty && _telemetryManager.EventsInProgress.IsEmpty); // No memory leak here
             }
             Assert.IsNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect NOT finding such an event
@@ -245,10 +245,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, enablePiiLogging: true);
             _logger = serviceBundle.DefaultLogger;
 
-            var telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
+            var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
-                var e1 = new ApiEvent(_logger, _crypto, telemetryCorrelationId)
+                var e1 = new ApiEvent(_logger, _crypto, correlationId)
                 {
                     Authority = new Uri("https://login.microsoftonline.com"),
                     AuthorityType = "Aad",
@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(telemetryCorrelationId);
+                _telemetryManager.Flush(correlationId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -292,10 +292,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PiiLoggingEnabled set to false, TenantId & UserId set to null values")]
         public void PiiLoggingEnabledFalse_TenantIdUserIdSetToNullValueTest()
         {
-            var telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
+            var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
-                var e1 = new ApiEvent(_logger, _crypto, telemetryCorrelationId)
+                var e1 = new ApiEvent(_logger, _crypto, correlationId)
                 {
                     Authority = new Uri("https://login.microsoftonline.com"),
                     AuthorityType = "Aad",
@@ -327,7 +327,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(telemetryCorrelationId);
+                _telemetryManager.Flush(correlationId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -336,10 +336,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("Check untrusted host Authority is set as null")]
         public void AuthorityNotInTrustedHostList_AuthorityIsSetAsNullValueTest()
         {
-            var telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
+            var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try
             {
-                var e1 = new ApiEvent(_logger, _crypto, telemetryCorrelationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(_logger, _crypto, correlationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -353,7 +353,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 _telemetryManager.StopEvent(e1);
 
                 // Authority host not in trusted host list, should return null
-                var e2 = new ApiEvent(_logger, _crypto, telemetryCorrelationId) { Authority = new Uri("https://login.contoso.com"), AuthorityType = "Aad" };
+                var e2 = new ApiEvent(_logger, _crypto, correlationId) { Authority = new Uri("https://login.contoso.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(e2);
                 // do some stuff...
                 e2.WasSuccessful = true;
@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                _telemetryManager.Flush(telemetryCorrelationId);
+                _telemetryManager.Flush(correlationId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
@@ -382,34 +382,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 for(int i=0; i < 5; i++)
                 {
-                    var telemetryCorrelationId = Guid.NewGuid().AsMatsCorrelationId();
-                    reqIdArray[i] = telemetryCorrelationId;
+                    var correlationId = Guid.NewGuid().AsMatsCorrelationId();
+                    reqIdArray[i] = correlationId;
                     Task task= new Task(() =>
                     {
-                        var e1 = new ApiEvent(_logger, _crypto, telemetryCorrelationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                        var e1 = new ApiEvent(_logger, _crypto, correlationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                         _telemetryManager.StartEvent(e1);
                         // do some stuff...
                         e1.WasSuccessful = true;
                         _telemetryManager.StopEvent(e1);
 
-                        var e2 = new HttpEvent(telemetryCorrelationId) { HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeUserAgent", QueryParams = "?a=1&b=2" };
+                        var e2 = new HttpEvent(correlationId) { HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeUserAgent", QueryParams = "?a=1&b=2" };
                         _telemetryManager.StartEvent(e2);
                         // do some stuff...
                         e2.HttpResponseStatus = 200;
                         _telemetryManager.StopEvent(e2);
 
-                        var e3 = new HttpEvent(telemetryCorrelationId) { HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeOtherUserAgent", QueryParams = "?a=3&b=4" };
+                        var e3 = new HttpEvent(correlationId) { HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeOtherUserAgent", QueryParams = "?a=3&b=4" };
                         _telemetryManager.StartEvent(e3);
                         // do some stuff...
                         e2.HttpResponseStatus = 200;
                         _telemetryManager.StopEvent(e3);
 
-                        var e4 = new CacheEvent(CacheEvent.TokenCacheWrite, telemetryCorrelationId) { TokenType = CacheEvent.TokenTypes.AT };
+                        var e4 = new CacheEvent(CacheEvent.TokenCacheWrite, correlationId) { TokenType = CacheEvent.TokenTypes.AT };
                         _telemetryManager.StartEvent(e4);
                         // do some stuff...
                         _telemetryManager.StopEvent(e4);
 
-                        var e5 = new CacheEvent(CacheEvent.TokenCacheDelete, telemetryCorrelationId) { TokenType = CacheEvent.TokenTypes.RT };
+                        var e5 = new CacheEvent(CacheEvent.TokenCacheDelete, correlationId) { TokenType = CacheEvent.TokenTypes.RT };
                         _telemetryManager.StartEvent(e5);
                         // do some stuff...
                         _telemetryManager.StopEvent(e5);

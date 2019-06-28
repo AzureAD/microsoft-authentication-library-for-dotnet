@@ -329,6 +329,18 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Sets the correlation id to be used in the authentication request.
+        /// </summary>
+        /// <param name="correlationId">correlation id of the authentication request</param>
+        /// <returns></returns>
+        public T WithCorrelationId(Guid correlationId)
+        {
+            CommonParameters.UserProvidedCorrelationId = correlationId;
+            CommonParameters.UseCorrelationIdFromUser = true;
+            return (T)this;
+        }
+
+        /// <summary>
         /// Validates the parameters of the AcquireToken operation.
         /// </summary>
         protected virtual void Validate()
@@ -340,7 +352,7 @@ namespace Microsoft.Identity.Client
             Validate();
             CommonParameters.ApiId = CalculateApiEventId();
             CommonParameters.ApiTelemId = ApiTelemetryId;
-            CommonParameters.TelemetryCorrelationId = Guid.NewGuid();
+            CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
         }
     }
 }

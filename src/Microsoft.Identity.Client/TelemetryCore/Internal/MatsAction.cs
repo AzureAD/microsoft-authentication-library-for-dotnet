@@ -5,15 +5,15 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
 {
     internal class MatsAction
     {
-        public MatsAction(string actionId, MatsScenario scenario, string telemetryCorrelationId)
+        public MatsAction(string actionId, MatsScenario scenario, string correlationId)
         {
             ActionId = actionId;
             Scenario = scenario;
-            TelemetryCorrelationId = telemetryCorrelationId;
+            CorrelationId = correlationId;
         }
 
         public string ActionId { get; }
         public MatsScenario Scenario { get; }
-        public string TelemetryCorrelationId { get; }
+        public string CorrelationId { get; }
     }
 }
