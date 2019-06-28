@@ -10,7 +10,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Serialization;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Unit
@@ -20,18 +19,27 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
         public const string ScopeStr = "r1/scope1 r1/scope2";
         public static readonly string[] GraphScopes = new[] { "user.read" };
+        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
+        public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
+        public const string AutomationTestThumbprint = "79fbcbeb5cd28994e50daff8035bacf764b14306";
 
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly SortedSet<string> CacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
         public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
         public const string Uid = "my-uid";
         public const string Utid = "my-utid";
+        public const string Common = "common";
+        public const string TenantId = "e56cat29e-b008-4cea-b6f0-48facatsd64a";
+        public static readonly IDictionary<string, string> ClientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
 
         public const string HomeAccountId = Uid + "." + Utid;
 
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
+
+        public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
+        public const string AuthorityNotKnownTenanted = "https://sts.access.edu/" + Utid + "/";
 
         public const string SovereignNetworkEnvironment = "login.microsoftonline.de";
         public const string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/home/";
@@ -118,10 +126,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
 
         public static readonly string UserIdentifier = CreateUserIdentifier();
 
-        public static string GetDiscoveryEndpoint(string authority)
-        {
-            return authority + DiscoveryEndPoint;
-        }
+       
 
         public static string CreateUserIdentifier()
         {
@@ -169,10 +174,45 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2";
         public const string BrokerClaims = "testClaims";
 
-#if !ANDROID && !iOS && !WINDOWS_APP
-        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
-        public static readonly ClientCredentialWrapper CredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
-#endif
+        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
+        public static readonly ClientCredentialWrapper CredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
+
+        public const string DiscoveryJsonResponse = @"{
+                        ""tenant_discovery_endpoint"":""https://login.microsoftonline.com/tenant/.well-known/openid-configuration"",
+                        ""api-version"":""1.1"",
+                        ""metadata"":[
+                            {
+                            ""preferred_network"":""login.microsoftonline.com"",
+                            ""preferred_cache"":""login.windows.net"",
+                            ""aliases"":[
+                                ""login.microsoftonline.com"", 
+                                ""login.windows.net"",
+                                ""login.microsoft.com"",
+                                ""sts.windows.net""]},
+                            {
+                            ""preferred_network"":""login.partner.microsoftonline.cn"",
+                            ""preferred_cache"":""login.partner.microsoftonline.cn"",
+                            ""aliases"":[
+                                ""login.partner.microsoftonline.cn"",
+                                ""login.chinacloudapi.cn""]},
+                            {
+                            ""preferred_network"":""login.microsoftonline.de"",
+                            ""preferred_cache"":""login.microsoftonline.de"",
+                            ""aliases"":[
+                                    ""login.microsoftonline.de""]},
+                            {
+                            ""preferred_network"":""login.microsoftonline.us"",
+                            ""preferred_cache"":""login.microsoftonline.us"",
+                            ""aliases"":[
+                                ""login.microsoftonline.us"",
+                                ""login.usgovcloudapi.net""]},
+                            {
+                            ""preferred_network"":""login-us.microsoftonline.com"",
+                            ""preferred_cache"":""login-us.microsoftonline.com"",
+                            ""aliases"":[
+                                ""login-us.microsoftonline.com""]}
+                        ]
+                }";
     }
 
     internal static class Adfs2019LabConstants

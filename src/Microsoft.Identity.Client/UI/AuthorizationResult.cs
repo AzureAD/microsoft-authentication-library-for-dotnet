@@ -147,8 +147,5 @@ namespace Microsoft.Identity.Client.UI
         /// is the same as the system who asked for it. It protects against XSRF https://openid.net/specs/openid-connect-core-1_0.html
         /// </remarks>
         public string State { get; set; }
-
-
-     
     }
 }

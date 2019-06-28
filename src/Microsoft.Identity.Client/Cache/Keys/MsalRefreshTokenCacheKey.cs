@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
         public override string ToString()
         {
             // FRT
-            if (!String.IsNullOrWhiteSpace(_familyId))
+            if (!string.IsNullOrWhiteSpace(_familyId))
             {
                 string d = MsalCacheKeys.CacheKeyDelimiter;
                 return $"{_homeAccountId}{d}{_environment}{d}{StorageJsonValues.CredentialTypeRefreshToken}{d}{_familyId}{d}{d}".ToLowerInvariant();
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             get
             {
                 // FRT
-                if (!String.IsNullOrWhiteSpace(_familyId))
+                if (!string.IsNullOrWhiteSpace(_familyId))
                 {
                     return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{_familyId}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
                 }
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             get
             {
                 // FRT
-                if (!String.IsNullOrWhiteSpace(_familyId))
+                if (!string.IsNullOrWhiteSpace(_familyId))
                 {
                     return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{_familyId}{MsalCacheKeys.CacheKeyDelimiter}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
                 }
@@ -108,6 +108,30 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
 
         #endregion
+
+        #region Equals and GetHashCode
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            var other = obj as MsalRefreshTokenCacheKey;
+
+            return string.Equals(
+                ToString(),
+                other.ToString(),
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        // override object.GetHashCode
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        #endregion
+
     }
 }
 

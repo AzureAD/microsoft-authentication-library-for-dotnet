@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
-using System.Collections;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Client
@@ -68,9 +67,11 @@ namespace Microsoft.Identity.Client
                 preferredUsername = idToken.PreferredUsername;
             }
 
+            // Do a full instance discovery when saving tokens (if not cached), 
+            // so that the PreferredNetwork environment is up to date.
             var instanceDiscoveryMetadata = await ServiceBundle.InstanceDiscoveryManager
                                 .GetMetadataEntryAsync(
-                                     new Uri(requestParams.TenantUpdatedCanonicalAuthority),
+                                    requestParams.TenantUpdatedCanonicalAuthority,
                                     requestParams.RequestContext)
                                 .ConfigureAwait(false);
 
@@ -211,216 +212,239 @@ namespace Microsoft.Identity.Client
 
         async Task<MsalAccessTokenCacheItem> ITokenCacheInternal.FindAccessTokenAsync(AuthenticationRequestParameters requestParams)
         {
-            IEnumerable<string> environmentAliases = Enumerable.Empty<string>();
-            string preferredEnvironmentAlias = null;
-
-            if (requestParams.AuthorityInfo != null)
-            {
-                InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry =
-                    await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                        new Uri(requestParams.AuthorityInfo.CanonicalAuthority),
-                        requestParams.RequestContext)
-                    .ConfigureAwait(false);
-
-                environmentAliases = instanceDiscoveryMetadataEntry.Aliases;
-                preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
-            }
-
             // no authority passed
-            if (!environmentAliases.Any())
+            if (requestParams?.AuthorityInfo?.CanonicalAuthority == null)
             {
                 requestParams.RequestContext.Logger.Warning("No authority provided. Skipping cache lookup ");
                 return null;
             }
 
-            await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
-            try
+            requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = Enumerable.Empty<MsalAccessTokenCacheItem>();
+            await LoadFromCacheAsync(
+                requestParams.RequestContext.CorrelationId.AsMatsCorrelationId(),
+                CacheEvent.TokenTypes.AT,
+                requestParams.Account,
+                () => tokenCacheItems = GetAllAccessTokensWithNoLocks(true))
+                    .ConfigureAwait(false);
+
+
+            tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
+
+            // no match found after initial filtering
+            if (!tokenCacheItems.Any())
             {
-                requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
-                MsalAccessTokenCacheItem msalAccessTokenCacheItem;
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, requestParams.Account, false);
-
-                List<MsalAccessTokenCacheItem> tokenCacheItems;
-
-                await OnBeforeAccessAsync(args).ConfigureAwait(false);
-                try
-                {
-                    // filtered by client id.
-                    tokenCacheItems = GetAllAccessTokensWithNoLocks(true).ToList();
-                }
-                finally
-                {
-                    await OnAfterAccessAsync(args).ConfigureAwait(false);
-                }
-
-                tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
-
-                // no match found after initial filtering
-                if (!tokenCacheItems.Any())
-                {
-                    requestParams.RequestContext.Logger.Info("No matching entry found for user or assertion");
-                    return null;
-                }
-
-                requestParams.RequestContext.Logger.Info("Matching entry count -" + tokenCacheItems.Count);
-
-                IEnumerable<MsalAccessTokenCacheItem> filteredItems =
-                    tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope)).ToList();
-
-                requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
-
-                // filter by authority
-                var filteredByPreferredAlias =
-                    filteredItems.Where
-                    (item => item.Environment.Equals(preferredEnvironmentAlias, StringComparison.OrdinalIgnoreCase)).ToList();
-
-                if (filteredByPreferredAlias.Any())
-                {
-                    filteredItems = filteredByPreferredAlias;
-                }
-                else
-                {
-                    filteredItems = filteredItems.Where(
-                        item => environmentAliases.Contains(item.Environment) &&
-                        (item.IsAdfs || item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase)));
-                }
-
-                // no match
-                if (!filteredItems.Any())
-                {
-                    requestParams.RequestContext.Logger.Info("No tokens found for matching authority, client_id, user and scopes.");
-                    return null;
-                }
-
-                // if only one cached token found
-                if (filteredItems.Count() == 1)
-                {
-                    msalAccessTokenCacheItem = filteredItems.First();
-                }
-                else
-                {
-                    requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
-
-                    throw new MsalClientException(
-                        MsalError.MultipleTokensMatchedError,
-                        MsalErrorMessage.MultipleTokensMatched);
-                }
-
-                if (msalAccessTokenCacheItem != null)
-                {
-                    if (msalAccessTokenCacheItem.ExpiresOn >
-                        DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
-                    {
-                        requestParams.RequestContext.Logger.Info(
-                            "Access token is not expired. Returning the found cache entry. " +
-                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
-                        return msalAccessTokenCacheItem;
-                    }
-
-                    if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled && msalAccessTokenCacheItem.ExtendedExpiresOn >
-                        DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
-                    {
-                        requestParams.RequestContext.Logger.Info(
-                            "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
-                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
-
-                        msalAccessTokenCacheItem.IsExtendedLifeTimeToken = true;
-                        return msalAccessTokenCacheItem;
-                    }
-
-                    requestParams.RequestContext.Logger.Info(
-                        "Access token has expired or about to expire. " +
-                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
-                }
-
+                requestParams.RequestContext.Logger.Info("No matching entry found for user or assertion");
                 return null;
             }
-            finally
+
+            requestParams.RequestContext.Logger.Info("Matching entry count -" + tokenCacheItems.Count());
+
+            IEnumerable<MsalAccessTokenCacheItem> filteredItems =
+                tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
+
+            requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
+
+            // at this point we need env aliases, try to get them without a discovery call
+            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                                     requestParams.AuthorityInfo.CanonicalAuthority,
+                                     filteredItems.Select(at => at.Environment),  // if all environments are known, a network call can be avoided
+                                     requestParams.RequestContext)
+                            .ConfigureAwait(false);
+
+            // filter by authority
+            var filteredByPreferredAlias = filteredItems.Where(
+                at => at.Environment.Equals(instanceMetadata.PreferredCache, StringComparison.OrdinalIgnoreCase));
+
+            if (filteredByPreferredAlias.Any())
             {
-                _semaphoreSlim.Release();
+                filteredItems = filteredByPreferredAlias;
             }
+            else
+            {
+                filteredItems = filteredItems.Where(
+                    item => instanceMetadata.Aliases.Contains(item.Environment) &&
+                    (item.IsAdfs || item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase)));
+            }
+
+            // no match
+            if (!filteredItems.Any())
+            {
+                requestParams.RequestContext.Logger.Info("No tokens found for matching authority, client_id, user and scopes.");
+                return null;
+            }
+
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem;
+
+            // if only one cached token found
+            if (filteredItems.Count() == 1)
+            {
+                msalAccessTokenCacheItem = filteredItems.First();
+            }
+            else
+            {
+                requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
+
+                throw new MsalClientException(
+                    MsalError.MultipleTokensMatchedError,
+                    MsalErrorMessage.MultipleTokensMatched);
+            }
+
+            if (msalAccessTokenCacheItem != null)
+            {
+                if (msalAccessTokenCacheItem.ExpiresOn >
+                    DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+                {
+                    requestParams.RequestContext.Logger.Info(
+                        "Access token is not expired. Returning the found cache entry. " +
+                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                    return msalAccessTokenCacheItem;
+                }
+
+                if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled && msalAccessTokenCacheItem.ExtendedExpiresOn >
+                    DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+                {
+                    requestParams.RequestContext.Logger.Info(
+                        "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
+                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+
+                    msalAccessTokenCacheItem.IsExtendedLifeTimeToken = true;
+                    return msalAccessTokenCacheItem;
+                }
+
+                requestParams.RequestContext.Logger.Info(
+                    "Access token has expired or about to expire. " +
+                    GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+            }
+
+            return null;
         }
+
+
 
         async Task<MsalRefreshTokenCacheItem> ITokenCacheInternal.FindRefreshTokenAsync(
             AuthenticationRequestParameters requestParams,
             string familyId)
         {
+            if (requestParams.Authority == null)
+                return null;
+
+            IEnumerable<MsalRefreshTokenCacheItem> allRts = Enumerable.Empty<MsalRefreshTokenCacheItem>();
+            await LoadFromCacheAsync(
+               requestParams.RequestContext.CorrelationId.AsMatsCorrelationId(),
+               CacheEvent.TokenTypes.AT,
+               requestParams.Account,
+               () => allRts = _accessor.GetAllRefreshTokens())
+                   .ConfigureAwait(false);
+
+            // TODO: bogavril - do we want to be silent here?
+            var metadata =
+                await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    allRts.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
+                    requestParams.RequestContext)
+                .ConfigureAwait(false);
+            var aliases = metadata.Aliases;
+
+            IEnumerable<MsalRefreshTokenCacheKey> candidateRtKeys = aliases.Select(
+                    al => new MsalRefreshTokenCacheKey(
+                        al,
+                        requestParams.ClientId,
+                        requestParams.Account?.HomeAccountId?.Identifier,
+                        familyId));
+
+            MsalRefreshTokenCacheItem candidateRt = allRts.FirstOrDefault(
+                rt => candidateRtKeys.Any(
+                    candidateKey => object.Equals(rt.GetKey(), candidateKey)));
+
+            requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (candidateRt != null));
+
+            if (candidateRt != null)
+                return candidateRt;
+
+            requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
+
+            string upn = string.IsNullOrWhiteSpace(requestParams.LoginHint)
+                ? requestParams.Account?.Username
+                : requestParams.LoginHint;
+
+            // ADAL legacy cache does not store FRTs
+            if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
+            {
+                return CacheFallbackOperations.GetAdalEntryForMsal(
+                    Logger,
+                    LegacyCachePersistence,
+                    metadata.PreferredCache,
+                    aliases,
+                    requestParams.ClientId,
+                    upn,
+                    requestParams.Account.HomeAccountId?.Identifier);
+            }
+
+            return null;
+        }
+
+        async Task<bool?> ITokenCacheInternal.IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId)
+        {
+            var logger = requestParams.RequestContext.Logger;
+            if (requestParams?.AuthorityInfo?.CanonicalAuthority == null)
+            {
+                logger.Warning("No authority details, can't check app metadata. Returning unknown");
+                return null;
+            }
+
+            IEnumerable<MsalAppMetadataCacheItem> allAppMetadata = Enumerable.Empty<MsalAppMetadataCacheItem>();
+            await LoadFromCacheAsync(
+                    requestParams.RequestContext.CorrelationId.AsMatsCorrelationId(),
+                    CacheEvent.TokenTypes.AppMetadata,
+                    requestParams.Account,
+                    () => allAppMetadata = _accessor.GetAllAppMetadata())
+                .ConfigureAwait(false);
+
+            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    allAppMetadata.Select(m => m.Environment),
+                    requestParams.RequestContext)
+                .ConfigureAwait(false);
+
+            var appMetadata =
+                instanceMetadata.Aliases
+                .Select(env => _accessor.GetAppMetadata(new MsalAppMetadataCacheKey(ClientId, env)))
+                .FirstOrDefault(item => item != null);
+
+            // From a FOCI perspective, an app has 3 states - in the family, not in the family or unknown
+            // Unknown is a valid state, where we never fetched tokens for that app or when we used an older 
+            // version of MSAL which did not record app metadata. 
+            if (appMetadata == null)
+            {
+                logger.Warning("No app metadata found. Returning unknown");
+                return null;
+            }
+
+            return appMetadata.FamilyId == familyId;
+        }
+
+        private async Task LoadFromCacheAsync(
+            string telemetryId, CacheEvent.TokenTypes type, IAccount account, Action loadingAction)
+        {
             var cacheEvent = new CacheEvent(
                 CacheEvent.TokenCacheLookup,
-                requestParams.RequestContext.CorrelationId.AsMatsCorrelationId())
+                telemetryId)
             {
-                TokenType = CacheEvent.TokenTypes.RT
+                TokenType = type
             };
 
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(cacheEvent))
             {
-                if (requestParams.Authority == null)
-                {
-                    return null;
-                }
-
-                InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata =
-                    await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                        new Uri(requestParams.AuthorityInfo.CanonicalAuthority),
-                        requestParams.RequestContext)
-                    .ConfigureAwait(false);
-
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, account, false);
                 await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
                 try
                 {
-                    requestParams.RequestContext.Logger.Info("Looking up refresh token in the cache..");
-
-                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, requestParams.Account, false);
-
-                    IEnumerable<MsalRefreshTokenCacheKey> keysAcrossEnvs =
-                        instanceDiscoveryMetadata.GetAliasesWithPreferredCacheFirst().Select(
-                            ea => new MsalRefreshTokenCacheKey(
-                                ea,
-                                requestParams.ClientId,
-                                requestParams.Account?.HomeAccountId?.Identifier,
-                                familyId));
-
                     await OnBeforeAccessAsync(args).ConfigureAwait(false);
-                    try
-                    {
-                        // Try to load from all env aliases, but stop at the first valid one
-                        MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = keysAcrossEnvs
-                            .Select(key => _accessor.GetRefreshToken(key))
-                            .FirstOrDefault(item => item != null);
 
-                        requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null));
+                    loadingAction();
 
-                        if (msalRefreshTokenCacheItem != null)
-                        {
-                            return msalRefreshTokenCacheItem;
-                        }
-
-                        requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
-
-                        string upn = string.IsNullOrWhiteSpace(requestParams.LoginHint)
-                            ? requestParams.Account?.Username
-                            : requestParams.LoginHint;
-
-                        // ADAL legacy cache does not store FRTs
-                        if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
-                        {
-                            return CacheFallbackOperations.GetAdalEntryForMsal(
-                                Logger,
-                                LegacyCachePersistence,
-                                instanceDiscoveryMetadata.PreferredCache,
-                                instanceDiscoveryMetadata.Aliases,
-                                requestParams.ClientId,
-                                upn,
-                                requestParams.Account.HomeAccountId?.Identifier);
-                        }
-
-                        return null;
-
-                    }
-                    finally
-                    {
-                        await OnAfterAccessAsync(args).ConfigureAwait(false);
-                    }
+                    await OnAfterAccessAsync(args).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -429,51 +453,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        async Task<bool?> ITokenCacheInternal.IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId)
-        {
-            var logger = requestParams.RequestContext.Logger;
-            if (requestParams?.AuthorityInfo?.CanonicalAuthority == null)
-            {
-                logger.Warning("No authority details, can't check app metadta. Returning unkown");
-                return null;
-            }
-
-            InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata =
-                   await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                       new Uri(requestParams.AuthorityInfo.CanonicalAuthority),
-                       requestParams.RequestContext)
-                   .ConfigureAwait(false);
-
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, requestParams?.Account, false);
-
-            //TODO: bogavril - is the env ok here? Can I cache it or pass it in?
-            MsalAppMetadataCacheItem appMetadata;
-            await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
-            try
-            {
-                await OnBeforeAccessAsync(args).ConfigureAwait(false);
-
-                appMetadata =
-                    instanceDiscoveryMetadata.Aliases
-                    .Select(env => _accessor.GetAppMetadata(new MsalAppMetadataCacheKey(ClientId, env)))
-                    .FirstOrDefault(item => item != null);
-
-                await OnAfterAccessAsync(args).ConfigureAwait(false);
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
-
-            if (appMetadata == null)
-            {
-                logger.Warning("No app metadata found. Returning unkown");
-                return null;
-            }
-
-            return appMetadata.FamilyId == familyId;
-        }
-
+        // TODO: no telemetry 
         async Task<MsalIdTokenCacheItem> ITokenCacheInternal.GetIdTokenCacheItemAsync(MsalIdTokenCacheKey msalIdTokenCacheKey, RequestContext requestContext)
         {
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
@@ -499,8 +479,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <remarks>
-        /// Get accounts should not make a network call, if possible.
+        /// Get accounts should not make a network call, if possible. This can be achieved if 
+        /// all the environments in the token cache are known to MSAL, as MSAL keeps a list of 
+        /// known environments in <see cref="KnownMetadataProvider"/>
         /// </remarks>
+        // TODO: No telemetry is emitted
         async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(string authority, RequestContext requestContext)
         {
             var environment = Authority.GetEnviroment(authority);
@@ -539,20 +522,20 @@ namespace Microsoft.Identity.Client
             }
 
             // Multi-cloud support - must filter by env.
-            // Use all env aliases to filter, in case PreferredCacheEnv changes in the future
-            ISet<string> existingEnvs = new HashSet<string>(
+            // Avoid making a discovery 
+            ISet<string> allEnvironmentsInCache = new HashSet<string>(
                 accountCacheItems.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
+            allEnvironmentsInCache.UnionWith(rtCacheItems.Select(rt => rt.Environment));
+            allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnviroments());
 
-            var aliases = await GetEnvironmentAliasesTryAvoidNetworkCallAsync(
+            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                 authority,
-                existingEnvs,
-                adalUsersResult.GetAdalUserEnviroments(),
-                requestContext)
-                .ConfigureAwait(false);
+                allEnvironmentsInCache,
+                requestContext).ConfigureAwait(false);
 
-            rtCacheItems = rtCacheItems.Where(rt => aliases.ContainsOrdinalIgnoreCase(rt.Environment));
-            accountCacheItems = accountCacheItems.Where(acc => aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+            rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment));
+            accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
             foreach (MsalRefreshTokenCacheItem rtItem in rtCacheItems)
@@ -571,9 +554,9 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            List<IAccount> accounts = UpdateWithAdalAccounts(
+            IEnumerable<IAccount> accounts = UpdateWithAdalAccounts(
                 environment,
-                aliases,
+                instanceMetadata.Aliases,
                 adalUsersResult,
                 clientInfoToAccountMap);
 

@@ -36,14 +36,15 @@ namespace Microsoft.Identity.Client.Core
 
         public const string WellKnownOpenIdConfigurationPath = ".well-known/openid-configuration";
         public const string OpenIdConfigurationEndpoint = "v2.0/" + WellKnownOpenIdConfigurationPath;
-
+        public const string Tenant = "{tenant}";
+        public const string TenantId = "{tenantid}";
         public static string FormatAdfsWebFingerUrl(string host, string resource)
         {
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "https://{0}/.well-known/webfinger?rel={1}&resource={2}",
                 host,
-                Constants.DefaultRealm,
+                DefaultRealm,
                 resource);
         }
     }

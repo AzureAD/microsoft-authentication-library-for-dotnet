@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
@@ -71,7 +70,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
@@ -109,7 +107,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
@@ -149,7 +146,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
@@ -180,7 +176,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness(isExtendedTokenLifetimeEnabled: true))
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
@@ -215,7 +210,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
@@ -246,7 +240,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var rtItem = new MsalRefreshTokenCacheItem(
@@ -281,7 +274,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
                 var rtItem = new MsalRefreshTokenCacheItem(
                     MsalTestConstants.SovereignNetworkEnvironment,
@@ -309,7 +301,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
@@ -381,7 +372,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
@@ -422,7 +412,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
@@ -463,7 +452,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
@@ -931,7 +919,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Arrange
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityTestTenant,
@@ -969,7 +956,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Arrange
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityTestTenant,
@@ -1012,7 +998,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)
         {
             (serviceBundle.InstanceDiscoveryManager as InstanceDiscoveryManager)
-                .AddTestValue(
+                .AddTestValueToStaticProvider(
                     host,
                     new InstanceDiscoveryMetadataEntry
                     {

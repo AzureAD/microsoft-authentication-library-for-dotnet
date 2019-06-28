@@ -17,6 +17,15 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class MsalServiceException : MsalException
     {
+        private const string ClaimsKey = "claims";
+        private const string ResponseBodyKey = "response_body";
+        private const string CorrelationIdKey = "correlation_id";
+        private const string SubErrorKey = "sub_error";
+
+        private HttpResponse _httpResponse;
+        private OAuth2ResponseBase _oauth2ResponseBase;
+
+        #region Constructors
         /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code, error message and a reference to the inner exception that is the cause of
@@ -123,7 +132,7 @@ namespace Microsoft.Identity.Client
             Claims = claims;
         }
 
-        private HttpResponse _httpResponse;
+        #endregion
 
         internal HttpResponse HttpResponse
         {
@@ -139,8 +148,6 @@ namespace Microsoft.Identity.Client
                 OAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(_httpResponse?.Body);
             }
         }
-
-        private OAuth2ResponseBase _oauth2ResponseBase;
 
         internal OAuth2ResponseBase OAuth2Response
         {
@@ -219,11 +226,6 @@ namespace Microsoft.Identity.Client
                 ResponseBody,
                 Headers);
         }
-
-        private const string ClaimsKey = "claims";
-        private const string ResponseBodyKey = "response_body";
-        private const string CorrelationIdKey = "correlation_id";
-        private const string SubErrorKey = "sub_error";
 
         internal override void PopulateJson(JObject jobj)
         {

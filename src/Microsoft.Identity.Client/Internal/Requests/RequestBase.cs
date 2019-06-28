@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 GetType().Name);
 
             if (authenticationRequestParameters.AuthorityInfo != null &&
-                AadAuthority.IsInTrustedHostList(authenticationRequestParameters.AuthorityInfo?.Host))
+                KnownMetadataProvider.IsKnownEnvironment(authenticationRequestParameters.AuthorityInfo?.Host))
             {
                 messageWithoutPii += string.Format(
                     CultureInfo.CurrentCulture,
@@ -276,6 +276,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task ResolveAuthorityEndpointsAsync()
         {
+            // This will make a network call unless instance discovery is cached, but this ok
+            // GetAccounts and AcquireTokenSilent do not need this
             await UpdateAuthorityWithPreferredNetworkHostAsync().ConfigureAwait(false);
 
             AuthenticationRequestParameters.Endpoints = await ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
@@ -372,7 +374,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             InstanceDiscoveryMetadataEntry metadata = await
                 ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                    new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority),
+                    AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority,
                     AuthenticationRequestParameters.RequestContext)
                 .ConfigureAwait(false);
 

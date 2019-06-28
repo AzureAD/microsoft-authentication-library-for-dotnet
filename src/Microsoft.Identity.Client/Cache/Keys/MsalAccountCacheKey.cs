@@ -68,5 +68,28 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
 
         #endregion
+
+        #region Equals and GetHashCode
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            var other = obj as MsalAccountCacheKey;
+
+            return string.Equals(
+                ToString(),
+                other.ToString(),
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        // override object.GetHashCode
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        #endregion
     }
 }

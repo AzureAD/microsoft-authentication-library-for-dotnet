@@ -147,8 +147,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
-
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
                     ScopeHelper.CreateSortedSetFromEnumerable(

@@ -1005,8 +1005,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 // Arrange
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager);
 
                 // Act
@@ -1054,8 +1052,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 // Arrange
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, tenantedAuthority1);
 
                 // Act

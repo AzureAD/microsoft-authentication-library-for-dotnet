@@ -21,6 +21,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
 
         private IServiceBundle _serviceBundle;
+        readonly string _audience1 = "Audience1";
+        readonly string _audience2 = "Audience2";
 
         [TestInitialize]
         public void TestInitialize()
@@ -33,57 +35,50 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [Description("Test for client assertion with mismatched parameters in Request Validator.")]
         public void ClientAssertionRequestValidatorMismatchParameterTest()
         {
-            string Audience1 = "Audience1";
-            string Audience2 = "Audience2";
-
-            var credential = new ClientCredentialWrapper(MsalTestConstants.ClientSecret)
-            {
-                Audience = Audience1,
-                ContainsX5C = false,
-                Assertion = MsalTestConstants.DefaultClientAssertion,
-                ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds))
-            };
+            var credential = ClientCredentialWrapper.CreateWithSecret(MsalTestConstants.ClientSecret);
+            credential.Audience = _audience1;
+            credential.ContainsX5C = false;
+            credential.CachedAssertion = MsalTestConstants.DefaultClientAssertion;
+            credential.ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
 
             // Validate cached client assertion with parameters
-            Assert.IsTrue(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
+            Assert.IsTrue(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, _audience1), false));
 
             // Different audience
-            credential.Audience = Audience2;
+            credential.Audience = _audience2;
 
             // cached assertion should be invalid
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, _audience1), false));
 
             // Different x5c, same audience
-            credential.Audience = Audience1;
+            credential.Audience = _audience1;
             credential.ContainsX5C = true;
 
             // cached assertion should be invalid
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, _audience1), false));
 
             // Different audience and x5c
-            credential.Audience = Audience2;
+            credential.Audience = _audience2;
 
             // cached assertion should be invalid
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, _audience1), false));
 
             // No cached Assertion
-            credential.Assertion = "";
+            credential.CachedAssertion = "";
 
             // should return false
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, _audience1), false));
         }
 
         [TestMethod]
         [Description("Test for expired client assertion in Request Validator.")]
         public void ClientAssertionRequestValidatorExpirationTimeTest()
         {
-            var credential = new ClientCredentialWrapper(MsalTestConstants.ClientSecret)
-            {
-                Audience = "Audience1",
-                ContainsX5C = false,
-                Assertion = MsalTestConstants.DefaultClientAssertion,
-                ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds))
-            };
+            var credential = ClientCredentialWrapper.CreateWithSecret(MsalTestConstants.ClientSecret);
+            credential.Audience = _audience1;
+            credential.ContainsX5C = false;
+            credential.CachedAssertion = MsalTestConstants.DefaultClientAssertion;
+            credential.ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
 
             // Validate cached client assertion with expiration time
             // Cached assertion should be valid

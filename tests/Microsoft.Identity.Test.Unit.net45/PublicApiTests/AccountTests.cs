@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -10,6 +11,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -77,7 +79,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsTrue(accounts.All(a => a.Environment == "login.microsoftonline.com"));
         }
 
-
         // Bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1030
         [TestMethod]
         [DeploymentItem(@"Resources\MultiCloudTokenCache.json")]
@@ -86,12 +87,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 // Arrange
-                httpManager.AddInstanceDiscoveryMockHandler();
+                // no discovery made because all environments are known
 
                 const string TokenCacheFile = "MultiCloudTokenCache.json";
-                var pcaGlobal = InitPcaForCloud(AzureCloudInstance.AzurePublic, httpManager, TokenCacheFile);
-                var pcaDe = InitPcaForCloud(AzureCloudInstance.AzureGermany, httpManager, TokenCacheFile);
-                var pcaCn = InitPcaForCloud(AzureCloudInstance.AzureChina, httpManager, TokenCacheFile);
+                var pcaGlobal = InitPcaFromCacheFile(AzureCloudInstance.AzurePublic, httpManager, TokenCacheFile);
+                var pcaDe = InitPcaFromCacheFile(AzureCloudInstance.AzureGermany, httpManager, TokenCacheFile);
+                var pcaCn = InitPcaFromCacheFile(AzureCloudInstance.AzureChina, httpManager, TokenCacheFile);
 
                 // Act
                 var accountsGlobal = await pcaGlobal.GetAccountsAsync().ConfigureAwait(false);
@@ -103,6 +104,62 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("login.microsoftonline.de", accountsDe.Single().Environment);
                 Assert.AreEqual("login.chinacloudapi.cn", accountsCn.Single().Environment);
             }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\MultiCloudTokenCache.json")]
+        public async Task GetAccounts_PerformsNetworkInstanceDiscovery_IfUnknownAccountEnvironment_Async()
+        {
+            // Arrange - modify an existing account to have an unknown environment
+            string tokenCacheAsString = File.ReadAllText(
+                ResourceHelper.GetTestResourceRelativePath("MultiCloudTokenCache.json"));
+            var cacheJson = JObject.Parse(tokenCacheAsString);
+
+            JEnumerable<JToken> tokens = cacheJson["Account"].Children();
+            foreach (JToken token in tokens)
+            {
+                var obj = token.Children().Single() as JObject;
+
+                if (string.Equals(
+                    obj["environment"].ToString(),
+                    "login.microsoftonline.de",
+                    StringComparison.InvariantCulture))
+                {
+                    obj["environment"] = new Uri(MsalTestConstants.AuthorityNotKnownTenanted).Host;
+                }
+            }
+
+            tokenCacheAsString = cacheJson.ToString();
+
+            await ValidateGetAccountsWithDiscoveryAsync(tokenCacheAsString).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\MultiCloudTokenCache.json")]
+        public async Task GetAccounts_PerformsNetworkInstanceDiscovery_IfUnknownRtEnvironment_Async()
+        {
+            // Arrange - modify an existing account to have an unknown environment
+            string tokenCacheAsString = File.ReadAllText(
+                ResourceHelper.GetTestResourceRelativePath("MultiCloudTokenCache.json"));
+            var cacheJson = JObject.Parse(tokenCacheAsString);
+
+            JEnumerable<JToken> tokens = cacheJson["RefreshToken"].Children();
+            foreach (JToken token in tokens)
+            {
+                var obj = token.Children().Single() as JObject;
+
+                if (string.Equals(
+                    obj["environment"].ToString(),
+                    "login.microsoftonline.de",
+                    StringComparison.InvariantCulture))
+                {
+                    obj["environment"] = new Uri(MsalTestConstants.AuthorityNotKnownTenanted).Host;
+                }
+            }
+
+            tokenCacheAsString = cacheJson.ToString();
+
+            await ValidateGetAccountsWithDiscoveryAsync(tokenCacheAsString).ConfigureAwait(false);
         }
 
         // Bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1030
@@ -134,8 +191,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Assert
             Assert.AreEqual("login.microsoftonline.de", accountsDe.Single().Environment);
         }
-
-     
 
         [TestMethod]
         public void TestGetAccounts()
@@ -291,10 +346,44 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
             Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
         }
+        private async Task ValidateGetAccountsWithDiscoveryAsync(string tokenCacheAsString)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
 
+                var pcaGlobal = InitPcaFromCacheString(AzureCloudInstance.AzurePublic, httpManager, tokenCacheAsString);
+                var pcaDe = InitPcaFromCacheString(AzureCloudInstance.AzureGermany, httpManager, tokenCacheAsString);
+                var pcaCn = InitPcaFromCacheString(AzureCloudInstance.AzureChina, httpManager, tokenCacheAsString);
 
+                // Act
+                var accountsGlobal = await pcaGlobal.GetAccountsAsync().ConfigureAwait(false);
+                var accountsDe = await pcaDe.GetAccountsAsync().ConfigureAwait(false);
+                var accountsCn = await pcaCn.GetAccountsAsync().ConfigureAwait(false);
 
-        private PublicClientApplication InitPcaForCloud(AzureCloudInstance cloud, HttpManager httpManager, string tokenCacheFile)
+                // Assert
+                Assert.AreEqual("login.microsoftonline.com", accountsGlobal.Single().Environment);
+                Assert.IsTrue(!accountsDe.Any());
+                Assert.AreEqual("login.chinacloudapi.cn", accountsCn.Single().Environment);
+            }
+        }
+
+        private PublicClientApplication InitPcaFromCacheFile(
+            AzureCloudInstance cloud, 
+            HttpManager httpManager,
+            string tokenCacheFile)
+        {
+            return InitPcaFromCacheString(
+                cloud,
+                httpManager,
+                File.ReadAllText(
+                    ResourceHelper.GetTestResourceRelativePath(tokenCacheFile)));
+        }
+
+        private PublicClientApplication InitPcaFromCacheString(
+            AzureCloudInstance cloud,
+            HttpManager httpManager,
+            string tokenCacheString)
         {
             PublicClientApplication pca = PublicClientApplicationBuilder
                   .Create(ClientIdInFile)
@@ -303,7 +392,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                   .WithTelemetry(new TraceTelemetryConfig())
                   .BuildConcrete();
 
-            pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile));
+            pca.InitializeTokenCacheFromString(tokenCacheString);
             pca.UserTokenCacheInternal.Accessor.AssertItemCount(3, 3, 3, 3, 1);
 
             return pca;
