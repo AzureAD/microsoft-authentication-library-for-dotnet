@@ -19,7 +19,7 @@ When removing an account, a removal is performed on both the MSAL and the ADAL c
 
 If the accountId is not null (note that the account id comes from ClientInfo), then delete everything with the same 
 clientInfo and env. 
-Otherwise, delete everything with the same diplayable id (aka preffered username) and env.
+Otherwise, delete everything with the same diplayable id (aka preferred username) and env.
 
 Note:
 - RemoveAdalUser is not scoped on ClientId, i.e. it will delete accoutns from different ClientIDs that match the criteria above
