@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.Internal
                 if (config.ClaimsToSign != null && config.ClaimsToSign.Any())
                 {
                     AuthenticationType = ConfidentialClientAuthenticationType.ClientCertificateWithClaims;
-                    AppendDefaultClaims = config.AppendDefaultClaims;
+                    AppendDefaultClaims = config.MergeWithDefaultClaims;
                 }
                 else
                 {

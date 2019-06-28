@@ -70,12 +70,14 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Sets the certificate associated with the application along with the specific claims to sign.
-        /// The required set of claims will need to be provided as well for a succsesful authentication request. See https://aka.ms/msal-net-client-assertion
+        /// By default, this will merge the <paramref name="claimsToSign"/> with the default required set of claims needed for authentication.
+        /// If <paramref name="mergeWithDefaultClaims"/> is set to false, you will need to provide the required default claims. See https://aka.ms/msal-net-client-assertion
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
+        /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign)
+        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true)
         {
             if (certificate == null)
             {
@@ -89,32 +91,7 @@ namespace Microsoft.Identity.Client
 
             Config.ClientCredentialCertificate = certificate;
             Config.ClaimsToSign = claimsToSign;
-            Config.ConfidentialClientCredentialCount++;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the certificate associated with the application along with the specific additional claims to sign. See https://aka.ms/msal-net-client-assertion
-        /// The required set of claims will be appended to the authentication request.
-        /// </summary>
-        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        /// <param name="additionalClaimsToSign">The claims to be signed by the provided certificate.</param>
-        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
-        public ConfidentialClientApplicationBuilder WithAdditionalClientClaims(X509Certificate2 certificate, IDictionary<string, string> additionalClaimsToSign)
-        {
-            if (certificate == null)
-            {
-                throw new ArgumentNullException(nameof(certificate));
-            }
-
-            if (additionalClaimsToSign == null || !additionalClaimsToSign.Any())
-            {
-                throw new ArgumentNullException(nameof(additionalClaimsToSign));
-            }
-
-            Config.ClientCredentialCertificate = certificate;
-            Config.ClaimsToSign = additionalClaimsToSign;
-            Config.AppendDefaultClaims = true;
+            Config.MergeWithDefaultClaims = mergeWithDefaultClaims;
             Config.ConfidentialClientCredentialCount++;
             return this;
         }
