@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             if (useRecommendedRedirectUri)
             {
-                return Constants.DefaultNetCoreRedirectUri;
+                return Constants.LocalHostRedirectUri;
             }
 
             return Constants.DefaultRedirectUri;

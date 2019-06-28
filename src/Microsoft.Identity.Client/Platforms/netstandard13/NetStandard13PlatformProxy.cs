@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         {
             if (useRecommendedRedirectUri)
             {
-                return Constants.DefaultDesktopRedirectUri;
+                return Constants.NativeClientRedirectUri;
             }
 
             return Constants.DefaultRedirectUri;

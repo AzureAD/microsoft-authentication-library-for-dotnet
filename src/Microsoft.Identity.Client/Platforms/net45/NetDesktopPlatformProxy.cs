@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             if (useRecommendedRedirectUri)
             {
-                return Constants.DefaultDesktopRedirectUri;
+                return Constants.NativeClientRedirectUri;
             }
 
             return Constants.DefaultRedirectUri;

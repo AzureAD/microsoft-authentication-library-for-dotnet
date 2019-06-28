@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         {
             if (useRecommendedRedirectUri)
             {
-                return Constants.DefaultDesktopRedirectUri;
+                return Constants.NativeClientRedirectUri;
             }
 
             return Constants.DefaultRedirectUri;

@@ -67,10 +67,12 @@ namespace Microsoft.Identity.Client
         /// <term>value of <c>WebAuthenticationBroker.GetCurrentApplicationCallbackUri()</c></term>
         /// </item>
         /// <item>
-        /// <term>.NET Core</term>
+        /// <term>For system browser on .NET Core</term>
         /// <term><c>https://localhost</c></term>
         /// </item>
         /// </list>
+        /// NOTE:There will be an update to the default rediect uri in the future to accomodate for system browsers on the 
+        /// .NET desktop and .NET Core platforms.
         /// </summary>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
