@@ -98,8 +98,8 @@ namespace Microsoft.Identity.Client.Internal
             {
                 if (_appendDefaultClaims)
                 {
-                    JObject json = JObject.FromObject(ClaimsToSign);
-                    json.Merge(JObject.FromObject(Payload));
+                    JObject json = JObject.FromObject(Payload);
+                    json.Merge(JObject.FromObject(ClaimsToSign));
                     jsonPayload = json.ToString();
                 }
                 else

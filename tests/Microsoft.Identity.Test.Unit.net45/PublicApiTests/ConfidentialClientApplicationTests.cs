@@ -25,6 +25,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Threading;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
+using System.IdentityModel.Tokens.Jwt;
 
 #if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -424,7 +425,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                var app = CreateConfidentialClient(httpManager, cert, 3, CredentialType.CertificateAndClaims);
+                var app = CreateConfidentialClient(httpManager, cert, 1, CredentialType.CertificateAndClaims);
 
                 var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -448,23 +449,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 string cachedAssertion = app.ClientCredential.CachedAssertion;
                 long cacheValidTo = app.ClientCredential.ValidTo;
 
-                result = await app
-                    .AcquireTokenForClient(MsalTestConstants.ScopeForAnotherResource.ToArray())
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(cacheValidTo, app.ClientCredential.ValidTo);
-                Assert.AreEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
-
-                // validate the send x5c forces a refresh of the cached client assertion
-                await app
-                      .AcquireTokenForClient(MsalTestConstants.Scope.ToArray())
-                      .WithSendX5C(true)
-                      .WithForceRefresh(true)
-                      .ExecuteAsync(CancellationToken.None)
-                      .ConfigureAwait(false);
-                Assert.AreNotEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadJwtToken(((ConfidentialClientApplication)app).ClientCredential.CachedAssertion);
+                var claims = jsonToken.Claims;
+                //checked if additional claim is in signed assertion
+                var audclaim = MsalTestConstants.ClientAssertionClaims.Where(x => x.Key == "aud").FirstOrDefault();
+                var validClaim = claims.Where(x => x.Type == audclaim.Key && x.Value == audclaim.Value).FirstOrDefault();
+                Assert.IsNotNull(validClaim);
             }
         }
 

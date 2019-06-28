@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         }
 
         [TestMethod]
-        public async Task ConfidentialClientWithClaimsTestAsync()
+        public async Task ConfidentialClientWithNoDefaultClaimsTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
             var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithClientClaims(cert, claims)
+                .WithClientClaims(cert, claims, false)
                 .Build();
 
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         }
 
         [TestMethod]
-        public async Task ConfidentialClientWithAdditionalClaimsTestAsync()
+        public async Task ConfidentialClientWithDefaultClaimsTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
             var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithAdditionalClientClaims(cert, claims)
+                .WithClientClaims(cert, claims)
                 .Build();
 
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
