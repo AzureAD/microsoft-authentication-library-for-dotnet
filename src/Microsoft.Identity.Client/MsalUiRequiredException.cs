@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-UiRequiredException for more details.
         /// </summary>
         /// <remarks>The class <see cref="InvalidGrantClassification"/> lists most classification strings as constants. </remarks>
-        public string Classification
+        internal string Classification
         {
             get
             {
