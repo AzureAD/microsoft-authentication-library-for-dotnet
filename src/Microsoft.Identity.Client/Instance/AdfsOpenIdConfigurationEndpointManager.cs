@@ -5,7 +5,6 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
@@ -30,19 +29,17 @@ namespace Microsoft.Identity.Client.Instance
             {
                 string resource = string.Format(CultureInfo.InvariantCulture, "https://{0}", authorityInfo.Host);
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
-             
 
-                var httpResponse = await _serviceBundle.HttpManager.SendGetAsync(new Uri(webFingerUrl), null, requestContext.Logger)
+
+                Http.HttpResponse httpResponse = await _serviceBundle.HttpManager.SendGetAsync(new Uri(webFingerUrl), null, requestContext.Logger)
                                                        .ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    throw new MsalServiceException(
+                    throw MsalServiceExceptionFactory.FromHttpResponse(
                         MsalError.InvalidAuthority,
-                        MsalErrorMessage.AuthorityValidationFailed)
-                    {
-                        HttpResponse = httpResponse
-                    };
+                        MsalErrorMessage.AuthorityValidationFailed,
+                        httpResponse);
                 }
 
                 AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext, false);

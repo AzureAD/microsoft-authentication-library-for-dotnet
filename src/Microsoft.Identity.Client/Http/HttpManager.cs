@@ -166,10 +166,10 @@ namespace Microsoft.Identity.Client.Http
                     return response;
                 }
 
-                throw new MsalServiceException(MsalError.ServiceNotAvailable, "Service is unavailable to process the request")
-                {
-                    HttpResponse = response
-                };
+                throw MsalServiceExceptionFactory.FromHttpResponse(
+                    MsalError.ServiceNotAvailable,
+                    "Service is unavailable to process the request",
+                    response);
             }
 
             return response;

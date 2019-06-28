@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return null;
 #else
                     if (MsalError.InvalidGrantError.Equals(ex?.ErrorCode, StringComparison.OrdinalIgnoreCase) &&
-                        OAuth2SubError.ClientMismatch.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
+                        InvalidGrantClassification.ClientMismatch.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
                     {
                         logger.Error("[FOCI] FRT refresh failed - client mismatch");
                         return null;

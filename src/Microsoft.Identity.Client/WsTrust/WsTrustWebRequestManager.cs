@@ -34,10 +34,10 @@ namespace Microsoft.Identity.Client.WsTrust
                         MsalErrorMessage.HttpRequestUnsuccessful,
                         (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
-                throw new MsalServiceException(MsalError.AccessingWsMetadataExchangeFailed, message)
-                {
-                    HttpResponse = httpResponse
-                };
+                throw MsalServiceExceptionFactory.FromHttpResponse(
+                    MsalError.AccessingWsMetadataExchangeFailed,
+                    message,
+                    httpResponse);
             }
 
             var mexDoc = new MexDocument(httpResponse.Body);
@@ -85,10 +85,10 @@ namespace Microsoft.Identity.Client.WsTrust
                         wsTrustEndpoint.Uri,
                         errorMessage);
 
-                throw new MsalServiceException(MsalError.FederatedServiceReturnedError, message)
-                {
-                    HttpResponse = resp
-                };
+                throw MsalServiceExceptionFactory.FromHttpResponse(
+                    MsalError.FederatedServiceReturnedError,
+                    message,
+                    resp);
             }
 
             try
