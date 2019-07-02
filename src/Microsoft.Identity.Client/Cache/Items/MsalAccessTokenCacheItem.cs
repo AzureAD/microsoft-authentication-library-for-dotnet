@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
         internal MsalAccessTokenCacheItem(
-            string prefferedCacheEnv,
+            string preferredCacheEnv,
             string clientId,
             string scopes,
             string tenantId,
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string userId = null)
             : this()
         {
-            Environment = prefferedCacheEnv;
+            Environment = preferredCacheEnv;
             ClientId = clientId;
             NormalizedScopes = scopes;
             TenantId = tenantId;
