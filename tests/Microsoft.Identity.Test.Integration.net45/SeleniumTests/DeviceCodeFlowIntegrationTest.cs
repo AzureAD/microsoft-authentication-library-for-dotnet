@@ -41,22 +41,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            //TODO: hook up the logger?
-            _seleniumDriver = SeleniumExtensions.CreateDefaultWebDriver();
-        }
-
-        [TestCleanup]
-        public void Cleanup()
-        {
-            _seleniumDriver?.Dispose();
-        }
         #endregion
 
         [TestMethod]
-        [Timeout(1 * 60 * 1000)] // 1 min timeout
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task DeviceCodeFlowTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -65,8 +53,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var pca = PublicClientApplicationBuilder.Create(labResponse.AppId).Build();
             var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
             {
-                RunAutomatedDeviceCodeFlow(deviceCodeResult, labResponse.User);
-
+                SeleniumExtensions.PerformDeviceCodeLogin(deviceCodeResult, labResponse.User, TestContext, false);
                 return Task.FromResult(0);
             }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
@@ -78,7 +65,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
 		[TestMethod]
         [Ignore("Adfs does not currently support device code flow")]
-        [Timeout(1 * 60 * 1000)] // 1 min timeout
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task DeviceCodeFlowAdfsTestAsync()
         {
             UserQuery query = new UserQuery
@@ -98,8 +85,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                                                                         .BuildConcrete();
             var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
             {
-                RunAutomatedDeviceCodeFlow(deviceCodeResult, labResponse.User, true);
-
+                SeleniumExtensions.PerformDeviceCodeLogin(deviceCodeResult, labResponse.User, TestContext, true);
                 return Task.FromResult(0);
             }).ExecuteAsync().ConfigureAwait(false);
 
@@ -107,40 +93,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-        }
-
-        private void RunAutomatedDeviceCodeFlow(DeviceCodeResult deviceCodeResult, LabUser user, bool isAdfs = false)
-        {
-            try
-            {
-                var fields = new UserInformationFieldIds(user);
-
-                Trace.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
-
-				string codeId = isAdfs ? "userCodeInput" : "code";
-                string continueId = isAdfs ? "confirmationButton" : "continueBtn";
-
-                _seleniumDriver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
-                _seleniumDriver
-                    // Device Code Flow web ui is undergoing A/B testing and is sometimes different - use 2 IDs
-                    .FindElement(SeleniumExtensions.ByIds("otc", codeId))
-                    .SendKeys(deviceCodeResult.UserCode);
-
-                IWebElement continueBtn = _seleniumDriver.WaitForElementToBeVisibleAndEnabled(
-                    SeleniumExtensions.ByIds(fields.AADSignInButtonId, continueId));
-                continueBtn?.Click();
-
-                _seleniumDriver.PerformLogin(user, Prompt.SelectAccount, isAdfs);
-
-                Trace.WriteLine("Authentication complete");
-
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("Browser automation failed " + ex);
-                _seleniumDriver.SaveScreenshot(TestContext);
-                throw;
-            }
         }
 
     }

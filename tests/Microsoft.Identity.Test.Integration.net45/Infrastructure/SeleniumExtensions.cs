@@ -12,6 +12,7 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using System.Linq;
 using Microsoft.Identity.Client;
+using System.Threading;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -30,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             options.AddArguments("headless");
 
             var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
-            if (String.IsNullOrEmpty(env))
+            if (string.IsNullOrEmpty(env))
             {
                 driver = new ChromeDriver(options);
             }
@@ -162,6 +163,48 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 Trace.WriteLine("Consenting...");
                 driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.AADSignInButtonId)).Click();
             }
+        }
+
+        public static void PerformDeviceCodeLogin(
+            DeviceCodeResult deviceCodeResult, 
+            LabUser user,
+            TestContext testContext,
+            bool isAdfs = false)
+        {
+            using (var seleniumDriver = CreateDefaultWebDriver())
+            {
+                try
+                {
+                    var fields = new UserInformationFieldIds(user);
+
+                    Trace.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
+
+                    string codeId = isAdfs ? "userCodeInput" : "code";
+                    string continueId = isAdfs ? "confirmationButton" : "continueBtn";
+
+                    seleniumDriver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
+                    seleniumDriver
+                        // Device Code Flow web ui is undergoing A/B testing and is sometimes different - use 2 IDs
+                        .FindElement(SeleniumExtensions.ByIds("otc", codeId))
+                        .SendKeys(deviceCodeResult.UserCode);
+
+                    IWebElement continueBtn = seleniumDriver.WaitForElementToBeVisibleAndEnabled(
+                        SeleniumExtensions.ByIds(fields.AADSignInButtonId, continueId));
+                    continueBtn?.Click();
+
+                    seleniumDriver.PerformLogin(user, Prompt.SelectAccount, isAdfs);
+                    Thread.Sleep(1000); // allow the browser to redirect
+
+                    Trace.WriteLine("Authentication complete");
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine("Browser automation failed " + ex);
+                    seleniumDriver?.SaveScreenshot(testContext);
+                    throw;
+                }
+            }
+            
         }
     }
 }
