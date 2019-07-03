@@ -95,12 +95,18 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                         return entry;
                     }
 
-                    InstanceDiscoveryResponse instanceDiscoveryResponse =
-                        await _networkMetadataProvider.FetchAllDiscoveryMetadataAsync(authorityUri, requestContext).ConfigureAwait(false);
-                    CacheInstanceDiscoveryMetadata(instanceDiscoveryResponse);
-                    entry = _staticMetadataProvider.GetMetadata(environment);
+                    entry = await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri, environment).ConfigureAwait(false);
 
-                    return entry ?? CreateEntryForSingleAuthority(authorityUri);
+                    if (entry != null)
+                    {
+                        return entry;
+                    }
+
+                    string message = "Instance metadata for this authority could neither be fetched nor found. " +
+                        "MSAL will continue regardless. SSO might be broken if authority aliases exist. ";
+                    requestContext.Logger.WarningPii(message + "Authority: " + authority, message);
+
+                    return CreateEntryForSingleAuthority(authorityUri);
 
                 // ADFS and B2C do not support instance discovery 
                 case AuthorityType.Adfs:
@@ -113,6 +119,33 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
         }
 
+        private async Task<InstanceDiscoveryMetadataEntry> FetchNetworkMetadataOrFallbackAsync(RequestContext requestContext, Uri authorityUri, string environment)
+        {
+            try
+            {
+                InstanceDiscoveryResponse instanceDiscoveryResponse =
+                    await _networkMetadataProvider.FetchAllDiscoveryMetadataAsync(authorityUri, requestContext).ConfigureAwait(false);
+                CacheInstanceDiscoveryMetadata(instanceDiscoveryResponse);
+                return _staticMetadataProvider.GetMetadata(environment);
+            }
+            catch (MsalServiceException ex)
+            {
+                // Validate Authority exception
+                if (ex.ErrorCode == MsalError.InvalidInstance)
+                {
+                    throw;
+                }
+
+                string message =
+                    "Instance Discovery failed. Potential cause: no network connection or discovery endpoint is busy. " +
+                    "See exception below. MSAL will continue without network instance metadata.";
+
+                requestContext.Logger.WarningPii(message + " Authority: " + authorityUri, message);
+                requestContext.Logger.WarningPii(ex);
+
+                return _knownMetadataProvider.GetMetadata(environment, Enumerable.Empty<string>());
+            }
+        }
 
         internal void AddTestValueToStaticProvider(string environment, InstanceDiscoveryMetadataEntry entry)
         {
