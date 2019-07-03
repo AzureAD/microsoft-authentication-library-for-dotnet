@@ -72,7 +72,7 @@ namespace XForms
 
             if (UseBroker)
             {
-                //builder.WithBroker(true);
+                builder.WithBroker(true);
                 builder = builder.WithRedirectUri(BrokerRedirectUriOnIos);
             }
 

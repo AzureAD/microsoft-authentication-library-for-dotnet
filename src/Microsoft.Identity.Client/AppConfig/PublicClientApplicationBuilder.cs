@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="enableBroker"></param>
         /// <returns></returns>
-        private PublicClientApplicationBuilder WithBroker(bool enableBroker)
+        public PublicClientApplicationBuilder WithBroker(bool enableBroker)
         {
 #if iOS
             Config.IsBrokerEnabled = enableBroker;

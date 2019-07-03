@@ -21,10 +21,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     /// </summary>
     internal class iOSBroker : NSObject, IBroker
     {
-        private static SemaphoreSlim brokerResponseReady = null;
-        private static NSUrl brokerResponse = null;
+        private static SemaphoreSlim s_brokerResponseReady = null;
+        private static NSUrl s_brokerResponse = null;
 
-        private IServiceBundle _serviceBundle;
+        private readonly IServiceBundle _serviceBundle;
 
         public iOSBroker(IServiceBundle serviceBundle)
         {
@@ -36,13 +36,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             if (uiParent == null)
             {
                 _serviceBundle.DefaultLogger.Error(iOSBrokerConstants.UiParentIsNullCannotInvokeBroker);
-                return false;
+                throw new MsalClientException("UIParent required", "UIParent required");
             }
 
             if (uiParent.CallerViewController == null)
             {
                 _serviceBundle.DefaultLogger.Error(iOSBrokerConstants.CallerViewControllerIsNullCannotInvokeBroker);
-                return false;
+                throw new MsalClientException("CallerViewController required", "CallerViewController required");
             }
 
             _serviceBundle.DefaultLogger.Info(iOSBrokerConstants.CanInvokeBroker + _serviceBundle.Config.IsBrokerEnabled);
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private async Task InvokeIosBrokerAsync(Dictionary<string, string> brokerPayload)
         {
-            brokerResponseReady = new SemaphoreSlim(0);
+            s_brokerResponseReady = new SemaphoreSlim(0);
 
             if (brokerPayload.ContainsKey(BrokerParameter.BrokerInstallUrl))
             {
@@ -126,12 +126,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
             }
 
-            await brokerResponseReady.WaitAsync().ConfigureAwait(false);
+            await s_brokerResponseReady.WaitAsync().ConfigureAwait(false);
         }
 
         private MsalTokenResponse ProcessBrokerResponse()
         {
-            string[] keyValuePairs = brokerResponse.Query.Split('&');
+            string[] keyValuePairs = s_brokerResponse.Query.Split('&');
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
 
             foreach (string pair in keyValuePairs)
@@ -190,8 +190,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public static void SetBrokerResponse(NSUrl responseUrl)
         {
-            brokerResponse = responseUrl;
-            brokerResponseReady.Release();
+            s_brokerResponse = responseUrl;
+            s_brokerResponseReady.Release();
         }
     }
 }

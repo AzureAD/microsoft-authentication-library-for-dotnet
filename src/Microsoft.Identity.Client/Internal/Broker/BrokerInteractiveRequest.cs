@@ -17,8 +17,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
     internal class BrokerInteractiveRequest
     {
         internal Dictionary<string, string> _brokerPayload = new Dictionary<string, string>();
-        readonly BrokerFactory brokerFactory = new BrokerFactory();
-        private IBroker Broker;
+        readonly BrokerFactory _brokerFactory = new BrokerFactory();
+        private IBroker _broker;
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
@@ -38,9 +38,9 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
-            Broker = brokerFactory.CreateBrokerFacade(_serviceBundle);
+            _broker = _brokerFactory.CreateBrokerFacade(_serviceBundle);
 
-            if (Broker.CanInvokeBroker(_interactiveParameters.UiParent))
+            if (_broker.CanInvokeBroker(_interactiveParameters.UiParent))
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             CreateRequestParametersForBroker();
 
             MsalTokenResponse msalTokenResponse =
-                await Broker.AcquireTokenUsingBrokerAsync(_brokerPayload).ConfigureAwait(false);
+                await _broker.AcquireTokenUsingBrokerAsync(_brokerPayload).ConfigureAwait(false);
 
             ValidateResponseFromBroker(msalTokenResponse);
             return msalTokenResponse;
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             _brokerPayload.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
             string scopes = EnumerableExtensions.AsSingleString(_authenticationRequestParameters.Scope);
 
-            _brokerPayload.Add(BrokerParameter.RequestScopes, scopes);
+            _brokerPayload.Add(BrokerParameter.Scope, scopes);
             _brokerPayload.Add(BrokerParameter.ClientId, _authenticationRequestParameters.ClientId);
             _brokerPayload.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString());
             _brokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());

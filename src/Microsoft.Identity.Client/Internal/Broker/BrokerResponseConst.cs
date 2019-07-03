@@ -6,7 +6,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
     internal class BrokerResponseConst
     {
         public const string ErrorMetadata = "error_metadata";
-        public const string ErrorDomain = "error_domain";
+        public const string BrokerErrorDomain = "broker_error_domain";
+        public const string BrokerErrorCode = "broker_error_code";
 
         public const string Authority = "authority";
         public const string AccessToken = "access_token";

@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(10, brokerInteractiveRequest._brokerPayload.Count);
 
                 Assert.AreEqual(CanonicalizedAuthority, brokerInteractiveRequest._brokerPayload[BrokerParameter.Authority]);
-                Assert.AreEqual(MsalTestConstants.ScopeStr, brokerInteractiveRequest._brokerPayload[BrokerParameter.RequestScopes]);
+                Assert.AreEqual(MsalTestConstants.ScopeStr, brokerInteractiveRequest._brokerPayload[BrokerParameter.Scope]);
                 Assert.AreEqual(MsalTestConstants.ClientId, brokerInteractiveRequest._brokerPayload[BrokerParameter.ClientId]);
 
                 Assert.IsFalse(String.IsNullOrEmpty(brokerInteractiveRequest._brokerPayload[BrokerParameter.CorrelationId]));

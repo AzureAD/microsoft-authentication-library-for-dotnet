@@ -80,6 +80,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     _msalTokenResponse = await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
                 }
+                else
+                {
+                    _msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+                }
             }
             else
             {
