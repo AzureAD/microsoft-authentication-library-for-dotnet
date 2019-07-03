@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             _brokerPayload.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString());
             _brokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
             _brokerPayload.Add(BrokerParameter.Force, "NO");
-            _brokerPayload.Add(BrokerParameter.RedirectUri, _authenticationRequestParameters.RedirectUri.AbsoluteUri);
+            _brokerPayload.Add(BrokerParameter.RedirectUri, _serviceBundle.Config.RedirectUri); 
 
             string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
             _brokerPayload.Add(BrokerParameter.ExtraQp, extraQP);

@@ -273,5 +273,6 @@ namespace Microsoft.Identity.Client
         public const string AuthorizeEndpointWasNotFoundInTheOpenIdConfiguration = "Authorize endpoint was not found in the openid configuration";
         public const string TokenEndpointWasNotFoundInTheOpenIdConfiguration = "Token endpoint was not found in the openid configuration";
         public const string IssuerWasNotFoundInTheOpenIdConfiguration = "Issuer was not found in the openid configuration";
+        public const string UIViewControllerIsRequiredToInvokeiOSBroker = "UIViewController is null, so MSAL.NET cannot invoke the iOS broker. See https://aka.ms/msal-net-ios-broker";
     }
 }

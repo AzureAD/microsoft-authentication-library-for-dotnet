@@ -33,16 +33,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public bool CanInvokeBroker(CoreUIParent uiParent)
         {
-            if (uiParent == null)
-            {
-                _serviceBundle.DefaultLogger.Error(iOSBrokerConstants.UiParentIsNullCannotInvokeBroker);
-                throw new MsalClientException("UIParent required", "UIParent required");
-            }
-
-            if (uiParent.CallerViewController == null)
+            if (uiParent?.CallerViewController == null)
             {
                 _serviceBundle.DefaultLogger.Error(iOSBrokerConstants.CallerViewControllerIsNullCannotInvokeBroker);
-                throw new MsalClientException("CallerViewController required", "CallerViewController required");
+                throw new MsalClientException(MsalError.UIViewControllerRequiredForiOSBroker, MsalErrorMessage.UIViewControllerIsRequiredToInvokeiOSBroker);
             }
 
             _serviceBundle.DefaultLogger.Info(iOSBrokerConstants.CanInvokeBroker + _serviceBundle.Config.IsBrokerEnabled);

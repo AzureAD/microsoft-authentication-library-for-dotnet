@@ -609,6 +609,14 @@ namespace Microsoft.Identity.Client
         /// <para>For more details</para> See https://aka.ms/msal-net-enable-keychain-groups
         /// </summary>
         public const string MissingEntitlements = "missing_entitlements";
+
+        /// <summary>
+        /// Xamarin.iOS + broker specific. This error indidates that the UiParent is null.
+        /// <para>Mitigation</para> In order to access the broker, you will need to pass in a UIViewController.
+        /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
+        /// 
+        /// </summary>
+        public const string UIViewControllerRequiredForiOSBroker = "uiViewController_required_for_ios_broker";
 #endif
 
 #if ANDROID
