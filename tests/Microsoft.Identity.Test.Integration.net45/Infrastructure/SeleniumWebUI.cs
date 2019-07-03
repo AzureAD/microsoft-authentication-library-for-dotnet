@@ -159,7 +159,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 }
 
                 throw new InvalidOperationException(
-                    $"Unknown exception: selenium status: {seleniumAutomationTask.Status} TCP listener status: {listenForAuthCodeTask.Status}");
+                    $"Unknown exception: selenium status: {seleniumAutomationTask.Status} TCP listener status: {listenForAuthCodeTask.Status}. " +
+                    $"Possible cause - the redirect Uri used is not the one configured." +
+                    $" A screen shot will be stored in the test results for you to inspect.");
             }
         }
 
