@@ -6,7 +6,6 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Content;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Platforms.Android;
 
 namespace XForms.Droid
 {

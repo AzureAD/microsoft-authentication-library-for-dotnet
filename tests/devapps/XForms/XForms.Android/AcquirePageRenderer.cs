@@ -17,14 +17,10 @@ using XForms;
 using Xamarin.Forms;
 using XForms.Droid;
 
-[assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
-
 namespace XForms.Droid
 {
     internal class AcquirePageRenderer : PageRenderer
     {
-        AcquirePage _page;
-
 		public AcquirePageRenderer(Context context) : base(context)
 		{
 		}
@@ -32,7 +28,6 @@ namespace XForms.Droid
 		protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
         {
             base.OnElementChanged(e);
-            _page = (AcquirePage)e.NewElement;
             var activity = this.Context as Activity;
         }
     }

@@ -2,10 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -14,11 +11,10 @@ namespace XForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LogPage : ContentPage
     {
-        private static readonly StringBuilder Sb = new StringBuilder();
-        private static readonly StringBuilder SbPii = new StringBuilder();
-        private static readonly object BufferLock = new object();
-        private static readonly object BufferLockPii = new object();
-
+        private static readonly StringBuilder s_sb = new StringBuilder();
+        private static readonly StringBuilder s_sbPii = new StringBuilder();
+        private static readonly object s_bufferLock = new object();
+        private static readonly object s_bufferLockPii = new object();
 
         public LogPage()
         {
@@ -32,25 +28,25 @@ namespace XForms
 
         private void ShowLog()
         {
-            lock (BufferLock)
+            lock (s_bufferLock)
             {
-                log.Text = Sb.ToString();
+                log.Text = s_sb.ToString();
             }
-            lock (BufferLockPii)
+            lock (s_bufferLockPii)
             {
-                logPii.Text = SbPii.ToString();
+                logPii.Text = s_sbPii.ToString();
             }
         }
 
         private void OnClearClicked(object sender, EventArgs e)
         {
-            lock (BufferLock)
+            lock (s_bufferLock)
             {
-                Sb.Clear();
+                s_sb.Clear();
             }
-            lock (BufferLockPii)
+            lock (s_bufferLockPii)
             {
-                SbPii.Clear();
+                s_sbPii.Clear();
             }
             ShowLog();
         }
@@ -59,16 +55,16 @@ namespace XForms
         {
             if (containsPii)
             {
-                lock (BufferLockPii)
+                lock (s_bufferLockPii)
                 {
-                    SbPii.AppendLine(str);
+                    s_sbPii.AppendLine(str);
                 }
             }
             else
             {
-                lock (BufferLock)
+                lock (s_bufferLock)
                 {
-                    Sb.AppendLine(str);
+                    s_sb.AppendLine(str);
                 }
             }
         }
