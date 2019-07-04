@@ -614,13 +614,11 @@ namespace Microsoft.Identity.Client
         /// Xamarin.iOS + broker specific. This error indidates that the UiParent is null.
         /// <para>Mitigation</para> In order to access the broker, you will need to pass in a UIViewController.
         /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
-        /// 
         /// </summary>
-        public const string UIViewControllerRequiredForiOSBroker = "uiViewController_required_for_ios_broker";
+        public const string UIViewControllerRequiredForiOSBroker = "uiviewcontroller_required_for_ios_broker";
 #endif
 
 #if ANDROID
-
         /// <summary>
         /// Xamarin.Android specific. This error indicates that a system browser was not installed on the user's device, and authentication
         /// using system browser could not be attempted because there was no available Android activity to handle the intent.

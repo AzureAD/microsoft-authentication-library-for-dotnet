@@ -84,10 +84,14 @@ namespace Microsoft.Identity.Client
 
 #if !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
-        ///
+        /// You can specify a Keychain Access Group to use for persisting the token cache across multiple applications.
+        /// This enables you to share the token cache between several applications having the same keychain access group.
+        /// Sharing the token cache allows single sign-on between all of the applications that use the same Keychain access Group.
+        /// See https://aka.ms/msal-net-ios-keychain-security-group for more information.
         /// </summary>
         /// <param name="keychainSecurityGroup"></param>
-        /// <returns></returns>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
         {
 #if iOS
@@ -97,10 +101,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///
+        /// On Android and iOS, brokers enabled Single-Sign-On, device identification,
+        /// and application identification verificatoin. To enable one of these features,
+        /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-brokers 
+        /// for more information on platform specific settings required to enable the broker.
         /// </summary>
         /// <param name="enableBroker"></param>
-        /// <returns></returns>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker)
         {
 #if iOS
