@@ -1,0 +1,20 @@
+﻿{
+    "metadata": [
+        {
+            "preferred_network": "login.microsoftonline.com",
+            "preferred_cache": "login.windows.net",
+            "aliases": [
+                "login.microsoftonline.com",
+                "login.windows.net"
+            ]
+        },
+        {
+            "preferred_network": "login.partner.microsoftonline.cn",
+            "preferred_cache": "login.partner.microsoftonline.cn",
+            "aliases": [
+                "login.partner.microsoftonline.cn",
+                "login.chinacloudapi.cn"
+            ]
+        }
+    ]
+}

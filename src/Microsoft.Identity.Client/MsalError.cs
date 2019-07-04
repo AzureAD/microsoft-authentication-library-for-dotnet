@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -650,6 +652,36 @@ namespace Microsoft.Identity.Client
         /// AAD service error indicating that the configured authority does not exist
         /// </summary>
         public const string InvalidInstance = "invalid_instance";
+        /// <summary>
+        /// <para>What happens?</para>You have configured your own instance metadata, but the json provided seems to be invalid. 
+        /// <para>Mitigation</para>See https://aka.ms/msal-net-custom-instance-metadata for an example of a valid json that can be used.
+        /// </summary>
+        public const string InvalidUserInstanceMetadata = "invalid-custom-instance-metadata";
+
+        /// <summary>
+        /// <para>What happens?</para>You have configured your own instance metadata, and have also configured custom metadata. These are mutually exclusive. 
+        /// <para>Mitigation</para>Set the validate authority flag to false. See https://aka.ms/msal-net-custom-instance-metadata for more details.
+        /// </summary>
+        public const string ValidateAuthorityOrCustomMetadata = "validate_authority_or_custom_instance_metadata";
+
+        /// <summary>
+        /// <para>What happens?</para>You haven't set a client ID.
+        /// <para>Mitigation</para>Use the application ID (a Guid) from the application portal as client ID in this SDK
+        /// </summary>
+        public const string NoClientId = "no_client_id";
+
+        /// <summary>
+        /// <para>What happens?</para>You've specified a client ID that is not a <see cref="Guid"/>
+        /// <para>Mitigation</para>Use the application ID (a Guid) from the application portal as client ID in this SDK
+        /// </summary>
+        public const string ClientIdMustBeAGuid = "client_id_must_be_guid";
+
+        /// <summary>
+        /// <para>What happens?</para>You have configured both a telememtry callback and a telemetry config. 
+        /// <para>Mitigation</para>Only one telememtry mechanism can be configured.
+        /// </summary>
+        public const string TelemetryConfigOrTelemetryCallback = "telemetry_config_or_telemetry_callback";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
