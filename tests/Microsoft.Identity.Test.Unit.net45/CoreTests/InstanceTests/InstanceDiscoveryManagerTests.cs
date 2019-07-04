@@ -3,8 +3,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -104,6 +106,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // No response from the static provider
             _staticMetadataProvider.GetMetadata("some_env.com").Returns((InstanceDiscoveryMetadataEntry)null);
+
             _knownMetadataProvider.GetMetadata("some_env.com", otherEnvs).Returns(_expectedResult);
 
             // Act
@@ -117,6 +120,80 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
             _staticMetadataProvider.Received(1).GetMetadata("some_env.com");
             _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs);
+        }
+
+        [TestMethod]
+        public async Task AuthorityValidationFailure_IsRethrown_Async()
+        {
+            // Arrange
+            var validationException = new MsalServiceException(MsalError.InvalidInstance, "authority validation failed"); 
+            _staticMetadataProvider = new StaticMetadataProvider();
+
+            // network fails with invalid_instance exception
+            _networkMetadataProvider
+                .When(x => x.FetchAllDiscoveryMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
+                .Do(x => throw validationException);
+          
+
+            // Act
+            var actualException = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+            _discoveryManager.GetMetadataEntryAsync(
+                "https://some_env.com/tid",
+                _testRequestContext))
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.AreSame(validationException, actualException);
+            _knownMetadataProvider.DidNotReceiveWithAnyArgs();
+        }
+
+        [TestMethod]
+        public async Task NetworkProviderFailures_AreIgnored_Async()
+        {
+            // Arrange
+            _staticMetadataProvider = new StaticMetadataProvider();
+            _knownMetadataProvider.GetMetadata("some_env.com", Enumerable.Empty<string>()).Returns(_expectedResult);
+
+            // network fails with something other than invalid_instance exception
+            _networkMetadataProvider
+                .When(x => x.FetchAllDiscoveryMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
+                .Do(x => throw new MsalServiceException("endpoint_busy", "some exception message"));
+
+
+            // Act
+            var actualResult = await _discoveryManager.GetMetadataEntryAsync(
+                "https://some_env.com/tid",
+                _testRequestContext)
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", Enumerable.Empty<string>());
+        }
+
+        [TestMethod]
+        public async Task NetworkProviderFailures_WithNoKnownMetadata_ContinuesWithAuthority_Async()
+        {
+            // Arrange
+            _staticMetadataProvider = new StaticMetadataProvider();
+
+            // no known metadata 
+            _knownMetadataProvider.GetMetadata(null, null).ReturnsForAnyArgs((InstanceDiscoveryMetadataEntry)null);
+
+            // network fails with something other than invalid_instance exception
+            _networkMetadataProvider
+                .When(x => x.FetchAllDiscoveryMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
+                .Do(x => throw new MsalServiceException("endpoint_busy", "some exception message"));
+
+            // Act
+            var actualResult = await _discoveryManager.GetMetadataEntryAsync(
+                "https://some_env.com/tid",
+                _testRequestContext)
+                .ConfigureAwait(false);
+
+            // Assert
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", Enumerable.Empty<string>());
+            ValidateSingleEntryMetadata(new Uri("https://some_env.com/tid"), actualResult);
         }
 
         [TestMethod]
@@ -178,15 +255,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(authority.Host, entry.PreferredCache);
-                Assert.AreEqual(authority.Host, entry.PreferredNetwork);
-                Assert.AreEqual(authority.Host, entry.Aliases.Single());
-
-                Assert.AreEqual(authority.Host, entry2.PreferredCache);
-                Assert.AreEqual(authority.Host, entry2.PreferredNetwork);
-                Assert.AreEqual(authority.Host, entry2.Aliases.Single());
-
+                ValidateSingleEntryMetadata(authority, entry);
+                ValidateSingleEntryMetadata(authority, entry2);
             }
+        }
+
+        private static void ValidateSingleEntryMetadata(Uri authority, InstanceDiscoveryMetadataEntry entry)
+        {
+            Assert.AreEqual(authority.Host, entry.PreferredCache);
+            Assert.AreEqual(authority.Host, entry.PreferredNetwork);
+            Assert.AreEqual(authority.Host, entry.Aliases.Single());
         }
     }
 }

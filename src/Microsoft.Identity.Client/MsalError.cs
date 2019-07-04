@@ -590,6 +590,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "Client_Credential_Authentication_Types_Are_Mutually_Exclusive";
 
+        /// <summary>
+        /// AAD service error indicating that the configured authority does not exist
+        /// </summary>
+        public const string InvalidInstance = "invalid_instance";
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
