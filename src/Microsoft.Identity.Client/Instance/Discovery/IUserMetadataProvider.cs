@@ -1,14 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
-    internal interface INetworkMetadataProvider
+    internal interface IUserMetadataProvider
     {
-        Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext);
+        InstanceDiscoveryMetadataEntry GetMetadataOrThrow(string environment, ICoreLogger logger);
     }
 }

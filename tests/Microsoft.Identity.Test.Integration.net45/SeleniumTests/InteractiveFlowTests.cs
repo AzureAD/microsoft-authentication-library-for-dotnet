@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
 #if DESKTOP // no point in running these tests on NetCore - the code path is similar
+
         [TestMethod]
         public async Task Interactive_AdfsV3_NotFederatedAsync()
         {
