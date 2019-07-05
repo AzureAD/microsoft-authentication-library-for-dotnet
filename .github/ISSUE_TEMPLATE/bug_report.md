@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Please do NOT file bugs without filling in this form.
-title: ''
+title: '[Bug] '
 labels: ''
 assignees: ''
 
