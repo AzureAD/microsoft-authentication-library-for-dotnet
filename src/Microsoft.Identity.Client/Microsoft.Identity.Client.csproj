@@ -24,10 +24,4 @@
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="MsalServiceExceptionFactory.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="MsalServiceExceptionFactory.cs" />
-  </ItemGroup>  
 </Project>

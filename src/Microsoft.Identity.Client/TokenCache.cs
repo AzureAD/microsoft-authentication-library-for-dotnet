@@ -6,12 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -160,7 +157,7 @@ namespace Microsoft.Identity.Client
         }
 
         private static IEnumerable<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(
-            AuthenticationRequestParameters requestParams, 
+            AuthenticationRequestParameters requestParams,
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
         {
             // this is OBO flow. match the cache entry with assertion hash,
@@ -218,7 +215,7 @@ namespace Microsoft.Identity.Client
             return homeAccIdMatch && clientIdMatch;
         }
 
-      
+
         private static List<IAccount> UpdateWithAdalAccounts(
             string envFromRequest,
             IEnumerable<string> envAliases,
