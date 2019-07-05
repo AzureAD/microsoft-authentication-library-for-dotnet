@@ -260,7 +260,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalUiRequiredException(
                     MsalError.NoPromptFailedError,
-                    MsalErrorMessage.NoPromptFailedErrorMessage);
+                    MsalErrorMessage.NoPromptFailedErrorMessage, 
+                    null, 
+                    UiRequiredExceptionClassification.PromptNeverFailed);
             }
 
             if (_authorizationResult.Status != AuthorizationStatus.Success)
