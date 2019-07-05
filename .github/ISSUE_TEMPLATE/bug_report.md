@@ -1,6 +1,10 @@
 ---
 name: Bug report
 about: Please do NOT file bugs without filling in this form.
+title: ''
+labels: ''
+assignees: ''
+
 ---
 
 **Which Version of MSAL are you using ?**

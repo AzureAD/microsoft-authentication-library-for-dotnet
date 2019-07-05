@@ -1,8 +1,12 @@
 ---
 name: Documentation
 about: Describe this issue template's purpose here.
+title: ''
+labels: ''
+assignees: ''
+
 ---
- 
+
 ### Documentation Related To Component:
 <!-- Type name of component here (e.g. "Contribute", or "Logging" ) -->
 
