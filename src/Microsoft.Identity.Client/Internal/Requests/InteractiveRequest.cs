@@ -70,11 +70,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (AuthenticationRequestParameters.IsBrokerEnabled)
             {
+                BrokerFactory brokerFactory = new BrokerFactory();
                 var brokerInteractiveRequest = new BrokerInteractiveRequest(
                     AuthenticationRequestParameters,
                     _interactiveParameters,
                     ServiceBundle,
-                    _authorizationResult);
+                    _authorizationResult,
+                    brokerFactory.Create(ServiceBundle));
 
                 if (brokerInteractiveRequest.IsBrokerInvocationRequired())
                 {

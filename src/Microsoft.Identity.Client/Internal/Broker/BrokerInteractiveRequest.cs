@@ -17,8 +17,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
     internal class BrokerInteractiveRequest
     {
         internal Dictionary<string, string> _brokerPayload = new Dictionary<string, string>();
-        readonly BrokerFactory _brokerFactory = new BrokerFactory();
-        private IBroker _broker;
+        internal readonly IBroker _broker;
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
@@ -28,18 +27,18 @@ namespace Microsoft.Identity.Client.Internal.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters,
             IServiceBundle serviceBundle,
-            AuthorizationResult authorizationResult)
+            AuthorizationResult authorizationResult,
+            IBroker broker)
         {
             _authenticationRequestParameters = authenticationRequestParameters;
             _interactiveParameters = acquireTokenInteractiveParameters;
             _serviceBundle = serviceBundle;
             _authorizationResult = authorizationResult;
+            _broker = broker;
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
-            _broker = _brokerFactory.CreateBrokerFacade(_serviceBundle);
-
             if (_broker.CanInvokeBroker(_interactiveParameters.UiParent))
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);

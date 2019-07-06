@@ -106,10 +106,10 @@ namespace Microsoft.Identity.Client
         /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-brokers 
         /// for more information on platform specific settings required to enable the broker.
         /// </summary>
-        /// <param name="enableBroker"></param>
+        /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
-        public PublicClientApplicationBuilder WithBroker(bool enableBroker)
+        public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
 #if iOS
             Config.IsBrokerEnabled = enableBroker;
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logeed-in in Windows.
+        /// Flag to enable authentication with the user currently logged-in in Windows.
         /// </summary>
         /// <param name="useCorporateNetwork">When set to true, the application will try to connect to the corporate network using windows integrated authentication.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more

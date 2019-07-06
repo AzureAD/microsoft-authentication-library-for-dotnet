@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
     internal class BrokerFactory
     {
         // thread safety ensured by implicit LazyThreadSafetyMode.ExecutionAndPublication
-        public IBroker CreateBrokerFacade(IServiceBundle serviceBundle)
+        public IBroker Create(IServiceBundle serviceBundle)
         {
 #if iOS
             return new iOSBroker(serviceBundle);

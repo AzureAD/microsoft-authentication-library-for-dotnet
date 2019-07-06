@@ -11,18 +11,18 @@ namespace XForms
     {
         public static PublicClientApplication MsalPublicClient;
 
-        public static object AndroidActivity { get; set; }
+        public static object RootViewController { get; set; }
 
-        public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
+        //public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
         // For system browser
-        //public const string DefaultClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+        public const string DefaultClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
 
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
 
-        public static string RedirectUriOnAndroid = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; // will not work with system browser
+        //public static string RedirectUriOnAndroid = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; // will not work with system browser
         // For system browser
-        //public static string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
+        public static string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
 
         public const string BrokerRedirectUriOnIos = "msauth.com.yourcompany.XForms://auth";
 
@@ -72,7 +72,7 @@ namespace XForms
 
             if (UseBroker)
             {
-                builder.WithBroker(true);
+                builder.WithBroker();
                 builder = builder.WithRedirectUri(BrokerRedirectUriOnIos);
             }
 
