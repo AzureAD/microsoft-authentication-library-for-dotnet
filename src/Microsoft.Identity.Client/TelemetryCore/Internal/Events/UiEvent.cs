@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public const string AccessDeniedKey = EventNamePrefix + "access_denied";
 
-        public UiEvent(string telemetryCorrelationId) : base(EventNamePrefix + "ui_event", telemetryCorrelationId) { }
+        public UiEvent(string correlationId) : base(EventNamePrefix + "ui_event", correlationId) { }
 
         public bool UserCancelled
         {

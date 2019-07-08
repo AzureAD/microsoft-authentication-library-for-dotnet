@@ -575,6 +575,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string WebviewUnavailable = "no_system_webview";
 
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <summary>
         /// <para>What happens?</para>You configured MSAL interactive authentication to use an embedded webview and you also configured <see cref="SystemWebViewOptions"/>.
         /// These are mutually exclusive.
@@ -582,7 +583,17 @@ namespace Microsoft.Identity.Client
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/>
         /// </summary>
         public const string SystemWebviewOptionsNotApplicable = "embedded_webview_not_compatible_default_browser";
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
+        /// <summary>
+        /// <para>What happens?</para>You configured MSAL confidential client authentication with more than one authentication type (Certificate, Secret, Client Assertion)
+        /// </summary>
+        public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "Client_Credential_Authentication_Types_Are_Mutually_Exclusive";
+
+        /// <summary>
+        /// AAD service error indicating that the configured authority does not exist
+        /// </summary>
+        public const string InvalidInstance = "invalid_instance";
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
@@ -602,10 +613,16 @@ namespace Microsoft.Identity.Client
         /// <para>For more details</para> See https://aka.ms/msal-net-enable-keychain-groups
         /// </summary>
         public const string MissingEntitlements = "missing_entitlements";
+
+        /// <summary>
+        /// Xamarin.iOS + broker specific. This error indidates that the UIViewController is null.
+        /// <para>Mitigation</para> In order to access the broker, you will need to pass in a UIViewController.
+        /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
+        /// </summary>
+        public const string UIViewControllerRequiredForiOSBroker = "uiviewcontroller_required_for_ios_broker";
 #endif
 
 #if ANDROID
-
         /// <summary>
         /// Xamarin.Android specific. This error indicates that a system browser was not installed on the user's device, and authentication
         /// using system browser could not be attempted because there was no available Android activity to handle the intent.

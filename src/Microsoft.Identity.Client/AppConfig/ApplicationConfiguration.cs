@@ -56,6 +56,7 @@ namespace Microsoft.Identity.Client
         public LogCallback LoggingCallback { get; internal set; }
         public string Component { get; internal set; }
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
+        public bool UseRecommendedDefaultRedirectUri { get; internal set; }
 
         internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
         internal ILegacyCachePersistence AppTokenLegacyCachePersistenceForTest { get; set; }
@@ -64,7 +65,11 @@ namespace Microsoft.Identity.Client
 
         public ClientCredentialWrapper ClientCredential { get; internal set; }
         public string ClientSecret { get; internal set; }
+        public string SignedClientAssertion { get; internal set; }
         public X509Certificate2 ClientCredentialCertificate { get; internal set; }
+        public IDictionary<string, string> ClaimsToSign { get; internal set; }
+        public bool MergeWithDefaultClaims { get; internal set; }
+        internal int ConfidentialClientCredentialCount;
 #endif
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions

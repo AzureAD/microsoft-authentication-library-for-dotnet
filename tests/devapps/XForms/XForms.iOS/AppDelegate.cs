@@ -33,7 +33,7 @@ namespace XForms.iOS
             Telemetry.GetInstance().RegisterReceiver(
                 (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
 #endif
-
+            App.RootViewController = new UIViewController();
             //App.MsalPublicClient.iOSKeychainSecurityGroup = "com.microsoft.adalcache";
 
             return base.FinishedLaunching(app, options);

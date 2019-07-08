@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -69,15 +70,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (AuthenticationRequestParameters.IsBrokerEnabled)
             {
+                BrokerFactory brokerFactory = new BrokerFactory();
                 var brokerInteractiveRequest = new BrokerInteractiveRequest(
                     AuthenticationRequestParameters,
                     _interactiveParameters,
                     ServiceBundle,
-                    _authorizationResult);
+                    _authorizationResult,
+                    brokerFactory.Create(ServiceBundle));
 
                 if (brokerInteractiveRequest.IsBrokerInvocationRequired())
                 {
                     _msalTokenResponse = await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    _msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
                 }
             }
             else
@@ -98,7 +105,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.RedirectUri = _webUi.UpdateRedirectUri(AuthenticationRequestParameters.RedirectUri);
             var authorizationUri = CreateAuthorizationUri(true);
 
-            var uiEvent = new UiEvent(AuthenticationRequestParameters.RequestContext.TelemetryCorrelationId);
+            var uiEvent = new UiEvent(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(uiEvent))
             {
                 _authorizationResult = await _webUi.AcquireAuthorizationAsync(

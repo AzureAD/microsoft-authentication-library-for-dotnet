@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             var requestParams = _confidentialClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             var requestParams = _confidentialClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             var requestParams = _confidentialClientApplication.CreateRequestParameters(
                 commonParameters,
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             var requestParameters = _confidentialClientApplication.CreateRequestParameters(
                 commonParameters,

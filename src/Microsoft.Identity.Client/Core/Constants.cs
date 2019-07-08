@@ -14,6 +14,8 @@ namespace Microsoft.Identity.Client.Core
 
         public const string UapWEBRedirectUri = "https://sso"; // only ADAL supports WEB
         public const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        public const string NativeClientRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
+        public const string LocalHostRedirectUri = "http://localhost";
         public const string DefaultConfidentialClientRedirectUri = "https://replyUrlNotSet";
 
         public const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
@@ -36,14 +38,15 @@ namespace Microsoft.Identity.Client.Core
 
         public const string WellKnownOpenIdConfigurationPath = ".well-known/openid-configuration";
         public const string OpenIdConfigurationEndpoint = "v2.0/" + WellKnownOpenIdConfigurationPath;
-
+        public const string Tenant = "{tenant}";
+        public const string TenantId = "{tenantid}";
         public static string FormatAdfsWebFingerUrl(string host, string resource)
         {
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "https://{0}/.well-known/webfinger?rel={1}&resource={2}",
                 host,
-                Constants.DefaultRealm,
+                DefaultRealm,
                 resource);
         }
     }

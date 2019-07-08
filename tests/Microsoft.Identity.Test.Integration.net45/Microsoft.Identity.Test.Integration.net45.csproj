@@ -26,6 +26,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
     <PackageReference Include="StrongNamer" Version="0.0.8" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.4.0" />
     <!-- This reference is a workaround for a bug in .net46
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />

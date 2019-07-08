@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenCommonParameters commonParameters,
             Func<Task<AuthenticationResult>> executorAction)
         {
-            var action = _mats.StartAction(_mats.CreateScenario(), commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
+            var action = _mats.StartAction(_mats.CreateScenario(), commonParameters.CorrelationId.AsMatsCorrelationId());
 
             try
             {
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenCommonParameters commonParameters,
             Func<Task<Uri>> executorAction)
         {
-            var action = _mats.StartAction(null, commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
+            var action = _mats.StartAction(null, commonParameters.CorrelationId.AsMatsCorrelationId());
 
             try
             {

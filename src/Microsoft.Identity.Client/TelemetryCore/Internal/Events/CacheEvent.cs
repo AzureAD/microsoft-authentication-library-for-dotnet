@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public const string TokenTypeKey = EventNamePrefix + "token_type";
 
-        public CacheEvent(string eventName, string telemetryCorrelationId) : base(eventName, telemetryCorrelationId)
+        public CacheEvent(string eventName, string correlationId) : base(eventName, correlationId)
         {
         }
 
@@ -25,7 +25,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             AT,
             RT,
             ID,
-            ACCOUNT
+            Account, 
+            AppMetadata
         };
 
         public TokenTypes TokenType
@@ -37,7 +38,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
                     {TokenTypes.AT, "at"},
                     {TokenTypes.RT, "rt"},
                     {TokenTypes.ID, "id"},
-                    {TokenTypes.ACCOUNT, "account"}
+                    {TokenTypes.Account, "account"},
+                    {TokenTypes.AppMetadata, "appmetadata"}
                 };
                 this[TokenTypeKey] = types[value];
             }

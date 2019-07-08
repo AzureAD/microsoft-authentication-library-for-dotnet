@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
         internal MsalAccountCacheItem(
-            string environment,
+            string preferredCacheEnv,
             MsalTokenResponse response,
             string preferredUsername,
             string tenantId)
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             var idToken = IdToken.Parse(response.IdToken);
 
             Init(
-                environment,
+                preferredCacheEnv,
                 idToken?.ObjectId,
                 response.ClientInfo,
                 idToken.Name,

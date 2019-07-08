@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             return stringBuilder.ToString().ToLowerInvariant();
         }
 
-#region iOS
+        #region iOS
 
         internal static readonly Dictionary<string, int> iOSAuthorityTypeToAttrType = new Dictionary<string, int>()
         {

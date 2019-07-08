@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Client
         public const string ConfidentialClientDoesntImplementIConfidentialClientApplicationExecutor =
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
 
-        public const string ClientSecretAndCertificateAreMutuallyExclusive = "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.";
+        public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "ClientSecret, Certificate and ClientAssertion are mutually exclusive properties. Only specify one. See https://aka.ms/msal-net-client-credentials";
         public const string ClientIdMustBeAGuid = "Error: ClientId is not a Guid.";
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
@@ -269,5 +269,10 @@ namespace Microsoft.Identity.Client
 
         public const string EmbeddedWebviewDefaultBrowser = "You configured MSAL interactive authentication to use an embedded WebView " +
             "and you also configured system WebView options. These are mutually exclusive. See https://aka.ms/msal-net-os-browser";
+
+        public const string AuthorizeEndpointWasNotFoundInTheOpenIdConfiguration = "Authorize endpoint was not found in the openid configuration";
+        public const string TokenEndpointWasNotFoundInTheOpenIdConfiguration = "Token endpoint was not found in the openid configuration";
+        public const string IssuerWasNotFoundInTheOpenIdConfiguration = "Issuer was not found in the openid configuration";
+        public const string UIViewControllerIsRequiredToInvokeiOSBroker = "UIViewController is null, so MSAL.NET cannot invoke the iOS broker. See https://aka.ms/msal-net-ios-broker";
     }
 }

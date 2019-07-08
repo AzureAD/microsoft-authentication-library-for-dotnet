@@ -64,6 +64,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string B2CWebPasswordId = "password";
         public const string B2CLoginAuthority = "b2clogin.com";
         public const string ROPC = "ROPC";
+        public const string AcquireTokenByRopcButtonId = "acquireTokenByROPC";
         public const string ROPCUsernameId = "usernameId";
         public const string ROPCPasswordId = "passwordId";
         public const string MicrosoftOnlineAuthority = "login.microsoftonline.com";

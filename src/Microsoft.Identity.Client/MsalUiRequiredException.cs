@@ -38,8 +38,22 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="innerException">Represents the root cause of the exception.</param>
-        public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException) : base(errorCode, errorMessage, innerException)
+        public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException) :
+            base(errorCode, errorMessage, innerException)
         {
+        }
+
+        /// <summary>
+        /// Classification of the conditional access error, enabling you to do more actions or inform the user depending on your scenario. 
+        /// See https://aka.ms/msal-net-UiRequiredException for more details.
+        /// </summary>
+        /// <remarks>The class <see cref="InvalidGrantClassification"/> lists most classification strings as constants. </remarks>
+        internal string Classification
+        {
+            get
+            {
+                return InvalidGrantClassification.GetUiExceptionClassification(SubError);
+            }
         }
     }
 }

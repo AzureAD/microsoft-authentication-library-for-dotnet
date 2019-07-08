@@ -1,3 +1,16 @@
+4.1.0
+=============
+New Features:
+- **MSAL.NET now provides options to control the system web browser**. From MSAL.NET 4.0.0, you have been able to use the interactive token acquisition with .NET Core, by delegating the sign-in and consent part to the system web browser on your machine. MSAL.NET 4.1, brings improvements to this experience by helping you run a specific browser if you wish, and by giving you ways to decide what to display to the user in case of a successful authentication, and in case of failure. [More information about this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.1#improved-experience-with-the-system-web-browser-on-net-core)
+- **MSAL.NET now supports ClientAssertions**. In order to prove their identity, confidential client applications exchange a secret with Azure AD. MSAL.NET 4.1 adds a new capabilities for this advanced scenario: in addition to `.WithClientSecret()` and `.WithCertificate()`, it now provides three new methods: `.WithSignedAssertion()`, `.WithClientClaims()` and `.WithClientAdditionalClaims()`. [More information on this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.1#confidential-client-applications-now-support-client-assertions)
+
+Bug Fixes:
+- **When using the `ConfidentialClientApplicationOptions` and including, for example `Instance = "https://login.microsoftonline.com/"`, MSAL.NET was concatenating the double-slash**. MSAL.NET will now check for a trailing slash and remove it. There is no action needed on the part of the developer. See [#1196] for details.
+- **When using ADFS 2019, if no login-hint was included in the call, a null ref was thrown**. See [#1214] for details.
+- **On iOS, for certain older auth libraries, sharing the cache with MSAL.NET, there was an issue with null handling in json**. The json serializer in MSAL.NET no longer writes values to json for which the values are null, this is especially important for foci_id. See [#1189] and [#1176] for details.
+- **When using `.WithCertificate()` and `/common/` as the authority in a confidential client flow, the MSAL.NET was creating the `aud` claim of the client assertion as `"https://login.microsoftonline.com/{tenantid}/v2.0"`**. Now, MSAL.NET will honor both a tenant specific authority and common or organizations when creating the `aud` claim. [#891]
+- **MSAL.NET will  make network calls less often when developers call `GetAccountsAsync` and `AcquireTokenSilent`**. AAD maintains an instance discovery endpoint which lists environment aliases for each cloud. In order to optimize SSO, MSAL fetches this list and caches it - MSAL has to make a network call even in simple cases like `GetAccontsAsync`. This improvement bypasses the need for this network call if the environments used are the standard ones. This work is tracked by [MSAL issue 1174](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1174)
+
 4.0.0
 =============
 New Features:

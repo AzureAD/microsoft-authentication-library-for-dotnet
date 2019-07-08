@@ -167,6 +167,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {

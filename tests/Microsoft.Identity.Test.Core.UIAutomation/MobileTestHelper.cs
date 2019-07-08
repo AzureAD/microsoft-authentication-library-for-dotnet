@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Test.LabInfrastructure;
 using NUnit.Framework;
@@ -18,9 +19,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         private string _acquirePageId;
         private string _cachePageId;
         private string _settingsPageId;
+        private Xamarin.UITest.Platform _platform;
 
         public MobileTestHelper(Xamarin.UITest.Platform platform)
         {
+            _platform = platform;
             SetPageNavigationIds(platform);
         }
 
@@ -74,8 +77,14 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             AcquireTokenInteractiveHelper(controller, labResponse, CoreUiTestConstants.UiBehaviorLogin);
             VerifyResult(controller);
 
-            //acquire token for 2nd resource with refresh token
-            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, CoreUiTestConstants.UiBehaviorLogin);
+            controller.Tap(CoreUiTestConstants.SelectUser, XamarinSelector.ByAutomationId);
+            controller.Tap(labResponse.User.Upn);
+
+            if (_platform == Xamarin.UITest.Platform.iOS)
+            {
+                controller.Tap("Done");
+            }
+
             controller.Tap(CoreUiTestConstants.AcquireTokenSilentButtonId);
             VerifyResult(controller);
         }
@@ -189,7 +198,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// <param name="controller">The test framework that will execute the test interaction</param>
         public void B2CLocalAccountAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
-            //acquire token for 1st resource
             B2CLocalAccountAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
             B2CSilentFlowHelper(controller);
@@ -202,13 +210,13 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public void B2CAcquireTokenROPCTest(ITestController controller, LabResponse labResponse)
         {
             SetB2CInputDataForROPC(controller);
-            
-            controller.Tap(_acquirePageId);
 
+            controller.Tap(_acquirePageId);
             controller.Tap(CoreUiTestConstants.ROPCUsernameId, XamarinSelector.ByAutomationId);
             controller.EnterText(CoreUiTestConstants.ROPCUsernameId, labResponse.User.Upn, XamarinSelector.ByAutomationId);
             controller.Tap(CoreUiTestConstants.ROPCPasswordId, XamarinSelector.ByAutomationId);
             controller.EnterText(CoreUiTestConstants.ROPCPasswordId, labResponse.User.GetOrFetchPassword(), XamarinSelector.ByAutomationId);
+            controller.Tap(CoreUiTestConstants.AcquireTokenByRopcButtonId, XamarinSelector.ByAutomationId);
 
             VerifyResult(controller);
         }
@@ -282,13 +290,27 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             // Select authority
             controller.Tap(CoreUiTestConstants.AuthorityPickerId);
             controller.Tap(authority);
+
+            if (_platform == Xamarin.UITest.Platform.iOS)
+            {
+                controller.Tap("Done");
+            }
         }
 
         public void PerformB2CLocalAccountSignInFlow(ITestController controller, LabUser user, UserInformationFieldIds userInformationFieldIds)
         {
             controller.EnterText(CoreUiTestConstants.WebUpnB2CLocalInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.EnterText(userInformationFieldIds.GetPasswordInputId(true), user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
+            if (_platform == Xamarin.UITest.Platform.iOS)
+            {
+                controller.Tap(CoreUiTestConstants.B2CWebPasswordId, XamarinSelector.ByHtmlIdAttribute);
+                controller.EnterText(CoreUiTestConstants.B2CWebPasswordId, user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
+                controller.DismissKeyboard();
+            }
+            else
+            {
+                controller.EnterText(userInformationFieldIds.GetPasswordInputId(true), user.GetOrFetchPassword(), XamarinSelector.ByHtmlIdAttribute);
+            }
 
             controller.Tap(userInformationFieldIds.GetPasswordSignInButtonId(true), XamarinSelector.ByHtmlIdAttribute);
         }
@@ -336,18 +358,18 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             switch (b2CIdentityProvider)
             {
-            case B2CIdentityProvider.Local:
-                PerformB2CLocalAccountSignInFlow(controller, user, userInformationFieldIds);
-                break;
-            case B2CIdentityProvider.Google:
-                PerformB2CGoogleProviderSignInFlow(controller, user, userInformationFieldIds);
-                break;
+                case B2CIdentityProvider.Local:
+                    PerformB2CLocalAccountSignInFlow(controller, user, userInformationFieldIds);
+                    break;
+                case B2CIdentityProvider.Google:
+                    PerformB2CGoogleProviderSignInFlow(controller, user, userInformationFieldIds);
+                    break;
 
-            case B2CIdentityProvider.Facebook:
-                PerformB2CFacebookProviderSignInFlow(controller, user, userInformationFieldIds);
-                break;
-            default:
-                throw new InvalidOperationException("B2CIdentityProvider unknown");
+                case B2CIdentityProvider.Facebook:
+                    PerformB2CFacebookProviderSignInFlow(controller, user, userInformationFieldIds);
+                    break;
+                default:
+                    throw new InvalidOperationException("B2CIdentityProvider unknown");
             }
             VerifyResult(controller);
         }
@@ -363,11 +385,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             switch (b2CIdentityProvider)
             {
-            case B2CIdentityProvider.Facebook:
-                controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
-                break;
-            default:
-                throw new InvalidOperationException("B2CIdentityProvider unknown");
+                case B2CIdentityProvider.Facebook:
+                    controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
+                    break;
+                default:
+                    throw new InvalidOperationException("B2CIdentityProvider unknown");
             }
             VerifyResult(controller);
         }
@@ -489,14 +511,14 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
                     switch (ex.Error)
                     {
-                    case VerificationError.ResultIndicatesFailure:
-                        Assert.Fail("Test result indicates failure");
-                        break;
-                    case VerificationError.ResultNotFound:
-                        Task.Delay(CoreUiTestConstants.ResultCheckPolliInterval).Wait();
-                        break;
-                    default:
-                        throw;
+                        case VerificationError.ResultIndicatesFailure:
+                            Assert.Fail("Test result indicates failure");
+                            break;
+                        case VerificationError.ResultNotFound:
+                            Task.Delay(CoreUiTestConstants.ResultCheckPolliInterval).Wait();
+                            break;
+                        default:
+                            throw;
                     }
                 }
             } while (true);
@@ -506,16 +528,16 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             switch (platform)
             {
-            case Xamarin.UITest.Platform.Android:
-                _cachePageId = CoreUiTestConstants.CachePageAndroidID;
-                _acquirePageId = CoreUiTestConstants.AcquirePageAndroidId;
-                _settingsPageId = CoreUiTestConstants.SettingsPageAndroidId;
-                break;
-            case Xamarin.UITest.Platform.iOS:
-                _cachePageId = CoreUiTestConstants.CachePageID;
-                _acquirePageId = CoreUiTestConstants.AcquirePageId;
-                _settingsPageId = CoreUiTestConstants.SettingsPageId;
-                break;
+                case Xamarin.UITest.Platform.Android:
+                    _cachePageId = CoreUiTestConstants.CachePageAndroidID;
+                    _acquirePageId = CoreUiTestConstants.AcquirePageAndroidId;
+                    _settingsPageId = CoreUiTestConstants.SettingsPageAndroidId;
+                    break;
+                case Xamarin.UITest.Platform.iOS:
+                    _cachePageId = CoreUiTestConstants.CachePageID;
+                    _acquirePageId = CoreUiTestConstants.AcquirePageId;
+                    _settingsPageId = CoreUiTestConstants.SettingsPageId;
+                    break;
             }
         }
     }

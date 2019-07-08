@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 return new MsalTokenResponse
                 {
-                    Error = responseDictionary[BrokerResponseConst.ErrorDomain],
+                    Error = responseDictionary[BrokerResponseConst.BrokerErrorCode],
                     ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.ErrorMetadata])
                 };
             }

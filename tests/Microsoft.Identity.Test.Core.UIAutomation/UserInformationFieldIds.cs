@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public string GetPasswordInputId(bool isB2CTest = false)
         {
 
-            if (String.IsNullOrWhiteSpace(_passwordInputId))
+            if (string.IsNullOrWhiteSpace(_passwordInputId))
             {
                 DetermineFieldIds(isB2CTest);
             }

@@ -50,12 +50,48 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Configures the public client application to use the recommended reply URI for the platform.
+        /// See https://aka.ms/msal-net-default-reply-uri.
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Platform</term>
+        /// <term>Default Reply URI</term>
+        /// </listheader>
+        /// <item>
+        /// <term>.NET desktop</term>
+        /// <term><c>https://login.microsoftonline.com/common/oauth2/nativeclient</c></term>
+        /// </item>
+        /// <item>
+        /// <term>UWP</term>
+        /// <term>value of <c>WebAuthenticationBroker.GetCurrentApplicationCallbackUri()</c></term>
+        /// </item>
+        /// <item>
+        /// <term>For system browser on .NET Core</term>
+        /// <term><c>https://localhost</c></term>
+        /// </item>
+        /// </list>
+        /// NOTE:There will be an update to the default rediect uri in the future to accomodate for system browsers on the
+        /// .NET desktop and .NET Core platforms.
+        /// </summary>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public PublicClientApplicationBuilder WithDefaultRedirectUri()
+        {
+            Config.UseRecommendedDefaultRedirectUri = true;
+            return this;
+        }
+
 #if !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
-        ///
+        /// You can specify a Keychain Access Group to use for persisting the token cache across multiple applications.
+        /// This enables you to share the token cache between several applications having the same keychain access group.
+        /// Sharing the token cache allows single sign-on between all of the applications that use the same Keychain access Group.
+        /// See https://aka.ms/msal-net-ios-keychain-security-group for more information.
         /// </summary>
         /// <param name="keychainSecurityGroup"></param>
-        /// <returns></returns>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
         {
 #if iOS
@@ -67,16 +103,15 @@ namespace Microsoft.Identity.Client
 #endif // !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
 
         /// <summary>
-        ///
+        /// On Android and iOS, brokers enable Single-Sign-On, device identification,
+        /// and application identification verification. To enable one of these features,
+        /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-brokers
+        /// for more information on platform specific settings required to enable the broker.
         /// </summary>
-        /// <param name="enableBroker"></param>
-        /// <returns></returns>
-#if SUPPORTS_WAM
-        public
-#else
-        private
-#endif
-            PublicClientApplicationBuilder WithBroker(bool enableBroker)
+        /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
 #if iOS || SUPPORTS_WAM
             Config.IsBrokerEnabled = enableBroker;
@@ -86,7 +121,7 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logeed-in in Windows.
+        /// Flag to enable authentication with the user currently logged-in in Windows.
         /// </summary>
         /// <param name="useCorporateNetwork">When set to true, the application will try to connect to the corporate network using windows integrated authentication.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
@@ -138,7 +173,7 @@ namespace Microsoft.Identity.Client
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
-                                                         .GetDefaultRedirectUri(Config.ClientId);
+                                                         .GetDefaultRedirectUri(Config.ClientId, Config.UseRecommendedDefaultRedirectUri);
             }
 
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))

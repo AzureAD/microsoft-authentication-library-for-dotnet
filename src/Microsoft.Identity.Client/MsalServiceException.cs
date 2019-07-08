@@ -17,6 +17,12 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class MsalServiceException : MsalException
     {
+        private const string ClaimsKey = "claims";
+        private const string ResponseBodyKey = "response_body";
+        private const string CorrelationIdKey = "correlation_id";
+        private const string SubErrorKey = "sub_error";
+
+        #region Constructors
         /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code, error message and a reference to the inner exception that is the cause of
@@ -123,36 +129,7 @@ namespace Microsoft.Identity.Client
             Claims = claims;
         }
 
-        private HttpResponse _httpResponse;
-
-        internal HttpResponse HttpResponse
-        {
-            get => _httpResponse;
-            set
-            {
-                _httpResponse = value;
-                ResponseBody = _httpResponse?.Body;
-                StatusCode = _httpResponse != null ? (int)_httpResponse.StatusCode : 0;
-                Headers = _httpResponse?.Headers;
-
-                // In most cases we can deserialize the body to get more details such as the suberror
-                OAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(_httpResponse?.Body);
-            }
-        }
-
-        private OAuth2ResponseBase _oauth2ResponseBase;
-
-        internal OAuth2ResponseBase OAuth2Response
-        {
-            get => _oauth2ResponseBase;
-            set
-            {
-                _oauth2ResponseBase = value;
-                Claims = _oauth2ResponseBase?.Claims;
-                CorrelationId = _oauth2ResponseBase?.CorrelationId;
-                SubError = _oauth2ResponseBase?.SubError;
-            }
-        }
+        #endregion
 
         /// <summary>
         /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c> in the inner
@@ -219,11 +196,6 @@ namespace Microsoft.Identity.Client
                 ResponseBody,
                 Headers);
         }
-
-        private const string ClaimsKey = "claims";
-        private const string ResponseBodyKey = "response_body";
-        private const string CorrelationIdKey = "correlation_id";
-        private const string SubErrorKey = "sub_error";
 
         internal override void PopulateJson(JObject jobj)
         {

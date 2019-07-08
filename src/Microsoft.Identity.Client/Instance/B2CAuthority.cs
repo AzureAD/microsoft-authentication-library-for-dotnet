@@ -19,27 +19,15 @@ namespace Microsoft.Identity.Client.Instance
         {
         }
 
-        #pragma warning disable
-        internal override async Task UpdateCanonicalAuthorityAsync(
-            RequestContext requestContext)
-        {
-        }
-
         internal override string GetTenantId()
         {
             return new Uri(AuthorityInfo.CanonicalAuthority).Segments[2].TrimEnd('/');
         }
 
-        internal override void UpdateTenantId(string tenantId)
+        internal override string GetTenantedAuthority(string tenantId)
         {
-            Uri authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
-            var segments = authorityUri.Segments;
-
-            var b2cPrefix = segments[1].TrimEnd('/');
-            var b2cPolicy = segments[3].TrimEnd('/');
-
-            AuthorityInfo.CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, B2CCanonicalAuthorityTemplate,
-                                                             authorityUri.Authority, b2cPrefix, tenantId, b2cPolicy);
+            // For B2C, tenant is not changeble
+            return AuthorityInfo.CanonicalAuthority;
         }
     }
 }

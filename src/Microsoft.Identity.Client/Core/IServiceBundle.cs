@@ -3,6 +3,7 @@
 
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.WsTrust;
@@ -15,7 +16,7 @@ namespace Microsoft.Identity.Client.Core
         ICoreLogger DefaultLogger { get; }
         IHttpManager HttpManager { get; }
         ITelemetryManager TelemetryManager { get; }
-        IAadInstanceDiscovery AadInstanceDiscovery { get; }
+        IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }

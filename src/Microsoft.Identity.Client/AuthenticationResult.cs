@@ -33,6 +33,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">granted scope values as returned by the service</param>
         /// <param name="tenantId">identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
         /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that
+        /// <param name="correlationId">The correlation id of the authentication request</param>
         /// is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
         public AuthenticationResult(
             string accessToken,
@@ -43,7 +44,8 @@ namespace Microsoft.Identity.Client
             string tenantId,
             IAccount account,
             string idToken,
-            IEnumerable<string> scopes)
+            IEnumerable<string> scopes,
+            Guid correlationId)
         {
             AccessToken = accessToken;
             IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
@@ -54,13 +56,14 @@ namespace Microsoft.Identity.Client
             Account = account;
             IdToken = idToken;
             Scopes = scopes;
+            CorrelationId = correlationId;
         }
 
         internal AuthenticationResult()
         {
         }
 
-        internal AuthenticationResult(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem)
+        internal AuthenticationResult(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem, Guid correlationID)
         {
             if (msalAccessTokenCacheItem.HomeAccountId != null)
             {
@@ -79,6 +82,7 @@ namespace Microsoft.Identity.Client
             IdToken = msalIdTokenCacheItem?.Secret;
             Scopes = msalAccessTokenCacheItem.ScopeSet;
             IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
+            CorrelationId = correlationID;
         }
 
         /// <summary>
@@ -140,6 +144,11 @@ namespace Microsoft.Identity.Client
         /// Gets the granted scope values returned by the service.
         /// </summary>
         public IEnumerable<string> Scopes { get; }
+
+        /// <summary>
+        /// Gets the correlation id used for the request.
+        /// </summary>
+        public Guid CorrelationId { get; }
 
         /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so

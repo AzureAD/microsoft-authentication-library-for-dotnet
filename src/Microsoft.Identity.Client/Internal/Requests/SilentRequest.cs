@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Linq;
 using System;
+using Microsoft.Identity.Client.Instance;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -18,7 +19,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
         private const string TheOnlyFamilyId = "1";
-        private const string FociClientMismatchSubError = "client_mismatch";
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.Account = account;
 
             AuthenticationRequestParameters.Authority = AuthenticationRequestParameters.AuthorityOverride == null
-                ? ClientApplicationBase.GetAuthority(ServiceBundle, account)
+                ? Authority.CreateAuthorityWithAccountTenant(ServiceBundle, account)
                 : Instance.Authority.CreateAuthorityWithOverride(
                     ServiceBundle,
                     AuthenticationRequestParameters.AuthorityOverride);
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (msalAccessTokenItem != null)
                 {
                     var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
-                    return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
+                    return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem, AuthenticationRequestParameters.RequestContext.CorrelationId);
                 }
             }
 
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return null;
             }
 
-            logger.Verbose("[FOCI] App is part of the family or unkown, looking for FRT");
+            logger.Verbose("[FOCI] App is part of the family or unknown, looking for FRT");
             var familyRefreshToken = await CacheManager.FindFamilyRefreshTokenAsync(TheOnlyFamilyId).ConfigureAwait(false);
             logger.Verbose("[FOCI] FRT found? " + (familyRefreshToken != null));
 
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return null;
 #else
                     if (MsalError.InvalidGrantError.Equals(ex?.ErrorCode, StringComparison.OrdinalIgnoreCase) &&
-                        FociClientMismatchSubError.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
+                        InvalidGrantClassification.ClientMismatch.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
                     {
                         logger.Error("[FOCI] FRT refresh failed - client mismatch");
                         return null;
@@ -178,7 +178,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return null;
-
         }
 
         private async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken)
