@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class BrokerParametersTest : TestBase
     {
-        public static readonly string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(MsalTestConstants.AuthorityTestTenant));
+        public static readonly string s_canonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(MsalTestConstants.AuthorityTestTenant));
 
         [TestMethod]
         [Description("Test setting of the broker parameters in the BrokerInteractiveRequest constructor.")]
@@ -32,28 +32,36 @@ namespace Microsoft.Identity.Test.Unit
                     MsalTestConstants.ExtraQueryParams);
 
                 // Act
-                BrokerInteractiveRequest brokerInteractiveRequest = new BrokerInteractiveRequest(parameters, null, null, null);
+                BrokerFactory brokerFactory = new BrokerFactory();
+                BrokerInteractiveRequest brokerInteractiveRequest = 
+                    new BrokerInteractiveRequest(
+                        parameters, 
+                        null, 
+                        harness.ServiceBundle, 
+                        null, 
+                        brokerFactory.Create(harness.ServiceBundle));
+
                 brokerInteractiveRequest.CreateRequestParametersForBroker();
 
                 // Assert
-                Assert.AreEqual(10, brokerInteractiveRequest._brokerPayload.Count);
+                Assert.AreEqual(10, brokerInteractiveRequest.BrokerPayload.Count);
 
-                Assert.AreEqual(CanonicalizedAuthority, brokerInteractiveRequest._brokerPayload[BrokerParameter.Authority]);
-                Assert.AreEqual(MsalTestConstants.ScopeStr, brokerInteractiveRequest._brokerPayload[BrokerParameter.RequestScopes]);
-                Assert.AreEqual(MsalTestConstants.ClientId, brokerInteractiveRequest._brokerPayload[BrokerParameter.ClientId]);
+                Assert.AreEqual(s_canonicalizedAuthority, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Authority]);
+                Assert.AreEqual(MsalTestConstants.ScopeStr, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Scope]);
+                Assert.AreEqual(MsalTestConstants.ClientId, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ClientId]);
 
-                Assert.IsFalse(String.IsNullOrEmpty(brokerInteractiveRequest._brokerPayload[BrokerParameter.CorrelationId]));
-                Assert.AreNotEqual(Guid.Empty.ToString(), brokerInteractiveRequest._brokerPayload[BrokerParameter.CorrelationId]);
-                Assert.AreEqual(MsalIdHelper.GetMsalVersion(), brokerInteractiveRequest._brokerPayload[BrokerParameter.ClientVersion]);
-                Assert.AreEqual("NO", brokerInteractiveRequest._brokerPayload[BrokerParameter.Force]);
-                Assert.AreEqual(string.Empty, brokerInteractiveRequest._brokerPayload[BrokerParameter.Username]);
+                Assert.IsFalse(string.IsNullOrEmpty(brokerInteractiveRequest.BrokerPayload[BrokerParameter.CorrelationId]));
+                Assert.AreNotEqual(Guid.Empty.ToString(), brokerInteractiveRequest.BrokerPayload[BrokerParameter.CorrelationId]);
+                Assert.AreEqual(MsalIdHelper.GetMsalVersion(), brokerInteractiveRequest.BrokerPayload[BrokerParameter.ClientVersion]);
+                Assert.AreEqual("NO", brokerInteractiveRequest.BrokerPayload[BrokerParameter.Force]);
+                Assert.AreEqual(string.Empty, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Username]);
 
-                Assert.AreEqual(MsalTestConstants.RedirectUri, brokerInteractiveRequest._brokerPayload[BrokerParameter.RedirectUri]);
+                Assert.AreEqual(MsalTestConstants.RedirectUri, brokerInteractiveRequest.BrokerPayload[BrokerParameter.RedirectUri]);
 
-                Assert.AreEqual(MsalTestConstants.BrokerExtraQueryParameters, brokerInteractiveRequest._brokerPayload[BrokerParameter.ExtraQp]);
+                Assert.AreEqual(MsalTestConstants.BrokerExtraQueryParameters, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraQp]);
 
                 //Assert.AreEqual(MsalTestConstants.BrokerClaims, brokerInteractiveRequest._brokerPayload[BrokerParameter.Claims]); //TODO
-                Assert.AreEqual(BrokerParameter.OidcScopesValue, brokerInteractiveRequest._brokerPayload[BrokerParameter.ExtraOidcScopes]);
+                Assert.AreEqual(BrokerParameter.OidcScopesValue, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
             }
         }
     }

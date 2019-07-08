@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
     {
         public const string Authority = "authority";
         public const string ClientId = "client_id";
-        public const string RequestScopes = "request_scopes";
+        public const string Scope = "scope";
         public const string ExtraOidcScopes = "extra_oidc_scopes";
         public const string OidcScopesValue = "openid offline_access profile";
         public const string RedirectUri = "redirect_uri";
