@@ -21,10 +21,7 @@
     <ProjectReference Include="..\..\..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="AccountCacheItemDetails.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="IdTokenCacheItemDetails.xaml">
+    <EmbeddedResource Update="TestPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
