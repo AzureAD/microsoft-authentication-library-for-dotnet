@@ -19,7 +19,7 @@ using Microsoft.Identity.Test.Common;
 namespace Microsoft.Identity.Test.UIAutomation
 {
     /// <summary>
-    /// Configures environment for core/Android tests to run
+    /// Configures environment for Android tests to run
     /// </summary>
     [TestFixture(Platform.Android)]
     public class AndroidTests
@@ -61,8 +61,6 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenTest,
                 AcquireTokenSilentTest,
 
-                //PromptBehaviorConsentSelectAccount,
-
                 AcquireTokenADFSV3InteractiveFederatedTest,
                 AcquireTokenADFSV3InteractiveNonFederatedTest,
                 AcquireTokenADFSV4InteractiveFederatedTest,
@@ -71,13 +69,12 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenADFSV2019InteractiveNonFederatedTest,
 
                 B2CLocalAccountAcquireTokenTest,
-               
-                // Ignored tests
-                //B2CGoogleB2CLoginAcquireTokenTest,
-                //B2CGoogleMicrosoftLoginAcquireTokenTest,
                 B2CFacebookMicrosoftLoginAcquireTokenTest,
+                B2CLocalEditPolicyAcquireTokenTest,
+               
+                //B2CGoogleB2CLoginAcquireTokenTest,
+                //B2CGoogleMicrosoftLoginAcquireTokenTest,                
                 //B2CFacebookB2CLoginAcquireTokenTest,
-                B2CLocalEditPolicyAcquireTokenTest
             };
 
             var hasFailed = false;
@@ -117,23 +114,6 @@ namespace Microsoft.Identity.Test.UIAutomation
                 _xamarinController,
                 LabUserHelper.GetDefaultUserAsync().GetAwaiter().GetResult(),
                 CoreUiTestConstants.AcquireTokenInteractive);
-        }
-
-        /// <summary>
-        /// Runs through the standard acquire token flow
-        /// </summary>
-        [Test]
-        [Ignore("needs some work")]
-        public void PromptBehaviorConsentSelectAccount()
-        {
-            TestCommon.ResetInternalStaticCaches();
-
-            LabResponse labResponse = LabUserHelper.GetDefaultUserAsync().GetAwaiter().GetResult();
-
-            _mobileTestHelper.AcquireTokenInteractiveWithConsentTest(
-                _xamarinController,
-                labResponse,
-                CoreUiTestConstants.AcquireTokenInteractiveConsentWithSelectAccount);
         }
 
         /// <summary>

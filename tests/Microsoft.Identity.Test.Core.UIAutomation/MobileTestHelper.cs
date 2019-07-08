@@ -39,35 +39,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             VerifyResult(controller);
         }
 
-        public void AcquireTokenInteractiveWithConsentTest(
-            ITestController controller,
-            LabResponse labResponse,
-            string testToRun)
-        {
-            PerformSignInFlow(
-               controller,
-               labResponse.User,
-               testToRun);
-
-            InteractWithTheConsentPrompt(controller);
-
-            //The web UI should display all users, so click on the current user
-            controller.Tap(labResponse.User.Upn, XamarinSelector.ByHtmlValue);
-
-            VerifyResult(controller);
-        }
-
-        private void InteractWithTheConsentPrompt(
-            ITestController controller)
-        {
-            // on consent, also hit the accept button
-            AppWebResult consentHeader = controller.WaitForWebElementByCssId("consentHeader").FirstOrDefault();
-            Assert.IsNotNull(consentHeader);
-            Assert.IsTrue(consentHeader.TextContent.Contains("Permissions requested"));
-
-            controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
-        }
-
         /// <summary>
         /// Runs through the B2C acquire token flow with local account
         /// </summary>
@@ -145,27 +116,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                 controller,
                 labResponse,
                 testToRun);
-
-            VerifyResult(controller);
-        }
-
-        /// <summary>
-        /// Runs through the B2C acquire token ROPC flow with local acount
-        /// </summary>
-        /// <param name="controller">The test framework that will execute the test interaction</param>
-        public void B2CAcquireTokenROPCTest(
-            ITestController controller,
-            LabResponse labResponse,
-            string testToRun)
-        {
-            controller.Tap(CoreUiTestConstants.TestsToRunPicker);
-            controller.Tap(testToRun);
-
-
-            controller.Tap(CoreUiTestConstants.ROPCUsernameId, XamarinSelector.ByAutomationId);
-            controller.EnterText(CoreUiTestConstants.ROPCUsernameId, labResponse.User.Upn, XamarinSelector.ByAutomationId);
-            controller.Tap(CoreUiTestConstants.ROPCPasswordId, XamarinSelector.ByAutomationId);
-            controller.EnterText(CoreUiTestConstants.ROPCPasswordId, labResponse.User.GetOrFetchPassword(), XamarinSelector.ByAutomationId);
 
             VerifyResult(controller);
         }
@@ -280,30 +230,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             controller.WaitForWebElementByCssId(CoreUiTestConstants.B2CEditProfileContinueId);
 
-            VerifyResult(controller);
-        }
-
-        public void PromptBehaviorTestHelperWithConsent(
-            ITestController controller,
-            LabResponse labResponse,
-            string testToRun)
-        {
-            // 1. Acquire token with uiBehavior set to consent
-            AcquireTokenTestHelper(
-                controller,
-                labResponse,
-                CoreUiTestConstants.UiBehaviorConsent);
-
-            // 2. Switch ui behavior to "select account"
-
-
-            // 3. Hit Acquire Token directly since we are not changing any other setting
-            controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
-
-            // 4. The web UI should display all users, so click on the current user
-            controller.Tap(labResponse.User.Upn, XamarinSelector.ByHtmlValue);
-
-            // 5. Validate token again
             VerifyResult(controller);
         }
 

@@ -18,7 +18,7 @@ using Microsoft.Identity.Test.Common;
 namespace Test.Microsoft.Identity.UIAutomation
 {
     /// <summary>
-    /// Configures environment for core/iOS tests to run
+    /// Configures environment for iOS tests to run
     /// </summary>
     [TestFixture(Platform.iOS)]
     public class IOSMsalTests
@@ -59,8 +59,6 @@ namespace Test.Microsoft.Identity.UIAutomation
             {
                 AcquireTokenInteractiveAndSilentTest,
 
-                //PromptBehaviorConsentSelectAccount,
-
                 AcquireTokenADFSV3InteractiveFederatedTest,
                 AcquireTokenADFSV3InteractiveNonFederatedTest,
                 AcquireTokenADFSV4InteractiveFederatedTest,
@@ -98,24 +96,6 @@ namespace Test.Microsoft.Identity.UIAutomation
             }
 
             Assert.IsFalse(hasFailed, $"Test Failed. {stringBuilderMessage}");
-        }
-
-        /// <summary>
-        /// Runs through the standard acquire token flow
-        /// </summary>
-        [Test]
-        [Ignore("Current web element search implementation is unable to properly wait for select account elements on login page." +
-            " Will be addressed in future updates.")]
-        public void PromptBehaviorConsentSelectAccount()
-        {
-            TestCommon.ResetInternalStaticCaches();
-
-            LabResponse labResponse = LabUserHelper.GetDefaultUserAsync().GetAwaiter().GetResult();
-
-            _mobileTestHelper.AcquireTokenInteractiveWithConsentTest(
-                _xamarinController,
-                labResponse,
-                CoreUiTestConstants.AcquireTokenInteractiveConsentWithSelectAccount);
         }
 
         /// <summary>
