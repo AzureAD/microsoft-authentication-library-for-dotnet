@@ -191,7 +191,7 @@ namespace XForms
             {
                 AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
                     .WithPrompt(prompt)
-                    .WithParentActivityOrWindow(App.AndroidActivity)
+                    .WithParentActivityOrWindow(App.RootViewController)
                     .WithUseEmbeddedWebView(true);
 
                 AuthenticationResult result = await
@@ -218,7 +218,7 @@ namespace XForms
             {
                 AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
                    .WithPrompt(Prompt.ForceLogin)
-                   .WithParentActivityOrWindow(App.AndroidActivity)
+                   .WithParentActivityOrWindow(App.RootViewController)
                    .WithUseEmbeddedWebView(true);
 
                 AuthenticationResult result = await
@@ -254,7 +254,7 @@ namespace XForms
             {
                 AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
                     .WithPrompt(Prompt.Consent)
-                    .WithParentActivityOrWindow(App.AndroidActivity)
+                    .WithParentActivityOrWindow(App.RootViewController)
                     .WithUseEmbeddedWebView(true);
 
                 AuthenticationResult result = await
@@ -262,7 +262,7 @@ namespace XForms
 
                 AcquireTokenInteractiveParameterBuilder request2 = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
                     .WithPrompt(Prompt.SelectAccount)
-                    .WithParentActivityOrWindow(App.AndroidActivity)
+                    .WithParentActivityOrWindow(App.RootViewController)
                     .WithUseEmbeddedWebView(true);
 
                 AuthenticationResult result2 = await
@@ -289,7 +289,7 @@ namespace XForms
             {
                 AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
                     .WithPrompt(Prompt.ForceLogin)
-                    .WithParentActivityOrWindow(App.AndroidActivity)
+                    .WithParentActivityOrWindow(App.RootViewController)
                     .WithUseEmbeddedWebView(true);
 
                 AuthenticationResult result = await
@@ -303,7 +303,7 @@ namespace XForms
                 AcquireTokenInteractiveParameterBuilder builder =
                    PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
                         .WithPrompt(Prompt.NoPrompt)
-                        .WithParentActivityOrWindow(App.AndroidActivity)
+                        .WithParentActivityOrWindow(App.RootViewController)
                         .WithUseEmbeddedWebView(true);
 
                 AuthenticationResult res = await builder
