@@ -114,8 +114,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Act
                 BrokerFactory brokerFactory = new BrokerFactory();
                 BrokerInteractiveRequest brokerInteractiveRequest = new BrokerInteractiveRequest(parameters, null, null, null, brokerFactory.Create(harness.ServiceBundle));
-                Assert.AreEqual(false, brokerInteractiveRequest._broker.CanInvokeBroker(null));
-                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => brokerInteractiveRequest._broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
+                Assert.AreEqual(false, brokerInteractiveRequest.Broker.CanInvokeBroker(null));
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
             }
         }
 

@@ -101,8 +101,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// On Android and iOS, brokers enabled Single-Sign-On, device identification,
-        /// and application identification verificatoin. To enable one of these features,
+        /// On Android and iOS, brokers enable Single-Sign-On, device identification,
+        /// and application identification verification. To enable one of these features,
         /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-brokers 
         /// for more information on platform specific settings required to enable the broker.
         /// </summary>

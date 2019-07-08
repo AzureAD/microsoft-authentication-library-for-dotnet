@@ -611,7 +611,7 @@ namespace Microsoft.Identity.Client
         public const string MissingEntitlements = "missing_entitlements";
 
         /// <summary>
-        /// Xamarin.iOS + broker specific. This error indidates that the UiParent is null.
+        /// Xamarin.iOS + broker specific. This error indidates that the UIViewController is null.
         /// <para>Mitigation</para> In order to access the broker, you will need to pass in a UIViewController.
         /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
         /// </summary>
