@@ -70,71 +70,67 @@ namespace XForms
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenSilentAsync().ConfigureAwait(false);
                     break;
-                case 2: // Consent with Select Account
-                    PrepareTestEnvironmentAsync().ConfigureAwait(false);
-                    AcquireTokenWithConsentAndSelectAccountAsync().ConfigureAwait(false);
-                    break;
-                case 3: // ADFSv3 Federated
+                case 2: // ADFSv3 Federated
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 4: // ADFSv3 NonFederated
+                case 3: // ADFSv3 NonFederated
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 5: // ADFSv4 Federated
+                case 4: // ADFSv4 Federated
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 6: //ADFSv4 NonFederated
+                case 5: //ADFSv4 NonFederated
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 7: // ADFSv2019 Federated
+                case 6: // ADFSv2019 Federated
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 8: //ADFSv2019 NonFederated
+                case 7: //ADFSv2019 NonFederated
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 9: // B2C Facebook b2clogin.com
+                case 8: // B2C Facebook b2clogin.com
                     _isB2CTest = true;
                     App.s_authority = App.B2CLoginAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 10: // B2C Local b2clogin.com edit profile
+                case 9: // B2C Local b2clogin.com edit profile
                     _isB2CTest = true;
                     App.s_authority = App.B2cAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireEditProfileTokenAsync().ConfigureAwait(false);
                     break;
-                case 11: // B2C Facebook microsoftonline.com
+                case 10: // B2C Facebook microsoftonline.com
                     _isB2CTest = true;
                     App.s_authority = App.B2cAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 12: // B2C Local b2clogin.com
+                case 11: // B2C Local b2clogin.com
                     _isB2CTest = true;
                     App.s_authority = App.B2CLoginAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 13: // B2C Local microsoftonline.com
+                case 12: // B2C Local microsoftonline.com
                     _isB2CTest = true;
                     App.s_authority = App.B2cAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 14: // B2C Google b2clogin.com
+                case 13: // B2C Google b2clogin.com
                     _isB2CTest = true;
                     App.s_authority = App.B2CLoginAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 15: // B2C Google microsoftonline.com
+                case 14: // B2C Google microsoftonline.com
                     _isB2CTest = true;
                     App.s_authority = App.B2cAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
@@ -241,41 +237,6 @@ namespace XForms
                 }
 
                 acquireResponseLabel.Text = "Acquire Token Silent Acquisition Result....\n" + resText;
-            }
-            catch (Exception exception)
-            {
-                CreateExceptionMessage(exception);
-            }
-        }
-
-        private async Task AcquireTokenWithConsentAndSelectAccountAsync()
-        {
-            try
-            {
-                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
-                    .WithPrompt(Prompt.Consent)
-                    .WithParentActivityOrWindow(App.RootViewController)
-                    .WithUseEmbeddedWebView(true);
-
-                AuthenticationResult result = await
-                    request.ExecuteAsync().ConfigureAwait(true);
-
-                AcquireTokenInteractiveParameterBuilder request2 = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
-                    .WithPrompt(Prompt.SelectAccount)
-                    .WithParentActivityOrWindow(App.RootViewController)
-                    .WithUseEmbeddedWebView(true);
-
-                AuthenticationResult result2 = await
-                   request.ExecuteAsync().ConfigureAwait(true);
-
-                var resText = GetResultDescription(result2);
-
-                if (result2.AccessToken != null)
-                {
-                    acquireResponseTitleLabel.Text = SuccessfulResult;
-                }
-
-                acquireResponseLabel.Text = "Acquire Token Consent and Select Account....\n" + resText;
             }
             catch (Exception exception)
             {
