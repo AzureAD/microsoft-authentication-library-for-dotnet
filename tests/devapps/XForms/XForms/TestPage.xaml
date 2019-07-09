@@ -18,7 +18,6 @@
                         <x:Array Type="{x:Type x:String}">
                             <x:String>Acquire Token Interactive</x:String>
                             <x:String>Acquire Token Silent</x:String>
-                            <x:String>Consent with Select Account</x:String>
                             <x:String>ADFSv3 Federated</x:String>
                             <x:String>ADFSv3 NonFederated</x:String>
                             <x:String>ADFSv4 Federated</x:String>
