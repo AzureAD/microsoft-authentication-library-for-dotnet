@@ -6,9 +6,11 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -105,13 +107,24 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalException.CorrelationId);
             Assert.AreEqual(suberror ?? "", msalException.SubError );
 
-
             if (expectUiRequiredException)
             {
                 Assert.IsTrue(msalException is MsalUiRequiredException);
                 Assert.AreEqual(expectedClassification, (msalException as MsalUiRequiredException).Classification);
-
             }
+
+            ValidateExceptionProductInformation(msalException);
+        }
+
+        private static void ValidateExceptionProductInformation(MsalException exception)
+        {
+            string exceptionString = exception.ToString();
+
+            string msalProductName = PlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
+            string msalVersion = MsalIdHelper.GetMsalVersion();
+
+            Assert.IsTrue(exceptionString.Contains(msalProductName), "Exception should contain the msalProductName");
+            Assert.IsTrue(exceptionString.Contains(msalVersion), "Exception should contain the msalVersion");
         }
 
         [TestMethod]
@@ -127,7 +140,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             // Act
             var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse);
 
-
             // Assert
             var msalServiceException = msalException as MsalServiceException;
             Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
@@ -135,6 +147,8 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("some_claims", msalServiceException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
             Assert.AreEqual("some_suberror", msalServiceException.SubError);
+
+            ValidateExceptionProductInformation(msalException);
         }
 
         [TestMethod]
@@ -165,6 +179,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("some_claims", msalServiceException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
             Assert.AreEqual("some_suberror", msalServiceException.SubError);
+            ValidateExceptionProductInformation(msalException);
 
             // Act
             string piiMessage = MsalLogger.GetPiiScrubbedExceptionDetails(msalException);
@@ -206,6 +221,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(ExMessage, msalUiRequiredException.Message);
             Assert.AreEqual(0, msalUiRequiredException.StatusCode);
             Assert.AreEqual(null, msalUiRequiredException.Classification);
+            ValidateExceptionProductInformation(msalException);
 
             // Act
             string piiMessage = MsalLogger.GetPiiScrubbedExceptionDetails(msalException);
@@ -251,6 +267,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("some_suberror", msalServiceException.SubError);
 
             Assert.AreEqual(retryAfterSpan, msalServiceException.Headers.RetryAfter.Delta);
+            ValidateExceptionProductInformation(msalException);
         }
 
         [TestMethod]
@@ -270,6 +287,8 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var ex = new MsalUiRequiredException("code", "message");
 
             Assert.IsNull(ex.InnerException);
+
+            ValidateExceptionProductInformation(ex);
         }
 
         [TestMethod]
@@ -281,6 +300,8 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsTrue(ex.ToString().Contains("errCode"));
             Assert.IsTrue(ex.ToString().Contains("errMessage"));
             Assert.IsTrue(ex.ToString().Contains("innerMsg"));
+
+            ValidateExceptionProductInformation(ex);
         }
 
         [TestMethod]
@@ -315,6 +336,8 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsTrue(ex.ToString().Contains("some_claims"));
             Assert.IsTrue(ex.ToString().Contains("AADSTS90002"));
             Assert.IsFalse(ex is MsalUiRequiredException);
+
+            ValidateExceptionProductInformation(ex);
         }
     }
 }
