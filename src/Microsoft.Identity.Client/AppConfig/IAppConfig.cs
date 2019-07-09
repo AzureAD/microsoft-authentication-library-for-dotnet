@@ -94,6 +94,10 @@ namespace Microsoft.Identity.Client
         X509Certificate2 ClientCredentialCertificate { get; }
 #endif
 
+        /// <summary>
+        /// </summary>
+        Func<object> ParentActivityOrWindowFunc { get; }
+
 #if WINDOWS_APP
         /// <summary>
         /// Flag to enable authentication with the user currently logeed-in in Windows.

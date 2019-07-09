@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Client
         {
             return AcquireTokenInteractiveParameterBuilder.Create(
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
+                ServiceBundle.Config.ParentActivityOrWindowFunc,
                 scopes);
         }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
