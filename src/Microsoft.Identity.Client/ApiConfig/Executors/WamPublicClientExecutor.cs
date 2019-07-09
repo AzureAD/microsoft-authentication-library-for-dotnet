@@ -56,7 +56,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 tenantId,
                 account,
                 idToken,
-                returnedScopes);
+                returnedScopes,
+                Guid.NewGuid());  // todo(wam): need to get correlation id from the request to inject here.
         }
 
         private Task<WebAccountProvider> FindAccountProviderForAuthorityAsync(
@@ -97,7 +98,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 }
             }
 
-            request.CorrelationId = commonParameters.TelemetryCorrelationId.ToString("N");
+            request.CorrelationId = commonParameters.CorrelationId.ToString("N");
             
             // TODO(WAM): verify with server team that this is the proper value
             request.Properties["api_version"] = "2.0";
@@ -120,7 +121,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(true);
             WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(provider, interactiveParameters.Account).ConfigureAwait(true);
@@ -150,7 +151,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             WebAccountProvider provider = await WebAuthenticationCoreManager.FindAccountProviderAsync(
                 "https://login.microsoft.com",
@@ -175,7 +176,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(true);
             WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext, forceAuthentication: true);
@@ -189,7 +190,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(true);
             WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext, forceAuthentication: true);
