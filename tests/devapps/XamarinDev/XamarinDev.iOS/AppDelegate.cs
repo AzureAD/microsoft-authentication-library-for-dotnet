@@ -34,7 +34,7 @@ namespace XamarinDev.iOS
                 (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
 #endif
             App.RootViewController = new UIViewController();
-            //App.MsalPublicClient.iOSKeychainSecurityGroup = "com.microsoft.adalcache";
+            App.MsalPublicClient.iOSKeychainSecurityGroup = "com.microsoft.adalcache";
 
             return base.FinishedLaunching(app, options);
         }

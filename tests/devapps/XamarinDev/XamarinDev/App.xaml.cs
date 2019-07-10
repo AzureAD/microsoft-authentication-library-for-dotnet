@@ -72,7 +72,7 @@ namespace XamarinDev
 
             if (UseBroker)
             {
-                builder.WithBroker(true);
+                builder.WithBroker();
                 builder = builder.WithRedirectUri(BrokerRedirectUriOnIos);
             }
 
