@@ -83,15 +83,12 @@ namespace XamarinDev
                 {
                 case "iOS":
                     builder = builder.WithRedirectUri(RedirectUriOnIos);
+                    builder = builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
                     break;
                 case "Android":
                     builder = builder.WithRedirectUri(RedirectUriOnAndroid);
                     break;
                 }
-
-#if IS_APPCENTER_BUILD
-            builder = builder.WithIosKeychainSecurityGroup("*");
-#endif
             }
 
             MsalPublicClient = builder.BuildConcrete();
