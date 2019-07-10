@@ -24,6 +24,7 @@
     <array>
         <string>msauthv2</string>
     </array>
+    
     <key>MinimumOSVersion</key>
     <string>8.0</string>
 

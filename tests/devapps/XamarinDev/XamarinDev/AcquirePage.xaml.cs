@@ -186,7 +186,7 @@ namespace XamarinDev
 
                 var request = App.MsalPublicClient.AcquireTokenInteractive(GetScopes())
                     .WithPrompt(GetPrompt())
-                    .WithParentActivityOrWindow(App.AndroidActivity)
+                    .WithParentActivityOrWindow(App.RootViewController)
                     .WithUseEmbeddedWebView(true)
                     .WithExtraQueryParameters(GetExtraQueryParams());
 
