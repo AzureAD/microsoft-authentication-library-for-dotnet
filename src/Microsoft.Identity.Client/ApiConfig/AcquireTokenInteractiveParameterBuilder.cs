@@ -52,11 +52,9 @@ namespace Microsoft.Identity.Client
 
         internal static AcquireTokenInteractiveParameterBuilder Create(
             IPublicClientApplicationExecutor publicClientApplicationExecutor,
-            Func<object> parentActivityOrWindowFunc,
             IEnumerable<string> scopes)
         {
             return new AcquireTokenInteractiveParameterBuilder(publicClientApplicationExecutor)
-                .WithParentActivityOrWindowFunc(parentActivityOrWindowFunc)
                 .WithCurrentSynchronizationContext()
                 .WithScopes(scopes);
         }
