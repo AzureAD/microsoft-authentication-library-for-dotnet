@@ -33,8 +33,7 @@ namespace XamarinDev.iOS
             Telemetry.GetInstance().RegisterReceiver(
                 (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
 #endif
-
-            //App.MsalPublicClient.iOSKeychainSecurityGroup = "com.microsoft.adalcache";
+            App.RootViewController = new UIViewController();
 
             return base.FinishedLaunching(app, options);
         }

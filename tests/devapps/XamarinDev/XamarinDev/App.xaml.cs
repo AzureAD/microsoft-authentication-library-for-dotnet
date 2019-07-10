@@ -11,7 +11,7 @@ namespace XamarinDev
     {
         public static PublicClientApplication MsalPublicClient;
 
-        public static object AndroidActivity { get; set; }
+        public static object RootViewController { get; set; }
 
         public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
         // For system browser
@@ -24,7 +24,7 @@ namespace XamarinDev
         // For system browser
         //public static string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
 
-        public const string BrokerRedirectUriOnIos = "msauth.com.yourcompany.XForms://auth";
+        public const string BrokerRedirectUriOnIos = "msauth.com.companyname.XamarinDev://auth";
 
         public static string RedirectUriOnIos = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri;
         // For system browser
@@ -72,7 +72,7 @@ namespace XamarinDev
 
             if (UseBroker)
             {
-                //builder.WithBroker(true);
+                builder.WithBroker();
                 builder = builder.WithRedirectUri(BrokerRedirectUriOnIos);
             }
 
@@ -83,15 +83,12 @@ namespace XamarinDev
                 {
                 case "iOS":
                     builder = builder.WithRedirectUri(RedirectUriOnIos);
+                    builder = builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
                     break;
                 case "Android":
                     builder = builder.WithRedirectUri(RedirectUriOnAndroid);
                     break;
                 }
-
-#if IS_APPCENTER_BUILD
-            builder = builder.WithIosKeychainSecurityGroup("*");
-#endif
             }
 
             MsalPublicClient = builder.BuildConcrete();
