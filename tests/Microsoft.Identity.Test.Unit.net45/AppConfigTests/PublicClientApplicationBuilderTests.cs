@@ -134,7 +134,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .WithParentActivityOrWindow(() => ownerPtr)
                 .Build();
 
-            Assert.AreEqual(ownerPtr, pca.AppConfig.ParentActivityOrWindowFunc);
+            Assert.IsNotNull(pca.AppConfig.ParentActivityOrWindowFunc);
+            Assert.AreEqual(ownerPtr, pca.AppConfig.ParentActivityOrWindowFunc());
         }
 
         [TestMethod]
