@@ -15,6 +15,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -39,6 +40,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
               () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (IAccount)null).ExecuteAsync()).ConfigureAwait(false);
             Assert.AreEqual(MsalError.UserNullError, ex.ErrorCode);
+            Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification);
+
         }
 
         [TestMethod]
@@ -62,6 +65,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             catch (MsalUiRequiredException exc)
             {
                 Assert.AreEqual(MsalError.NoTokensFoundError, exc.ErrorCode);
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exc.Classification);
             }
 
             Assert.IsNotNull(
@@ -147,6 +151,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
         public void AcquireTokenSilentScopeAndUserOverloadTenantSpecificAuthorityTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -312,6 +317,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.NoAccountForLoginHint, exception.ErrorCode);
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exception.Classification);
             }
         }
 
@@ -339,6 +345,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.MultipleAccountsForLoginHint, exception.ErrorCode);
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exception.Classification);
             }
         }
 

@@ -28,7 +28,7 @@ namespace XamarinDev.Droid
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
 
-            App.AndroidActivity = this;
+            App.RootViewController = this;
 
 #if ARIA_TELEMETRY_ENABLED
             Telemetry.GetInstance().RegisterReceiver(

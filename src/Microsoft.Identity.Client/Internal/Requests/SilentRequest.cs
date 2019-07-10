@@ -44,14 +44,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalUiRequiredException(
                     MsalError.NoAccountForLoginHint,
-                    MsalErrorMessage.NoAccountForLoginHint);
+                    MsalErrorMessage.NoAccountForLoginHint,
+                    null,
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
 
             if (accounts.Count() > 1)
             {
                 throw new MsalUiRequiredException(
                     MsalError.MultipleAccountsForLoginHint,
-                    MsalErrorMessage.MultipleAccountsForLoginHint);
+                    MsalErrorMessage.MultipleAccountsForLoginHint,
+                    null,
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
+
             }
 
             return accounts.First();
@@ -162,7 +167,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return null;
 #else
                     if (MsalError.InvalidGrantError.Equals(ex?.ErrorCode, StringComparison.OrdinalIgnoreCase) &&
-                        InvalidGrantClassification.ClientMismatch.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
+                        MsalError.ClientMismatch.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
                     {
                         logger.Error("[FOCI] FRT refresh failed - client mismatch");
                         return null;
@@ -207,7 +212,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 throw new MsalUiRequiredException(
                     MsalError.NoTokensFoundError,
-                    MsalErrorMessage.NoTokensFoundError);
+                    MsalErrorMessage.NoTokensFoundError, 
+                    null, 
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
 
             return msalRefreshTokenItem;

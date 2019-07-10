@@ -22,6 +22,7 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using System.IO;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -324,6 +325,77 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
                 Assert.AreEqual(MsalTestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
+        public async Task AcquireTokenInterative_WithValidCustomInstanceMetadata_Async()
+        {
+            string instanceMetadataJson = File.ReadAllText(
+                ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
+
+            using (var harness = CreateTestHarness())
+            {
+                // No instance discovery is made - it is important to not have this mock handler added
+                // harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new Uri("https://login.windows.net/common/"), false)
+                    .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
+                    .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                // the rest of the communcation with AAD happens on the preferred_network alias, not on login.windows.net
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
+
+                AuthenticationResult result = await app
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+                Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
+                Assert.AreEqual(MsalTestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
+                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
+        public async Task AcquireTokenInterative_WithBadCustomInstanceMetadata_Async()
+        {
+            string instanceMetadataJson = File.ReadAllText(
+                ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
+
+            using (var harness = CreateTestHarness())
+            {
+                // No instance discovery is made - it is important to not have this mock handler added
+                // harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAuthority(new Uri(@"https://sts.windows.net/common/"), false)
+                    .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithTelemetry(new TraceTelemetryConfig())
+                    .BuildConcrete();
+
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() => app
+                    .AcquireTokenInteractive(MsalTestConstants.Scope)
+                    .ExecuteAsync(CancellationToken.None))
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
             }
         }
 

@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Core
                 TelemetryManager = new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
             }
 
-            InstanceDiscoveryManager = new InstanceDiscoveryManager(HttpManager, TelemetryManager, shouldClearCaches);
+            InstanceDiscoveryManager = new InstanceDiscoveryManager(HttpManager, TelemetryManager, shouldClearCaches, config.CustomInstanceDiscoveryMetadata);
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
         }

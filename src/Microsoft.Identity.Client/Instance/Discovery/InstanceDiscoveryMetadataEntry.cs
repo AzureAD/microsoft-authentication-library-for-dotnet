@@ -18,18 +18,5 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         [DataMember(Name = "aliases")]
         public string[] Aliases { get; set; }
 
-        public IEnumerable<string> GetAliasesWithPreferredCacheFirst()
-        {
-            var list = new List<string>(new[] { PreferredCache });
-            foreach (var alias in Aliases)
-            {
-                if (!string.Equals(PreferredCache, alias, System.StringComparison.OrdinalIgnoreCase))
-                {
-                    list.Add(alias);
-                }
-            }
-
-            return list;
-        }
     }
 }

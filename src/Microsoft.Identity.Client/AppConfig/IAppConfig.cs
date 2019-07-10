@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client
         bool EnablePiiLogging { get; }
 
         /// <summary>
-        /// <see cref="IMsalHttpClientFactory"/> used to get HttpClient instances to commmunicate
+        /// <see cref="IMsalHttpClientFactory"/> used to get HttpClient instances to communicate
         /// with the identity provider.
         /// </summary>
         IMsalHttpClientFactory HttpClientFactory { get; }
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logeed-in in Windows.
+        /// Flag to enable authentication with the user currently logged-in in Windows.
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
         /// </summary>
         bool UseCorporateNetwork { get; }

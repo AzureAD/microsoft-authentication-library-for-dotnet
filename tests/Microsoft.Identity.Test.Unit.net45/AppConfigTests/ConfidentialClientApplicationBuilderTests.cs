@@ -3,11 +3,13 @@
 
 using System;
 using System.Drawing.Text;
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
@@ -220,6 +222,41 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                       .Create(MsalTestConstants.ClientId).WithCertificate(cert).Build();
 
             Assert.IsNotNull(cca.AppConfig.ClientCredentialCertificate);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
+        public void TestConstructor_WithValidInstanceDicoveryMetadata()
+        {
+            string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
+            var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                   .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                   .Build();
+
+            var instanceDiscoveryMetadata = (cca.AppConfig as ApplicationConfiguration).CustomInstanceDiscoveryMetadata;
+            Assert.AreEqual(2, instanceDiscoveryMetadata.Metadata.Length);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
+        public void TestConstructor_InstanceMetadata_ValidateAuthority_MutuallyExclusive()
+        {
+            string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
+            var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                  .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                  .WithAuthority("https://some.authority/bogus/", true)
+                                                  .Build());
+            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+        }
+
+        [TestMethod]
+        public void TestConstructor_BadInstanceMetadata()
+        {
+            var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                  .WithInstanceDicoveryMetadata("{bad_json_metadata")
+                                                  .Build());
+
+            Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
         }
     }
 }

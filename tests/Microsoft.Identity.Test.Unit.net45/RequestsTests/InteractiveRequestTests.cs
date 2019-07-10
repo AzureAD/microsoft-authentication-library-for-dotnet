@@ -278,6 +278,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual(
                         MsalError.NoPromptFailedError,
                         ((MsalUiRequiredException)exc.InnerException).ErrorCode);
+
+                    Assert.AreEqual(
+                       UiRequiredExceptionClassification.PromptNeverFailed,
+                       ((MsalUiRequiredException)exc.InnerException).Classification);
                 }
 
                 webUi = new MockWebUI

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
@@ -69,7 +70,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             AddToKnownCache(usCloudEntry);
         }
 
-        public InstanceDiscoveryMetadataEntry GetMetadata(string environment, IEnumerable<string> existingEnvironmentsInCache)
+        public InstanceDiscoveryMetadataEntry GetMetadata(
+            string environment,
+            IEnumerable<string> existingEnvironmentsInCache,
+            ICoreLogger logger)
         {
             if (existingEnvironmentsInCache == null)
             {
@@ -81,9 +85,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             if (canUseProvider)
             {
                 s_knownEntries.TryGetValue(environment, out InstanceDiscoveryMetadataEntry entry);
+                logger.Verbose($"[Instance Discovery] Tried to use known metadata provider for {environment}. Success? {entry != null}");
+
                 return entry;
             }
 
+            logger.VerbosePii(
+                $"[Instance Discovery] Could not use known metadata provider because at least one environment in the cache is not known. Environments in cache: {string.Join(" ", existingEnvironmentsInCache)} ",
+                $"[Instance Discovery] Could not use known metadata provider because at least one environment in the cache is not known");
             return null;
         }
 

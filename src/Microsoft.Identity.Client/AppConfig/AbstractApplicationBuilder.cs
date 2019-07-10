@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
@@ -35,6 +36,43 @@ namespace Microsoft.Identity.Client
         {
             Config.HttpClientFactory = httpClientFactory;
             return (T)this;
+        }
+
+        /// <summary>
+        /// Allows developers to configure their own valid authorities. A json string similar to https://aka.ms/aad-instance-discovery should be provided.
+        /// MSAL uses this information to: 
+        /// <list type="bullet">
+        /// <item>Call REST APIs on the environment specified in the preferred_network</item>
+        /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
+        /// <item>Use the environment aliases to match tokens issued to other authorities</item>
+        /// </list>
+        /// For more details see https://aka.ms/msal-net-custom-instance-metadata
+        /// </summary>
+        /// <remarks>
+        /// Developers take responsibility for authority validation if they use this method. Should not be used when the authority is not know in advance. 
+        /// Has no effect on ADFS or B2C authorities, only for AAD authorities</remarks>
+        /// <param name="instanceDiscoveryJson"></param>
+        /// <returns></returns>
+        public T WithInstanceDicoveryMetadata(string instanceDiscoveryJson)
+        {
+            if (string.IsNullOrEmpty(instanceDiscoveryJson))
+            {
+                throw new ArgumentNullException(instanceDiscoveryJson);
+            }
+
+            try
+            {
+                InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceDiscoveryJson);
+                Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
+                return (T)this;
+            }
+            catch (System.Runtime.Serialization.SerializationException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidUserInstanceMetadata,
+                    MsalErrorMessage.InvalidUserInstanceMetadata,
+                    ex);
+            }
         }
 
         internal T WithHttpManager(IHttpManager httpManager)
@@ -272,20 +310,26 @@ namespace Microsoft.Identity.Client
             // Validate that we have a client id
             if (string.IsNullOrWhiteSpace(Config.ClientId))
             {
-                throw new InvalidOperationException(MsalErrorMessage.NoClientIdWasSpecified);
+                throw new MsalClientException(MsalError.NoClientId, MsalErrorMessage.NoClientIdWasSpecified);
             }
 
             //Adfs does not require client id to be in the form of a Guid
             if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
             {
-                throw new InvalidOperationException(MsalErrorMessage.ClientIdMustBeAGuid);
+                throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
             TryAddDefaultAuthority();
 
+            if (Config.AuthorityInfo.ValidateAuthority && Config.CustomInstanceDiscoveryMetadata != null)
+            {
+                throw new MsalClientException(MsalError.ValidateAuthorityOrCustomMetadata, MsalErrorMessage.ValidateAuthorityOrCustomMetadata);
+            }
+
             if (Config.TelemetryCallback != null && Config.TelemetryConfig != null)
             {
-                throw new InvalidOperationException(MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously);
+                throw new MsalClientException(MsalError.TelemetryConfigOrTelemetryCallback, 
+                    MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously);
             }
         }
 
@@ -308,7 +352,7 @@ namespace Microsoft.Identity.Client
             Config.AuthorityInfo = new AuthorityInfo(
                     AuthorityType.Aad,
                     new Uri($"{defaultAuthorityInstance}/{defaultAuthorityAudience}").ToString(),
-                    true);
+                    false /* default authority is well known, there is no need for validation */);
         }
 
         private string GetDefaultAuthorityAudience()

@@ -121,7 +121,11 @@ namespace Microsoft.Identity.Client
             base.Validate();
             if (Parameters.Account == null && string.IsNullOrWhiteSpace(Parameters.LoginHint))
             {
-                throw new MsalUiRequiredException(MsalError.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
+                throw new MsalUiRequiredException(
+                    MsalError.UserNullError, 
+                    MsalErrorMessage.MsalUiRequiredMessage, 
+                    null, 
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
         }
     }
