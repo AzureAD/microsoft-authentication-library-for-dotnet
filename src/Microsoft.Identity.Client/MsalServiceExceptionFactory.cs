@@ -32,6 +32,13 @@ namespace Microsoft.Identity.Client
                 }
             }
 
+            if (string.Equals(oAuth2Response?.Error, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
+            {
+                ex = new MsalServiceException(
+                    MsalError.InvalidClient,
+                    MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription);
+            }
+
             if (ex == null)
             {
                 ex = new MsalServiceException(errorCode, errorMessage, innerException);

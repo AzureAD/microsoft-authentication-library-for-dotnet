@@ -297,6 +297,53 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        [TestMethod]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
+        [DeploymentItem(@"Resources\TestMex.xml")]
+        [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
+        public async Task AcquireTokenByIntegratedWindowsAuthInvalidClientTestAsync()
+        {
+            IDictionary<string, string> extraQueryParamsAndClaims =
+                MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
+                AddMockHandlerMex(httpManager);
+                AddMockHandlerWsTrustWindowsTransport(httpManager);
+                httpManager.AddMockHandler(
+                   new MockHttpMessageHandler
+                   {
+                       ExpectedUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                       ExpectedMethod = HttpMethod.Post,
+                       ResponseMessage = MockHelpers.CreateInvalidClientResponseMessage()
+                   });
+
+                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithHttpManager(httpManager)
+                                                        .WithExtraQueryParameters(MsalTestConstants.ExtraQueryParams)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
+                                                        .BuildConcrete();
+
+                var result = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    async () => await app.AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
+                                                        .WithClaims(MsalTestConstants.Claims)
+                                                        .WithUsername(MsalTestConstants.User.Username)
+                                                        .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                // Check inner exception
+                Assert.AreEqual(MsalError.InvalidClient, result.ErrorCode);
+
+                // There should be no cached entries.
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+            }
+        }
+
 #if !WINDOWS_APP // U/P flow not enabled on UWP
         [TestMethod]
         [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
@@ -703,6 +750,61 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Check error code
                 Assert.AreEqual(MsalError.InvalidGrantError, result.ErrorCode);
+
+                // There should be no cached entries.
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
+        public async Task UsernamePasswordInvalidClientTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+
+                // user realm discovery
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"id.com\"}")
+                        },
+                        ExpectedQueryParams = new Dictionary<string, string>
+                        {
+                            {"api-version", "1.0"}
+                        }
+                    });
+
+                // AAD
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateInvalidClientResponseMessage()
+                    });
+
+                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithHttpManager(httpManager)
+                                                        .WithTelemetry(new TraceTelemetryConfig())
+                                                        .BuildConcrete();
+
+                // Call acquire token
+                var result = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    async () => await app.AcquireTokenByUsernamePassword(
+                        MsalTestConstants.Scope,
+                        MsalTestConstants.User.Username,
+                        _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
+
+                // Check inner exception
+                Assert.AreEqual(MsalError.InvalidClient, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());

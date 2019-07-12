@@ -682,6 +682,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string TelemetryConfigOrTelemetryCallback = "telemetry_config_or_telemetry_callback";
 
+        /// <summary>
+        /// AAD service error indicating that the configured client is not valid
+        /// <para>Migigation</para>In the AAD app registration portal, make sure the correct client (Public or
+        /// Confidential) is selected for the respective authentication flow.
+        /// See https://aka.ms/msal-net-invalid-client for details.
+        /// </summary>
+        public const string InvalidClient = "invalid_client";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
