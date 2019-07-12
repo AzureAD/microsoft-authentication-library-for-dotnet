@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public ITokenCache UserTokenCache => UserTokenCacheInternal;
 
-        internal ITokenCacheInternal UserTokenCacheInternal { get; set; }
+        internal ITokenCacheInternal UserTokenCacheInternal { get; }
 
         internal ClientApplicationBase(ApplicationConfiguration config)
         {
