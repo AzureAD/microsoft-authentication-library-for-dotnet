@@ -137,7 +137,10 @@ namespace Microsoft.Identity.Client
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
         /// </summary>
-        /// <remarks>Mandatory only on Android. Can also be set via the AcquireTokenInteractive builder.</remarks>
+        /// <remarks>
+        /// Mandatory only on Android to be set either from here or from AcquireTokenInteractive builder.
+        /// See https://aka.ms/msal-net-android-activity for further documentation and details.
+        /// </remarks>
         /// <param name="parentActivityOrWindowFunc">The parent as an object, so that it can be used from shared NetStandard assemblies</param>
         /// <returns>The builder to chain the .With methods</returns>
         public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<object> parentActivityOrWindowFunc)
