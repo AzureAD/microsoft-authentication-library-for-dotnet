@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
         internal Func<TokenCacheNotificationArgs, Task> AsyncAfterAccess { get; set; }
         internal Func<TokenCacheNotificationArgs, Task> AsyncBeforeWrite { get; set; }
 
-        internal async Task OnAfterAccessAsync(TokenCacheNotificationArgs args)
+        async Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)
         {
             AfterAccess?.Invoke(args);
 
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal async Task OnBeforeAccessAsync(TokenCacheNotificationArgs args)
+        async Task ITokenCacheInternal.OnBeforeAccessAsync(TokenCacheNotificationArgs args)
         {
             BeforeAccess?.Invoke(args);
             if (AsyncBeforeAccess != null)
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal async Task OnBeforeWriteAsync(TokenCacheNotificationArgs args)
+        async Task ITokenCacheInternal.OnBeforeWriteAsync(TokenCacheNotificationArgs args)
         {
 #pragma warning disable CS0618 // Type or member is obsolete, but preserve old behavior until it is deleted
             HasStateChanged = true;

@@ -41,11 +41,13 @@ namespace Microsoft.Identity.Client
 
         internal IServiceBundle ServiceBundle { get; }
         internal ILegacyCachePersistence LegacyCachePersistence { get; }
-        internal readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
         internal string ClientId => ServiceBundle.Config.ClientId;
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
+
+        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+
         SemaphoreSlim ITokenCacheInternal.Semaphore => _semaphoreSlim;
 
         /// <summary>
