@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client
 {
@@ -90,7 +91,16 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                accounts = await UserTokenCacheInternal.GetAccountsAsync(Authority, requestContext).ConfigureAwait(false);
+                // a simple session consisting of a single call
+                CacheSessionManager cacheSessionManager = new CacheSessionManager(
+                    UserTokenCacheInternal,
+                    new AuthenticationRequestParameters(
+                        ServiceBundle, 
+                        UserTokenCacheInternal, 
+                        new AcquireTokenCommonParameters(), 
+                        requestContext));
+
+                accounts = await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
             }
 
             return accounts;

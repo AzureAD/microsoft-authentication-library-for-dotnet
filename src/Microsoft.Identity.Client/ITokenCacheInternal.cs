@@ -18,6 +18,10 @@ namespace Microsoft.Identity.Client
     {
         SemaphoreSlim Semaphore { get; }
 
+        ILegacyCachePersistence LegacyPersistence { get; }
+        ITokenCacheAccessor Accessor { get; }
+
+        #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
         Task<IEnumerable<IAccount>> GetAccountsAsync(string authority, RequestContext requestContext);
 
@@ -41,8 +45,6 @@ namespace Microsoft.Identity.Client
 
         void SetIosKeychainSecurityGroup(string securityGroup);
 
-        ILegacyCachePersistence LegacyPersistence { get; }
-        ITokenCacheAccessor Accessor { get; }
 
         void RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext);
 
@@ -60,5 +62,14 @@ namespace Microsoft.Identity.Client
         void ClearAdalCache();
         void ClearMsalCache();
         Task ClearAsync();
+
+        #endregion
+
+        #region Cache notifications
+        Task OnAfterAccessAsync(TokenCacheNotificationArgs args);
+        Task OnBeforeAccessAsync(TokenCacheNotificationArgs args);
+        Task OnBeforeWriteAsync(TokenCacheNotificationArgs args);
+
+        #endregion
     }
 }
