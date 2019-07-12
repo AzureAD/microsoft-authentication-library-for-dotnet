@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     /// 6. If going to the network fails with an error different than "invalid_instance" (i.e.authority validation failed), use the well-known instance metadata entry for the given authority
     /// 7. On failure, use the authority itself(i.e.preferred cache = preferred network = aliases = configured_authority)
     /// 
-    /// Spec: https://identitydivision.visualstudio.com/DevEx/_git/AuthLibrariesApiReview?path=%2FInstance%20Discovery%20Caching%2Fdesktop_web_caching.md&version=GBdev
+    /// Spec: https://identitydivision.visualstudio.com/DevEx/_git/AuthLibrariesApiReview?path=%2FInstance%20Discovery%20Caching%2Fdesktop_web_caching.md
     /// </summary>
     internal class InstanceDiscoveryManager : IInstanceDiscoveryManager
     {

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-using System;
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
@@ -9,7 +8,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
@@ -27,7 +25,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     public class DeviceCodeFlow
     {
         private static readonly string[] s_scopes = { "User.Read" };
-        private IWebDriver _seleniumDriver;
 
         #region MSTest Hooks
         /// <summary>
@@ -63,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
         }
 
-		[TestMethod]
+        [TestMethod]
         [Ignore("Adfs does not currently support device code flow")]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task DeviceCodeFlowAdfsTestAsync()
