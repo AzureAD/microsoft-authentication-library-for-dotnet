@@ -203,7 +203,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var testFlags = Substitute.For<IFeatureFlags>();
                 testFlags.IsFociEnabled.Returns(false);
                 _appB.ServiceBundle.PlatformProxy.SetFeatureFlags(testFlags);
-                _appB.UserTokenCacheInternal = new TokenCache(_appB.ServiceBundle);
 
                 await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
