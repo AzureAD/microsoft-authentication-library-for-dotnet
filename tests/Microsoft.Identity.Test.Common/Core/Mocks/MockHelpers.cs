@@ -155,6 +155,20 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
         }
 
+        public static HttpResponseMessage CreateInvalidClientResponseMessage()
+        {
+            return CreateFailureMessage(HttpStatusCode.BadRequest,
+                "{\"error\":\"invalid_client\",\"error_description\":\"AADSTS7000218: " +
+                "The request body must contain the following parameter: " +
+                "'client_assertion' or 'client_secret'." +
+                "Trace ID: 21c3e4db - d2fd - 44f7 - a3e0 - 5939f84e6000" +
+                "Correlation ID: 3d483b09 - 1198 - 4acb - 929f - c648674e32bd" +
+                "Timestamp: 2019 - 07 - 12 19:24:42Z\"," +
+                "\"error_codes\":[7000218],\"timestamp\":\"2019-07-12 19:24:42Z\"," +
+                "\"trace_id\":\"21c3e4db-d2fd-44f7-a3e0-5939f84e6000\",\"correlation_id\":" +
+                "\"3d483b09-1198-4acb-929f-c648674e32bd\"}");
+        }
+
         public static HttpResponseMessage CreateNoErrorFieldResponseMessage()
         {
             return CreateFailureMessage(HttpStatusCode.BadRequest,
