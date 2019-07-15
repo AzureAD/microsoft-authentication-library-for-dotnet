@@ -43,15 +43,15 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters authenticationRequestParameters,
             string familyId = null);
 
-        void SetIosKeychainSecurityGroup(string securityGroup);
+        #endregion
 
-
-        void RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext);
-
+        #region For test
         Task<IEnumerable<MsalAccessTokenCacheItem>> GetAllAccessTokensAsync(bool filterByClientId);
         Task<IEnumerable<MsalRefreshTokenCacheItem>> GetAllRefreshTokensAsync(bool filterByClientId);
         Task<IEnumerable<MsalIdTokenCacheItem>> GetAllIdTokensAsync(bool filterByClientId);
         Task<IEnumerable<MsalAccountCacheItem>> GetAllAccountsAsync();
+
+        void RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext);
 
         /// <summary>
         /// FOCI - check in the app metadata to see if the app is part of the family
@@ -62,6 +62,8 @@ namespace Microsoft.Identity.Client
         void ClearAdalCache();
         void ClearMsalCache();
         Task ClearAsync();
+
+        void SetIosKeychainSecurityGroup(string securityGroup);
 
         #endregion
 

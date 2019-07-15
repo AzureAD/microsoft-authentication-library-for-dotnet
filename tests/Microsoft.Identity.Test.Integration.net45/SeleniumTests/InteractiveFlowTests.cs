@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
@@ -131,7 +132,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = true
             };
 
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);            
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -199,10 +200,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task MultiUserCacheCompatabilityTestAsync()
         {
             // Arrange
-            //cache = new TokenCache();
 
             //Acquire AT for default lab account
-            LabResponse labResponseDefault = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);           
+            LabResponse labResponseDefault = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             AuthenticationResult defaultAccountResult = await RunTestForUserAsync(labResponseDefault).ConfigureAwait(false);
 
             //Acquire AT for ADFS 2019 account
@@ -268,6 +268,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .Build();
             }
+
+            var userCacheAccess = pca.UserTokenCache.RecordAccess();
+
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(s_scopes)
@@ -275,11 +278,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
+            userCacheAccess.AssertAccessCounts(0, 1);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            userCacheAccess.AssertAccessCounts(1, 1); // the assert calls GetAccounts
 
             Trace.WriteLine("Part 2 - Clear the cache");
             await pca.RemoveAsync(account).ConfigureAwait(false);
+            userCacheAccess.AssertAccessCounts(1, 2);
             Assert.IsFalse((await pca.GetAccountsAsync().ConfigureAwait(false)).Any());
+            userCacheAccess.AssertAccessCounts(2, 2);
 
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
@@ -289,8 +296,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .WithLoginHint(labResponse.User.HomeUPN)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
+            userCacheAccess.AssertAccessCounts(2, 3);
 
             account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            userCacheAccess.AssertAccessCounts(3, 3);
 
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca
@@ -299,6 +308,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ConfigureAwait(false);
 
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+
             return result;
         }
 

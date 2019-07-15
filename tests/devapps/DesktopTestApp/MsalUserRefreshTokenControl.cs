@@ -29,8 +29,16 @@ namespace DesktopTestApp
             _cache = publicClient.UserTokenCacheInternal;
             _rtItem = rtItem;
 
-            _accountItem = _cache.GetAccountAsync(_rtItem).GetAwaiter().GetResult(); // todo: yuck
-            upnLabel.Text = _accountItem.PreferredUsername;
+            foreach (var acc in _cache.Accessor.GetAllAccounts())
+            {
+                if (_rtItem.HomeAccountId.Equals(acc.HomeAccountId, StringComparison.OrdinalIgnoreCase) &&
+                    _rtItem.Environment.Equals(acc.Environment, StringComparison.OrdinalIgnoreCase))
+                {
+                    _accountItem = acc;
+                }
+            }
+
+            upnLabel.Text = _accountItem?.PreferredUsername;
 
             invalidateRefreshTokenBtn.Enabled = !_rtItem.Secret.Equals(GarbageRtValue, StringComparison.OrdinalIgnoreCase);
         }
@@ -43,7 +51,7 @@ namespace DesktopTestApp
         private void InvalidateRefreshTokenBtn_Click(object sender, System.EventArgs e)
         {
             _rtItem.Secret = GarbageRtValue;
-            _cache.AddRefreshTokenCacheItem(_rtItem);
+            _cache.Accessor.SaveRefreshToken(_rtItem);
             invalidateRefreshTokenBtn.Enabled = false;
         }
 

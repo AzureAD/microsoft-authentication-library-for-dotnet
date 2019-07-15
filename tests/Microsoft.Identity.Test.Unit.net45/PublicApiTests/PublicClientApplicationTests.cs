@@ -293,6 +293,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
@@ -307,6 +308,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
                 Assert.AreEqual(MsalTestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
+                userCacheAccess.AssertAccessCounts(0, 1); 
 
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
@@ -325,6 +327,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
                 Assert.AreEqual(MsalTestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
+                userCacheAccess.AssertAccessCounts(0, 2);
             }
         }
 

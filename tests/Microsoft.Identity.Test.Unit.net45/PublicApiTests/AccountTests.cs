@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -70,6 +71,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath("SingleCloudTokenCache.json"));
             pca.UserTokenCacheInternal.Accessor.AssertItemCount(2, 2, 2, 2, 1);
+            var cacheAccessRecorder = pca.UserTokenCache.RecordAccess();
 
             // Act
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -77,7 +79,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Assert
             Assert.AreEqual(2, accounts.Count());
             Assert.IsTrue(accounts.All(a => a.Environment == "login.microsoftonline.com"));
+            cacheAccessRecorder.AssertAccessCounts(1, 0);
         }
+
+      
 
         // Bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1030
         [TestMethod]
@@ -184,12 +189,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Where(a => a.Environment != "login.microsoftonline.de")
                 .ToList()
                 .ForEach(a => pcaDe.UserTokenCacheInternal.Accessor.DeleteAccount(a.GetKey()));
+            var cacheAccessRecorder = pcaDe.UserTokenCache.RecordAccess();
 
             // Act
             var accountsDe = await pcaDe.GetAccountsAsync().ConfigureAwait(false);
 
             // Assert
             Assert.AreEqual("login.microsoftonline.de", accountsDe.Single().Environment);
+            cacheAccessRecorder.AssertAccessCounts(1, 0);
         }
 
         [TestMethod]
@@ -288,6 +295,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // Populate with tokens tied to ClientId2
             tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId2);
+            var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
 
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                 expectedAtCount: 2,
@@ -301,6 +309,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // Assert 
             Assert.IsFalse(accounts.Any(), "No accounts should be returned because the existing account to a different client");
+            cacheAccessRecorder.AssertAccessCounts(1, 0);
 
             // Arrange
 
@@ -316,9 +325,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // Act
             accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+            cacheAccessRecorder.AssertAccessCounts(2, 0);
+
             await app.RemoveAsync(accounts.Single()).ConfigureAwait(false);
 
             // Assert
+            cacheAccessRecorder.AssertAccessCounts(2, 1);
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                expectedAtCount: 2,
                expectedRtCount: 1,
@@ -346,6 +358,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
             Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
         }
+
         private async Task ValidateGetAccountsWithDiscoveryAsync(string tokenCacheAsString)
         {
             using (var httpManager = new MockHttpManager())

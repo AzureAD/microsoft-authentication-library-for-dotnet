@@ -20,8 +20,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         {
         }
 
-        // TODO: these do not make sense - what question does this answer? We don't load just a single type of token, we load
-        // multiple objects at the same time. 
         public enum TokenTypes
         {
             AT,
