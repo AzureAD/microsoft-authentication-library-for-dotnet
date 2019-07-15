@@ -402,11 +402,7 @@ namespace Microsoft.Identity.Client
             return appMetadata.FamilyId == familyId;
         }
 
-        // TODO: no telemetry 
-        // TODO: not async
-        async Task<MsalIdTokenCacheItem> ITokenCacheInternal.GetIdTokenCacheItemAsync(
-            MsalIdTokenCacheKey msalIdTokenCacheKey,
-            RequestContext requestContext)
+        MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey)
         {
             var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
             return idToken;
@@ -417,7 +413,6 @@ namespace Microsoft.Identity.Client
         /// all the environments in the token cache are known to MSAL, as MSAL keeps a list of 
         /// known environments in <see cref="KnownMetadataProvider"/>
         /// </remarks>
-        // TODO: No telemetry is emitted
         async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(string authority, RequestContext requestContext)
         {
             var environment = Authority.GetEnviroment(authority);

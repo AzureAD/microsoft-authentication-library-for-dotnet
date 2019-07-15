@@ -443,14 +443,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             });
 
             var notification = new TokenCacheNotificationArgs(tokenCache, null, null, false);
-            await tokenCache.OnBeforeAccessAsync(notification).ConfigureAwait(false);
-            await tokenCache.OnAfterAccessAsync(notification).ConfigureAwait(false);
+            await (tokenCache as ITokenCacheInternal).OnBeforeAccessAsync(notification).ConfigureAwait(false);
+            await (tokenCache as ITokenCacheInternal).OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
-            await tokenCache.OnBeforeAccessAsync(notification).ConfigureAwait(false);
+            await (tokenCache as ITokenCacheInternal).OnBeforeAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
-            await tokenCache.OnAfterAccessAsync(notification).ConfigureAwait(false);
+            await (tokenCache as ITokenCacheInternal).OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
             var finalJson = JObject.Parse(Encoding.UTF8.GetString(cache));

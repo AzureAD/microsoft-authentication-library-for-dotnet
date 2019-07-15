@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Cache
         public async Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalIdTokenCacheKey idTokenCacheKey)
         {
             await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.ID).ConfigureAwait(false);
-            return await TokenCacheInternal.GetIdTokenCacheItemAsync(idTokenCacheKey, _requestParams.RequestContext).ConfigureAwait(false);
+            return TokenCacheInternal.GetIdTokenCacheItem(idTokenCacheKey);
         }
 
         public async Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
@@ -95,18 +95,18 @@ namespace Microsoft.Identity.Client.Cache
         {
             if (!_cacheRefreshedForRead)
             {
+                string telemetryId = _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId();
+                var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup, telemetryId)
+                {
+                    TokenType = cacheEventType
+                };
+
                 await TokenCacheInternal.Semaphore.WaitAsync().ConfigureAwait(false);
 
                 try
                 {
                     if (!_cacheRefreshedForRead) // double check locking
                     {
-                        string telemetryId = _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId();
-                        var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup, telemetryId)
-                        {
-                            TokenType = cacheEventType
-                        };
-
                         using (_telemetryManager.CreateTelemetryHelper(cacheEvent))
                         {
                             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
