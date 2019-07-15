@@ -31,9 +31,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint)
         {
-            var accounts = await CacheManager.TokenCacheInternal.GetAccountsAsync(
-                ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
-                AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+            var accounts = await CacheManager.GetAccountsAsync(ServiceBundle.Config.AuthorityInfo.CanonicalAuthority)
+                .ConfigureAwait(false);
 
             accounts = accounts
                 .Where(a => !string.IsNullOrWhiteSpace(a.Username) &&

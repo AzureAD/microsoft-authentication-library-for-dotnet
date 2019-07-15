@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Common = "common";
         public const string TenantId = "e56cat29e-b008-4cea-b6f0-48facatsd64a";
         public static readonly IDictionary<string, string> ClientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
+        public const string RTSecret = "someRT";
 
         public const string HomeAccountId = Uid + "." + Utid;
 
