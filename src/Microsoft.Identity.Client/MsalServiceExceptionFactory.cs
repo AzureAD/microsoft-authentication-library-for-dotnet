@@ -36,7 +36,8 @@ namespace Microsoft.Identity.Client
             {
                 ex = new MsalServiceException(
                     MsalError.InvalidClient,
-                    MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription);
+                    MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription, 
+                    innerException);
             }
 
             if (ex == null)
