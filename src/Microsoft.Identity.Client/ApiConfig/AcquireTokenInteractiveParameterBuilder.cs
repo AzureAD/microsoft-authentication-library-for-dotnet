@@ -66,6 +66,19 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        internal AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindowFunc(Func<object> parentActivityOrWindowFunc)
+        {
+#if RUNTIME || NETSTANDARD_BUILDTIME
+
+            if (parentActivityOrWindowFunc != null)
+            {
+                WithParentActivityOrWindow(parentActivityOrWindowFunc());
+            }
+#endif 
+
+            return this;
+        }
+
         /// <summary>
         /// Specifies if the public client application should used an embedded web browser
         /// or the system default browser
@@ -202,7 +215,7 @@ namespace Microsoft.Identity.Client
                 Parameters.UiParent.CallerActivity = activity;
             }           
 #elif iOS
-            if(parent is UIViewController uiViewController)
+            if (parent is UIViewController uiViewController)
             {
                 Parameters.UiParent.CallerViewController = uiViewController;
             }
@@ -327,7 +340,7 @@ namespace Microsoft.Identity.Client
             base.Validate();
 
 #if ANDROID
-            if (Parameters.UiParent.Activity==null)
+            if (Parameters.UiParent.Activity == null)
             {
                 throw new InvalidOperationException(MsalErrorMessage.ActivityRequiredForParentObjectAndroid);
             }

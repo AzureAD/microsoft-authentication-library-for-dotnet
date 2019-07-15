@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
             Assert.IsNull(pca.AppConfig.TenantId);
             Assert.IsNull(pca.AppConfig.TelemetryConfig);
+            Assert.IsNull(pca.AppConfig.ParentActivityOrWindowFunc);
         }
 
         [TestMethod]
@@ -121,6 +122,20 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
             Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithParentActivityOrWindowFunc()
+        {
+            IntPtr ownerPtr = new IntPtr(23478);
+
+            var pca = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithParentActivityOrWindow(() => ownerPtr)
+                .Build();
+
+            Assert.IsNotNull(pca.AppConfig.ParentActivityOrWindowFunc);
+            Assert.AreEqual(ownerPtr, pca.AppConfig.ParentActivityOrWindowFunc());
         }
 
         [TestMethod]
