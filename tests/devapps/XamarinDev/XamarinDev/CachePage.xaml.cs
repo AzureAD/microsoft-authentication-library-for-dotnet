@@ -95,7 +95,7 @@ namespace XamarinDev
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
 
             var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
-            tokenCache.DeleteAccessToken(accessTokenCacheItem);
+            tokenCache.Accessor.DeleteAccessToken(accessTokenCacheItem.GetKey());
 
             RefreshCacheViewAsync().ConfigureAwait(true);
         }
@@ -110,7 +110,7 @@ namespace XamarinDev
             refreshTokenCacheItem.Secret = "InvalidValue";
 
             // update entry in the cache
-            tokenCache.AddRefreshTokenCacheItem(refreshTokenCacheItem);
+            tokenCache.Accessor.SaveRefreshToken(refreshTokenCacheItem);
 
             RefreshCacheViewAsync().ConfigureAwait(true);
         }

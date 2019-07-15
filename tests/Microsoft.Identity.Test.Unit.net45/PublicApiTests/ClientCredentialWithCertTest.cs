@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -103,6 +104,9 @@ namespace Microsoft.Identity.Test.Unit
                     .WithCertificate(certificate)
                     .BuildConcrete();
 
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
                 AuthenticationResult result = await app
@@ -112,7 +116,10 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result.AccessToken);
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
 
+                // from the cache
                 result = await app
                     .AcquireTokenForClient(MsalTestConstants.Scope)
                     .ExecuteAsync(CancellationToken.None)
@@ -122,9 +129,8 @@ namespace Microsoft.Identity.Test.Unit
 
                 //Check app cache
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-
-                //Clear cache
-                app.AppTokenCacheInternal.ClearMsalCache();
+                appCacheAccess.AssertAccessCounts(2, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
 
@@ -148,6 +154,9 @@ namespace Microsoft.Identity.Test.Unit
                     .WithCertificate(certificate)
                     .BuildConcrete();
 
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
                 var userAssertion = new UserAssertion(MsalTestConstants.DefaultAccessToken);
 
                 //Check for x5c claim
@@ -159,6 +168,9 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
 
+                appCacheAccess.AssertAccessCounts(0, 0);
+                userCacheAccess.AssertAccessCounts(1, 1);
+
                 result = await app
                     .AcquireTokenOnBehalfOf(MsalTestConstants.Scope, userAssertion)
                     .ExecuteAsync(CancellationToken.None)
@@ -168,9 +180,8 @@ namespace Microsoft.Identity.Test.Unit
 
                 //Check user cache
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-
-                //Clear cache
-                app.UserTokenCacheInternal.ClearMsalCache();
+                appCacheAccess.AssertAccessCounts(0, 0);
+                userCacheAccess.AssertAccessCounts(2, 1);
             }
         }
 
@@ -193,6 +204,9 @@ namespace Microsoft.Identity.Test.Unit
                     .WithCertificate(certificate).BuildConcrete();
 
                 _tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
                     new MsalAccessTokenCacheKey(
                         MsalTestConstants.ProductionPrefNetworkEnvironment,
@@ -217,8 +231,8 @@ namespace Microsoft.Identity.Test.Unit
                 //Check user cache
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
 
-                //Clear cache
-                app.UserTokenCacheInternal.ClearMsalCache();
+                appCacheAccess.AssertAccessCounts(0, 0);
+                userCacheAccess.AssertAccessCounts(1, 1);
             }
         }
 

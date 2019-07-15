@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private int _afterAccessWriteCalls = 0;
         private int _beforeWriteCalls = 0;
 
-
         [TestInitialize]
         public override void TestInitialize()
         {

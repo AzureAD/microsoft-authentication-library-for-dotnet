@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -48,6 +49,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
             var pca = PublicClientApplicationBuilder.Create(labResponse.AppId).Build();
+            var userCacheAccess = pca.UserTokenCache.RecordAccess();
+
             var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
             {
                 SeleniumExtensions.PerformDeviceCodeLogin(deviceCodeResult, labResponse.User, TestContext, false);
@@ -56,6 +59,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Trace.WriteLine("Running asserts");
 
+            userCacheAccess.AssertAccessCounts(0, 1);
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
         }
@@ -91,6 +95,5 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
         }
-
     }
 }

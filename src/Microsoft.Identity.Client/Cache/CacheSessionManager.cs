@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Cache
     /// MSAL should only interact with the cache though this object. It is reponsible for firing cache notifications.
     /// Flows should only perform (at most) 2 cache accesses: one to read data and one to write tokens. Reading data multiple times 
     /// (e.g. read all ATs, read all RTs) should not refresh the cache from disk because of perf impact.
-    /// Write operations are still the responsability of TokenCache (TODO)
+    /// Write operations are still the responsability of TokenCache.
     /// </summary>
     internal class CacheSessionManager : ICacheSessionManager
     {
@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
         {
-            // TODO: for consistency, move the write operations here as well.
             return await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
         }
 

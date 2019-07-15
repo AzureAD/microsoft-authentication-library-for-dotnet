@@ -22,6 +22,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
         }
 
+        public static TokenCacheAccessRecorder RecordAccess(this ITokenCache tokenCache)
+        {
+            return new TokenCacheAccessRecorder(tokenCache as TokenCache);
+        }
 
         public static void ClearAccessTokens(this ITokenCacheAccessor accessor)
         {
