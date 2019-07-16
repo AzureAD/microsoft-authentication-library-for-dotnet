@@ -74,15 +74,13 @@ for labUserData in testInput['LabUserDatas']:
 
     if result:
         print("got token for '" + upn + "' from the cache")
-        # results.append(CacheExecutorAccountResult(upn, result.get("Username"), True))  
-        results.append(CacheExecutorAccountResult(upn, upn, True))  # TODO(BUG): Tried to do line above for result.get("Username") but I don't get the UPN that was acquired
+        results.append(CacheExecutorAccountResult(upn, accounts[0]["username"] if accounts else "n/a", True))
     else:
         result = app.acquire_token_by_username_password(upn, labUserData['Password'], scopes=the_scopes)
         if result:
             print("got token for '" + upn + "' by signing in with credentials")
             print(result)
-            # results.append(CacheExecutorAccountResult(upn, result.get("Username"), False))
-            results.append(CacheExecutorAccountResult(upn, upn, False))  # TODO(BUG): Tried to do line above for result.get("Username") but I don't get the UPN that was acquired
+            results.append(CacheExecutorAccountResult(upn, result.get("id_token_claims", {}).get("preferred_username"), False))
         else:
             print("** ACQUIRE TOKEN FAILURE **")
             print(result.get("error"))
