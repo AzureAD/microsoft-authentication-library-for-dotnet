@@ -198,6 +198,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
@@ -208,6 +211,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(app.UserTokenCache);
                 Assert.IsNotNull(app.AppTokenCache);
+
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
 
@@ -227,6 +233,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -241,6 +249,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
+
                 // call AcquireTokenForClientAsync again to get result back from the cache
                 result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -254,6 +265,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // check app token cache count to be 1
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+
+                appCacheAccess.AssertAccessCounts(2, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
 
@@ -269,6 +283,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 httpManager.AddMockHandler(
                 new MockHttpMessageHandler
@@ -295,6 +311,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
 
                 // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
@@ -317,6 +335,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // check app token cache count to be 1
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no refresh tokens are returned
+                appCacheAccess.AssertAccessCounts(2, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
+
             }
         }
 
@@ -375,11 +396,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
                 var app = CreateConfidentialClient(httpManager, cert, 3);
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
 
                 // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
@@ -403,6 +428,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
+                appCacheAccess.AssertAccessCounts(2, 2);
+                userCacheAccess.AssertAccessCounts(0, 0);
+
                 Assert.IsNotNull(result);
                 Assert.AreEqual(cacheValidTo, app.ClientCredential.ValidTo);
                 Assert.AreEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
@@ -415,6 +443,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                       .ExecuteAsync(CancellationToken.None)
                       .ConfigureAwait(false);
                 Assert.AreNotEqual(cachedAssertion, app.ClientCredential.CachedAssertion);
+
+                appCacheAccess.AssertAccessCounts(2, 3);
+                userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
 
@@ -427,11 +458,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
                 var app = CreateConfidentialClient(httpManager, cert, 1, CredentialType.CertificateAndClaims);
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 var result = await app.AcquireTokenForClient(MsalTestConstants.Scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
 
                 // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
@@ -641,6 +676,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityGuestTenant);
 
@@ -656,6 +693,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var uri = task.Result;
                 Assert.IsNotNull(uri);
+                appCacheAccess.AssertAccessCounts(0, 0);
+                userCacheAccess.AssertAccessCounts(0, 0);
+
                 Assert.IsTrue(
                     uri.AbsoluteUri.StartsWith(MsalTestConstants.AuthorityGuestTenant, StringComparison.CurrentCulture));
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);

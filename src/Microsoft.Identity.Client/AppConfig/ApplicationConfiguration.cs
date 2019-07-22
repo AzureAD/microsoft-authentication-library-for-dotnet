@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
@@ -31,6 +33,8 @@ namespace Microsoft.Identity.Client
             get => _clientVersion;
             internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? DefaultClientVersion : value; }
         }
+
+        public Func<object> ParentActivityOrWindowFunc { get; internal set; }
 
         public bool UseCorporateNetwork { get; internal set; }
         public string IosKeychainSecurityGroup { get; internal set; }
@@ -70,7 +74,11 @@ namespace Microsoft.Identity.Client
         public IDictionary<string, string> ClaimsToSign { get; internal set; }
         public bool MergeWithDefaultClaims { get; internal set; }
         internal int ConfidentialClientCredentialCount;
+
 #endif
+
+        public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }
+
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
         /// </summary>

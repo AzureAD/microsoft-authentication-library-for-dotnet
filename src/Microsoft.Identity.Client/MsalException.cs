@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
@@ -103,7 +105,22 @@ namespace Microsoft.Identity.Client
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            return base.ToString() + string.Format(CultureInfo.InvariantCulture, "\n\tErrorCode: {0}", ErrorCode);
+            string msalProductName = PlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
+            string msalVersion = MsalIdHelper.GetMsalVersion();
+
+            string innerExceptionContents = InnerException == null 
+                ? string.Empty 
+                : string.Format(CultureInfo.InvariantCulture, "\nInner Excception: {0}", InnerException.ToString());
+
+            return string.Format(
+                CultureInfo.InvariantCulture, 
+                "{0}.{1}.{2}: \n\tErrorCode: {3}\n{4}{5}", 
+                msalProductName, 
+                msalVersion, 
+                GetType().Name,
+                ErrorCode, 
+                base.ToString(), 
+                innerExceptionContents);
         }
 
         #region SERIALIZATION

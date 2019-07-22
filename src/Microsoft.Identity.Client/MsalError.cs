@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -590,10 +592,104 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "Client_Credential_Authentication_Types_Are_Mutually_Exclusive";
 
+        #region InvalidGrant suberrors
+        /// <summary>
+        /// Issue can be resolved by user interaction during the interactive authentication flow.
+        /// See https://aka.ms/msal-net-UiRequiredException for details
+        /// </summary>
+        internal const string BasicAction = "basic_action";
+
+        /// <summary>
+        /// Issue can be resolved by additional remedial interaction with the system, outside of the interactive authentication flow.
+        /// Interactive authentication is still required to inform the user of what is needed. Calling application may choose to hide flows that require additional_action if the user is unlikely to complete the remedial action.
+        /// Example: 
+        /// </summary>
+        internal const string AdditionalAction = "additional_action";
+
+        /// <summary>
+        /// Issue cannot be resolved at this time. Launching interactive authentication flow will show a message explaining the condition.
+        /// </summary>
+        internal const string MessageOnly = "message_only";
+
+        /// <summary>
+        /// User's password has expired.
+        /// </summary>
+        internal const string UserPasswordExpired = "user_password_expired";
+
+        /// <summary>
+        /// User consent is missing, or has been revoked.
+        /// </summary>
+        internal const string ConsentRequired = "consent_required";
+
+        /// <summary>
+        /// Internal to MSALs. Indicates that no further silent calls should be made with this refresh token.
+        /// </summary>
+        internal const string BadToken = "bad_token";
+
+        /// <summary>
+        /// Internal to MSALs. Indicates that no further silent calls should be made with this refresh token.
+        /// </summary>
+        internal const string TokenExpired = "token_expired";
+
+        /// <summary>
+        /// Internal to MSALs. Needed in ios/android to complete the end-to-end true MAM flow. This suberror code is re-mapped to a different top level error code (IntuneAppProtectionPoliciesRequired), and not InteractionRequired
+        /// </summary>
+        internal const string ProtectionPolicyRequired = "protection_policy_required";
+
+        /// <summary>
+        /// Internal to MSALs. Used in scenarios where an application is using family refresh token even though it is not part of FOCI (or vice versa). Needed to handle cases where app changes FOCI membership after being shipped. This is handled internally and doesn't need to be exposed to the calling app. Please see FOCI design document for more details.
+        /// </summary>
+        internal const string ClientMismatch = "client_mismatch";
+
+        /// <summary>
+        /// Internal to MSALs. Indicates that device should be re-registered.
+        /// </summary>
+        internal const string DeviceAuthenticationFailed = "device_authentication_failed";
+
+        #endregion
+
         /// <summary>
         /// AAD service error indicating that the configured authority does not exist
         /// </summary>
         public const string InvalidInstance = "invalid_instance";
+        /// <summary>
+        /// <para>What happens?</para>You have configured your own instance metadata, but the json provided seems to be invalid. 
+        /// <para>Mitigation</para>See https://aka.ms/msal-net-custom-instance-metadata for an example of a valid json that can be used.
+        /// </summary>
+        public const string InvalidUserInstanceMetadata = "invalid-custom-instance-metadata";
+
+        /// <summary>
+        /// <para>What happens?</para>You have configured your own instance metadata, and have also configured custom metadata. These are mutually exclusive. 
+        /// <para>Mitigation</para>Set the validate authority flag to false. See https://aka.ms/msal-net-custom-instance-metadata for more details.
+        /// </summary>
+        public const string ValidateAuthorityOrCustomMetadata = "validate_authority_or_custom_instance_metadata";
+
+        /// <summary>
+        /// <para>What happens?</para>You haven't set a client ID.
+        /// <para>Mitigation</para>Use the application ID (a Guid) from the application portal as client ID in this SDK
+        /// </summary>
+        public const string NoClientId = "no_client_id";
+
+        /// <summary>
+        /// <para>What happens?</para>You've specified a client ID that is not a <see cref="Guid"/>
+        /// <para>Mitigation</para>Use the application ID (a Guid) from the application portal as client ID in this SDK
+        /// </summary>
+        public const string ClientIdMustBeAGuid = "client_id_must_be_guid";
+
+        /// <summary>
+        /// <para>What happens?</para>You have configured both a telememtry callback and a telemetry config. 
+        /// <para>Mitigation</para>Only one telememtry mechanism can be configured.
+        /// </summary>
+        public const string TelemetryConfigOrTelemetryCallback = "telemetry_config_or_telemetry_callback";
+
+        /// <summary>
+        /// AAD service error indicating that the configured client is not valid
+        /// <para>Migigation</para>In the AAD app registration portal, make sure the correct client (Public or
+        /// Confidential) is selected for the respective authentication flow.
+        /// See https://aka.ms/msal-net-invalid-client for details.
+        /// </summary>
+        public const string InvalidClient = "invalid_client";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

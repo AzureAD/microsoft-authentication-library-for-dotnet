@@ -9,7 +9,26 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string MSGraph = "https://graph.microsoft.com";
         public const string Exchange = "https://outlook.office365.com/";
 
-        //MSAL test app
+        // Test to run
+        public const string AcquireTokenInteractive = "Acquire Token Interactive";
+        public const string AcquireTokenInteractiveConsentWithSelectAccount = "Consent with Select Account";
+        public const string AcquireTokenSilent = "Acquire Token Silent";
+        public const string ADFSv3Federated = "ADFSv3 Federated";
+        public const string ADFSv3NonFederated = "ADFSv3 NonFederated";
+        public const string ADFSv4Federated = "ADFSv4 Federated";
+        public const string ADFSv4NonFederated = "ADFSv4 NonFederated";
+        public const string ADFSv2019Federated = "ADFSv2019 Federated";
+        public const string ADFSv2019NonFederated = "ADFSv2019 NonFederated";
+        public const string B2CROPC = "B2C ROPC";
+        public const string B2CFacebookb2clogin = "B2C FB b2clogin.com";
+        public const string B2CLocalEditProfile = "B2C Local edit profile";
+        public const string B2CFacebookMicrosoftLogin = "B2C FB microsoftonline.com";
+        public const string B2CLocalb2clogin = "B2C Local b2clogin.com";
+        public const string B2CLocalMicrosoftLogin = "B2C Local microsoftonline.com";
+        public const string B2CGoogleb2clogin = "B2C Google b2clogin.com";
+        public const string B2CGoogleMicrosoftLogin = "B2C Google microsoftonline.com";
+
+        public const string TestsToRunPicker = "uiTestPicker";
         public const string AcquireTokenButtonId = "acquireToken_button";
         public const string AcquireTokenWithPromptBehaviorAlwaysId = "acquireTokenPromptBehaviorAlways";
         public const string AcquireTokenSilentButtonId = "acquireTokenSilent_button";

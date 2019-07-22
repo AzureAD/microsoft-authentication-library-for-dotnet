@@ -18,13 +18,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public const string TooManyRequestsContent = "Too many requests error";
         public static readonly TimeSpan TestRetryAfterDuration = TimeSpan.FromSeconds(120);
 
-        //public static readonly string TokenResponseTemplate =
-        //    "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
-        //    "\"{0}\",\"access_token\":\"some-access-token\"" +
-        //    ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
-        //    ":\"{2}\",\"id_token\"" +
-        //    ":\"{1}\",\"id_token_expires_in\":\"3600\"}";
-
         public static readonly string DefaultTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
@@ -106,7 +99,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return responseMessage;
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage(string scopes, string idToken, string clientInfo)
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(
+            string scopes, 
+            string idToken, 
+            string clientInfo)
         {
             return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,
                 "{{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
@@ -122,6 +118,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return CreateSuccessResponseMessage(
                 foci ? FociTokenResponse : DefaultTokenResponse);
         }
+
+        public static HttpResponseMessage CreateSuccessTokenResponseMessageWithUid(
+            string uid, string utid, string displayableName)
+        {
+            string tokenResponse =
+                "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+                "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
+                ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
+                ":\"" + CreateClientInfo(uid, utid) + "\",\"id_token\"" +
+                ":\"" + CreateIdToken(uid, displayableName) +
+                "\",\"id_token_expires_in\":\"3600\"}";
+
+            return CreateSuccessResponseMessage(tokenResponse);
+        }
+
 
         public static HttpResponseMessage CreateAdfsSuccessTokenResponseMessage()
         {
@@ -153,6 +164,20 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
                 "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
                 "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
+        }
+
+        public static HttpResponseMessage CreateInvalidClientResponseMessage()
+        {
+            return CreateFailureMessage(HttpStatusCode.BadRequest,
+                "{\"error\":\"invalid_client\",\"error_description\":\"AADSTS7000218: " +
+                "The request body must contain the following parameter: " +
+                "'client_assertion' or 'client_secret'." +
+                "Trace ID: 21c3e4db - d2fd - 44f7 - a3e0 - 5939f84e6000" +
+                "Correlation ID: 3d483b09 - 1198 - 4acb - 929f - c648674e32bd" +
+                "Timestamp: 2019 - 07 - 12 19:24:42Z\"," +
+                "\"error_codes\":[7000218],\"timestamp\":\"2019-07-12 19:24:42Z\"," +
+                "\"trace_id\":\"21c3e4db-d2fd-44f7-a3e0-5939f84e6000\",\"correlation_id\":" +
+                "\"3d483b09-1198-4acb-929f-c648674e32bd\"}");
         }
 
         public static HttpResponseMessage CreateNoErrorFieldResponseMessage()
@@ -338,7 +363,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(
-            string discoveryEndpoint, 
+            string discoveryEndpoint,
             string content = MsalTestConstants.DiscoveryJsonResponse)
         {
             return new MockHttpMessageHandler()
@@ -352,6 +377,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
         }
 
-       
+
     }
 }

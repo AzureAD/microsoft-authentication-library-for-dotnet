@@ -18,6 +18,10 @@ namespace Microsoft.Identity.Client
     {
         SemaphoreSlim Semaphore { get; }
 
+        ILegacyCachePersistence LegacyPersistence { get; }
+        ITokenCacheAccessor Accessor { get; }
+
+        #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
         Task<IEnumerable<IAccount>> GetAccountsAsync(string authority, RequestContext requestContext);
 
@@ -30,7 +34,7 @@ namespace Microsoft.Identity.Client
             MsalTokenResponse msalTokenResponse);
 
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters authenticationRequestParameters);
-        Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalIdTokenCacheKey getIdTokenItemKey, RequestContext requestContext);
+        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey getIdTokenItemKey);
 
         /// <summary>
         /// Returns a RT for the request. If familyId is specified, it tries to return the FRT.
@@ -39,17 +43,15 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters authenticationRequestParameters,
             string familyId = null);
 
-        void SetIosKeychainSecurityGroup(string securityGroup);
+        #endregion
 
-        ILegacyCachePersistence LegacyPersistence { get; }
-        ITokenCacheAccessor Accessor { get; }
-
-        void RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext);
-
+        #region For test
         Task<IEnumerable<MsalAccessTokenCacheItem>> GetAllAccessTokensAsync(bool filterByClientId);
         Task<IEnumerable<MsalRefreshTokenCacheItem>> GetAllRefreshTokensAsync(bool filterByClientId);
         Task<IEnumerable<MsalIdTokenCacheItem>> GetAllIdTokensAsync(bool filterByClientId);
         Task<IEnumerable<MsalAccountCacheItem>> GetAllAccountsAsync();
+
+        void RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext);
 
         /// <summary>
         /// FOCI - check in the app metadata to see if the app is part of the family
@@ -60,5 +62,16 @@ namespace Microsoft.Identity.Client
         void ClearAdalCache();
         void ClearMsalCache();
         Task ClearAsync();
+
+        void SetIosKeychainSecurityGroup(string securityGroup);
+
+        #endregion
+
+        #region Cache notifications
+        Task OnAfterAccessAsync(TokenCacheNotificationArgs args);
+        Task OnBeforeAccessAsync(TokenCacheNotificationArgs args);
+        Task OnBeforeWriteAsync(TokenCacheNotificationArgs args);
+
+        #endregion
     }
 }

@@ -4,18 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Extensibility;
 using NetStandard;
-//using NetStandard;
 
 namespace NetFx
 {
@@ -41,6 +38,8 @@ namespace NetFx
 
         public static void Main(string[] args)
         {
+            Console.ResetColor();
+            Console.BackgroundColor = ConsoleColor.Black;
             var pca = CreatePca();
             RunConsoleAppLogicAsync(pca).Wait();
         }
@@ -62,12 +61,24 @@ namespace NetFx
 
             pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
             {
+                //Console.BackgroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine($"SetBeforeAccess invoked for {notificationArgs?.Account?.Username ?? "null"} ");
+                Debug.WriteLine($"SetBeforeAccess invoked for {notificationArgs?.Account?.Username ?? "null"} ");
+                Console.ResetColor();
+
                 notificationArgs.TokenCache.DeserializeMsalV3(File.Exists(CacheFilePath)
                     ? File.ReadAllBytes(CacheFilePath)
                     : null);
             });
             pca.UserTokenCache.SetAfterAccess(notificationArgs =>
             {
+                //Console.BackgroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine($"SetAfterAccess invoked for {notificationArgs?.Account?.Username ?? "null" } " +
+                    $"with HasStateChanges = {notificationArgs.HasStateChanged}");
+                Debug.WriteLine($"SetAfterAccess invoked for {notificationArgs?.Account?.Username ?? "null" } " +
+                    $"with HasStateChanges = {notificationArgs.HasStateChanged}");
+                Console.ResetColor();
+
                 // if the access operation resulted in a cache update
                 if (notificationArgs.HasStateChanged)
                 {
@@ -92,14 +103,16 @@ namespace NetFx
                         1. IWA
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
-                        5. Acquire Token Interactive 
+                        4. Acquire Token Interactive 
+                        5. Acquire Token Interactive via NetStandard lib
                         6. Acquire Token Silently
-                        7. Acquire Interactive (logic in netstandard, default authority)
+                        7. Acquire Token Silently - multiple requests in parallel
                         8. Clear cache
                         9. Rotate Tenant ID
-                        0. Exit App
+                        0. Expire all ATs
+                        x. Exit app
                     Enter your Selection: ");
-                int.TryParse(Console.ReadLine(), out var selection);
+                char.TryParse(Console.ReadLine(), out var selection);
 
                 Task<AuthenticationResult> authTask = null;
 
@@ -107,89 +120,126 @@ namespace NetFx
                 {
                     switch (selection)
                     {
-                    case 1: // acquire token
-                        authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                        case '1': // acquire token
+                            authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                        break;
-                    case 2: // acquire token u/p
-                        SecureString password = GetPasswordFromConsole();
-                        authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                            break;
+                        case '2': // acquire token u/p
+                            SecureString password = GetPasswordFromConsole();
+                            authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                        break;
-                    case 3:
-                        authTask = pca.AcquireTokenWithDeviceCode(
-                            s_scopes,
-                            deviceCodeResult =>
+                            break;
+                        case '3':
+                            authTask = pca.AcquireTokenWithDeviceCode(
+                                s_scopes,
+                                deviceCodeResult =>
+                                {
+                                    Console.WriteLine(deviceCodeResult.Message);
+                                    return Task.FromResult(0);
+                                }).ExecuteAsync(CancellationToken.None);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+
+                            break;
+
+                        case '4': // acquire token interactive
+
+                            CancellationTokenSource cts = new CancellationTokenSource();
+                            authTask = pca.AcquireTokenInteractive(s_scopes)
+                                .WithUseEmbeddedWebView(false)
+                                .WithSystemWebViewOptions(new SystemWebViewOptions()
+                                {
+                                    //BrowserRedirectSuccess = new Uri("https://www.google.com"),
+                                    HtmlMessageSuccess = "All good, close the browser!",
+
+                                    //OpenBrowserAsync = (Uri u) =>
+                                    //{
+                                    //    string url = u.AbsoluteUri;
+                                    //    url = url.Replace("&", "^&");
+                                    //    Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
+                                    //    return Task.FromResult(0);
+                                    //}
+                                    OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
+                                })
+                                .ExecuteAsync(cts.Token);
+
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+
+                            break;
+                        case '6': // acquire token silent
+                            IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
+                            if (account == null)
                             {
-                                Console.WriteLine(deviceCodeResult.Message);
-                                return Task.FromResult(0);
-                            }).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                                Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
+                            }
 
-                        break;
-                 
-                    case 5: // acquire token interactive
+                            authTask = pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                        CancellationTokenSource cts = new CancellationTokenSource();
-                        authTask = pca.AcquireTokenInteractive(s_scopes)
-                            .WithUseEmbeddedWebView(false)
-                            .WithSystemWebViewOptions(new SystemWebViewOptions()
+                            break;
+
+                        case '7': // acquire token silent - one request per IAccount
+                            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                            Task<AuthenticationResult>[] tasks = accounts
+                                .Select(acc => pca.AcquireTokenSilent(s_scopes, acc).ExecuteAsync())
+                                .ToArray();
+
+                            AuthenticationResult[] result = await Task.WhenAll(tasks).ConfigureAwait(false);
+                            
+                            foreach (var ar in result)
                             {
-                                //BrowserRedirectSuccess = new Uri("https://www.google.com"),
-                                     HtmlMessageSuccess = "All good, close the browser!",
+                                Console.BackgroundColor = ConsoleColor.DarkGreen;
+                                Console.WriteLine($"Got a token for {ar.Account.Username} ");
+                                Console.ResetColor();
+                            }
 
-                                //OpenBrowserAsync = (Uri u) =>
-                                //{
-                                //    string url = u.AbsoluteUri;
-                                //    url = url.Replace("&", "^&");
-                                //    Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
-                                //    return Task.FromResult(0);
-                                //}
-                                OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
-                            })
-                            .ExecuteAsync(cts.Token);
+                            break;
+                        case '5': // Acquire Token Interactive via NetStandard lib
+                            CancellationTokenSource cts2 = new CancellationTokenSource();
+                            var authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
+                            await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
+                            break;
+                        case '8':
+                            var accounts2 = await pca.GetAccountsAsync().ConfigureAwait(false);
+                            foreach (var acc in accounts2)
+                            {
+                                await pca.RemoveAsync(acc).ConfigureAwait(false);
+                            }
 
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                            break;
+                        case '9':
 
-                        break;
-                    case 6: // acquire token silent
-                        IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
-                        if (account == null)
-                        {
-                            Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
-                        }
+                            s_currentTid = (s_currentTid + 1) % s_tids.Length;
+                            pca = CreatePca();
+                            RunConsoleAppLogicAsync(pca).Wait();
+                            break;
 
-                        authTask = pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                        case '0':
 
-                        break;
-                    case 7:
-                        CancellationTokenSource cts2 = new CancellationTokenSource();
-                        var authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
-                        await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
-                        break;
-                    case 8:
-                        var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-                        foreach (var acc in accounts)
-                        {
-                            await pca.RemoveAsync(acc).ConfigureAwait(false);
-                        }
+                            var tokenCacheInternal = pca.UserTokenCache as ITokenCacheInternal;
+                            var ats = tokenCacheInternal.Accessor.GetAllAccessTokens();
+                            // set access tokens as expired
+                            foreach (var accessItem in ats)
+                            {
+                                accessItem.ExpiresOnUnixTimestamp =
+                                    ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
+                                    .ToString(CultureInfo.InvariantCulture);
 
-                        break;
-                    case 9:
+                                tokenCacheInternal.Accessor.SaveAccessToken(accessItem);
+                            }
 
-                        s_currentTid = (s_currentTid + 1) % s_tids.Length;
-                        pca = CreatePca();
-                        RunConsoleAppLogicAsync(pca).Wait();
-                        break;
+                            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
+                                pca.UserTokenCache as ITokenCacheInternal, s_clientIdForPublicApp, null, true);
 
+                            await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
 
-                    case 0:
-                        return;
-                    default:
-                        break;
+                            break;
+
+                        case 'x':
+                            return;
+                        default:
+                            break;
                     }
 
                 }
@@ -239,17 +289,17 @@ namespace NetFx
 
             switch (level)
             {
-            case LogLevel.Error:
-                Console.ForegroundColor = ConsoleColor.Red;
-                break;
-            case LogLevel.Warning:
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                break;
-            case LogLevel.Verbose:
-                Console.ForegroundColor = ConsoleColor.Gray;
-                break;
-            default:
-                break;
+                case LogLevel.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case LogLevel.Warning:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case LogLevel.Verbose:
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    break;
+                default:
+                    break;
             }
 
             Console.WriteLine($"{level} {message}");

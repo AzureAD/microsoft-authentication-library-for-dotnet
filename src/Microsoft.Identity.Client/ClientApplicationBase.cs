@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client
 {
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public ITokenCache UserTokenCache => UserTokenCacheInternal;
 
-        internal ITokenCacheInternal UserTokenCacheInternal { get; set; }
+        internal ITokenCacheInternal UserTokenCacheInternal { get; }
 
         internal ClientApplicationBase(ApplicationConfiguration config)
         {
@@ -83,7 +84,25 @@ namespace Microsoft.Identity.Client
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-            IEnumerable<IAccount> accounts = await UserTokenCacheInternal.GetAccountsAsync(Authority, requestContext).ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
+            if (UserTokenCache == null)
+            {
+                requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
+            }
+            else
+            {
+                // a simple session consisting of a single call
+                CacheSessionManager cacheSessionManager = new CacheSessionManager(
+                    UserTokenCacheInternal,
+                    new AuthenticationRequestParameters(
+                        ServiceBundle,
+                        UserTokenCacheInternal,
+                        new AcquireTokenCommonParameters(),
+                        requestContext),
+                    ServiceBundle.TelemetryManager);
+
+                accounts = await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
+            }
             return accounts;
         }
 

@@ -122,10 +122,10 @@ namespace Microsoft.Identity.Client
                     HasStateChanged = true;
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                    await OnBeforeAccessAsync(args).ConfigureAwait(false);
+                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                     try
                     {
-                        await OnBeforeWriteAsync(args).ConfigureAwait(false);
+                        await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
 
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client
                     }
                     finally
                     {
-                        await OnAfterAccessAsync(args).ConfigureAwait(false);
+                        await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
                     }
 
                     return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
@@ -220,14 +220,7 @@ namespace Microsoft.Identity.Client
             }
 
             requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = Enumerable.Empty<MsalAccessTokenCacheItem>();
-            await LoadFromCacheAsync(
-                requestParams.RequestContext.CorrelationId.AsMatsCorrelationId(),
-                CacheEvent.TokenTypes.AT,
-                requestParams.Account,
-                () => tokenCacheItems = GetAllAccessTokensWithNoLocks(true))
-                    .ConfigureAwait(false);
-
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
 
@@ -320,8 +313,6 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-
-
         async Task<MsalRefreshTokenCacheItem> ITokenCacheInternal.FindRefreshTokenAsync(
             AuthenticationRequestParameters requestParams,
             string familyId)
@@ -329,15 +320,8 @@ namespace Microsoft.Identity.Client
             if (requestParams.Authority == null)
                 return null;
 
-            IEnumerable<MsalRefreshTokenCacheItem> allRts = Enumerable.Empty<MsalRefreshTokenCacheItem>();
-            await LoadFromCacheAsync(
-               requestParams.RequestContext.CorrelationId.AsMatsCorrelationId(),
-               CacheEvent.TokenTypes.AT,
-               requestParams.Account,
-               () => allRts = _accessor.GetAllRefreshTokens())
-                   .ConfigureAwait(false);
+            IEnumerable<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens();
 
-            // TODO: bogavril - do we want to be silent here?
             var metadata =
                 await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                     requestParams.AuthorityInfo.CanonicalAuthority,
@@ -393,13 +377,7 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            IEnumerable<MsalAppMetadataCacheItem> allAppMetadata = Enumerable.Empty<MsalAppMetadataCacheItem>();
-            await LoadFromCacheAsync(
-                    requestParams.RequestContext.CorrelationId.AsMatsCorrelationId(),
-                    CacheEvent.TokenTypes.AppMetadata,
-                    requestParams.Account,
-                    () => allAppMetadata = _accessor.GetAllAppMetadata())
-                .ConfigureAwait(false);
+            IEnumerable<MsalAppMetadataCacheItem> allAppMetadata = _accessor.GetAllAppMetadata();
 
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                     requestParams.AuthorityInfo.CanonicalAuthority,
@@ -424,58 +402,10 @@ namespace Microsoft.Identity.Client
             return appMetadata.FamilyId == familyId;
         }
 
-        private async Task LoadFromCacheAsync(
-            string telemetryId, CacheEvent.TokenTypes type, IAccount account, Action loadingAction)
+        MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey)
         {
-            var cacheEvent = new CacheEvent(
-                CacheEvent.TokenCacheLookup,
-                telemetryId)
-            {
-                TokenType = type
-            };
-
-            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(cacheEvent))
-            {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, account, false);
-                await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
-                try
-                {
-                    await OnBeforeAccessAsync(args).ConfigureAwait(false);
-
-                    loadingAction();
-
-                    await OnAfterAccessAsync(args).ConfigureAwait(false);
-                }
-                finally
-                {
-                    _semaphoreSlim.Release();
-                }
-            }
-        }
-
-        // TODO: no telemetry
-        async Task<MsalIdTokenCacheItem> ITokenCacheInternal.GetIdTokenCacheItemAsync(MsalIdTokenCacheKey msalIdTokenCacheKey, RequestContext requestContext)
-        {
-            await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
-            try
-            {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, false);
-
-                await OnBeforeAccessAsync(args).ConfigureAwait(false);
-                try
-                {
-                    var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
-                    return idToken;
-                }
-                finally
-                {
-                    await OnAfterAccessAsync(args).ConfigureAwait(false);
-                }
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
+            var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
+            return idToken;
         }
 
         /// <remarks>
@@ -483,46 +413,20 @@ namespace Microsoft.Identity.Client
         /// all the environments in the token cache are known to MSAL, as MSAL keeps a list of
         /// known environments in <see cref="KnownMetadataProvider"/>
         /// </remarks>
-        // TODO: No telemetry is emitted
         async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(string authority, RequestContext requestContext)
         {
             var environment = Authority.GetEnviroment(authority);
-
-            // FetchAllAccountItemsFromCacheAsync...
-            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems;
-            IEnumerable<MsalAccountCacheItem> accountCacheItems;
-            AdalUsersForMsal adalUsersResult;
-
             bool filterByClientId = !_featureFlags.IsFociEnabled;
 
-            await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
-            try
-            {
-                var args = new TokenCacheNotificationArgs(this, ClientId, null, false);
+            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
+            IEnumerable<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
 
-                await OnBeforeAccessAsync(args).ConfigureAwait(false);
-                try
-                {
-                    rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
-                    accountCacheItems = _accessor.GetAllAccounts();
-
-                    adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
-                        Logger,
-                        LegacyCachePersistence,
-                        ClientId);
-                }
-                finally
-                {
-                    await OnAfterAccessAsync(args).ConfigureAwait(false);
-                }
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
+            AdalUsersForMsal adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
+                Logger,
+                LegacyCachePersistence,
+                ClientId);
 
             // Multi-cloud support - must filter by env.
-            // Avoid making a discovery
             ISet<string> allEnvironmentsInCache = new HashSet<string>(
                 accountCacheItems.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
@@ -626,17 +530,17 @@ namespace Microsoft.Identity.Client
                 {
                     var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
 
-                    await OnBeforeAccessAsync(args).ConfigureAwait(false);
+                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                     try
                     {
-                        await OnBeforeWriteAsync(args).ConfigureAwait(false);
+                        await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
 
                         ((ITokenCacheInternal)this).RemoveMsalAccountWithNoLocks(account, requestContext);
                         RemoveAdalUser(account);
                     }
                     finally
                     {
-                        await OnAfterAccessAsync(args).ConfigureAwait(false);
+                        await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
                     }
                 }
                 finally
@@ -713,17 +617,17 @@ namespace Microsoft.Identity.Client
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true);
 
-                await OnBeforeAccessAsync(args).ConfigureAwait(false);
+                await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try
                 {
-                    await OnBeforeWriteAsync(args).ConfigureAwait(false);
+                    await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
 
                     ((ITokenCacheInternal)this).ClearMsalCache();
                     ((ITokenCacheInternal)this).ClearAdalCache();
                 }
                 finally
                 {
-                    await OnAfterAccessAsync(args).ConfigureAwait(false);
+                    await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete

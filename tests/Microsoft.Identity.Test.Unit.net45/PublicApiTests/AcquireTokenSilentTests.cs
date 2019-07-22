@@ -15,6 +15,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -39,6 +40,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
               () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (IAccount)null).ExecuteAsync()).ConfigureAwait(false);
             Assert.AreEqual(MsalError.UserNullError, ex.ErrorCode);
+            Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification);
+
         }
 
         [TestMethod]
@@ -62,6 +65,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             catch (MsalUiRequiredException exc)
             {
                 Assert.AreEqual(MsalError.NoTokensFoundError, exc.ErrorCode);
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exc.Classification);
             }
 
             Assert.IsNotNull(
@@ -96,6 +100,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         MsalTestConstants.UserIdentifier,
                         MsalTestConstants.ClientId,
                         MsalTestConstants.ScopeForAnotherResourceStr));
+                var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
@@ -108,6 +113,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(MsalTestConstants.ScopeForAnotherResource.AsSingleString(), result.Scopes.AsSingleString());
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                cacheAccess.AssertAccessCounts(1, 0);
             }
         }
 
@@ -147,6 +153,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
         public void AcquireTokenSilentScopeAndUserOverloadTenantSpecificAuthorityTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -278,6 +285,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 var tokenCacheHelper = new TokenCacheHelper();
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 AuthenticationResult result = await app.AcquireTokenSilent(
                     MsalTestConstants.Scope.ToArray(),
@@ -289,6 +297,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+                cacheAccess.AssertAccessCounts(1, 0);
             }
         }
 
@@ -312,6 +321,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.NoAccountForLoginHint, exception.ErrorCode);
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exception.Classification);
             }
         }
 
@@ -328,6 +338,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 var tokenCacheHelper = new TokenCacheHelper();
+                var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid1", "utid");
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid2", "utid");
@@ -339,6 +350,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.MultipleAccountsForLoginHint, exception.ErrorCode);
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exception.Classification);
+                cacheAccess.AssertAccessCounts(1, 0);
             }
         }
 
@@ -359,6 +372,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var tokenCacheHelper = new TokenCacheHelper();
                 tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
+                var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityUtidTenant);
@@ -387,6 +401,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                cacheAccess.AssertAccessCounts(1, 1);
             }
         }
 

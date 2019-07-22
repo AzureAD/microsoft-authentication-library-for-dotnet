@@ -273,6 +273,21 @@ namespace Microsoft.Identity.Client
         public const string AuthorizeEndpointWasNotFoundInTheOpenIdConfiguration = "Authorize endpoint was not found in the openid configuration";
         public const string TokenEndpointWasNotFoundInTheOpenIdConfiguration = "Token endpoint was not found in the openid configuration";
         public const string IssuerWasNotFoundInTheOpenIdConfiguration = "Issuer was not found in the openid configuration";
+        public const string InvalidUserInstanceMetadata = "The json containing instance metadata could not be parsed. See https://aka.ms/msal-net-custom-instance-metadata for details.";
+
         public const string UIViewControllerIsRequiredToInvokeiOSBroker = "UIViewController is null, so MSAL.NET cannot invoke the iOS broker. See https://aka.ms/msal-net-ios-broker";
+        public const string ValidateAuthorityOrCustomMetadata = "You have configured custom instance metadata, but the validateAuthority flag is set to true. These are mutually exclusive. Set the validateAuthority flag to false. See https://aka.ms/msal-net-custom-instance-metadata for more details.";
+
+        public const string InvalidClient = "The wrong application (public or confidential) is being used with this authentication flow." +
+            " Check the configuration of the app being used in the app registration portal." +
+            " See https://aka.ms/msal-net-invalid-client for details. ";
+
+        public static string NoUserInstanceMetadataEntry(string environment)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture, 
+                "The json containing instance metadata does not contain details about the authority in use: {0}. See https://aka.ms/msal-net-custom-instance-metadata for more details.", 
+                environment);
+        }
     }
 }

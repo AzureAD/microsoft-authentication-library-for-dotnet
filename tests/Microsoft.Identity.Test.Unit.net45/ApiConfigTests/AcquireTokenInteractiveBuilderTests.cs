@@ -155,6 +155,48 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
             Assert.AreEqual(MsalError.SystemWebviewOptionsNotApplicable, ex.ErrorCode);
         }
+
+        [TestMethod]
+        public async Task TestAcquireTokenInteractive_ParentWindow_OnlyAtAcquireTokenBuilder_Async()
+        {
+            IntPtr parentWindowIntPtr = new IntPtr(12345);
+
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                                                         .WithParentActivityOrWindow(parentWindowIntPtr)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
+
+            Assert.AreEqual(parentWindowIntPtr, _harness.InteractiveParametersReceived.UiParent.OwnerWindow);
+        }
+
+        [TestMethod]
+        public async Task TestAcquireTokenInteractive_ParentWindow_WithCallbackFunc_Async()
+        {
+            IntPtr parentWindowIntPtr = new IntPtr(12345);
+
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                                                         .WithParentActivityOrWindowFunc(() => parentWindowIntPtr)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
+
+            Assert.AreEqual(parentWindowIntPtr, _harness.InteractiveParametersReceived.UiParent.OwnerWindow);
+        }
+
+        [TestMethod]
+        public async Task TestAcquireTokenInteractive_ParentWindow_WithCallbackFuncAndAcquireTokenBuilder_Async()
+        {
+            IntPtr parentWindowIntPtrFromCallback = new IntPtr(12345);
+            IntPtr parentWindowIntPtrSpecific = new IntPtr(98765);
+
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                                                         .WithParentActivityOrWindowFunc(() => parentWindowIntPtrFromCallback)
+                                                         .WithParentActivityOrWindow(parentWindowIntPtrSpecific)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
+
+            Assert.AreEqual(parentWindowIntPtrSpecific, _harness.InteractiveParametersReceived.UiParent.OwnerWindow);
+        }
+
 #endif
 
 #if NET_CORE

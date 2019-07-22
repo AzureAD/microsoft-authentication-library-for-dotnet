@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
@@ -19,5 +21,7 @@ namespace Microsoft.Identity.Client.Cache
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();
         Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId);
         Task<bool?> IsAppFociMemberAsync(string familyId);
+
+        Task<IEnumerable<IAccount>> GetAccountsAsync(string authority);
     }
 }

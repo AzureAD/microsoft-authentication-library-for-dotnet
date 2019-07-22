@@ -255,10 +255,10 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
 
         private static string GetSignedClientAssertion(string clientId, IDictionary<string, string> claims)
         {
-#if DESKTOP
-            var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
-#elif NET_CORE
+#if NET_CORE
             var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
+#else
+            var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
 #endif
             var jwtToken = new JsonWebToken(manager, clientId, MsalTestConstants.ClientCredentialAudience, claims);
             var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);

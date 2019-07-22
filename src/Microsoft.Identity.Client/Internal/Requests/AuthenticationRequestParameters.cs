@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 : Authority.CreateAuthorityWithOverride(serviceBundle, commonParameters.AuthorityOverride);
 
             ClientId = serviceBundle.Config.ClientId;
-            CacheSessionManager = new CacheSessionManager(tokenCache, this);
+            CacheSessionManager = new CacheSessionManager(tokenCache, this, serviceBundle.TelemetryManager);
             Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;

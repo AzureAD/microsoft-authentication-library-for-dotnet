@@ -4,10 +4,6 @@
              x:Class="XForms.MainPage"
              xmlns:pages="clr-namespace:XForms;assembly=XForms"
              Title="Main Page">
-
-    <pages:AcquirePage Title="Acquire" AutomationId="AcquirePage"/>
-    <pages:SettingsPage Title="Settings" AutomationId="SettingsPage"/>
-    <pages:CachePage Title="Cache" AutomationId="CachePage"/>
+    <pages:TestPage Title="Tests" AutomationId="TestPage"/>
     <pages:LogPage Title="Log" AutomationId="LogPage"/>
-
 </TabbedPage>

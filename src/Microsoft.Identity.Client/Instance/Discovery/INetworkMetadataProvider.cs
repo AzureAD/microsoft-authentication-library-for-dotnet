@@ -9,6 +9,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 {
     internal interface INetworkMetadataProvider
     {
-        Task<InstanceDiscoveryResponse> FetchAllDiscoveryMetadataAsync(Uri authority, RequestContext requestContext);
+        Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext);
     }
 }

@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
@@ -34,6 +36,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
             Assert.IsNull(pca.AppConfig.TenantId);
             Assert.IsNull(pca.AppConfig.TelemetryConfig);
+            Assert.IsNull(pca.AppConfig.ParentActivityOrWindowFunc);
         }
 
         [TestMethod]
@@ -121,6 +124,54 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
         }
 
+        [TestMethod]
+        public void TestConstructor_WithParentActivityOrWindowFunc()
+        {
+            IntPtr ownerPtr = new IntPtr(23478);
+
+            var pca = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithParentActivityOrWindow(() => ownerPtr)
+                .Build();
+
+            Assert.IsNotNull(pca.AppConfig.ParentActivityOrWindowFunc);
+            Assert.AreEqual(ownerPtr, pca.AppConfig.ParentActivityOrWindowFunc());
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
+        public void TestConstructor_WithValidInstanceDicoveryMetadata()
+        {
+            string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                   .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                   .Build();
+
+            var instanceDiscoveryMetadata = (pca.AppConfig as ApplicationConfiguration).CustomInstanceDiscoveryMetadata;
+            Assert.AreEqual(2, instanceDiscoveryMetadata.Metadata.Length);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
+        public void TestConstructor_InstanceMetadata_ValidateAuthority_MutuallyExclusive()
+        {
+            string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
+            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                  .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                  .WithAuthority("https://some.authority/bogus/", true)
+                                                  .Build());
+            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+        }
+
+        [TestMethod]
+        public void TestConstructor_BadInstanceMetadata()
+        {
+            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                  .WithInstanceDicoveryMetadata("{bad_json_metadata")
+                                                  .Build());
+
+            Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
+        }
 
         [TestMethod]
         public void TestConstructor_WithHttpClientFactory()
@@ -401,14 +452,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             try
             {
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                    .WithTelemetry((List<Dictionary<string, string>> events) => {})
+                    .WithTelemetry((List<Dictionary<string, string>> events) => { })
                     .WithTelemetry(new TelemetryConfig())
                     .Build();
                 Assert.Fail("Should not reach here, exception should be thrown");
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(ex is InvalidOperationException);
+                Assert.IsTrue(ex is MsalClientException);
                 Assert.AreEqual(MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously, ex.Message);
             }
         }

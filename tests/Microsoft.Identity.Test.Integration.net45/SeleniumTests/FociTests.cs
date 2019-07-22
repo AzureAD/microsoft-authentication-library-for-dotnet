@@ -61,6 +61,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
                 CreateFamilyApps(labResponse, cacheFilePath, out IPublicClientApplication pca_fam1, out IPublicClientApplication pca_fam2, out IPublicClientApplication pca_nonFam);
 
+                var userCacheAccess1 = pca_fam1.UserTokenCache.RecordAccess();
+                var userCacheAccess2 = pca_fam2.UserTokenCache.RecordAccess();
+                var userCacheAccess3 = pca_nonFam.UserTokenCache.RecordAccess();
+
                 Trace.WriteLine("Get a token interactively with an app from the family.");
                 AuthenticationResult authResult = await pca_fam1.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
                 {
@@ -75,18 +79,28 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ConfigureAwait(false);
 
                 MsalAssert.AssertAuthResult(authResult, user);
+                userCacheAccess1.AssertAccessCounts(0, 1);
+                userCacheAccess2.AssertAccessCounts(0, 0);
+                userCacheAccess3.AssertAccessCounts(0, 0);
 
                 Trace.WriteLine("Get a token silently with another app from the family.");
                 authResult = await pca_fam2.AcquireTokenSilent(s_scopes, user.Upn)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 MsalAssert.AssertAuthResult(authResult, user);
+                userCacheAccess1.AssertAccessCounts(0, 1);
+                userCacheAccess2.AssertAccessCounts(1, 1); // a write occurs because appA does not have an AT, so it needs to refresh the FRT
+                userCacheAccess3.AssertAccessCounts(0, 0);
 
                 Trace.WriteLine("Apps that are not part of the family cannot get tokens this way.");
                 await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => pca_nonFam
                         .AcquireTokenSilent(s_scopes, user.Upn)
                         .ExecuteAsync())
                     .ConfigureAwait(false);
+
+                userCacheAccess1.AssertAccessCounts(0, 1);
+                userCacheAccess2.AssertAccessCounts(1, 1);
+                userCacheAccess3.AssertAccessCounts(1, 0);
 
                 Trace.WriteLine("Sing-out from one app - sign out of all apps in the family");
                 System.Collections.Generic.IEnumerable<IAccount> accounts = await pca_fam1.GetAccountsAsync().ConfigureAwait(false);
