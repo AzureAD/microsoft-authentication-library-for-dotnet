@@ -1,3 +1,17 @@
+4.2.0
+=============
+New Features:
+- **Allow users to specify their own instance metadata**.  For details see https://aka.ms/msal-net-custom-instance-metadata [More information on this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.2#improved-application-startup-cost-disconnected-scenarios-and-advanced-scenarios)
+- **AcquireTokenSilent should not make calls to the network** [More information on this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.2#cache-is-accessed-less-frequently)
+- **Improve CA Error Handling** [More information on this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1148)
+- **AcquireTokenSilent access the cache too many times** [More information on this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.2#improved-application-startup-cost-disconnected-scenarios-and-advanced-scenarios)
+- **Allow injecting the Parent Activity/Window in the Client Builder** [More information on this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.2#improved-api-on-xamarin)
+- **Add framework and version to MsalException ToString()** [More information on this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.2#self-troubleshooting-improvements)
+
+Bug Fixes:
+- **Resolved the "Key not valid for use in specified state" error when a certificate with a non-exportable key is used on .NET Framework 4.7.2+** [More information on this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1201)
+- **Cryptic exceptions when attempting IWA / UP / Device Flow with an app that isn't registered as a public client** [More information on this feature here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1249)
+
 4.1.0
 =============
 New Features:

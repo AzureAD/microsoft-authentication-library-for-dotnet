@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
-        public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
+        internal PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
 #if iOS || SUPPORTS_WAM
             Config.IsBrokerEnabled = enableBroker;
