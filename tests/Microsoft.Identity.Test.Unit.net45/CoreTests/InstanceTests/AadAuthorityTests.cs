@@ -319,6 +319,31 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public void TenantSpecificAuthorityInitTest()
+        {
+            var host = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment);
+            var fullAuthority = String.Concat(host, "/" , MsalTestConstants.TenantId, "/");
+
+            var publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                             .WithAuthority(host, MsalTestConstants.TenantId)
+                                                             .BuildConcrete();
+
+            Assert.AreEqual(publicClient.Authority, fullAuthority);
+
+            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                         .WithAuthority(host, new Guid(MsalTestConstants.TenantId))
+                                                         .BuildConcrete();
+
+            Assert.AreEqual(publicClient.Authority, fullAuthority);
+
+            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                         .WithAuthority(new Uri(fullAuthority))
+                                                         .BuildConcrete();
+
+            Assert.AreEqual(publicClient.Authority, fullAuthority);
+        }
+
+        [TestMethod]
         public void TenantAuthorityDoesNotChange()
         {
             // no change because initial authority is tenanted

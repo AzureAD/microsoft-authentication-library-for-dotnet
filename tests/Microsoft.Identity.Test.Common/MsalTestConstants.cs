@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Uid = "my-uid";
         public const string Utid = "my-utid";
         public const string Common = "common";
-        public const string TenantId = "e56cat29e-b008-4cea-b6f0-48facatsd64a";
+        public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
         public static readonly IDictionary<string, string> ClientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
         public const string RTSecret = "someRT";
 
