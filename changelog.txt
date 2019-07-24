@@ -1,3 +1,10 @@
+4.2.1
+=============
+Bug Fixes:
+
+- ** Fixed API availability of WithParentActivityOrWindow on ios/android/windows/mac.  See [this item](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1095)
+- ** Fixed System browser not on by default in iOS and Android.  See [this item](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1285)
+
 4.2.0
 =============
 New Features:
