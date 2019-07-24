@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client
         internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, Guid tenantId, bool validateAuthority)
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
-            return FromAuthorityUri(new Uri(cloudInstanceUri, tenantId.ToString("D")).ToString(), validateAuthority);
+            return FromAuthorityUri(new Uri(cloudInstanceUri, tenantId.ToString("D")).AbsoluteUri, validateAuthority);
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client
             {
                 return FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
             }
-            return FromAuthorityUri(new Uri(cloudInstanceUri, tenant).ToString(), validateAuthority);
+            return FromAuthorityUri(new Uri(cloudInstanceUri, tenant).AbsoluteUri, validateAuthority);
         }
 
         internal static AuthorityInfo FromAadAuthority(
