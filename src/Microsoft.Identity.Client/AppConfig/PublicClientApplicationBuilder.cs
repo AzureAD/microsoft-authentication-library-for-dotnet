@@ -5,6 +5,22 @@ using System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
+#if iOS
+using UIKit;
+#endif
+
+#if ANDROID
+using Android.App;
+#endif
+
+#if DESKTOP
+using System.Windows.Forms;
+#endif
+
+#if MAC
+using AppKit;
+#endif
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -145,8 +161,86 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<object> parentActivityOrWindowFunc)
         {
-            Config.ParentActivityOrWindowFunc = parentActivityOrWindowFunc;
+            return WithParentFunc(parentActivityOrWindowFunc);
+        }
+#endif
+
+        private PublicClientApplicationBuilder WithParentFunc(Func<object> parentFunc)
+        {
+            Config.ParentActivityOrWindowFunc = parentFunc;
             return this;
+        }
+
+#if ANDROID
+        /// <summary>
+        /// Sets a reference to the current Activity that triggers the browser to be shown. Required
+        /// for MSAL to be able to show the browser when using Xamarin.Android
+        /// </summary>
+        /// <param name="activityFunc">A function to return the current Activity</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<Activity> activityFunc)
+        {
+            if (activityFunc == null)
+            {
+                throw new ArgumentNullException(nameof(activityFunc));
+            }
+
+            return WithParentFunc(() => (object)activityFunc());
+        }
+#endif
+
+#if iOS
+        /// <summary>
+        /// Sets a reference to the current ViewController that triggers the browser to be shown. 
+        /// </summary>
+        /// <param name="viewControllerFunc">A function to return the current ViewController</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<UIViewController> viewControllerFunc)
+        {
+            if (viewControllerFunc == null)
+            {
+                throw new ArgumentNullException(nameof(viewControllerFunc));
+            }
+
+            return WithParentFunc(() => (object)viewControllerFunc());
+        }
+#endif
+
+#if DESKTOP
+        /// <summary>
+        /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
+        /// Used to center the browser that pop-up onto this window.
+        /// </summary>
+        /// <param name="windowFunc">A function to return the current window</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<IWin32Window> windowFunc)
+        {
+            if (windowFunc == null)
+            {
+                throw new ArgumentNullException(nameof(windowFunc));
+            }
+
+            return WithParentFunc(() => (object)windowFunc());
+        }
+
+        /// <summary>
+        /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
+        /// Used to center the browser that pop-up onto this window.
+        /// </summary>
+        /// <param name="windowFunc">A function to return the current window</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        [CLSCompliant(false)]
+        public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<IntPtr> windowFunc)
+        {
+            if (windowFunc == null)
+            {
+                throw new ArgumentNullException(nameof(windowFunc));
+            }
+
+            return WithParentFunc(() => (object)windowFunc());
         }
 #endif
 
