@@ -13,6 +13,7 @@ using CoreFoundation;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -24,22 +25,22 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private static SemaphoreSlim s_brokerResponseReady = null;
         private static NSUrl s_brokerResponse = null;
 
-        private readonly IServiceBundle _serviceBundle;
+        private readonly ICoreLogger _logger;
+        private readonly ICryptographyManager _cryptoManager;
 
-        public iOSBroker(IServiceBundle serviceBundle)
+        public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager)
         {
-            _serviceBundle = serviceBundle;
+            _logger = logger;
+            _cryptoManager = cryptoManager;
         }
 
         public bool CanInvokeBroker(CoreUIParent uiParent)
         {
             if (uiParent?.CallerViewController == null)
             {
-                _serviceBundle.DefaultLogger.Error(iOSBrokerConstants.CallerViewControllerIsNullCannotInvokeBroker);
+                _logger.Error(iOSBrokerConstants.CallerViewControllerIsNullCannotInvokeBroker);
                 throw new MsalClientException(MsalError.UIViewControllerRequiredForiOSBroker, MsalErrorMessage.UIViewControllerIsRequiredToInvokeiOSBroker);
             }
-
-            _serviceBundle.DefaultLogger.Info(iOSBrokerConstants.CanInvokeBroker + _serviceBundle.Config.IsBrokerEnabled);
 
             var result = false;
 
@@ -50,7 +51,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (!result)
             {
-                _serviceBundle.DefaultLogger.Info(result + iOSBrokerConstants.CanInvokeBrokerReturnsFalseMessage);
+                _logger.Info(result + iOSBrokerConstants.CanInvokeBrokerReturnsFalseMessage);
             }
 
             return result;
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private void AddIosSpecificParametersToPayload(Dictionary<string, string> brokerPayload)
         {
-            string encodedBrokerKey = Base64UrlHelpers.Encode(BrokerKeyHelper.GetRawBrokerKey(_serviceBundle.DefaultLogger));
+            string encodedBrokerKey = Base64UrlHelpers.Encode(BrokerKeyHelper.GetRawBrokerKey(_logger));
             brokerPayload[iOSBrokerConstants.BrokerKey] = encodedBrokerKey;
             brokerPayload[iOSBrokerConstants.MsgProtocolVer] = BrokerParameter.MsgProtocolVersion3;
 
@@ -85,7 +86,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (brokerPayload.ContainsKey(BrokerParameter.BrokerInstallUrl))
             {
-                _serviceBundle.DefaultLogger.Info(iOSBrokerConstants.BrokerPayloadContainsInstallUrl);
+                _logger.Info(iOSBrokerConstants.BrokerPayloadContainsInstallUrl);
 
                 string url = brokerPayload[BrokerParameter.BrokerInstallUrl];
                 Uri uri = new Uri(url);
@@ -96,11 +97,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     query = query.Substring(1);
                 }
 
-                _serviceBundle.DefaultLogger.Info(iOSBrokerConstants.InvokeIosBrokerAppLink);
+                _logger.Info(iOSBrokerConstants.InvokeIosBrokerAppLink);
 
                 Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
 
-                _serviceBundle.DefaultLogger.Info(iOSBrokerConstants.StartingActionViewActivity + iOSBrokerConstants.AppLink);
+                _logger.Info(iOSBrokerConstants.StartingActionViewActivity + iOSBrokerConstants.AppLink);
 
                 DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(keyPair[iOSBrokerConstants.AppLink])));
 
@@ -109,11 +110,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             else
             {
-                _serviceBundle.DefaultLogger.Info(iOSBrokerConstants.InvokeTheIosBroker);
+                _logger.Info(iOSBrokerConstants.InvokeTheIosBroker);
 
                 NSUrl url = new NSUrl(iOSBrokerConstants.InvokeBroker + brokerPayload.ToQueryParameter());
 
-                _serviceBundle.DefaultLogger.VerbosePii(iOSBrokerConstants.BrokerPayloadPii + brokerPayload.ToQueryParameter(),
+                _logger.VerbosePii(iOSBrokerConstants.BrokerPayloadPii + brokerPayload.ToQueryParameter(),
 
                 iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
 
@@ -138,13 +139,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 {
                     responseDictionary[iOSBrokerConstants.Error] = iOSBrokerConstants.BrokerError;
 
-                    _serviceBundle.DefaultLogger.VerbosePii(iOSBrokerConstants.BrokerResponseValuesPii + keyValue.ToString(),
+                    _logger.VerbosePii(iOSBrokerConstants.BrokerResponseValuesPii + keyValue.ToString(),
 
                     iOSBrokerConstants.BrokerResponseContainsError);
                 }
             }
 
-            _serviceBundle.DefaultLogger.Verbose(iOSBrokerConstants.ProcessBrokerResponse + responseDictionary.Count);
+            _logger.Verbose(iOSBrokerConstants.ProcessBrokerResponse + responseDictionary.Count);
 
             return ResultFromBrokerResponse(responseDictionary);
         }
@@ -160,8 +161,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             string expectedHash = responseDictionary[iOSBrokerConstants.ExpectedHash];
             string encryptedResponse = responseDictionary[iOSBrokerConstants.EncryptedResponsed];
-            string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse, _serviceBundle.DefaultLogger);
-            string responseActualHash = _serviceBundle.PlatformProxy.CryptographyManager.CreateSha256Hash(decryptedResponse);
+            string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse, _logger);
+            string responseActualHash = _cryptoManager.CreateSha256Hash(decryptedResponse);
             byte[] rawHash = Convert.FromBase64String(responseActualHash);
             string hash = BitConverter.ToString(rawHash);
 

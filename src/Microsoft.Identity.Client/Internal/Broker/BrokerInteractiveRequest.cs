@@ -84,22 +84,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             BrokerPayload.Add(BrokerParameter.Username, _authenticationRequestParameters.Account?.Username ?? string.Empty);
             BrokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
         }
-
-        internal bool IsBrokerInvocationRequired()
-        {
-            if (_authorizationResult.Code != null &&
-               !string.IsNullOrEmpty(_authorizationResult.Code) &&
-               _authorizationResult.Code.StartsWith(BrokerParameter.AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired, StringComparison.OrdinalIgnoreCase) ||
-               _authorizationResult.Code.StartsWith(_serviceBundle.Config.RedirectUri, StringComparison.OrdinalIgnoreCase))
-            {
-                _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationRequired);
-                return true;
-            }
-
-            _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationNotRequired);
-            return false;
-        }
-
+        
         internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
         {
             _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CheckMsalTokenResponseReturnedFromBroker);
