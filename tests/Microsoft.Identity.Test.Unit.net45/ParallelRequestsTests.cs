@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 PublicClientApplication pca = PublicClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId)
+                    .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     // execute won't start here because IEnumerable is lazy
                     IEnumerable<Task<AuthenticationResult>> tasks = accounts.Select(acc =>
-                        pca.AcquireTokenSilent(MsalTestConstants.Scope, acc).ExecuteAsync());
+                        pca.AcquireTokenSilent(TestConstants.s_scope, acc).ExecuteAsync());
 
                     // execution starts here 
                     Task<AuthenticationResult>[] taskArray = tasks.ToArray();
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             ParallelRequestMockHanler httpManager = new ParallelRequestMockHanler();
 
             PublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(MsalTestConstants.ClientId)
+                .Create(TestConstants.ClientId)
                 .WithHttpManager(httpManager)
                 .BuildConcrete();
 
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _tokenCacheHelper.PopulateCache(
                     pca.UserTokenCacheInternal.Accessor,
                     GetUid(i),
-                    MsalTestConstants.Utid,
+                    TestConstants.Utid,
                     displayableId: GetUpn(i),
                     rtSecret: i.ToString(CultureInfo.InvariantCulture), // this will help create a valid response
                     expiredAccessTokens: true);
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 // execute won't start here because IEnumerable is lazy
                 IEnumerable<Task<AuthenticationResult>> tasks = accounts.Select(acc =>
-                    pca.AcquireTokenSilent(MsalTestConstants.Scope, acc).ExecuteAsync());
+                    pca.AcquireTokenSilent(TestConstants.s_scope, acc).ExecuteAsync());
 
                 // execution starts here 
                 Task<AuthenticationResult>[] taskArray = tasks.ToArray();
@@ -230,7 +230,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
     /// <summary>
     /// This custom HttpManager does the following: 
-    /// 
     /// - provides a standard reponse for discovery calls
     /// - responds with valid tokens based on a naming convention (uid = "uid" + rtSecret, upn = "user_" + rtSecret)
     /// </summary>
@@ -245,7 +244,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 return new HttpResponse()
                 {
-                    Body = MsalTestConstants.DiscoveryJsonResponse,
+                    Body = TestConstants.DiscoveryJsonResponse,
                     StatusCode = System.Net.HttpStatusCode.OK
                 };
             }
@@ -254,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 return new HttpResponse()
                 {
-                    Body = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityUtidTenant).Content.ReadAsStringAsync().Result,
+                    Body = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityUtidTenant).Content.ReadAsStringAsync().Result,
                     StatusCode = System.Net.HttpStatusCode.OK
                 };
             }
@@ -288,11 +287,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 var upn = ParallelRequestsTests.GetUpn(i);
                 var uid = ParallelRequestsTests.GetUid(i);
-                HttpResponseMessage response = MockHelpers.CreateSuccessTokenResponseMessageWithUid(uid, MsalTestConstants.Utid, upn);
+                HttpResponseMessage response = MockHelpers.CreateSuccessTokenResponseMessageWithUid(uid, TestConstants.Utid, upn);
                 return response.Content.ReadAsStringAsync().Result;
             }
 
-            Assert.Fail("Expecting the rt secret to be a number, to be able to craft a reponse");
+            Assert.Fail("Expecting the rt secret to be a number, to be able to craft a response");
             return null;
         }
 

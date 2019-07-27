@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _instanceAndEndpointRequestPerformed = true;
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityUtidTenant);
+                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
             }
 
             _harness.HttpManager.AddMockHandler(
@@ -291,13 +291,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     IsError(serverTokenResponse) ?
                         MockHelpers.CreateInvalidGrantTokenResponseMessage(GetSubError(serverTokenResponse)) :
                         MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray(),
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray(),
                             foci: serverTokenResponse == ServerTokenResponse.FociToken)
                 });
 
-            AuthenticationResult resultB = await app.AcquireTokenSilent(MsalTestConstants.Scope, account)
+            AuthenticationResult resultB = await app.AcquireTokenSilent(TestConstants.s_scope, account)
                 .WithForceRefresh(true)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -339,19 +339,19 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _instanceAndEndpointRequestPerformed = true;
 
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityUtidTenant);
+                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
             }
 
             MsalMockHelpers.ConfigureMockWebUI(
                 app.ServiceBundle.PlatformProxy,
-                AuthorizationResult.FromUri(MsalTestConstants.B2CLoginAuthority + "?code=some-code"));
+                AuthorizationResult.FromUri(TestConstants.B2CLoginAuthority + "?code=some-code"));
 
             _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
-                MsalTestConstants.AuthorityUtidTenant,
+                TestConstants.AuthorityUtidTenant,
                 foci: serverTokenResponse == ServerTokenResponse.FociToken);
 
             // Acquire token interactively for A
-            AuthenticationResult result = await app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            AuthenticationResult result = await app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(result.Account);
             AssertAppMetadata(app, serverTokenResponse == ServerTokenResponse.FociToken);
         }
@@ -360,16 +360,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
 
             _appA = PublicClientApplicationBuilder
-                .Create(MsalTestConstants.ClientId)
+                .Create(TestConstants.ClientId)
                 .WithHttpManager(_harness.HttpManager)
-                .WithAuthority(MsalTestConstants.AuthorityUtidTenant)
+                .WithAuthority(TestConstants.AuthorityUtidTenant)
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             _appB = PublicClientApplicationBuilder
-                .Create(MsalTestConstants.ClientId2)
+                .Create(TestConstants.ClientId2)
                 .WithHttpManager(_harness.HttpManager)
-                .WithAuthority(MsalTestConstants.AuthorityUtidTenant)
+                .WithAuthority(TestConstants.AuthorityUtidTenant)
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 

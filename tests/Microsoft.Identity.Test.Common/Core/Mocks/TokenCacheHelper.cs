@@ -17,10 +17,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         internal void PopulateCacheForClientCredential(ITokenCacheAccessor accessor)
         {
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
-               MsalTestConstants.ProductionPrefCacheEnvironment,
-               MsalTestConstants.ClientId,
-               MsalTestConstants.Scope.AsSingleString(),
-               MsalTestConstants.Utid,
+               TestConstants.ProductionPrefCacheEnvironment,
+               TestConstants.ClientId,
+               TestConstants.s_scope.AsSingleString(),
+               TestConstants.Utid,
                "",
                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
@@ -31,12 +31,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         internal void PopulateCache(
             ITokenCacheAccessor accessor,
-            string uid = MsalTestConstants.Uid,
-            string utid = MsalTestConstants.Utid,
-            string clientId = MsalTestConstants.ClientId,
-            string environment = MsalTestConstants.ProductionPrefCacheEnvironment,
-            string displayableId = MsalTestConstants.DisplayableId,
-            string rtSecret = MsalTestConstants.RTSecret,
+            string uid = TestConstants.Uid,
+            string utid = TestConstants.Utid,
+            string clientId = TestConstants.ClientId,
+            string environment = TestConstants.ProductionPrefCacheEnvironment,
+            string displayableId = TestConstants.DisplayableId,
+            string rtSecret = TestConstants.RTSecret,
             bool expiredAccessTokens = false)
         {
             var accessTokenExpiresOn = expiredAccessTokens ?
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                 environment,
                 clientId,
-                MsalTestConstants.Scope.AsSingleString(),
+                TestConstants.s_scope.AsSingleString(),
                 utid,
                 "",
                 accessTokenExpiresOn,
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             var idTokenCacheItem = new MsalIdTokenCacheItem(
                 environment,
                 clientId,
-                MockHelpers.CreateIdToken(MsalTestConstants.UniqueId + "more", displayableId),
+                MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", displayableId),
                 MockHelpers.CreateClientInfo(uid, utid),
                 utid);
 
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             atItem = new MsalAccessTokenCacheItem(
               environment,
               clientId,
-              MsalTestConstants.ScopeForAnotherResource.AsSingleString(),
+              TestConstants.s_scopeForAnotherResource.AsSingleString(),
               utid,
               "",
               accessTokenExpiresOn,
@@ -108,10 +108,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         internal void PopulateCacheWithOneAccessToken(ITokenCacheAccessor accessor)
         {
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
-               MsalTestConstants.ProductionPrefCacheEnvironment,
-               MsalTestConstants.ClientId,
-               MsalTestConstants.Scope.AsSingleString(),
-               MsalTestConstants.Utid,
+               TestConstants.ProductionPrefCacheEnvironment,
+               TestConstants.ClientId,
+               TestConstants.s_scope.AsSingleString(),
+               TestConstants.Utid,
                "",
                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
@@ -121,38 +121,38 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             accessor.SaveAccessToken(atItem);
 
             MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
-                MsalTestConstants.ProductionPrefCacheEnvironment, MsalTestConstants.ClientId,
-                MockHelpers.CreateIdToken(MsalTestConstants.UniqueId + "more", MsalTestConstants.DisplayableId),
-                MockHelpers.CreateClientInfo(), MsalTestConstants.Utid);
+                TestConstants.ProductionPrefCacheEnvironment, TestConstants.ClientId,
+                MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId),
+                MockHelpers.CreateClientInfo(), TestConstants.Utid);
 
             accessor.SaveIdToken(idTokenCacheItem);
 
             MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
-                (MsalTestConstants.ProductionPrefNetworkEnvironment, null, MockHelpers.CreateClientInfo(), null, null, MsalTestConstants.Utid,
+                (TestConstants.ProductionPrefNetworkEnvironment, null, MockHelpers.CreateClientInfo(), null, null, TestConstants.Utid,
                 null, null);
 
             accessor.SaveAccount(accountCacheItem);
 
             atItem = new MsalAccessTokenCacheItem(
-                MsalTestConstants.ProductionPrefCacheEnvironment,
-                MsalTestConstants.ClientId,
-                MsalTestConstants.ScopeForAnotherResource.AsSingleString(),
-                MsalTestConstants.Utid,
+                TestConstants.ProductionPrefCacheEnvironment,
+                TestConstants.ClientId,
+                TestConstants.s_scopeForAnotherResource.AsSingleString(),
+                TestConstants.Utid,
                 "",
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
                 MockHelpers.CreateClientInfo());
 
-            AddRefreshTokenToCache(accessor, MsalTestConstants.Uid, MsalTestConstants.Utid);
+            AddRefreshTokenToCache(accessor, TestConstants.Uid, TestConstants.Utid);
         }
 
         public static void AddRefreshTokenToCache(
             ITokenCacheAccessor accessor,
             string uid,
             string utid,
-            string clientId = MsalTestConstants.ClientId,
-            string environment = MsalTestConstants.ProductionPrefCacheEnvironment, 
-            string rtSecret = MsalTestConstants.RTSecret)
+            string clientId = TestConstants.ClientId,
+            string environment = TestConstants.ProductionPrefCacheEnvironment, 
+            string rtSecret = TestConstants.RTSecret)
         {
             var rtItem = new MsalRefreshTokenCacheItem
                 (environment, clientId, rtSecret, MockHelpers.CreateClientInfo(uid, utid));
@@ -163,11 +163,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static void AddIdTokenToCache(ITokenCacheAccessor accessor, string uid, string utid)
         {
             MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
-                MsalTestConstants.ProductionPrefCacheEnvironment,
-                MsalTestConstants.ClientId,
-                MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                TestConstants.ProductionPrefCacheEnvironment,
+                TestConstants.ClientId,
+                MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                 MockHelpers.CreateClientInfo(),
-                MsalTestConstants.Utid);
+                TestConstants.Utid);
 
             accessor.SaveIdToken(idTokenCacheItem);
         }
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static void AddAccountToCache(ITokenCacheAccessor accessor, string uid, string utid)
         {
             MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
-                (MsalTestConstants.ProductionPrefCacheEnvironment, null, MockHelpers.CreateClientInfo(uid, utid), null, null, utid, null, null);
+                (TestConstants.ProductionPrefCacheEnvironment, null, MockHelpers.CreateClientInfo(uid, utid), null, null, utid, null, null);
 
             accessor.SaveAccount(accountCacheItem);
         }

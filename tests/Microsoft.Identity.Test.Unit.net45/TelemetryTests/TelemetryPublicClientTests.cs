@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             using (var harness = CreateTestHarness())
             {
-                var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithHttpManager(harness.HttpManager)
                     .WithClientName(AppName)
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     })
                     .Build();
 
-                var authResult = pca.AcquireTokenSilent(MsalTestConstants.Scope, MsalTestConstants.DisplayableId)
+                var authResult = pca.AcquireTokenSilent(TestConstants.s_scope, TestConstants.DisplayableId)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }

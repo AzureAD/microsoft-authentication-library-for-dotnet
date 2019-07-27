@@ -6,20 +6,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Guid = System.Guid;
-using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
-
     [TestClass]
     [DeploymentItem("Resources\\drs-response-missing-field.json")]
     [DeploymentItem("Resources\\drs-response.json")]
@@ -27,9 +22,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-OnPremise.json")]
     public class AdfsAuthorityTests : TestBase
     {
-
         [TestMethod]
-        [TestCategory("AdfsAuthorityTests")]
         [Ignore]
         public void SuccessfulValidationUsingOnPremiseDrsTest()
         {
@@ -75,13 +68,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
                 var endpoints = harness.ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
-                    MsalTestConstants.FabrikamDisplayableId,
+                    TestConstants.FabrikamDisplayableId,
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
 
@@ -90,13 +83,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
 
                 // attempt to do authority validation again. NO network call should be made
-                instance = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.OnPremiseAuthority);
+                instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
                 endpoints = harness.ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
-                    MsalTestConstants.FabrikamDisplayableId,
+                    TestConstants.FabrikamDisplayableId,
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
 
@@ -165,14 +158,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
                 var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
-                    MsalTestConstants.FabrikamDisplayableId,
+                    TestConstants.FabrikamDisplayableId,
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
 
@@ -199,13 +192,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
-                    MsalTestConstants.FabrikamDisplayableId,
+                    TestConstants.FabrikamDisplayableId,
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
 
@@ -250,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateFailureMessage(HttpStatusCode.NotFound, "not-found")
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
@@ -259,7 +252,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
-                        MsalTestConstants.FabrikamDisplayableId,
+                        TestConstants.FabrikamDisplayableId,
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
@@ -306,7 +299,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.some-other-sts.com")
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 try
@@ -314,7 +307,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
-                        MsalTestConstants.FabrikamDisplayableId,
+                        TestConstants.FabrikamDisplayableId,
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
@@ -347,7 +340,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response-missing-field.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 try
@@ -355,7 +348,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
-                        MsalTestConstants.FabrikamDisplayableId,
+                        TestConstants.FabrikamDisplayableId,
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
@@ -368,7 +361,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AdfsAuthorityTests")]
         [Ignore]
         public void FailedTenantDiscoveryMissingEndpointsTest()
         {
@@ -384,7 +376,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                             ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-MissingFields-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 try
@@ -392,7 +384,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
-                        MsalTestConstants.FabrikamDisplayableId,
+                        TestConstants.FabrikamDisplayableId,
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
                     Assert.Fail("validation should have failed here");
@@ -408,7 +400,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void TenantTest()
         {
             AuthorityTestHelper.AuthorityDoesNotUpdateTenant(
-                MsalTestConstants.ADFSAuthority, null);
+                TestConstants.ADFSAuthority, null);
         }
     }
 }

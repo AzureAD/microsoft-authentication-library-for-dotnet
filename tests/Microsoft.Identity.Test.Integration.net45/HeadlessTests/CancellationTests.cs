@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Act - start with cancellation not requested
             var tokenTask = pca // do not wait for this to finish
-                .AcquireTokenInteractive(MsalTestConstants.GraphScopes)
+                .AcquireTokenInteractive(TestConstants.s_graphScopes)
                 .WithUseEmbeddedWebView(false)
                 .ExecuteAsync(cts.Token)
                 .ConfigureAwait(false);
@@ -48,7 +48,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ValidatePortIsFree(new Uri(redirectUri).Port);
         }
 
-
         [TestMethod]
         public async Task DefaultOsBrowser_IsCancellable_StartsCancelled_Async()
         {
@@ -61,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             cts.Cancel();
 
             var tokenTask = pca // do not wait for this to finish
-                .AcquireTokenInteractive(MsalTestConstants.GraphScopes)
+                .AcquireTokenInteractive(TestConstants.s_graphScopes)
                 .WithUseEmbeddedWebView(false)
                 .ExecuteAsync(cts.Token)
                 .ConfigureAwait(false);
@@ -69,8 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await ValidateOperationCancelledAsync(redirectUri, cts, tokenTask).ConfigureAwait(false);
             ValidatePortIsFree(new Uri(redirectUri).Port);
         }
-
-
+        
         private async Task ValidateOperationCancelledAsync(string redirectUri, CancellationTokenSource cts, System.Runtime.CompilerServices.ConfiguredTaskAwaitable<AuthenticationResult> tokenTask)
         {
             // Assert

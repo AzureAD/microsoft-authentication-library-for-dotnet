@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Common
             string authority = ClientApplicationBase.DefaultAuthority,
             bool isExtendedTokenLifetimeEnabled = false,
             bool enablePiiLogging = false,
-            string clientId = MsalTestConstants.ClientId,
+            string clientId = TestConstants.ClientId,
             bool clearCaches = true)
         {
             var appConfig = new ApplicationConfiguration()
@@ -60,13 +60,13 @@ namespace Microsoft.Identity.Test.Common
 
         public static IServiceBundle CreateDefaultAdfsServiceBundle()
         {
-            return CreateServiceBundleWithCustomHttpManager(null, authority: MsalTestConstants.OnPremiseAuthority);
+            return CreateServiceBundleWithCustomHttpManager(null, authority: TestConstants.OnPremiseAuthority);
         }
 
         internal static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
         }
     }
 }

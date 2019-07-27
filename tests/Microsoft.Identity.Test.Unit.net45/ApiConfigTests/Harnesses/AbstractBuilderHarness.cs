@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             Assert.AreEqual(expectedAuthorityOverride, CommonParametersReceived.AuthorityOverride);
 
             CoreAssert.AreScopesEqual(
-                (expectedScopes ?? MsalTestConstants.Scope).AsSingleString(),
+                (expectedScopes ?? TestConstants.s_scope).AsSingleString(),
                 CommonParametersReceived.Scopes.AsSingleString());
 
             CollectionAssert.AreEqual(

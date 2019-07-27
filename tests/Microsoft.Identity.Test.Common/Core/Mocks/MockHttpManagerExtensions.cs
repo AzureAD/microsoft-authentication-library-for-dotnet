@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     {
         public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager)
         {
-            AddInstanceDiscoveryMockHandler(httpManager, MsalTestConstants.AuthorityCommonTenant);
+            AddInstanceDiscoveryMockHandler(httpManager, TestConstants.AuthorityCommonTenant);
         }
 
         public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager, string authority)
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.OnPremiseAuthority)
             });
 
             httpManager.AddMockHandler(new MockHttpMessageHandler

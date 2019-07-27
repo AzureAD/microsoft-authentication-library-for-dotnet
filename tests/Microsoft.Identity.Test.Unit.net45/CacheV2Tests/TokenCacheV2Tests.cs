@@ -45,11 +45,11 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         public void GetExactScopesMatchedAccessTokenTest()
         {
             var atItem = Credential.CreateAccessToken(
-                MsalTestConstants.HomeAccountId,
-                MsalTestConstants.ProductionPrefNetworkEnvironment,
-                new Uri(MsalTestConstants.AuthorityTestTenant).GetRealm(),
-                MsalTestConstants.ClientId,
-                ScopeUtils.JoinScopes(MsalTestConstants.Scope),
+                TestConstants.HomeAccountId,
+                TestConstants.ProductionPrefNetworkEnvironment,
+                new Uri(TestConstants.AuthorityTestTenant).GetRealm(),
+                TestConstants.ClientId,
+                ScopeUtils.JoinScopes(TestConstants.s_scope),
                 TimeUtils.GetSecondsFromEpochNow(),
                 TimeUtils.GetSecondsFromEpochNow() + MsalCacheV2TestConstants.ValidExpiresIn,
                 TimeUtils.GetSecondsFromEpochNow() + MsalCacheV2TestConstants.ValidExtendedExpiresIn,
@@ -76,9 +76,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                 // Authority = new Uri(MsalTestConstants.AuthorityTestTenant),
 
                 var cacheManager = new CacheManager(_storageManager, harness.CreateAuthenticationRequestParameters(
-                                                        MsalTestConstants.AuthorityTestTenant,
+                                                        TestConstants.AuthorityTestTenant,
                                                         new SortedSet<string>(MsalCacheV2TestConstants.Scope),
-                                                        account: MsalTestConstants.User));
+                                                        account: TestConstants.s_user));
 
                 Assert.IsTrue(cacheManager.TryReadCache(out var tokenResponse, out var accountResponse));
                 Assert.IsNotNull(tokenResponse);

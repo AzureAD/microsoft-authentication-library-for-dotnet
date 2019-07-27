@@ -23,14 +23,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\"" + CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId) +
+            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
 
         public static readonly string DefaultAdfsTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\"" +
-            ":\"" + CreateAdfsIdToken(MsalTestConstants.OnPremiseDisplayableId) +
+            ":\"" + CreateAdfsIdToken(TestConstants.OnPremiseDisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
         public static readonly string FociTokenResponse =
            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
@@ -38,12 +38,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
            ",\"foci\":\"1\"" +
            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-           ":\"" + CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId) +
+           ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
            "\",\"id_token_expires_in\":\"3600\"}";
 
         public static string CreateClientInfo()
         {
-            return CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid);
+            return CreateClientInfo(TestConstants.Uid, TestConstants.Utid);
         }
 
         public static string CreateClientInfo(string uid, string utid)
@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope, bool foci = false)
         {
-            string idToken = CreateIdToken(uniqueId, displayableId, MsalTestConstants.Utid);
+            string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             string stringContent = "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
                                   scope.AsSingleString() +
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string CreateIdToken(string uniqueId, string displayableId)
         {
-            return CreateIdToken(uniqueId, displayableId, MsalTestConstants.Utid);
+            return CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
         }
 
         public static string CreateIdToken(string uniqueId, string displayableId, string tenantId)
@@ -265,14 +265,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static string CreateAdfsIdToken(string upn)
         {
             string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
-                        "\"iss\": \"" + MsalTestConstants.OnPremiseAuthority + "\"," +
+                        "\"iss\": \"" + TestConstants.OnPremiseAuthority + "\"," +
                         "\"iat\": 1455833828," +
                         "\"nbf\": 1455833828," +
                         "\"exp\": 1455837728," +
                         "\"ipaddr\": \"131.107.159.117\"," +
                         "\"name\": \"Marrrrrio Bossy\"," +
                         "\"upn\": \"" + upn + "\"," +
-                        "\"sub\": \"" + MsalTestConstants.OnPremiseUniqueId + "\"}";
+                        "\"sub\": \"" + TestConstants.OnPremiseUniqueId + "\"}";
 
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
@@ -364,7 +364,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(
             string discoveryEndpoint,
-            string content = MsalTestConstants.DiscoveryJsonResponse)
+            string content = TestConstants.DiscoveryJsonResponse)
         {
             return new MockHttpMessageHandler()
             {

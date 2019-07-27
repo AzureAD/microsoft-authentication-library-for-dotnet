@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod()]
-        [TestCategory("LoggerTests")]
         public void ConstructorComponentTest()
         {
             MsalLogger logger = new MsalLogger(Guid.Empty, null, null, LogLevel.Verbose, false, true, null);
@@ -43,33 +42,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod()]
-        [TestCategory("LoggerTests")]
         public void CallbackTestErrorTest()
         {
             MsalLogger logger = CreateLogger(LogLevel.Error);
             var counter = 0;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Error("test message");
+            logger.Error(TestConstants.TestMessage);
             Assert.AreEqual(1, counter);
             _callback.Received().Invoke(Arg.Is(LogLevel.Error), Arg.Any<string>(), Arg.Is(false));
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Warning("test message");
+            logger.Warning(TestConstants.TestMessage);
             Assert.AreEqual(1, counter);
             _callback.Received().Invoke(Arg.Is(LogLevel.Error), Arg.Any<string>(), Arg.Is(false));
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Info("test message");
+            logger.Info(TestConstants.TestMessage);
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Verbose("test message");
+            logger.Verbose(TestConstants.TestMessage);
             Assert.AreEqual(1, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerTests")]
         public void CallbackTestWarning()
         {
             MsalLogger logger = CreateLogger(LogLevel.Warning);
@@ -77,24 +74,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).
                 Do(x => counter++);
-            logger.ErrorPii(new ArgumentException("test message"));
+            logger.ErrorPii(new ArgumentException(TestConstants.TestMessage));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Warning("test message");
+            logger.Warning(TestConstants.TestMessage);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Info("test message");
+            logger.Info(TestConstants.TestMessage);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Verbose("test message");
+            logger.Verbose(TestConstants.TestMessage);
             Assert.AreEqual(2, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerTests")]
         public void CallbackTestInfo()
         {
             MsalLogger logger = CreateLogger(LogLevel.Info);
@@ -102,24 +98,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var counter = 0;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.ErrorPii(new ArgumentException("test message"));
+            logger.ErrorPii(new ArgumentException(TestConstants.TestMessage));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Warning("test message");
+            logger.Warning(TestConstants.TestMessage);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Info("test message");
+            logger.Info(TestConstants.TestMessage);
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Verbose("test message");
+            logger.Verbose(TestConstants.TestMessage);
             Assert.AreEqual(3, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerTests")]
         public void CallbackTestVerbose()
         {
             MsalLogger logger = CreateLogger(LogLevel.Verbose);
@@ -127,24 +122,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var counter = 0;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.ErrorPii(new ArgumentException("test message"));
+            logger.ErrorPii(new ArgumentException(TestConstants.TestMessage));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Warning("test message");
+            logger.Warning(TestConstants.TestMessage);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Info("test message");
+            logger.Info(TestConstants.TestMessage);
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Verbose("test message");
+            logger.Verbose(TestConstants.TestMessage);
             Assert.AreEqual(4, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerTests")]
         public void CallbackTestErrorPii()
         {
             MsalLogger logger = CreateLogger(LogLevel.Error, true);
@@ -152,24 +146,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var counter = 0;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.ErrorPii(new ArgumentException("test message"));
+            logger.ErrorPii(new ArgumentException(TestConstants.TestMessage));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.WarningPii("test message", string.Empty);
+            logger.WarningPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.InfoPii("test message", string.Empty);
+            logger.InfoPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.VerbosePii("test message", string.Empty);
+            logger.VerbosePii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(1, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerTests")]
         public void CallbackTestWarningPii()
         {
             MsalLogger logger = CreateLogger(LogLevel.Warning, true);
@@ -177,24 +170,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var counter = 0;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.ErrorPii(new ArgumentException("test message"));
+            logger.ErrorPii(new ArgumentException(TestConstants.TestMessage));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.WarningPii("test message", string.Empty);
+            logger.WarningPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.InfoPii("test message", string.Empty);
+            logger.InfoPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.VerbosePii("test message", string.Empty);
+            logger.VerbosePii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(2, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerTests")]
         public void CallbackTestInfoPii()
         {
             MsalLogger logger = CreateLogger(LogLevel.Info, true);
@@ -202,24 +194,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var counter = 0;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.ErrorPii(new ArgumentException("test message"));
+            logger.ErrorPii(new ArgumentException(TestConstants.TestMessage));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.WarningPii("test message", string.Empty);
+            logger.WarningPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.InfoPii("test message", string.Empty);
+            logger.InfoPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.VerbosePii("test message", string.Empty);
+            logger.VerbosePii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(3, counter);
         }
 
         [TestMethod()]
-        [TestCategory("LoggerTests")]
         public void CallbackTestVerbosePii()
         {
             MsalLogger logger = CreateLogger(LogLevel.Verbose, true);
@@ -227,19 +218,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var counter = 0;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.ErrorPii(new ArgumentException("test message"));
+            logger.ErrorPii(new ArgumentException(TestConstants.TestMessage));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.WarningPii("test message", string.Empty);
+            logger.WarningPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.InfoPii("test message", string.Empty);
+            logger.InfoPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.VerbosePii("test message", string.Empty);
+            logger.VerbosePii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(4, counter);
         }
     }

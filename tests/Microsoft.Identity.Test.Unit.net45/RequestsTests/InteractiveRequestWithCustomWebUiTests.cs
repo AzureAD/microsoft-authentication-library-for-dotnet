@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
         }
 
         private async Task ExecuteTestAsync(
@@ -54,14 +53,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 }
 
                 var parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant,
-                    MsalTestConstants.Scope);
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope);
                 parameters.RedirectUri = new Uri(ExpectedRedirectUri);
-                parameters.LoginHint = MsalTestConstants.DisplayableId;
+                parameters.LoginHint = TestConstants.DisplayableId;
                 var interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.ForceLogin,
-                    ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                    ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                     CustomWebUi = customWebUi
                 };
 
@@ -96,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 },
                 async request =>
                 {
-                    await request.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);                           
+                    await request.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 }).ConfigureAwait(false);
         }
 
@@ -144,8 +143,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
                 }).ConfigureAwait(false);
         }
-
-
 
         [TestMethod]
         public async Task TestInteractiveWithCustomWebUi_IncorrectStateAsync()

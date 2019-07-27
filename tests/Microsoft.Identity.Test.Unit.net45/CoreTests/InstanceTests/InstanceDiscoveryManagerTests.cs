@@ -68,14 +68,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public async Task B2C_GetMetadataAsync()
         {
-            await ValidateSelfEntryAsync(new Uri(MsalTestConstants.B2CAuthority))
+            await ValidateSelfEntryAsync(new Uri(TestConstants.B2CAuthority))
                 .ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ADFS_GetMetadataAsync()
         {
-            await ValidateSelfEntryAsync(new Uri(MsalTestConstants.ADFSAuthority))
+            await ValidateSelfEntryAsync(new Uri(TestConstants.ADFSAuthority))
                 .ConfigureAwait(false);
         }
 

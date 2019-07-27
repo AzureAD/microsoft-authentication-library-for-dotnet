@@ -11,12 +11,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -73,7 +69,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("DeviceCodeRequestTests")]
         public void TestDeviceCodeAuthSuccess()
         {
             const int NumberOfAuthorizationPendingRequestsToInject = 1;
@@ -113,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(authenticationResult);
                 Assert.IsNotNull(actualDeviceCodeResult);
 
-                Assert.AreEqual(MsalTestConstants.ClientId, actualDeviceCodeResult.ClientId);
+                Assert.AreEqual(TestConstants.ClientId, actualDeviceCodeResult.ClientId);
                 Assert.AreEqual(ExpectedDeviceCode, actualDeviceCodeResult.DeviceCode);
                 Assert.AreEqual(ExpectedInterval, actualDeviceCodeResult.Interval);
                 Assert.AreEqual(ExpectedMessage, actualDeviceCodeResult.Message);
@@ -132,12 +127,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         [TestMethod]
         [Ignore("Adfs does not currently support device code flow")]
-        [TestCategory("DeviceCodeRequestTests")]
         public void TestDeviceCodeAuthSuccessWithAdfs()
         {
             const int NumberOfAuthorizationPendingRequestsToInject = 1;
 
-            using (var harness = new MockHttpAndServiceBundle(authority: MsalTestConstants.OnPremiseAuthority))
+            using (var harness = new MockHttpAndServiceBundle(authority: TestConstants.OnPremiseAuthority))
             {
                 var parameters = CreateAuthenticationParametersAndSetupMocks(
                     harness,
@@ -171,7 +165,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var authenticationResult = task.Result;
                 Assert.IsNotNull(authenticationResult);
                 Assert.IsNotNull(actualDeviceCodeResult);
-                Assert.AreEqual(MsalTestConstants.ClientId, actualDeviceCodeResult.ClientId);
+                Assert.AreEqual(TestConstants.ClientId, actualDeviceCodeResult.ClientId);
                 Assert.AreEqual(ExpectedDeviceCode, actualDeviceCodeResult.DeviceCode);
                 Assert.AreEqual(ExpectedInterval, actualDeviceCodeResult.Interval);
                 Assert.AreEqual(ExpectedMessage, actualDeviceCodeResult.Message);
@@ -187,7 +181,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("DeviceCodeRequestTests")]
         public async Task TestDeviceCodeCancelAsync()
         {
             using (var harness = CreateTestHarness())
@@ -206,7 +199,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     DeviceCodeResultCallback = async result =>
                     {
                         await Task.Delay(200, CancellationToken.None).ConfigureAwait(false);
-                        actualDeviceCodeResult = result;                    }
+                        actualDeviceCodeResult = result;
+                    }
                 };
 
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
@@ -219,7 +213,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("DeviceCodeRequestTests")]
         public void VerifyAuthorizationPendingErrorDoesNotLogError()
         {
             // When calling DeviceCodeFlow, we poll for the authorization and if the user hasn't entered the code in yet
@@ -300,19 +293,19 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             var cache = new TokenCache(harness.ServiceBundle);
             var parameters = harness.CreateAuthenticationRequestParameters(
-                isAdfs ? MsalTestConstants.OnPremiseAuthority : MsalTestConstants.AuthorityHomeTenant, 
+                isAdfs ? TestConstants.OnPremiseAuthority : TestConstants.AuthorityHomeTenant,
                 null,
                 cache,
                 null,
-                extraQueryParameters: MsalTestConstants.ExtraQueryParams, 
-                claims: MsalTestConstants.Claims);
+                extraQueryParameters: TestConstants.s_extraQueryParams,
+                claims: TestConstants.Claims);
 
             if (isAdfs)
             {
                 harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateAdfsOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                    ResponseMessage = MockHelpers.CreateAdfsOpenIdConfigurationResponse(TestConstants.OnPremiseAuthority)
                 });
             }
             else
@@ -321,14 +314,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
 
             expectedScopes = new HashSet<string>();
-            expectedScopes.UnionWith(MsalTestConstants.Scope);
+            expectedScopes.UnionWith(TestConstants.s_scope);
             expectedScopes.Add(OAuth2Value.ScopeOfflineAccess);
             expectedScopes.Add(OAuth2Value.ScopeProfile);
             expectedScopes.Add(OAuth2Value.ScopeOpenId);
 
             IDictionary<string, string> extraQueryParamsAndClaims =
-                MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
-            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+                TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
 
             // Mock Handler for device code request
             harness.HttpManager.AddMockHandler(
@@ -337,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExpectedMethod = HttpMethod.Post,
                     ExpectedPostData = new Dictionary<string, string>()
                     {
-                        { OAuth2Parameter.ClientId, MsalTestConstants.ClientId },
+                        { OAuth2Parameter.ClientId, TestConstants.ClientId },
                         { OAuth2Parameter.Scope, expectedScopes.AsSingleString() }
                     },
                     ResponseMessage = isAdfs ? CreateAdfsDeviceCodeResponseSuccessMessage() : CreateDeviceCodeResponseSuccessMessage(),
@@ -350,7 +343,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Post,
-                        ExpectedUrl = isAdfs ? "https://fs.contoso.com/adfs/oauth2/token" :"https://login.microsoftonline.com/home/oauth2/v2.0/token",
+                        ExpectedUrl = isAdfs ? "https://fs.contoso.com/adfs/oauth2/token" : "https://login.microsoftonline.com/home/oauth2/v2.0/token",
                         ResponseMessage = MockHelpers.CreateFailureMessage(
                             HttpStatusCode.Forbidden,
                             "{\"error\":\"authorization_pending\"," +
@@ -372,7 +365,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ExpectedMethod = HttpMethod.Post,
                         ExpectedPostData = new Dictionary<string, string>()
                         {
-                            {OAuth2Parameter.ClientId, MsalTestConstants.ClientId},
+                            {OAuth2Parameter.ClientId, TestConstants.ClientId},
                             {OAuth2Parameter.Scope, expectedScopes.AsSingleString()}
                         },
                         ResponseMessage = isAdfs ? MockHelpers.CreateAdfsSuccessTokenResponseMessage() : MockHelpers.CreateSuccessTokenResponseMessage()

@@ -40,14 +40,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public void ConstructorTests()
         {
-            using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
+            using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
                 var parameters = harness.CreateRequestParams(harness.Cache, null);
                 var silentParameters = new AcquireTokenSilentParameters();
                 var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
                 Assert.IsNotNull(request);
 
-                parameters.Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null);
+                parameters.Account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
                 request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
                 Assert.IsNotNull(request);
 
@@ -60,22 +60,22 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task ExpiredTokenRefreshFlowTestAsync()
         {
             IDictionary<string, string> extraQueryParamsAndClaims =
-               MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
-            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+               TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
 
-            using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
+            using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
                 _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
                     null,
-                    MsalTestConstants.ExtraQueryParams,
-                    MsalTestConstants.Claims,
-                    authorityOverride: AuthorityInfo.FromAuthorityUri(MsalTestConstants.AuthorityHomeTenant, false));
+                    TestConstants.s_extraQueryParams,
+                    TestConstants.Claims,
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
 
                 var silentParameters = new AcquireTokenSilentParameters()
                 {
-                    Account = new Account(MsalTestConstants.HomeAccountId, MsalTestConstants.DisplayableId, MsalTestConstants.ProductionPrefCacheEnvironment),
+                    Account = new Account(TestConstants.HomeAccountId, TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment),
                 };
 
                 // set access tokens as expired
@@ -104,14 +104,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var result = task.Result;
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
-                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
             }
         }
 
         [TestMethod]
         public void SilentRefreshFailedNullCacheTest()
         {
-            using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
+            using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
                 var parameters = harness.CreateRequestParams(
                     null,
@@ -121,11 +121,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                             "some-scope1",
                             "some-scope2"
                         }),
-                    authorityOverride: AuthorityInfo.FromAuthorityUri(MsalTestConstants.AuthorityHomeTenant, false));
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
 
                 var silentParameters = new AcquireTokenSilentParameters()
                 {
-                    Account = new Account(MsalTestConstants.HomeAccountId, MsalTestConstants.DisplayableId, MsalTestConstants.ProductionPrefCacheEnvironment),
+                    Account = new Account(TestConstants.HomeAccountId, TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment),
                 };
 
                 try
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public void SilentRefreshFailedNoCacheItemFoundTest()
         {
-            using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
+            using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
@@ -157,11 +157,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                             "some-scope1",
                             "some-scope2"
                         }),
-                    authorityOverride: AuthorityInfo.FromAuthorityUri(MsalTestConstants.AuthorityHomeTenant, false));
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
 
                 var silentParameters = new AcquireTokenSilentParameters()
                 {
-                    Account = new Account(MsalTestConstants.HomeAccountId, MsalTestConstants.DisplayableId, MsalTestConstants.ProductionPrefCacheEnvironment),
+                    Account = new Account(TestConstants.HomeAccountId, TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment),
                 };
 
                 try
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 var commonParameters = new AcquireTokenCommonParameters
                 {
-                    Scopes = scopes ?? MsalTestConstants.Scope,
+                    Scopes = scopes ?? TestConstants.s_scope,
                     ExtraQueryParameters = extraQueryParams,
                     Claims = claims,
                     AuthorityOverride = authorityOverride
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     commonParameters,
                     new RequestContext(ServiceBundle, Guid.NewGuid()))
                 {
-                    Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
+                    Account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null),
                 };
                 return parameters;
             }
