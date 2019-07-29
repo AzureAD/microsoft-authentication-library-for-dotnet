@@ -68,24 +68,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
             VerifyAuthorizationResult();
 
-            if (AuthenticationRequestParameters.IsBrokerEnabled)
+            if (AuthenticationRequestParameters.IsBrokerEnabled || IsBrokerInvocationRequired())
             {
-                BrokerFactory brokerFactory = new BrokerFactory();
+                IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker();
+
                 var brokerInteractiveRequest = new BrokerInteractiveRequest(
                     AuthenticationRequestParameters,
                     _interactiveParameters,
                     ServiceBundle,
                     _authorizationResult,
-                    brokerFactory.Create(ServiceBundle));
+                    broker);
 
-                if (brokerInteractiveRequest.IsBrokerInvocationRequired())
-                {
-                    _msalTokenResponse = await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
-                }
-                else
-                {
-                    _msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
-                }
+                _msalTokenResponse = await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
             }
             else
             {
@@ -95,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(_msalTokenResponse).ConfigureAwait(false);
         }
 
-        private async Task AcquireAuthorizationAsync(CancellationToken cancellationToken)
+        internal /* internal for test only */ async Task AcquireAuthorizationAsync(CancellationToken cancellationToken)
         {
             if (_webUi == null)
             {
@@ -260,8 +254,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalUiRequiredException(
                     MsalError.NoPromptFailedError,
-                    MsalErrorMessage.NoPromptFailedErrorMessage, 
-                    null, 
+                    MsalErrorMessage.NoPromptFailedErrorMessage,
+                    null,
                     UiRequiredExceptionClassification.PromptNeverFailed);
             }
 
@@ -269,6 +263,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalClientException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unknown error.");
             }
+        }
+        internal /* internal for test only */ bool IsBrokerInvocationRequired()
+        {
+            if (_authorizationResult.Code != null &&
+               !string.IsNullOrEmpty(_authorizationResult.Code) &&
+               _authorizationResult.Code.StartsWith(BrokerParameter.AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired, StringComparison.OrdinalIgnoreCase) ||
+               _authorizationResult.Code.StartsWith(ServiceBundle.Config.RedirectUri, StringComparison.OrdinalIgnoreCase))
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationRequired);
+                return true;
+            }
+
+            AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationNotRequired);
+            return false;
         }
     }
 }

@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client;
@@ -32,14 +30,14 @@ namespace Microsoft.Identity.Test.Unit
                     MsalTestConstants.ExtraQueryParams);
 
                 // Act
-                BrokerFactory brokerFactory = new BrokerFactory();
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
                 BrokerInteractiveRequest brokerInteractiveRequest = 
                     new BrokerInteractiveRequest(
                         parameters, 
                         null, 
                         harness.ServiceBundle, 
-                        null, 
-                        brokerFactory.Create(harness.ServiceBundle));
+                        null,
+                        broker);
 
                 brokerInteractiveRequest.CreateRequestParametersForBroker();
 

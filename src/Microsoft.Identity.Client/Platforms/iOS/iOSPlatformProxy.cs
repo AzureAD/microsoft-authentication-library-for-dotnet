@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using UIKit;
+using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -156,5 +157,15 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
 
         protected override IFeatureFlags CreateFeatureFlags() => new iOSFeatureFlags();
+
+        public override IBroker CreateBroker()
+        {
+            if (OverloadBrokerForTest != null)
+            {
+                return OverloadBrokerForTest;
+            }
+
+            return new iOSBroker(Logger, CryptographyManager);
+        }
     }
 }

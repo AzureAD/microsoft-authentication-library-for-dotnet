@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
@@ -141,8 +142,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <inheritdoc />
         public IPlatformLogger PlatformLogger => _platformLogger.Value;
 
+        protected IBroker OverloadBrokerForTest { get; private set; }
+
         protected abstract IWebUIFactory CreateWebUiFactory();
         protected abstract IFeatureFlags CreateFeatureFlags();
+
+        
+
         protected abstract string InternalGetDeviceModel();
         protected abstract string InternalGetOperatingSystem();
         protected abstract string InternalGetProcessorArchitecture();
@@ -173,9 +179,19 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             OverloadFeatureFlags = featureFlags;
         }
 
+        public void SetBrokerForTest(IBroker broker)
+        {
+            OverloadBrokerForTest = broker;
+        }
+
         public virtual Task StartDefaultOsBrowserAsync(string url)
         {
             throw new NotImplementedException();
+        }
+
+        public virtual IBroker CreateBroker()
+        {
+            return OverloadBrokerForTest ?? new NullBroker();
         }
     }
 }

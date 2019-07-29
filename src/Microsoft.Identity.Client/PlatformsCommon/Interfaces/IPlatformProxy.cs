@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
@@ -101,5 +102,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// Go to a Url using the OS default browser. 
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url);
+
+        IBroker CreateBroker();
+
+        void /* for test */ SetBrokerForTest(IBroker broker);
     }
 }
