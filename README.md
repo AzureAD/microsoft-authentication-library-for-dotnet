@@ -1,3 +1,15 @@
+---
+page_type: sample
+languages:
+  - csharp
+products:
+  - azure
+  - azure-active-directory  
+  - xamarin
+  - windows-uwp
+  - dotnet
+  - dotnet-core
+---
 # Microsoft Authentication Library (MSAL) for .NET, UWP, NetCore, Xamarin Android and iOS
 
 The MSAL library for .NET is part of the [Microsoft identity platform for developers](https://aka.ms/aaddevv2) (formerly named Azure AD) v2.0. It enables you to acquire security tokens to call protected APIs. It uses industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
