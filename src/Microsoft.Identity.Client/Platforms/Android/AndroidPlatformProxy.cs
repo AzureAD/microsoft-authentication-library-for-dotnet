@@ -207,5 +207,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             // show up, therefore need to check application.Enabled is false
             return string.IsNullOrEmpty(ChromePackage) || applicationInfo.Enabled;
         }
+
+        public override bool UseEmbeddedWebViewDefault => false;
     }
 }

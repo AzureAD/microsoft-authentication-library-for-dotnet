@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public override bool IsSystemWebViewAvailable => true;
 
+        public override bool UseEmbeddedWebViewDefault => false;
+
         /// <summary>
         /// Get the user logged
         /// </summary>
