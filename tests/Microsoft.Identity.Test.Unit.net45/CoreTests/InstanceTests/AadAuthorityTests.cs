@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -316,6 +317,68 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             authority = Authority.CreateAuthority(serviceBundle, UriCustomPort);
             Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
+        }
+
+        [TestMethod]
+        public void TenantSpecificAuthorityInitTest()
+        {
+            var host = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment);
+            var expectedAuthority = String.Concat(host, "/" , MsalTestConstants.TenantId, "/");
+
+            var publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                             .WithAuthority(host, MsalTestConstants.TenantId)
+                                                             .BuildConcrete();
+
+            Assert.AreEqual(publicClient.Authority, expectedAuthority);
+
+            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                         .WithAuthority(host, new Guid(MsalTestConstants.TenantId))
+                                                         .BuildConcrete();
+
+            Assert.AreEqual(publicClient.Authority, expectedAuthority);
+
+            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                         .WithAuthority(new Uri(expectedAuthority))
+                                                         .BuildConcrete();
+
+            Assert.AreEqual(publicClient.Authority, expectedAuthority);
+        }
+
+        [TestMethod]
+        public void MalformedAuthorityInitTest()
+        {
+            PublicClientApplication publicClient = null;
+            var expectedAuthority = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment, "/", MsalTestConstants.TenantId, "/");
+
+            //Check bad URI format
+            var host = String.Concat("test", MsalTestConstants.ProductionPrefNetworkEnvironment, "/");
+            var fullAuthority = String.Concat(host, MsalTestConstants.TenantId);
+
+            AssertException.Throws<UriFormatException>(() =>
+            {
+                publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                             .WithAuthority(fullAuthority)
+                                                             .BuildConcrete();
+            });
+
+            //Check empty path segments
+            host = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment, "/");
+            fullAuthority = String.Concat(host, MsalTestConstants.TenantId, "//");
+
+            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                         .WithAuthority(host, new Guid(MsalTestConstants.TenantId))
+                                                         .BuildConcrete();
+
+            Assert.AreEqual(publicClient.Authority, expectedAuthority);
+
+            //Check additional path segments
+            fullAuthority = String.Concat(host , MsalTestConstants.TenantId, "/ABCD!@#$TEST//");
+
+            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                         .WithAuthority(new Uri(fullAuthority))
+                                                         .BuildConcrete();
+
+            Assert.AreEqual(publicClient.Authority, expectedAuthority);
         }
 
         [TestMethod]
