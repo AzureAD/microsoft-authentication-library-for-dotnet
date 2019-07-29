@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
 
-            //app = new PublicClientApplication(MsalTestConstants.ClientId, MsalTestConstants.OnPremiseAuthority);
+            //app = new PublicClientApplication(TestConstants.ClientId, TestConstants.OnPremiseAuthority);
             app = PublicClientApplicationBuilder.Create(TestConstants.ClientId).WithAuthority(TestConstants.OnPremiseAuthority).BuildConcrete();
             Assert.IsNotNull(app);
             Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);

@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.AreEqual(TestConstants.BrokerExtraQueryParameters, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraQp]);
 
-                //Assert.AreEqual(MsalTestConstants.BrokerClaims, brokerInteractiveRequest._brokerPayload[BrokerParameter.Claims]); //TODO
+                //Assert.AreEqual(TestConstants.BrokerClaims, brokerInteractiveRequest._brokerPayload[BrokerParameter.Claims]); //TODO
                 Assert.AreEqual(BrokerParameter.OidcScopesValue, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
             }
         }

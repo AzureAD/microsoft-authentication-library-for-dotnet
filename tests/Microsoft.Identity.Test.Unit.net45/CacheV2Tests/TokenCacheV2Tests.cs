@@ -72,8 +72,8 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                 // outside of the context of the authentication parameters and
                 // cache interaction and just track the authority we're using...
 
-                // AccountId = MsalTestConstants.HomeAccountId,
-                // Authority = new Uri(MsalTestConstants.AuthorityTestTenant),
+                // AccountId = TestConstants.HomeAccountId,
+                // Authority = new Uri(TestConstants.AuthorityTestTenant),
 
                 var cacheManager = new CacheManager(_storageManager, harness.CreateAuthenticationRequestParameters(
                                                         TestConstants.AuthorityTestTenant,

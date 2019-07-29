@@ -314,22 +314,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void TenantSpecificAuthorityInitTest()
         {
-            var host = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment);
-            var expectedAuthority = String.Concat(host, "/" , MsalTestConstants.TenantId, "/");
+            var host = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment);
+            var expectedAuthority = String.Concat(host, "/" , TestConstants.TenantId, "/");
 
-            var publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                             .WithAuthority(host, MsalTestConstants.TenantId)
+            var publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                             .WithAuthority(host, TestConstants.TenantId)
                                                              .BuildConcrete();
 
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
 
-            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                         .WithAuthority(host, new Guid(MsalTestConstants.TenantId))
+            publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                         .WithAuthority(host, new Guid(TestConstants.TenantId))
                                                          .BuildConcrete();
 
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
 
-            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(new Uri(expectedAuthority))
                                                          .BuildConcrete();
 
@@ -340,33 +340,33 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void MalformedAuthorityInitTest()
         {
             PublicClientApplication publicClient = null;
-            var expectedAuthority = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment, "/", MsalTestConstants.TenantId, "/");
+            var expectedAuthority = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/", TestConstants.TenantId, "/");
 
             //Check bad URI format
-            var host = String.Concat("test", MsalTestConstants.ProductionPrefNetworkEnvironment, "/");
-            var fullAuthority = String.Concat(host, MsalTestConstants.TenantId);
+            var host = String.Concat("test", TestConstants.ProductionPrefNetworkEnvironment, "/");
+            var fullAuthority = String.Concat(host, TestConstants.TenantId);
 
             AssertException.Throws<UriFormatException>(() =>
             {
-                publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                              .WithAuthority(fullAuthority)
                                                              .BuildConcrete();
             });
 
             //Check empty path segments
-            host = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment, "/");
-            fullAuthority = String.Concat(host, MsalTestConstants.TenantId, "//");
+            host = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/");
+            fullAuthority = String.Concat(host, TestConstants.TenantId, "//");
 
-            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                         .WithAuthority(host, new Guid(MsalTestConstants.TenantId))
+            publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                         .WithAuthority(host, new Guid(TestConstants.TenantId))
                                                          .BuildConcrete();
 
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
 
             //Check additional path segments
-            fullAuthority = String.Concat(host , MsalTestConstants.TenantId, "/ABCD!@#$TEST//");
+            fullAuthority = String.Concat(host , TestConstants.TenantId, "/ABCD!@#$TEST//");
 
-            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(new Uri(fullAuthority))
                                                          .BuildConcrete();
 

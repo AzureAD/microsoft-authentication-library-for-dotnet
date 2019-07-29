@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 MockWebUI ui = new MockWebUI()
                 {
-                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
+                    MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code")
                 };
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
@@ -209,8 +209,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.ServiceBundle.PlatformProxy.SetBrokerForTest(CreateMockBroker());
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant,
-                    MsalTestConstants.Scope,
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
                     null);
                 parameters.IsBrokerEnabled = true;
                 
@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     // When the auth code is returned from the authorization server prefixed with msauth:// 
                     // this means the user who logged requires cert based auth and broker
-                    MockResult = AuthorizationResult.FromUri(MsalTestConstants.AuthorityHomeTenant + "?code=msauth://some-code")
+                    MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=msauth://some-code")
                 };
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
@@ -243,8 +243,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.ServiceBundle.PlatformProxy.SetBrokerForTest(CreateMockBroker());
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant,
-                    MsalTestConstants.Scope,
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
                     null);
                 parameters.IsBrokerEnabled = false;
                 
@@ -424,7 +424,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             IBroker mockBroker = Substitute.For<IBroker>();
             mockBroker.CanInvokeBroker(null).ReturnsForAnyArgs(true);
-            mockBroker.AcquireTokenUsingBrokerAsync(null).ReturnsForAnyArgs(MsalTestConstants.CreateMsalTokenResponse());
+            mockBroker.AcquireTokenUsingBrokerAsync(null).ReturnsForAnyArgs(TestConstants.CreateMsalTokenResponse());
             return mockBroker;
         }
     }
