@@ -264,7 +264,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new MsalClientException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unknown error.");
             }
         }
-
         internal /* internal for test only */ bool IsBrokerInvocationRequired()
         {
             if (_authorizationResult.Code != null &&

@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public override IBroker CreateBroker()
         {
-            if (base.CreateBroker() == base.OverloadBrokerForTest)
+            if (OverloadBrokerForTest != null)
             {
                 return OverloadBrokerForTest;
             }
