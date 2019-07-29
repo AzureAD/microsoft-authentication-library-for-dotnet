@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-
 #if !ANDROID && !iOS && !WINDOWS_APP 
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -14,12 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Client.Internal.JsonWebToken;
 
@@ -58,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit
                     var jsonToken = handler.ReadJwtToken(encodedJwt);
                     var x5c = jsonToken.Header.Where(header => header.Key == "x5c").FirstOrDefault();
                     Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-                    Assert.AreEqual(x5c.Value.ToString(), MsalTestConstants.Defaultx5cValue);
+                    Assert.AreEqual(x5c.Value.ToString(), TestConstants.Defaultx5cValue);
                 }
             };
         }
@@ -66,17 +60,17 @@ namespace Microsoft.Identity.Test.Unit
         private static HttpResponseMessage CreateResponse(bool clientCredentialFlow)
         {
             return clientCredentialFlow ?
-                MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid)) :
+                MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid)) :
                 MockHelpers.CreateSuccessTokenResponseMessage(
-                          MsalTestConstants.Scope.AsSingleString(),
-                          MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
-                          MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid));
+                          TestConstants.s_scope.AsSingleString(),
+                          MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                          MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid));
         }
 
         private void SetupMocks(MockHttpManager httpManager)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+            httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
         }
 
         private void SetupMocks(MockHttpManager httpManager, string authority)
@@ -94,12 +88,12 @@ namespace Microsoft.Identity.Test.Unit
                 SetupMocks(harness.HttpManager);
                 var certificate = new X509Certificate2(
                     ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                    MsalTestConstants.DefaultPassword);
+                    TestConstants.DefaultPassword);
 
                 var app = ConfidentialClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId)
+                    .Create(TestConstants.ClientId)
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
-                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
                     .BuildConcrete();
@@ -110,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
                 AuthenticationResult result = await app
-                    .AcquireTokenForClient(MsalTestConstants.Scope)
+                    .AcquireTokenForClient(TestConstants.s_scope)
                     .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -121,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 // from the cache
                 result = await app
-                    .AcquireTokenForClient(MsalTestConstants.Scope)
+                    .AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -144,12 +138,12 @@ namespace Microsoft.Identity.Test.Unit
 
                 var certificate = new X509Certificate2(
                     ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                    MsalTestConstants.DefaultPassword);
+                    TestConstants.DefaultPassword);
 
                 var app = ConfidentialClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId)
+                    .Create(TestConstants.ClientId)
                     .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
-                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
                     .BuildConcrete();
@@ -157,12 +151,12 @@ namespace Microsoft.Identity.Test.Unit
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
-                var userAssertion = new UserAssertion(MsalTestConstants.DefaultAccessToken);
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
                 AuthenticationResult result = await app
-                    .AcquireTokenOnBehalfOf(MsalTestConstants.Scope, userAssertion)
+                    .AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
                     .WithSendX5C(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -172,7 +166,7 @@ namespace Microsoft.Identity.Test.Unit
                 userCacheAccess.AssertAccessCounts(1, 1);
 
                 result = await app
-                    .AcquireTokenOnBehalfOf(MsalTestConstants.Scope, userAssertion)
+                    .AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -194,12 +188,12 @@ namespace Microsoft.Identity.Test.Unit
                 SetupMocks(harness.HttpManager, "https://login.microsoftonline.com/my-utid/");
                 var certificate = new X509Certificate2(
                     ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                    MsalTestConstants.DefaultPassword);
+                    TestConstants.DefaultPassword);
 
                 var app = ConfidentialClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId)
+                    .Create(TestConstants.ClientId)
                     .WithAuthority(new System.Uri("https://login.microsoftonline.com/my-utid"),true)
-                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate).BuildConcrete();
 
@@ -209,11 +203,11 @@ namespace Microsoft.Identity.Test.Unit
 
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
                     new MsalAccessTokenCacheKey(
-                        MsalTestConstants.ProductionPrefNetworkEnvironment,
-                        MsalTestConstants.Utid,
-                        MsalTestConstants.UserIdentifier,
-                        MsalTestConstants.ClientId,
-                        MsalTestConstants.ScopeForAnotherResourceStr));
+                        TestConstants.ProductionPrefNetworkEnvironment,
+                        TestConstants.Utid,
+                        TestConstants.s_userIdentifier,
+                        TestConstants.ClientId,
+                        TestConstants.ScopeForAnotherResourceStr));
 
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
@@ -221,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit
                 var result = await app
                     .AcquireTokenSilent(
                         new[] { "someTestScope"},
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                     .WithSendX5C(true)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);

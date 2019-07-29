@@ -35,10 +35,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [Description("Test for client assertion with mismatched parameters in Request Validator.")]
         public void ClientAssertionRequestValidatorMismatchParameterTest()
         {
-            var credential = ClientCredentialWrapper.CreateWithSecret(MsalTestConstants.ClientSecret);
+            var credential = ClientCredentialWrapper.CreateWithSecret(TestConstants.ClientSecret);
             credential.Audience = _audience1;
             credential.ContainsX5C = false;
-            credential.CachedAssertion = MsalTestConstants.DefaultClientAssertion;
+            credential.CachedAssertion = TestConstants.DefaultClientAssertion;
             credential.ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
 
             // Validate cached client assertion with parameters
@@ -74,10 +74,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [Description("Test for expired client assertion in Request Validator.")]
         public void ClientAssertionRequestValidatorExpirationTimeTest()
         {
-            var credential = ClientCredentialWrapper.CreateWithSecret(MsalTestConstants.ClientSecret);
+            var credential = ClientCredentialWrapper.CreateWithSecret(TestConstants.ClientSecret);
             credential.Audience = _audience1;
             credential.ContainsX5C = false;
-            credential.CachedAssertion = MsalTestConstants.DefaultClientAssertion;
+            credential.CachedAssertion = TestConstants.DefaultClientAssertion;
             credential.ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
 
             // Validate cached client assertion with expiration time

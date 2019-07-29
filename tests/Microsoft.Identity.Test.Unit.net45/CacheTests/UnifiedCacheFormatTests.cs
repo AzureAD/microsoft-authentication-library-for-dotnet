@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
             harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
             {
@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             });
 
             AuthenticationResult result = app
-                .AcquireTokenInteractive(MsalTestConstants.Scope)
+                .AcquireTokenInteractive(TestConstants.s_scope)
                 .ExecuteAsync(CancellationToken.None)
                 .Result;
 

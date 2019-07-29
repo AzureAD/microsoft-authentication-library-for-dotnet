@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,19 +31,19 @@ namespace Microsoft.Identity.Test.Unit
                 using (var harness = CreateTestHarness())
                 {
                     AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                        MsalTestConstants.AuthorityHomeTenant,
-                        MsalTestConstants.Scope,
+                        TestConstants.AuthorityHomeTenant,
+                        TestConstants.s_scope,
                         null,
                         extraQueryParameters: new Dictionary<string, string>
                         {
                             {"extra", "qp"}
                         });
                     parameters.RedirectUri = new Uri("some://uri#fragment=not-so-good");
-                    parameters.LoginHint = MsalTestConstants.DisplayableId;
+                    parameters.LoginHint = TestConstants.DisplayableId;
                     var interactiveParameters = new AcquireTokenInteractiveParameters
                     {
                         Prompt = Prompt.ForceLogin,
-                        ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                        ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                     };
 
                     new InteractiveRequest(
@@ -176,15 +177,15 @@ namespace Microsoft.Identity.Test.Unit
                     });
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant,
-                    MsalTestConstants.Scope,
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
                     null);
                 parameters.RedirectUri = new Uri("some://uri");
-                parameters.LoginHint = MsalTestConstants.DisplayableId;
+                parameters.LoginHint = TestConstants.DisplayableId;
                 AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.SelectAccount,
-                    ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                    ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                 };
 
                 InteractiveRequest request = new InteractiveRequest(

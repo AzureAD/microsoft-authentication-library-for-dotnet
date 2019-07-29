@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class B2CAuthorityTests : TestBase
     {
         [TestMethod]
-        [TestCategory("B2CAuthorityTests")]
         public void NotEnoughPathSegmentsTest()
         {
             try
@@ -61,7 +60,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("B2CAuthorityTests")]
         public void B2CLoginAuthorityCreateAuthority()
         {
             using (var httpManager = new MockHttpManager())
@@ -69,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var appConfig = new ApplicationConfiguration()
                 {
                     HttpManager = httpManager,
-                    AuthorityInfo = AuthorityInfo.FromAuthorityUri(MsalTestConstants.B2CLoginAuthority, false)
+                    AuthorityInfo = AuthorityInfo.FromAuthorityUri(TestConstants.B2CLoginAuthority, false)
                 };
 
                 var serviceBundle = ServiceBundle.Create(appConfig);
@@ -86,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Authority instance = Authority.CreateAuthority(
                     serviceBundle,
-                    MsalTestConstants.B2CLoginAuthority);
+                    TestConstants.B2CLoginAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
                 var resolver = new AuthorityEndpointResolutionManager(serviceBundle);
@@ -107,7 +105,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("B2CAuthorityTests")]
         [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1038
         public void B2CMicrosoftOnlineCreateAuthority()
         {
@@ -147,19 +144,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("B2CAuthorityTests")]
         public void CanonicalAuthorityInitTest()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
-            const string UriNoPort = MsalTestConstants.B2CAuthority;
-            const string UriNoPortTailSlash = MsalTestConstants.B2CAuthority;
+            const string UriNoPort = TestConstants.B2CAuthority;
+            const string UriNoPortTailSlash = TestConstants.B2CAuthority;
 
             const string UriDefaultPort = "https://login.microsoftonline.in:443/tfp/tenant/policy";
 
             const string UriCustomPort = "https://login.microsoftonline.in:444/tfp/tenant/policy";
             const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/policy/";
-            const string UriVanityPort = MsalTestConstants.B2CLoginAuthority;
+            const string UriVanityPort = TestConstants.B2CLoginAuthority;
 
             var authority = new B2CAuthority(serviceBundle, new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));
             Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);

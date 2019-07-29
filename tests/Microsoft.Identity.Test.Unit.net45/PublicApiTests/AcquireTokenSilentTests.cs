@@ -30,15 +30,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task NullAccount_EmptyLoginHintAsync()
         {
             IPublicClientApplication app = PublicClientApplicationBuilder
-                .Create(MsalTestConstants.ClientId)
+                .Create(TestConstants.ClientId)
                 .WithTelemetry(new TraceTelemetryConfig())
                 .Build();
 
             await AssertException.TaskThrowsAsync<ArgumentNullException>(
-             () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (string)null).ExecuteAsync()).ConfigureAwait(false);
+             () => app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), (string)null).ExecuteAsync()).ConfigureAwait(false);
 
             var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
-              () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (IAccount)null).ExecuteAsync()).ConfigureAwait(false);
+              () => app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), (IAccount)null).ExecuteAsync()).ConfigureAwait(false);
             Assert.AreEqual(MsalError.UserNullError, ex.ErrorCode);
             Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification);
 
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task AcquireTokenSilentScopeAndEmptyCacheTestAsync()
         {
             var receiver = new MyReceiver();
-            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                         .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                         .BuildConcrete();
@@ -57,8 +57,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 AuthenticationResult result = await app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
@@ -95,23 +95,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
                     new MsalAccessTokenCacheKey(
-                        MsalTestConstants.ProductionPrefNetworkEnvironment,
-                        MsalTestConstants.Utid,
-                        MsalTestConstants.UserIdentifier,
-                        MsalTestConstants.ClientId,
-                        MsalTestConstants.ScopeForAnotherResourceStr));
+                        TestConstants.ProductionPrefNetworkEnvironment,
+                        TestConstants.Utid,
+                        TestConstants.s_userIdentifier,
+                        TestConstants.ClientId,
+                        TestConstants.ScopeForAnotherResourceStr));
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                        TestConstants.s_scopeForAnotherResource.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
-                Assert.AreEqual(MsalTestConstants.ScopeForAnotherResource.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_scopeForAnotherResource.AsSingleString(), result.Scopes.AsSingleString());
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 cacheAccess.AssertAccessCounts(1, 0);
             }
@@ -122,8 +122,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
@@ -133,22 +133,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
                     new MsalAccessTokenCacheKey(
-                        MsalTestConstants.ProductionPrefNetworkEnvironment,
-                        MsalTestConstants.Utid,
-                        MsalTestConstants.UserIdentifier,
-                        MsalTestConstants.ClientId,
-                        MsalTestConstants.ScopeForAnotherResourceStr));
+                        TestConstants.ProductionPrefNetworkEnvironment,
+                        TestConstants.Utid,
+                        TestConstants.s_userIdentifier,
+                        TestConstants.ClientId,
+                        TestConstants.ScopeForAnotherResourceStr));
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
             }
         }
 
@@ -158,8 +158,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.AuthorityGuestTenant), true)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.AuthorityGuestTenant), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
@@ -168,35 +168,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(
                     new MsalAccessTokenCacheKey(
-                        MsalTestConstants.ProductionPrefNetworkEnvironment,
-                        MsalTestConstants.Utid,
-                        MsalTestConstants.UserIdentifier,
-                        MsalTestConstants.ClientId,
-                        MsalTestConstants.ScopeForAnotherResourceStr));
+                        TestConstants.ProductionPrefNetworkEnvironment,
+                        TestConstants.Utid,
+                        TestConstants.s_userIdentifier,
+                        TestConstants.ClientId,
+                        TestConstants.ScopeForAnotherResourceStr));
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityGuestTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuestTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
                     });
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
             }
         }
 
@@ -204,15 +204,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void AcquireTokenSilentCacheOnlyLookupTest()
         {
             RunAcquireTokenSilentCacheOnlyTest(
-                MsalTestConstants.AuthorityTestTenant,
+                TestConstants.AuthorityTestTenant,
                 expectNetworkDiscovery: false);  // MSAL known authority
 
             RunAcquireTokenSilentCacheOnlyTest(
-                 MsalTestConstants.AuthorityWindowsNet,
+                 TestConstants.AuthorityWindowsNet,
                  expectNetworkDiscovery: false);  // MSAL known authority
 
             RunAcquireTokenSilentCacheOnlyTest(
-                MsalTestConstants.AuthorityNotKnownTenanted,
+                TestConstants.AuthorityNotKnownTenanted,
                 expectNetworkDiscovery: true);  // not known authority
 
         }
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var receiver = new MyReceiver();
             using (MockHttpAndServiceBundle testHarness = base.CreateTestHarness())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(authority, true)
                                                                             .WithHttpManager(testHarness.HttpManager)
                                                                             .WithTelemetry(receiver.HandleTelemetryEvents)
@@ -232,11 +232,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 app.UserTokenCacheInternal.Accessor.DeleteAccessToken(new MsalAccessTokenCacheKey(
-                    MsalTestConstants.ProductionPrefNetworkEnvironment,
-                    MsalTestConstants.Utid,
-                    MsalTestConstants.UserIdentifier,
-                    MsalTestConstants.ClientId,
-                    MsalTestConstants.ScopeForAnotherResourceStr));
+                    TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.Utid,
+                    TestConstants.s_userIdentifier,
+                    TestConstants.ClientId,
+                    TestConstants.ScopeForAnotherResourceStr));
 
                 if (expectNetworkDiscovery)
                 {
@@ -247,23 +247,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                     string discoveryEndpoint = $"https://{discoveryHost}/common/discovery/instance";
 
-                    var jsonResponse = MsalTestConstants.DiscoveryJsonResponse.Replace("login.microsoft.com", host);
+                    var jsonResponse = TestConstants.DiscoveryJsonResponse.Replace("login.microsoft.com", host);
                     testHarness.HttpManager.AddMockHandler(
                         MockHelpers.CreateInstanceDiscoveryMockHandler(discoveryEndpoint, jsonResponse));
                 }
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                     .WithAuthority(app.Authority, false)
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
 
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
@@ -278,8 +278,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
@@ -288,15 +288,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 AuthenticationResult result = await app.AcquireTokenSilent(
-                    MsalTestConstants.Scope.ToArray(),
-                    MsalTestConstants.DisplayableId)
+                    TestConstants.s_scope.ToArray(),
+                    TestConstants.DisplayableId)
                     .WithAuthority(app.Authority, false)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
                 cacheAccess.AssertAccessCounts(1, 0);
             }
         }
@@ -306,8 +306,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
@@ -315,7 +315,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
-                    MsalTestConstants.Scope.ToArray(),
+                    TestConstants.s_scope.ToArray(),
                     "other_login_hint@contoso.com")
                     .WithAuthority(app.Authority, false)
                     .ExecuteAsync()).ConfigureAwait(false);
@@ -331,8 +331,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var receiver = new MyReceiver();
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
@@ -344,8 +344,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid2", "utid");
 
                 var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () => await app.AcquireTokenSilent(
-                    MsalTestConstants.Scope.ToArray(),
-                    MsalTestConstants.DisplayableId)
+                    TestConstants.s_scope.ToArray(),
+                    TestConstants.DisplayableId)
                     .WithAuthority(app.Authority, false)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -364,7 +364,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
@@ -375,29 +375,29 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityUtidTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
                     });
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
 
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
@@ -412,7 +412,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
@@ -420,52 +420,52 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
                     });
 
                 // ForceRefresh=true, so skip cache lookup of Access Token
                 // Use refresh token to acquire a new Access Token
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
-                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
 
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityGuidTenant2);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant2);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
                     });
 
                 Task<AuthenticationResult> task2 = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
-                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant2)
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
+                    .WithAuthority(TestConstants.AuthorityGuidTenant2)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -473,38 +473,38 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Should result in new AccessToken, but same refresh token
                 AuthenticationResult result2 = task2.Result;
                 Assert.IsNotNull(result2);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result2.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.ToArray().AsSingleString(), result2.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result2.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result2.Scopes.AsSingleString());
 
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityGuidTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
                     });
 
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
                 Task<AuthenticationResult> task3 = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
-                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant)
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
+                    .WithAuthority(TestConstants.AuthorityGuidTenant)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result3 = task3.Result;
                 Assert.IsNotNull(result3);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result3.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.ToArray().AsSingleString(), result3.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result3.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result3.Scopes.AsSingleString());
 
                 Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
@@ -515,23 +515,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
                     });
 
                 Task<AuthenticationResult> task4 = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
-                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant)
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
+                    .WithAuthority(TestConstants.AuthorityGuidTenant)
                     .WithForceRefresh(true)
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result4 = task4.Result;
                 Assert.IsNotNull(result4);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result4.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.ToArray().AsSingleString(), result4.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result4.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result4.Scopes.AsSingleString());
 
                 Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
@@ -545,7 +545,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
@@ -556,90 +556,90 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
                     });
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
-                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
 
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityGuidTenant2);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant2);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
                     });
 
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
                 Task<AuthenticationResult> task2 = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
-                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant2)
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
+                    .WithAuthority(TestConstants.AuthorityGuidTenant2)
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result2 = task2.Result;
                 Assert.IsNotNull(result2);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result2.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.ToArray().AsSingleString(), result2.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result2.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result2.Scopes.AsSingleString());
 
                 Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityGuidTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
+                            TestConstants.UniqueId,
+                            TestConstants.DisplayableId,
+                            TestConstants.s_scope.ToArray())
                     });
 
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
                 Task<AuthenticationResult> task3 = app
                     .AcquireTokenSilent(
-                        MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
-                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant)
+                        TestConstants.s_scope.ToArray(),
+                        new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
+                    .WithAuthority(TestConstants.AuthorityGuidTenant)
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result3 = task3.Result;
                 Assert.IsNotNull(result3);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result3.Account.Username);
-                Assert.AreEqual(MsalTestConstants.Scope.ToArray().AsSingleString(), result3.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.DisplayableId, result3.Account.Username);
+                Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result3.Scopes.AsSingleString());
 
                 Assert.AreEqual(4, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
@@ -651,13 +651,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 //populate cache
                 var tokenCacheHelper = new TokenCacheHelper();
@@ -673,8 +673,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     Task<AuthenticationResult> task = app
                         .AcquireTokenSilent(
-                            MsalTestConstants.CacheMissScope,
-                            new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                            TestConstants.s_cacheMissScope,
+                            new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
                         .WithAuthority(app.Authority)
                         .WithForceRefresh(false)
                         .ExecuteAsync(CancellationToken.None);

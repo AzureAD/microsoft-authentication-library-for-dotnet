@@ -23,7 +23,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class AadAuthorityTests : TestBase
     {
         [TestMethod]
-        [TestCategory("AadAuthorityTests")]
         public void SuccessfulValidationTest()
         {
             using (var harness = CreateTestHarness())
@@ -79,7 +78,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AadAuthorityTests")]
         public void ValidationOffSuccessTest()
         {
             using (var harness = CreateTestHarness())
@@ -116,7 +114,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AadAuthorityTests")]
         public void CreateEndpointsWithCommonTenantTest()
         {
             using (var harness = CreateTestHarness())
@@ -149,11 +146,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AadAuthorityTests")]
         public void SelfSignedJwtAudienceEndpointValidationTest()
         {
-            string common = MsalTestConstants.Common;
-            string tenantSpecific = MsalTestConstants.TenantId;
+            string common = TestConstants.Common;
+            string tenantSpecific = TestConstants.TenantId;
             string issuerCommonWithTenant = "https://login.microsoftonline.com/{tenant}/v2.0";
             string issuerCommonWithTenantId = "https://login.microsoftonline.com/{tenantid}/v2.0";
             string issuerTenantSpecific = $"https://login.microsoftonline.com/{tenantSpecific}/v2.0";
@@ -165,7 +161,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AadAuthorityTests")]
         public void FailedValidationTest()
         {
             using (var harness = CreateTestHarness())
@@ -217,7 +212,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AadAuthorityTests")]
         public void FailedValidationMissingFieldsTest()
         {
             using (var harness = CreateTestHarness())
@@ -258,7 +252,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AadAuthorityTests")]
         public void FailedTenantDiscoveryMissingEndpointsTest()
         {
             using (var harness = CreateTestHarness())
@@ -296,7 +289,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [TestCategory("AadAuthorityTests")]
         public void CanonicalAuthorityInitTest()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
@@ -322,22 +314,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void TenantSpecificAuthorityInitTest()
         {
-            var host = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment);
-            var expectedAuthority = String.Concat(host, "/" , MsalTestConstants.TenantId, "/");
+            var host = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment);
+            var expectedAuthority = String.Concat(host, "/" , TestConstants.TenantId, "/");
 
-            var publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                             .WithAuthority(host, MsalTestConstants.TenantId)
+            var publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                             .WithAuthority(host, TestConstants.TenantId)
                                                              .BuildConcrete();
 
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
 
-            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                         .WithAuthority(host, new Guid(MsalTestConstants.TenantId))
+            publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                         .WithAuthority(host, new Guid(TestConstants.TenantId))
                                                          .BuildConcrete();
 
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
 
-            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(new Uri(expectedAuthority))
                                                          .BuildConcrete();
 
@@ -348,33 +340,33 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void MalformedAuthorityInitTest()
         {
             PublicClientApplication publicClient = null;
-            var expectedAuthority = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment, "/", MsalTestConstants.TenantId, "/");
+            var expectedAuthority = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/", TestConstants.TenantId, "/");
 
             //Check bad URI format
-            var host = String.Concat("test", MsalTestConstants.ProductionPrefNetworkEnvironment, "/");
-            var fullAuthority = String.Concat(host, MsalTestConstants.TenantId);
+            var host = String.Concat("test", TestConstants.ProductionPrefNetworkEnvironment, "/");
+            var fullAuthority = String.Concat(host, TestConstants.TenantId);
 
             AssertException.Throws<UriFormatException>(() =>
             {
-                publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                              .WithAuthority(fullAuthority)
                                                              .BuildConcrete();
             });
 
             //Check empty path segments
-            host = String.Concat("https://", MsalTestConstants.ProductionPrefNetworkEnvironment, "/");
-            fullAuthority = String.Concat(host, MsalTestConstants.TenantId, "//");
+            host = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment, "/");
+            fullAuthority = String.Concat(host, TestConstants.TenantId, "//");
 
-            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                         .WithAuthority(host, new Guid(MsalTestConstants.TenantId))
+            publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                         .WithAuthority(host, new Guid(TestConstants.TenantId))
                                                          .BuildConcrete();
 
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
 
             //Check additional path segments
-            fullAuthority = String.Concat(host , MsalTestConstants.TenantId, "/ABCD!@#$TEST//");
+            fullAuthority = String.Concat(host , TestConstants.TenantId, "/ABCD!@#$TEST//");
 
-            publicClient = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(new Uri(fullAuthority))
                                                          .BuildConcrete();
 
@@ -386,23 +378,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             // no change because initial authority is tenanted
             AuthorityTestHelper.AuthorityDoesNotUpdateTenant(
-                MsalTestConstants.AuthorityUtidTenant, MsalTestConstants.Utid);
+                TestConstants.AuthorityUtidTenant, TestConstants.Utid);
         }
 
         [TestMethod]
         public void TenantlessAuthorityChanges()
         {
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(
-                MsalTestConstants.AuthorityCommonTenant);
+                TestConstants.AuthorityCommonTenant);
 
             Assert.AreEqual("common", authority.GetTenantId());
 
-            string updatedAuthority = authority.GetTenantedAuthority(MsalTestConstants.Utid);
-            Assert.AreEqual(MsalTestConstants.AuthorityUtidTenant, updatedAuthority);
-            Assert.AreEqual(updatedAuthority, MsalTestConstants.AuthorityUtidTenant);
+            string updatedAuthority = authority.GetTenantedAuthority(TestConstants.Utid);
+            Assert.AreEqual(TestConstants.AuthorityUtidTenant, updatedAuthority);
+            Assert.AreEqual(updatedAuthority, TestConstants.AuthorityUtidTenant);
 
-            authority.UpdateWithTenant(MsalTestConstants.Utid);
-            Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, MsalTestConstants.AuthorityUtidTenant);
+            authority.UpdateWithTenant(TestConstants.Utid);
+            Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, TestConstants.AuthorityUtidTenant);
         }
                
         private void CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(string issuer, string tenantId, string expectedJwtAudience)

@@ -19,14 +19,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [TestCategory("HttpClientFactoryTests")]
         public void GetHttpClient_MaxRespContentBuffSizeSetTo1Mb()
         {
             Assert.AreEqual(1024 * 1024, new HttpClientFactory().GetHttpClient().MaxResponseContentBufferSize);
         }
 
         [TestMethod]
-        [TestCategory("HttpClientFactoryTests")]
         public void GetHttpClient_DefaultHeadersSetToJson()
         {
             var client = new HttpClientFactory().GetHttpClient();

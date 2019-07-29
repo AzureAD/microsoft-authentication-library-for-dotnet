@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit
         public void DeviceCodeResultShouldContainVerificationUrlIfOnlyThatIsPresent()
         {
             var deviceCodeResponse = new DeviceCodeResponse { VerificationUrl = VerificationUrl };
-            var deviceCodeResult = deviceCodeResponse.GetResult(MsalTestConstants.ClientId, MsalTestConstants.Scope);
+            var deviceCodeResult = deviceCodeResponse.GetResult(TestConstants.ClientId, TestConstants.s_scope);
 
             Assert.AreEqual(VerificationUrl, deviceCodeResult.VerificationUrl);
         }
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit
         public void DeviceCodeResultShouldContainVerificationUriIfOnlyThatIsPresent()
         {
             var deviceCodeResponse = new DeviceCodeResponse { VerificationUri = VerificationUri };
-            var deviceCodeResult = deviceCodeResponse.GetResult(MsalTestConstants.ClientId, MsalTestConstants.Scope);
+            var deviceCodeResult = deviceCodeResponse.GetResult(TestConstants.ClientId, TestConstants.s_scope);
 
             Assert.AreEqual(VerificationUri, deviceCodeResult.VerificationUrl);
         }
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit
                 VerificationUrl = VerificationUrl
             };
 
-            var deviceCodeResult = deviceCodeResponse.GetResult(MsalTestConstants.ClientId, MsalTestConstants.Scope);
+            var deviceCodeResult = deviceCodeResponse.GetResult(TestConstants.ClientId, TestConstants.s_scope);
 
             Assert.AreEqual(VerificationUri, deviceCodeResult.VerificationUrl);
         }

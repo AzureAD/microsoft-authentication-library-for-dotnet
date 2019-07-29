@@ -33,13 +33,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             var response = new MsalTokenResponse
             {
-                IdToken = MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                 AccessToken = "access-token",
                 ClientInfo = MockHelpers.CreateClientInfo(),
                 ExpiresIn = 3599,
                 CorrelationId = "correlation-id",
                 RefreshToken = "refresh-token",
-                Scope = MsalTestConstants.Scope.AsSingleString(),
+                Scope = TestConstants.s_scope.AsSingleString(),
                 TokenType = "Bearer"
             };
 
@@ -99,17 +99,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public void BrokerInteractiveRequestTest()
         {
-            string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(MsalTestConstants.AuthorityTestTenant));
+            string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(TestConstants.AuthorityTestTenant));
 
             using (var harness = CreateTestHarness())
             {
                 // Arrange
                 var parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityTestTenant,
+                    TestConstants.AuthorityTestTenant,
                     null,
                     null,
                     null,
-                    MsalTestConstants.ExtraQueryParams);
+                    TestConstants.s_extraQueryParams);
 
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
@@ -145,11 +145,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant,
-                    MsalTestConstants.Scope,
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle),
-                    extraQueryParameters: MsalTestConstants.ExtraQueryParams,
-                    claims: MsalTestConstants.Claims);
+                    extraQueryParameters: TestConstants.s_extraQueryParams,
+                    claims: TestConstants.Claims);
 
                 parameters.IsBrokerEnabled = true;
 

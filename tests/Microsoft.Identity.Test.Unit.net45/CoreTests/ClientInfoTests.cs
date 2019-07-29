@@ -12,13 +12,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
     public class ClientInfoTests
     {
         [TestMethod]
-        [TestCategory("ClientInfoTests")]
         public void ParseTest()
         {
             ClientInfo clientInfo = ClientInfo.CreateFromJson("eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9");
             Assert.IsNotNull(clientInfo);
-            Assert.AreEqual(MsalTestConstants.Uid, clientInfo.UniqueObjectIdentifier);
-            Assert.AreEqual(MsalTestConstants.Utid, clientInfo.UniqueTenantIdentifier);
+            Assert.AreEqual(TestConstants.Uid, clientInfo.UniqueObjectIdentifier);
+            Assert.AreEqual(TestConstants.Utid, clientInfo.UniqueTenantIdentifier);
         }
     }
 }
