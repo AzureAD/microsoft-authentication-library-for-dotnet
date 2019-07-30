@@ -94,7 +94,6 @@ namespace Microsoft.Identity.Client
             IEnumerable<IAccount> accounts = await UserTokenCacheInternal.GetAccountsAsync(
                 ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
                 requestContext).ConfigureAwait(false);
-
             return accounts;
         }
 
@@ -109,11 +108,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        #region Unsupported With WAM
+#region Unsupported With WAM
         public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(IEnumerable<string> scopes, Func<DeviceCodeResult, Task> deviceCodeResultCallback) => throw new NotImplementedException();
-        #endregion
+#endregion
 
-        #region obsolete
+#region obsolete
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
@@ -203,7 +202,7 @@ namespace Microsoft.Identity.Client
         public IUser GetUser(string identifier) => throw new NotImplementedException();
         [Obsolete]
         public void Remove(IUser user) => throw new NotImplementedException();
-        #endregion
+#endregion
     }
 }
 

@@ -98,14 +98,15 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 }
             }
 
-            request.CorrelationId = commonParameters.CorrelationId.ToString("N");
+            request.CorrelationId = commonParameters.CorrelationId.ToString("D");
             
             // TODO(WAM): verify with server team that this is the proper value
             request.Properties["api_version"] = "2.0";
 
             // Since we've set api_version=2.0, we can send in scopes in the scope parameter since the WAM providers are now set to v2 protocol and token semantics.
             // Therefore we don't need the resource parameter.
-            // request.Properties["resource"] = "https://graph.microsoft.com";  
+            // TODO(WAM): Update (7/29).  Apparently we _do_ have to have this.  So need to figure out how to get this resource URL out of the MSAL request.
+            request.Properties["resource"] = "https://graph.microsoft.com";  
 
             if (Windows.Foundation.Metadata.ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 6))
             {
