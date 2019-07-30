@@ -14,23 +14,23 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Unit
 {
-    internal static class MsalTestConstants
+    internal static class TestConstants
     {
-        public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
+        public static readonly SortedSet<string> s_scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
         public const string ScopeStr = "r1/scope1 r1/scope2";
-        public static readonly string[] GraphScopes = new[] { "user.read" };
+        public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
         public const string AutomationTestThumbprint = "79fbcbeb5cd28994e50daff8035bacf764b14306";
 
-        public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
-        public static readonly SortedSet<string> CacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
+        public static readonly SortedSet<string> s_scopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
+        public static readonly SortedSet<string> s_cacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
         public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
         public const string Uid = "my-uid";
         public const string Utid = "my-utid";
         public const string Common = "common";
-        public const string TenantId = "e56cat29e-b008-4cea-b6f0-48facatsd64a";
-        public static readonly IDictionary<string, string> ClientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
+        public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
+        public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
         public const string RTSecret = "someRT";
 
         public const string HomeAccountId = Uid + "." + Utid;
@@ -82,6 +82,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string XClientSku = "x-client-SKU";
         public const string XClientVer = "x-client-Ver";
         public const TokenSubjectType TokenSubjectTypeUser = 0;
+        public const string TestMessage = "test message";
 
         public const string LocalAccountId = "test_local_account_id";
         public const string GivenName = "Joe";
@@ -103,11 +104,11 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         {
             get
             {
-                return Regex.Replace(_defaultx5cValue, @"\r\n?|\n", String.Empty);
+                return Regex.Replace(_defaultx5cValue, @"\r\n?|\n", string.Empty);
             }
         }
 
-        public static readonly IDictionary<string, string> ExtraQueryParams
+        public static readonly IDictionary<string, string> s_extraQueryParams
             = new Dictionary<string, string>()
             {
                 {"extra", "qp" },
@@ -121,13 +122,13 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/214a15bf554e41a7aef4e44707311cfb";
 
         public enum AuthorityType { B2C };
-        public static string[] ProdEnvAliases = new string[] {
+        public static string[] s_prodEnvAliases = new string[] {
                                 "login.microsoftonline.com",
                                 "login.windows.net",
                                 "login.microsoft.com",
                                 "sts.windows.net"};
 
-        public static readonly string UserIdentifier = CreateUserIdentifier();
+        public static readonly string s_userIdentifier = CreateUserIdentifier();
 
        
 
@@ -146,39 +147,39 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         {
             return new MsalTokenResponse
             {
-                IdToken = MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                IdToken = MockHelpers.CreateIdToken(UniqueId, DisplayableId),
                 AccessToken = "access-token",
                 ClientInfo = MockHelpers.CreateClientInfo(),
                 ExpiresIn = 3599,
                 CorrelationId = "correlation-id",
                 RefreshToken = "refresh-token",
-                Scope = MsalTestConstants.Scope.AsSingleString(),
+                Scope = s_scope.AsSingleString(),
                 TokenType = "Bearer"
             };
         }
 
-        public static readonly Account User = new Account(UserIdentifier, DisplayableId, ProductionPrefNetworkEnvironment);
+        public static readonly Account s_user = new Account(s_userIdentifier, DisplayableId, ProductionPrefNetworkEnvironment);
 
-        public static readonly string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
-        public static readonly string OnPremiseClientId = "on_premise_client_id";
-        public static readonly string OnPremiseUniqueId = "on_premise_unique_id";
-        public static readonly string OnPremiseDisplayableId = "displayable@contoso.com";
-        public static readonly string FabrikamDisplayableId = "displayable@fabrikam.com";
-        public static readonly string OnPremiseHomeObjectId = OnPremiseUniqueId;
-        public static readonly string OnPremisePolicy = "on_premise_policy";
-        public static readonly string OnPremiseRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
-        public static readonly string OnPremiseClientSecret = "on_premise_client_secret";
-        public static readonly string OnPremiseUid = "my-OnPremise-UID";
-        public static readonly string OnPremiseUtid = "my-OnPremise-UTID";
+        public const string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
+        public const string OnPremiseClientId = "on_premise_client_id";
+        public const string OnPremiseUniqueId = "on_premise_unique_id";
+        public const string OnPremiseDisplayableId = "displayable@contoso.com";
+        public const string FabrikamDisplayableId = "displayable@fabrikam.com";
+        public const string OnPremiseHomeObjectId = OnPremiseUniqueId;
+        public const string OnPremisePolicy = "on_premise_policy";
+        public const string OnPremiseRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        public const string OnPremiseClientSecret = "on_premise_client_secret";
+        public const string OnPremiseUid = "my-OnPremise-UID";
+        public const string OnPremiseUtid = "my-OnPremise-UTID";
 
-        public static readonly Account OnPremiseUser = new Account(
+        public static readonly Account s_onPremiseUser = new Account(
             string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
 
         public const string BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2";
         public const string BrokerClaims = "testClaims";
 
-        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
-        public static readonly ClientCredentialWrapper CredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
+        public static readonly ClientCredentialWrapper s_onPremiseCredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
+        public static readonly ClientCredentialWrapper s_credentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
 
         public const string DiscoveryJsonResponse = @"{
                         ""tenant_discovery_endpoint"":""https://login.microsoftonline.com/tenant/.well-known/openid-configuration"",
@@ -225,7 +226,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string PublicClientId = "PublicClientId";
         public const string ConfidentialClientId = "ConfidentialClientId";
         public const string ClientRedirectUri = "http://localhost:8080";
-        public static readonly SortedSet<string> SupportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" });
+        public static readonly SortedSet<string> s_supportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" });
         public const string ADFS2019ClientSecretURL = "https://buildautomation.vault.azure.net/secrets/ADFS2019ClientCredSecret/c55ec1128f32493da85b7643ede6eb80";
     }
 }

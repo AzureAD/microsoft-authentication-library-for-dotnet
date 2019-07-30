@@ -35,8 +35,17 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             var sendAuthorizeRequestWithTcs = new Action<object>((tcs) =>
             {
-                authorizationResult = Authenticate(authorizationUri, redirectUri);
-                ((TaskCompletionSource<object>)tcs).TrySetResult(null);
+                try
+                {
+                    authorizationResult = Authenticate(authorizationUri, redirectUri);
+                   ((TaskCompletionSource<object>)tcs).TrySetResult(null);
+                }
+                catch (Exception e)
+                {
+                    // Need to catch the exception here and put on the TCS which is the task we are waiting on so that
+                    // the exception comming out of Authenticate is correctly thrown.
+                    ((TaskCompletionSource<object>)tcs).TrySetException(e);
+               }
             });
 
             // If the thread is MTA, it cannot create or communicate with WebBrowser which is a COM control.

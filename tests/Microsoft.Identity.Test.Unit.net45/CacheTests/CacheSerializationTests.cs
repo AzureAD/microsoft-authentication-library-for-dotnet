@@ -38,14 +38,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             return new MsalAccessTokenCacheItem
             {
-                ClientId = MsalTestConstants.ClientId,
+                ClientId = TestConstants.ClientId,
                 Environment = "env",
                 ExpiresOnUnixTimestamp = "12345",
                 ExtendedExpiresOnUnixTimestamp = "23456",
                 CachedAt = "34567",
-                HomeAccountId = MsalTestConstants.HomeAccountId,
+                HomeAccountId = TestConstants.HomeAccountId,
                 IsExtendedLifeTimeToken = false,
-                NormalizedScopes = MsalTestConstants.ScopeStr,
+                NormalizedScopes = TestConstants.ScopeStr,
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
                 RawClientInfo = string.Empty, 
@@ -57,9 +57,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             return new MsalRefreshTokenCacheItem
             {
-                ClientId = MsalTestConstants.ClientId,
+                ClientId = TestConstants.ClientId,
                 Environment = "env",
-                HomeAccountId = MsalTestConstants.HomeAccountId,
+                HomeAccountId = TestConstants.HomeAccountId,
                 Secret = "access_token_secret",
                 RawClientInfo = string.Empty, 
             };
@@ -69,9 +69,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             return new MsalIdTokenCacheItem
             {
-                ClientId = MsalTestConstants.ClientId,
+                ClientId = TestConstants.ClientId,
                 Environment = "env",
-                HomeAccountId = MsalTestConstants.HomeAccountId,
+                HomeAccountId = TestConstants.HomeAccountId,
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
                 RawClientInfo = string.Empty,
@@ -83,15 +83,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             return new MsalAccountCacheItem
             {
                 Environment = "env",
-                HomeAccountId = MsalTestConstants.HomeAccountId,
+                HomeAccountId = TestConstants.HomeAccountId,
                 TenantId = "the_tenant_id",
                 AuthorityType = "authority type",
                 RawClientInfo = string.Empty,
-                LocalAccountId = MsalTestConstants.LocalAccountId,
-                Name = MsalTestConstants.Name,
-                GivenName = MsalTestConstants.GivenName,
-                FamilyName = MsalTestConstants.FamilyName,
-                PreferredUsername = MsalTestConstants.Username
+                LocalAccountId = TestConstants.LocalAccountId,
+                Name = TestConstants.Name,
+                GivenName = TestConstants.GivenName,
+                FamilyName = TestConstants.FamilyName,
+                PreferredUsername = TestConstants.Username
             };
         }
 
@@ -152,9 +152,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 accessor.SaveAccount(item);
             }
 
-            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_1", "1"));
-            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_2", ""));
-            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId2, "env_1", "another_family"));
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(TestConstants.ClientId, "env_1", "1"));
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(TestConstants.ClientId, "env_2", ""));
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(TestConstants.ClientId2, "env_1", "another_family"));
 
             return accessor;
         }
@@ -371,7 +371,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestAppMetadata_SerializeDeserialize()
         {
-            var item = new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env", "1");
+            var item = new MsalAppMetadataCacheItem(TestConstants.ClientId, "env", "1");
             string asJson = item.ToJsonString();
             var item2 = MsalAppMetadataCacheItem.FromJsonString(asJson);
 
@@ -381,7 +381,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestAppMetadata_Supports_AdditionalFields()
         {
-            var item = new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env", "1");
+            var item = new MsalAppMetadataCacheItem(TestConstants.ClientId, "env", "1");
 
             // Add an unknown field into the json
             var asJObject = item.ToJObject();

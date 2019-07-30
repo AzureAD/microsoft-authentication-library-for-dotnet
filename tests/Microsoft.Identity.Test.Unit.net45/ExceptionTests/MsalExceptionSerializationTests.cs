@@ -17,8 +17,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         private const string SomeCorrelationId = "the correlation id";
         private const string SomeResponseBody = "the response body";
         private const string SomeSubError = "the_sub_error";
-
-
+        
         private void SerializeDeserializeAndValidate(MsalException ex, Type expectedType, bool isServiceExceptionDerived)
         {
             string json = ex.ToJsonString();

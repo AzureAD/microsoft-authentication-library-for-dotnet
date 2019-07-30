@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         public async Task ConfidentialClientWithClientSecretTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
+            var secret = keyvault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
 
             var confidentialApp = ConfidentialClientApplicationBuilder
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         public async Task ConfidentialClientWithNoDefaultClaimsTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
+            var secret = keyvault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
             var claims = GetClaims();
 
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         public async Task ConfidentialClientWithDefaultClaimsTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
+            var secret = keyvault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
             var claims = GetClaims(false);
 
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         public async Task ConfidentialClientWithSignedAssertionTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(MsalTestConstants.MsalCCAKeyVaultUri).Value;
+            var secret = keyvault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
             var claims = GetClaims();
 
@@ -231,11 +231,11 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             {
                 DateTime validFrom = DateTime.UtcNow;
                 var nbf = ConvertToTimeT(validFrom);
-                var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(MsalTestConstants.JwtToAadLifetimeInSeconds));
+                var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(TestConstants.JwtToAadLifetimeInSeconds));
 
                 return new Dictionary<string, string>()
                 {
-                { "aud", MsalTestConstants.ClientCredentialAudience },
+                { "aud", TestConstants.ClientCredentialAudience },
                 { "exp", exp.ToString(CultureInfo.InvariantCulture) },
                 { "iss", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
                 { "jti", Guid.NewGuid().ToString() },
@@ -260,14 +260,14 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
 #else
             var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
 #endif
-            var jwtToken = new JsonWebToken(manager, clientId, MsalTestConstants.ClientCredentialAudience, claims);
+            var jwtToken = new JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
             return jwtToken.Sign(clientCredential, false);
         }
 
         private static X509Certificate2 GetCertificate()
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(MsalTestConstants.AutomationTestThumbprint);
+            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(TestConstants.AutomationTestThumbprint);
             if (cert == null)
             {
                 throw new InvalidOperationException(
@@ -314,14 +314,14 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             var user = labResponse.User;
 
             var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(MsalTestConstants.MsalOBOKeyVaultUri).Value;
+            var secret = keyvault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
             //TODO: acquire scenario specific client ids from the lab resonse
             var publicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
             var oboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID).WithAuthority(MsalTestConstants.AuthorityOrganizationsTenant).WithRedirectUri("urn:ietf:wg:oauth:2.0:oob").Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID).WithAuthority(TestConstants.AuthorityOrganizationsTenant).WithRedirectUri("urn:ietf:wg:oauth:2.0:oob").Build();
 
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, securePassword)

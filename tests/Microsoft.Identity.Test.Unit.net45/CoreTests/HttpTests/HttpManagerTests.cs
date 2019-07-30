@@ -8,8 +8,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
@@ -27,15 +25,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [TestCategory("HttpManagerTests")]
         public void TestSendPostNullHeaderNullBody()
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityHomeTenant);
 
                 var response = httpManager.SendPostAsync(
-                    new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
+                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
                     null,
                     (IDictionary<string, string>)null,
                     null).Result;
@@ -47,7 +44,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [TestCategory("HttpManagerTests")]
         public void TestSendPostNoFailure()
         {
             var bodyParameters = new Dictionary<string, string>
@@ -63,10 +59,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant, bodyParameters, queryParams);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityHomeTenant, bodyParameters, queryParams);
 
                 var response = httpManager.SendPostAsync(
-                    new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
+                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
                     queryParams,
                     bodyParameters,
                     null).Result;
@@ -78,7 +74,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [TestCategory("HttpManagerTests")]
         public void TestSendGetNoFailure()
         {
             var queryParams = new Dictionary<string, string>
@@ -92,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddSuccessTokenResponseMockHandlerForGet(queryParameters: queryParams);
 
                 var response = httpManager.SendGetAsync(
-                    new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
+                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                     queryParams,
                     null).Result;
 
@@ -103,7 +98,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [TestCategory("HttpManagerTests")]
         public async Task TestSendGetWithHttp500TypeFailureAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -114,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 try
                 {
                     var msalHttpResponse = await httpManager.SendGetAsync(
-                                                                new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);
@@ -129,7 +123,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [TestCategory("HttpManagerTests")]
         public async Task TestSendGetWithHttp500TypeFailure2Async()
         {
             using (var httpManager = new MockHttpManager())
@@ -138,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.BadGateway);
 
                 var msalHttpResponse = await httpManager.SendPostForceResponseAsync(
-                                                            new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                            new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                             new Dictionary<string, string>(),
                                                             new StringContent("body"),
                                                             Substitute.For<ICoreLogger>())
@@ -149,7 +142,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [TestCategory("HttpManagerTests")]
         public async Task TestSendPostWithHttp500TypeFailureAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -160,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 try
                 {
                     var msalHttpResponse = await httpManager.SendPostAsync(
-                                                                new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 (IDictionary<string, string>)null,
                                                                Substitute.For<ICoreLogger>())
@@ -176,7 +168,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [TestCategory("HttpManagerTests")]
         public async Task TestSendGetWithRetryOnTimeoutFailureAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -187,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 try
                 {
                     var msalHttpResponse = await httpManager.SendGetAsync(
-                                                                new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);
@@ -203,7 +194,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [TestCategory("HttpManagerTests")]
         public async Task TestSendPostWithRetryOnTimeoutFailureAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -214,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 try
                 {
                     var msalHttpResponse = await httpManager.SendPostAsync(
-                                                                new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 new Dictionary<string, string>(),
                                                                 Substitute.For<ICoreLogger>())

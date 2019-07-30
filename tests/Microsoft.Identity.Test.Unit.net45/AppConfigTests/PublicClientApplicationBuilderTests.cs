@@ -19,21 +19,21 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .Build();
-            Assert.AreEqual(MsalTestConstants.ClientId, pca.AppConfig.ClientId);
+            Assert.AreEqual(TestConstants.ClientId, pca.AppConfig.ClientId);
             Assert.IsNotNull(pca.UserTokenCache);
 
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, pca.AppConfig.LogLevel);
-            Assert.AreEqual(MsalTestConstants.ClientId, pca.AppConfig.ClientId);
+            Assert.AreEqual(TestConstants.ClientId, pca.AppConfig.ClientId);
             Assert.IsNotNull(pca.AppConfig.ClientName);
             Assert.IsNotNull(pca.AppConfig.ClientVersion);
             Assert.IsFalse(pca.AppConfig.EnablePiiLogging);
             Assert.IsNull(pca.AppConfig.HttpClientFactory);
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(pca.AppConfig.LoggingCallback);
-            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
+            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
             Assert.IsNull(pca.AppConfig.TenantId);
             Assert.IsNull(pca.AppConfig.TelemetryConfig);
             Assert.IsNull(pca.AppConfig.ParentActivityOrWindowFunc);
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_ClientIdOverride()
         {
             const string ClientId = "7b94cb0c-3744-4e6e-908b-ae10368b765d";
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithClientId(ClientId)
                                                     .Build();
             Assert.AreEqual(ClientId, pca.AppConfig.ClientId);
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string ClientName = "my client name";
             const string ClientVersion = "1.2.3.4-prerelease";
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithClientName(ClientName)
                                                     .WithClientVersion(ClientVersion)
                                                     .Build();
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithDebugLoggingCallback()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithDebugLoggingCallback(LogLevel.Verbose, true, true)
                                                     .Build();
             Assert.IsNotNull(pca.AppConfig.LoggingCallback);
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Ensure that values in the options are not reset to defaults when not sent into WithLogging
             var options = new PublicClientApplicationOptions
             {
-                ClientId = MsalTestConstants.ClientId,
+                ClientId = TestConstants.ClientId,
                 LogLevel = LogLevel.Error,
                 EnablePiiLogging = true,
                 IsDefaultPlatformLoggingEnabled = true
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Ensure that values in the options are reset to new values when sent into WithLogging
             var options = new PublicClientApplicationOptions
             {
-                ClientId = MsalTestConstants.ClientId,
+                ClientId = TestConstants.ClientId,
                 LogLevel = LogLevel.Error,
                 EnablePiiLogging = false,
                 IsDefaultPlatformLoggingEnabled = true
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             IntPtr ownerPtr = new IntPtr(23478);
 
             var pca = PublicClientApplicationBuilder
-                .Create(MsalTestConstants.ClientId)
+                .Create(TestConstants.ClientId)
                 .WithParentActivityOrWindow(() => ownerPtr)
                 .Build();
 
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithValidInstanceDicoveryMetadata()
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                    .WithInstanceDicoveryMetadata(instanceMetadataJson)
                                                    .Build();
 
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_InstanceMetadata_ValidateAuthority_MutuallyExclusive()
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
-            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDicoveryMetadata(instanceMetadataJson)
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_BadInstanceMetadata()
         {
-            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                   .WithInstanceDicoveryMetadata("{bad_json_metadata")
                                                   .Build());
 
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithHttpClientFactory()
         {
             var httpClientFactory = NSubstitute.Substitute.For<IMsalHttpClientFactory>();
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithHttpClientFactory(httpClientFactory)
                                                     .Build();
             Assert.AreEqual(httpClientFactory, pca.AppConfig.HttpClientFactory);
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithLogging()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithLogging((level, message, pii) => { }, LogLevel.Verbose, true, true)
                                                     .Build();
 
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithRedirectUri()
         {
             const string RedirectUri = "http://some_redirect_uri/";
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithRedirectUri(RedirectUri)
                                                     .Build();
 
@@ -210,37 +210,37 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithNullRedirectUri()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithRedirectUri(null)
                                                     .Build();
 
-            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
+            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
         }
 
         [TestMethod]
         public void TestConstructor_WithEmptyRedirectUri()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithRedirectUri(string.Empty)
                                                     .Build();
 
-            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
+            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
         }
 
         [TestMethod]
         public void TestConstructor_WithWhitespaceRedirectUri()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithRedirectUri("    ")
                                                     .Build();
 
-            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
+            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
         }
 
         [TestMethod]
         public void TestConstructor_WithConstantsDefaultRedirectUri()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithRedirectUri(Constants.DefaultRedirectUri)
                                                     .Build();
 
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithTenantId()
         {
             const string TenantId = "a_tenant id";
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithTenantId(TenantId)
                                                     .Build();
 
@@ -265,11 +265,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 Instance = "https://login.microsoftonline.com",
                 TenantId = "organizations",
-                ClientId = MsalTestConstants.ClientId
+                ClientId = TestConstants.ClientId
             };
             var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
                                                     .Build();
-            Assert.AreEqual(MsalTestConstants.AuthorityOrganizationsTenant, pca.Authority);
+            Assert.AreEqual(TestConstants.AuthorityOrganizationsTenant, pca.Authority);
         }
 
         [TestMethod]
@@ -279,11 +279,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 AzureCloudInstance = AzureCloudInstance.AzurePublic,
                 AadAuthorityAudience = AadAuthorityAudience.AzureAdMultipleOrgs,
-                ClientId = MsalTestConstants.ClientId
+                ClientId = TestConstants.ClientId
             };
             var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
                                                     .Build();
-            Assert.AreEqual(MsalTestConstants.AuthorityOrganizationsTenant, pca.Authority);
+            Assert.AreEqual(TestConstants.AuthorityOrganizationsTenant, pca.Authority);
         }
 
         [TestMethod]
@@ -293,7 +293,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 AzureCloudInstance = AzureCloudInstance.AzurePublic,
                 AadAuthorityAudience = AadAuthorityAudience.AzureAdMyOrg,
-                ClientId = MsalTestConstants.ClientId
+                ClientId = TestConstants.ClientId
             };
 
             try
@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 AzureCloudInstance = AzureCloudInstance.AzurePublic,
                 AadAuthorityAudience = AadAuthorityAudience.AzureAdMyOrg,
                 TenantId = tenantId,
-                ClientId = MsalTestConstants.ClientId
+                ClientId = TestConstants.ClientId
             };
 
             var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
@@ -328,8 +328,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [DataTestMethod]
-        [DataRow(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdMultipleOrgs, MsalTestConstants.AuthorityOrganizationsTenant, DisplayName = "AzurePublic + AzureAdMultipleOrgs")]
-        [DataRow(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, MsalTestConstants.AuthorityCommonTenant, DisplayName = "AzurePublic + AzureAdAndPersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdMultipleOrgs, TestConstants.AuthorityOrganizationsTenant, DisplayName = "AzurePublic + AzureAdMultipleOrgs")]
+        [DataRow(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, TestConstants.AuthorityCommonTenant, DisplayName = "AzurePublic + AzureAdAndPersonalMicrosoftAccount")]
         [DataRow(AzureCloudInstance.AzurePublic, AadAuthorityAudience.PersonalMicrosoftAccount, "https://login.microsoftonline.com/consumers/", DisplayName = "AzurePublic + PersonalMicrosoftAccount")]
         [DataRow(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, "https://login.chinacloudapi.cn/organizations/", DisplayName = "AzureChina + AzureAdMultipleOrgs")]
         [DataRow(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, "https://login.chinacloudapi.cn/common/", DisplayName = "AzureChina + AzureAdAndPersonalMicrosoftAccount")]
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 AzureCloudInstance = cloudInstance,
                 AadAuthorityAudience = audience,
-                ClientId = MsalTestConstants.ClientId
+                ClientId = TestConstants.ClientId
             };
             var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
                                                     .Build();
@@ -356,12 +356,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             IPublicClientApplication app;
 
             // No AAD Authority
-            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                 .Build();
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
 
             // Azure Cloud Instance + AAD Authority Audience
-            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                 .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual("https://login.chinacloudapi.cn/organizations/", app.Authority);
 
             // Azure Cloud Instance + common
-            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                 .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     "common")
@@ -377,7 +377,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual("https://login.chinacloudapi.cn/common/", app.Authority);
 
             // Azure Cloud Instance + consumers
-            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                 .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     "consumers")
@@ -385,7 +385,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual("https://login.chinacloudapi.cn/consumers/", app.Authority);
 
             // Azure Cloud Instance + domain
-            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                 .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     "contoso.com")
@@ -394,7 +394,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + tenantId(GUID)
             Guid tenantId = Guid.NewGuid();
-            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                 .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     tenantId)
@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + tenantId(string)
             tenantId = Guid.NewGuid();
-            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                 .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     tenantId.ToString())
@@ -416,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             try
             {
-                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                     .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
                                                     .WithTenantId("contoso.com")
                                                     .Build();
@@ -434,7 +434,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             try
             {
-                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority("https://login.microsoftonline.fr")
                                                         .Build();
                 Assert.Fail("Should not reach here, exception should be thrown");
@@ -451,7 +451,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             try
             {
-                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithTelemetry((List<Dictionary<string, string>> events) => { })
                     .WithTelemetry(new TelemetryConfig())
                     .Build();
@@ -472,7 +472,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 SessionId = "some session id"
             };
 
-            var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+            var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithTelemetry(telemetryConfig)
                 .Build();
 

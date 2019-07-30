@@ -121,8 +121,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private static void CreateFamilyApps(LabResponse labResponse, string cacheFilePath, out IPublicClientApplication pca_fam1, out IPublicClientApplication pca_fam2, out IPublicClientApplication pca_nonFam)
         {
             var keyvault = new KeyVaultSecretsProvider();
-            var clientId1 = keyvault.GetSecret(MsalTestConstants.FociApp1).Value;
-            var clientId2 = keyvault.GetSecret(MsalTestConstants.FociApp2).Value;
+            var clientId1 = keyvault.GetSecret(TestConstants.FociApp1).Value;
+            var clientId2 = keyvault.GetSecret(TestConstants.FociApp2).Value;
 
             pca_fam1 = PublicClientApplicationBuilder
                .Create(clientId1)

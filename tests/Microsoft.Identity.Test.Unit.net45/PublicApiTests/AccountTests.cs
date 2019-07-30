@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     "login.microsoftonline.de",
                     StringComparison.InvariantCulture))
                 {
-                    obj["environment"] = new Uri(MsalTestConstants.AuthorityNotKnownTenanted).Host;
+                    obj["environment"] = new Uri(TestConstants.AuthorityNotKnownTenanted).Host;
                 }
             }
 
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     "login.microsoftonline.de",
                     StringComparison.InvariantCulture))
                 {
-                    obj["environment"] = new Uri(MsalTestConstants.AuthorityNotKnownTenanted).Host;
+                    obj["environment"] = new Uri(TestConstants.AuthorityNotKnownTenanted).Host;
                 }
             }
 
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
@@ -220,10 +220,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, accounts.Count());
 
                 var atItem = new MsalAccessTokenCacheItem(
-                    MsalTestConstants.ProductionPrefCacheEnvironment,
-                    MsalTestConstants.ClientId,
-                    MsalTestConstants.Scope.AsSingleString(),
-                    MsalTestConstants.Utid,
+                    TestConstants.ProductionPrefCacheEnvironment,
+                    TestConstants.ClientId,
+                    TestConstants.s_scope.AsSingleString(),
+                    TestConstants.Utid,
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
@@ -235,24 +235,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // another cache entry for different uid. user count should be 2.
 
                 MsalRefreshTokenCacheItem rtItem = new MsalRefreshTokenCacheItem(
-                    MsalTestConstants.ProductionPrefCacheEnvironment,
-                    MsalTestConstants.ClientId,
+                    TestConstants.ProductionPrefCacheEnvironment,
+                    TestConstants.ClientId,
                     "someRT",
                     MockHelpers.CreateClientInfo("uId1", "uTId1"));
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
 
                 MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
-                    MsalTestConstants.ProductionPrefCacheEnvironment,
-                    MsalTestConstants.ClientId,
-                    MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                    TestConstants.ProductionPrefCacheEnvironment,
+                    TestConstants.ClientId,
+                    MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                     MockHelpers.CreateClientInfo("uId1", "uTId1"),
                     "uTId1");
 
                 app.UserTokenCacheInternal.Accessor.SaveIdToken(idTokenCacheItem);
 
                 MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem(
-                    MsalTestConstants.ProductionPrefCacheEnvironment,
+                    TestConstants.ProductionPrefCacheEnvironment,
                     null,
                     MockHelpers.CreateClientInfo("uId1", "uTId1"),
                     null,
@@ -270,10 +270,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // another cache entry for different environment. user count should still be 2. Sovereign cloud user must not be returned
                 rtItem = new MsalRefreshTokenCacheItem(
-                    MsalTestConstants.SovereignNetworkEnvironment,
-                    MsalTestConstants.ClientId,
+                    TestConstants.SovereignNetworkEnvironment,
+                    TestConstants.ClientId,
                     "someRT",
-                    MockHelpers.CreateClientInfo(MsalTestConstants.Uid + "more1", MsalTestConstants.Utid));
+                    MockHelpers.CreateClientInfo(TestConstants.Uid + "more1", TestConstants.Utid));
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
                 Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
@@ -289,12 +289,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             var tokenCacheHelper = new TokenCacheHelper();
             PublicClientApplication app = PublicClientApplicationBuilder
-                .Create(MsalTestConstants.ClientId)
+                .Create(TestConstants.ClientId)
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
             // Populate with tokens tied to ClientId2
-            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId2);
+            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: TestConstants.ClientId2);
             var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
 
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
@@ -314,7 +314,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
 
             // Populate for clientid2
-            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId);
+            tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: TestConstants.ClientId);
 
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                 expectedAtCount: 4,
@@ -344,7 +344,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void GetAccountsAndSignThemOutTest()
         {
             PublicClientApplication app = PublicClientApplicationBuilder
-                .Create(MsalTestConstants.ClientId)
+                .Create(TestConstants.ClientId)
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
             var tokenCacheHelper = new TokenCacheHelper();

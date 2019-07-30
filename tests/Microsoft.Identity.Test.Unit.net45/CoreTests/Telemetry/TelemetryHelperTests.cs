@@ -47,7 +47,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         }
 
         [TestMethod]
-        [TestCategory("TelemetryHelperTests")]
         public void TestTelemetryHelper()
         {
             using (_telemetryManager.CreateTelemetryHelper(_trackingEvent))
@@ -58,7 +57,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         }
 
         [TestMethod]
-        [TestCategory("TelemetryHelperTests")]
         public void TestTelemetryHelperWithFlush()
         {
             using (_telemetryManager.CreateTelemetryHelper(_trackingEvent))

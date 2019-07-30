@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public async Task TestAcquireTokenInteractiveBuilderAsync()
         {
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
@@ -47,36 +47,36 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public async Task TestAcquireTokenInteractiveBuilderWithAccountAsync()
         {
             var account = Substitute.For<IAccount>();
-            account.Username.Returns(MsalTestConstants.DisplayableId);
+            account.Username.Returns(TestConstants.DisplayableId);
 
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithAccount(account)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
-            _harness.ValidateInteractiveParameters(account, expectedLoginHint: MsalTestConstants.DisplayableId);
+            _harness.ValidateInteractiveParameters(account, expectedLoginHint: TestConstants.DisplayableId);
         }
 
         [TestMethod]
         public async Task TestAcquireTokenInteractiveBuilderWithLoginHintAsync()
         {
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
-                                                         .WithLoginHint(MsalTestConstants.DisplayableId)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
+                                                         .WithLoginHint(TestConstants.DisplayableId)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenInteractive);
-            _harness.ValidateInteractiveParameters(expectedLoginHint: MsalTestConstants.DisplayableId);
+            _harness.ValidateInteractiveParameters(expectedLoginHint: TestConstants.DisplayableId);
         }
 
         [TestMethod]
         public async Task TestAcquireTokenInteractiveBuilderWithAccountAndLoginHintAsync()
         {
             var account = Substitute.For<IAccount>();
-            account.Username.Returns(MsalTestConstants.DisplayableId);
+            account.Username.Returns(TestConstants.DisplayableId);
 
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithAccount(account)
                                                          .WithLoginHint("SomeOtherLoginHint")
                                                          .ExecuteAsync()
@@ -89,8 +89,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public async Task TestAcquireTokenInteractiveBuilderWithPromptAndExtraQueryParametersAsync()
         {
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
-                                                         .WithLoginHint(MsalTestConstants.DisplayableId)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
+                                                         .WithLoginHint(TestConstants.DisplayableId)
                                                          .WithExtraQueryParameters("domain_hint=mydomain.com")
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 ApiEvent.ApiIds.AcquireTokenInteractive,
                 expectedExtraQueryParameters: new Dictionary<string, string> { { "domain_hint", "mydomain.com" } });
             _harness.ValidateInteractiveParameters(
-                expectedLoginHint: MsalTestConstants.DisplayableId);
+                expectedLoginHint: TestConstants.DisplayableId);
         }
 
         [TestMethod]
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             var customWebUi = Substitute.For<ICustomWebUi>();
 
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithCustomWebUi(customWebUi)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             var customWebUi = Substitute.For<ICustomWebUi>();
 
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithUseEmbeddedWebView(false)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public async Task TestAcquireTokenInteractive_Embedded_Async()
         {
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithUseEmbeddedWebView(true)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             var options = new SystemWebViewOptions();
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
 
-                 AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                 AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithSystemWebViewOptions(options)
                                                          .WithUseEmbeddedWebView(true)
                                                          .ExecuteAsync()
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             IntPtr parentWindowIntPtr = new IntPtr(12345);
 
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithParentActivityOrWindow(parentWindowIntPtr)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         {
             IntPtr parentWindowIntPtr = new IntPtr(12345);
 
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithParentActivityOrWindowFunc(() => parentWindowIntPtr)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             IntPtr parentWindowIntPtrFromCallback = new IntPtr(12345);
             IntPtr parentWindowIntPtrSpecific = new IntPtr(98765);
 
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithParentActivityOrWindowFunc(() => parentWindowIntPtrFromCallback)
                                                          .WithParentActivityOrWindow(parentWindowIntPtrSpecific)
                                                          .ExecuteAsync()
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             var customWebUi = Substitute.For<ICustomWebUi>();
 
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                 AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+                 AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithUseEmbeddedWebView(true)
                                                          .ExecuteAsync()
                                                         ).ConfigureAwait(false);
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public async Task TestAcquireTokenInteractive_Options_Async()
         {
             var options = new SystemWebViewOptions();
-            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, MsalTestConstants.Scope)
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithSystemWebViewOptions(options)
                                                          .ExecuteAsync()
                                                          .ConfigureAwait(false);

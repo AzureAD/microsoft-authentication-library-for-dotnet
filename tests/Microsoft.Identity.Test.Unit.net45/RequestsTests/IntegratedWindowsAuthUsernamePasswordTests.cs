@@ -147,17 +147,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         internal MockHttpMessageHandler AddMockResponseForFederatedAccounts(MockHttpManager httpManager)
         {
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+            httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
             MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
             AddMockHandlerMex(httpManager);
             AddMockHandlerWsTrustUserName(httpManager);
-            AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
+            AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
             return realmDiscoveryHandler;
         }
 
         private void AddMockResponseforManagedAccounts(MockHttpManager httpManager)
         {
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
+            httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityOrganizationsTenant);
 
             // user realm discovery
             httpManager.AddMockHandler(
@@ -184,10 +184,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery_ManagedUser(httpManager);
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -196,8 +196,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Act
                 MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
                     async () => await app
-                        .AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
-                        .WithUsername(MsalTestConstants.User.Username)
+                        .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
+                        .WithUsername(TestConstants.s_user.Username)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 // user realm discovery - unknown user type
                 httpManager.AddMockHandler(
@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         }
                     });
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -237,8 +237,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Act
                 MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
                     async () => await app
-                        .AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
-                        .WithUsername(MsalTestConstants.User.Username)
+                        .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
+                        .WithUsername(TestConstants.s_user.Username)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -254,43 +254,43 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task AcquireTokenByIntegratedWindowsAuthTestAsync()
         {
             IDictionary<string, string> extraQueryParamsAndClaims =
-                MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
-            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+                TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
 
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
-                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
+                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
                 mockTokenRequestHttpHandler.ExpectedQueryParams = extraQueryParamsAndClaims;
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(MsalTestConstants.ExtraQueryParams)
+                                                        .WithExtraQueryParameters(TestConstants.s_extraQueryParams)
                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 AuthenticationResult result = await app
-                    .AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
-                                                        .WithClaims(MsalTestConstants.Claims)
-                                                        .WithUsername(MsalTestConstants.User.Username)
+                    .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
+                                                        .WithClaims(TestConstants.Claims)
+                                                        .WithUsername(TestConstants.s_user.Username)
                                                         .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.IsNotNull(result.Account);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessge.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), MsalTestConstants.XClientSku,
-                    "Client info header should contain " + MsalTestConstants.XClientSku,
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), TestConstants.XClientSku,
+                    "Client info header should contain " + TestConstants.XClientSku,
                     StringComparison.OrdinalIgnoreCase);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), MsalTestConstants.XClientVer,
-                    "Client info header should contain " + MsalTestConstants.XClientVer,
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), TestConstants.XClientVer,
+                    "Client info header should contain " + TestConstants.XClientVer,
                     StringComparison.OrdinalIgnoreCase);
             }
         }
@@ -301,14 +301,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task AcquireTokenByIntegratedWindowsAuthInvalidClientTestAsync()
         {
             IDictionary<string, string> extraQueryParamsAndClaims =
-                MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
-            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+                TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
 
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
@@ -320,17 +320,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                        ResponseMessage = MockHelpers.CreateInvalidClientResponseMessage()
                    });
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(MsalTestConstants.ExtraQueryParams)
+                                                        .WithExtraQueryParameters(TestConstants.s_extraQueryParams)
                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                    async () => await app.AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
-                                                        .WithClaims(MsalTestConstants.Claims)
-                                                        .WithUsername(MsalTestConstants.User.Username)
+                    async () => await app.AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
+                                                        .WithClaims(TestConstants.Claims)
+                                                        .WithUsername(TestConstants.s_user.Username)
                                                         .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check inner exception
@@ -352,27 +352,27 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddInstanceDiscoveryMockHandler();
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockResponseForFederatedAccounts(httpManager);
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 AuthenticationResult result = await app.AcquireTokenByUsernamePassword(
-                    MsalTestConstants.Scope,
-                    MsalTestConstants.User.Username,
+                    TestConstants.s_scope,
+                    TestConstants.s_user.Username,
                     _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.IsNotNull(result.Account);
-                Assert.AreEqual(MsalTestConstants.User.Username, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_user.Username, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessge.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), MsalTestConstants.XClientSku,
-                    "Client info header should contain " + MsalTestConstants.XClientSku,
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), TestConstants.XClientSku,
+                    "Client info header should contain " + TestConstants.XClientSku,
                     StringComparison.OrdinalIgnoreCase);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), MsalTestConstants.XClientVer,
-                    "Client info header should contain " + MsalTestConstants.XClientVer,
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), TestConstants.XClientVer,
+                    "Client info header should contain " + TestConstants.XClientVer,
                     StringComparison.OrdinalIgnoreCase);
             }
         }
@@ -384,7 +384,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityOrganizationsTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
 
                 // MEX
@@ -401,7 +401,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         }
                     });
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -410,8 +410,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Call acquire token, Mex parser fails
                 MsalClientException result = await AssertException.TaskThrowsAsync<MsalClientException>(
                     async () => await app.AcquireTokenByUsernamePassword(
-                        MsalTestConstants.Scope,
-                        MsalTestConstants.User.Username,
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
                         _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check exception message
@@ -430,7 +430,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
 
@@ -438,7 +438,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post,
                     "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -447,8 +447,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Call acquire token, endpoint not found
                 MsalClientException result = await AssertException.TaskThrowsAsync<MsalClientException>(
                     async () => await app.AcquireTokenByUsernamePassword(
-                        MsalTestConstants.Scope,
-                        MsalTestConstants.User.Username,
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
                         _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check exception message
@@ -465,14 +465,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
 
                 // MEX
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Get,
                     "https://msft.sts.microsoft.com/adfs/services/trust/mex");
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -481,8 +481,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Call acquire token
                 MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
                     async () => await app.AcquireTokenByUsernamePassword(
-                        MsalTestConstants.Scope,
-                        MsalTestConstants.User.Username,
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
                         _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check inner exception
@@ -501,7 +501,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
 
@@ -509,7 +509,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post,
                     "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -520,8 +520,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Call acquire token
                 MsalClientException result = await AssertException.TaskThrowsAsync<MsalClientException>(
                     async () => await app.AcquireTokenByUsernamePassword(
-                        MsalTestConstants.Scope,
-                        MsalTestConstants.User.Username,
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
                         str).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check inner exception
@@ -540,7 +540,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustUserName(httpManager);
@@ -554,7 +554,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage()
                     });
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -563,8 +563,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Call acquire token
                 MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
                     async () => await app.AcquireTokenByUsernamePassword(
-                        MsalTestConstants.Scope,
-                        MsalTestConstants.User.Username,
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
                         _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check inner exception
@@ -581,7 +581,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 // user realm discovery
                 httpManager.AddMockHandler(
@@ -606,7 +606,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage()
                     });
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -615,8 +615,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Call acquire token
                 MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
                     async () => await app.AcquireTokenByUsernamePassword(
-                        MsalTestConstants.Scope,
-                        MsalTestConstants.User.Username,
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
                         _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check inner exception
@@ -644,26 +644,26 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ExpectedPostDataObject = new Dictionary<string, object>
                         {
                             {"grant_type", "password"},
-                            {"username", MsalTestConstants.User.Username},
+                            {"username", TestConstants.s_user.Username},
                             {"password", _secureString}
                         }
                     });
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
                 AuthenticationResult result = await app.AcquireTokenByUsernamePassword(
-                    MsalTestConstants.Scope,
-                    MsalTestConstants.User.Username,
+                    TestConstants.s_scope,
+                    TestConstants.s_user.Username,
                     _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.IsNotNull(result.Account);
-                Assert.AreEqual(MsalTestConstants.User.Username, result.Account.Username);
+                Assert.AreEqual(TestConstants.s_user.Username, result.Account.Username);
             }
         }
 
@@ -675,7 +675,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddInstanceDiscoveryMockHandler();
                 AddMockResponseforManagedAccounts(httpManager);
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -686,8 +686,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Call acquire token
                 MsalClientException result = await AssertException.TaskThrowsAsync<MsalClientException>(
                     async () => await app.AcquireTokenByUsernamePassword(
-                        MsalTestConstants.Scope,
-                        MsalTestConstants.User.Username,
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
                         str).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check error code
@@ -718,12 +718,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ExpectedPostDataObject = new Dictionary<string, object>
                         {
                             {"grant_type", "password"},
-                            {"username", MsalTestConstants.User.Username},
+                            {"username", TestConstants.s_user.Username},
                             {"password", _secureString}
                         }
                     });
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -732,8 +732,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Call acquire token
                 MsalUiRequiredException result = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
                     () => app.AcquireTokenByUsernamePassword(
-                        MsalTestConstants.Scope,
-                        MsalTestConstants.User.Username,
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
                         str).ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 
                 // Check error code
@@ -750,7 +750,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 // user realm discovery
                 httpManager.AddMockHandler(
@@ -777,7 +777,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ResponseMessage = MockHelpers.CreateInvalidClientResponseMessage()
                     });
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithTelemetry(new TraceTelemetryConfig())
@@ -786,8 +786,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Call acquire token
                 MsalServiceException result = await Assert.ThrowsExceptionAsync<MsalServiceException>(
                     () => app.AcquireTokenByUsernamePassword(
-                        MsalTestConstants.Scope,
-                        MsalTestConstants.User.Username,
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
                         _secureString).ExecuteAsync()).ConfigureAwait(false);
 
                 // Check inner exception

@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             var commonParameters = new AcquireTokenCommonParameters
             {
-                Scopes = scopes ?? MsalTestConstants.Scope,
+                Scopes = scopes ?? TestConstants.s_scope,
                 ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>(),
                 Claims = claims
             };

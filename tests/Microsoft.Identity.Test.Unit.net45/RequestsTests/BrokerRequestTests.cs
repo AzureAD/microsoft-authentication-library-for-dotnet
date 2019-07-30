@@ -3,16 +3,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -22,7 +26,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private BrokerInteractiveRequest _brokerInteractiveRequest;
 
         [TestMethod]
-        [TestCategory("BrokerRequestTests")]
         public void BrokerResponseTest()
         {
             // Arrange
@@ -30,13 +33,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             var response = new MsalTokenResponse
             {
-                IdToken = MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                 AccessToken = "access-token",
                 ClientInfo = MockHelpers.CreateClientInfo(),
                 ExpiresIn = 3599,
                 CorrelationId = "correlation-id",
                 RefreshToken = "refresh-token",
-                Scope = MsalTestConstants.Scope.AsSingleString(),
+                Scope = TestConstants.s_scope.AsSingleString(),
                 TokenType = "Bearer"
             };
 
@@ -50,7 +53,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("BrokerRequestTests")]
         public void BrokerErrorResponseTest()
         {
             CreateBrokerHelper();
@@ -73,7 +75,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("BrokerRequestTests")]
         public void BrokerUnknownErrorResponseTest()
         {
             CreateBrokerHelper();
@@ -96,26 +97,31 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("BrokerRequestTests")]
         public void BrokerInteractiveRequestTest()
         {
-            string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(MsalTestConstants.AuthorityTestTenant));
+            string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(TestConstants.AuthorityTestTenant));
 
             using (var harness = CreateTestHarness())
             {
                 // Arrange
                 var parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityTestTenant,
+                    TestConstants.AuthorityTestTenant,
                     null,
                     null,
                     null,
-                    MsalTestConstants.ExtraQueryParams);
+                    TestConstants.s_extraQueryParams);
 
                 // Act
-                BrokerFactory brokerFactory = new BrokerFactory();
-                BrokerInteractiveRequest brokerInteractiveRequest = new BrokerInteractiveRequest(parameters, null, null, null, brokerFactory.Create(harness.ServiceBundle));
-                Assert.AreEqual(false, brokerInteractiveRequest.Broker.CanInvokeBroker(null));
-                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
+                _brokerInteractiveRequest =
+                    new BrokerInteractiveRequest(
+                        parameters,
+                        null,
+                        harness.ServiceBundle,
+                        null,
+                        broker);
+                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.CanInvokeBroker(null));
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
             }
         }
 
@@ -139,11 +145,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant,
-                    MsalTestConstants.Scope,
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle),
-                    extraQueryParameters: MsalTestConstants.ExtraQueryParams,
-                    claims: MsalTestConstants.Claims);
+                    extraQueryParameters: TestConstants.s_extraQueryParams,
+                    claims: TestConstants.Claims);
 
                 parameters.IsBrokerEnabled = true;
 
@@ -155,8 +161,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     interactiveParameters,
                     new MockWebUI());
 
-                BrokerFactory brokerFactory = new BrokerFactory();
-                _brokerInteractiveRequest = new BrokerInteractiveRequest(parameters, interactiveParameters, harness.ServiceBundle, null, brokerFactory.Create(harness.ServiceBundle));
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
+                _brokerInteractiveRequest =
+                    new BrokerInteractiveRequest(
+                        parameters,
+                        interactiveParameters,
+                        harness.ServiceBundle,
+                        null,
+                        broker);
             }
         }
     }

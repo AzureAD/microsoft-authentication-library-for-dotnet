@@ -44,12 +44,12 @@ namespace Microsoft.Identity.Test.Unit
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "https://{0}/common",
-                        MsalTestConstants.ProductionNotPrefEnvironmentAlias));
+                        TestConstants.ProductionNotPrefEnvironmentAlias));
 
                 httpManager.AddInstanceDiscoveryMockHandler(authorityUri.AbsoluteUri);
 
                 PublicClientApplication app = PublicClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId)
+                    .Create(TestConstants.ClientId)
                           .WithAuthority(authorityUri, true)
                           .WithHttpManager(httpManager)
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
@@ -61,39 +61,39 @@ namespace Microsoft.Identity.Test.Unit
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/v2.0/.well-known/openid-configuration",
-                        MsalTestConstants.ProductionPrefNetworkEnvironment),
+                        TestConstants.ProductionPrefNetworkEnvironment),
                     ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityHomeTenant)
+                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
                 });
 
                 // mock webUi authorization
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"), null, MsalTestConstants.ProductionPrefNetworkEnvironment);
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"), null, TestConstants.ProductionPrefNetworkEnvironment);
 
                 // mock token request
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/home/oauth2/v2.0/token",
-                        MsalTestConstants.ProductionPrefNetworkEnvironment),
+                        TestConstants.ProductionPrefNetworkEnvironment),
                     ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 });
 
-                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope).ExecuteAsync(CancellationToken.None).Result;
+                AuthenticationResult result = app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync(CancellationToken.None).Result;
 
                 // make sure that all cache entities are stored with "preferred_cache" environment
                 // (it is taken from metadata in instance discovery response)
-                await ValidateCacheEntitiesEnvironmentAsync(app.UserTokenCacheInternal, MsalTestConstants.ProductionPrefCacheEnvironment).ConfigureAwait(false);
+                await ValidateCacheEntitiesEnvironmentAsync(app.UserTokenCacheInternal, TestConstants.ProductionPrefCacheEnvironment).ConfigureAwait(false);
 
                 // silent request targeting at, should return at from cache for any environment alias
-                foreach (var envAlias in MsalTestConstants.ProdEnvAliases)
+                foreach (var envAlias in TestConstants.s_prodEnvAliases)
                 {
                     result = await app
                         .AcquireTokenSilent(
-                            MsalTestConstants.Scope,
+                            TestConstants.s_scope,
                             app.GetAccountsAsync().Result.First())
-                        .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid))
+                        .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, TestConstants.Utid))
                         .WithForceRefresh(false)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
@@ -105,20 +105,20 @@ namespace Microsoft.Identity.Test.Unit
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/v2.0/.well-known/openid-configuration",
-                        MsalTestConstants.ProductionPrefNetworkEnvironment, MsalTestConstants.Utid),
+                        TestConstants.ProductionPrefNetworkEnvironment, TestConstants.Utid),
                     ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityUtidTenant)
+                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityUtidTenant)
                 });
 
                 // silent request targeting rt should find rt in cache for authority with any environment alias
-                foreach (var envAlias in MsalTestConstants.ProdEnvAliases)
+                foreach (var envAlias in TestConstants.s_prodEnvAliases)
                 {
                     result = null;
 
                     httpManager.AddMockHandler(new MockHttpMessageHandler()
                     {
                         ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/v2.0/token",
-                            MsalTestConstants.ProductionPrefNetworkEnvironment, MsalTestConstants.Utid),
+                            TestConstants.ProductionPrefNetworkEnvironment, TestConstants.Utid),
                         ExpectedMethod = HttpMethod.Post,
                         ExpectedPostData = new Dictionary<string, string>()
                     {
@@ -132,9 +132,9 @@ namespace Microsoft.Identity.Test.Unit
                     {
                         result = await app
                             .AcquireTokenSilent(
-                                MsalTestConstants.ScopeForAnotherResource,
+                                TestConstants.s_scopeForAnotherResource,
                                 (await app.GetAccountsAsync().ConfigureAwait(false)).First())
-                            .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid))
+                            .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, TestConstants.Utid))
                             .WithForceRefresh(false)
                             .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                     }
