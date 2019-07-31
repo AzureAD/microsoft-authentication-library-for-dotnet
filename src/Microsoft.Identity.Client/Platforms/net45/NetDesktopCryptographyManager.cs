@@ -122,7 +122,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <returns><see cref="RSACryptoServiceProvider"/> initialized with private key from <paramref name="certificate"/></returns>
         private static RSACryptoServiceProvider GetCryptoProviderForSha256(X509Certificate2 certificate)
         {
-            return (RSACryptoServiceProvider) certificate.PrivateKey;
+            // We need to call the other GetCryptoProviderForSha256 method in case certificate.PrivateKey is using
+            // one of the providers that doesn't support SHA256
+            return GetCryptoProviderForSha256((RSACryptoServiceProvider)certificate.PrivateKey);
         }
 
         // Copied from ACS code
