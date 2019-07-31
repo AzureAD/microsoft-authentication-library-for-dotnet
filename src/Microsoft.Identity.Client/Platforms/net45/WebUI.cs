@@ -92,16 +92,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             RequestUri = requestUri;
             CallbackUri = callbackUri;
 
-            ThrowOnNetworkDown();
             return OnAuthenticate();
-        }
-
-        private static void ThrowOnNetworkDown()
-        {
-            if (!NetworkInterface.GetIsNetworkAvailable())
-            {
-                throw new MsalClientException(MsalError.NetworkNotAvailableError, MsalErrorMessage.NetworkNotAvailable);
-            }
         }
 
         protected abstract AuthorizationResult OnAuthenticate();
