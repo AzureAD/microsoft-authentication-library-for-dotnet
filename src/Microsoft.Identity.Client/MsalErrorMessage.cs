@@ -48,7 +48,6 @@ namespace Microsoft.Identity.Client
         public const string MultipleTokensMatched =
             "The cache contains multiple tokens satisfying the requirements. Try to clear token cache";
 
-        public const string NetworkNotAvailable = "The network is down so authentication cannot proceed";
         public const string NoDataFromSTS = "No data received from security token service";
         public const string NullParameterTemplate = "Parameter '{0}' cannot be null";
         public const string ParsingMetadataDocumentFailed = "Parsing WS metadata exchange failed";
