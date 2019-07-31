@@ -38,7 +38,7 @@
             <string>com.companyname.XamarinDev</string>
             <key>CFBundleURLSchemes</key>
             <array>
-                <string>msauth.com.yourcompany.XamarinDev</string>
+                <string>msauth.com.companyname.XamarinDev</string>
             </array>
         </dict>
     </array>
