@@ -801,7 +801,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }
-                catch (MsalClientException exc)
+                catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual("authentication_canceled", exc.ErrorCode);
@@ -810,6 +810,47 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             anEvent => // Expect finding such an event
                                 anEvent[EventBase.EventNameKey].EndsWith("ui_event") &&
                                 anEvent[UiEvent.UserCancelledKey] == "true"));
+                    return;
+                }
+            }
+
+            Assert.Fail("Should not reach here. Exception was not thrown.");
+        }
+
+        [TestMethod]
+        [Description("Test for AcquireToken with user resetting password")]
+        public async Task B2CAcquireTokenWithResetPasswordTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithB2CAuthority(TestConstants.B2CLoginAuthority)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .WithDebugLoggingCallback(logLevel: LogLevel.Verbose)
+                                                                            .BuildConcrete();
+
+                // Interactive call and user wants to reset password
+                var ui = new MockWebUI()
+                {
+                    MockResult = AuthorizationResult.FromUri(TestConstants.B2CLoginAuthority +
+                    "?error=access_denied&error_description=AADB2C90091%3a+The+user+has+cancelled+entering+self-asserted+information.")
+                };
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
+                MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
+
+                try
+                {
+                    AuthenticationResult result = await app
+                        .AcquireTokenInteractive(TestConstants.s_scope)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
+                }
+                catch (MsalServiceException exc)
+                {
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual("access_denied", exc.ErrorCode);
+                    Assert.AreEqual("AADB2C90091: The user has cancelled entering self-asserted information.", exc.Message);
                     return;
                 }
             }
@@ -850,7 +891,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }
-                catch (MsalClientException exc)
+                catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual("access_denied", exc.ErrorCode);
