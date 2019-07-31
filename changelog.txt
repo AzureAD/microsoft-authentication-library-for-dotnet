@@ -1,3 +1,8 @@
+3.0.9
+=============
+Bug Fixes:
+-- ** Set exception on TCS so it is thrown in correct place **.  If an exception is thrown on .NET 45 targets with Interactive login flows in the WebUI, the exception can go uncaught and escape the thread which can cause process level crashes.  This is now properly caught and set onto the TaskCompletionSource for propagation of the error.  [MSAL Issue 1304](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1304)
+
 3.0.8
 =============
 Bug Fixes:
