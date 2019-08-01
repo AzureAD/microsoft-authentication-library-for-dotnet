@@ -407,5 +407,34 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             string selfSignedJwtAudience = resolver.ReplaceNonTenantSpecificValueWithTenant(tenantDiscoveryResponse, tenantId);
             Assert.AreEqual(expectedJwtAudience, selfSignedJwtAudience);
         }
+
+        [TestMethod]
+        public void AuthorityCustomPortTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var customPortAuthority = "https://localhost:5215/common/";
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(customPortAuthority), false)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+                //Ensure that the PublicClientApplication init does not remove the port from the authority
+                Assert.AreEqual(customPortAuthority, app.Authority);
+
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .Result;
+
+                //Ensure that acquiring a token does not remove the port from the authority
+                Assert.AreEqual(customPortAuthority, app.Authority);
+            }
+        }
     }
 }
