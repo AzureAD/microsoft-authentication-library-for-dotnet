@@ -13,6 +13,10 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using System.Security;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Client.UI;
+using System.Threading;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -411,25 +415,31 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void AuthorityCustomPortTest()
         {
+            var customPortAuthority = "https://localhost:5215/common/";
+
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                var customPortAuthority = "https://localhost:5215/common/";
+                harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(customPortAuthority), false)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
+
                 //Ensure that the PublicClientApplication init does not remove the port from the authority
                 Assert.AreEqual(customPortAuthority, app.Authority);
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(customPortAuthority);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customPortAuthority);
+                harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync()
+                    .ExecuteAsync(CancellationToken.None)
                     .Result;
 
                 //Ensure that acquiring a token does not remove the port from the authority

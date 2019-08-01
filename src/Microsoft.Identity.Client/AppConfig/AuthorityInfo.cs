@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(
+                CanonicalAuthority = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(
                     CultureInfo.InvariantCulture,
                     "https://{0}/{1}/",
                     authorityBuilder.Uri.Authority,
