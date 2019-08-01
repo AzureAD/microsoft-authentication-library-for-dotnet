@@ -13,7 +13,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using System.Security;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Client.UI;
 using System.Threading;
