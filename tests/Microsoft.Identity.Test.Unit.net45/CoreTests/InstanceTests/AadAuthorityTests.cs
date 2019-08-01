@@ -412,6 +412,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        //Test for bug #1292 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1292)
         public void AuthorityCustomPortTest()
         {
             var customPortAuthority = "https://localhost:5215/common/";
