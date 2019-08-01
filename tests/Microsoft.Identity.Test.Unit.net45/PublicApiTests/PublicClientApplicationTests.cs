@@ -801,7 +801,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }
-                catch (MsalServiceException exc)
+                catch (MsalClientException exc)
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual("authentication_canceled", exc.ErrorCode);

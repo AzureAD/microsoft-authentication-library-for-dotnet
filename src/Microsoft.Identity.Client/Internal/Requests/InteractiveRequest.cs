@@ -259,6 +259,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     UiRequiredExceptionClassification.PromptNeverFailed);
             }
 
+            if(_authorizationResult.Status == AuthorizationStatus.UserCancel)
+            {
+                throw new MsalClientException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "User cancelled authentication.");
+            }
+
             if (_authorizationResult.Status != AuthorizationStatus.Success)
             {
                 throw new MsalServiceException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unknown error.");
