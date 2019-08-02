@@ -5,7 +5,7 @@ New Features:
 
 Bug Fixes:
 - **MSAL.NET was adding an extra `/` to the authority when using `.WithAuthority(AzureCloudInstance azureCloudInstance, Guid tenantId)`**. This resulted in an MsalServiceException: "AADSTAT9002: Tenant `v2.0` not found..." More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1270).
-- **Starting in MSAL.NET 4.0, a MsalServiceException was thrown instead of a MsalClientException in exceptions coming from the server**. Details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1276).
+- **Starting in MSAL.NET 4.0, a MsalClientException was thrown instead of a MsalServiceException in exceptions coming from the server**. Details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1276).
 - **MSAL.NET required custom error handling when dealing with a network down error**. This was especially problematic on Xamarin iOS and Android. Details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/592).
 - **MSAL.NET was not correctly catching a network down exception**. MSAL.NET now catches the exception and sets it on the correct TaskCompletionSource object. More information [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1304).
 
