@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.UI
                         : null);
             }
 
-
             var result = new AuthorizationResult();
             result.Status = AuthorizationStatus.Success;
 

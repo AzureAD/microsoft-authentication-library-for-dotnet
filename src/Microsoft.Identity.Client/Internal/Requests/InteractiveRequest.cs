@@ -259,11 +259,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     UiRequiredExceptionClassification.PromptNeverFailed);
             }
 
+            if (_authorizationResult.Status == AuthorizationStatus.UserCancel)
+            {
+                ServiceBundle.DefaultLogger.Info(LogMessages.UserCancelledAuthentication);
+                throw new MsalClientException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "User cancelled authentication.");
+            }
+
             if (_authorizationResult.Status != AuthorizationStatus.Success)
             {
-                throw new MsalClientException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unknown error.");
+                ServiceBundle.DefaultLogger.InfoPii(
+                    LogMessages.AuthorizationResultWasNotSuccessful + _authorizationResult.ErrorDescription ?? "Unknown error.", 
+                    LogMessages.AuthorizationResultWasNotSuccessful);
+                throw new MsalServiceException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unknown error.");
             }
         }
+
         internal /* internal for test only */ bool IsBrokerInvocationRequired()
         {
             if (_authorizationResult.Code != null &&
