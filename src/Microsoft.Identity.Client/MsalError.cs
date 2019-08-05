@@ -470,6 +470,7 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation [App development]</para> In the application you could either inform the user that there are network issues
         /// or retry later
         /// </summary>
+        [Obsolete("MSAL no longer throws this error - it will allow the HttpClient exceptions to propagate. App developers may write their own logic for detecting access to the network issues, for example by using Xamarin.Essentials. ")]
         public const string NetworkNotAvailableError = "network_not_available";
 
         /// <summary>

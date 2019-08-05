@@ -64,6 +64,10 @@
     {
 	    "file": "OAuthConstants.cs", 
       "_justification": "RFC well-known strings such as GET param names. No param values or secrets here."
-	  }
+	},
+	{
+	"file": "TestConstants.cs", 
+      "_justification": "A few of the constants have the value: `secret` which triggers a CredScan issue."
+	}
   ]
 }

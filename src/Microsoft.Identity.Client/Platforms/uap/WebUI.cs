@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
 
-            ThrowOnNetworkDown();
             if (_silentMode)
             {
                 options |= WebAuthenticationOptions.SilentMode;
@@ -77,25 +76,12 @@ namespace Microsoft.Identity.Client.Platforms.uap
                     ex);
             }
 
-            AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, requestContext);
+            AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult);
 
             return result;
         }
 
-        private void ThrowOnNetworkDown()
-        {
-            var profile = NetworkInformation.GetInternetConnectionProfile();
-            var isConnected = (profile != null
-                               && profile.GetNetworkConnectivityLevel() ==
-                               NetworkConnectivityLevel.InternetAccess);
-            if (!isConnected)
-            {
-                throw new MsalClientException(MsalError.NetworkNotAvailableError, MsalErrorMessage.NetworkNotAvailable);
-            }
-        }
-
-        private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult,
-            RequestContext requestContext)
+        private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult)
         {
             AuthorizationResult result;
             switch (webAuthenticationResult.ResponseStatus)

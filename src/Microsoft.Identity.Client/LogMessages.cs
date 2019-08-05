@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Client
         public const string CanInvokeBrokerAcquireTokenWithBroker = "Can invoke broker. Will attempt to acquire token with broker. ";
         public const string AuthenticationWithBrokerDidNotSucceed = "Broker authentication did not succeed, or the broker install failed. " +
             "See https://aka.ms/msal-net-brokers for more information. ";
+        public const string UserCancelledAuthentication = "Authorization result status returned user cancelled authentication. ";
+        public const string AuthorizationResultWasNotSuccessful = "Authorization result was not successful. See error message for more details. ";
 
         public static string ErrorReturnedInBrokerResponse(string error)
         {

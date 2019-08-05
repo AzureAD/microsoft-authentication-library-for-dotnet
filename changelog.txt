@@ -1,9 +1,20 @@
+4.3.0
+=============
+New Features: 
+- **Broker support for Xamarin iOS**. MSAL.NET now supports brokered authentication with Xamarin iOS. For details see https:aka.ms/msal-net-brokers, along with code snippets, and more details in the [4.3 release blog post](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.3#broker-support-on-xamarinios). For help migrating from ADAL.NET using iOS broker to MSAL.NET using iOS broker, see [this page on migration](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/How-to-migrate-from-using-iOS-Broker-on-ADAL.NET-to-MSAL.NET).
+
+Bug Fixes:
+- **MSAL.NET was adding an extra `/` to the authority when using `.WithAuthority(AzureCloudInstance azureCloudInstance, Guid tenantId)`**. This resulted in an MsalServiceException: "AADSTAT9002: Tenant `v2.0` not found..." More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1270).
+- **Starting in MSAL.NET 4.0, a MsalClientException was thrown instead of a MsalServiceException in exceptions coming from the server**. Details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1276).
+- **MSAL.NET required custom error handling when dealing with a network down error**. This was especially problematic on Xamarin iOS and Android. Details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/592).
+- **MSAL.NET was not correctly catching a network down exception**. MSAL.NET now catches the exception and sets it on the correct TaskCompletionSource object. More information [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1304).
+
 4.2.1
 =============
 Bug Fixes:
 
-- ** Fixed API availability of WithParentActivityOrWindow on ios/android/windows/mac.  See [this item](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1095)
-- ** Fixed System browser not on by default in iOS and Android.  See [this item](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1285)
+- **Fixed API availability of WithParentActivityOrWindow on ios/android/windows/mac**.  See [this item](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1095)
+- **Fixed System browser not on by default in iOS and Android**.  See [this item](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1285)
 
 4.2.0
 =============
