@@ -35,11 +35,23 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             string uniqueId = string.Empty;
 
-            // TokenExpiresOn is seconds since January 1, 1601 00:00:00 (Gregorian calendar)
-            long tokenExpiresOn = long.Parse(tokenResponse.Properties["TokenExpiresOn"], CultureInfo.InvariantCulture);
-            DateTime expiresOn = new DateTime(1601, 1, 1).AddSeconds(tokenExpiresOn);
+            // TODO(WAM): since we don't get these values from both MSA and AAD (both are only in AAD),
+            // should we just NOT pull them out and have a consistent WAM experience that these are not returned?
 
-            string tenantId = tokenResponse.Properties["TenantId"];
+            DateTime expiresOn = DateTime.UtcNow;
+
+            if (tokenResponse.Properties.ContainsKey("TokenExpiresOn"))
+            {
+                // TokenExpiresOn is seconds since January 1, 1601 00:00:00 (Gregorian calendar)
+                long tokenExpiresOn = long.Parse(tokenResponse.Properties["TokenExpiresOn"], CultureInfo.InvariantCulture);
+                expiresOn = new DateTime(1601, 1, 1).AddSeconds(tokenExpiresOn);
+            }
+
+            string tenantId = string.Empty;
+            if (tokenResponse.Properties.ContainsKey("TenantId"))
+            {
+                tenantId = tokenResponse.Properties["TenantId"];
+            }
             var account = WamUtils.CreateMsalAccountFromWebAccount(webAccount);            
             string idToken = string.Empty;
             var returnedScopes = new List<string>();
@@ -100,14 +112,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             }
 
             request.CorrelationId = commonParameters.CorrelationId.ToString("D");
-            
-            // TODO(WAM): verify with server team that this is the proper value
-            request.Properties["api_version"] = "2.0";
 
-            // Since we've set api_version=2.0, we can send in scopes in the scope parameter since the WAM providers are now set to v2 protocol and token semantics.
+            // TODO(WAM): verify with server team that this is the proper value
+            request.Properties["api-version"] = "2.0";
+
+            // Since we've set api-version=2.0, we can send in scopes in the scope parameter since the WAM providers are now set to v2 protocol and token semantics.
             // Therefore we don't need the resource parameter.
-            // TODO(WAM): Update (7/29).  Apparently we _do_ have to have this.  So need to figure out how to get this resource URL out of the MSAL request.
-            request.Properties["resource"] = "https://graph.microsoft.com";  
+            // TODO(WAM): Update (7/29).  Apparently we _do_ have to have this, but ONLY for MSA/consumers.  So need to figure out how to get this resource URL out of the MSAL request.
+            if (provider.Authority == "consumers")
+            {
+                request.Properties["resource"] = "https://graph.microsoft.com";
+            }
 
             if (Windows.Foundation.Metadata.ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 6))
             {
@@ -132,14 +147,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 command = await wamAccountHandler.ExecuteAsync().ConfigureAwait(true);
             }
 
-            if (command == null)
-            {
-                // TODO(WAM): THROW cancelled??
-            }            
-
             // WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(true);
             //WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(command.WebAccountProvider, interactiveParameters.Account).ConfigureAwait(true);
-            WebTokenRequest request = CreateWebTokenRequest(command.WebAccountProvider, commonParameters, requestContext, forceAuthentication: true);
+            WebTokenRequest request = CreateWebTokenRequest(command.WebAccountProvider, commonParameters, requestContext, forceAuthentication: false);
 
             WebTokenRequestResult result;
 
