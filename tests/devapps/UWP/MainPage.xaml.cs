@@ -24,8 +24,9 @@ namespace UWP
     {
         private readonly IPublicClientApplication _pca;
         // private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
-        private static readonly string s_clientID = "8787cfc0-a723-49fa-99e1-291d58cb6f81"; // todo(wam): DO NOT CHECK THIS IN
-        
+        //private static readonly string s_clientID = "8787cfc0-a723-49fa-99e1-291d58cb6f81"; // todo(wam): DO NOT CHECK THIS IN  this one is AAD only
+        private static readonly string s_clientID = "940b3627-f844-48e3-a56a-87afde85c4a3"; // todo(wam): do not check this in   this one is AAD + MSA
+
         private static readonly string s_authority = "https://login.microsoftonline.com/common"; 
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";

@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
+using Windows.UI.ApplicationSettings;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
@@ -124,13 +125,25 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
-            WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(true);
-            WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(provider, interactiveParameters.Account).ConfigureAwait(true);
-            WebTokenRequest request = CreateWebTokenRequest(provider, commonParameters, requestContext, forceAuthentication: true);
+            WebAccountProviderCommand command = null;
+
+            using (var wamAccountHandler = new WamAccountHandler())
+            {
+                command = await wamAccountHandler.ExecuteAsync().ConfigureAwait(true);
+            }
+
+            if (command == null)
+            {
+                // TODO(WAM): THROW cancelled??
+            }            
+
+            // WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(true);
+            //WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(command.WebAccountProvider, interactiveParameters.Account).ConfigureAwait(true);
+            WebTokenRequest request = CreateWebTokenRequest(command.WebAccountProvider, commonParameters, requestContext, forceAuthentication: true);
 
             WebTokenRequestResult result;
 
-            if (webAccount == null)
+            //if (webAccount == null)
             {
                 if (!string.IsNullOrWhiteSpace(interactiveParameters.LoginHint))
                 {
@@ -139,10 +152,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
                 result = await WebAuthenticationCoreManager.RequestTokenAsync(request);
             }
-            else
-            {
-                result = await WebAuthenticationCoreManager.RequestTokenAsync(request, webAccount);
-            }
+            //else
+            //{
+            //    result = await WebAuthenticationCoreManager.RequestTokenAsync(request, webAccount);
+            //}
 
             return HandleWebTokenRequestResult(result);
         }
