@@ -16,5 +16,6 @@ namespace Microsoft.Identity.Client.Cache
         public const string CredentialTypeOther = "Other";
 
         public const string AppMetadata = "AppMetadata";
+        public const string WamAccountRootKey = "WamAccount";
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
@@ -18,6 +19,8 @@ namespace Microsoft.Identity.Client.Cache
         void SaveAccount(MsalAccountCacheItem item);
 
         void SaveAppMetadata(MsalAppMetadataCacheItem item);
+
+        void SaveWamAccount(MsalWamAccountCacheItem item);
 
         MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey);
 
@@ -46,7 +49,7 @@ namespace Microsoft.Identity.Client.Cache
         IEnumerable<MsalAccountCacheItem> GetAllAccounts();
 
         IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata();
-
+        IEnumerable<MsalWamAccountCacheItem> GetAllWamAccounts();
 
 #if iOS
         void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);

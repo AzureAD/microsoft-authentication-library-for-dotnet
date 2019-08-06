@@ -23,5 +23,10 @@ namespace Microsoft.Identity.Client.Cache
         Task<bool?> IsAppFociMemberAsync(string familyId);
 
         Task<IEnumerable<IAccount>> GetAccountsAsync(string authority);
+
+#if SUPPORTS_WAM
+        Task SaveWamResponseAsync(IAccount account);
+        Task<IEnumerable<IAccount>> GetWamAccountsAsync();
+#endif // SUPPORTS_WAM
     }
 }

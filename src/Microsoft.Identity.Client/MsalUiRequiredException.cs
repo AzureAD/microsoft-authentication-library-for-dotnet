@@ -72,19 +72,29 @@ namespace Microsoft.Identity.Client
             get
             {
                 if (string.Equals(base.SubError, MsalError.BasicAction, StringComparison.OrdinalIgnoreCase))
+                {
                     return UiRequiredExceptionClassification.BasicAction;
+                }
 
                 if (string.Equals(base.SubError, MsalError.AdditionalAction, StringComparison.OrdinalIgnoreCase))
+                {
                     return UiRequiredExceptionClassification.AdditionalAction;
+                }
 
                 if (string.Equals(base.SubError, MsalError.MessageOnly, StringComparison.OrdinalIgnoreCase))
+                {
                     return UiRequiredExceptionClassification.MessageOnly;
+                }
 
                 if (string.Equals(base.SubError, MsalError.ConsentRequired, StringComparison.OrdinalIgnoreCase))
+                {
                     return UiRequiredExceptionClassification.ConsentRequired;
+                }
 
                 if (string.Equals(base.SubError, MsalError.UserPasswordExpired, StringComparison.OrdinalIgnoreCase))
+                {
                     return UiRequiredExceptionClassification.UserPasswordExpired;
+                }
 
                 return _classification;
             }

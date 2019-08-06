@@ -325,6 +325,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             throw new NotImplementedException();
         }
+
+        public void SaveWamAccount(MsalWamAccountCacheItem item) => throw new NotImplementedException();
+        public IEnumerable<MsalWamAccountCacheItem> GetAllWamAccounts() => throw new NotImplementedException();
         #endregion
     }
 }

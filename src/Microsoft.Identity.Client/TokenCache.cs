@@ -261,7 +261,6 @@ namespace Microsoft.Identity.Client
                 : refreshTokens;
         }
 
-
         private IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId)
         {
             var accessTokens = _accessor.GetAllAccessTokens();

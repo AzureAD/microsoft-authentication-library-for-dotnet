@@ -51,6 +51,12 @@ namespace Microsoft.Identity.Client.Cache
                     .ToString()] = appMetadata;
             }
 
+            foreach (var wamAccount in _accessor.GetAllWamAccounts())
+            {
+                cache.WamAccounts[wamAccount.GetKey()
+                    .ToString()] = wamAccount;
+            }
+
             return cache.ToJsonString()
                         .ToByteArray();
         }
@@ -110,6 +116,14 @@ namespace Microsoft.Identity.Client.Cache
                 foreach (var appMetadata in cache.AppMetadata.Values)
                 {
                     _accessor.SaveAppMetadata(appMetadata);
+                }
+            }
+
+            if (cache.WamAccounts != null)
+            {
+                foreach (var wamAccount in cache.WamAccounts.Values)
+                {
+                    _accessor.SaveWamAccount(wamAccount);
                 }
             }
 

@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Cache
         public const string ClientInfo = "client_info";
         public const string FamilyId = "family_id";
         public const string AppMetadata = "appmetadata";
-
+        public const string WamAccountId = "wam_account_id";
 
         // todo(cache): this needs to be added to the spec.  needed for OBO flow on .NET.
         public const string UserAssertionHash = "user_assertion_hash";

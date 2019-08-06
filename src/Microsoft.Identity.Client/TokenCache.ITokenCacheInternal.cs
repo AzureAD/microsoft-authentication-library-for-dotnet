@@ -7,7 +7,6 @@ using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using System;
@@ -15,12 +14,68 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
+using System.Collections;
 
 namespace Microsoft.Identity.Client
 {
     public sealed partial class TokenCache : ITokenCacheInternal
     {
+        #region WAM specific operations
+
+        async Task ITokenCacheInternal.SaveWamResponseAsync(IAccount account)
+        {
+            await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                try
+                {
+                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+                    HasStateChanged = true;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                    await(this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
+                    try
+                    {
+                        await(this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
+                        _accessor.SaveWamAccount(new MsalWamAccountCacheItem(account));
+                    }
+                    finally
+                    {
+                        await(this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
+                    }
+
+                    return;
+                }
+                finally
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    HasStateChanged = false;
+#pragma warning restore CS0618 // Type or member is obsolete
+                }
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+        }
+
+        Task<IEnumerable<IAccount>> ITokenCacheInternal.GetWamAccountsAsync(RequestContext requestContext)
+        {
+            IEnumerable<MsalWamAccountCacheItem> wamAccountCacheItems = _accessor.GetAllWamAccounts();
+
+            var accounts = new List<IAccount>();
+            foreach (var wamAccount in wamAccountCacheItems)
+            {
+                accounts.Add(new WamAccount(wamAccount.WamAccountId, wamAccount.Username, wamAccount.Environment));
+            }
+
+            return Task.FromResult(accounts.AsEnumerable());
+        }
+
+        #endregion // WAM specific operations
+
         async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> ITokenCacheInternal.SaveTokenResponseAsync(
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
@@ -318,7 +373,9 @@ namespace Microsoft.Identity.Client
             string familyId)
         {
             if (requestParams.Authority == null)
+            {
                 return null;
+            }
 
             IEnumerable<MsalRefreshTokenCacheItem> allRts = _accessor.GetAllRefreshTokens();
 
@@ -344,7 +401,9 @@ namespace Microsoft.Identity.Client
             requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (candidateRt != null));
 
             if (candidateRt != null)
+            {
                 return candidateRt;
+            }
 
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
 

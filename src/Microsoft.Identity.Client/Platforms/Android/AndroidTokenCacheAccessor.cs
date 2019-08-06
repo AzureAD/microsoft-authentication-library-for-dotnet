@@ -187,6 +187,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             throw new NotImplementedException();
         }
+
+        public void SaveWamAccount(MsalWamAccountCacheItem item) => throw new NotImplementedException();
+        public IEnumerable<MsalWamAccountCacheItem> GetAllWamAccounts() => throw new NotImplementedException();
         #endregion
     }
 }

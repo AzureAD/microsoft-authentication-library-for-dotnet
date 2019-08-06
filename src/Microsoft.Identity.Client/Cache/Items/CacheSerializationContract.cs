@@ -16,7 +16,9 @@ namespace Microsoft.Identity.Client.Cache.Items
                 StorageJsonValues.CredentialTypeRefreshToken,
                 StorageJsonValues.CredentialTypeIdToken,
                 StorageJsonValues.AccountRootKey,
-                StorageJsonValues.AppMetadata};
+                StorageJsonValues.AppMetadata,
+                StorageJsonValues.WamAccountRootKey,
+        };
 
         public Dictionary<string, MsalAccessTokenCacheItem> AccessTokens { get; set; } =
             new Dictionary<string, MsalAccessTokenCacheItem>();
@@ -32,6 +34,9 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         public Dictionary<string, MsalAppMetadataCacheItem> AppMetadata { get; set; } =
             new Dictionary<string, MsalAppMetadataCacheItem>();
+
+        public Dictionary<string, MsalWamAccountCacheItem> WamAccounts { get; set; } =
+            new Dictionary<string, MsalWamAccountCacheItem>();
 
         public IDictionary<string, JToken> UnknownNodes { get; }
 
@@ -117,6 +122,20 @@ namespace Microsoft.Identity.Client.Cache.Items
                 }
             }
 
+            // Wam Account Info
+            if (root.ContainsKey(StorageJsonValues.WamAccountRootKey))
+            {
+                foreach (var token in root[StorageJsonValues.WamAccountRootKey]
+                    .Values())
+                {
+                    if (token is JObject j)
+                    {
+                        var item = MsalWamAccountCacheItem.FromJObject(j);
+                        contract.WamAccounts[item.GetKey().ToString()] = item;
+                    }
+                }
+            }
+
             return contract;
         }
         private static IDictionary<string, JToken> ExtractUnkownNodes(JObject root)
@@ -174,6 +193,15 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             root[StorageJsonValues.AppMetadata] = appMetadataRoot;
+
+            // WAM Accounts
+            var wamAccountRoot = new JObject();
+            foreach (var kvp in WamAccounts)
+            {
+                wamAccountRoot[kvp.Key] = kvp.Value.ToJObject();
+            }
+
+            root[StorageJsonValues.WamAccountRootKey] = wamAccountRoot;
 
             // Anything else
             foreach (var kvp in UnknownNodes)

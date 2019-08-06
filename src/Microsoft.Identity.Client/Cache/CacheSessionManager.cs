@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
@@ -88,7 +89,22 @@ namespace Microsoft.Identity.Client.Cache
             return await TokenCacheInternal.GetAccountsAsync(authority, _requestParams.RequestContext).ConfigureAwait(false);
         }
 
-        #endregion
+#if SUPPORTS_WAM
+
+        public async Task<IEnumerable<IAccount>> GetWamAccountsAsync()
+        {
+            await RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes.WamAccount).ConfigureAwait(false);
+            return await TokenCacheInternal.GetWamAccountsAsync(_requestParams.RequestContext).ConfigureAwait(false);
+        }
+
+        public async Task SaveWamResponseAsync(IAccount account)
+        {
+            await TokenCacheInternal.SaveWamResponseAsync(account).ConfigureAwait(false);
+        }
+
+#endif // SUPPORTS_WAM
+
+#endregion
 
         private async Task RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes cacheEventType)
         {

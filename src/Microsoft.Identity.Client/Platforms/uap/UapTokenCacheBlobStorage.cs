@@ -5,6 +5,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -54,6 +55,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
                     CreationCollisionOption.ReplaceExisting).AsTask().GetAwaiter().GetResult();
 
                 byte[] blob = args.TokenCache.SerializeMsalV3();
+                string cache = Encoding.UTF8.GetString(blob);
+
                 byte[] encryptedBlob = _cryptographyManager.Encrypt(blob);
 
                 FileIO.WriteBytesAsync(cacheFile, encryptedBlob).GetAwaiter().GetResult();

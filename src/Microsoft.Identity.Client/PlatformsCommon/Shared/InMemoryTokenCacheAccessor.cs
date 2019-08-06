@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using System.Collections;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
@@ -32,6 +33,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private readonly IDictionary<string, MsalAppMetadataCacheItem> _appMetadataDictionary =
            new Dictionary<string, MsalAppMetadataCacheItem>();
 
+        private readonly IDictionary<string, MsalWamAccountCacheItem> _wamAccountCacheDictionary =
+            new Dictionary<string, MsalWamAccountCacheItem>();
+
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             _accessTokenCacheDictionary[item.GetKey().ToString()] = item;
@@ -55,6 +59,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public void SaveAppMetadata(MsalAppMetadataCacheItem item)
         {
             _appMetadataDictionary[item.GetKey().ToString()] = item;
+        }
+
+        public void SaveWamAccount(MsalWamAccountCacheItem item)
+        {
+            _wamAccountCacheDictionary[item.GetKey().ToString()] = item;
         }
 
         public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
@@ -145,6 +154,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return new ReadOnlyCollection<MsalAppMetadataCacheItem>(
                _appMetadataDictionary.Values.ToList());
+        }
+
+        public IEnumerable<MsalWamAccountCacheItem> GetAllWamAccounts()
+        {
+            return new ReadOnlyCollection<MsalWamAccountCacheItem>(
+                _wamAccountCacheDictionary.Values.ToList());
         }
 
         public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)

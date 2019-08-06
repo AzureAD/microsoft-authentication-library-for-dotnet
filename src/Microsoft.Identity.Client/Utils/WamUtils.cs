@@ -51,11 +51,7 @@ namespace Microsoft.Identity.Client.Utils
 
         public static IAccount CreateMsalAccountFromWebAccount(WebAccount webAccount)
         {
-            // TODO(WAM): what should environment be here?
-            // TODO(WAM):  Need to cache additional information in the WAM account for persistence so that we know what provider to load
-            // and we already have the webAccount.Id here.
-            // can we just use:  webAccount.WebAccountProvider.Authority ?
-            return new Account(webAccount.Id, webAccount.UserName, environment: string.Empty);
+            return new WamAccount(webAccount.Id, webAccount.UserName, environment: webAccount.WebAccountProvider.Authority);
         }
     }
 }

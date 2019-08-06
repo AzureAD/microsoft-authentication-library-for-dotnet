@@ -12,7 +12,10 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client
 {
@@ -91,9 +94,25 @@ namespace Microsoft.Identity.Client
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
             RequestContext requestContext = new RequestContext(ServiceBundle, Guid.NewGuid());
-            IEnumerable<IAccount> accounts = await UserTokenCacheInternal.GetAccountsAsync(
-                ServiceBundle.Config.AuthorityInfo.CanonicalAuthority,
-                requestContext).ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
+            if (UserTokenCache == null)
+            {
+                requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
+            }
+            else
+            {
+                // a simple session consisting of a single call
+                CacheSessionManager cacheSessionManager = new CacheSessionManager(
+                    UserTokenCacheInternal,
+                    new AuthenticationRequestParameters(
+                        ServiceBundle,
+                        UserTokenCacheInternal,
+                        new AcquireTokenCommonParameters(),
+                        requestContext),
+                    ServiceBundle.TelemetryManager);
+
+                accounts = await cacheSessionManager.GetWamAccountsAsync().ConfigureAwait(false);
+            }
             return accounts;
         }
 

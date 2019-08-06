@@ -207,7 +207,7 @@ namespace UWP
 
         private async Task DisplayErrorAsync(Exception ex)
         {
-            await DisplayMessageAsync($"{ex.Message}{Environment.NewLine}{ex.StackTrace}").ConfigureAwait(true);
+            await DisplayMessageAsync($"{ex.GetType()} -- {ex.Message}{Environment.NewLine}{ex.StackTrace}").ConfigureAwait(true);
         }
 
         private async Task DisplayResultAsync(AuthenticationResult result)

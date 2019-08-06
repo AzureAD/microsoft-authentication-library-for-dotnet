@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,11 @@ namespace Microsoft.Identity.Client
 
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
+
+        #region WAM specific operations
+        Task SaveWamResponseAsync(IAccount account);
+        Task<IEnumerable<IAccount>> GetWamAccountsAsync(RequestContext requestContext);
+        #endregion // WAM specific operations
 
         #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
