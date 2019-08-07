@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (AuthenticationRequestParameters.IsBrokerEnabled)
+            if (AuthenticationRequestParameters.IsBrokerEnabled) // set by developer
             {
                 _msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
                 VerifyAuthorizationResult();
 
-                if (IsBrokerInvocationRequired())
+                if (IsBrokerInvocationRequired()) // if auth code is prefixed w/msauth, broker is required due to conditional access policies
                 {
                     _msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
                 }
