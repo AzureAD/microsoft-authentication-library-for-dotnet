@@ -184,9 +184,7 @@ namespace XamarinDev
             {
                 acquireResponseTitleLabel.Text = EmptyResult;
 
-                AcquireTokenInteractiveParameterBuilder request;
-
-                request = App.MsalPublicClient.AcquireTokenInteractive(GetScopes())
+                var request = App.MsalPublicClient.AcquireTokenInteractive(GetScopes())
                    .WithPrompt(GetPrompt())
                    .WithParentActivityOrWindow(App.RootViewController)
                    .WithExtraQueryParameters(GetExtraQueryParams());
