@@ -185,10 +185,14 @@ namespace XamarinDev
                 acquireResponseTitleLabel.Text = EmptyResult;
 
                 var request = App.MsalPublicClient.AcquireTokenInteractive(GetScopes())
-                    .WithPrompt(GetPrompt())
-                    .WithParentActivityOrWindow(App.RootViewController)
-                    .WithUseEmbeddedWebView(true)
-                    .WithExtraQueryParameters(GetExtraQueryParams());
+                   .WithPrompt(GetPrompt())
+                   .WithParentActivityOrWindow(App.RootViewController)
+                   .WithExtraQueryParameters(GetExtraQueryParams());
+
+                if (!App.MsalPublicClient.IsSystemWebViewAvailable)
+                {
+                    request.WithUseEmbeddedWebView(true);
+                }
 
                 var result = await request.ExecuteAsync().ConfigureAwait(true);
 
