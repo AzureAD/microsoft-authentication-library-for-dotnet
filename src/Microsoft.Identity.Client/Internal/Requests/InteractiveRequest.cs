@@ -64,26 +64,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-            await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
-            VerifyAuthorizationResult();
-
-            if (AuthenticationRequestParameters.IsBrokerEnabled || IsBrokerInvocationRequired())
+            if (AuthenticationRequestParameters.IsBrokerEnabled)
             {
-                IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker();
-
-                var brokerInteractiveRequest = new BrokerInteractiveRequest(
-                    AuthenticationRequestParameters,
-                    _interactiveParameters,
-                    ServiceBundle,
-                    _authorizationResult,
-                    broker);
-
-                _msalTokenResponse = await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
+                _msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                _msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+                await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+                await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
+                VerifyAuthorizationResult();
+
+                if (IsBrokerInvocationRequired())
+                {
+                    _msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    _msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+                }
             }
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(_msalTokenResponse).ConfigureAwait(false);
@@ -272,6 +270,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogMessages.AuthorizationResultWasNotSuccessful);
                 throw new MsalServiceException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unknown error.");
             }
+        }
+
+        private async Task<MsalTokenResponse> ExecuteBrokerAsync(CancellationToken cancellationToken)
+        {
+            IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker();
+
+            var brokerInteractiveRequest = new BrokerInteractiveRequest(
+                AuthenticationRequestParameters,
+                _interactiveParameters,
+                ServiceBundle,
+                _authorizationResult,
+                broker);
+
+            return await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
         }
 
         internal /* internal for test only */ bool IsBrokerInvocationRequired()
