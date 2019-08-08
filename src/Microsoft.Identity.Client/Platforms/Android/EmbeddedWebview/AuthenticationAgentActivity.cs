@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Webkit;
 using Android.Widget;
@@ -14,7 +15,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {
-    [Activity(Label = "Sign in")]
+    [Activity(Label = "Sign in", ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
     internal class AuthenticationAgentActivity : Activity
     {
         private const string AboutBlankUri = "about:blank";
