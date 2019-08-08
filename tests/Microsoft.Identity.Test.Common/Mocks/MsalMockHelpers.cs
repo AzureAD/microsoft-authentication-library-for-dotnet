@@ -14,20 +14,20 @@ namespace Microsoft.Identity.Test.Common.Mocks
 {
     internal static class MsalMockHelpers
     {
-        public static void ConfigureMockWebUI(IPlatformProxy platformProxy, AuthorizationResult authorizationResult)
+        public static MockWebUI ConfigureMockWebUI(IPlatformProxy platformProxy, AuthorizationResult authorizationResult)
         {
-            ConfigureMockWebUI(platformProxy, authorizationResult, new Dictionary<string, string>());
+            return ConfigureMockWebUI(platformProxy, authorizationResult, new Dictionary<string, string>());
         }
 
-        public static void ConfigureMockWebUI(
+        public static MockWebUI ConfigureMockWebUI(
             IPlatformProxy platformProxy,
             AuthorizationResult authorizationResult,
             Dictionary<string, string> queryParamsToValidate)
         {
-            ConfigureMockWebUI(platformProxy, authorizationResult, queryParamsToValidate, null);
+            return ConfigureMockWebUI(platformProxy, authorizationResult, queryParamsToValidate, null);
         }
 
-        public static void ConfigureMockWebUI(
+        public static MockWebUI ConfigureMockWebUI(
             IPlatformProxy platformProxy,
             AuthorizationResult authorizationResult,
             Dictionary<string, string> queryParamsToValidate,
@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Test.Common.Mocks
             };
 
             ConfigureMockWebUI(platformProxy, webUi);
+
+            return webUi;
         }
 
         public static void ConfigureMockWebUI(IPlatformProxy platformProxy, MockWebUI webUi)
