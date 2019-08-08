@@ -209,6 +209,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.RedirectUri] = redirectUriOverride?.OriginalString ?? AuthenticationRequestParameters.RedirectUri.OriginalString
             };
 
+            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.Claims))
+            {
+                authorizationRequestParameters[OAuth2Parameter.Claims] = AuthenticationRequestParameters.Claims;
+            }
+
             if (!string.IsNullOrWhiteSpace(_interactiveParameters.LoginHint))
             {
                 authorizationRequestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.LoginHint;

@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         [Description("Tests the public interfaces can be mocked")]
         [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
         public void MockPublicClientApplication()
@@ -76,7 +75,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         [Description("Tests the public application interfaces can be mocked to throw MSAL exceptions")]
         [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
         public void MockPublicClientApplication_Exception()
@@ -95,7 +93,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void ConstructorsTest()
         {
             PublicClientApplication app = PublicClientApplicationBuilder
@@ -138,8 +135,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         }
 
+
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public async Task NoStateReturnedTestAsync()
         {
             var receiver = new MyReceiver();
@@ -189,7 +186,42 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
+        public async Task ClaimsAreSentTo_AuthroizationEndpoint_And_TokenEndpoint_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+
+                var mockUi = MsalMockHelpers.ConfigureMockWebUI(
+                     app.ServiceBundle.PlatformProxy,
+                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                mockUi.QueryParamsToValidate = new Dictionary<string, string>{ { OAuth2Parameter.Claims, TestConstants.Claims} };
+                
+
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant, 
+                    queryParameters: mockUi.QueryParamsToValidate);
+
+                AuthenticationResult result = await app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithClaims(TestConstants.Claims)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.Account);
+            }
+        }
+
+        [TestMethod]
         public async Task DifferentStateReturnedTestAsync()
         {
             var receiver = new MyReceiver();
@@ -232,7 +264,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public async Task AcquireTokenNoClientInfoReturnedTestAsync()
         {
             using (var harness = CreateTestHarness())
@@ -278,7 +309,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSameUserTest()
         {
             using (var harness = CreateTestHarness())
@@ -308,7 +338,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
                 Assert.AreEqual(TestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
-                userCacheAccess.AssertAccessCounts(0, 1); 
+                userCacheAccess.AssertAccessCounts(0, 1);
 
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
@@ -431,7 +461,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenAddTwoUsersTest()
         {
             using (var harness = CreateTestHarness())
@@ -498,7 +527,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenDifferentUserReturnedFromServiceTest()
         {
             var receiver = new MyReceiver();
@@ -586,7 +614,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenNullUserPassedInAndNewUserReturnedFromServiceTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -654,7 +681,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public async Task HttpRequestExceptionIsNotSuppressedAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -683,7 +709,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public async Task AuthUiFailedExceptionTestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -728,7 +753,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void GetAccountTests()
         {
             var app = PublicClientApplicationBuilder
@@ -939,7 +963,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.AuthorityTestTenant, authority.AuthorityInfo.CanonicalAuthority);
         }
 
-        [TestCategory("PublicClientApplicationTests")]
         public async Task AcquireTokenSilentNullAccountErrorTestAsync()
         {
             PublicClientApplication app = PublicClientApplicationBuilder
@@ -1031,11 +1054,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
-
-                var ui = new MockWebUI()
-                {
-                    MockResult = AuthorizationResult.FromUri(TestConstants.B2CLoginAuthority + "?code=some-code")
-                };
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
@@ -1273,7 +1291,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenFromAdfs()
         {
             using (var httpManager = new MockHttpManager())
@@ -1318,7 +1335,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenFromAdfsWithNoLoginHintWithAccountInCacheTest()
         {
             using (var httpManager = new MockHttpManager())
@@ -1357,7 +1373,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void EnsurePublicApiSurfaceExistsOnInterface()
         {
             IPublicClientApplication app = PublicClientApplicationBuilder
