@@ -62,6 +62,21 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        public void TestBuildWithNoClientSecretButUsingCert()
+        {
+            var options = new ConfidentialClientApplicationOptions()
+            {
+                ClientId = TestConstants.ClientId,
+                TenantId = "the_tenant_id",
+                Instance = "https://login.microsoftonline.com"
+            };
+
+            var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
+            var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.AuthorityInfo;
+            Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authorityInfo.CanonicalAuthority);
+        }
+
+        [TestMethod]
         public void TestBuildWithInstanceWithTrailingSlash()
         {
             var options = CreateConfidentialClientApplicationOptions();
