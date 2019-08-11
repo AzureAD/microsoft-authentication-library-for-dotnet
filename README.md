@@ -21,7 +21,7 @@ Released     | Nightly
 
 ### Roadmap
 
-MSAL.NET roadmap is available from [Roadmap](wiki#roadmap) in the [Wiki pages](https://aka.ms/msal-net), along with release notes.
+MSAL.NET roadmap is available from [Roadmap](../../wiki#roadmap) in the [Wiki pages](https://aka.ms/msal-net), along with release notes.
 
 ### Support SLA
 
