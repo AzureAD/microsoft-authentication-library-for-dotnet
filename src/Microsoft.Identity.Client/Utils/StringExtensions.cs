@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Utils
@@ -16,5 +17,52 @@ namespace Microsoft.Identity.Client.Utils
         {
             return new UTF8Encoding().GetBytes(stringInput);
         }
+
+        /// <summary>
+        /// Culture aware String.Replace
+        /// </summary>
+        public static string Replace(this string src, string oldValue, string newValue, StringComparison comparison)
+        {
+            if (string.IsNullOrWhiteSpace(src))
+            {
+                return src;
+            }
+
+            if (string.IsNullOrWhiteSpace(oldValue))
+            { 
+                throw new ArgumentException("oldValue cannot be empty"); 
+            }
+
+            // skip the loop entirely if oldValue and newValue are the same
+            if (string.Compare(oldValue, newValue, comparison) == 0)
+            { 
+                return src; 
+            }
+
+            if (oldValue.Length > src.Length)
+            { 
+                return src;
+            }
+
+            var sb = new StringBuilder();
+
+            int previousIndex = 0;
+            int index = src.IndexOf(oldValue, comparison);
+
+            while (index != -1)
+            {
+                sb.Append(src.Substring(previousIndex, index - previousIndex));
+                sb.Append(newValue);
+                index += oldValue.Length;
+
+                previousIndex = index;
+                index = src.IndexOf(oldValue, index, comparison);
+            }
+
+            sb.Append(src.Substring(previousIndex));
+
+            return sb.ToString();
+        }
     }
 }
+

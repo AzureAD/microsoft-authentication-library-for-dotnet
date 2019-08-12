@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
                     endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token", 
+                    endpoints.SelfSignedJwtAudience);
                 Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
             }
         }
@@ -112,7 +113,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
                     endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token", 
+                    endpoints.SelfSignedJwtAudience);
             }
         }
 
@@ -144,23 +146,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", endpoints.TokenEndpoint);
-                Assert.AreEqual("https://login.microsoftonline.com/common/v2.0", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", endpoints.SelfSignedJwtAudience);
             }
-        }
-
-        [TestMethod]
-        public void SelfSignedJwtAudienceEndpointValidationTest()
-        {
-            string common = TestConstants.Common;
-            string tenantSpecific = TestConstants.TenantId;
-            string issuerCommonWithTenant = "https://login.microsoftonline.com/{tenant}/v2.0";
-            string issuerCommonWithTenantId = "https://login.microsoftonline.com/{tenantid}/v2.0";
-            string issuerTenantSpecific = $"https://login.microsoftonline.com/{tenantSpecific}/v2.0";
-            string jwtAudienceEndpointCommon = $"https://login.microsoftonline.com/{common}/v2.0";
-
-            CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(issuerCommonWithTenant, common, jwtAudienceEndpointCommon);
-            CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(issuerCommonWithTenantId, common, jwtAudienceEndpointCommon);
-            CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(issuerTenantSpecific, common, issuerTenantSpecific);
         }
 
         [TestMethod]

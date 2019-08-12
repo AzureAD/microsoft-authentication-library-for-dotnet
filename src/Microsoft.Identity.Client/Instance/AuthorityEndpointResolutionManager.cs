@@ -8,6 +8,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -40,10 +42,6 @@ namespace Microsoft.Identity.Client.Instance
 
             requestContext.Logger.Info(LogMessages.ResolvingAuthorityEndpointsFalse);
 
-            var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
-            string path = authorityUri.AbsolutePath.Substring(1);
-            string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-
             var endpointManager = OpenIdConfigurationEndpointManagerFactory.Create(authorityInfo, _serviceBundle);
 
             string openIdConfigurationEndpoint = await endpointManager.ValidateAuthorityAndGetOpenIdDiscoveryEndpointAsync(
@@ -74,34 +72,41 @@ namespace Microsoft.Identity.Client.Instance
                     MsalError.TenantDiscoveryFailedError,
                     MsalErrorMessage.IssuerWasNotFoundInTheOpenIdConfiguration);
             }
+            
+            var authority = Authority.CreateAuthority(_serviceBundle, authorityInfo.CanonicalAuthority);
+            var tenantId = authority.GetTenantId();
+
+            string authorizationEndpoint = ReplaceTenantToken(edr.AuthorizationEndpoint, tenantId);
+            string tokenEndpoint = ReplaceTenantToken(edr.TokenEndpoint, tenantId);
 
             endpoints = new AuthorityEndpoints(
-                edr.AuthorizationEndpoint.Replace(Constants.Tenant, tenant),
-                edr.TokenEndpoint.Replace(Constants.Tenant, tenant),
-                ReplaceNonTenantSpecificValueWithTenant(edr, tenant));
+                authorizationEndpoint,
+                tokenEndpoint,
+                GetSelfSignedJwtAudience(edr.Issuer, tokenEndpoint, tenantId, authorityInfo.AuthorityType));
 
             Add(authorityInfo, userPrincipalName, endpoints);
             return endpoints;
         }
 
-        internal string ReplaceNonTenantSpecificValueWithTenant(TenantDiscoveryResponse endpoints, string tenant)
+        // Used in WithCertificate to create an audience claim in JWT sent by MSAL to EVO
+        // ADAL uses the token endpoint as audience (tenanted or not)
+        // MSAL had been using the issuer, which does not work when tenantnless. But continue to use issuer for ADFS and B2C.
+        private static string GetSelfSignedJwtAudience(string issuer, string tokenEndpoint, string tenantId, AuthorityType authorityType)
         {
-            string selfSignedJwtAudience = endpoints.Issuer;
+            if (authorityType == AuthorityType.Aad)
+            {
+                return tokenEndpoint;
+            }
 
-            if (selfSignedJwtAudience.Contains(Constants.TenantId))
-            {
-                selfSignedJwtAudience = selfSignedJwtAudience.Replace(Constants.TenantId, tenant);
-                return selfSignedJwtAudience;
-            }
-            else if (selfSignedJwtAudience.Contains(Constants.Tenant))
-            {
-                selfSignedJwtAudience = selfSignedJwtAudience.Replace(Constants.Tenant, tenant);
-                return selfSignedJwtAudience;
-            }
-            else
-            {
-                return selfSignedJwtAudience;
-            }            
+            return ReplaceTenantToken(issuer, tenantId);
+        }
+
+        private static string ReplaceTenantToken(string template, string tenantId)
+        {
+            // some templates use {tenant}, some {tenantid}
+            template = template.Replace(Constants.Tenant, tenantId, StringComparison.OrdinalIgnoreCase);
+            template = template.Replace(Constants.TenantId, tenantId, StringComparison.OrdinalIgnoreCase);
+            return template;
         }
 
         private bool TryGetCacheValue(AuthorityInfo authorityInfo, string userPrincipalName, out AuthorityEndpoints endpoints)
