@@ -62,19 +62,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             return result;
         }
 
-        public void ValidateRedirectUri(Uri redirectUri)
-        {
-            if (!redirectUri.IsLoopback)
-            {
-                throw new ArgumentException("Only loopback redirect uri");
-            }
-
-            if (redirectUri.IsDefaultPort)
-            {
-                throw new ArgumentException("Port required");
-            }
-        }
-
         public static string FindFreeLocalhostRedirectUri()
         {
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
