@@ -21,6 +21,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
 
+        public TestContext TestContext { get; set; }
+
         [TestMethod]
         public async Task AuthorityMigrationAsync()
         {
@@ -29,6 +31,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(labResponse.AppId)
+                .WithLogging((lvl, msg, pii) => TestContext.WriteLine($"{lvl} - {msg}"), LogLevel.Verbose, true)
                 .Build();
 
             Trace.WriteLine("Acquire a token using a not so common authority alias");
@@ -37,7 +40,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                s_scopes,
                 user.Upn,
                 new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
-                .WithAuthority("https://sts.windows.net/" + user.CurrentTenantId + "/")
+                // BugBug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/776308/
+                // sts.windows.net fails when doing instance discovery, e.g.: 
+                // https://sts.windows.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Fsts.windows.net%2Ff645ad92-e38d-4d1a-b510-d1b09a74a8ca%2Foauth2%2Fv2.0%2Fauthorize
+                .WithAuthority("https://login.windows.net/" + user.CurrentTenantId + "/")
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -62,6 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(labResponse.AppId)
                 .WithAuthority("https://bogus.microsoft.com/common")
+                .WithLogging((lvl, msg, pii) => TestContext.WriteLine($"{lvl} - {msg}"), LogLevel.Verbose, true)
                 .Build();
 
             Trace.WriteLine("Acquire a token using a not so common authority alias");
