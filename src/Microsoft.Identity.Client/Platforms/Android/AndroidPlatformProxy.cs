@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
                 // Chrome is difficult to uninstall on an Android device. Most users will disable it, but the package will still
                 // show up, therefore need to check application.Enabled is false
-                return string.IsNullOrEmpty(ChromePackage) || applicationInfo.Enabled;
+                return applicationInfo.Enabled;
             }
             catch (PackageManager.NameNotFoundException)
             {
