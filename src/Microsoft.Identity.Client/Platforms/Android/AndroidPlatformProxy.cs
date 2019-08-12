@@ -201,11 +201,19 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         private static bool IsChromeEnabled()
         {
-            ApplicationInfo applicationInfo = Application.Context.PackageManager.GetApplicationInfo(ChromePackage, 0);
+            try
+            {
+                ApplicationInfo applicationInfo = Application.Context.PackageManager.GetApplicationInfo(ChromePackage, 0);
 
-            // Chrome is difficult to uninstall on an Android device. Most users will disable it, but the package will still
-            // show up, therefore need to check application.Enabled is false
-            return string.IsNullOrEmpty(ChromePackage) || applicationInfo.Enabled;
+                // Chrome is difficult to uninstall on an Android device. Most users will disable it, but the package will still
+                // show up, therefore need to check application.Enabled is false
+                return string.IsNullOrEmpty(ChromePackage) || applicationInfo.Enabled;
+            }
+            catch (PackageManager.NameNotFoundException)
+            {
+                // In case Chrome is actually uninstalled, GetApplicationInfo will throw
+                return false;
+            }
         }
 
         public override bool UseEmbeddedWebViewDefault => false;
