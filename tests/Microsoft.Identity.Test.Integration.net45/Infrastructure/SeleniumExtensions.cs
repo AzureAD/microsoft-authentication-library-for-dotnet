@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
     public static class SeleniumExtensions
     {
         private const int ImplicitTimeoutSeconds = 10;
-        private const int ExplicitTimeoutSeconds = 15;
+        private const int ExplicitTimeoutSeconds = 20;
 
         public static IWebDriver CreateDefaultWebDriver()
         {
@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
-            options.AddArguments("headless");
+            //options.AddArguments("headless");
 
             var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
             if (string.IsNullOrEmpty(env))
@@ -66,6 +66,31 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 #endif
         }
 
+        public static void LogAllUiElements(this IWebDriver driver)
+        {
+            Trace.WriteLine("===== HTML elements Begin =====");
+
+            driver.FindElements(By.XPath("//*[@id]")).ToList().ForEach(el =>
+            {
+                try
+                {
+                    Trace.WriteLine($"Element " +
+                        $"id: {el.GetAttribute("id")} " +
+                        $"type: {el.TagName} " +
+                        $"text: {el.Text} " +
+                        $"displayed: { el.Displayed} " +
+                        $"enabled: { el.Enabled} ");
+                }
+                catch (Exception e)
+                {
+                    Trace.WriteLine("Failed to get details about an element." +
+                        " This can happen if an element becomes stale. " + e.Message);
+                }
+            });
+
+            Trace.WriteLine("===== HTML elements End =====");
+        }
+
         #endregion
 
         public static IWebElement WaitForElementToBeVisibleAndEnabled(this IWebDriver driver, By by)
@@ -73,29 +98,44 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Trace.WriteLine($"[Selenium UI] Waiting for {by.ToString()} to be visible and enabled");
             var webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(ExplicitTimeoutSeconds));
 
-            IWebElement continueBtn = webDriverWait.Until(dr =>
+            try
             {
-                try
+                IWebElement element = webDriverWait.Until(dr =>
                 {
-                    var elementToBeDisplayed = driver.FindElement(by);
-                    if (elementToBeDisplayed.Displayed && elementToBeDisplayed.Enabled)
+                    try
                     {
-                        return elementToBeDisplayed;
+                        var elementToBeDisplayed = driver.FindElement(by);
+
+                        if (elementToBeDisplayed.Displayed && elementToBeDisplayed.Enabled)
+                        {
+                            Trace.WriteLine($"[Selenium UI][DEBUG] Element {by.ToString()} found and is visible");
+                            return elementToBeDisplayed;
+                        }
+
+                        Trace.WriteLine($"[Selenium UI][DEBUG] Element {by.ToString()} found but Displayed={elementToBeDisplayed.Displayed} Enabled={elementToBeDisplayed.Enabled}");
+
+                        return null;
                     }
-                    return null;
-                }
-                catch (StaleElementReferenceException)
-                {
-                    return null;
-                }
-                catch (NoSuchElementException)
-                {
-                    return null;
-                }
-            });
+                    catch (StaleElementReferenceException)
+                    {
+                        Trace.WriteLine($"[Selenium UI][DEBUG] {by.ToString()} is stale");
+                        return null;
+                    }
+                    catch (NoSuchElementException)
+                    {
+                        Trace.WriteLine($"[Selenium UI][DEBUG] {by.ToString()} not found");
+                        return null;
+                    }
+                });
 
-
-            return continueBtn;
+                return element;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                Trace.WriteLine($"[Selenium UI] Element {by.ToString()} has not been found");
+                driver.LogAllUiElements();
+                throw;
+            }
         }
 
         /// <summary>
