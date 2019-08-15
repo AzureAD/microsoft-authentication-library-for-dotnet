@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
@@ -75,12 +76,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             var client = new OAuth2Client(requestContext.Logger, _httpManager, _telemetryManager);
 
             client.AddQueryParameter("api-version", "1.1");
-            client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority.Host, GetTenant(authority)));
+            client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority));
 
             string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authority.Host) ?
                 authority.Host :
                 AadAuthority.DefaultTrustedHost;
-            string instanceDiscoveryEndpoint = BuildInstanceDiscoveryEndpoint(discoveryHost);
+            string instanceDiscoveryEndpoint = BuildInstanceDiscoveryEndpoint(discoveryHost, authority.Port);
 
             requestContext.Logger.InfoPii(
                 $"Fetching instance discovery from the network from host {discoveryHost}. Endpoint {instanceDiscoveryEndpoint}",
@@ -93,9 +94,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return discoveryResponse;
         }
 
-        private static string BuildAuthorizeEndpoint(string host, string tenant)
+        private static string BuildAuthorizeEndpoint(Uri authority)
         {
-            return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/v2.0/authorize", host, tenant);
+            return UriBuilderExtensions.GetHttpsUriWithOptionalPort(authority.Host, GetTenant(authority), "oauth2/v2.0/authorize", authority.Port);
         }
 
         private static string GetTenant(Uri uri)
@@ -104,9 +105,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return uri.AbsolutePath.Split('/')[1];
         }
 
-        private static string BuildInstanceDiscoveryEndpoint(string host)
+        private static string BuildInstanceDiscoveryEndpoint(string host, int port)
         {
-            return string.Format(CultureInfo.InvariantCulture, "https://{0}/common/discovery/instance", host);
+            return UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(CultureInfo.InvariantCulture, "https://{0}/common/discovery/instance", host), port);
         }
     }
 }

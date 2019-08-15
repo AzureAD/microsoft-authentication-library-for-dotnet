@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
@@ -21,12 +22,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager, string authority)
         {
-            string host = new Uri(authority).Host;
-            string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(host)
-                                       ? host
+            Uri authorityURI = new Uri(authority);
+            string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authorityURI.Host)
+                                       ? authorityURI.Host
                                        : AadAuthority.DefaultTrustedHost;
 
-            string discoveryEndpoint = $"https://{discoveryHost}/common/discovery/instance";
+            string discoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort($"https://{discoveryHost}/common/discovery/instance", authorityURI.Port);
 
             httpManager.AddMockHandler(
                 MockHelpers.CreateInstanceDiscoveryMockHandler(discoveryEndpoint));
