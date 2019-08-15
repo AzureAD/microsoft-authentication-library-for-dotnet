@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -23,6 +24,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private const string KeyVaultName = "https://buildautomation.vault.azure.net/";
         private readonly KeyVaultConfiguration _config;
         private KeyVaultClient _keyVaultClient;
+
+        private static InMemoryTokenCache s_staticCache = new InMemoryTokenCache();
 
         /// <summary>Initialize the secrets provider with the "keyVault" configuration section.</summary>
         /// <remarks>
@@ -119,7 +122,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                         .WithCertificate(cert)
                         .Build();
 
-                    TokenCacheHelper.EnableSerialization(confidentialApp.AppTokenCache);
+                    s_staticCache.Bind(confidentialApp.AppTokenCache);
 
                     authResult = await confidentialApp
                         .AcquireTokenForClient(scopes)
@@ -132,7 +135,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                         .WithAuthority(new Uri(authority), true)
                         .WithClientSecret(_config.KeyVaultSecret)
                         .Build();
-                    TokenCacheHelper.EnableSerialization(confidentialApp.AppTokenCache);
+                    s_staticCache.Bind(confidentialApp.AppTokenCache);
 
                     authResult = await confidentialApp
                         .AcquireTokenForClient(scopes)
@@ -144,7 +147,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                         .Create(KeyVaultPublicClientId)
                         .WithAuthority(new Uri(authority), true)
                         .Build();
-                    TokenCacheHelper.EnableSerialization(publicApp.UserTokenCache);
+                    s_staticCache.Bind(publicApp.UserTokenCache);
 
                     authResult = await publicApp
                         .AcquireTokenByIntegratedWindowsAuth(scopes)
@@ -166,48 +169,4 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         }
     }
 
-    static class TokenCacheHelper
-    {
-        /// <summary>
-        /// Path to the token cache
-        /// </summary>
-        public static readonly string CacheFilePath = Path.Combine(Directory.GetCurrentDirectory(), "msalcache.bin3");
-
-        private static readonly object FileLock = new object();
-
-        public static void BeforeAccessNotification(TokenCacheNotificationArgs args)
-        {
-            lock (FileLock)
-            {
-                args.TokenCache.DeserializeMsalV3(File.Exists(CacheFilePath)
-                        ? ProtectedData.Unprotect(File.ReadAllBytes(CacheFilePath),
-                                                 null,
-                                                 DataProtectionScope.CurrentUser)
-                        : null);
-            }
-        }
-
-        public static void AfterAccessNotification(TokenCacheNotificationArgs args)
-        {
-            // if the access operation resulted in a cache update
-            if (args.HasStateChanged)
-            {
-                lock (FileLock)
-                {
-                    // reflect changesgs in the persistent store
-                    File.WriteAllBytes(CacheFilePath,
-                                       ProtectedData.Protect(args.TokenCache.SerializeMsalV3(),
-                                                             null,
-                                                             DataProtectionScope.CurrentUser)
-                                      );
-                }
-            }
-        }
-
-        internal static void EnableSerialization(ITokenCache tokenCache)
-        {
-            tokenCache.SetBeforeAccess(BeforeAccessNotification);
-            tokenCache.SetAfterAccess(AfterAccessNotification);
-        }
-    }
 }
