@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Check that the private key is accessable when signing")]
-        public async Task CheckPrivateKeyCanSignAssertionAsync()
+        public async Task CheckRSAPrivateKeyCanSignAssertionAsync()
         {
             using (var harness = CreateTestHarness())
             {
