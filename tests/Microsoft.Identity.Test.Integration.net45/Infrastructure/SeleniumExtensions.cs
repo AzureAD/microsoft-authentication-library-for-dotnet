@@ -177,6 +177,17 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
                     Trace.WriteLine("Logging in ... Clicking <Next> after username");
                     driver.FindElementById(fields.AADSignInButtonId).Click();
+
+                    try
+                    {
+                        driver.FindElementById(fields.AADSignInButtonId).Click();
+                        Trace.WriteLine("Yes, workaround ok");
+
+                    }
+                    catch
+                    {
+                        Trace.WriteLine("No, workaround failed");
+                    }
                 }
 
                 if (user.FederationProvider == FederationProvider.AdfsV2 && user.IsFederated)
