@@ -272,8 +272,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 SetupMocks(harness.HttpManager);
                 var certificate = new X509Certificate2(
-                    ResourceHelper.GetTestResourceRelativePath("RSATestCertDotNet.pfx"),
-                    TestConstants.DefaultPassword);
+                    ResourceHelper.GetTestResourceRelativePath("RSATestCertDotNet.pfx"));
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
