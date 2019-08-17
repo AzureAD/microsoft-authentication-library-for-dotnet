@@ -21,6 +21,6 @@
     <PackageReference Include="System.Resources.ResourceManager" version="4.0.1" />
     <PackageReference Include="System.Runtime" version="4.1.0" />
     <PackageReference Include="System.Runtime.Extensions" version="4.1.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.0.1-preview" />
+    <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.2.0" />
   </ItemGroup>
 </Project>
