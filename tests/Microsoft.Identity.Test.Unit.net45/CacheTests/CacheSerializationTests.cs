@@ -195,6 +195,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        public void TestSerializeMsalAccessTokenCacheItem_WithRefreshOn()
+        {
+            var item = CreateAccessTokenItem();
+            item.RefreshOnUnixTimestamp = "123456";
+            string asJson = item.ToJsonString();
+            var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
+
+            AssertAccessTokenCacheItemsAreEqual(item, item2);
+        }
+
+        [TestMethod]
         public void TestMsalAccessTokenCacheItem_HasProperJObjectFields()
         {
             var item = CreateAccessTokenItem();
@@ -786,6 +797,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             CollectionAssert.AreEqual(expected.ScopeSet, actual.ScopeSet, nameof(actual.ScopeSet));
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
             Assert.AreEqual(expected.UserAssertionHash, actual.UserAssertionHash, nameof(actual.UserAssertionHash));
+            Assert.AreEqual(expected.RefreshOnUnixTimestamp, actual.RefreshOnUnixTimestamp, nameof(actual.RefreshOnUnixTimestamp));
+            Assert.AreEqual(expected.RefreshOn, actual.RefreshOn, nameof(actual.RefreshOn));
         }
 
         private void AssertRefreshTokenCacheItemsAreEqual(MsalRefreshTokenCacheItem expected, MsalRefreshTokenCacheItem actual)
