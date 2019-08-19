@@ -57,7 +57,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 cache.Accessor.SaveAccessToken(atItem);
                 var item = cache.FindAccessTokenAsync(
-                    harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityTestTenant, TestConstants.s_scope, account: TestConstants.s_user)).Result;
+                    harness.CreateAuthenticationRequestParameters(
+                        TestConstants.AuthorityTestTenant, 
+                        TestConstants.s_scope,
+                        cache,
+                        account: TestConstants.s_user)).Result;
 
                 Assert.IsNotNull(item);
                 Assert.AreEqual(atKey, item.Secret);
@@ -91,6 +95,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var param = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     new SortedSet<string>(),
+                    cache,
                     account: TestConstants.s_user);
 
                 param.Scope.Add("r1/scope1");
@@ -129,6 +134,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var param = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     new SortedSet<string>(),
+                    cache,
                     account: new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null));
 
                 param.Scope.Add(TestConstants.s_scope.First());
@@ -164,6 +170,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var param = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     new SortedSet<string>(),
+                    cache, 
                     account: new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null));
 
                 Assert.IsNull(cache.FindAccessTokenAsync(param).Result);
@@ -194,6 +201,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var param = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     new SortedSet<string>(),
+                    cache,
                     account: new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null));
 
                 var cacheItem = cache.FindAccessTokenAsync(param).Result;
@@ -228,6 +236,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var param = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     new SortedSet<string>(),
+                    cache,
                     account: new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null));
 
                 Assert.IsNull(cache.FindAccessTokenAsync(param).Result);
@@ -254,6 +263,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
+                    cache,
                     account: TestConstants.s_user);
 
                 Assert.IsNotNull(cache.FindRefreshTokenAsync(authParams));
@@ -265,6 +275,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                      harness.CreateAuthenticationRequestParameters(
                                          TestConstants.AuthorityHomeTenant + "more",
                                          TestConstants.s_scope,
+                                         cache,
                                          account: TestConstants.s_user)));
             }
         }
@@ -287,6 +298,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
+                    cache,
                     account: TestConstants.s_user);
 
                 var rt = cache.FindRefreshTokenAsync(authParams).Result;
@@ -320,7 +332,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
-                    TestConstants.s_scope);
+                    TestConstants.s_scope, 
+                    cache);
                 authParams.ClientCredential = TestConstants.s_credentialWithSecret;
                 authParams.IsClientCredentialRequest = true;
 
@@ -393,7 +406,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
-                    TestConstants.s_scope);
+                    TestConstants.s_scope, 
+                    cache);
                 authParams.UserAssertion = new UserAssertion(
                     harness.ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(atKey));
 
@@ -435,7 +449,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
-                    TestConstants.s_scope);
+                    TestConstants.s_scope, 
+                    cache);
                 authParams.UserAssertion = new UserAssertion(atItem.UserAssertionHash + "-random");
 
                 var item = cache.FindAccessTokenAsync(authParams).Result;
@@ -474,7 +489,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
-                    TestConstants.s_scope);
+                    TestConstants.s_scope, 
+                    cache);
                 authParams.UserAssertion = new UserAssertion(atKey);
 
                 ((TokenCache)cache).AfterAccess = AfterAccessNoChangeNotification;
@@ -896,7 +912,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             return new AuthenticationRequestParameters(
                 serviceBundle,
-                null,
+                new TokenCache(serviceBundle),
                 commonParameters,
                 requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid()))
             {
@@ -922,7 +938,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
-                    TestConstants.s_scope,
+                    TestConstants.s_scope, 
+                    cache,
                     account: TestConstants.s_user);
 
                 // Act
@@ -960,6 +977,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
+                    cache,
                     account: TestConstants.s_user);
 
                 cache.Accessor.SaveAppMetadata(

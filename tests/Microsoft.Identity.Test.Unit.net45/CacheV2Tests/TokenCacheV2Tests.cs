@@ -78,6 +78,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                 var cacheManager = new CacheManager(_storageManager, harness.CreateAuthenticationRequestParameters(
                                                         TestConstants.AuthorityTestTenant,
                                                         new SortedSet<string>(MsalCacheV2TestConstants.Scope),
+                                                        new TokenCache(harness.ServiceBundle),
                                                         account: TestConstants.s_user));
 
                 Assert.IsTrue(cacheManager.TryReadCache(out var tokenResponse, out var accountResponse));

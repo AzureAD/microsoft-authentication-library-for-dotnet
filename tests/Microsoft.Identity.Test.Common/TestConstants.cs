@@ -16,7 +16,14 @@ namespace Microsoft.Identity.Test.Unit
 {
     internal static class TestConstants
     {
-        public static readonly SortedSet<string> s_scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
+        public static SortedSet<string> s_scope
+        {
+            get
+            {
+                return new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
+            }
+        }
+
         public const string ScopeStr = "r1/scope1 r1/scope2";
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes

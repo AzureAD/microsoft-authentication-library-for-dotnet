@@ -36,14 +36,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // for the user because the new incoming token may have updated claims
             // like mfa etc.
 
-            if (CacheManager.HasCache)
+            MsalAccessTokenCacheItem msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+            if (msalAccessTokenItem != null)
             {
-                MsalAccessTokenCacheItem msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
-                if (msalAccessTokenItem != null)
-                {
-                    return new AuthenticationResult(msalAccessTokenItem, null, AuthenticationRequestParameters.RequestContext.CorrelationId);
-                }
+                return new AuthenticationResult(msalAccessTokenItem, null, AuthenticationRequestParameters.RequestContext.CorrelationId);
             }
+
 
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);

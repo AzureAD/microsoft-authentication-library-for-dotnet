@@ -14,7 +14,6 @@ namespace Microsoft.Identity.Client.Cache
     internal interface ICacheSessionManager
     {
         ITokenCacheInternal TokenCacheInternal { get; }
-        bool HasCache { get; }
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync();
         Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse);
         Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalIdTokenCacheKey idTokenCacheKey);

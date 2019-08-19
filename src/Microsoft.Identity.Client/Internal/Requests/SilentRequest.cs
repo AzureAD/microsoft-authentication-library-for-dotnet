@@ -85,13 +85,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (!CacheManager.HasCache)
-            {
-                throw new MsalUiRequiredException(
-                    MsalError.TokenCacheNullError,
-                    MsalErrorMessage.NullTokenCacheForSilentError);
-            }
-
             // Look for access token
             if (!_silentParameters.ForceRefresh)
             {
@@ -105,6 +98,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
+            return await RefreshRTAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<AuthenticationResult> RefreshRTAsync(CancellationToken cancellationToken)
+        {
             // Try FOCI first
             MsalTokenResponse msalTokenResponse = await TryGetTokenUsingFociAsync(cancellationToken)
                 .ConfigureAwait(false);

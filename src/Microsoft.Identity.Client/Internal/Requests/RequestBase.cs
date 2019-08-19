@@ -61,17 +61,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             string messageWithPii = string.Format(
                 CultureInfo.InvariantCulture,
-                "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
+                "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t",
                 authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
                 authenticationRequestParameters.ClientId,
-                CacheManager.HasCache,
                 GetType().Name);
 
             string messageWithoutPii = string.Format(
                 CultureInfo.InvariantCulture,
-                "=== Token Acquisition ({1}) started:\n\tCache Provided: {0}",
-                CacheManager.HasCache,
+                "=== Token Acquisition ({0}) started:\n\t",
                 GetType().Name);
 
             if (authenticationRequestParameters.AuthorityInfo != null &&
@@ -212,29 +210,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority =
                    AuthenticationRequestParameters.Authority.GetTenantedAuthority(idToken?.TenantId);
 
-            if (CacheManager.HasCache)
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
+            AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
-                return new AuthenticationResult(tuple.Item1, tuple.Item2, AuthenticationRequestParameters.RequestContext.CorrelationId);
-            }
-            else
-            {
-                return new AuthenticationResult(
-                    new MsalAccessTokenCacheItem(
-                        AuthenticationRequestParameters.AuthorityInfo.Host,
-                        AuthenticationRequestParameters.ClientId,
-                        msalTokenResponse,
-                        idToken?.TenantId),
-                    new MsalIdTokenCacheItem(
-                        AuthenticationRequestParameters.AuthorityInfo.Host,
-                        AuthenticationRequestParameters.ClientId,
-                        msalTokenResponse,
-                        idToken?.TenantId),
-                        AuthenticationRequestParameters.RequestContext.CorrelationId
-                    );
-            }
+            var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
+            return new AuthenticationResult(tuple.Item1, tuple.Item2, AuthenticationRequestParameters.RequestContext.CorrelationId);
+
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
