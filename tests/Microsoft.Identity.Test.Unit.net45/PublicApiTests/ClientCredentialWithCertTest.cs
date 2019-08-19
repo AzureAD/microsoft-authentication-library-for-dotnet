@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     [DeploymentItem(@"Resources\valid_cert.pfx")]
     [DeploymentItem(@"Resources\testCert.crtfile")]
+    [DeploymentItem(@"Resources\RSATestCertDotNet.pfx")]
     public class ConfidentialClientWithCertTests : TestBase
     {
         private TokenCacheHelper _tokenCacheHelper;
@@ -31,6 +32,15 @@ namespace Microsoft.Identity.Test.Unit
         {
             base.TestInitialize();
             _tokenCacheHelper = new TokenCacheHelper();
+        }
+
+        private static MockHttpMessageHandler CreateTokenResponseHttpHandler(bool clientCredentialFlow)
+        {
+            return new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = CreateResponse(clientCredentialFlow)
+            };
         }
 
         private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(bool clientCredentialFlow)
@@ -254,6 +264,52 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(header.X509CertificateThumbprint);
         }
 
+        [TestMethod]
+        [Description("Check that the private key is accessable when signing")]
+        public async Task CheckRSAPrivateKeyCanSignAssertionAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                SetupMocks(harness.HttpManager);
+                var certificate = new X509Certificate2(
+                    ResourceHelper.GetTestResourceRelativePath("RSATestCertDotNet.pfx"));
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithRedirectUri(TestConstants.RedirectUri)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
+
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithSendX5C(true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+                appCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
+
+                // from the cache
+                result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+
+                //Check app cache
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                appCacheAccess.AssertAccessCounts(2, 1);
+                userCacheAccess.AssertAccessCounts(0, 0);
+            }
+        }
         private ClientCredentialWrapper GenerateClientAssertionCredential()
         {
             var cert = new X509Certificate2(

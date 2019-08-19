@@ -65,7 +65,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
             throw new NotImplementedException();
         }
 
-        /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
             if (certificate.PublicKey.Key.KeySize < ClientCredentialWrapper.MinKeySizeInBits)
@@ -76,43 +75,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
 
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            var x509Key = new X509AsymmetricSecurityKey(certificate);
-
-            RSA rsa = x509Key.GetAsymmetricAlgorithm(SecurityAlgorithms.RsaSha256Signature, true) as RSA;
-
-            RSACryptoServiceProvider newRsa = null;
-            try
+            var rsa = GetCryptoProviderForSha256(certificate);
+            using (var sha = new SHA256Cng())
             {
-                if (rsa is RSACryptoServiceProvider cspRsa)
-                {
-                    // For .NET 4.6 and below we get the old RSACryptoServiceProvider implementation as the default.
-                    // Try and get an instance of RSACryptoServiceProvider which supports SHA256
-                    newRsa = GetCryptoProviderForSha256(cspRsa);
-                }
-                else
-                {
-                    // For .NET Framework 4.7 and onwards the RSACng implementation is the default.
-                    // Since we're targeting .NET Framework 4.5, we cannot actually use this type as it was
-                    // only introduced with .NET Framework 4.6.
-                    // Instead we try and create an RSACryptoServiceProvider based on the private key from the
-                    // certificate.
-                    newRsa = GetCryptoProviderForSha256(certificate);
-                }
-
-                using (var sha = new SHA256Cng())
-                {
-                    return newRsa.SignData(messageBytes, sha);
-                }
-            }
-            finally
-            {
-                // We only want to dispose of the 'newRsa' instance if it is a *different instance*
-                // from the original one that was used to create it.
-                if (newRsa != null && !ReferenceEquals(rsa, newRsa))
-                {
-                    newRsa.Dispose();
-                }
-            }
+                return rsa.SignData(messageBytes, sha);
+            };
         }
 
         /// <summary>
@@ -122,13 +89,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <returns><see cref="RSACryptoServiceProvider"/> initialized with private key from <paramref name="certificate"/></returns>
         private static RSACryptoServiceProvider GetCryptoProviderForSha256(X509Certificate2 certificate)
         {
-            return (RSACryptoServiceProvider) certificate.PrivateKey;
-        }
+            var rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
+            if (rsaProvider == null)
+            {
+                throw new MsalException("The provided certificate has a key that is not accessable.");
+            }
 
-        // Copied from ACS code
-        // This method returns an AsymmetricSignatureFormatter capable of supporting Sha256 signatures.
-        private static RSACryptoServiceProvider GetCryptoProviderForSha256(RSACryptoServiceProvider rsaProvider)
-        {
             const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
 
             // ProviderType == 1(PROV_RSA_FULL) and providerType == 12(PROV_RSA_SCHANNEL) are provider types that only support SHA1.
@@ -158,6 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             return rsaProvider;
         }
+
 
     }
 }

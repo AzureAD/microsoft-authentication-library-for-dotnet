@@ -102,6 +102,28 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         }
 
         [TestMethod]
+        public async Task ConfidentialClientWithRSACertificateTestAsync()
+        {
+            AuthenticationResult authResult;
+            IConfidentialClientApplication confidentialApp;
+            X509Certificate2 cert = GetCertificate(true);
+            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+
+            confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(ConfidentialClientID)
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithCertificate(cert)
+                .Build();
+
+            authResult = await confidentialApp
+                .AcquireTokenForClient(s_keyvaultScope)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult);
+        }
+
+        [TestMethod]
         public async Task ConfidentialClientWithClientSecretTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
@@ -265,9 +287,9 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             return jwtToken.Sign(clientCredential, false);
         }
 
-        private static X509Certificate2 GetCertificate()
+        private static X509Certificate2 GetCertificate(bool useRSACert = false)
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(TestConstants.AutomationTestThumbprint);
+            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert? TestConstants.RSATestCertThumbprint : TestConstants.AutomationTestThumbprint);
             if (cert == null)
             {
                 throw new InvalidOperationException(
