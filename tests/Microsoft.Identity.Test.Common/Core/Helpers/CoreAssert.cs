@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,13 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         {
             Assert.AreEqual(val1, val2, "First and second values differ");
             Assert.AreEqual(val1, val3, "First and third values differ");
+        }
+
+        public static void AreEqual(DateTimeOffset expected, DateTimeOffset actual, TimeSpan delta)
+        {
+            TimeSpan t = expected - actual;
+            Assert.IsTrue(t < delta, 
+                $"The dates are off by {t.TotalMilliseconds}ms, which is more than the expected {delta.TotalMilliseconds}ms");
         }
 
         public static void AssertDictionariesAreEqual<TKey, TValue>(

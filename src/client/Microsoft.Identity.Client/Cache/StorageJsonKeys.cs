@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.Cache
         public const string Target = "target";
         public const string CachedAt = "cached_at";
         public const string ExpiresOn = "expires_on";
+        public const string RefreshOn = "refresh_on";
         public const string ExtendedExpiresOn = "extended_expires_on";
         public const string ClientInfo = "client_info";
         public const string FamilyId = "family_id";

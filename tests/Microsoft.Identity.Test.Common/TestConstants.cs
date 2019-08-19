@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Utid = "my-utid";
         public const string Common = "common";
         public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
-        public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string> {{ "client_ip", "some_ip" }, { "aud", "some_audience" }};
+        public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string> { { "client_ip", "some_ip" }, { "aud", "some_audience" } };
         public const string RTSecret = "someRT";
 
         public const string HomeAccountId = Uid + "." + Utid;
@@ -138,7 +138,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
 
         public static readonly string s_userIdentifier = CreateUserIdentifier();
 
-       
+
 
         public static string CreateUserIdentifier()
         {
@@ -225,6 +225,19 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                                 ""login-us.microsoftonline.com""]}
                         ]
                 }";
+
+        public const string TokenResponseJson =
+            "{\"token_type\":\"Bearer\"," +
+            "\"scope\":\"user_impersonation\"," +
+            "\"expires_in\":\"3600\"," +
+            "\"ext_expires_in\":\"3600\"," +
+            "\"expires_on\":\"1566165638\"," +
+            "\"not_before\":\"1566161738\"," +
+            "\"resource\":\"user.read\"," +
+            "\"access_token\":\"at_secret\"," +
+            "\"refresh_token\":\"rt_secret\"," +
+            "\"id_token\":\"idtoken.\"," +
+            "\"client_info\":\"eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0\"}";
     }
 
     internal static class Adfs2019LabConstants

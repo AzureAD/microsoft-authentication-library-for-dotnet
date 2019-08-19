@@ -147,6 +147,48 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        public void AccessToken_WithRefresh_FromMsalResponseJson()
+        {
+            // Arrange
+            string json = TestConstants.TokenResponseJson;
+            json = JsonTestUtils.AddKeyValue(json, "refresh_in", "1800");
+
+            var tokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+
+            // Act
+            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ClientId,
+                    tokenResponse,
+                    TestConstants.TenantId);
+
+            // Assert
+            Assert.AreEqual(tokenResponse.RefreshIn, 1800);
+            Assert.IsTrue(at.RefreshOn.HasValue);
+            CoreAssert.AreEqual(
+                at.RefreshOn.Value, 
+                (at.CachedAtOffset + TimeSpan.FromSeconds(1800)), 
+                TimeSpan.FromSeconds(1) );
+        }
+
+        [TestMethod]
+        public void AccessToken_WithNoRefresh_FromMsalResponseJson()
+        {
+            // Arrange
+            string json = TestConstants.TokenResponseJson;
+            var tokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+
+            // Act
+            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ClientId,
+                    tokenResponse,
+                    TestConstants.TenantId);
+
+            // Assert
+            Assert.AreEqual(tokenResponse.RefreshIn, 0);
+            Assert.IsFalse(at.RefreshOn.HasValue);
+        }
+
+        [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void GetExpiredAccessTokenTest()
         {
@@ -608,6 +650,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual("1", frt.FamilyId);
         }
+
+       
 
 
         [TestMethod]

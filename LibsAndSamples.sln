@@ -101,6 +101,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "microsoft.identity.client",
 	ProjectSection(SolutionItems) = preProject
 		src\client\Directory.Build.props = src\client\Directory.Build.props
 		src\client\Directory.Build.targets = src\client\Directory.Build.targets
+		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.net45", "tests\Microsoft.Identity.Test.Integration.net45\Microsoft.Identity.Test.Integration.net45.csproj", "{6A93C76A-5DEB-4A4D-A004-1F611C67B4E6}"
