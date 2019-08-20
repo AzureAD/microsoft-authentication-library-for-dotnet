@@ -197,6 +197,11 @@ namespace Microsoft.Identity.Client
                 Headers);
         }
 
+        internal bool IsAadUnavailable()
+        {
+            return StatusCode >= 500 && StatusCode < 600;
+        }
+
         internal override void PopulateJson(JObject jobj)
         {
             base.PopulateJson(jobj);

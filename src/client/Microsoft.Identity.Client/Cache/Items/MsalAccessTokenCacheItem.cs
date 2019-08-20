@@ -197,5 +197,11 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             return new MsalIdTokenCacheKey(Environment, TenantId, HomeAccountId, ClientId);
         }
+
+        internal bool NeedsRefresh()
+        {
+            return RefreshOn.HasValue &&
+                RefreshOn.Value < DateTime.UtcNow;
+        }
     }
 }
