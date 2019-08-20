@@ -387,17 +387,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, TestConstants.AuthorityUtidTenant);
         }
                
-        private void CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(string issuer, string tenantId, string expectedJwtAudience)
-        {
-            var resolver = new AuthorityEndpointResolutionManager(null);
-
-            TenantDiscoveryResponse tenantDiscoveryResponse = new TenantDiscoveryResponse();
-
-            tenantDiscoveryResponse.Issuer = issuer;
-            string selfSignedJwtAudience = resolver.ReplaceNonTenantSpecificValueWithTenant(tenantDiscoveryResponse, tenantId);
-            Assert.AreEqual(expectedJwtAudience, selfSignedJwtAudience);
-        }
-
         [TestMethod]
         //Test for bug #1292 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1292)
         public void AuthorityCustomPortTest()
