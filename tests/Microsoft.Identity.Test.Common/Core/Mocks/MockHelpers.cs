@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-            string stringContent = "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
+            string stringContent = "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":\"" +
                                   scope.AsSingleString() +
                                   "\",\"access_token\":\"some-access-token\",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\":\"" +
                                   idToken +

@@ -37,7 +37,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string environment = TestConstants.ProductionPrefCacheEnvironment,
             string displayableId = TestConstants.DisplayableId,
             string rtSecret = TestConstants.RTSecret,
-            bool expiredAccessTokens = false)
+            bool expiredAccessTokens = false, 
+            bool addSecondAt = true)
         {
             var accessTokenExpiresOn = expiredAccessTokens ?
                 new DateTimeOffset(DateTime.UtcNow) : 
@@ -57,7 +58,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 extendedAccessTokenExpiresOn,
                 MockHelpers.CreateClientInfo(uid, utid));
 
-
             // add access token
             accessor.SaveAccessToken(atItem);
 
@@ -71,17 +71,20 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             accessor.SaveIdToken(idTokenCacheItem);
 
             // add another access token
-            atItem = new MsalAccessTokenCacheItem(
-              environment,
-              clientId,
-              TestConstants.s_scopeForAnotherResource.AsSingleString(),
-              utid,
-              "",
-              accessTokenExpiresOn,
-              extendedAccessTokenExpiresOn,
-              MockHelpers.CreateClientInfo(uid, utid));
+            if (addSecondAt)
+            {
+                atItem = new MsalAccessTokenCacheItem(
+                  environment,
+                  clientId,
+                  TestConstants.s_scopeForAnotherResource.AsSingleString(),
+                  utid,
+                  "",
+                  accessTokenExpiresOn,
+                  extendedAccessTokenExpiresOn,
+                  MockHelpers.CreateClientInfo(uid, utid));
 
-            accessor.SaveAccessToken(atItem);
+                accessor.SaveAccessToken(atItem);
+            }
 
             var accountCacheItem = new MsalAccountCacheItem(
                 environment,

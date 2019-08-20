@@ -54,6 +54,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             _httpMessageHandlerQueue.Enqueue(handler);
         }
 
+        public int QueueSize => _httpMessageHandlerQueue.Count;
+
         /// <inheritdoc />
 
         protected override HttpClient GetHttpClient()
