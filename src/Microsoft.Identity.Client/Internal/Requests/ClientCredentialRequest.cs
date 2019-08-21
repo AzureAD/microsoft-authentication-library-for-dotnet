@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (!_clientParameters.ForceRefresh && CacheManager.HasCache)
+            if (!_clientParameters.ForceRefresh)
             {
                 var msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 if (msalAccessTokenItem != null)

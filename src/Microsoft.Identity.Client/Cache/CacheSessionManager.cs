@@ -31,15 +31,13 @@ namespace Microsoft.Identity.Client.Cache
             AuthenticationRequestParameters requestParams, 
             ITelemetryManager telemetryManager)
         {
-            TokenCacheInternal = tokenCacheInternal;
+            TokenCacheInternal = tokenCacheInternal ?? throw new ArgumentNullException(nameof(tokenCacheInternal));
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
         }
 
         #region ICacheSessionManager implementation
         public ITokenCacheInternal TokenCacheInternal { get; }
-
-        public bool HasCache => TokenCacheInternal != null; 
 
         public async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {

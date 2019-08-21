@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
-        private const string AzurePublicEnv = "login.microsoftonline.com";
         private const int DefaultExpirationBufferInMinutes = 5;
 
         private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;

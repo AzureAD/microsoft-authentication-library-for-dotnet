@@ -37,7 +37,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
-                    TestConstants.s_scope);
+                    TestConstants.s_scope, 
+                    new TokenCache(harness.ServiceBundle));
 
                 var interactiveParameters = new AcquireTokenInteractiveParameters
                 {
@@ -213,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    null);
+                    new TokenCache(harness.ServiceBundle));
                 parameters.IsBrokerEnabled = false;
                 
                 InteractiveRequest request = new InteractiveRequest(
@@ -238,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                         TestConstants.AuthorityHomeTenant,
                         TestConstants.s_scope,
-                        null,
+                        new TokenCache(harness.ServiceBundle),
                         extraQueryParameters: new Dictionary<string, string>
                         {
                             {"extra", "qp"}
@@ -281,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    null,
+                    new TokenCache(harness.ServiceBundle),
                     extraQueryParameters: new Dictionary<string, string> { { "extra", "qp" } });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = TestConstants.DisplayableId;
@@ -351,7 +352,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    null,
+                    new TokenCache(harness.ServiceBundle),
                     extraQueryParameters: new Dictionary<string, string> { { "extra", "qp" }, { "prompt", "login" } });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = TestConstants.DisplayableId;

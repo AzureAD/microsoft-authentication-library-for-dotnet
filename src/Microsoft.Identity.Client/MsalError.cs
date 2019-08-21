@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Client
         /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when
         /// the user cache had not been set in the application constructor. This should never happen in MSAL.NET 3.x as the cache is created by the application
         /// </summary>
+        [Obsolete("This error code is not in use")]
         public const string TokenCacheNullError = "token_cache_null";
 
         /// <summary>

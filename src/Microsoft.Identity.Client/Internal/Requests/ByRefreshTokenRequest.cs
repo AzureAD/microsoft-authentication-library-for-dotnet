@@ -25,13 +25,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (!CacheManager.HasCache)
-            {
-                throw new MsalUiRequiredException(
-                    MsalError.TokenCacheNullError,
-                    MsalErrorMessage.NullTokenCacheError);
-            }
-
             AuthenticationRequestParameters.RequestContext.Logger.Verbose(LogMessages.BeginningAcquireByRefreshToken);
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(
