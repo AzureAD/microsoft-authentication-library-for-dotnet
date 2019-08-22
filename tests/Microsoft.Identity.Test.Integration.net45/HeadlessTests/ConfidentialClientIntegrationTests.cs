@@ -102,7 +102,6 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         }
 
         [TestMethod]
-        [Ignore] // broken by commit d0935782 - bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1352
         public async Task ConfidentialClientWithRSACertificateTestAsync()
         {
             AuthenticationResult authResult;
