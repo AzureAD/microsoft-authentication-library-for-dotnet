@@ -22,6 +22,10 @@
       "_justification": "Self-signed certificate used by unit tests."
     },
     {
+      "file": "RSATestCertDotNet.pfx",
+      "_justification": "Self-signed certificate used by unit tests."
+    },
+    {
       "file": "invalid_cert.pfx",
       "_justification": "Self-signed certificate used by unit tests."
     },
