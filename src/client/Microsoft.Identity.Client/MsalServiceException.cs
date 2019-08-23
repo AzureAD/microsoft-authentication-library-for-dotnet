@@ -197,9 +197,16 @@ namespace Microsoft.Identity.Client
                 Headers);
         }
 
+        /// <summary>
+        /// As per discussion with Evo, AAD 
+        /// </summary>
         internal bool IsAadUnavailable()
         {
-            return StatusCode >= 500 && StatusCode < 600;
+
+            return 
+                StatusCode == 429 || // "Too Many Requests", does not mean AAD is down
+                StatusCode >= 500 || 
+                string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
         }
 
         internal override void PopulateJson(JObject jobj)
