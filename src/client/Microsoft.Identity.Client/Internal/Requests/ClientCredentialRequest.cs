@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using System;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -28,15 +29,42 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+
             if (!_clientParameters.ForceRefresh)
             {
-                var msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
-                if (msalAccessTokenItem != null)
+                cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+
+                if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
                 {
-                    return new AuthenticationResult(msalAccessTokenItem, null, AuthenticationRequestParameters.RequestContext.CorrelationId);
+                    return new AuthenticationResult(cachedAccessTokenItem, null, AuthenticationRequestParameters.RequestContext.CorrelationId);
                 }
             }
 
+            // No AT in the cache or AT needs to be refreshed
+            try
+            {
+                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (MsalServiceException e)
+            {
+                bool isAadUnavailable = e.IsAadUnavailable();
+                logger.Warning($"Fetching a new AT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
+
+                if (cachedAccessTokenItem != null && isAadUnavailable)
+                {
+                    logger.Info("Returning existing access token. It is not expired, but should be refreshed.");
+                    return new AuthenticationResult(cachedAccessTokenItem, null, AuthenticationRequestParameters.RequestContext.CorrelationId);
+                }
+
+                logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable.");
+                throw;
+            }
+        }
+
+        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
+        {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
