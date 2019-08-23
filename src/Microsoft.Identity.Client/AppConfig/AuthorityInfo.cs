@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -16,12 +17,13 @@ namespace Microsoft.Identity.Client
             AuthorityType = authorityType;
             ValidateAuthority = validateAuthority;
 
-            Host = new UriBuilder(authority).Host;
+            var authorityBuilder = new UriBuilder(authority);
+            Host = authorityBuilder.Host;
 
             // TODO: can we simplify this and/or move validation/configuration logic to AbstractApplicationBuilder
             // so that all authority mangling/management is in one place?
 
-            UserRealmUriPrefix = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", Host);
+            UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", Host), authorityBuilder.Port);
 
             if (AuthorityType == AuthorityType.B2C)
             {
@@ -47,12 +49,11 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                var authorityUri = new UriBuilder(authority);
-                CanonicalAuthority = string.Format(
+                CanonicalAuthority = UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(
                     CultureInfo.InvariantCulture,
                     "https://{0}/{1}/",
-                    authorityUri.Uri.Authority,
-                    GetFirstPathSegment(authority));
+                    authorityBuilder.Uri.Authority,
+                    GetFirstPathSegment(authority)), authorityBuilder.Port);
             }
         }
 

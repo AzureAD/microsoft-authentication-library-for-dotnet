@@ -19,13 +19,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         ///     values against incoming request parameters.
         /// </summary>
         /// <returns>Returns true if the previously cached client assertion is valid</returns>
-        public static bool ValidateClientAssertion(ClientCredentialWrapper clientCredential, AuthorityEndpoints endpoints, bool sendX5C)
+        public static bool ValidateClientAssertion(ClientCredentialWrapper clientCredential, string audience, bool sendX5C)
         {
             if (clientCredential == null)
             {
                 throw new ArgumentNullException(nameof(clientCredential));
             }
-            else if (string.IsNullOrWhiteSpace(clientCredential.CachedAssertion))
+
+            if (string.IsNullOrWhiteSpace(clientCredential.CachedAssertion))
             {
                 return false;
             }
@@ -36,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                            JsonWebToken.ConvertToTimeT(
                                DateTime.UtcNow + TimeSpan.FromMinutes(Constants.ExpirationMarginInMinutes));
 
-            bool parametersMatch = clientCredential.Audience == endpoints?.SelfSignedJwtAudience &&
+            bool parametersMatch = string.Equals(clientCredential.Audience, audience, StringComparison.OrdinalIgnoreCase) &&
                                    clientCredential.ContainsX5C == sendX5C;
 
             return !expired && parametersMatch;
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     if ((clientCredential.CachedAssertion == null || clientCredential.ValidTo != 0) && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertion)
                     {
-                        if (!ValidateClientAssertion(clientCredential, endpoints, sendX5C))
+                        if (!ValidateClientAssertion(clientCredential, endpoints.SelfSignedJwtAudience, sendX5C))
                         {
                             logger.Info(LogMessages.ClientAssertionDoesNotExistOrNearExpiry);
                            
@@ -69,17 +70,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             
                             if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.ClientCertificateWithClaims)
                             {
-                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience, clientCredential.ClaimsToSign, clientCredential.AppendDefaultClaims);
+                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints.SelfSignedJwtAudience, clientCredential.ClaimsToSign, clientCredential.AppendDefaultClaims);
                             }
                             else
                             {
-                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints?.SelfSignedJwtAudience);
+                                jwtToken = new JsonWebToken(cryptographyManager, clientId, endpoints.SelfSignedJwtAudience);
                             }
 
                             clientCredential.CachedAssertion = jwtToken.Sign(clientCredential, sendX5C);
                             clientCredential.ValidTo = jwtToken.ValidTo;
                             clientCredential.ContainsX5C = sendX5C;
-                            clientCredential.Audience = endpoints?.SelfSignedJwtAudience;
+                            clientCredential.Audience = endpoints.SelfSignedJwtAudience;
                         }
                         else
                         {

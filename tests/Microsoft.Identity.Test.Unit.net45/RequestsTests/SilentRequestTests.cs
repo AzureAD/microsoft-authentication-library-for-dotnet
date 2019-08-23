@@ -109,38 +109,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void SilentRefreshFailedNullCacheTest()
+        public void RequestParamsNullArg()
         {
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
-                var parameters = harness.CreateRequestParams(
+                AssertException.Throws<ArgumentNullException>( () => harness.CreateRequestParams(
                     null,
-                    ScopeHelper.CreateSortedSetFromEnumerable(
-                        new[]
-                        {
-                            "some-scope1",
-                            "some-scope2"
-                        }),
-                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
-
-                var silentParameters = new AcquireTokenSilentParameters()
-                {
-                    Account = new Account(TestConstants.HomeAccountId, TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment),
-                };
-
-                try
-                {
-                    var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
-                    Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                    var authenticationResult = task.Result;
-                    Assert.Fail("MsalUiRequiredException should be thrown here");
-                }
-                catch (AggregateException ae)
-                {
-                    var exc = ae.InnerException as MsalUiRequiredException;
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.TokenCacheNullError, exc.ErrorCode);
-                }
+                    TestConstants.s_scope,
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false)));
             }
         }
 

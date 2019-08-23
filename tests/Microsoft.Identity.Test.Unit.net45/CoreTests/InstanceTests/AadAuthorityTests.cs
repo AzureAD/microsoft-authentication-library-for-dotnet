@@ -13,6 +13,9 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Client.UI;
+using System.Threading;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -72,7 +75,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
                     endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token", 
+                    endpoints.SelfSignedJwtAudience);
                 Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
             }
         }
@@ -109,7 +113,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
                     endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token", 
+                    endpoints.SelfSignedJwtAudience);
             }
         }
 
@@ -141,23 +146,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", endpoints.TokenEndpoint);
-                Assert.AreEqual("https://login.microsoftonline.com/common/v2.0", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", endpoints.SelfSignedJwtAudience);
             }
-        }
-
-        [TestMethod]
-        public void SelfSignedJwtAudienceEndpointValidationTest()
-        {
-            string common = TestConstants.Common;
-            string tenantSpecific = TestConstants.TenantId;
-            string issuerCommonWithTenant = "https://login.microsoftonline.com/{tenant}/v2.0";
-            string issuerCommonWithTenantId = "https://login.microsoftonline.com/{tenantid}/v2.0";
-            string issuerTenantSpecific = $"https://login.microsoftonline.com/{tenantSpecific}/v2.0";
-            string jwtAudienceEndpointCommon = $"https://login.microsoftonline.com/{common}/v2.0";
-
-            CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(issuerCommonWithTenant, common, jwtAudienceEndpointCommon);
-            CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(issuerCommonWithTenantId, common, jwtAudienceEndpointCommon);
-            CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(issuerTenantSpecific, common, issuerTenantSpecific);
         }
 
         [TestMethod]
@@ -397,15 +387,40 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, TestConstants.AuthorityUtidTenant);
         }
                
-        private void CheckCorrectJwtAudienceEndpointIsCreatedFromIssuer(string issuer, string tenantId, string expectedJwtAudience)
+        [TestMethod]
+        //Test for bug #1292 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1292)
+        public void AuthorityCustomPortTest()
         {
-            var resolver = new AuthorityEndpointResolutionManager(null);
+            var customPortAuthority = "https://localhost:5215/common/";
 
-            TenantDiscoveryResponse tenantDiscoveryResponse = new TenantDiscoveryResponse();
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
 
-            tenantDiscoveryResponse.Issuer = issuer;
-            string selfSignedJwtAudience = resolver.ReplaceNonTenantSpecificValueWithTenant(tenantDiscoveryResponse, tenantId);
-            Assert.AreEqual(expectedJwtAudience, selfSignedJwtAudience);
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(customPortAuthority), false)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .BuildConcrete();
+
+                //Ensure that the PublicClientApplication init does not remove the port from the authority
+                Assert.AreEqual(customPortAuthority, app.Authority);
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(customPortAuthority);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customPortAuthority);
+                harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
+
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
+                //Ensure that acquiring a token does not remove the port from the authority
+                Assert.AreEqual(customPortAuthority, app.Authority);
+            }
         }
     }
 }

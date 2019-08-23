@@ -125,6 +125,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XamarinDev", "tests\devapps
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Integration.net47", "tests\Microsoft.Identity.Test.Integration.net47\Microsoft.Identity.Test.Integration.net47.csproj", "{8C209A34-0F6E-488D-B1A9-D52B1354AC78}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Integration.net48", "tests\Microsoft.Identity.Test.Integration.net48\Microsoft.Identity.Test.Integration.net48.csproj", "{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -566,6 +568,18 @@ Global
 		{8C209A34-0F6E-488D-B1A9-D52B1354AC78}.Release|iPhone.Build.0 = Release|Any CPU
 		{8C209A34-0F6E-488D-B1A9-D52B1354AC78}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{8C209A34-0F6E-488D-B1A9-D52B1354AC78}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Release|iPhone.Build.0 = Release|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -612,6 +626,7 @@ Global
 		{0DCAC48B-0035-4A32-8EAD-A94F8D700EA7} = {DFE52FB6-1B8E-4854-AA9B-854101A5B9BA}
 		{839E9613-D234-44D3-94E2-3C85C35603D8} = {DFE52FB6-1B8E-4854-AA9B-854101A5B9BA}
 		{8C209A34-0F6E-488D-B1A9-D52B1354AC78} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
+		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}

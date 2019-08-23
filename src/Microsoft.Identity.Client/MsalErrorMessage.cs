@@ -210,9 +210,6 @@ namespace Microsoft.Identity.Client
         public const string InstanceAndAzureCloudInstanceAreMutuallyExclusive = "Instance and AzureCloudInstance are both set but they're mutually exclusive.";
         public const string NoRefreshTokenProvided = "A refresh token must be provided.";
 
-        public const string NullTokenCacheError = "Token cache is set to null. Acquire by refresh token requests cannot be executed.";
-        public const string NullTokenCacheForSilentError = "Token cache is set to null. Silent requests cannot be executed.";
-
         public const string NoTokensFoundError = "No Refresh Token found in the cache";
         public const string NoRefreshTokenInResponse = "Acquire by refresh token request completed, but no refresh token was found";
 
@@ -278,6 +275,7 @@ namespace Microsoft.Identity.Client
         public const string ValidateAuthorityOrCustomMetadata = "You have configured custom instance metadata, but the validateAuthority flag is set to true. These are mutually exclusive. Set the validateAuthority flag to false. See https://aka.ms/msal-net-custom-instance-metadata for more details.";
 
         public const string InvalidClient = "The wrong application (public or confidential) is being used with this authentication flow." +
+            " Potential issue: the redirect URI is valid, but it has been configured for the wrong app type." +
             " Check the configuration of the app being used in the app registration portal." +
             " See https://aka.ms/msal-net-invalid-client for details. ";
 

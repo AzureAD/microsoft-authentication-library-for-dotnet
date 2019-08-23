@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenADFSV2019InteractiveNonFederatedTest,
 
                 B2CLocalAccountAcquireTokenTest,
-                B2CFacebookMicrosoftLoginAcquireTokenTest,
+                //B2CFacebookMicrosoftLoginAcquireTokenTest,
                 B2CLocalEditPolicyAcquireTokenTest,
                
                 //B2CGoogleB2CLoginAcquireTokenTest,
@@ -153,6 +153,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// with subsequent silent call
         /// </summary>
         [Test]
+        [Ignore("Facebook tests are unstable")] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1351
         public void B2CFacebookMicrosoftLoginAcquireTokenTest()
         {
             TestCommon.ResetInternalStaticCaches();

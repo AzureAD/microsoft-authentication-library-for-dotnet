@@ -33,8 +33,13 @@ namespace Microsoft.Identity.Client
             ConfidentialClientApplicationOptions options)
         {
             var config = new ApplicationConfiguration();
-            return new ConfidentialClientApplicationBuilder(config)
-                   .WithOptions(options).WithClientSecret(options.ClientSecret);
+            var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
+
+            if (!string.IsNullOrWhiteSpace(options.ClientSecret))
+            {
+                builder = builder.WithClientSecret(options.ClientSecret);
+            }
+            return builder;
         }
 
         /// <summary>
