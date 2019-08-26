@@ -173,7 +173,9 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNotNull(result.AccessToken);
 
                 appCacheAccess.AssertAccessCounts(0, 0);
-                userCacheAccess.AssertAccessCounts(1, 1);
+                userCacheAccess.AssertAccessCounts(0, 1);
+
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(false));
 
                 result = await app
                     .AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
@@ -185,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit
                 //Check user cache
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 appCacheAccess.AssertAccessCounts(0, 0);
-                userCacheAccess.AssertAccessCounts(2, 1);
+                userCacheAccess.AssertAccessCounts(0, 2);
             }
         }
 
