@@ -2,10 +2,10 @@
 =============
 Bug Fixes:
 
-- **.WithCertificate with /common audience scenario is broken**. Confidential Client authorization flow and OBO were not able to use certificates with the common authority set. More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891)
-- **Do not strip the port from authority Uri**. When passing your own authority uri which includes a port, MSAL used to strip out the port from the URI, making the authority unreachable. More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1313)
-- **Fix a crash on Android when Chrome isn't installed on the device**. Exception is NameNotFoundException: com.android.chrome. More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1334)
-- **ConfidentialClient built from options won't allow certificates**. When building a confidential client from options, MSAL was forcing developers to use a secret. More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1332)
+- **.WithCertificate with /common audience scenario was broken**. Confidential Client authorization flow and OBO were not able to use certificates with the common authority set. More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891)
+- *MSAL.NET no longer strips the port from the authority URI**. When passing your own authority uri which includes a port, MSAL used to strip out the port from the URI, making the authority unreachable. More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1292)
+- **Fixed a crash on Android when Chrome isn't installed on the device**. Exception was NameNotFoundException: com.android.chrome. More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1334)
+- **ConfidentialClient built from options didn't allow certificates**. When building a confidential client from options, MSAL was forcing developers to use a secret. More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1332)
 - **Login screen loses information on device orientation change on Android**. Username used to be lost from embedded webview when rotating the device. More details [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1244)
 
 4.3.0
