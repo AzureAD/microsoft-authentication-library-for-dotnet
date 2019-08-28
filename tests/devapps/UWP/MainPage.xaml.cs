@@ -27,7 +27,7 @@ namespace UWP
         //private static readonly string s_clientID = "8787cfc0-a723-49fa-99e1-291d58cb6f81"; // todo(wam): DO NOT CHECK THIS IN  this one is AAD only
         private static readonly string s_clientID = "940b3627-f844-48e3-a56a-87afde85c4a3"; // todo(wam): do not check this in   this one is AAD + MSA
 
-        private static readonly string s_authority = "https://login.microsoftonline.com/common"; 
+        private static readonly string s_authority = "https://login.microsoftonline.com/common";
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";
 
@@ -80,9 +80,9 @@ namespace UWP
 #endif
         }
 
-        private IPublicClientApplication CreateWamPublicClientApplication()
+        private IPublicClientApplication CreateWamPublicClientApplication(string authority = null)
         {
-            return PublicClientApplicationBuilder.Create(s_clientID).WithBroker(true).WithAuthority(s_authority).Build();
+            return PublicClientApplicationBuilder.Create(s_clientID).WithBroker(true).WithAuthority(authority ?? s_authority).Build();
         }
 
         private async void AcquireTokenWAMInteractive_ClickAsync(object sender, RoutedEventArgs e)
@@ -212,7 +212,7 @@ namespace UWP
 
         private async Task DisplayResultAsync(AuthenticationResult result)
         {
-            await DisplayMessageAsync("Signed in User - " + result.Account.Username + "\nAccessToken: \n" + result.AccessToken).ConfigureAwait(true);
+            await DisplayMessageAsync(DateTime.Now.ToLongTimeString() + " - Signed in User - " + result.Account.Username + "\nAccessToken: \n" + result.AccessToken).ConfigureAwait(true);
         }
 
         private async Task DisplayMessageAsync(string message)
@@ -223,6 +223,65 @@ namespace UWP
                 {
                     AccessToken.Text = message;
                 });
+        }
+
+        private async void AcquireTokenWAM_LoginCommon_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var pca = CreateWamPublicClientApplication("https://login.microsoftonline.com/common/");
+
+            try
+            {
+                var result = await pca
+                    .AcquireTokenInteractive(s_scopes)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(true);
+
+                await DisplayResultAsync(result).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
+            }
+        }
+
+        private async void AcquireTokenWAM_LoginGmail2_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var pca = CreateWamPublicClientApplication("https://login.microsoftonline.com/williamabartlettgmail2.onmicrosoft.com/");
+
+            try
+            {
+                var result = await pca
+                    .AcquireTokenInteractive(s_scopes)
+                    .WithLoginHint("msalwamtest1@outlook.com")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(true);
+
+                await DisplayResultAsync(result).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
+            }
+        }
+
+        private async void AcquireTokenWAM_LoginGmail3_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var pca = CreateWamPublicClientApplication("https://login.microsoftonline.com/williamabartlettgmail3.onmicrosoft.com/");
+
+            try
+            {
+                var result = await pca
+                    .AcquireTokenInteractive(s_scopes)
+                    .WithLoginHint("msalwamtest1@outlook.com")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(true);
+
+                await DisplayResultAsync(result).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
+            }
         }
     }
 }

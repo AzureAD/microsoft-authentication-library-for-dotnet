@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Windows.Security.Authentication.Web.Core;
+using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -31,14 +32,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             WebAccountProviderCommand command = null;
 
+            string tenantId = AuthenticationRequestParameters.Authority.GetTenantId();
+
+            WebAccountProvider webAccountProvider = null;
+
             using (var wamAccountHandler = new WamAccountHandler())
             {
-                command = await wamAccountHandler.ExecuteAsync().ConfigureAwait(true);
+                if (string.Compare(tenantId, "common", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    command = await wamAccountHandler.ExecuteAsync().ConfigureAwait(true);
+                    webAccountProvider = command.WebAccountProvider;
+                }
+                else if (string.Compare(tenantId, "consumers", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    webAccountProvider = await wamAccountHandler.GetMsaAccountProviderAsync().ConfigureAwait(true);
+                }
+                else
+                {
+                    // default to organizations since if it's not common (and the user can choose) and it's not consumers, then it's an AAD custom tenant
+                    webAccountProvider = await wamAccountHandler.GetAadAccountProviderAsync().ConfigureAwait(true);
+                }
             }
 
-            // WebAccountProvider provider = await FindAccountProviderForAuthorityAsync(requestContext, commonParameters).ConfigureAwait(true);
-            //WebAccount webAccount = await GetWebAccountFromMsalAccountAsync(command.WebAccountProvider, interactiveParameters.Account).ConfigureAwait(true);
-            WebTokenRequest request = CreateWebTokenRequest(command.WebAccountProvider, forceAuthentication: false);
+            WebTokenRequest request = CreateWebTokenRequest(webAccountProvider, forceAuthentication: true);
 
             WebTokenRequestResult result;
 

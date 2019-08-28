@@ -40,6 +40,16 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return _webAccountProviderCommand;
         }
 
+        public Task<WebAccountProvider> GetMsaAccountProviderAsync()
+        {
+            return GetProviderAsync(MicrosoftProviderId, MicrosoftAccountAuthority);
+        }
+
+        public Task<WebAccountProvider> GetAadAccountProviderAsync()
+        {
+            return GetProviderAsync(MicrosoftProviderId, AzureActiveDirectoryAuthority);
+        }
+
         private async void OnAccountCommandsRequested(
             AccountsSettingsPane sender,
             AccountsSettingsPaneCommandsRequestedEventArgs e)

@@ -136,10 +136,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 ServiceBundle,
                 _wamPublicClientApplication.UserTokenCacheInternal,
                 commonParameters,
-                requestContext);
-
-            requestParameters.LoginHint = interactiveParameters.LoginHint;
-            requestParameters.Account = interactiveParameters.Account;
+                requestContext)
+            {
+                LoginHint = interactiveParameters.LoginHint,
+                Account = interactiveParameters.Account
+            };
 
             var handler = new WamInteractiveRequest(
                 ServiceBundle,
