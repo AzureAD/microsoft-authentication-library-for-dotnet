@@ -25,10 +25,10 @@ namespace UWP
         private readonly IPublicClientApplication _pca;
         // private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
         //private static readonly string s_clientID = "8787cfc0-a723-49fa-99e1-291d58cb6f81"; // todo(wam): DO NOT CHECK THIS IN  this one is AAD only
-        private static readonly string s_clientID = "940b3627-f844-48e3-a56a-87afde85c4a3"; // todo(wam): do not check this in   this one is AAD + MSA
+        private static readonly string s_clientID = "2b8a3db6-9675-45f6-972c-c9017fc1d6f2"; // todo(wam): do not check this in   this one is AAD + MSA
 
         private static readonly string s_authority = "https://login.microsoftonline.com/common";
-        private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
+        private static readonly IEnumerable<string> s_scopes = new[] { "https://graph.windows.net/user.read", "https://graph.windows.net/user.readwrite" };
         private const string CacheFileName = "msal_user_cache.json";
 
         public MainPage()
@@ -273,6 +273,69 @@ namespace UWP
                 var result = await pca
                     .AcquireTokenInteractive(s_scopes)
                     .WithLoginHint("msalwamtest1@outlook.com")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(true);
+
+                await DisplayResultAsync(result).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
+            }
+        }
+
+        private async void AcquireTokenWAM_SilentLoginCommon_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var pca = CreateWamPublicClientApplication("https://login.microsoftonline.com/common/");
+
+            try
+            {
+                var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
+                var account = accounts.FirstOrDefault();
+                var result = await pca
+                    .AcquireTokenSilent(s_scopes, account)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(true);
+
+                await DisplayResultAsync(result).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
+            }
+        }
+
+        private async void AcquireTokenWAM_SilentLoginGmail2_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var pca = CreateWamPublicClientApplication("https://login.microsoftonline.com/williamabartlettgmail2.onmicrosoft.com/");
+
+            try
+            {
+                var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
+                var account = accounts.FirstOrDefault();
+                var result = await pca
+                    .AcquireTokenSilent(s_scopes, account)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(true);
+
+                await DisplayResultAsync(result).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(true);
+            }
+        }
+
+        private async void AcquireTokenWAM_SilentLoginGmail3_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var pca = CreateWamPublicClientApplication("https://login.microsoftonline.com/williamabartlettgmail3.onmicrosoft.com/");
+
+            try
+            {
+                var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
+                var account = accounts.FirstOrDefault();
+                var result = await pca
+                    .AcquireTokenSilent(s_scopes, account)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(true);
 

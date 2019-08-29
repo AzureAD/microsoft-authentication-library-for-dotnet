@@ -50,7 +50,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 else
                 {
                     // default to organizations since if it's not common (and the user can choose) and it's not consumers, then it's an AAD custom tenant
-                    webAccountProvider = await wamAccountHandler.GetAadAccountProviderAsync().ConfigureAwait(true);
+                    string canonicalAuthority = AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority;
+                    webAccountProvider = await wamAccountHandler.GetAadAccountProviderAsync(canonicalAuthority).ConfigureAwait(true);
                 }
             }
 

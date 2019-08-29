@@ -20,9 +20,17 @@
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" BorderBrush="White" BorderThickness="5">
+            <TextBlock FontSize="24" VerticalAlignment="Center">Interactive:</TextBlock>
             <Button Content="WAM /Common/" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AcquireTokenWAM_LoginCommon_ClickAsync"/>
             <Button Content="WAM /gmail2/" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AcquireTokenWAM_LoginGmail2_ClickAsync"/>
             <Button Content="WAM /gmail3/" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AcquireTokenWAM_LoginGmail3_ClickAsync"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" BorderBrush="White" BorderThickness="5">
+            <TextBlock FontSize="24" VerticalAlignment="Center">Silent:</TextBlock>
+            <Button Content="WAM /Common/" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AcquireTokenWAM_SilentLoginCommon_ClickAsync"/>
+            <Button Content="WAM /gmail2/" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AcquireTokenWAM_SilentLoginGmail2_ClickAsync"/>
+            <Button Content="WAM /gmail3/" HorizontalAlignment="Center" Margin="20,10,20,10" VerticalAlignment="Center" Click="AcquireTokenWAM_SilentLoginGmail3_ClickAsync"/>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">

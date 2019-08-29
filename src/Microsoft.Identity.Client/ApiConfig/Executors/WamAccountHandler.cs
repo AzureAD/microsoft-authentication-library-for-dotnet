@@ -45,9 +45,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return GetProviderAsync(MicrosoftProviderId, MicrosoftAccountAuthority);
         }
 
-        public Task<WebAccountProvider> GetAadAccountProviderAsync()
+        public Task<WebAccountProvider> GetAadAccountProviderAsync(string authority)
         {
-            return GetProviderAsync(MicrosoftProviderId, AzureActiveDirectoryAuthority);
+            return GetProviderAsync(MicrosoftProviderId, authority ?? AzureActiveDirectoryAuthority);
         }
 
         private async void OnAccountCommandsRequested(
