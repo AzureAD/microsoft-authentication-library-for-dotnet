@@ -123,7 +123,7 @@
     <PackageReference Include="Xamarin.TestCloud.Agent">
       <Version>0.21.7</Version>
     </PackageReference>
-    <ProjectReference Include="..\..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+    <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
