@@ -66,10 +66,22 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-    <ProjectReference Include="..\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj" />
-    <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj" />
-    <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
+    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+      <Project>{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}</Project>
+      <Name>Microsoft.Identity.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj">
+      <Project>{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}</Project>
+      <Name>Microsoft.Identity.Test.UIAutomation.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
+      <Project>{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}</Project>
+      <Name>Microsoft.Identity.Test.LabInfrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj">
+      <Project>{18559D36-C735-4933-AA86-398C8222D4F6}</Project>
+      <Name>Microsoft.Identity.Test.Common</Name>
+    </ProjectReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />

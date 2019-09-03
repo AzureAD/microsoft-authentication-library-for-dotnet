@@ -93,16 +93,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9B-427F-AC02-642BDF8D936B}"
 	ProjectSection(SolutionItems) = preProject
 		changelog.txt = changelog.txt
-		Directory.Build.props = Directory.Build.props
-		src\Directory.Build.targets = src\Directory.Build.targets
 		global.json = global.json
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "product", "product", "{4667ADF0-37FA-4306-BD2A-F55D6360143E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "microsoft.identity.client", "microsoft.identity.client", "{4667ADF0-37FA-4306-BD2A-F55D6360143E}"
 	ProjectSection(SolutionItems) = preProject
-		src\Directory.Build.props = src\Directory.Build.props
-		src\Directory.Build.targets = src\Directory.Build.targets
+		src\client\Directory.Build.props = src\client\Directory.Build.props
+		src\client\Directory.Build.targets = src\client\Directory.Build.targets
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.net45", "tests\Microsoft.Identity.Test.Integration.net45\Microsoft.Identity.Test.Integration.net45.csproj", "{6A93C76A-5DEB-4A4D-A004-1F611C67B4E6}"
