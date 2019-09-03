@@ -93,16 +93,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9B-427F-AC02-642BDF8D936B}"
 	ProjectSection(SolutionItems) = preProject
 		changelog.txt = changelog.txt
-		Directory.Build.props = Directory.Build.props
-		src\Directory.Build.targets = src\Directory.Build.targets
 		global.json = global.json
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "product", "product", "{4667ADF0-37FA-4306-BD2A-F55D6360143E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "microsoft.identity.client", "microsoft.identity.client", "{4667ADF0-37FA-4306-BD2A-F55D6360143E}"
 	ProjectSection(SolutionItems) = preProject
-		src\Directory.Build.props = src\Directory.Build.props
-		src\Directory.Build.targets = src\Directory.Build.targets
+		src\client\Directory.Build.props = src\client\Directory.Build.props
+		src\client\Directory.Build.targets = src\client\Directory.Build.targets
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.net45", "tests\Microsoft.Identity.Test.Integration.net45\Microsoft.Identity.Test.Integration.net45.csproj", "{6A93C76A-5DEB-4A4D-A004-1F611C67B4E6}"
@@ -126,6 +124,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Integration.net47", "tests\Microsoft.Identity.Test.Integration.net47\Microsoft.Identity.Test.Integration.net47.csproj", "{8C209A34-0F6E-488D-B1A9-D52B1354AC78}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Integration.net48", "tests\Microsoft.Identity.Test.Integration.net48\Microsoft.Identity.Test.Integration.net48.csproj", "{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Extensions.Web", "src\extensions.web\Microsoft.Identity.Client.Extensions.Web\Microsoft.Identity.Client.Extensions.Web.csproj", "{00665BF8-F364-4390-A835-D533FFC9ADDD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A1BDB0D8-A1F8-4203-A95F-31D0ABC4DF7B} = {A1BDB0D8-A1F8-4203-A95F-31D0ABC4DF7B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -580,6 +583,18 @@ Global
 		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Release|iPhone.Build.0 = Release|Any CPU
 		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Release|iPhone.Build.0 = Release|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{00665BF8-F364-4390-A835-D533FFC9ADDD}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
