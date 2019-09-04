@@ -1,8 +1,3 @@
-pool:
-  name: Hosted VS2017
-  demands:
-  - msbuild
-  - visualstudio
 
 variables:
   BuildPlatform: 'any cpu'
@@ -10,76 +5,234 @@ variables:
 
 #BUILD PHASE
 
-steps:
-- task: VSBuild@1
-  displayName: 'NuGet restore LibsAndSamples.sln'
-  inputs:
-    solution: LibsAndSamples.sln
-    vsVersion: 15.0
-    msbuildArgs: '/t:restore'
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
-  condition: succeededOrFailed()
+stages:
+- stage: UIAutomation
+  jobs:
+  - job: 'Build'
+    pool:
+        name: Hosted VS2017
+        demands:
+        - msbuild
+        - visualstudio
+    steps:
+    - task: VSBuild@1
+      displayName: 'NuGet restore LibsAndSamples.sln'
+      inputs:
+        solution: LibsAndSamples.sln
+        vsVersion: '15.0'
+        msbuildArgs: '/t:restore'
+        platform: '$(BuildPlatform)'
+        configuration: '$(BuildConfiguration)'
+      condition: succeededOrFailed()
 
-- task: VSBuild@1
-  displayName: 'Build solution LibsAndSamples.sln'
-  inputs:
-    solution: LibsAndSamples.sln
-    vsVersion: 15.0
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
-    clean: true
+    - task: VSBuild@1
+      displayName: 'Build solution LibsAndSamples.sln'
+      inputs:
+        solution: LibsAndSamples.sln
+        vsVersion: '15.0'
+        platform: '$(BuildPlatform)'
+        configuration: '$(BuildConfiguration)'
+        clean: true
 
-- task: DownloadSecureFile@1
-  displayName: 'Download Xamarin Ui Test Tools'
-  inputs:
-    secureFile: '8967c7eb-9f99-4122-ac28-84ae962a71bd'
+    - task: DownloadSecureFile@1
+      displayName: 'Download Xamarin Ui Test Tools'
+      inputs:
+        secureFile: '8967c7eb-9f99-4122-ac28-84ae962a71bd'
 
-- task: CopyFiles@2
-  displayName: 'Stage Xamarin Ui Test Tools'
-  inputs:
-    SourceFolder: '$(Agent.TempDirectory)'
-    Contents: 'test-cloud.exe'
-    TargetFolder: '$(build.artifactstagingdirectory)'
-    flattenFolders: true
+    - task: CopyFiles@2
+      displayName: 'Stage Xamarin Ui Test Tools'
+      inputs:
+        SourceFolder: '$(Agent.TempDirectory)'
+        Contents: 'test-cloud.exe'
+        TargetFolder: '$(build.artifactstagingdirectory)'
+        flattenFolders: true
 
-#Task group has not been exported, task groups are not supported yet
-# Get MSAL.NET PREPARE & PUBLISH AUTOMATION ARTIFACTS TASK GROUP HERE
+    - task: MSBuild@1
+      displayName: 'Build and Sign MSAL Android apk'
+      inputs:
+        solution: tests/devapps/XForms/XForms.Android/XForms.Android.csproj
+        configuration: Release
+        msbuildArguments: '/t:SignAndroidPackage'
+        clean: true
+        restoreNugetPackages: true
+
+    - task: CopyFiles@2
+      displayName: 'Stage App Center Android Automation Tests'
+      inputs:
+        SourceFolder: tests/Microsoft.Identity.Test.Android.UIAutomation
+        Contents: '**\bin\**'
+        TargetFolder: '$(build.artifactstagingdirectory)/AppCenter/MSAL/Android'
+
+    - task: CopyFiles@2
+      displayName: 'Stage App Center iOS Automation Tests'
+      inputs:
+        SourceFolder: tests/Microsoft.Identity.Test.iOS.UIAutomation
+        Contents: '**\bin\**'
+        TargetFolder: '$(build.artifactstagingdirectory)/AppCenter/MSAL/iOS'
+
+    - task: CopyFiles@2
+      displayName: 'Stage Xforms MSAL apk'
+      inputs:
+        SourceFolder: tests/devapps/XForms/XForms.Android
+        Contents: '**\*Signed.apk'
+        TargetFolder: '$(build.artifactstagingdirectory)'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: drop'
 
 
 # BUILD IOS APPCENTER APP PHASE
 
-pool:
-  name: Hosted Mac Internal
-  demands: Xamarin.iOS
+  - job: 'BuildiOSAppCenterApp'
+    pool:
+        name: Hosted Mac Internal
+        demands:
+        - Xamarin.iOS
+        - visualstudio
+    steps:
+    - task: AzureKeyVault@1
+      displayName: 'Azure Key Vault: BuildAutomation'
+      inputs:
+        azureSubscription: 'MSID MSAL.NET Automation KeyVault'
+        KeyVaultName: BuildAutomation
+        SecretsFilter: iOSAppcenterSigningCertPW
 
-steps:
-- task: AzureKeyVault@1
-  displayName: 'Azure Key Vault: BuildAutomation'
-  inputs:
-    azureSubscription: 'MSID MSAL.NET Automation KeyVault'
-    KeyVaultName: BuildAutomation
-    SecretsFilter: iOSAppcenterSigningCertPW
+    - task: DownloadSecureFile@1
+      displayName: 'Download Certificate'
+      inputs:
+        secureFile: AppCenteriOSTestCert.p12
 
-#Task group has not been exported, task groups are not supported yet
-# GET APPCENTER .NET BUILD IOS MSAL TASK GROUP
+    - task: DownloadSecureFile@1
+      displayName: 'Download Provisioning Provile'
+      inputs:
+        secureFile: 'iOS_Team_Provisioning_Profile.mobileprovision'
+
+    - task: DotNetCoreInstaller@0
+      displayName: 'Use .NET Core sdk 2.1.502'
+      inputs:
+        version: 2.1.502
+
+    - task: NuGetCommand@2
+      displayName: 'NuGet restore'
+      inputs:
+        restoreSolution: LibsMacOS.sln
+
+#Your build pipeline references an undefined variable named ‘iOSAppcenterSigningCertPW’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
+    - task: XamariniOS@1
+      displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
+      inputs:
+        solutionFile: LibsMacOS.sln
+        configuration: Debug
+        clean: true
+        runNugetRestore: false
+        args: '/p:APPCENTER_BUILD=1'
+        buildToolOption: msbuild
+        signingP12File: '$(Agent.TempDirectory)/AppCenteriOSTestCert.p12'
+        signingP12Password: '$(iOSAppcenterSigningCertPW)'
+        signingProvisioningProfileFile: '$(Agent.TempDirectory)/iOS_Team_Provisioning_Profile.mobileprovision'
+
+    - task: CopyFiles@2
+      displayName: 'Copy ipa to staging directory'
+      inputs:
+        SourceFolder: tests/devapps/XForms/XForms.iOS/bin/iPhone/Debug
+        Contents: '**/*.ipa'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        CleanTargetFolder: true
+        OverWrite: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: Xamarin.iOS'
+      inputs:
+        ArtifactName: Xamarin.iOS
 
 
 # APP CENTER ANDROID MSAL TESTS PHASE
 
-dependsOn: Phase_1
-pool:
-  name: Hosted VS2017
-#Task group has not been exported, task groups are not supported yet
-# GET APPCENTER .NET MSAL ANDROID HOSTED TASK GROUP
+  - job: 'AppCenterAndroidMsalTests'
+    dependsOn: 'Build'
+    pool:
+        name: Hosted VS2017
+    steps:
+
+#Your build pipeline references an undefined variable named ‘FastRun’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
+    - powershell: '$Import = $(FastRun)'
+      errorActionPreference: silentlyContinue
+      displayName: 'Import Variables'
+      continueOnError: true
+
+    - powershell: 'npm install -g appcenter-cli'
+      errorActionPreference: silentlyContinue
+      displayName: 'Install Appcenter Cli'
+
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Build Artifacts'
+      inputs:
+        artifactName: drop
+        itemPattern: '**/*'
+
+#Your build pipeline references an undefined variable named ‘TestSecret’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
+    - powershell: |
+        $secret = '$(TestSecret)'
+        $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\Android\bin\Debug\data.txt
+      displayName: 'Get Credentials'
+
+    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-ADAL" --devices c7afcb8d --app-path $(System.ArtifactsDirectory)\drop\bin\Release\com.Microsoft.XFormsDroid.MSAL-Signed.apk --test-series "msal" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\Android\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --include-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
+      displayName: 'Run App Center MSAL Tests (Fast)'
+      condition: and(succeeded(), eq(variables['FastRun'], 'true'))
+
+    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-ADAL" --devices c7afcb8d --app-path $(System.ArtifactsDirectory)\drop\bin\Release\com.Microsoft.XFormsDroid.MSAL-Signed.apk --test-series "msal" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\Android\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --exclude-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
+      displayName: 'Run App Center MSAL Tests (Full)'
+      condition: and(succeeded(), eq(variables['FastRun'], 'false'))
 
 
 # APP CENTER IOS MSAL TESTS PHASE
 
-dependsOn:
-  - Phase_4
-  - Phase_1
-pool:
-  name: Hosted VS2017
-#Task group has not been exported, task groups are not supported yet
-# GET APPCENTER .NET MSAL IOS HOSTED TASK GROUP
+  - job: 'AppCenterIosMsalTests'
+    dependsOn:
+    - 'Build'
+    - 'BuildiOSAppCenterApp'
+    pool:
+        name: Hosted VS2017
+    steps:
+
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Xamarin.iOS'
+      inputs:
+        artifactName: Xamarin.iOS
+        itemPattern: '**/*'
+
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Drop'
+      inputs:
+        artifactName: drop
+        itemPattern: '**/*'
+
+#Your build pipeline references an undefined variable named ‘FastRun’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
+    - powershell: |
+        $Import = $(FastRun)
+      errorActionPreference: silentlyContinue
+      displayName: 'Import Variables'
+      continueOnError: true
+
+    - powershell: 'npm install -g appcenter-cli'
+      errorActionPreference: silentlyContinue
+      displayName: 'Install Appcenter Cli'
+
+#Your build pipeline references an undefined variable named ‘TestSecret’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
+    - powershell: |
+        $secret = '$(TestSecret)'
+        $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\iOS\bin\Debug\data.txt
+      displayName: 'Get Credentials'
+
+    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-iOS" --devices a8568261 --app-path $(System.ArtifactsDirectory)\Xamarin.iOS\XForms.iOS.ipa --test-series "master" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\iOS\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --include-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
+      displayName: 'Run App Center MSAL Tests (Fast)'
+      condition: and(succeeded(), eq(variables['FastRun'], 'true'))
+
+    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-iOS" --devices a8568261 --app-path $(System.ArtifactsDirectory)\Xamarin.iOS\XForms.iOS.ipa --test-series "master" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\iOS\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --exclude-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
+      displayName: 'Run App Center MSAL Tests (Full)'
+      condition: and(succeeded(), eq(variables['FastRun'], 'false'))

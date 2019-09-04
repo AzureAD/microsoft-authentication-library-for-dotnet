@@ -51,7 +51,7 @@ steps:
   displayName: 'NuGet restore LibsAndSamples.sln'
   inputs:
     solution: LibsAndSamples.sln
-    vsVersion: 16.0
+    vsVersion: '16.0'
     msbuildArgs: '/t:restore'
     configuration: '$(BuildConfiguration)'
 
