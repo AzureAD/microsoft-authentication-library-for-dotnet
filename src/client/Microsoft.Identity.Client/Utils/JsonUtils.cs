@@ -29,6 +29,18 @@ namespace Microsoft.Identity.Client.Utils
             return string.Empty;
         }
 
+        public static T ExtractExistingOrDefault<T>(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out var val))
+            {
+                T obj = val.ToObject<T>();
+                json.Remove(key);
+                return obj;
+            }
+
+            return default(T);
+        }
+
         public static long ExtractParsedIntOrZero(JObject json, string key)
         {
             string strVal = ExtractExistingOrEmptyString(json, key);

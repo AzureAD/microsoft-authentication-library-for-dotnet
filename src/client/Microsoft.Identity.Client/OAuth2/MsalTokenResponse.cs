@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string ExtendedExpiresIn = "ext_expires_in";
         public const string Authority = "authority";
         public const string FamilyId = "foci";
+        public const string RefreshIn = "refresh_in";
     }
 
     [DataContract]
@@ -32,6 +33,7 @@ namespace Microsoft.Identity.Client.OAuth2
     {
         private long _expiresIn;
         private long _extendedExpiresIn;
+        private long _refreshIn;
 
         [DataMember(Name = TokenResponseClaim.TokenType, IsRequired = false)]
         public string TokenType { get; set; }
@@ -73,14 +75,27 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
+        [DataMember(Name = TokenResponseClaim.RefreshIn, IsRequired = false)]
+        public long RefreshIn
+        {
+            get => _refreshIn;
+            set
+            {
+                _refreshIn = value;
+                AccessTokenRefreshOn = DateTime.UtcNow + TimeSpan.FromSeconds(_refreshIn);
+            }
+        }
+
         /// <summary>
         /// Optional field, FOCI support.
         /// </summary>
-        [DataMember(Name=TokenResponseClaim.FamilyId, IsRequired = false)]
+        [DataMember(Name = TokenResponseClaim.FamilyId, IsRequired = false)]
         public string FamilyId { get; set; }
 
         public DateTimeOffset AccessTokenExpiresOn { get; private set; }
         public DateTimeOffset AccessTokenExtendedExpiresOn { get; private set; }
+
+        public DateTimeOffset? AccessTokenRefreshOn { get; private set; }
 
         public string Authority { get; private set; }
 
@@ -95,7 +110,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 };
             }
 
-            return new MsalTokenResponse
+            var response =  new MsalTokenResponse
             {
                 Authority = responseDictionary.ContainsKey(BrokerResponseConst.Authority)
                     ? AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.Authority]))
@@ -109,12 +124,21 @@ namespace Microsoft.Identity.Client.OAuth2
                 CorrelationId = responseDictionary[BrokerResponseConst.CorrelationId],
                 Scope = responseDictionary[BrokerResponseConst.Scope],
                 ExpiresIn = responseDictionary.ContainsKey(BrokerResponseConst.ExpiresOn)
-                ? long.Parse(responseDictionary[BrokerResponseConst.ExpiresOn].Split('.')[0], CultureInfo.InvariantCulture)
-                : Convert.ToInt64(DateTime.UtcNow, CultureInfo.InvariantCulture),
+                    ? long.Parse(responseDictionary[BrokerResponseConst.ExpiresOn].Split('.')[0], CultureInfo.InvariantCulture)
+                    : Convert.ToInt64(DateTime.UtcNow, CultureInfo.InvariantCulture),
                 ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
                     ? responseDictionary[BrokerResponseConst.ClientInfo]
                     : null,
             };
+
+            if (responseDictionary.ContainsKey(TokenResponseClaim.RefreshIn))
+            {
+                response.RefreshIn = long.Parse(
+                    responseDictionary[TokenResponseClaim.RefreshIn], 
+                    CultureInfo.InvariantCulture);
+            }
+
+            return response;
         }
     }
 }

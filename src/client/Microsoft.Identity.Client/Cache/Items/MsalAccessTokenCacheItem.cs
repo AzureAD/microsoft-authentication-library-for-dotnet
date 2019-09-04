@@ -34,11 +34,12 @@ namespace Microsoft.Identity.Client.Cache.Items
                 response.AccessTokenExpiresOn,
                 response.AccessTokenExtendedExpiresOn,
                 response.ClientInfo,
-                userId)
+                userId,
+                response.AccessTokenRefreshOn)
         {
         }
 
-        internal MsalAccessTokenCacheItem(
+        internal /* for test only */ MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,
             string scopes,
@@ -47,7 +48,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             DateTimeOffset accessTokenExpiresOn,
             DateTimeOffset accessTokenExtendedExpiresOn,
             string rawClientInfo,
-            string userId = null)
+            string userId = null,
+            DateTimeOffset? accessTokenRefreshOn = null)
             : this()
         {
             Environment = preferredCacheEnv;
@@ -59,6 +61,11 @@ namespace Microsoft.Identity.Client.Cache.Items
             ExtendedExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(accessTokenExtendedExpiresOn);
             CachedAt = CoreHelpers.CurrDateTimeInUnixTimestamp();
             RawClientInfo = rawClientInfo;
+
+            if (accessTokenRefreshOn.HasValue)
+            {
+                RefreshOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(accessTokenRefreshOn.Value);
+            }
 
             //Adfs does not send back client info, so HomeAccountId must be explicitly set
             HomeAccountId = userId;
@@ -81,8 +88,13 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string CachedAt { get; set; }
         internal string ExpiresOnUnixTimestamp { get; set; }
         internal string ExtendedExpiresOnUnixTimestamp { get; set; }
+
+        /// <summary>
+        /// If set, AT should be refreshed earlier to make sure the token cache
+        /// always has ATs with a long life. 
+        /// </summary>
+        internal string RefreshOnUnixTimestamp { get; set; }
         public string UserAssertionHash { get; set; }
- 
 
         internal bool IsAdfs { get; set; }
 
@@ -94,6 +106,17 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal DateTimeOffset ExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExpiresOnUnixTimestamp);
         internal DateTimeOffset ExtendedExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExtendedExpiresOnUnixTimestamp);
+        internal DateTimeOffset? RefreshOn
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(RefreshOnUnixTimestamp) ? 
+                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp) : 
+                    (DateTimeOffset?)null;
+            }
+        }
+        internal DateTimeOffset CachedAtOffset => CoreHelpers.UnixTimestampStringToDateTime(CachedAt);
+
         public bool IsExtendedLifeTimeToken { get; set; }
 
         internal static MsalAccessTokenCacheItem FromJsonString(string json)
@@ -127,6 +150,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 CachedAt = cachedAt.ToString(CultureInfo.InvariantCulture),
                 ExpiresOnUnixTimestamp = expiresOn.ToString(CultureInfo.InvariantCulture),
                 ExtendedExpiresOnUnixTimestamp = extendedExpiresOn.ToString(CultureInfo.InvariantCulture),
+                RefreshOnUnixTimestamp = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.RefreshOn),
                 UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
             };
 
@@ -145,6 +169,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.CachedAt, CachedAt);
             SetItemIfValueNotNull(json, StorageJsonKeys.ExpiresOn, ExpiresOnUnixTimestamp);
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn, ExtendedExpiresOnUnixTimestamp);
+            SetItemIfValueNotNull(json, StorageJsonKeys.RefreshOn, RefreshOnUnixTimestamp);
 
             // previous versions of msal used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compat
@@ -171,6 +196,12 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal MsalIdTokenCacheKey GetIdTokenItemKey()
         {
             return new MsalIdTokenCacheKey(Environment, TenantId, HomeAccountId, ClientId);
+        }
+
+        internal bool NeedsRefresh()
+        {
+            return RefreshOn.HasValue &&
+                RefreshOn.Value < DateTime.UtcNow;
         }
     }
 }

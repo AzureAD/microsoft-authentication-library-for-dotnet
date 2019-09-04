@@ -85,23 +85,52 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+           
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+
             // Look for access token
             if (!_silentParameters.ForceRefresh)
             {
-                MsalAccessTokenCacheItem msalAccessTokenItem =
-                    await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
-                if (msalAccessTokenItem != null)
+                if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
                 {
-                    var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
-                    return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem, AuthenticationRequestParameters.RequestContext.CorrelationId);
+                    logger.Info("Returning access token found in cache. RefreshOn exists ? "
+                        + cachedAccessTokenItem.RefreshOn.HasValue);
+                    return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
             }
 
-            return await RefreshRTAsync(cancellationToken).ConfigureAwait(false);
+            // No AT or AT.RefreshOn > Now --> refresh the RT
+            try
+            {
+                return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (MsalServiceException e)
+            {
+                bool isAadUnavailable = e.IsAadUnavailable();
+
+                logger.Warning($"Refreshing the RT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
+
+                if (cachedAccessTokenItem != null && isAadUnavailable)
+                {
+                    logger.Info("Returning existing access token. It is not expired, but should be refreshed.");
+                    return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
+                }
+
+                logger.Warning("Failed to refresh the RT and cannot use existing AT (expired or missing).");
+                throw;
+            }
         }
 
-        private async Task<AuthenticationResult> RefreshRTAsync(CancellationToken cancellationToken)
+        private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {
+            var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
+            return new AuthenticationResult(cachedAccessTokenItem, msalIdTokenItem, AuthenticationRequestParameters.RequestContext.CorrelationId);
+        }
+
+        private async Task<AuthenticationResult> RefreshRtOrFailAsync(CancellationToken cancellationToken)
         {
             // Try FOCI first
             MsalTokenResponse msalTokenResponse = await TryGetTokenUsingFociAsync(cancellationToken)
@@ -209,8 +238,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 throw new MsalUiRequiredException(
                     MsalError.NoTokensFoundError,
-                    MsalErrorMessage.NoTokensFoundError, 
-                    null, 
+                    MsalErrorMessage.NoTokensFoundError,
+                    null,
                     UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
 
