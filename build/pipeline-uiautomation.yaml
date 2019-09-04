@@ -2,6 +2,7 @@
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
+  FastRun: true
 
 #BUILD PHASE
 
