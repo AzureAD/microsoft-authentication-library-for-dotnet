@@ -1241,6 +1241,48 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        [TestCategory("Regression")]
+        [WorkItem(1365)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1365
+        public async Task PCAAuthority_DirtiedByATS_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                await app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
+
+                // ATS must not update the PCA authority
+                var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
+                await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
+
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                // this would fail because the request should go to /common but instead it goes to tenanted authority
+                await app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
+
+            }
+        }
+
+
         private static PublicClientApplication CreatePcaFromFileWithAuthority(
             MockHttpManager httpManager,
             string authority = null)
