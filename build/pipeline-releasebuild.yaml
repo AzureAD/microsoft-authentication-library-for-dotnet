@@ -45,8 +45,6 @@ steps:
   inputs:
     arguments: '-m pip install msal'
 
-#Your build pipeline references an undefined variable named ‘BuildConfiguration’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-
 - task: VSBuild@1
   displayName: 'NuGet restore LibsAndSamples.sln'
   inputs:
@@ -55,10 +53,6 @@ steps:
     msbuildArgs: '/t:restore'
     configuration: '$(BuildConfiguration)'
 
-#Your build pipeline references an undefined variable named ‘MsalClientSemVer’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘BuildPlatform’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘BuildConfiguration’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-
 - task: VSBuild@1
   displayName: 'Build solution LibsAndSamples.sln'
   inputs:
@@ -66,8 +60,6 @@ steps:
     msbuildArgs: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true'
     platform: '$(BuildPlatform)'
     configuration: '$(BuildConfiguration)'
-
-#Your build pipeline references an undefined variable named ‘BuildConfiguration’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 
 - task: DotNetCoreCLI@2
   displayName: 'Run MSAL unit tests'
@@ -84,8 +76,6 @@ steps:
   displayName: 'Check Roslyn Results '
   inputs:
     RoslynAnalyzers: true
-
-#Your build pipeline references an undefined variable named ‘BuildConfiguration’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 
 - task: VSBuild@1
   displayName: 'Pack MSAL'
@@ -207,8 +197,6 @@ steps:
   displayName: 'Check BinSkim Results'
   inputs:
     BinSkim: true
-
-#Your build pipeline references an undefined variable named ‘BuildConfiguration’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 
 - task: VSBuild@1
   displayName: 'Pack MSAL'
