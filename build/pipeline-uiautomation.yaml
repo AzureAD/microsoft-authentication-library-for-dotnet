@@ -88,7 +88,6 @@ stages:
         name: Hosted Mac Internal
         demands:
         - Xamarin.iOS
-        - visualstudio
     steps:
     - task: AzureKeyVault@1
       displayName: 'Azure Key Vault: BuildAutomation'
