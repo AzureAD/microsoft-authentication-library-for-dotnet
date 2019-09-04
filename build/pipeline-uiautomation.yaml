@@ -1,0 +1,85 @@
+pool:
+  name: Hosted VS2017
+  demands:
+  - msbuild
+  - visualstudio
+
+variables:
+  BuildPlatform: 'any cpu'
+  BuildConfiguration: 'debug'
+
+#BUILD PHASE
+
+steps:
+- task: VSBuild@1
+  displayName: 'NuGet restore LibsAndSamples.sln'
+  inputs:
+    solution: LibsAndSamples.sln
+    vsVersion: 15.0
+    msbuildArgs: '/t:restore'
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+  condition: succeededOrFailed()
+
+- task: VSBuild@1
+  displayName: 'Build solution LibsAndSamples.sln'
+  inputs:
+    solution: LibsAndSamples.sln
+    vsVersion: 15.0
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+    clean: true
+
+- task: DownloadSecureFile@1
+  displayName: 'Download Xamarin Ui Test Tools'
+  inputs:
+    secureFile: '8967c7eb-9f99-4122-ac28-84ae962a71bd'
+
+- task: CopyFiles@2
+  displayName: 'Stage Xamarin Ui Test Tools'
+  inputs:
+    SourceFolder: '$(Agent.TempDirectory)'
+    Contents: 'test-cloud.exe'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+    flattenFolders: true
+
+#Task group has not been exported, task groups are not supported yet
+# Get MSAL.NET PREPARE & PUBLISH AUTOMATION ARTIFACTS TASK GROUP HERE
+
+
+# BUILD IOS APPCENTER APP PHASE
+
+pool:
+  name: Hosted Mac Internal
+  demands: Xamarin.iOS
+
+steps:
+- task: AzureKeyVault@1
+  displayName: 'Azure Key Vault: BuildAutomation'
+  inputs:
+    azureSubscription: 'MSID MSAL.NET Automation KeyVault'
+    KeyVaultName: BuildAutomation
+    SecretsFilter: iOSAppcenterSigningCertPW
+
+#Task group has not been exported, task groups are not supported yet
+# GET APPCENTER .NET BUILD IOS MSAL TASK GROUP
+
+
+# APP CENTER ANDROID MSAL TESTS PHASE
+
+dependsOn: Phase_1
+pool:
+  name: Hosted VS2017
+#Task group has not been exported, task groups are not supported yet
+# GET APPCENTER .NET MSAL ANDROID HOSTED TASK GROUP
+
+
+# APP CENTER IOS MSAL TESTS PHASE
+
+dependsOn:
+  - Phase_4
+  - Phase_1
+pool:
+  name: Hosted VS2017
+#Task group has not been exported, task groups are not supported yet
+# GET APPCENTER .NET MSAL IOS HOSTED TASK GROUP

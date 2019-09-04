@@ -4,9 +4,6 @@ pool:
   - msbuild
   - visualstudio
 
-#Your build pipeline references an undefined variable named ‘AzureADIdentityDivisionTestAgent’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘RSATestCertDotNet’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘RSATestCertDotNet’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
