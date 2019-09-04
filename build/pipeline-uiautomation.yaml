@@ -117,8 +117,6 @@ stages:
       inputs:
         restoreSolution: LibsMacOS.sln
 
-#Your build pipeline references an undefined variable named ‘iOSAppcenterSigningCertPW’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-
     - task: XamariniOS@1
       displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
       inputs:
@@ -170,10 +168,15 @@ stages:
         artifactName: drop
         itemPattern: '**/*'
 
-#Your build pipeline references an undefined variable named ‘TestSecret’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+    - task: AzureKeyVault@1
+      displayName: 'Azure Key Vault: AzureADIdentityDivisionTestAgentSecret'
+      inputs:
+        azureSubscription: 'MSID MSAL.NET Automation KeyVault'
+        KeyVaultName: BuildAutomation
+        SecretsFilter: AzureADIdentityDivisionTestAgentSecret
 
     - powershell: |
-        $secret = '$(TestSecret)'
+        $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
         $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\Android\bin\Debug\data.txt
       displayName: 'Get Credentials'
 
@@ -208,8 +211,7 @@ stages:
         artifactName: drop
         itemPattern: '**/*'
 
-    - powershell: |
-        $Import = $(FastRun)
+    - powershell: '$Import = $(FastRun)'
       errorActionPreference: silentlyContinue
       displayName: 'Import Variables'
       continueOnError: true
@@ -218,10 +220,15 @@ stages:
       errorActionPreference: silentlyContinue
       displayName: 'Install Appcenter Cli'
 
-#Your build pipeline references an undefined variable named ‘TestSecret’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+    - task: AzureKeyVault@1
+      displayName: 'Azure Key Vault: AzureADIdentityDivisionTestAgentSecret'
+      inputs:
+        azureSubscription: 'MSID MSAL.NET Automation KeyVault'
+        KeyVaultName: BuildAutomation
+        SecretsFilter: AzureADIdentityDivisionTestAgentSecret
 
     - powershell: |
-        $secret = '$(TestSecret)'
+        $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
         $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\iOS\bin\Debug\data.txt
       displayName: 'Get Credentials'
 
