@@ -1,12 +1,21 @@
 
-# UI Automation builds should be triggered on every branch except master (so we don't trigger again after a merge)
+# UI Automation builds should be triggered on every push to master, and on any PR making its way to master.
 trigger:
   branches:
     include:
-    - '*'
-    exclude:
     - master
 
+pr:
+- master
+
+# Create a daily midnight build for UI automation builds on master.
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily midnight build
+  branches:
+    include:
+    - master
+    
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
