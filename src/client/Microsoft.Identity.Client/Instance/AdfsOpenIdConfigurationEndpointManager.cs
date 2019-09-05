@@ -55,6 +55,5 @@ namespace Microsoft.Identity.Client.Instance
 
             return authorityInfo.CanonicalAuthority + Constants.WellKnownOpenIdConfigurationPath;
         }
-
     }
 }

@@ -17,8 +17,8 @@ namespace Microsoft.Identity.Client.Instance
     {
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
 
-        public AdfsAuthority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
-            : base(serviceBundle, authorityInfo)
+        public AdfsAuthority(AuthorityInfo authorityInfo)
+            : base(authorityInfo)
         {
         }
 

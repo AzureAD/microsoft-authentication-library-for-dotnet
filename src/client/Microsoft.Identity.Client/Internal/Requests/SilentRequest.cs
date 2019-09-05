@@ -77,10 +77,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.Account = account;
 
             AuthenticationRequestParameters.Authority = AuthenticationRequestParameters.AuthorityOverride == null
-                ? Authority.CreateAuthorityWithAccountTenant(ServiceBundle, account)
-                : Instance.Authority.CreateAuthorityWithOverride(
-                    ServiceBundle,
-                    AuthenticationRequestParameters.AuthorityOverride);
+                ? Authority.CreateAuthorityWithAccountTenant(ServiceBundle.Config.AuthorityInfo, account)
+                : Authority.CreateAuthorityWithOverride(
+                    AuthenticationRequestParameters.AuthorityOverride, 
+                    ServiceBundle.Config.AuthorityInfo);
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)

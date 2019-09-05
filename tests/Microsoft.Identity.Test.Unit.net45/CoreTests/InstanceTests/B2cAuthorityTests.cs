@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             try
             {
                 var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-                var instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/tfp/");
+                var instance = Authority.CreateAuthority("https://login.microsoftonline.in/tfp/");
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
 
@@ -83,7 +83,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
 
                 Authority instance = Authority.CreateAuthority(
-                    serviceBundle,
                     TestConstants.B2CLoginAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
@@ -121,7 +120,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
 
                 Authority instance = Authority.CreateAuthority(
-                    harness.ServiceBundle,
                     "https://login.microsoftonline.com/tfp/mytenant.com/my-policy/");
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
@@ -157,16 +155,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/policy/";
             const string UriVanityPort = TestConstants.B2CLoginAuthority;
 
-            var authority = new B2CAuthority(serviceBundle, new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));
+            var authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));
             Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
 
-            authority = new B2CAuthority(serviceBundle, new AuthorityInfo(AuthorityType.B2C, UriDefaultPort, true));
+            authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriDefaultPort, true));
             Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
 
-            authority = new B2CAuthority(serviceBundle, new AuthorityInfo(AuthorityType.B2C, UriCustomPort, true));
+            authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriCustomPort, true));
             Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
 
-            authority = new B2CAuthority(serviceBundle, new AuthorityInfo(AuthorityType.B2C, UriVanityPort, true));
+            authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriVanityPort, true));
             Assert.AreEqual(UriVanityPort, authority.AuthorityInfo.CanonicalAuthority);
         }
     }

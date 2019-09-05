@@ -14,8 +14,8 @@ namespace Microsoft.Identity.Client.Instance
         public const string Prefix = "tfp"; // The http path of B2C authority looks like "/tfp/<your_tenant_name>/..."
         public const string B2CCanonicalAuthorityTemplate = "https://{0}/{1}/{2}/{3}/";
 
-        internal B2CAuthority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
-            : base(serviceBundle, authorityInfo)
+        internal B2CAuthority(AuthorityInfo authorityInfo)
+            : base(authorityInfo)
         {
         }
 

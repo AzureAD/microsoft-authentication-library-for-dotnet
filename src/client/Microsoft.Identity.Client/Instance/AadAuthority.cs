@@ -14,9 +14,7 @@ namespace Microsoft.Identity.Client.Instance
         public const string DefaultTrustedHost = "login.microsoftonline.com";
         public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
 
-        internal AadAuthority(
-            IServiceBundle serviceBundle,
-            AuthorityInfo authorityInfo) : base(serviceBundle, authorityInfo)
+        internal AadAuthority(AuthorityInfo authorityInfo) : base(authorityInfo)
         {
         }
 
