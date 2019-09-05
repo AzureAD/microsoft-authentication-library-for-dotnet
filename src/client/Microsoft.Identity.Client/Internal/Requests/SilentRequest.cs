@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.Account = account;
 
             AuthenticationRequestParameters.Authority = AuthenticationRequestParameters.AuthorityOverride == null
-                ? Authority.CreateAuthorityWithAccountTenant(ServiceBundle.Config.AuthorityInfo, account)
+                ? Authority.CreateAuthorityWithTenant(ServiceBundle.Config.AuthorityInfo, account?.HomeAccountId?.TenantId)
                 : Authority.CreateAuthorityWithOverride(
                     AuthenticationRequestParameters.AuthorityOverride, 
                     ServiceBundle.Config.AuthorityInfo);

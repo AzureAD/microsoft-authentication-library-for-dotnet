@@ -932,7 +932,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [Description("ClientApplicationBase.GetAuthoriy tests")]
+        [Description("ClientApplicationBase.GetAuthority tests")]
         public void GetAuthority_AccountWithNullIdPassed_CommonAuthorityReturned()
         {
             PublicClientApplication app = PublicClientApplicationBuilder
@@ -940,12 +940,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
-            var authoriy = Authority.CreateAuthorityWithAccountTenant(app.ServiceBundle.Config.AuthorityInfo, new Account(null, TestConstants.Name, TestConstants.ProductionPrefNetworkEnvironment));
+            var authoriy = Authority.CreateAuthorityWithTenant(app.ServiceBundle.Config.AuthorityInfo, null);
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]
-        [Description("ClientApplicationBase.GetAuthoriy tests")]
+        [Description("ClientApplicationBase.GetAuthority tests")]
         public void GetAuthority_AccountWithIdPassed_TenantedAuthorityUsed()
         {
             PublicClientApplication app = PublicClientApplicationBuilder
@@ -953,12 +953,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
-            var authority = Authority.CreateAuthorityWithAccountTenant(
+            var authority = Authority.CreateAuthorityWithTenant(
                 app.ServiceBundle.Config.AuthorityInfo,
-                new Account(
-                    "objectId." + TestConstants.Utid,
-                    TestConstants.Name,
-                    TestConstants.ProductionPrefNetworkEnvironment));
+                TestConstants.Utid);
 
             Assert.AreEqual(TestConstants.AuthorityTestTenant, authority.AuthorityInfo.CanonicalAuthority);
         }

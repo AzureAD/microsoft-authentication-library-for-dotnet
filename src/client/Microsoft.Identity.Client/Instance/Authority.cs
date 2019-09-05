@@ -7,6 +7,9 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance
 {
+    /// <summary>
+    /// 
+    /// </summary>
     internal abstract class Authority
     {
         protected static readonly HashSet<string> TenantlessTenantNames = new HashSet<string>(
@@ -20,11 +23,19 @@ namespace Microsoft.Identity.Client.Instance
 
         protected Authority(AuthorityInfo authorityInfo)
         {
-            AuthorityInfo = authorityInfo;
+            if (authorityInfo==null)
+            {
+                throw new ArgumentNullException(nameof(authorityInfo));
+            }
+
+            // Don't reuse the same authority info, instead copy it
+            // to prevent objects updating each other's details
+            AuthorityInfo = new AuthorityInfo(authorityInfo);
         }
 
         public AuthorityInfo AuthorityInfo { get; }
 
+        #region Builders
         public static Authority CreateAuthorityWithOverride(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
         {
             switch (requestAuthorityInfo.AuthorityType)
@@ -59,16 +70,42 @@ namespace Microsoft.Identity.Client.Instance
             return CreateAuthorityWithOverride(authorityInfo, null);
         }
 
-        /// <summary>
-        /// Creates a tenanted authority, using account tenantId, if the one from the service bundle is tenantless
-        /// </summary>
-        public static Authority CreateAuthorityWithAccountTenant(AuthorityInfo authorityInfo, IAccount account)
+        internal static Authority CreateAuthorityWithTenant(AuthorityInfo authorityInfo, string tenantId)
         {
-            var authority = CreateAuthority(authorityInfo);
-            authority.UpdateWithTenant(account?.HomeAccountId?.TenantId);
+            var initialAuthority = CreateAuthority(authorityInfo);
 
-            return authority;
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                return initialAuthority;
+            }
+
+            string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId);
+
+            return CreateAuthority(tenantedAuthority, authorityInfo.ValidateAuthority);
         }
+
+        internal static Authority CreateAuthorityWithEnvironment(AuthorityInfo authorityInfo, string environment)
+        {
+            var uriBuilder = new UriBuilder(authorityInfo.CanonicalAuthority)
+            {
+                Host = environment
+            };
+
+           return CreateAuthority(uriBuilder.Uri.AbsoluteUri, authorityInfo.ValidateAuthority);
+        }
+
+        //internal static string CreateAuthorityWithEnvironment(string authority, string environment)
+        //{
+        //    var uriBuilder = new UriBuilder(authority)
+        //    {
+        //        Host = environment
+        //    };
+
+        //    return uriBuilder.Uri.AbsoluteUri;
+        //}
+
+
+        #endregion
 
         internal static string GetFirstPathSegment(string authority)
         {
@@ -79,6 +116,7 @@ namespace Microsoft.Identity.Client.Instance
             }
             return string.Empty;
         }
+
 
         internal static AuthorityType GetAuthorityType(string authority)
         {
@@ -106,24 +144,6 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId);
 
-        /// <summary>
-        /// Updates a tenantless authority with a tenant Id. NO-OP for B2C and ADFS.
-        /// </summary>
-        /// <param name="tenantId"></param>
-        internal void UpdateWithTenant(string tenantId)
-        {
-            AuthorityInfo.CanonicalAuthority = GetTenantedAuthority(tenantId);
-        }
-
-        internal static string CreateAuthorityWithEnvironment(string authority, string environment)
-        {
-            var uriBuilder = new UriBuilder(authority)
-            {
-                Host = environment
-            };
-
-            return uriBuilder.Uri.AbsoluteUri;
-        }
 
         private static void CheckB2CAuthorityHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
         {

@@ -3,10 +3,14 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
+    /// <remarks>
+    /// This class must be kept immutable
+    /// </remarks>
     internal class AuthorityInfo
     {
         public AuthorityInfo(
@@ -57,12 +61,32 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        private AuthorityInfo(string host, string canonicalAuthority, AuthorityType authorityType, string userRealmUriPrefix, bool validateAuthority)
+        {
+            Host = host;
+            CanonicalAuthority = canonicalAuthority;
+            AuthorityType = authorityType;
+            UserRealmUriPrefix = userRealmUriPrefix;
+            ValidateAuthority = validateAuthority;
+        }
+
+        public AuthorityInfo(AuthorityInfo other) : 
+            this(
+                other.Host,
+                other.CanonicalAuthority,
+                other.AuthorityType,
+                other.UserRealmUriPrefix,
+                other.ValidateAuthority)
+        {
+        }
+
         public string Host { get; }
-        public string CanonicalAuthority { get; set; }
+        public string CanonicalAuthority { get; }
         public AuthorityType AuthorityType { get; }
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
 
+        #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
         {
             string canonicalUri = CanonicalizeAuthorityUri(authorityUri);
@@ -150,69 +174,48 @@ namespace Microsoft.Identity.Client
             return new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
         }
 
+        #endregion
+
+        #region Helpers
         internal static string GetCloudUrl(AzureCloudInstance azureCloudInstance)
         {
             switch (azureCloudInstance)
             {
-            case AzureCloudInstance.AzurePublic:
-                return "https://login.microsoftonline.com";
-            case AzureCloudInstance.AzureChina:
-                return "https://login.chinacloudapi.cn";
-            case AzureCloudInstance.AzureGermany:
-                return "https://login.microsoftonline.de";
-            case AzureCloudInstance.AzureUsGovernment:
-                return "https://login.microsoftonline.us";
-            default:
-                throw new ArgumentException(nameof(azureCloudInstance));
+                case AzureCloudInstance.AzurePublic:
+                    return "https://login.microsoftonline.com";
+                case AzureCloudInstance.AzureChina:
+                    return "https://login.chinacloudapi.cn";
+                case AzureCloudInstance.AzureGermany:
+                    return "https://login.microsoftonline.de";
+                case AzureCloudInstance.AzureUsGovernment:
+                    return "https://login.microsoftonline.us";
+                default:
+                    throw new ArgumentException(nameof(azureCloudInstance));
             }
-        }
-
-        internal static string GetAuthorityUri(
-            AzureCloudInstance azureCloudInstance,
-            AadAuthorityAudience authorityAudience,
-            string tenantId = null)
-        {
-            string cloudUrl = GetCloudUrl(azureCloudInstance);
-            string tenantValue = GetAadAuthorityAudienceValue(authorityAudience, tenantId);
-
-            return string.Format(CultureInfo.InvariantCulture, "{0}/{1}", cloudUrl, tenantValue);
         }
 
         internal static string GetAadAuthorityAudienceValue(AadAuthorityAudience authorityAudience, string tenantId)
         {
             switch (authorityAudience)
             {
-            case AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount:
-                return "common";
-            case AadAuthorityAudience.AzureAdMultipleOrgs:
-                return "organizations";
-            case AadAuthorityAudience.PersonalMicrosoftAccount:
-                return "consumers";
-            case AadAuthorityAudience.AzureAdMyOrg:
-                if (string.IsNullOrWhiteSpace(tenantId))
-                {
-                    throw new InvalidOperationException(MsalErrorMessage.AzureAdMyOrgRequiresSpecifyingATenant);
-                }
+                case AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount:
+                    return "common";
+                case AadAuthorityAudience.AzureAdMultipleOrgs:
+                    return "organizations";
+                case AadAuthorityAudience.PersonalMicrosoftAccount:
+                    return "consumers";
+                case AadAuthorityAudience.AzureAdMyOrg:
+                    if (string.IsNullOrWhiteSpace(tenantId))
+                    {
+                        throw new InvalidOperationException(MsalErrorMessage.AzureAdMyOrgRequiresSpecifyingATenant);
+                    }
 
-                return tenantId;
-            default:
-                throw new ArgumentException(nameof(authorityAudience));
+                    return tenantId;
+                default:
+                    throw new ArgumentException(nameof(authorityAudience));
             }
         }
 
-
-        // TODO: consolidate this with the same method in Authority.cs
-        private static string GetFirstPathSegment(string authority)
-        {
-            var uri = new Uri(authority);
-            if (uri.Segments.Length >= 2)
-            {
-                return new Uri(authority).Segments[1]
-                                         .TrimEnd('/');
-            }
-
-            throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
-        }
 
         internal static string CanonicalizeAuthorityUri(string uri)
         {
@@ -223,6 +226,8 @@ namespace Microsoft.Identity.Client
 
             return uri.ToLowerInvariant();
         }
+
+        #endregion
 
         private static void ValidateAuthorityUri(string authority)
         {
@@ -253,6 +258,30 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath);
             }
+        }
+
+        private static string GetAuthorityUri(
+            AzureCloudInstance azureCloudInstance,
+            AadAuthorityAudience authorityAudience,
+            string tenantId = null)
+        {
+            string cloudUrl = GetCloudUrl(azureCloudInstance);
+            string tenantValue = GetAadAuthorityAudienceValue(authorityAudience, tenantId);
+
+            return string.Format(CultureInfo.InvariantCulture, "{0}/{1}", cloudUrl, tenantValue);
+        }
+
+        // TODO: consolidate this with the same method in Authority.cs
+        private static string GetFirstPathSegment(string authority)
+        {
+            var uri = new Uri(authority);
+            if (uri.Segments.Length >= 2)
+            {
+                return new Uri(authority).Segments[1]
+                                         .TrimEnd('/');
+            }
+
+            throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
         }
     }
 }

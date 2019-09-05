@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public Authority Authority { get; set; }
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
-        public string TenantUpdatedCanonicalAuthority { get; set; }
+        public Authority TenantUpdatedCanonicalAuthority { get; set; }
         public ICacheSessionManager CacheSessionManager { get; }
         public SortedSet<string> Scope { get; }
         public string ClientId { get; }

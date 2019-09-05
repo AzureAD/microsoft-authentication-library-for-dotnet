@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -45,6 +46,31 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         {
             Assert.IsTrue(DictionariesAreEqual(dict1, dict2, valueComparer));
         }
+
+        public static void IsImmutable<T>()
+        {
+            Assert.IsTrue(IsImmutable(typeof(T)));
+        }
+
+        private static bool IsImmutable(Type type)
+        {
+            if (type == typeof(string) || type.GetTypeInfo().IsPrimitive || type.GetTypeInfo().IsEnum)
+            {
+                return true;
+            }
+
+            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var isShallowImmutable = fieldInfos.All(f => f.IsInitOnly);
+            
+            if (!isShallowImmutable)
+            {
+                return false;
+            }
+
+            var isDeepImmutable = fieldInfos.All(f => IsImmutable(f.FieldType));
+            return isDeepImmutable;
+        }
+
 
         private static bool DictionariesAreEqual<TKey, TValue>(
             IDictionary<TKey, TValue> dict1, 
