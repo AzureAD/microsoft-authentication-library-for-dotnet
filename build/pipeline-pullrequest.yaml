@@ -4,7 +4,7 @@ trigger:
   branches:
     include:
     - '*'
-    exclue:
+    exclude:
     - master
 
 pool:
