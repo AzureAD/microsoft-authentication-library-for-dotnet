@@ -40,12 +40,6 @@ steps:
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
-
-# Nuget Restore and Build LibsAndSamples.sln
-- template: template-restore-build-libsandsamples.yaml
-  parameters:
-    BuildPlatform: '$(BuildPlatform)'
-    BuildConfiguration: '$(BuildConfiguration)'
     MsBuildArguments: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true'
 
 # Run Unit Tests

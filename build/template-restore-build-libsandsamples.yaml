@@ -4,7 +4,7 @@
 parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
-  MsBuildArguments: ''
+  MsBuildArguments: '/p:RunCodeAnalysis=false '
 
 steps:
 - task: VSBuild@1
