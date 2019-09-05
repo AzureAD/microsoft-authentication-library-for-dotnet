@@ -4,6 +4,8 @@ trigger:
   branches:
     include:
     - master
+    exclude:
+    - markzuber/*
 
 pr:
 - master
@@ -15,7 +17,7 @@ schedules:
   branches:
     include:
     - master
-    
+
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
@@ -33,24 +35,12 @@ stages:
         - msbuild
         - visualstudio
     steps:
-    - task: VSBuild@1
-      displayName: 'NuGet restore LibsAndSamples.sln'
-      inputs:
-        solution: LibsAndSamples.sln
-        vsVersion: '15.0'
-        msbuildArgs: '/t:restore'
-        platform: '$(BuildPlatform)'
-        configuration: '$(BuildConfiguration)'
-      condition: succeededOrFailed()
 
-    - task: VSBuild@1
-      displayName: 'Build solution LibsAndSamples.sln'
-      inputs:
-        solution: LibsAndSamples.sln
-        vsVersion: '15.0'
-        platform: '$(BuildPlatform)'
-        configuration: '$(BuildConfiguration)'
-        clean: true
+    # Nuget Restore and Build LibsAndSamples.sln
+    - template: template-restore-build-libsandsamples.yaml
+      parameters:
+        BuildPlatform: '$(BuildPlatform)'
+        BuildConfiguration: '$(BuildConfiguration)'
 
     - task: DownloadSecureFile@1
       displayName: 'Download Xamarin Ui Test Tools'

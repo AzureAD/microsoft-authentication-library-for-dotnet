@@ -1,0 +1,28 @@
+
+parameters:
+  BuildConfiguration: 'debug'
+  ProjectRootPath: ''
+  AssemblyName: ''
+  HasRefAssembly: 'false'
+
+steps:
+- template: template-nuget-pack.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
+    ProjectPath: '$(ProjectRootPath)\$(AssemblyName)\$(AssemblyName).csproj'
+
+- template: template-sign-binary.yaml
+  parameters:
+    FolderPath: '$(ProjectRootPath)\$(AssemblyName)'
+    Pattern: '**\bin\**\$(AssemblyName).dll'
+
+- ${{ if eq(parameters.HasRefAssembly, 'true') }}:
+  - template: template-sign-binary.yaml
+    parameters:
+      FolderPath: '$(ExtensionsMsalProjPath)\$(AssemblyName).Ref'
+      Pattern: '**\ref\**\$(AssemblyName).dll'
+
+- template: template-nuget-pack.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
+    ProjectPath: '$(ProjectRootPath)\$(AssemblyName)\$(AssemblyName).csproj'

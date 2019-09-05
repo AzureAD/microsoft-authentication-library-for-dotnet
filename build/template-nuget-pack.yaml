@@ -1,0 +1,13 @@
+
+parameters:
+  BuildConfiguration: 'release'
+  ProjectPath: ''
+
+steps:
+- task: VSBuild@1
+  displayName: 'Pack $(ProjectPath)'
+  inputs:
+    solution: 'src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+    vsVersion: 15.0
+    msbuildArgs: '/t:pack /p:nobuild=true /p:IncludeSymbols=true'
+    configuration: '$(BuildConfiguration)'

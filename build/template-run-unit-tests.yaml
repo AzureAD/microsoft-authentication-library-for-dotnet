@@ -1,0 +1,15 @@
+# template-run-unit-tests.yaml
+# Run all unit tests across the LibsAndSamples.sln project
+
+parameters:
+  BuildConfiguration: 'debug'
+
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'Run unit tests'
+  inputs:
+    command: test
+    projects: |
+     tests/Microsoft.Identity.Test.Unit.*/*.csproj
+     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
+    arguments: '-c $(BuildConfiguration) --no-build --no-restore --collect "Code coverage"'

@@ -1,0 +1,12 @@
+# template-postbuild-code-analysis.yaml
+# Run post-build code analysis (e.g. Roslyn analyzers)
+
+steps:
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
+  displayName: 'Run Roslyn Analyzers'
+  continueOnError: true
+
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+  displayName: 'Check Roslyn Results '
+  inputs:
+    RoslynAnalyzers: true

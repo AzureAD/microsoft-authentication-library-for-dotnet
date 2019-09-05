@@ -1,0 +1,27 @@
+# template-restore-build-libsandsamples.yaml
+# Performs Nuget Restore and Build of LibsAndSamples.sln based on BuildPlatform and BuildConfiguration
+
+parameters:
+  BuildPlatform: 'any cpu'
+  BuildConfiguration: 'debug'
+  MsBuildArguments: ''
+
+steps:
+- task: VSBuild@1
+  displayName: 'NuGet restore LibsAndSamples.sln'
+  inputs:
+    solution: LibsAndSamples.sln
+    vsVersion: "15.0"
+    msbuildArgs: '/t:restore'
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+
+- task: VSBuild@1
+  displayName: 'Build solution LibsAndSamples.sln'
+  inputs:
+    solution: LibsAndSamples.sln
+    msbuildargs: '$(MsBuildArguments)'
+    vsVersion: "15.0"
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+    clean: true

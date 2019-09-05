@@ -21,299 +21,49 @@ variables:
   BuildConfiguration: 'release'
 
 steps:
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
-  displayName: 'Run PoliCheck'
-  inputs:
-    targetType: F
-    optionsFTPATH: 'build/policheck_filetypes.xml'
-  continueOnError: true
+# Run pre-build code analysis (policheck, credscan, etc)
+- template: template-prebuild-code-analysis.yaml
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
-  displayName: 'Run CredScan'
-  inputs:
-    suppressionsFile: 'build/credscan-exclusion.json'
-    debugMode: false
-
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
-  displayName: 'Post Analysis'
-  inputs:
-    CredScan: true
-    PoliCheck: true
-
-- task: NuGetToolInstaller@0
-  displayName: 'Use NuGet 4.6.2'
-  inputs:
-    versionSpec: 4.6.2
-
-#Your build pipeline references an undefined variable named ‘TestSecret’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+# Run Nuget Tool Installer
+- template: template-install-nuget.yaml
 
 - powershell: |
    $secret = '$(TestSecret)'
    $secret | Out-File $(Build.SourcesDirectory)/tests/Microsoft.Identity.Test.LabInfrastructure/data.txt
   displayName: 'Install Keyvault Secrets'
 
-- task: stevedower.python.PythonScript.PythonScript@1
-  displayName: 'Install MSAL.Python PIP'
-  inputs:
-    arguments: '-m pip install msal'
+# Configure Python
+- template: template-python-config.yaml
 
-- task: VSBuild@1
-  displayName: 'NuGet restore LibsAndSamples.sln'
-  inputs:
-    solution: LibsAndSamples.sln
-    vsVersion: '16.0'
-    msbuildArgs: '/t:restore'
-    configuration: '$(BuildConfiguration)'
+# Nuget Restore and Build LibsAndSamples.sln
+- template: template-restore-build-libsandsamples.yaml
+  parameters:
+    BuildPlatform: '$(BuildPlatform)'
+    BuildConfiguration: '$(BuildConfiguration)'
 
-- task: VSBuild@1
-  displayName: 'Build solution LibsAndSamples.sln'
-  inputs:
-    solution: LibsAndSamples.sln
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true'
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
+# Nuget Restore and Build LibsAndSamples.sln
+- template: template-restore-build-libsandsamples.yaml
+  parameters:
+    BuildPlatform: '$(BuildPlatform)'
+    BuildConfiguration: '$(BuildConfiguration)'
+    MsBuildArguments: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Run MSAL unit tests'
-  inputs:
-    command: test
-    projects: 'tests/Microsoft.Identity.Test.Unit.*/*.csproj'
-    arguments: '-c $(BuildConfiguration) --no-build --no-restore'
+# Run Unit Tests
+- template: template-run-unit-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
-  displayName: 'Run Roslyn Analyzers'
-  continueOnError: true
+# TODO: run integration tests?
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
-  displayName: 'Check Roslyn Results '
-  inputs:
-    RoslynAnalyzers: true
+# Run Post-build code analysis (e.g. Roslyn)
+- template: template-postbuild-code-analysis.yaml
 
-- task: VSBuild@1
-  displayName: 'Pack MSAL'
-  inputs:
-    solution: 'src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
-    vsVersion: 15.0
-    msbuildArgs: '/t:pack /p:nobuild=true '
-    configuration: '$(BuildConfiguration)'
+# Pack and sign all of the nuget packages
+- template: template-pack-and-sign-all-nugets.yaml
 
-- task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-  displayName: 'Sign MSAL Binaries'
-  inputs:
-    ConnectedServiceName: 'IDDP Code Signing'
-    FolderPath: '$(Build.SourcesDirectory)\src\client\Microsoft.Identity.Client'
-    Pattern: '**\bin\**\Microsoft.Identity.Client.dll'
-    UseMinimatch: true
-    signConfigType: inlineSignParams
-    inlineOperation: |
-     [
-       {
-         "keyCode": "CP-230012",
-         "operationSetCode": "SigntoolSign",
-         "parameters": [
-         {
-           "parameterName": "OpusName",
-           "parameterValue": "TestSign"
-         },
-         {
-           "parameterName": "OpusInfo",
-           "parameterValue": "http://test"
-         },
-         {
-           "parameterName": "PageHash",
-           "parameterValue": "/NPH"
-         },
-         {
-           "parameterName": "FileDigest",
-           "parameterValue": "/fd sha256"
-         },
-         {
-           "parameterName": "TimeStamp",
-           "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
-         }
-         ],
-         "toolName": "signtool.exe",
-         "toolVersion": "6.2.9304.0"
-       },
-       {
-         "keyCode": "CP-230012",
-         "operationSetCode": "SigntoolVerify",
-         "parameters": [ ],
-         "toolName": "signtool.exe",
-         "toolVersion": "6.2.9304.0"
-       }
-     ]
-    SessionTimeout: 20
-    VerboseLogin: true
-  timeoutInMinutes: 10
+# Publish nuget packages and symbols
+- template: template-publish-packages-and-symbols.yaml
 
-- task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-  displayName: 'Sign MSAL Ref Binaries '
-  inputs:
-    ConnectedServiceName: 'IDDP Code Signing'
-    FolderPath: '$(Build.SourcesDirectory)\src\client\Microsoft.Identity.Client.Ref'
-    Pattern: '**\ref\Microsoft.Identity.Client.dll'
-    UseMinimatch: true
-    signConfigType: inlineSignParams
-    inlineOperation: |
-     [
-       {
-         "keyCode": "CP-230012",
-         "operationSetCode": "SigntoolSign",
-         "parameters": [
-         {
-           "parameterName": "OpusName",
-           "parameterValue": "TestSign"
-         },
-         {
-           "parameterName": "OpusInfo",
-           "parameterValue": "http://test"
-         },
-         {
-           "parameterName": "PageHash",
-           "parameterValue": "/NPH"
-         },
-         {
-           "parameterName": "FileDigest",
-           "parameterValue": "/fd sha256"
-         },
-         {
-           "parameterName": "TimeStamp",
-           "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
-         }
-         ],
-         "toolName": "signtool.exe",
-         "toolVersion": "6.2.9304.0"
-       },
-       {
-         "keyCode": "CP-230012",
-         "operationSetCode": "SigntoolVerify",
-         "parameters": [ ],
-         "toolName": "signtool.exe",
-         "toolVersion": "6.2.9304.0"
-       }
-     ]
-    SessionTimeout: 20
-    VerboseLogin: true
-  timeoutInMinutes: 10
+# Publish analysis and cleanup
+- template: template-publish-analysis-and-cleanup.yaml
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
-  displayName: 'Run BinSkim '
-  inputs:
-    InputType: Basic
-    AnalyzeTarget: '$(Build.SourcesDirectory)\**\bin\**\Microsoft.Identity.Client.dll'
-    AnalyzeVerbose: true
-    AnalyzeHashes: true
-
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
-  displayName: 'Check BinSkim Results'
-  inputs:
-    BinSkim: true
-
-- task: VSBuild@1
-  displayName: 'Pack MSAL'
-  inputs:
-    solution: 'src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
-    vsVersion: 15.0
-    msbuildArgs: '/t:pack /p:nobuild=true /p:IncludeSymbols=true'
-    configuration: '$(BuildConfiguration)'
-
-- task: CopyFiles@2
-  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\packages'
-  inputs:
-    SourceFolder: '$(Build.SourcesDirectory)'
-    Contents: '**\*nupkg'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)\packages'
-    flattenFolders: true
-
-- task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-  displayName: 'Sign Packages'
-  inputs:
-    ConnectedServiceName: 'IDDP Code Signing'
-    FolderPath: '$(Build.ArtifactStagingDirectory)\packages'
-    Pattern: '*nupkg'
-    signConfigType: inlineSignParams
-    inlineOperation: |
-     [
-         {
-             "keyCode": "CP-401405",
-             "operationSetCode": "NuGetSign",
-             "parameters": [ ],
-             "toolName": "sign",
-             "toolVersion": "1.0"
-         },
-         {
-             "keyCode": "CP-401405",
-             "operationSetCode": "NuGetVerify",
-             "parameters": [ ],
-             "toolName": "sign",
-             "toolVersion": "1.0"
-         }
-     ]
-    SessionTimeout: 20
-    VerboseLogin: true
-  timeoutInMinutes: 5
-
-- task: NuGetCommand@2
-  displayName: 'Verify packages are signed'
-  inputs:
-    command: custom
-    arguments: 'verify -Signature $(Build.ArtifactStagingDirectory)\packages\*.nupkg'
-  continueOnError: true
-
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
-  displayName: 'Publish Security Analysis Logs'
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: packages'
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)\packages'
-    ArtifactName: packages
-
-- task: NuGetCommand@2
-  displayName: 'Publish packages to MyGet'
-  inputs:
-    command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/packages/**/*.nupkg'
-    nuGetFeedType: external
-    publishFeedCredentials: 'Wilson MyGet feed'
-  continueOnError: true
-
-- task: NuGetCommand@2
-  displayName: 'Publish packages to VSTS feed'
-  inputs:
-    command: push
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/packages/**/*.nupkg'
-    publishVstsFeed: '46419298-b96c-437f-bd4c-12c8df7f868d'
-    allowPackageConflicts: true
-  continueOnError: true
-
-- task: PublishSymbols@2
-  displayName: 'Publish symbols'
-  inputs:
-    SearchPattern: '**/bin/**/microsoft.identity.client.*'
-    IndexSources: false
-    SymbolServerType: TeamServices
-
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
-  displayName: 'TSA upload to Codebase: Unified .NET Core Stamp: Azure'
-  inputs:
-    tsaVersion: TsaV2
-    codebase: NewOrUpdate
-    codeBaseName: 'Unified .NET Core'
-    notificationAlias: 'IdentityDevExDotnet@microsoft.com'
-    codeBaseAdmins: 'EUROPE\\aadidagt'
-    instanceUrlForTsaV2: IDENTITYDIVISION
-    projectNameIDENTITYDIVISION: IDDP
-    areaPath: 'IDDP\DevEx-Client-SDK\DotNet'
-    iterationPath: 'IDDP\Unscheduled'
-    uploadAPIScan: false
-    uploadFortifySCA: false
-    uploadFxCop: false
-    uploadModernCop: false
-    uploadPREfast: false
-    uploadTSLint: false
-  continueOnError: true
-
-- task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
-  displayName: 'Clean Agent Directories'

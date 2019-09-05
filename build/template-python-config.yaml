@@ -1,0 +1,13 @@
+# template-python-config.yaml
+# Installs and updates PIP and ensures MSAL.Python PIP is properly installed on build machine.
+
+steps:
+- task: stevedower.python.PythonScript.PythonScript@1
+  displayName: 'Update PIP'
+  inputs:
+    arguments: '-m pip install --upgrade pip'
+
+- task: stevedower.python.PythonScript.PythonScript@1
+  displayName: 'Install MSAL.Python PIP'
+  inputs:
+    arguments: '-m pip install msal'
