@@ -20,11 +20,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 AuthorityInfo = AuthorityInfo.FromAuthorityUri(uri, false)
             };
 
-            var serviceBundle = ServiceBundle.Create(appConfig);
-
-            Authority authority = Authority.CreateAuthority(
-                serviceBundle,
-                uri);
+            Authority authority = Authority.CreateAuthority(uri);
 
             return authority;
         }

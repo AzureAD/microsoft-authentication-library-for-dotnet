@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
 
                 // attempt to do authority validation again. NO network call should be made
-                instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
+                instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateFailureMessage(HttpStatusCode.NotFound, "not-found")
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.some-other-sts.com")
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 try
@@ -340,7 +340,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response-missing-field.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 try
@@ -376,7 +376,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                             ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-MissingFields-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 try

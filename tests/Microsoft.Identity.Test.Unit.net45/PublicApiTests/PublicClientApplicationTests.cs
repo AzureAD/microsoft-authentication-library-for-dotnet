@@ -940,7 +940,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithTelemetry(new TraceTelemetryConfig())
                 .BuildConcrete();
 
-            var authoriy = Authority.CreateAuthorityWithAccountTenant(app.ServiceBundle, new Account(null, TestConstants.Name, TestConstants.ProductionPrefNetworkEnvironment));
+            var authoriy = Authority.CreateAuthorityWithAccountTenant(app.ServiceBundle.Config.AuthorityInfo, new Account(null, TestConstants.Name, TestConstants.ProductionPrefNetworkEnvironment));
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.AuthorityInfo.CanonicalAuthority);
         }
 
@@ -954,7 +954,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             var authority = Authority.CreateAuthorityWithAccountTenant(
-                app.ServiceBundle,
+                app.ServiceBundle.Config.AuthorityInfo,
                 new Account(
                     "objectId." + TestConstants.Utid,
                     TestConstants.Name,

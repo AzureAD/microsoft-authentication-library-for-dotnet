@@ -18,29 +18,29 @@ namespace Microsoft.Identity.Client.Instance
             },
             StringComparer.OrdinalIgnoreCase);
 
-        protected Authority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
+        protected Authority(AuthorityInfo authorityInfo)
         {
-            ServiceBundle = serviceBundle;
             AuthorityInfo = authorityInfo;
         }
 
         public AuthorityInfo AuthorityInfo { get; }
 
-        protected IServiceBundle ServiceBundle { get; }
-
-        public static Authority CreateAuthorityWithOverride(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
+        public static Authority CreateAuthorityWithOverride(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
         {
-            switch (authorityInfo.AuthorityType)
+            switch (requestAuthorityInfo.AuthorityType)
             {
                 case AuthorityType.Adfs:
-                    return new AdfsAuthority(serviceBundle, authorityInfo);
+                    return new AdfsAuthority(requestAuthorityInfo);
 
                 case AuthorityType.B2C:
-                    CheckB2CAuthorityHost(serviceBundle, authorityInfo);
-                    return new B2CAuthority(serviceBundle, authorityInfo);
+                    if (configAuthorityInfo != null)
+                    {
+                        CheckB2CAuthorityHost(requestAuthorityInfo, configAuthorityInfo);
+                    }
+                    return new B2CAuthority(requestAuthorityInfo);
 
                 case AuthorityType.Aad:
-                    return new AadAuthority(serviceBundle, authorityInfo);
+                    return new AadAuthority(requestAuthorityInfo);
 
                 default:
                     throw new MsalClientException(
@@ -49,24 +49,22 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
-        public static Authority CreateAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority = false)
+        public static Authority CreateAuthority(string authority, bool validateAuthority = false)
         {
-            return CreateAuthorityWithOverride(
-                serviceBundle,
-                AuthorityInfo.FromAuthorityUri(authority, validateAuthority));
+            return CreateAuthorityWithOverride(AuthorityInfo.FromAuthorityUri(authority, validateAuthority), null);
         }
 
-        public static Authority CreateAuthority(IServiceBundle serviceBundle)
+        public static Authority CreateAuthority(AuthorityInfo authorityInfo)
         {
-            return CreateAuthorityWithOverride(serviceBundle, serviceBundle.Config.AuthorityInfo);
+            return CreateAuthorityWithOverride(authorityInfo, null);
         }
 
         /// <summary>
         /// Creates a tenanted authority, using account tenantId, if the one from the service bundle is tenantless
         /// </summary>
-        public static Authority CreateAuthorityWithAccountTenant(IServiceBundle serviceBundle, IAccount account)
+        public static Authority CreateAuthorityWithAccountTenant(AuthorityInfo authorityInfo, IAccount account)
         {
-            var authority = CreateAuthority(serviceBundle);
+            var authority = CreateAuthority(authorityInfo);
             authority.UpdateWithTenant(account?.HomeAccountId?.TenantId);
 
             return authority;
@@ -127,9 +125,9 @@ namespace Microsoft.Identity.Client.Instance
             return uriBuilder.Uri.AbsoluteUri;
         }
 
-        private static void CheckB2CAuthorityHost(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
+        private static void CheckB2CAuthorityHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
         {
-            if (serviceBundle.Config.AuthorityInfo.Host != authorityInfo.Host)
+            if (configAuthorityInfo.Host != requestAuthorityInfo.Host)
             {
                 throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
             }

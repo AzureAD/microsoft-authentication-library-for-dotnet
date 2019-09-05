@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             public MockHttpTestHarness(string authorityUri)
             {
                 _mockHttpAndServiceBundle = new MockHttpAndServiceBundle();
-                Authority = Authority.CreateAuthority(ServiceBundle, authorityUri);
+                Authority = Authority.CreateAuthority(authorityUri);
                 Cache = new TokenCache(ServiceBundle);
             }
 

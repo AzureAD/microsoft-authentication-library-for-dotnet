@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 new RequestContext(ServiceBundle, Guid.NewGuid()))
             {
                 Account = account,
-                Authority = Authority.CreateAuthority(ServiceBundle, authority)
+                Authority = Authority.CreateAuthority(authority)
             };
         }
     }

@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client
             MsalTokenResponse response)
         {
             var tenantId = Authority
-                .CreateAuthority(ServiceBundle, requestParams.TenantUpdatedCanonicalAuthority)
+                .CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority)
                 .GetTenantId();
 
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;

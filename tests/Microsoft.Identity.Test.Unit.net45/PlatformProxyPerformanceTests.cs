@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private const long AllowedMilliseconds = 10;
+        private const long AllowedMilliseconds = 20;
         private const long DomainJoinedAllowedMilliseconds = 100;
 
 

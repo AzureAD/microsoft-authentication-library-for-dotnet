@@ -72,8 +72,8 @@ namespace Microsoft.Identity.Client.Instance
                     MsalError.TenantDiscoveryFailedError,
                     MsalErrorMessage.IssuerWasNotFoundInTheOpenIdConfiguration);
             }
-            
-            var authority = Authority.CreateAuthority(_serviceBundle, authorityInfo.CanonicalAuthority);
+
+            var authority = Authority.CreateAuthority(authorityInfo);
             var tenantId = authority.GetTenantId();
 
             string authorizationEndpoint = ReplaceTenantToken(edr.AuthorizationEndpoint, tenantId);

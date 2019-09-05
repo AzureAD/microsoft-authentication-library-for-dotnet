@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
-            var requestParams = CreateAuthenticationRequestParameters(serviceBundle, authority: Authority.CreateAuthority(serviceBundle, TestConstants.B2CAuthority));
+            var requestParams = CreateAuthenticationRequestParameters(serviceBundle, authority: Authority.CreateAuthority(TestConstants.B2CAuthority));
             requestParams.TenantUpdatedCanonicalAuthority = TestConstants.AuthorityTestTenant;
 
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);
@@ -753,7 +753,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 var serviceBundle = harness.ServiceBundle;
                 ITokenCacheInternal adfsCache = new TokenCache(serviceBundle);
-                var authority = Authority.CreateAuthority(serviceBundle, TestConstants.OnPremiseAuthority);
+                var authority = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
 
                 MsalTokenResponse response = new MsalTokenResponse();
 
@@ -925,7 +925,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 string tenantID = "someTenantID";
                 Authority authority = Authority.CreateAuthority(
-                    harness.ServiceBundle,
                     $"https://login.microsoftonline.com/tfp/{tenantID}/somePolicy/oauth2/v2.0/authorize");
 
                 // creating IDToken with empty tenantID and displayableID/PreferredUserName for B2C scenario
@@ -960,7 +959,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 commonParameters,
                 requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid()))
             {
-                Authority = authority ?? Authority.CreateAuthority(serviceBundle, TestConstants.AuthorityTestTenant)
+                Authority = authority ?? Authority.CreateAuthority(TestConstants.AuthorityTestTenant)
             };
         }
 
