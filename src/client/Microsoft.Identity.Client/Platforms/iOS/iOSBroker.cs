@@ -154,11 +154,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             MsalTokenResponse brokerTokenResponse;
 
-            if (responseDictionary.ContainsKey(iOSBrokerConstants.Error) || responseDictionary.ContainsKey(iOSBrokerConstants.ErrorDescription))
-            {
-                return MsalTokenResponse.CreateFromBrokerResponse(responseDictionary);
-            }
-
             string expectedHash = responseDictionary[iOSBrokerConstants.ExpectedHash];
             string encryptedResponse = responseDictionary[iOSBrokerConstants.EncryptedResponsed];
             string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse, _logger);

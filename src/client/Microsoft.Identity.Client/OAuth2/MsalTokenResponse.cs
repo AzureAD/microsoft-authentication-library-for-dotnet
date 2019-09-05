@@ -101,12 +101,13 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal static MsalTokenResponse CreateFromBrokerResponse(Dictionary<string, string> responseDictionary)
         {
-            if (responseDictionary.ContainsKey(BrokerResponseConst.ErrorMetadata))
+            if (responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorCode) ||
+                responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorDescription))
             {
                 return new MsalTokenResponse
                 {
                     Error = responseDictionary[BrokerResponseConst.BrokerErrorCode],
-                    ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.ErrorMetadata])
+                    ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription])
                 };
             }
 
