@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client
             MsalTokenResponse response)
         {
             var tenantId = Authority
-                .CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority)
+                .CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo.CanonicalAuthority)
                 .GetTenantId();
 
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
             // so that the PreferredNetwork environment is up to date.
             var instanceDiscoveryMetadata = await ServiceBundle.InstanceDiscoveryManager
                                 .GetMetadataEntryAsync(
-                                    requestParams.TenantUpdatedCanonicalAuthority,
+                                    requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo.CanonicalAuthority,
                                     requestParams.RequestContext)
                                 .ConfigureAwait(false);
 
@@ -178,14 +178,16 @@ namespace Microsoft.Identity.Client
                         // do not save RT in ADAL cache for MSAL B2C scenarios
                         if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AuthorityType.B2C))
                         {
+                            var authorityWithPrefferedCache = Authority.CreateAuthorityWithEnvironment(
+                                    requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo,
+                                    instanceDiscoveryMetadata.PreferredCache);
+
                             CacheFallbackOperations.WriteAdalRefreshToken(
                                 Logger,
                                 LegacyCachePersistence,
                                 msalRefreshTokenCacheItem,
                                 msalIdTokenCacheItem,
-                                Authority.CreateAuthorityWithEnvironment(
-                                    requestParams.TenantUpdatedCanonicalAuthority,
-                                    instanceDiscoveryMetadata.PreferredCache),
+                                authorityWithPrefferedCache.AuthorityInfo.CanonicalAuthority,
                                 msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
                         }
 

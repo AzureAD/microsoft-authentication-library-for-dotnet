@@ -13,13 +13,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     {
         public static Authority CreateAuthorityFromUrl(string uri)
         {
-            var httpManager = new MockHttpManager();
-            var appConfig = new ApplicationConfiguration()
-            {
-                HttpManager = httpManager,
-                AuthorityInfo = AuthorityInfo.FromAuthorityUri(uri, false)
-            };
-
             Authority authority = Authority.CreateAuthority(uri);
 
             return authority;
@@ -34,7 +27,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(actualTenant, authority.GetTenantId());
             Assert.AreEqual(updatedAuthority, authorityUri);
 
-            authority.UpdateWithTenant("other_tenant_id_2");
+            authority = Authority.CreateAuthorityWithTenant(authority.AuthorityInfo, "other_tenant_id_2");
+
             Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, authorityUri);
         }
 

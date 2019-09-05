@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IdToken idToken = IdToken.Parse(msalTokenResponse.IdToken);
 
             AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority =
-                   AuthenticationRequestParameters.Authority.GetTenantedAuthority(idToken?.TenantId);
+                   Authority.CreateAuthorityWithTenant(AuthenticationRequestParameters.Authority.AuthorityInfo, idToken?.TenantId);
 
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
@@ -358,9 +358,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext)
                 .ConfigureAwait(false);
 
-            AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority =
-                Authority.CreateAuthorityWithEnvironment(
-                    AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority,
+            AuthenticationRequestParameters.Authority = Authority.CreateAuthorityWithEnvironment(
+                    AuthenticationRequestParameters.AuthorityInfo,
                     metadata.PreferredNetwork);
         }
 

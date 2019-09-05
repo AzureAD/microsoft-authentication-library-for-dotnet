@@ -25,6 +25,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\OpenidConfigurationCommon.json")]
     public class AadAuthorityTests : TestBase
     {
+
+#if NET_CORE
+        [TestMethod]
+        public void ImmutableTest()
+        {
+            CoreAssert.IsImmutable<AadAuthority>();
+            CoreAssert.IsImmutable<AdfsAuthority>();
+            CoreAssert.IsImmutable<B2CAuthority>();
+            CoreAssert.IsImmutable<Authority>();
+            CoreAssert.IsImmutable<AuthorityInfo>();
+        }
+#endif
         [TestMethod]
         public void SuccessfulValidationTest()
         {
@@ -383,7 +395,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(TestConstants.AuthorityUtidTenant, updatedAuthority);
             Assert.AreEqual(updatedAuthority, TestConstants.AuthorityUtidTenant);
 
-            authority.UpdateWithTenant(TestConstants.Utid);
+            authority = Authority.CreateAuthorityWithTenant(
+              authority.AuthorityInfo,
+              TestConstants.Utid);
+
             Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, TestConstants.AuthorityUtidTenant);
         }
                
