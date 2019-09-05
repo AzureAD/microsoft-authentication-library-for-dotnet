@@ -135,6 +135,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Extensions.Msal.UnitTests", "tests\Microsoft.Identity.Client.Extensions.Msal.UnitTests\Microsoft.Identity.Client.Extensions.Msal.UnitTests.csproj", "{8B98F4CB-B016-40F8-88EC-B979BCF484F6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{EA983957-DC2F-4D9E-A2E3-79ADEB5CEB26}"
+	ProjectSection(SolutionItems) = preProject
+		build\pipeline-pullrequest.yaml = build\pipeline-pullrequest.yaml
+		build\pipeline-releasebuild.yaml = build\pipeline-releasebuild.yaml
+		build\pipeline-uiautomation.yaml = build\pipeline-uiautomation.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -672,6 +679,7 @@ Global
 		{8C209A34-0F6E-488D-B1A9-D52B1354AC78} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{8B98F4CB-B016-40F8-88EC-B979BCF484F6} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
+		{EA983957-DC2F-4D9E-A2E3-79ADEB5CEB26} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}
