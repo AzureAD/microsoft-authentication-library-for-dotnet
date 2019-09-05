@@ -1,4 +1,12 @@
 
+# UI Automation builds should be triggered on every branch except master (so we don't trigger again after a merge)
+trigger:
+  branches:
+    include:
+    - '*'
+    exclue:
+    - master
+
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
