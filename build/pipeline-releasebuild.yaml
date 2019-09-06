@@ -30,11 +30,6 @@ steps:
 # Install keyvault secrets
 - template: template-install-keyvault-secrets.yaml
 
-- powershell: |
-   $secret = '$(TestSecret)'
-   $secret | Out-File $(Build.SourcesDirectory)/tests/Microsoft.Identity.Test.LabInfrastructure/data.txt
-  displayName: 'Install Keyvault Secrets'
-
 # Configure Python
 - template: template-python-config.yaml
 
