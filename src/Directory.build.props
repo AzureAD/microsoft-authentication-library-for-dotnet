@@ -8,6 +8,9 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+
+    <NoWarn>NU5105</NoWarn>
+
   </PropertyGroup>
 
   <ItemGroup>

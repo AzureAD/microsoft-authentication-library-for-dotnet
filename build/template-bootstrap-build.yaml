@@ -1,0 +1,14 @@
+# template-bootstrap-build.yaml
+# Basic bootstraps for any build (nuget, dotnet, secrets)
+
+# Run Dotnet Tool Installer
+- template: template-install-dotnet-core.yaml
+
+# Run Nuget Tool Installer
+- template: template-install-nuget.yaml
+
+# Install keyvault secrets
+- template: template-install-keyvault-secrets.yaml
+
+# Configure Python
+- template: template-python-config.yaml

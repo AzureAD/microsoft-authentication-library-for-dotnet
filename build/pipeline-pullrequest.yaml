@@ -18,11 +18,8 @@ variables:
   BuildConfiguration: 'debug'
 
 steps:
-# Install keyvault secrets
-- template: template-install-keyvault-secrets.yaml
-
-# Configure Python
-- template: template-python-config.yaml
+# Bootstrap the build
+- template: template-bootstrap-build.yaml
 
 # Nuget Restore and Build LibsAndSamples.sln
 - template: template-restore-build-libsandsamples.yaml

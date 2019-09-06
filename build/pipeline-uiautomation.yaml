@@ -36,6 +36,9 @@ stages:
         - visualstudio
     steps:
 
+    # Bootstrap the build
+    - template: template-bootstrap-build.yaml
+
     # Nuget Restore and Build LibsAndSamples.sln
     - template: template-restore-build-libsandsamples.yaml
       parameters:

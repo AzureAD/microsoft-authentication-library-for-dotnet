@@ -24,14 +24,8 @@ steps:
 # Run pre-build code analysis (policheck, credscan, etc)
 - template: template-prebuild-code-analysis.yaml
 
-# Run Nuget Tool Installer
-- template: template-install-nuget.yaml
-
-# Install keyvault secrets
-- template: template-install-keyvault-secrets.yaml
-
-# Configure Python
-- template: template-python-config.yaml
+# Bootstrap the build
+- template: template-bootstrap-build.yaml
 
 # Nuget Restore and Build LibsAndSamples.sln
 - template: template-restore-build-libsandsamples.yaml
@@ -39,14 +33,16 @@ steps:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
-    # MsBuildArguments: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true'
 
 # Run Unit Tests
 - template: template-run-unit-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
 
-# TODO: run integration tests?
+# Run Integration Tests
+- template: template-run-integration-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml
