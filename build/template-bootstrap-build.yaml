@@ -1,6 +1,8 @@
 # template-bootstrap-build.yaml
 # Basic bootstraps for any build (nuget, dotnet, secrets)
 
+steps:
+
 # Run Dotnet Tool Installer
 - template: template-install-dotnet-core.yaml
 
