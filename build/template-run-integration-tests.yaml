@@ -2,7 +2,6 @@
 # Run all integration tests across the LibsAndSamples.sln project
 
 parameters:
-  BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
 
 steps:

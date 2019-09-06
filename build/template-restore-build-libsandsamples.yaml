@@ -4,7 +4,6 @@
 parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
-  MsBuildArguments: '/p:RunCodeAnalysis=false '
 
 steps:
 - task: VSBuild@1
@@ -21,7 +20,7 @@ steps:
   inputs:
     solution: LibsAndSamples.sln
     vsVersion: '15.0'
-    msbuildArgs: '$(MsBuildArguments)'
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true'
     platform: '$(BuildPlatform)'
     configuration: '$(BuildConfiguration)'
     clean: true

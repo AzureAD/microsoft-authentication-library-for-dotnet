@@ -40,7 +40,7 @@ steps:
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
-    MsBuildArguments: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true'
+    # MsBuildArguments: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true'
 
 # Run Unit Tests
 - template: template-run-unit-tests.yaml
