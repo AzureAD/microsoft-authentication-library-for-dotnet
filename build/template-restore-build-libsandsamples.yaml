@@ -4,6 +4,7 @@
 parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
+  MsalClientSemVer: '4.0.0-devopsbuild'
 
 steps:
 - task: VSBuild@1
