@@ -21,7 +21,7 @@ steps:
   inputs:
     solution: LibsAndSamples.sln
     vsVersion: '15.0'
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }}) /p:SourceLinkCreate=true'
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
     clean: true
