@@ -5,9 +5,9 @@ parameters:
 
 steps:
 - task: VSBuild@1
-  displayName: 'Pack $(ProjectPath)'
+  displayName: 'Pack ${{ parameters.ProjectPath }}'
   inputs:
-    solution: 'src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
-    vsVersion: 15.0
+    solution: ${{ parameters.ProjectPath }}
+    vsVersion: '15.0'
     msbuildArgs: '/t:pack /p:nobuild=true /p:IncludeSymbols=true'
-    configuration: '$(BuildConfiguration)'
+    configuration: ${{ parameters.BuildConfiguration }}

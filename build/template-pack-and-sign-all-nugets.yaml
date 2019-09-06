@@ -9,7 +9,7 @@ steps:
 # Pack and sign Microsoft.Identity.Client
 - template: template-pack-and-sign-nuget.yaml
   parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
     ProjectRootPath: '$(Build.SourcesDirectory)\src\client'
     AssemblyName: 'Microsoft.Identity.Client'
     HasRefAssembly: 'true'
@@ -17,14 +17,14 @@ steps:
 # Pack and sign Microsoft.Identity.Client.Extensions.Msal
 - template: template-pack-and-sign-nuget.yaml
   parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
     ProjectRootPath: '$(Build.SourcesDirectory)\src\extensions.msal'
     AssemblyName: 'Microsoft.Identity.Client.Extensions.Msal'
 
 # Pack and sign Microsoft.Identity.Client.Extensions.Web
 - template: template-pack-and-sign-nuget.yaml
   parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
     ProjectRootPath: '$(Build.SourcesDirectory)\src\extensions.web'
     AssemblyName: 'Microsoft.Identity.Client.Extensions.Web'
 

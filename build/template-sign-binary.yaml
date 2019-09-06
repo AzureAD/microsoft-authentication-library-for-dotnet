@@ -7,11 +7,11 @@ parameters:
 
 steps:
 - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-  displayName: 'Sign Binary: $(Pattern)'
+  displayName: 'Sign Binary: ${{ parameters.Pattern }}'
   inputs:
     ConnectedServiceName: 'IDDP Code Signing'
-    FolderPath: '$(FolderPath)'
-    Pattern: '$(Pattern)'
+    FolderPath: ${{ parameters.FolderPath }}
+    Pattern: ${{ parameters.Pattern }}
     UseMinimatch: true
     signConfigType: inlineSignParams
     inlineOperation: |
@@ -57,10 +57,10 @@ steps:
   timeoutInMinutes: 10
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
-  displayName: 'Run BinSkim $(Pattern)'
+  displayName: 'Run BinSkim ${{ parameters.Pattern }}'
   inputs:
     InputType: Basic
-    AnalyzeTarget: '$(Pattern)'
+    AnalyzeTarget: ${{ parameters.Pattern }}
     AnalyzeVerbose: true
     AnalyzeHashes: true
 

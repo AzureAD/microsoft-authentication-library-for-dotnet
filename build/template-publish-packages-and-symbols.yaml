@@ -12,20 +12,20 @@ steps:
   displayName: 'Verify packages are signed'
   inputs:
     command: custom
-    arguments: 'verify -Signature $(NugetPackagesWildcard)'
+    arguments: 'verify -Signature ${{ parameters.NugetPackagesWildcard }}'
   continueOnError: true
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: packages'
   inputs:
-    PathtoPublish: '$(ArtifactPublishPath)'
-    ArtifactName: $(DropArtifactName)
+    PathtoPublish: '${{ parameters.ArtifactPublishPath }}'
+    ArtifactName: ${{ parameters.DropArtifactName }}''
 
 - task: NuGetCommand@2
   displayName: 'Publish packages to MyGet'
   inputs:
     command: push
-    packagesToPush: '$(NugetPackagesWildcard)'
+    packagesToPush: '${{ parameters.NugetPackagesWildcard }}'
     nuGetFeedType: external
     publishFeedCredentials: 'Wilson MyGet feed'
   continueOnError: true
@@ -34,7 +34,7 @@ steps:
   displayName: 'Publish packages to VSTS feed'
   inputs:
     command: push
-    packagesToPush: '$(NugetPackagesWildcard)'
+    packagesToPush: '${{ parameters.NugetPackagesWildcard }}'
     publishVstsFeed: '46419298-b96c-437f-bd4c-12c8df7f868d'
     allowPackageConflicts: true
   continueOnError: true
@@ -42,6 +42,6 @@ steps:
 - task: PublishSymbols@2
   displayName: 'Publish symbols'
   inputs:
-    SearchPattern: '$(SymbolPublishWildcard)'
+    SearchPattern: '${{ parameters.SymbolPublishWildcard }}'
     IndexSources: false
     SymbolServerType: TeamServices

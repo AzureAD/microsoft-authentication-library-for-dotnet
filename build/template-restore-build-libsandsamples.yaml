@@ -13,15 +13,15 @@ steps:
     solution: LibsAndSamples.sln
     vsVersion: '15.0'
     msbuildArgs: '/t:restore'
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
 
 - task: VSBuild@1
   displayName: 'Build solution LibsAndSamples.sln'
   inputs:
     solution: LibsAndSamples.sln
     vsVersion: '15.0'
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true'
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:ReferencedBinsPathRoot=$(Build.BinariesDirectory)\FxCopRefAssemblies /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }}) /p:SourceLinkCreate=true'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
     clean: true

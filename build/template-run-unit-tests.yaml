@@ -12,4 +12,4 @@ steps:
     projects: |
      tests/Microsoft.Identity.Test.Unit.*/*.csproj
      tests/CacheCompat/CommonCache.Test.Unit/*.csproj
-    arguments: '-c $(BuildConfiguration) --no-build --no-restore --collect "Code coverage"'
+    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
