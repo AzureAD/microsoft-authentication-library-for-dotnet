@@ -4,7 +4,7 @@
 steps:
 
 # Run Dotnet Tool Installer
-- template: template-install-dotnet-core.yaml
+# - template: template-install-dotnet-core.yaml
 
 # Run Nuget Tool Installer
 - template: template-install-nuget.yaml
