@@ -27,6 +27,9 @@ steps:
 # Run Nuget Tool Installer
 - template: template-install-nuget.yaml
 
+# Install keyvault secrets
+- template: template-install-keyvault-secrets.yaml
+
 - powershell: |
    $secret = '$(TestSecret)'
    $secret | Out-File $(Build.SourcesDirectory)/tests/Microsoft.Identity.Test.LabInfrastructure/data.txt
