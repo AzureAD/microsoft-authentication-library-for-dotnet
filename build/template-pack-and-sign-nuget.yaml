@@ -1,6 +1,6 @@
 
 parameters:
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'release'
   ProjectRootPath: ''
   AssemblyName: ''
   HasRefAssembly: 'false'

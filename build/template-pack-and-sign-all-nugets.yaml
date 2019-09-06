@@ -2,7 +2,7 @@
 # Pack and sign all nuget packages needed for our builds
 
 parameters:
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'release'
 
 steps:
 
