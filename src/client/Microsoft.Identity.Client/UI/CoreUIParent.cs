@@ -65,10 +65,9 @@ namespace Microsoft.Identity.Client.UI
                 UITabBarController tabBarController = (UITabBarController)callerViewController;
                 return FindCurrentViewController(tabBarController.SelectedViewController);
             }
-            else if (callerViewController is UINavigationController)
+            else if (callerViewController is UINavigationController uiNavigationController && uiNavigationController.VisibleViewController != null)
             {
-                UINavigationController navigationController = (UINavigationController)callerViewController;
-                return FindCurrentViewController(navigationController.VisibleViewController);
+                return FindCurrentViewController(uiNavigationController.VisibleViewController);
             }
             else if (callerViewController.PresentedViewController != null)
             {
