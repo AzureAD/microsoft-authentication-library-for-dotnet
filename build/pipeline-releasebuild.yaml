@@ -40,9 +40,9 @@ steps:
     BuildConfiguration: '$(BuildConfiguration)'
 
 # Run Integration Tests
-- template: template-run-integration-tests.yaml
-  parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
+# - template: template-run-integration-tests.yaml
+#   parameters:
+#     BuildConfiguration: '$(BuildConfiguration)'
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml
