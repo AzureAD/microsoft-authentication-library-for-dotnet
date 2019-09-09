@@ -9,6 +9,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 
+    <!-- We use SemVer 2.0, and this removes the warning when building nuget packages that 2.0 semver is not compatible with semver 1.0 tools. -->
     <NoWarn>NU5105</NoWarn>
 
   </PropertyGroup>
