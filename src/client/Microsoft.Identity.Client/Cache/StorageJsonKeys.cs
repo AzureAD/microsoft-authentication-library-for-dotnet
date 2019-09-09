@@ -28,6 +28,8 @@ namespace Microsoft.Identity.Client.Cache
         public const string ClientInfo = "client_info";
         public const string FamilyId = "family_id";
         public const string AppMetadata = "appmetadata";
+        public const string KeyId = "key_id";
+        public const string TokenType = "token_type";
 
 
         // todo(cache): this needs to be added to the spec.  needed for OBO flow on .NET.
