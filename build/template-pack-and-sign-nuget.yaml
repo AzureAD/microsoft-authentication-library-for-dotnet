@@ -1,0 +1,28 @@
+
+parameters:
+  BuildConfiguration: 'release'
+  ProjectRootPath: ''
+  AssemblyName: ''
+  HasRefAssembly: 'false'
+
+steps:
+- template: template-nuget-pack.yaml
+  parameters:
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
+    ProjectPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj'
+
+- template: template-sign-binary.yaml
+  parameters:
+    FolderPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}'
+    Pattern: '**\bin\**\${{ parameters.AssemblyName }}.dll'
+
+- ${{ if eq(parameters.HasRefAssembly, 'true') }}:
+  - template: template-sign-binary.yaml
+    parameters:
+      FolderPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}.Ref'
+      Pattern: '**\ref\**\${{ parameters.AssemblyName }}.dll'
+
+- template: template-nuget-pack.yaml
+  parameters:
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
+    ProjectPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj'

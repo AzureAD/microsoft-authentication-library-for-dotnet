@@ -18,78 +18,21 @@ variables:
   BuildConfiguration: 'debug'
 
 steps:
-- task: AzureKeyVault@1
-  displayName: 'Azure Key Vault: BuildAutomation'
-  inputs:
-    azureSubscription: 'MSID MSAL.NET Automation KeyVault'
-    KeyVaultName: BuildAutomation
-    SecretsFilter: 'AzureADIdentityDivisionTestAgent, RSATestCertDotNet'
+# Bootstrap the build
+- template: template-bootstrap-build.yaml
 
-- powershell: |
-   $kvSecretBytes = [System.Convert]::FromBase64String('$(AzureADIdentityDivisionTestAgent)')
-   $certCollection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
-   $certCollection.Import($kvSecretBytes, $null, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
+# Nuget Restore and Build LibsAndSamples.sln
+- template: template-restore-build-libsandsamples.yaml
+  parameters:
+    BuildPlatform: '$(BuildPlatform)'
+    BuildConfiguration: '$(BuildConfiguration)'
 
-   $protectedCertificateBytes = $certCollection.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12)
-   $pfxPath = '$(Build.SourcesDirectory)' + "\TestCert.pfx"
-   [System.IO.File]::WriteAllBytes($pfxPath, $protectedCertificateBytes)
+# Run Unit Tests
+- template: template-run-unit-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
 
-   Import-PfxCertificate -FilePath $pfxPath -CertStoreLocation Cert:\LocalMachine\My
-
-   $kvSecretBytes = [System.Convert]::FromBase64String('$(RSATestCertDotNet)')
-   $certCollection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
-   $certCollection.Import($kvSecretBytes, $null, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
-
-   $protectedCertificateBytes = $certCollection.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12)
-   $pfxPath = '$(Build.SourcesDirectory)' + "\TestCert.pfx"
-   [System.IO.File]::WriteAllBytes($pfxPath, $protectedCertificateBytes)
-
-   Import-PfxCertificate -FilePath $pfxPath -CertStoreLocation Cert:\LocalMachine\My
-  displayName: 'Install Keyvault Secrets'
-
-- task: stevedower.python.PythonScript.PythonScript@1
-  displayName: 'Update PIP'
-  inputs:
-    arguments: '-m pip install --upgrade pip'
-
-- task: stevedower.python.PythonScript.PythonScript@1
-  displayName: 'Install MSAL.Python PIP'
-  inputs:
-    arguments: '-m pip install msal'
-
-- task: VSBuild@1
-  displayName: 'NuGet restore LibsAndSamples.sln'
-  inputs:
-    solution: LibsAndSamples.sln
-    vsVersion: "15.0"
-    msbuildArgs: '/t:restore'
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
-
-- task: VSBuild@1
-  displayName: 'Build solution LibsAndSamples.sln'
-  inputs:
-    solution: LibsAndSamples.sln
-    vsVersion: "15.0"
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
-    clean: true
-
-- task: DotNetCoreCLI@2
-  displayName: 'Run unit tests'
-  inputs:
-    command: test
-    projects: |
-     tests/Microsoft.Identity.Test.Unit.*/*.csproj
-     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
-    arguments: '-c $(BuildConfiguration) --no-build --no-restore --collect "Code coverage"'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Run integration Tests'
-  inputs:
-    command: test
-    projects: |
-     tests/Microsoft.Identity.Test.Integration.net45/Microsoft.Identity.Test.Integration.net45.csproj
-     tests/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.netcore.csproj
-     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
-    arguments: '-c $(BuildConfiguration) --no-build --no-restore --collect "Code coverage"'
+# Run Integration Tests
+- template: template-run-integration-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'

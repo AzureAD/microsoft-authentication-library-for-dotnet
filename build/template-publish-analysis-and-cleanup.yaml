@@ -1,0 +1,30 @@
+# template-publish-analysis-and-cleanup.yaml
+# Publish any security analysis logs (e.g. TSA) and perform post-build cleanup
+# Should be LAST step of any build it's used in.
+
+steps:
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
+  displayName: 'Publish Security Analysis Logs'
+
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
+  displayName: 'TSA upload to Codebase: Unified .NET Core Stamp: Azure'
+  inputs:
+    tsaVersion: TsaV2
+    codebase: NewOrUpdate
+    codeBaseName: 'Unified .NET Core'
+    notificationAlias: 'IdentityDevExDotnet@microsoft.com'
+    codeBaseAdmins: 'EUROPE\\aadidagt'
+    instanceUrlForTsaV2: IDENTITYDIVISION
+    projectNameIDENTITYDIVISION: IDDP
+    areaPath: 'IDDP\DevEx-Client-SDK\DotNet'
+    iterationPath: 'IDDP\Unscheduled'
+    uploadAPIScan: false
+    uploadFortifySCA: false
+    uploadFxCop: false
+    uploadModernCop: false
+    uploadPREfast: false
+    uploadTSLint: false
+  continueOnError: true
+
+- task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
+  displayName: 'Clean Agent Directories'

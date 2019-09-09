@@ -25,11 +25,11 @@
   <PropertyGroup>
 
     <!--This should be passed from the VSTS build-->
-    <ClientSemVer Condition="'$(ClientSemVer)' == ''">4.0.0-localbuild</ClientSemVer>
+    <ClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.0.0-localbuild</ClientSemVer>
     <!-- For now, the Extensions.Msal libraries are ALWAYS in preview mode -->
     <MsalClientSemVer Condition="'$(MsalClientSemVer)' != ''">$(MsalClientSemVer)-preview</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
-    <Version>$(ClientSemVer)</Version>
+    <Version>$(MsalClientSemVer)</Version>
 
     <DefineConstants>$(DefineConstants);MSAL</DefineConstants>
     <Authors>Microsoft</Authors>

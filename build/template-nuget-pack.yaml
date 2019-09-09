@@ -1,0 +1,13 @@
+
+parameters:
+  BuildConfiguration: 'release'
+  ProjectPath: ''
+
+steps:
+- task: VSBuild@1
+  displayName: 'Pack ${{ parameters.ProjectPath }}'
+  inputs:
+    solution: ${{ parameters.ProjectPath }}
+    vsVersion: '15.0'
+    msbuildArgs: '/t:pack /p:nobuild=true /p:IncludeSymbols=true'
+    configuration: ${{ parameters.BuildConfiguration }}

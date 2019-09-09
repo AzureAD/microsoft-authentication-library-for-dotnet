@@ -1,0 +1,70 @@
+# template-sign-binary.yaml
+# Signs a binary via ESRP
+
+parameters:
+  FolderPath: ''
+  Pattern: ''
+
+steps:
+- task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  displayName: 'Sign Binary: ${{ parameters.Pattern }}'
+  inputs:
+    ConnectedServiceName: 'IDDP Code Signing'
+    FolderPath: ${{ parameters.FolderPath }}
+    Pattern: ${{ parameters.Pattern }}
+    UseMinimatch: true
+    signConfigType: inlineSignParams
+    inlineOperation: |
+     [
+       {
+         "keyCode": "CP-230012",
+         "operationSetCode": "SigntoolSign",
+         "parameters": [
+         {
+           "parameterName": "OpusName",
+           "parameterValue": "TestSign"
+         },
+         {
+           "parameterName": "OpusInfo",
+           "parameterValue": "http://test"
+         },
+         {
+           "parameterName": "PageHash",
+           "parameterValue": "/NPH"
+         },
+         {
+           "parameterName": "FileDigest",
+           "parameterValue": "/fd sha256"
+         },
+         {
+           "parameterName": "TimeStamp",
+           "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+         }
+         ],
+         "toolName": "signtool.exe",
+         "toolVersion": "6.2.9304.0"
+       },
+       {
+         "keyCode": "CP-230012",
+         "operationSetCode": "SigntoolVerify",
+         "parameters": [ ],
+         "toolName": "signtool.exe",
+         "toolVersion": "6.2.9304.0"
+       }
+     ]
+    SessionTimeout: 20
+    VerboseLogin: true
+  timeoutInMinutes: 10
+
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
+  displayName: 'Run BinSkim ${{ parameters.Pattern }}'
+  inputs:
+    InputType: Basic
+    AnalyzeTarget: ${{ parameters.Pattern }}
+    AnalyzeVerbose: true
+    AnalyzeHashes: true
+
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+  displayName: 'Check BinSkim Results'
+  inputs:
+    BinSkim: true

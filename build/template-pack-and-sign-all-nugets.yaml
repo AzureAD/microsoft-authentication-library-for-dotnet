@@ -1,0 +1,67 @@
+# template-pack-and-sign-all-nugets.yaml
+# Pack and sign all nuget packages needed for our builds
+
+parameters:
+  BuildConfiguration: 'release'
+
+steps:
+
+# Pack and sign Microsoft.Identity.Client
+- template: template-pack-and-sign-nuget.yaml
+  parameters:
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
+    ProjectRootPath: '$(Build.SourcesDirectory)\src\client'
+    AssemblyName: 'Microsoft.Identity.Client'
+    HasRefAssembly: 'true'
+
+# Pack and sign Microsoft.Identity.Client.Extensions.Msal
+- template: template-pack-and-sign-nuget.yaml
+  parameters:
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
+    ProjectRootPath: '$(Build.SourcesDirectory)\src\extensions.msal'
+    AssemblyName: 'Microsoft.Identity.Client.Extensions.Msal'
+
+# Pack and sign Microsoft.Identity.Client.Extensions.Web
+- template: template-pack-and-sign-nuget.yaml
+  parameters:
+    BuildConfiguration: ${{ parameters.BuildConfiguration }}
+    ProjectRootPath: '$(Build.SourcesDirectory)\src\extensions.web'
+    AssemblyName: 'Microsoft.Identity.Client.Extensions.Web'
+
+# Copy all packages out to staging
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\packages'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**\*nupkg'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\packages'
+    flattenFolders: true
+
+# Sign all final nuget packages in the staging directory
+- task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  displayName: 'Sign Packages'
+  inputs:
+    ConnectedServiceName: 'IDDP Code Signing'
+    FolderPath: '$(Build.ArtifactStagingDirectory)\packages'
+    Pattern: '*nupkg'
+    signConfigType: inlineSignParams
+    inlineOperation: |
+     [
+         {
+             "keyCode": "CP-401405",
+             "operationSetCode": "NuGetSign",
+             "parameters": [ ],
+             "toolName": "sign",
+             "toolVersion": "1.0"
+         },
+         {
+             "keyCode": "CP-401405",
+             "operationSetCode": "NuGetVerify",
+             "parameters": [ ],
+             "toolName": "sign",
+             "toolVersion": "1.0"
+         }
+     ]
+    SessionTimeout: 20
+    VerboseLogin: true
+  timeoutInMinutes: 5
