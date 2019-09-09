@@ -18,13 +18,13 @@ namespace Microsoft.Identity.Client.Cache.Items
             CredentialType = StorageJsonValues.CredentialTypeAccessToken;
         }
 
-
         internal MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,
             MsalTokenResponse response,
             string tenantId,
-            string userId = null)
+            string userId = null,
+            string keyId = null)
             : this(
                 preferredCacheEnv,
                 clientId,
@@ -35,7 +35,9 @@ namespace Microsoft.Identity.Client.Cache.Items
                 response.AccessTokenExtendedExpiresOn,
                 response.ClientInfo,
                 userId,
-                response.AccessTokenRefreshOn)
+                keyId,
+                response.AccessTokenRefreshOn,
+                response.TokenType)
         {
         }
 
@@ -49,8 +51,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             DateTimeOffset accessTokenExtendedExpiresOn,
             string rawClientInfo,
             string userId = null,
-            DateTimeOffset? accessTokenRefreshOn = null)
-            : this()
+            string keyId = null,
+            DateTimeOffset? accessTokenRefreshOn = null,
+            string tokenType = StorageJsonValues.TokenTypeBearer) : this()
         {
             Environment = preferredCacheEnv;
             ClientId = clientId;
@@ -61,6 +64,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             ExtendedExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(accessTokenExtendedExpiresOn);
             CachedAt = CoreHelpers.CurrDateTimeInUnixTimestamp();
             RawClientInfo = rawClientInfo;
+            KeyId = keyId;
+            TokenType = tokenType;
 
             if (accessTokenRefreshOn.HasValue)
             {
@@ -88,13 +93,21 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string CachedAt { get; set; }
         internal string ExpiresOnUnixTimestamp { get; set; }
         internal string ExtendedExpiresOnUnixTimestamp { get; set; }
+        internal string UserAssertionHash { get; set; }
+
+        /// <summary>
+        /// Used when the token is bound to a public / private key pair which is identified by a key id (kid). 
+        /// Currently used by PoP tokens
+        /// </summary>
+        internal string KeyId { get; set; }
+
+        internal string TokenType { get; set; }
 
         /// <summary>
         /// If set, AT should be refreshed earlier to make sure the token cache
         /// always has ATs with a long life. 
         /// </summary>
         internal string RefreshOnUnixTimestamp { get; set; }
-        public string UserAssertionHash { get; set; }
 
         internal bool IsAdfs { get; set; }
 
@@ -110,8 +123,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             get
             {
-                return !string.IsNullOrEmpty(RefreshOnUnixTimestamp) ? 
-                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp) : 
+                return !string.IsNullOrEmpty(RefreshOnUnixTimestamp) ?
+                    CoreHelpers.UnixTimestampStringToDateTime(RefreshOnUnixTimestamp) :
                     (DateTimeOffset?)null;
             }
         }
@@ -152,6 +165,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 ExtendedExpiresOnUnixTimestamp = extendedExpiresOn.ToString(CultureInfo.InvariantCulture),
                 RefreshOnUnixTimestamp = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.RefreshOn),
                 UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
+                KeyId = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId),
+                TokenType = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer
             };
 
             item.PopulateFieldsFromJObject(j);
@@ -169,6 +184,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.CachedAt, CachedAt);
             SetItemIfValueNotNull(json, StorageJsonKeys.ExpiresOn, ExpiresOnUnixTimestamp);
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn, ExtendedExpiresOnUnixTimestamp);
+            SetItemIfValueNotNull(json, StorageJsonKeys.KeyId, KeyId);
+            SetItemIfValueNotNullOrDefault(json, StorageJsonKeys.TokenType, TokenType, StorageJsonValues.TokenTypeBearer);
             SetItemIfValueNotNull(json, StorageJsonKeys.RefreshOn, RefreshOnUnixTimestamp);
 
             // previous versions of msal used "ext_expires_on" instead of the correct "extended_expires_on".

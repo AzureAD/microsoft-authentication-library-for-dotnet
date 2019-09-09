@@ -163,11 +163,35 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Assert
             Assert.AreEqual(tokenResponse.RefreshIn, 1800);
+            Assert.AreEqual(tokenResponse.TokenType, at.TokenType);
+            Assert.IsNull(at.KeyId);
             Assert.IsTrue(at.RefreshOn.HasValue);
             CoreAssert.AreEqual(
                 at.RefreshOn.Value,
                 (at.CachedAtOffset + TimeSpan.FromSeconds(1800)),
                 TimeSpan.FromSeconds(1));
+        }
+
+
+        [TestMethod]
+        public void AccessToken_WithKidAndType_FromMsalResponseJson()
+        {
+            // Arrange
+            string json = TestConstants.TokenResponseJson;
+            json = JsonTestUtils.AddKeyValue(json, StorageJsonKeys.TokenType, "pop");
+
+            var tokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+
+            // Act
+            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ClientId,
+                    tokenResponse,
+                    TestConstants.TenantId, 
+                    keyId: "kid1");
+
+            // Assert
+            Assert.AreEqual("kid1", at.KeyId);
+            CoreAssert.AreEqual(tokenResponse.TokenType, at.TokenType, "pop");
         }
 
         [TestMethod]

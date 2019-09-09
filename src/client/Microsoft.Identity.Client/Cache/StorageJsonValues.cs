@@ -9,6 +9,7 @@ namespace Microsoft.Identity.Client.Cache
         public const string AuthorityTypeMsa = "MSA";
         public const string AuthorityTypeMsSts = "MSSTS";
         public const string AuthorityTypeOther = "Other";
+        public const string TokenTypeBearer = "Bearer";
         public const string CredentialTypeRefreshToken = "RefreshToken";
         public const string CredentialTypeAccessToken = "AccessToken";
         public const string CredentialTypeIdToken = "IdToken";
@@ -16,5 +17,6 @@ namespace Microsoft.Identity.Client.Cache
         public const string CredentialTypeOther = "Other";
 
         public const string AppMetadata = "AppMetadata";
+    
     }
 }

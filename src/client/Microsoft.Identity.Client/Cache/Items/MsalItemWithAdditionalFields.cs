@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
@@ -29,6 +30,17 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal void SetItemIfValueNotNull(JObject json, string key, JToken value)
         {
+            SetValueIfFilterMatches(json, key, value, strVal => !string.IsNullOrEmpty(strVal));
+        }
+
+        internal void SetItemIfValueNotNullOrDefault(JObject json, string key, JToken value, string defaultValue)
+        {
+            SetValueIfFilterMatches(json, key, value, strVal => !string.IsNullOrEmpty(strVal) &&
+                        !strVal.Equals(defaultValue, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static void SetValueIfFilterMatches(JObject json, string key, JToken value, Func<string, bool> filter)
+        {
             bool shouldSetValue = true;
 
             object asObj = value.ToObject<object>();
@@ -42,7 +54,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 string asString = asObj as string;
                 if (asString != null)
                 {
-                    shouldSetValue = !string.IsNullOrEmpty(asString);
+                    shouldSetValue = filter(asString);
                 }
             }
 

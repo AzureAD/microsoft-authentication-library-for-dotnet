@@ -50,6 +50,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TenantId = "the_tenant_id",
                 RawClientInfo = string.Empty, 
                 UserAssertionHash = "assertion hash",
+                TokenType = StorageJsonValues.TokenTypeBearer
             };
         }
 
@@ -165,6 +166,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void TestSerializeMsalAccessTokenCacheItem()
         {
             var item = CreateAccessTokenItem();
+            Assert.AreEqual(StorageJsonValues.TokenTypeBearer, item.TokenType);
+
             string asJson = item.ToJsonString();
             var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
 
@@ -199,6 +202,22 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             var item = CreateAccessTokenItem();
             item.RefreshOnUnixTimestamp = "123456";
+            string asJson = item.ToJsonString();
+            var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
+
+            AssertAccessTokenCacheItemsAreEqual(item, item2);
+        }
+
+
+        [TestMethod]
+        public void TestSerializeMsalAccessTokenCacheItem_WithKidAndTokenType()
+        {
+            var item = CreateAccessTokenItem();
+            Assert.AreEqual(StorageJsonValues.TokenTypeBearer, item.TokenType);
+
+            item.KeyId = "kid";
+            item.TokenType = "pop";
+
             string asJson = item.ToJsonString();
             var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
 
@@ -465,7 +484,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
             var finalJson = JObject.Parse(Encoding.UTF8.GetString(cache));
-
+            
             var originalJson = JObject.Parse(jsonContent);
             Assert.IsTrue(JToken.DeepEquals(originalJson, finalJson));
         }
@@ -632,7 +651,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ExpiresOnUnixTimestamp = "1548846619",
                 ExtendedExpiresOnUnixTimestamp = "1548846619",
                 NormalizedScopes = "User.Read User.ReadBasic.All profile openid email",
-                UserAssertionHash = string.Empty
+                UserAssertionHash = string.Empty, 
+                TokenType = StorageJsonValues.TokenTypeBearer
             };
             AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.GetAllAccessTokens().First());
 
@@ -799,6 +819,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.UserAssertionHash, actual.UserAssertionHash, nameof(actual.UserAssertionHash));
             Assert.AreEqual(expected.RefreshOnUnixTimestamp, actual.RefreshOnUnixTimestamp, nameof(actual.RefreshOnUnixTimestamp));
             Assert.AreEqual(expected.RefreshOn, actual.RefreshOn, nameof(actual.RefreshOn));
+            Assert.AreEqual(expected.KeyId, actual.KeyId, nameof(actual.KeyId));
+            Assert.AreEqual(expected.TokenType, actual.TokenType, nameof(actual.TokenType));
         }
 
         private void AssertRefreshTokenCacheItemsAreEqual(MsalRefreshTokenCacheItem expected, MsalRefreshTokenCacheItem actual)
