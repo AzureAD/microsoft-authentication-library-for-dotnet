@@ -24,14 +24,33 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Returns if the response is from the broker app
+        /// Returns if the response is from the broker app. See https://aka.ms/msal-net-ios-13-broker
+        /// for more details.
         /// </summary>
         /// <param name="sourceApplication">application bundle id of the broker</param>
         /// <returns>True if the response is from broker, False otherwise.</returns>
         public static bool IsBrokerResponse(string sourceApplication)
         {
-            Debug.WriteLine("IsBrokerResponse Called with sourceApplication {0}", sourceApplication);
-            return sourceApplication != null && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase);
+            Debug.WriteLine("IsBrokerResponse called with sourceApplication {0}", sourceApplication);
+
+            if (sourceApplication != null && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            else if (string.IsNullOrEmpty(sourceApplication))
+            {
+                // For iOS 13+, SourceApplication will not be returned
+                // Customers will need to install iOS broker >= 6.3.19
+                // MSAL.NET will generate a nonce (guid), which broker will
+                // return in the response. MSAL.NET will validate a match in iOSBroker.cs
+                // So if SourceApplication is null, just return, MSAL.NET will throw a 
+                // specific error message if the nonce does not match.
+                return true; 
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>

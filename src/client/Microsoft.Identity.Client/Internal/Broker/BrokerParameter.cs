@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public const string BrokerInstallUrl = "broker_install_url";
         public const string BrokerV2 = "msauthv2://";
+        public const string BrokerV3 = "msauthv3://";
         public const string AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired = "msauth://";
     }
 }

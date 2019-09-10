@@ -394,6 +394,11 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseReturnedError = "broker_response_returned_error";
 
         /// <summary>
+        /// Broker response nonce does not match the request nonce sent by MSAL.NET for iOS broker >= v6.3.19
+        /// </summary>
+        public const string BrokerNonceMismatch = "broker_nonce_mismatch";
+
+        /// <summary>
         /// MSAL is not able to invoke the broker. Possible reasons are the broker is not installed on the user's device,
         /// or there were issues with the UiParent or CallerViewController being null. See https://aka.ms/msal-brokers
         /// </summary>

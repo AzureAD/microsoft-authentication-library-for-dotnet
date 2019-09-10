@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public const string ErrorDescription = "error_description";
         public const string ExpectedHash = "hash";
         public const string EncryptedResponsed = "response";
+        public const string BrokerNonce = "broker_nonce";
 
         public const string BrokerKeyService = "Broker Key Service";
         public const string BrokerKeyAccount = "Broker Key Account";
@@ -45,6 +46,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public const string CanInvokeBroker = "Can invoke broker? ";
         public const string CanInvokeBrokerReturnsFalseMessage = " - returned from CanOpenUrl. Msauthv2 needs to be included " +
                     "in LSApplicationQueriesSchemes in Info.plist. See aka.ms/iosBroker for more information. ";
+        public const string iOSBrokerv2Installed = "iOS broker msauthv2:// installed on device: ";
+        public const string iOSBrokerv3Installed = "iOS broker msauthv3:// installed on device: ";
         public const string BrokerPayloadContainsInstallUrl = "iOS Broker - broker payload contains install url. ";
         public const string StartingActionViewActivity = "iOS Broker - Starting ActionView activity to ";
         public const string BrokerResponseContainsError = "Broker response contains an error. ";
