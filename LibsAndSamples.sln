@@ -140,6 +140,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\pipeline-pullrequest.yaml = build\pipeline-pullrequest.yaml
 		build\pipeline-releasebuild.yaml = build\pipeline-releasebuild.yaml
 		build\pipeline-uiautomation.yaml = build\pipeline-uiautomation.yaml
+		build\template-bootstrap-build.yaml = build\template-bootstrap-build.yaml
+		build\template-install-dotnet-core.yaml = build\template-install-dotnet-core.yaml
+		build\template-install-keyvault-secrets.yaml = build\template-install-keyvault-secrets.yaml
+		build\template-install-nuget.yaml = build\template-install-nuget.yaml
+		build\template-nuget-pack.yaml = build\template-nuget-pack.yaml
+		build\template-pack-and-sign-all-nugets.yaml = build\template-pack-and-sign-all-nugets.yaml
+		build\template-pack-and-sign-nuget.yaml = build\template-pack-and-sign-nuget.yaml
+		build\template-postbuild-code-analysis.yaml = build\template-postbuild-code-analysis.yaml
+		build\template-prebuild-code-analysis.yaml = build\template-prebuild-code-analysis.yaml
+		build\template-publish-analysis-and-cleanup.yaml = build\template-publish-analysis-and-cleanup.yaml
+		build\template-publish-packages-and-symbols.yaml = build\template-publish-packages-and-symbols.yaml
+		build\template-python-config.yaml = build\template-python-config.yaml
+		build\template-restore-build-libsandsamples.yaml = build\template-restore-build-libsandsamples.yaml
+		build\template-run-integration-tests.yaml = build\template-run-integration-tests.yaml
+		build\template-run-unit-tests.yaml = build\template-run-unit-tests.yaml
+		build\template-sign-binary.yaml = build\template-sign-binary.yaml
 	EndProjectSection
 EndProject
 Global
