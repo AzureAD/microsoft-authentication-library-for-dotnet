@@ -26,11 +26,20 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string MSAOutlookAccountClientID = "9668f2bd-6103-4292-9024-84fa2d1b6fb2";
         public const string Upn = "upn";
 
+        // constants for V2 Lab api
+        public const string ProtectionPolicy = "protectionpolicy";
+        public const string HomeDomain = "homedomain";
+        public const string HomeUPN = "homeupn";
+        public const string FederationProviderV2 = "federationprovider";
+        public const string AzureEnvironment = "azureenvironment";
+        public const string SignInAudience = "SignInAudience";
+
         public const string True = "true";
         public const string False = "false";
 
         public const string BetaEndpoint = "http://api.msidlab.com/api/userbeta";
-        public const string LabEndpoint = "http://api.msidlab.com/api/user";
+        //public const string LabEndpoint = "http://api.msidlab.com/api/user";
         public const string CreateLabUser = "https://request.msidlab.com/api/CreateLabUser";
+        public const string LabEndPoint = "https://user.msidlab.com/api/user";
     }
 }

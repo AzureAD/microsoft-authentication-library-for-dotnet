@@ -163,6 +163,35 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
+            EnterUsername(driver, user, withLoginHint, adfsOnly, fields);
+            EnterPassword(driver, user, fields);
+
+            if (user.Upn.Contains("outlook.com"))
+            {
+                Trace.WriteLine("Logging in ... clicking accept prompts for outlook.com MSA user");
+                driver.WaitForElementToBeVisibleAndEnabled(By.Id(CoreUiTestConstants.ConsentAcceptId)).Click();
+            }
+
+            if (prompt == Prompt.Consent)
+            {
+                Trace.WriteLine("Consenting...");
+                driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.AADSignInButtonId)).Click();
+            }
+        }
+
+        private static void EnterPassword(IWebDriver driver, LabUser user, UserInformationFieldIds fields)
+        {
+            Trace.WriteLine("Logging in ... Entering password");
+            string password = user.GetOrFetchPassword();
+            string passwordField = fields.GetPasswordInputId();
+            driver.WaitForElementToBeVisibleAndEnabled(By.Id(passwordField)).SendKeys(password);
+
+            Trace.WriteLine("Logging in ... Clicking next after password");
+            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordSignInButtonId())).Click();
+        }
+
+        private static void EnterUsername(IWebDriver driver, LabUser user, bool withLoginHint, bool adfsOnly, UserInformationFieldIds fields)
+        {
             if (adfsOnly && !withLoginHint)
             {
                 Trace.WriteLine("Logging in ... Entering username");
@@ -190,29 +219,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     }
                 }
 
-                if (user.FederationProvider == FederationProvider.AdfsV2 && user.IsFederated)
+                if (user.FederationProvider == FederationProvider.AdfsV2 && (user.UserType == UserType.Federated))
                 {
                     Trace.WriteLine("Logging in ... AFDSv2 - Entering the username again, this time in the ADFSv2 form");
                     driver.FindElementById(CoreUiTestConstants.AdfsV2WebUsernameInputId).SendKeys(user.Upn);
                 }
-            }
-
-            Trace.WriteLine("Logging in ... Entering password");
-            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordInputId())).SendKeys(user.GetOrFetchPassword());
-
-            Trace.WriteLine("Logging in ... Clicking next after password");
-            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordSignInButtonId())).Click();
-
-            if (user.HomeUPN.Contains("outlook.com"))
-            {
-                Trace.WriteLine("Logging in ... clicking accept prompts for outlook.com MSA user");
-                driver.WaitForElementToBeVisibleAndEnabled(By.Id(CoreUiTestConstants.ConsentAcceptId)).Click();
-            }
-
-            if (prompt == Prompt.Consent)
-            {
-                Trace.WriteLine("Consenting...");
-                driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.AADSignInButtonId)).Click();
             }
         }
 

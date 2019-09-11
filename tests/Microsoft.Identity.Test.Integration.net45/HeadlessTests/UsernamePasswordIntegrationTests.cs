@@ -81,15 +81,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.ADFSv2019,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
 
 
             var user = labResponse.User;
@@ -115,7 +107,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.AppId).WithAuthority(_authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
 
             try
             {
@@ -140,22 +132,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AcquireTokenWithFederatedUsernameIncorrectPasswordAsync()
         {
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.AdfsV4,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = false
-            };
-
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).ConfigureAwait(false);
             var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.AppId).WithAuthority(_authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
 
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () => await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectSecurePassword)
@@ -169,7 +153,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.AppId).WithAuthority(_authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
 
             //AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             AuthenticationResult authResult = await msalPublicClient
@@ -180,7 +164,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            Assert.AreEqual(user.Upn, authResult.Account.Username);
+            Assert.IsTrue(string.Equals(user.Upn, authResult.Account.Username, System.StringComparison.InvariantCultureIgnoreCase));
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.

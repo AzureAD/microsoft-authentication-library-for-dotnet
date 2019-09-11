@@ -17,23 +17,22 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             _user = user;
         }
 
-        public string GetPasswordInputId(bool isB2CTest = false)
+        public string GetPasswordInputId()
         {
-
             if (string.IsNullOrWhiteSpace(_passwordInputId))
             {
-                DetermineFieldIds(isB2CTest);
+                DetermineFieldIds();
             }
             return _passwordInputId;
 
         }
 
-        public string GetPasswordSignInButtonId(bool isB2CTest = false)
+        public string GetPasswordSignInButtonId()
         {
 
             if (String.IsNullOrWhiteSpace(_passwordSignInButtonId))
             {
-                DetermineFieldIds(isB2CTest);
+                DetermineFieldIds();
             }
             return _passwordSignInButtonId;
 
@@ -63,9 +62,9 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             }
         }
 
-        private void DetermineFieldIds(bool isB2CTest)
+        private void DetermineFieldIds()
         {
-            if (_user.IsFederated)
+            if (_user.UserType == UserType.Federated)
             {
                 if (_user.FederationProvider == FederationProvider.AdfsV2)
                 {
@@ -80,7 +79,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                 return;
             }
 
-            if (_user.UserType == UserType.B2C && isB2CTest)
+            if (_user.UserType == UserType.B2C)
             {
                 DetermineB2CFieldIds();
                 return;
@@ -92,7 +91,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         private void DetermineB2CFieldIds()
         {
-            switch (_user.B2CIdentityProvider)
+            switch (_user.B2cProvider)
             {
             case B2CIdentityProvider.Local:
                 _passwordInputId = CoreUiTestConstants.B2CWebPasswordId;

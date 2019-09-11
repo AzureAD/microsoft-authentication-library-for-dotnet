@@ -7,10 +7,38 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public class LabResponse
     {
-        [JsonProperty("AppId")]
+        [JsonProperty("app")]
+        public LabApp App { get; set; }
+
+        [JsonProperty("user")]
+        public LabUser User { get; set; }
+
+        [JsonProperty("lab")]
+        public Lab Lab { get; set; }
+    }
+
+    public class LabApp
+    {
+        [JsonProperty("appid")]
         public string AppId { get; set; }
 
-        [JsonProperty("Users")]
-        public LabUser User { get; set; }
+        // TODO: this is a list, but lab sends a string. Not used today, discuss with lab to return a list
+        //[JsonProperty("redirecturi")]
+        //public string RedirectUri { get; set; }
+
+        [JsonProperty("signinaudience")]
+        public string Audience { get; set; }
+    }
+
+    public class Lab
+    {
+        [JsonProperty("tenantid")]
+        public string TenantId { get; set; }
+
+        [JsonProperty("federationprovider")]
+        public FederationProvider FederationProvider { get; set; }
+
+        [JsonProperty("credentialvaultkeyname")]
+        public string CredentialVaultkeyName { get; set; }
     }
 }

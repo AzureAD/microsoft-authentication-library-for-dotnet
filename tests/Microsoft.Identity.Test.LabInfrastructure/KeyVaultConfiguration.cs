@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <summary>
         /// The authentication type to use to communicate with the Key Vault.
         /// </summary>
-        public KeyVaultAuthenticationType AuthType { get; set; }
+        public LabAccessAuthenticationType AuthType { get; set; }
 
         /// <summary>
         /// The ID of the test harness client.
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         /// <summary>
         /// The thumbprint of the <see cref="System.Security.Cryptography.X509Certificates.X509Certificate2"/> to use when
-        /// <see cref="AuthType"/> is <see cref="KeyVaultAuthenticationType.ClientCertificate"/>.
+        /// <see cref="AuthType"/> is <see cref="LabAccessAuthenticationType.ClientCertificate"/>.
         /// </summary>
         public string CertThumbprint { get; set; }
 
@@ -35,10 +35,5 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public string KeyVaultSecret { get; set; }
     }
 
-    public enum KeyVaultAuthenticationType
-    {
-        ClientCertificate,
-        ClientSecret,
-        UserCredential
-    }
+
 }

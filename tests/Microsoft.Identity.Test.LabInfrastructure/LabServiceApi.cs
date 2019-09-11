@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -13,13 +14,16 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     /// <summary>
     /// Wrapper for new lab service API
     /// </summary>
-    public class LabServiceApi : ILabService, IDisposable
+    public class LabServiceApi : ILabService
     {
-        private readonly HttpClient _httpClient;
+        private string _labAccessAppId;
+        private string _labAccessClientSecret;
 
         public LabServiceApi()
         {
-            _httpClient = new HttpClient();
+            KeyVaultSecretsProvider _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
+            _labAccessAppId = _keyVaultSecretsProvider.GetMsidLabSecret("LabVaultAppID").Value;
+            _labAccessClientSecret = _keyVaultSecretsProvider.GetMsidLabSecret("LabVaultAppSecret").Value;
         }
 
         /// <summary>
@@ -35,11 +39,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             if (!Uri.IsWellFormedUriString(user.CredentialUrl, UriKind.Absolute))
             {
                 Console.WriteLine($"User '{user.Upn}' has invalid Credential URL: '{user.CredentialUrl}'");
-            }
-
-            if (user.IsExternal && user.HomeUser == null)
-            {
-                Console.WriteLine($"User '{user.Upn}' has no matching home user.");
             }
 
             return response;
@@ -60,90 +59,68 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private static LabResponse CreateLabResponseFromResultString(string result)
         {
-            LabResponse response = JsonConvert.DeserializeObject<LabResponse>(result);
-            LabUser user = JsonConvert.DeserializeObject<LabUser>(result);
-
-            if (!string.IsNullOrEmpty(user.HomeTenantId) && !string.IsNullOrEmpty(user.HomeUPN))
+            LabResponse[] responses = JsonConvert.DeserializeObject<LabResponse[]>(result);
+            if (responses.Length > 1)
             {
-                user.InitializeHomeUser();
+                throw new InvalidOperationException(
+                    "Test Setup Error: Not expecting the lab to return multiple users for a query." +
+                    " Please have rewrite the query so that it returns a single user.");
             }
+
+            var response = responses[0];
+            response.User.CredentialUrl = response.Lab.CredentialVaultkeyName;
+            response.User.TenantId = response.Lab.TenantId;
+            response.User.FederationProvider = response.Lab.FederationProvider;
 
             return response;
         }
+
 
         private Task<string> RunQueryAsync(UserQuery query)
         {
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
 
-            //Disabled for now until there are tests that use it.
-            queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);
-            queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
-            bool queryRequiresBetaEndpoint = false;
-
             //Building user query
-            if (!string.IsNullOrWhiteSpace(query.Upn))
-            {
-                queryDict.Add(LabApiConstants.Upn, query.Upn);
-                return SendLabRequestAsync(LabApiConstants.LabEndpoint, queryDict);
-            }
-
-            if (query.FederationProvider != null)
-            {
-                if (query.FederationProvider == FederationProvider.ADFSv2019)
-                {
-                    queryRequiresBetaEndpoint = true;
-                }
-                queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
-            }
-
-            if (!string.IsNullOrWhiteSpace(query.Upn))
-            {
-                queryDict.Add(LabApiConstants.Upn, query.Upn);
-            }
-
-            queryDict.Add(LabApiConstants.MobileAppManagement, query.IsMamUser != null && (bool)(query.IsMamUser) ? LabApiConstants.True : LabApiConstants.False);
-            queryDict.Add(LabApiConstants.MultiFactorAuthentication, query.IsMfaUser != null && (bool)(query.IsMfaUser) ? LabApiConstants.True : LabApiConstants.False);
-
-            if (query.Licenses != null && query.Licenses.Count > 0)
-            {
-                queryDict.Add(LabApiConstants.License, query.Licenses.ToArray().ToString());
-            }
-
-            queryDict.Add(LabApiConstants.FederatedUser, query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? LabApiConstants.True : LabApiConstants.False);
+            //Required parameters will be set to default if not supplied by the test code
+            queryDict.Add(LabApiConstants.MultiFactorAuthentication, query.MFA != null ? query.MFA.ToString() : MFA.None.ToString());
+            queryDict.Add(LabApiConstants.ProtectionPolicy, query.ProtectionPolicy != null ? query.ProtectionPolicy.ToString() : ProtectionPolicy.None.ToString());
 
             if (query.UserType != null)
             {
                 queryDict.Add(LabApiConstants.UserType, query.UserType.ToString());
             }
 
-            queryDict.Add(LabApiConstants.External, query.IsExternalUser != null && (bool)(query.IsExternalUser) ? LabApiConstants.True : LabApiConstants.False);
-
-            if (query.B2CIdentityProvider == B2CIdentityProvider.Local)
+            if (query.HomeDomain != null)
             {
-                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CLocal);
+                queryDict.Add(LabApiConstants.HomeDomain, query.HomeDomain.ToString());
             }
 
-            if (query.B2CIdentityProvider == B2CIdentityProvider.Facebook)
+            if (query.HomeUPN != null)
             {
-                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CFacebook);
+                queryDict.Add(LabApiConstants.HomeUPN, query.HomeUPN.ToString());
             }
 
-            if (query.B2CIdentityProvider == B2CIdentityProvider.Google)
+            if (query.B2CIdentityProvider != null)
             {
-                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
+                queryDict.Add(LabApiConstants.B2CProvider, query.B2CIdentityProvider.ToString());
             }
 
-            if (query.B2CIdentityProvider == B2CIdentityProvider.MSA)
+            if (query.FederationProvider != null)
             {
-                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CMSA);
+                queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
             }
 
-            if (!string.IsNullOrEmpty(query.UserSearch))
+            if (query.AzureEnvironment != null)
             {
-                queryDict.Add(LabApiConstants.UserContains, query.UserSearch);
+                queryDict.Add(LabApiConstants.AzureEnvironment, query.AzureEnvironment.ToString());
             }
 
-            return SendLabRequestAsync(queryRequiresBetaEndpoint ? LabApiConstants.BetaEndpoint : LabApiConstants.LabEndpoint, queryDict);
+            if (query.SignInAudience != null)
+            {
+                queryDict.Add(LabApiConstants.SignInAudience, query.SignInAudience.ToString());
+            }
+
+            return SendLabRequestAsync(LabApiConstants.LabEndPoint, queryDict);
         }
 
         private async Task<string> SendLabRequestAsync(string requestUrl, IDictionary<string, string> queryDict)
@@ -152,12 +129,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             {
                 Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()))
             };
-            return await _httpClient.GetStringAsync(uriBuilder.ToString()).ConfigureAwait(false);
-        }
 
-        public void Dispose()
-        {
-            _httpClient.Dispose();
+            var res = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret).ConfigureAwait(false);
+
+            using (HttpClient httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", res));               
+                return await httpClient.GetStringAsync(uriBuilder.ToString()).ConfigureAwait(false);               
+            }
         }
 
         public async Task<LabResponse> CreateTempLabUserAsync()
