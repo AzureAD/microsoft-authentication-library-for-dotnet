@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Client.Cache;
+using System.Globalization;
 using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client
@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
     public partial class AuthenticationResult
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
-        private const string Oauth2AuthorizationHeader = "Bearer ";
+        private readonly IAuthenticationScheme _authenticationScheme;
 
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
@@ -26,15 +26,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="accessToken">Access Token that can be used as a bearer token to access protected web APIs</param>
         /// <param name="account">Account information</param>
-        /// <param name="expiresOn">Expiracy date-time for the access token</param>
+        /// <param name="expiresOn">Expiry date-time for the access token</param>
         /// <param name="extendedExpiresOn">See <see cref="ExtendedExpiresOn"/></param>
         /// <param name="idToken">ID token</param>
         /// <param name="isExtendedLifeTimeToken">See <see cref="IsExtendedLifeTimeToken"/></param>
-        /// <param name="scopes">granted scope values as returned by the service</param>
-        /// <param name="tenantId">identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
-        /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that
+        /// <param name="scopes">Granted scope values as returned by the service</param>
+        /// <param name="tenantId">Identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
+        /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
         /// <param name="correlationId">The correlation id of the authentication request</param>
-        /// is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
+        /// <param name="tokenType">The token type, defaults to Bearer</param>
         public AuthenticationResult(
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -45,7 +45,8 @@ namespace Microsoft.Identity.Client
             IAccount account,
             string idToken,
             IEnumerable<string> scopes,
-            Guid correlationId)
+            Guid correlationId,
+            string tokenType = "Bearer")
         {
             AccessToken = accessToken;
             IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
@@ -57,14 +58,17 @@ namespace Microsoft.Identity.Client
             IdToken = idToken;
             Scopes = scopes;
             CorrelationId = correlationId;
+            TokenType = tokenType;
         }
 
-        internal AuthenticationResult()
+        internal AuthenticationResult(
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem,
+            IAuthenticationScheme authenticationScheme,
+            Guid correlationID)
         {
-        }
+            _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
 
-        internal AuthenticationResult(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem, Guid correlationID)
-        {
             if (msalAccessTokenCacheItem.HomeAccountId != null)
             {
                 string username = msalAccessTokenCacheItem.IsAdfs ? msalIdTokenCacheItem?.IdToken.Upn : msalIdTokenCacheItem?.IdToken?.PreferredUsername;
@@ -74,7 +78,7 @@ namespace Microsoft.Identity.Client
                     msalAccessTokenCacheItem.Environment);
             }
 
-            AccessToken = msalAccessTokenCacheItem.Secret;
+            AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
             ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
             ExtendedExpiresOn = msalAccessTokenCacheItem.ExtendedExpiresOn;
@@ -83,6 +87,7 @@ namespace Microsoft.Identity.Client
             Scopes = msalAccessTokenCacheItem.ScopeSet;
             IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
             CorrelationId = correlationID;
+            TokenType = msalAccessTokenCacheItem.TokenType;
         }
 
         /// <summary>
@@ -151,6 +156,15 @@ namespace Microsoft.Identity.Client
         public Guid CorrelationId { get; }
 
         /// <summary>
+        /// Identifies the type of access token. By default tokens returned by Azure Active Directory are Bearer tokens.        
+        /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
+        /// </summary>
+        /// <remarks>This API is experimental and may change without a major version upgrade. 
+        /// The values returned by this property are not guaranteed to remain the same.
+        /// Please use <seealso cref="CreateAuthorizationHeader"/> instead.</remarks>
+        internal string TokenType { get; }
+
+        /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so
         /// that you can call a protected API
         /// </summary>
@@ -166,7 +180,11 @@ namespace Microsoft.Identity.Client
         /// </example>
         public string CreateAuthorizationHeader()
         {
-            return Oauth2AuthorizationHeader + AccessToken;
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0} {1}",
+                _authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType,
+                AccessToken);
         }
     }
 }

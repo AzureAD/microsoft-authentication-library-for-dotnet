@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/751a212b-4003-416e-b600-e1f48e40db9f/";
         public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string> { { "client_ip", "some_ip" }, { "aud", "some_audience" } };
         public const string RTSecret = "someRT";
+        public const string ATSecret = "some-access-token";
 
         public const string HomeAccountId = Uid + "." + Utid;
 

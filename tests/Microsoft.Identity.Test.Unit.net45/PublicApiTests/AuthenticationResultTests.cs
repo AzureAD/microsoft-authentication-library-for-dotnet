@@ -31,7 +31,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .GetProperties()
                 .Where(p => p.GetCustomAttribute(typeof(ObsoleteAttribute)) == null);
 
-            Assert.AreEqual(ctorParameters.Length, classProperties.Count(), "The <for test> constructor should include all properties of AuthenticationObject"); ;
+            Assert.AreEqual(ctorParameters.Length, classProperties.Count() + 1, "The <for test> constructor should include all properties of AuthenticationObject except AuthenticationScheme"); ;
+        }
+
+        [TestMethod]
+        public void GetAuthorizationHeader()
+        {
+            var ar = new AuthenticationResult(
+                "at",
+                false,
+                "uid",
+                DateTime.UtcNow,
+                DateTime.UtcNow,
+                "tid",
+                new Account("aid", "user", "env"),
+                "idt", new[] { "scope" }, Guid.NewGuid(),
+                "SomeTokenType");
+
+            Assert.AreEqual("SomeTokenType at", ar.CreateAuthorizationHeader());
         }
     }
 }

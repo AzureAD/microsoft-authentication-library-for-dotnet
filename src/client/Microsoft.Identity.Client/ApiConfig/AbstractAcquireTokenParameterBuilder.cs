@@ -340,6 +340,12 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+        internal /* for testing */ T WithAuthenticationScheme(IAuthenticationScheme scheme)
+        {
+            CommonParameters.AuthenticationScheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
+            return (T)this;
+        }
+
         /// <summary>
         /// Validates the parameters of the AcquireToken operation.
         /// </summary>

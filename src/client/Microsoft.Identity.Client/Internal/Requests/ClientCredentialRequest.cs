@@ -38,7 +38,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
                 {
-                    return new AuthenticationResult(cachedAccessTokenItem, null, AuthenticationRequestParameters.RequestContext.CorrelationId);
+                    return new AuthenticationResult(
+                        cachedAccessTokenItem, 
+                        null,
+                        AuthenticationRequestParameters.AuthenticationScheme,
+                        AuthenticationRequestParameters.RequestContext.CorrelationId);
                 }
             }
 
@@ -55,7 +59,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (cachedAccessTokenItem != null && isAadUnavailable)
                 {
                     logger.Info("Returning existing access token. It is not expired, but should be refreshed.");
-                    return new AuthenticationResult(cachedAccessTokenItem, null, AuthenticationRequestParameters.RequestContext.CorrelationId);
+                    return new AuthenticationResult(
+                        cachedAccessTokenItem, 
+                        null, 
+                        AuthenticationRequestParameters.AuthenticationScheme, 
+                        AuthenticationRequestParameters.RequestContext.CorrelationId);
                 }
 
                 logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable.");
