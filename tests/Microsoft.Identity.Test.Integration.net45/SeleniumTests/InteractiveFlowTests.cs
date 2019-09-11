@@ -58,81 +58,35 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         public async Task Interactive_AdfsV3_NotFederatedAsync()
         {
-            // Arrange
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.AdfsV4,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = false
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, false).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task Interactive_AdfsV3_FederatedAsync()
         {
-            // Arrange
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.AdfsV4,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task Interactive_AdfsV2_FederatedAsync()
         {
-            // Arrange
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.AdfsV2,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV2, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task Interactive_AdfsV4_NotFederatedAsync()
         {
-            // Arrange
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.AdfsV4,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = false
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task Interactive_AdfsV4_FederatedAsync()
         {
-            // Arrange
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.AdfsV4,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -148,32 +102,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         public async Task Interactive_AdfsV2019_NotFederatedAsync()
         {
-            // Arrange
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.ADFSv2019,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = false
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, false).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task Interactive_AdfsV2019_FederatedAsync()
         {
-            // Arrange
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.ADFSv2019,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
@@ -182,16 +118,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         public async Task Interactive_AdfsV2019_DirectAsync()
         {
-            // Arrange
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.ADFSv2019,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
         }
 
@@ -206,15 +133,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             AuthenticationResult defaultAccountResult = await RunTestForUserAsync(labResponseDefault).ConfigureAwait(false);
 
             //Acquire AT for ADFS 2019 account
-            UserQuery federatedUserquery = new UserQuery
-            {
-                FederationProvider = FederationProvider.ADFSv2019,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-            LabResponse labResponseFederated = await LabUserHelper.GetLabUserDataAsync(federatedUserquery).ConfigureAwait(false);
+            LabResponse labResponseFederated = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
             var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, false).ConfigureAwait(false);
 
             //Acquire AT for MSA account

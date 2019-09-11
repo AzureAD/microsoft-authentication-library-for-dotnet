@@ -81,15 +81,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.ADFSv2019,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
 
 
             var user = labResponse.User;
@@ -140,15 +132,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AcquireTokenWithFederatedUsernameIncorrectPasswordAsync()
         {
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.AdfsV4,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = false
-            };
-
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).ConfigureAwait(false);
             var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();

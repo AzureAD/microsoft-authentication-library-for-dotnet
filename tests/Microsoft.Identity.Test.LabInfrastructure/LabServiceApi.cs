@@ -75,75 +75,69 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
 
-            //Disabled for now until there are tests that use it.
-            queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);
-            queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
-            bool queryRequiresBetaEndpoint = false;
-
             //Building user query
-            if (!string.IsNullOrWhiteSpace(query.Upn))
-            {
-                queryDict.Add(LabApiConstants.Upn, query.Upn);
-                return SendLabRequestAsync(LabApiConstants.LabEndpoint, queryDict);
-            }
-
-            if (query.FederationProvider != null)
-            {
-                if (query.FederationProvider == FederationProvider.ADFSv2019)
-                {
-                    queryRequiresBetaEndpoint = true;
-                }
-                queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
-            }
-
-            if (!string.IsNullOrWhiteSpace(query.Upn))
-            {
-                queryDict.Add(LabApiConstants.Upn, query.Upn);
-            }
-
-            queryDict.Add(LabApiConstants.MobileAppManagement, query.IsMamUser != null && (bool)(query.IsMamUser) ? LabApiConstants.True : LabApiConstants.False);
-            queryDict.Add(LabApiConstants.MultiFactorAuthentication, query.IsMfaUser != null && (bool)(query.IsMfaUser) ? LabApiConstants.True : LabApiConstants.False);
-
-            if (query.Licenses != null && query.Licenses.Count > 0)
-            {
-                queryDict.Add(LabApiConstants.License, query.Licenses.ToArray().ToString());
-            }
-
-            queryDict.Add(LabApiConstants.FederatedUser, query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? LabApiConstants.True : LabApiConstants.False);
+            //Required parameters will be set to default if not supplied by the test code
+            queryDict.Add(LabApiConstants.MultiFactorAuthentication, query.MFA != null ? query.MFA.ToString() : MFA.None.ToString());
+            queryDict.Add(LabApiConstants.ProtectionPolicy, query.ProtectionPolicy != null ? query.ProtectionPolicy.ToString() : ProtectionPolicy.None.ToString());
 
             if (query.UserType != null)
             {
                 queryDict.Add(LabApiConstants.UserType, query.UserType.ToString());
             }
 
-            queryDict.Add(LabApiConstants.External, query.IsExternalUser != null && (bool)(query.IsExternalUser) ? LabApiConstants.True : LabApiConstants.False);
-
-            if (query.B2CIdentityProvider == B2CIdentityProvider.Local)
+            if (query.HomeDomain != null)
             {
-                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CLocal);
+                queryDict.Add(LabApiConstants.HomeDomain, query.HomeDomain.ToString());
             }
 
-            if (query.B2CIdentityProvider == B2CIdentityProvider.Facebook)
+            if (query.HomeUPN != null)
             {
-                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CFacebook);
+                queryDict.Add(LabApiConstants.HomeUPN, query.HomeUPN.ToString());
             }
 
-            if (query.B2CIdentityProvider == B2CIdentityProvider.Google)
+            if (query.B2CIdentityProvider != null)
             {
-                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
+                queryDict.Add(LabApiConstants.B2CProvider, query.B2CIdentityProvider.ToString());
             }
 
-            if (query.B2CIdentityProvider == B2CIdentityProvider.MSA)
+            if (query.FederationProvider != null)
             {
-                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CMSA);
+                queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
             }
 
-            if (!string.IsNullOrEmpty(query.UserSearch))
+            //if (!string.IsNullOrWhiteSpace(query.Upn))
+            //{
+            //    queryDict.Add(LabApiConstants.Upn, query.Upn);
+            //    return SendLabRequestAsync(LabApiConstants.LabEndpoint, queryDict);
+            //}
+
+            if (query.AzureEnvironment != null)
             {
-                queryDict.Add(LabApiConstants.UserContains, query.UserSearch);
+                queryDict.Add(LabApiConstants.AzureEnvironment, query.AzureEnvironment.ToString());
             }
 
-            return SendLabRequestAsync(queryRequiresBetaEndpoint ? LabApiConstants.BetaEndpoint : LabApiConstants.LabEndpoint, queryDict);
+            if (query.SignInAudience != null)
+            {
+                queryDict.Add(LabApiConstants.SignInAudience, query.SignInAudience.ToString());
+            }
+
+            //if (query.Licenses != null && query.Licenses.Count > 0)
+            //{
+            //    queryDict.Add(LabApiConstants.License, query.Licenses.ToArray().ToString());
+            //}
+
+            //queryDict.Add(LabApiConstants.FederatedUser, query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? LabApiConstants.True : LabApiConstants.False);
+
+            //queryDict.Add(LabApiConstants.External, query.IsExternalUser != null && (bool)(query.IsExternalUser) ? LabApiConstants.True : LabApiConstants.False);
+
+
+
+            //if (!string.IsNullOrEmpty(query.UserSearch))
+            //{
+            //    queryDict.Add(LabApiConstants.UserContains, query.UserSearch);
+            //}
+
+            return SendLabRequestAsync(LabApiConstants.LabEndPoint, queryDict);
         }
 
         private async Task<string> SendLabRequestAsync(string requestUrl, IDictionary<string, string> queryDict)

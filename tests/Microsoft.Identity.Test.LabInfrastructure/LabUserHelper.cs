@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static Task<LabResponse> GetSpecificUserAsync(string upn)
         {
             var query = new UserQuery();
-            query.Upn = upn;
+            //query.Upn = upn;
             return GetLabUserDataAsync(query);
         }
 
@@ -83,7 +83,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             var query = UserQuery.DefaultUserQuery;
             query.FederationProvider = federationProvider;
-            query.IsFederatedUser = federated;
             return GetLabUserDataAsync(query);
         }
 

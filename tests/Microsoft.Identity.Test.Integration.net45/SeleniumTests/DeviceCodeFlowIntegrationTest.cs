@@ -69,15 +69,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task DeviceCodeFlowAdfsTestAsync()
         {
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.ADFSv2019,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false);
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
 
             Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(Adfs2019LabConstants.PublicClientId)
