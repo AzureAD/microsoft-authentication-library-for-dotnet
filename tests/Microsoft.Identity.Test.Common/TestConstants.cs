@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
         public const string Uid = "my-uid";
         public const string Utid = "my-utid";
+        public const string Utid2 = "my-utid2";
         public const string Common = "common";
         public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
         public const string AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/751a212b-4003-416e-b600-e1f48e40db9f/";
@@ -55,6 +56,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string SovereignNetworkEnvironment = "login.microsoftonline.de";
         public const string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/home/";
         public const string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
+        public const string AuthorityUtid2Tenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid2 + "/";
         public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
         public const string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
         public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";

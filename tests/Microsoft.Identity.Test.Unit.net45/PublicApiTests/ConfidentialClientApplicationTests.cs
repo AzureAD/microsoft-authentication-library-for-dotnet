@@ -217,6 +217,42 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+
+        [TestMethod]
+        [TestCategory("Regression")]
+        [WorkItem(1365)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1365
+        public async Task FooAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant);
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithAuthority(TestConstants.AuthorityUtid2Tenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid2);
+
+            }
+        }
+
         [TestMethod]
         public async Task ConfidentialClientUsingSecretTestAsync()
         {
@@ -363,16 +399,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             switch (credentialType)
             {
-            case CredentialType.CertificateAndClaims:
-                builder = builder.WithClientClaims(cert, TestConstants.s_clientAssertionClaims);
-                break;
-            case CredentialType.SignedAssertion:
-                builder = builder.WithClientAssertion(TestConstants.DefaultClientAssertion);
-                break;
-            case CredentialType.Certificate:
-            default:
-                builder = builder.WithCertificate(cert);
-                break;
+                case CredentialType.CertificateAndClaims:
+                    builder = builder.WithClientClaims(cert, TestConstants.s_clientAssertionClaims);
+                    break;
+                case CredentialType.SignedAssertion:
+                    builder = builder.WithClientAssertion(TestConstants.DefaultClientAssertion);
+                    break;
+                case CredentialType.Certificate:
+                default:
+                    builder = builder.WithCertificate(cert);
+                    break;
             }
 
             var app = builder.BuildConcrete();
