@@ -25,11 +25,11 @@ namespace Microsoft.Identity.Client
             HomeAccountId = AccountId.ParseFromString(homeAccountId);
         }
 
-        public string Username { get; internal set; }
+        public string Username { get; }
 
-        public string Environment { get; internal set; }
+        public string Environment { get; }
 
-        public AccountId HomeAccountId { get; internal set; }
+        public AccountId HomeAccountId { get; }
 
         public override string ToString()
         {

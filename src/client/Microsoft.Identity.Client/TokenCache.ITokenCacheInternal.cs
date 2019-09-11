@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client
 {
@@ -81,7 +82,8 @@ namespace Microsoft.Identity.Client
                     requestParams.ClientId,
                     response,
                     tenantId,
-                    subject)
+                    subject,
+                    requestParams.AuthenticationScheme.KeyId)
                 {
                     UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
                     IsAdfs = isAdfsAuthority
@@ -285,8 +287,12 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.MultipleTokensMatched);
             }
 
+            msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
+
             if (msalAccessTokenCacheItem != null)
             {
+
+
                 if (msalAccessTokenCacheItem.ExpiresOn >
                     DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                 {
@@ -313,6 +319,35 @@ namespace Microsoft.Identity.Client
             }
 
             return null;
+        }
+
+        private MsalAccessTokenCacheItem FilterByKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
+        {
+            if (item == null)
+            {
+                return null;
+            }
+
+            string requestKid = authenticationRequest.AuthenticationScheme.KeyId;
+            if (string.IsNullOrEmpty(item.KeyId) && string.IsNullOrEmpty(requestKid))
+            {
+                authenticationRequest.RequestContext.Logger.Verbose("Bearer token found");
+                return item;
+            }
+
+            if (string.Equals(item.KeyId, requestKid))
+            {
+                authenticationRequest.RequestContext.Logger.Verbose("PoP token found");
+                return item;
+            }
+
+            authenticationRequest.RequestContext.Logger.Info(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "A token bound to the wrong key was found. Token key id: {0} Request key id: {1}", 
+                        item.KeyId, 
+                        requestKid));
+                return null;
         }
 
         async Task<MsalRefreshTokenCacheItem> ITokenCacheInternal.FindRefreshTokenAsync(

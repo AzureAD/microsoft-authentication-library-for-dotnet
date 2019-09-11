@@ -11,7 +11,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     internal class AcquireTokenCommonParameters
     {
         private readonly Dictionary<string, string> _apiTelemetry = new Dictionary<string, string>();
-
         public ApiEvent.ApiIds ApiId { get; set; } = ApiEvent.ApiIds.None;
         public Guid CorrelationId { get; set; }
         public Guid UserProvidedCorrelationId { get; set; }
@@ -21,6 +20,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
+
+        public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
+
         public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
         {
             _apiTelemetry[MatsConverter.AsString(feature)] = "true";

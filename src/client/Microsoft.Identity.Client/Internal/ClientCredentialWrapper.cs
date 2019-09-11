@@ -150,8 +150,7 @@ namespace Microsoft.Identity.Client.Internal
             return cryptographyManager.SignWithCertificate(message, Certificate);
         }
 
-        private static readonly int s_minKeySizeInBits = 2048;
-        public static int MinKeySizeInBits { get { return s_minKeySizeInBits; } }
+        public static int MinKeySizeInBits { get; } = 2048;
         internal string Thumbprint { get { return Base64UrlHelpers.Encode(Certificate.GetCertHash()); } }
         internal X509Certificate2 Certificate { get; private set; }
         // The cached assertion created from the JWT signing operation

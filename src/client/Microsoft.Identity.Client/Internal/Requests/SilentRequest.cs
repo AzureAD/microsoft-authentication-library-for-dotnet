@@ -127,7 +127,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
             var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
-            return new AuthenticationResult(cachedAccessTokenItem, msalIdTokenItem, AuthenticationRequestParameters.RequestContext.CorrelationId);
+            return new AuthenticationResult(
+                cachedAccessTokenItem, 
+                msalIdTokenItem, 
+                AuthenticationRequestParameters.AuthenticationScheme, 
+                AuthenticationRequestParameters.RequestContext.CorrelationId);
         }
 
         private async Task<AuthenticationResult> RefreshRtOrFailAsync(CancellationToken cancellationToken)

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
@@ -44,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // Copy in call-specific query parameters.
             if (commonParameters.ExtraQueryParameters != null)
             {
-                foreach (var kvp in commonParameters.ExtraQueryParameters)
+                foreach (KeyValuePair<string, string> kvp in commonParameters.ExtraQueryParameters)
                 {
                     ExtraQueryParameters[kvp.Key] = kvp.Value;
                 }
@@ -76,7 +75,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal bool IsBrokerEnabled { get; set; }
 
-#region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
+        public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
+
+        #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
@@ -105,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public bool IsRefreshTokenRequest { get; set; }
         public UserAssertion UserAssertion { get; set; }
 
-#endregion
+        #endregion
 
         public void LogParameters(ICoreLogger logger)
         {
