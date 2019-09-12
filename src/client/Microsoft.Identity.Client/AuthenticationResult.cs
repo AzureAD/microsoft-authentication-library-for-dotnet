@@ -61,6 +61,10 @@ namespace Microsoft.Identity.Client
             TokenType = tokenType;
         }
 
+        /// <summary>
+        /// Create an authentication result from an AccessToken item and optionally from an IdToken item. 
+        /// IdToken can be null, for example in client credential grant.
+        /// </summary>
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem,
@@ -82,7 +86,7 @@ namespace Microsoft.Identity.Client
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
             ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
             ExtendedExpiresOn = msalAccessTokenCacheItem.ExtendedExpiresOn;
-            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
+            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId ?? msalAccessTokenCacheItem.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             Scopes = msalAccessTokenCacheItem.ScopeSet;
             IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;

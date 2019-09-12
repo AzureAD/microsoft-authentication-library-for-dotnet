@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Instance
 
             if (!string.IsNullOrEmpty(tenantId) &&
                 !string.IsNullOrEmpty(currentTenantId) &&
-                TenantlessTenantNames.Contains(currentTenantId))
+                IsInTenantlessSet(currentTenantId))
             {
                 var authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
 
@@ -41,6 +41,17 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             return AuthorityInfo.CanonicalAuthority;
+        }
+
+        private static bool IsInTenantlessSet(string tenantId)
+        {
+            return TenantlessTenantNames.Contains(tenantId);
+        }
+
+        internal bool IsTenantless()
+        {
+            string currentTenantId = this.GetTenantId();
+            return IsInTenantlessSet(currentTenantId);
         }
     }
 }

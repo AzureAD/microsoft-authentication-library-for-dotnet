@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(TestConstants.AuthorityUtidTenant)
                                                               .WithRedirectUri(TestConstants.RedirectUri)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -240,6 +240,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
+                Assert.AreEqual(TestConstants.Utid, result.TenantId);
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtid2Tenant);
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
@@ -247,10 +248,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithAuthority(TestConstants.AuthorityUtid2Tenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.AreEqual(TestConstants.Utid2, result.TenantId);
 
                 Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
             }
+        }
+
+
+        [TestMethod]
+        [TestCategory("Regression")]
+        [WorkItem(1368)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1368
+        public async Task ClientCreds_DoesNotAllowCommonTenant_Async()
+        {
+
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                          .WithClientSecret(TestConstants.ClientSecret)
+                                                          .BuildConcrete();
+
+
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.ClientCredentialExplicitTenantId, ex.ErrorCode);
+
         }
 
         [TestMethod]
@@ -261,7 +283,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(TestConstants.AuthorityUtidTenant)
                                                               .WithRedirectUri(TestConstants.RedirectUri)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -392,7 +414,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             TelemetryCallback telemetryCallback = null)
         {
             var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                              .WithAuthority(TestConstants.AuthorityUtidTenant)
                               .WithRedirectUri(TestConstants.RedirectUri)
                               .WithHttpManager(httpManager)
                               .WithTelemetry(telemetryCallback);
@@ -771,7 +793,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(TestConstants.AuthorityUtidTenant)
                                                               .WithRedirectUri(TestConstants.RedirectUri)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)

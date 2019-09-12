@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit
         private void SetupMocks(MockHttpManager httpManager)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+            httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
         }
 
         private void SetupMocks(MockHttpManager httpManager, string authority)
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)
@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate(certificate)

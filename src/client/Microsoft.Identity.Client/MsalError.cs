@@ -679,18 +679,25 @@ namespace Microsoft.Identity.Client
         public const string ClientIdMustBeAGuid = "client_id_must_be_guid";
 
         /// <summary>
-        /// <para>What happens?</para>You have configured both a telememtry callback and a telemetry config. 
-        /// <para>Mitigation</para>Only one telememtry mechanism can be configured.
+        /// <para>What happens?</para>You have configured both a telemetry callback and a telemetry config. 
+        /// <para>Mitigation</para>Only one telemetry mechanism can be configured.
         /// </summary>
         public const string TelemetryConfigOrTelemetryCallback = "telemetry_config_or_telemetry_callback";
 
         /// <summary>
         /// AAD service error indicating that the configured client is not valid
-        /// <para>Migigation</para>In the AAD app registration portal, make sure the correct client (Public or
+        /// <para>Mitigation</para>In the AAD app registration portal, make sure the correct client (Public or
         /// Confidential) is selected for the respective authentication flow.
         /// See https://aka.ms/msal-net-invalid-client for details.
         /// </summary>
         public const string InvalidClient = "invalid_client";
+
+        /// <summary>
+        /// <para>What happens?</para>You didn't specify an authority or you are trying to use 
+        /// an AAD authority with a general audience (`common`, `organizations` or `consumers`). 
+        /// <para>Mitigation</para>Specify the tenant id with your authority. You can get tenant id from the app registration portal. Use a method like .WithAuthority(audience, tenantID) to specify the authority.
+        /// </summary>
+        public const string ClientCredentialExplicitTenantId = "client_credential_explicit_tenant_id";
 
 #if iOS
         /// <summary>

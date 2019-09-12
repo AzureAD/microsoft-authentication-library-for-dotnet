@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
@@ -52,6 +53,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal);
+
+            if (requestParams.Authority is AadAuthority aadAuthority && aadAuthority.IsTenantless()) 
+            {
+                throw new MsalClientException(
+                    MsalError.ClientCredentialExplicitTenantId, 
+                    MsalErrorMessage.ClientCredentialExplicitTenantId);
+            }
 
             requestParams.SendX5C = clientParameters.SendX5C;
             requestParams.IsClientCredentialRequest = true;

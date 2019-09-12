@@ -278,6 +278,10 @@ namespace Microsoft.Identity.Client
             " Potential issue: the redirect URI is valid, but it has been configured for the wrong app type." +
             " Check the configuration of the app being used in the app registration portal." +
             " See https://aka.ms/msal-net-invalid-client for details. ";
+        
+        internal const string ClientCredentialExplicitTenantId =
+            "You're using the client credential flow (for a daemon app) and you didn't configure an authority or you are trying to use an AAD authority with a general audience (`common`, `organizations` or `consumers`). " +
+            "Specify the tenant id with your authority. You can get tenant id from the app registration portal. Use a method such as .WithAuthority(audience, tenantID) to specify the authority. See https://aka.ms/msal-net-client-credentials";
 
         public static string NoUserInstanceMetadataEntry(string environment)
         {
