@@ -241,28 +241,7 @@ namespace Microsoft.Identity.Client
                 tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
 
             requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
-
-            // at this point we need env aliases, try to get them without a discovery call
-            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                                     requestParams.AuthorityInfo.CanonicalAuthority,
-                                     filteredItems.Select(at => at.Environment),  // if all environments are known, a network call can be avoided
-                                     requestParams.RequestContext)
-                            .ConfigureAwait(false);
-
-            // filter by authority
-            var filteredByPreferredAlias = filteredItems.Where(
-                at => at.Environment.Equals(instanceMetadata.PreferredCache, StringComparison.OrdinalIgnoreCase));
-
-            if (filteredByPreferredAlias.Any())
-            {
-                filteredItems = filteredByPreferredAlias;
-            }
-            else
-            {
-                filteredItems = filteredItems.Where(
-                    item => instanceMetadata.Aliases.Contains(item.Environment) &&
-                    (item.IsAdfs || item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase)));
-            }
+            filteredItems = await FilterByEnvironmentAsync(requestParams, filteredItems).ConfigureAwait(false);
 
             // no match
             if (!filteredItems.Any())
@@ -271,24 +250,47 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem;
-
-            // if only one cached token found
-            if (filteredItems.Count() == 1)
-            {
-                msalAccessTokenCacheItem = filteredItems.First();
-            }
-            else
-            {
-                requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
-
-                throw new MsalClientException(
-                    MsalError.MultipleTokensMatchedError,
-                    MsalErrorMessage.MultipleTokensMatched);
-            }
-
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, filteredItems);
             msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
 
+            return GetUnexpiredAccessTokenOrNull(requestParams, msalAccessTokenCacheItem);
+        }
+
+        private static IEnumerable<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(
+            AuthenticationRequestParameters requestParams,
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
+        {
+            // this is OBO flow. match the cache entry with assertion hash,
+            // Authority, ScopeSet and client Id.
+            if (requestParams.UserAssertion != null)
+            {
+                return tokenCacheItems.FilterWithLogging(item =>
+                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by user assertion id");
+            }
+
+            string requestTenantId = requestParams.Authority.GetTenantId();
+
+            tokenCacheItems = tokenCacheItems.FilterWithLogging(item => 
+                string.Equals(item.TenantId ?? string.Empty, requestTenantId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
+                requestParams.RequestContext.Logger,
+                "Filtering by tenant id");
+
+            if (!requestParams.IsClientCredentialRequest)
+            {
+                tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
+                                requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                                requestParams.RequestContext.Logger,
+                                "Filtering by home account id");
+            }
+
+            return tokenCacheItems;
+        }
+
+        private MsalAccessTokenCacheItem GetUnexpiredAccessTokenOrNull(AuthenticationRequestParameters requestParams, MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        { 
             if (msalAccessTokenCacheItem != null)
             {
 
@@ -319,6 +321,52 @@ namespace Microsoft.Identity.Client
             }
 
             return null;
+        }
+
+        private static MsalAccessTokenCacheItem GetSingleResult(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> filteredItems)
+        {
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem;
+
+            // if only one cached token found
+            if (filteredItems.Count() == 1)
+            {
+                msalAccessTokenCacheItem = filteredItems.First();
+            }
+            else
+            {
+                requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
+
+                throw new MsalClientException(
+                    MsalError.MultipleTokensMatchedError,
+                    MsalErrorMessage.MultipleTokensMatched);
+            }
+
+            return msalAccessTokenCacheItem;
+        }
+
+        private async Task<IEnumerable<MsalAccessTokenCacheItem>> FilterByEnvironmentAsync(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> filteredItems)
+        {
+
+            // at this point we need env aliases, try to get them without a discovery call
+            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                                     requestParams.AuthorityInfo.CanonicalAuthority,
+                                     filteredItems.Select(at => at.Environment),  // if all environments are known, a network call can be avoided
+                                     requestParams.RequestContext)
+                            .ConfigureAwait(false);
+
+            // In case we're sharing the cache with an MSAL that does not implement env aliasing, 
+            // it's possible (but unlikely), that we have multiple ATs from the same alias family.
+            // To overcome some of these use cases, try to filter just by preferred cache alias
+            var filteredByPreferredAlias = filteredItems.Where(
+                at => at.Environment.Equals(instanceMetadata.PreferredCache, StringComparison.OrdinalIgnoreCase));
+
+            if (filteredByPreferredAlias.Any())
+            {
+                return filteredByPreferredAlias;
+            }
+
+            return filteredItems.Where(
+                item => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(item.Environment));
         }
 
         private MsalAccessTokenCacheItem FilterByKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)

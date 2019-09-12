@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                AddHttpMocks(TokenResponseType.Valid, harness.HttpManager, pca: true);
+                AddHttpMocks(TokenResponseType.Valid, harness.HttpManager);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 
                 Trace.WriteLine("3. Configure AAD to respond with a 500 error");
-                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager, pca: true);
+                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager);
 
                 // Act
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 
                 Trace.WriteLine("3. Configure AAD to respond with the typical Invalid Grant error");
-                AddHttpMocks(TokenResponseType.Invalid_AADAvailable, harness.HttpManager, pca: true);
+                AddHttpMocks(TokenResponseType.Invalid_AADAvailable, harness.HttpManager);
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
 
                 // Act
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to be unavaiable");
-                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager, pca: true);
+                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager);
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
 
                 // Act
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                AddHttpMocks(TokenResponseType.Valid, harness.HttpManager, pca: false);
+                AddHttpMocks(TokenResponseType.Valid, harness.HttpManager);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private static ConfidentialClientApplication SetupCca(MockHttpAndServiceBundle harness)
         {
             ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                          .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                                                          .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                                                           .WithClientSecret(TestConstants.ClientSecret)
                                                           .WithHttpManager(harness.HttpManager)
                                                           .BuildConcrete();
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with an error");
-                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager, pca: false);
+                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager);
 
                 // Act
                 AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -296,7 +296,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with the typical Invalid Grant error");
-                AddHttpMocks(TokenResponseType.Invalid_AADAvailable, harness.HttpManager, pca: false);
+                AddHttpMocks(TokenResponseType.Invalid_AADAvailable, harness.HttpManager);
 
                 // Act
                 await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => 
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to be unavaiable");
-                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager, pca: false);
+                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager);
 
                 // Act
                 MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
@@ -338,11 +338,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         #endregion
 
-        private static void AddHttpMocks(TokenResponseType aadResponse, MockHttpManager httpManager, bool pca)
+        private static void AddHttpMocks(TokenResponseType aadResponse, MockHttpManager httpManager)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
             httpManager.AddMockHandlerForTenantEndpointDiscovery(
-                pca ? TestConstants.AuthorityUtidTenant : TestConstants.AadAuthorityWithTestTenantId);
+                TestConstants.AuthorityUtidTenant);
 
             AddTokenResponse(aadResponse, httpManager);
         }

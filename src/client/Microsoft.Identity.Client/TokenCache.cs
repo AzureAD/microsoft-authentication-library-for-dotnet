@@ -157,43 +157,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private static IEnumerable<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(
-            AuthenticationRequestParameters requestParams,
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
-        {
-            // this is OBO flow. match the cache entry with assertion hash,
-            // Authority, ScopeSet and client Id.
-            if (requestParams.UserAssertion != null)
-            {
-                return tokenCacheItems.FilterWithLogging(item =>
-                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
-                                requestParams.RequestContext.Logger,
-                                "Filtering by user assertion id");
-            }
-
-            if (!requestParams.IsClientCredentialRequest)
-            {
-                tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
-                                requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
-                                requestParams.RequestContext.Logger,
-                                "Filtering by home account id");
-
-                string tenantId = requestParams.Authority.GetTenantId();
-
-                if (!String.IsNullOrEmpty(tenantId))
-                {
-                    requestParams.RequestContext.Logger.Info($"Tenant id: {tenantId}");
-                    tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.TenantId.Equals(
-                                   tenantId, StringComparison.OrdinalIgnoreCase),
-                                    requestParams.RequestContext.Logger,
-                                    "Filtering by tenant id");
-                }
-            }
-
-            return tokenCacheItems;
-
-        }
+    
 
         private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
