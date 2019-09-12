@@ -27,9 +27,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private readonly ICoreLogger _logger;
         private readonly ICryptographyManager _cryptoManager;
-        private string BrokerRequestNonce { get; set; }
-        private string BrokerResponseNonce { get; set; }
-        public static bool DoesNonceMatch { get; set; } = false;
+        private string _brokerRequestNonce;
+        private string _brokerResponseNonce;
+        private bool _brokerV3Installed = false;
 
         public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager)
         {
@@ -45,29 +45,37 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 throw new MsalClientException(MsalError.UIViewControllerRequiredForiOSBroker, MsalErrorMessage.UIViewControllerIsRequiredToInvokeiOSBroker);
             }
 
-            var result = false;
+            bool canStartBroker = false;
 
             uiParent.CallerViewController.InvokeOnMainThread(() =>
             {
-                result = UIApplication.SharedApplication.CanOpenUrl(new NSUrl(BrokerParameter.BrokerV3));
-                if (result)
+                if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV3))
                 {
-                    BrokerRequestNonce = Guid.NewGuid().ToString();
-                    _logger.Info(iOSBrokerConstants.iOSBrokerv3Installed + result);
+                    _logger.Info(iOSBrokerConstants.iOSBrokerv3Installed);
+                    _brokerV3Installed = true;
+                    canStartBroker = true;
                 }
             });
 
-            if (!result)
+            if (!canStartBroker)
             {
-                result = UIApplication.SharedApplication.CanOpenUrl(new NSUrl(BrokerParameter.BrokerV2));
-                _logger.Info(iOSBrokerConstants.iOSBrokerv2Installed + result);
-            }
-            if (!result)
-            {
-                _logger.Info(result + iOSBrokerConstants.CanInvokeBrokerReturnsFalseMessage);
+                uiParent.CallerViewController.InvokeOnMainThread(() =>
+                {
+                    if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV2))
+                    {
+                        _brokerRequestNonce = Guid.NewGuid().ToString();
+                        _logger.Info(iOSBrokerConstants.iOSBrokerv2Installed);
+                        canStartBroker = true;
+                    }
+                });
             }
 
-            return result;
+            if (!canStartBroker)
+            {
+                _logger.Info(iOSBrokerConstants.CanInvokeBrokerReturnsFalseMessage);
+            }
+
+            return canStartBroker;
         }
 
         public async Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
@@ -85,9 +93,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             brokerPayload[iOSBrokerConstants.BrokerKey] = encodedBrokerKey;
             brokerPayload[iOSBrokerConstants.MsgProtocolVer] = BrokerParameter.MsgProtocolVersion3;
 
-            if (!string.IsNullOrEmpty(BrokerRequestNonce))
+            if (_brokerV3Installed)
             {
-                brokerPayload[iOSBrokerConstants.BrokerNonce] = BrokerRequestNonce;
+                CreateBrokerRequestNonce();
+                brokerPayload[iOSBrokerConstants.BrokerNonce] = _brokerRequestNonce;
             }
 
             if (brokerPayload.ContainsKey(iOSBrokerConstants.Claims))
@@ -178,6 +187,18 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             byte[] rawHash = Convert.FromBase64String(responseActualHash);
             string hash = BitConverter.ToString(rawHash);
 
+            if (!string.IsNullOrEmpty(_brokerRequestNonce))
+            {
+                if (!ValidateBrokerResponseNonceWithRequestNonce(responseDictionary))
+                {
+                    return new MsalTokenResponse
+                    {
+                        Error = MsalError.BrokerNonceMismatch,
+                        ErrorDescription = MsalErrorMessage.BrokerNonceMismatch
+                    };
+                }
+            }
+
             if (expectedHash.Equals(hash.Replace("-", ""), StringComparison.OrdinalIgnoreCase))
             {
                 responseDictionary = CoreHelpers.ParseKeyValueList(decryptedResponse, '&', false, null);
@@ -192,31 +213,30 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 };
             }
 
-            if (!string.IsNullOrEmpty(BrokerRequestNonce))
-            {
-                ValidateBrokerResponseNonceWithRequestNonce(responseDictionary);
-                if (!DoesNonceMatch)
-                {
-                    brokerTokenResponse = new MsalTokenResponse
-                    {
-                        Error = MsalError.BrokerNonceMismatch,
-                        ErrorDescription = MsalErrorMessage.BrokerNonceMismatch
-                    };
-                }
-            }            
-
             return brokerTokenResponse;
         }
 
-        private void ValidateBrokerResponseNonceWithRequestNonce(Dictionary<string, string> brokerResponseDictionary)
+        private bool IsBrokerInstalled(string brokerUriScheme)
         {
-            BrokerResponseNonce = brokerResponseDictionary.ContainsKey(BrokerResponseConst.iOSBrokerNonce)
+            return UIApplication.SharedApplication.CanOpenUrl(new NSUrl(brokerUriScheme));
+        }
+
+        private void CreateBrokerRequestNonce()
+        {
+            _brokerRequestNonce = Guid.NewGuid().ToString();
+        }
+
+        private bool ValidateBrokerResponseNonceWithRequestNonce(Dictionary<string, string> brokerResponseDictionary)
+        {
+            _brokerResponseNonce = brokerResponseDictionary.ContainsKey(BrokerResponseConst.iOSBrokerNonce)
                    ? brokerResponseDictionary[BrokerResponseConst.iOSBrokerNonce]
                    : null;
-            if (BrokerResponseNonce == BrokerRequestNonce)
+            if (_brokerResponseNonce == _brokerRequestNonce)
             {
-                DoesNonceMatch = true;
+                return true;
             }
+
+            return false;
         }
 
         public static void SetBrokerResponse(NSUrl responseUrl)

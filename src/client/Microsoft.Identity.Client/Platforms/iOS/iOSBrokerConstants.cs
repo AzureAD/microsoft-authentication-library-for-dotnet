@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public const string UiParentIsNullCannotInvokeBroker = "UIParent is null cannot invoke broker. ";
         public const string CallerViewControllerIsNullCannotInvokeBroker = "The CallerViewController is null. See https://aka.ms/msal-net-ios-Broker for details. ";
         public const string CanInvokeBroker = "Can invoke broker? ";
-        public const string CanInvokeBrokerReturnsFalseMessage = " - returned from CanOpenUrl. Msauthv2 needs to be included " +
+        public const string CanInvokeBrokerReturnsFalseMessage = "Cannot invoke the iOS broker. Returned from CanOpenUrl. msauthv2 and msauthv3 need to be included " +
                     "in LSApplicationQueriesSchemes in Info.plist. See aka.ms/iosBroker for more information. ";
         public const string iOSBrokerv2Installed = "iOS broker msauthv2:// installed on device: ";
         public const string iOSBrokerv3Installed = "iOS broker msauthv3:// installed on device: ";

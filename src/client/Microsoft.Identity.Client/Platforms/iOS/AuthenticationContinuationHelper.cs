@@ -45,12 +45,10 @@ namespace Microsoft.Identity.Client
                 // return in the response. MSAL.NET will validate a match in iOSBroker.cs
                 // So if SourceApplication is null, just return, MSAL.NET will throw a 
                 // specific error message if the nonce does not match.
-                return true; 
+                return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>
