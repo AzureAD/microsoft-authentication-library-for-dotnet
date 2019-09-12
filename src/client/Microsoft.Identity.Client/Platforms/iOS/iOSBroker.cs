@@ -28,7 +28,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private readonly ICoreLogger _logger;
         private readonly ICryptographyManager _cryptoManager;
         private string _brokerRequestNonce;
-        private string _brokerResponseNonce;
         private bool _brokerV3Installed = false;
 
         public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager)
@@ -63,7 +62,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 {
                     if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV2))
                     {
-                        _brokerRequestNonce = Guid.NewGuid().ToString();
                         _logger.Info(iOSBrokerConstants.iOSBrokerv2Installed);
                         canStartBroker = true;
                     }
@@ -95,7 +93,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (_brokerV3Installed)
             {
-                CreateBrokerRequestNonce();
+                _brokerRequestNonce = string.Empty;
+                _brokerRequestNonce = Guid.NewGuid().ToString();
                 brokerPayload[iOSBrokerConstants.BrokerNonce] = _brokerRequestNonce;
             }
 
@@ -154,7 +153,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private MsalTokenResponse ProcessBrokerResponse()
         {
             string[] keyValuePairs = s_brokerResponse.Query.Split('&');
-            Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
+            Dictionary<string, string> responseDictionary = new Dictionary<string, string>(StringComparer.InvariantCulture);
 
             foreach (string pair in keyValuePairs)
             {
@@ -221,22 +220,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return UIApplication.SharedApplication.CanOpenUrl(new NSUrl(brokerUriScheme));
         }
 
-        private void CreateBrokerRequestNonce()
-        {
-            _brokerRequestNonce = Guid.NewGuid().ToString();
-        }
-
         private bool ValidateBrokerResponseNonceWithRequestNonce(Dictionary<string, string> brokerResponseDictionary)
         {
-            _brokerResponseNonce = brokerResponseDictionary.ContainsKey(BrokerResponseConst.iOSBrokerNonce)
+            string brokerResponseNonce = brokerResponseDictionary.ContainsKey(BrokerResponseConst.iOSBrokerNonce)
                    ? brokerResponseDictionary[BrokerResponseConst.iOSBrokerNonce]
                    : null;
-            if (_brokerResponseNonce == _brokerRequestNonce)
-            {
-                return true;
-            }
 
-            return false;
+            return string.Equals(brokerResponseNonce, _brokerRequestNonce);
         }
 
         public static void SetBrokerResponse(NSUrl responseUrl)
