@@ -4,14 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.SSHCertificates;
+using Microsoft.Identity.Client.Utils;
 using NetStandard;
 
 namespace NetFx
@@ -23,6 +26,7 @@ namespace NetFx
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
+        //private static readonly IEnumerable<string> s_scopes = new[] { "https://sshservice.azure.net/.default" }; // used for WIA and U/P, can be empty
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -107,9 +111,10 @@ namespace NetFx
                         5. Acquire Token Interactive via NetStandard lib
                         6. Acquire Token Silently
                         7. Acquire Token Silently - multiple requests in parallel
-                        8. Clear cache
-                        9. Rotate Tenant ID
-                        0. Expire all ATs
+                        8. Acquire SSH Cert Interactive
+                        c. Clear cache
+                        r. Rotate Tenant ID
+                        e. Expire all ATs
                         x. Exit app
                     Enter your Selection: ");
                 char.TryParse(Console.ReadLine(), out var selection);
@@ -144,22 +149,27 @@ namespace NetFx
                             break;
 
                         case '4': // acquire token interactive
+                            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+                            RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
+
+                            string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus);
+                            string exp = Base64UrlHelpers.Encode(rsaKeyInfo.Exponent);
+                            string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
+
+                            //string jwk2 = @"{""kty"":""RSA"",""n"":""vlPIqf8Tsd76DuSCTzqIXTjubl64XMEOz+RZn/1ZbKVTFp67Fz7Av1eD/+EIqihkpW+q0WjUxNi960AslVv9b8SF6yUZgLxXqCt5tpqxOs4pykcfkRBRLnsyJ0HSbY3FJAJJXT2JH41nnQIiLBJcK5wF+/DFe0VevrZhBMP7aLzNP+vJPReB0haLWC4hEdZ3LgIJPEjpzfCulTwX26irODC7PDbDSCkNX/PVB3YECdbzgaL+Zlyz8UZw2zmkCNcvMwZdX0F3WqZiFg/7nUvvEqtlSAZfic2OGYAinnXNiISzr2NwRAuFGUmoNqpwLLPSYelm6yOLX6G4BBR1G7867Q=="",""e"":""AQAB""";
 
                             CancellationTokenSource cts = new CancellationTokenSource();
                             authTask = pca.AcquireTokenInteractive(s_scopes)
                                 .WithUseEmbeddedWebView(false)
+                                .WithExtraQueryParameters(new Dictionary<string, string>() {
+                                    { "dc", "prod-wst-test1"},
+                                    { "slice", "test"},
+                                    { "sshcrt", "true" }
+                                })
+                                .WithSSHCertificateAuthenticationScheme(jwk2, "1")
                                 .WithSystemWebViewOptions(new SystemWebViewOptions()
                                 {
-                                    //BrowserRedirectSuccess = new Uri("https://www.google.com"),
                                     HtmlMessageSuccess = "All good, close the browser!",
-
-                                    //OpenBrowserAsync = (Uri u) =>
-                                    //{
-                                    //    string url = u.AbsoluteUri;
-                                    //    url = url.Replace("&", "^&");
-                                    //    Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
-                                    //    return Task.FromResult(0);
-                                    //}
                                     OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
                                 })
                                 .ExecuteAsync(cts.Token);
@@ -186,7 +196,7 @@ namespace NetFx
                                 .ToArray();
 
                             AuthenticationResult[] result = await Task.WhenAll(tasks).ConfigureAwait(false);
-                            
+
                             foreach (var ar in result)
                             {
                                 Console.BackgroundColor = ConsoleColor.DarkGreen;
@@ -200,7 +210,7 @@ namespace NetFx
                             var authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
                             await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
                             break;
-                        case '8':
+                        case 'c':
                             var accounts2 = await pca.GetAccountsAsync().ConfigureAwait(false);
                             foreach (var acc in accounts2)
                             {
@@ -208,14 +218,14 @@ namespace NetFx
                             }
 
                             break;
-                        case '9':
+                        case 'r': // rotate tid
 
                             s_currentTid = (s_currentTid + 1) % s_tids.Length;
                             pca = CreatePca();
                             RunConsoleAppLogicAsync(pca).Wait();
                             break;
 
-                        case '0':
+                        case 'e': // expire all ATs
 
                             var tokenCacheInternal = pca.UserTokenCache as ITokenCacheInternal;
                             var ats = tokenCacheInternal.Accessor.GetAllAccessTokens();
