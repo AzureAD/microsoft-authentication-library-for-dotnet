@@ -148,36 +148,7 @@ namespace NetFx
 
                             break;
 
-                        case '4': // acquire token interactive
-                            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-                            RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
 
-                            string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus);
-                            string exp = Base64UrlHelpers.Encode(rsaKeyInfo.Exponent);
-                            string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
-
-                            // Use a hardcoded value for now.
-                            string jwk2 = @"{""kty"":""RSA"",""n"":""vlPIqf8Tsd76DuSCTzqIXTjubl64XMEOz+RZn/1ZbKVTFp67Fz7Av1eD/+EIqihkpW+q0WjUxNi960AslVv9b8SF6yUZgLxXqCt5tpqxOs4pykcfkRBRLnsyJ0HSbY3FJAJJXT2JH41nnQIiLBJcK5wF+/DFe0VevrZhBMP7aLzNP+vJPReB0haLWC4hEdZ3LgIJPEjpzfCulTwX26irODC7PDbDSCkNX/PVB3YECdbzgaL+Zlyz8UZw2zmkCNcvMwZdX0F3WqZiFg/7nUvvEqtlSAZfic2OGYAinnXNiISzr2NwRAuFGUmoNqpwLLPSYelm6yOLX6G4BBR1G7867Q=="",""e"":""AQAB""";
-
-                            CancellationTokenSource cts = new CancellationTokenSource();
-                            authTask = pca.AcquireTokenInteractive(s_scopes)
-                                .WithUseEmbeddedWebView(false)
-                                .WithExtraQueryParameters(new Dictionary<string, string>() {
-                                    { "dc", "prod-wst-test1"},
-                                    { "slice", "test"},
-                                    { "sshcrt", "true" }
-                                })
-                                .WithSSHCertificateAuthenticationScheme(jwk2, "1")
-                                .WithSystemWebViewOptions(new SystemWebViewOptions()
-                                {
-                                    HtmlMessageSuccess = "All good, close the browser!",
-                                    OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
-                                })
-                                .ExecuteAsync(cts.Token);
-
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
-                            break;
                         case '6': // acquire token silent
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
                             if (account == null)
@@ -210,6 +181,33 @@ namespace NetFx
                             CancellationTokenSource cts2 = new CancellationTokenSource();
                             var authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
                             await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
+                            break;
+                        case '8': // acquire SSH cert
+                            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+                            RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
+
+                            string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus);
+                            string exp = Base64UrlHelpers.Encode(rsaKeyInfo.Exponent);
+                            string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
+
+                            CancellationTokenSource cts = new CancellationTokenSource();
+                            authTask = pca.AcquireTokenInteractive(s_scopes)
+                                .WithUseEmbeddedWebView(false)
+                                .WithExtraQueryParameters(new Dictionary<string, string>() {
+                                    { "dc", "prod-wst-test1"},
+                                    { "slice", "test"},
+                                    { "sshcrt", "true" }
+                                })
+                                .WithSSHCertificateAuthenticationScheme(jwk, "1")
+                                .WithSystemWebViewOptions(new SystemWebViewOptions()
+                                {
+                                    HtmlMessageSuccess = "All good, close the browser!",
+                                    OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
+                                })
+                                .ExecuteAsync(cts.Token);
+
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+
                             break;
                         case 'c':
                             var accounts2 = await pca.GetAccountsAsync().ConfigureAwait(false);

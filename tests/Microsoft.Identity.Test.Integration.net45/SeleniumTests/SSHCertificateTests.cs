@@ -50,6 +50,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ConfigureAwait(false);
 
             userCacheAccess.AssertAccessCounts(0, 1);
+            Assert.AreEqual("ssh-cert", result.TokenType);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(1, 1); // the assert calls GetAccounts
 
@@ -73,18 +74,19 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
+            Assert.AreEqual("ssh-cert", result.TokenType);
             userCacheAccess.AssertAccessCounts(4, 2);
-
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
         }
 
         private string CreateJwk()
         {
-            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
             RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
 
-            string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus);
-            string exp = Base64UrlHelpers.Encode(rsaKeyInfo.Exponent);
+
+            string modulus = Convert.ToBase64String(rsaKeyInfo.Modulus);
+            string exp = Convert.ToBase64String(rsaKeyInfo.Exponent);
             string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
 
             return jwk;
