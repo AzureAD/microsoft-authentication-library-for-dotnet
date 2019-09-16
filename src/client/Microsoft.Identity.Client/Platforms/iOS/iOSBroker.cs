@@ -186,16 +186,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             byte[] rawHash = Convert.FromBase64String(responseActualHash);
             string hash = BitConverter.ToString(rawHash);
 
-            if (!string.IsNullOrEmpty(_brokerRequestNonce))
+            if (!ValidateBrokerResponseNonceWithRequestNonce(responseDictionary))
             {
-                if (!ValidateBrokerResponseNonceWithRequestNonce(responseDictionary))
+                return new MsalTokenResponse
                 {
-                    return new MsalTokenResponse
-                    {
-                        Error = MsalError.BrokerNonceMismatch,
-                        ErrorDescription = MsalErrorMessage.BrokerNonceMismatch
-                    };
-                }
+                    Error = MsalError.BrokerNonceMismatch,
+                    ErrorDescription = MsalErrorMessage.BrokerNonceMismatch
+                };
             }
 
             if (expectedHash.Equals(hash.Replace("-", ""), StringComparison.OrdinalIgnoreCase))
@@ -222,11 +219,15 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private bool ValidateBrokerResponseNonceWithRequestNonce(Dictionary<string, string> brokerResponseDictionary)
         {
-            string brokerResponseNonce = brokerResponseDictionary.ContainsKey(BrokerResponseConst.iOSBrokerNonce)
+            if (!string.IsNullOrEmpty(_brokerRequestNonce))
+            {
+                string brokerResponseNonce = brokerResponseDictionary.ContainsKey(BrokerResponseConst.iOSBrokerNonce)
                    ? brokerResponseDictionary[BrokerResponseConst.iOSBrokerNonce]
                    : null;
 
-            return string.Equals(brokerResponseNonce, _brokerRequestNonce);
+                return string.Equals(brokerResponseNonce, _brokerRequestNonce);
+            }
+            return false;
         }
 
         public static void SetBrokerResponse(NSUrl responseUrl)
