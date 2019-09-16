@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(3, 1);
 
-            Trace.WriteLine("Part 2 - Acquire a token silent with a different keyID - should not sbe served from the cache");
+            Trace.WriteLine("Part 3 - Acquire a token silent with a different keyID - should not sbe served from the cache");
             result = await pca
                 .AcquireTokenSilent(s_scopes, account)
                 .WithSSHCertificateAuthenticationScheme(jwk, "key2")
