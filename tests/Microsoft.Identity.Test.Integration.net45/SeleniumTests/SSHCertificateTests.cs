@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
 
 
-            string modulus = Convert.ToBase64String(rsaKeyInfo.Modulus);
+            string modulus = Convert.ToBase64String(rsaKeyInfo.Modulus); //TODO- this is a bug, params should be base64 url encoded as described here https://www.rfc-editor.org/rfc/rfc7515.html#appendix-C
             string exp = Convert.ToBase64String(rsaKeyInfo.Exponent);
             string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
 
