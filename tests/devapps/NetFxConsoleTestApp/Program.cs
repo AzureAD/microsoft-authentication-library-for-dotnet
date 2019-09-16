@@ -156,7 +156,8 @@ namespace NetFx
                             string exp = Base64UrlHelpers.Encode(rsaKeyInfo.Exponent);
                             string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
 
-                            //string jwk2 = @"{""kty"":""RSA"",""n"":""vlPIqf8Tsd76DuSCTzqIXTjubl64XMEOz+RZn/1ZbKVTFp67Fz7Av1eD/+EIqihkpW+q0WjUxNi960AslVv9b8SF6yUZgLxXqCt5tpqxOs4pykcfkRBRLnsyJ0HSbY3FJAJJXT2JH41nnQIiLBJcK5wF+/DFe0VevrZhBMP7aLzNP+vJPReB0haLWC4hEdZ3LgIJPEjpzfCulTwX26irODC7PDbDSCkNX/PVB3YECdbzgaL+Zlyz8UZw2zmkCNcvMwZdX0F3WqZiFg/7nUvvEqtlSAZfic2OGYAinnXNiISzr2NwRAuFGUmoNqpwLLPSYelm6yOLX6G4BBR1G7867Q=="",""e"":""AQAB""";
+                            // Use a hardcoded value for now.
+                            string jwk2 = @"{""kty"":""RSA"",""n"":""vlPIqf8Tsd76DuSCTzqIXTjubl64XMEOz+RZn/1ZbKVTFp67Fz7Av1eD/+EIqihkpW+q0WjUxNi960AslVv9b8SF6yUZgLxXqCt5tpqxOs4pykcfkRBRLnsyJ0HSbY3FJAJJXT2JH41nnQIiLBJcK5wF+/DFe0VevrZhBMP7aLzNP+vJPReB0haLWC4hEdZ3LgIJPEjpzfCulTwX26irODC7PDbDSCkNX/PVB3YECdbzgaL+Zlyz8UZw2zmkCNcvMwZdX0F3WqZiFg/7nUvvEqtlSAZfic2OGYAinnXNiISzr2NwRAuFGUmoNqpwLLPSYelm6yOLX6G4BBR1G7867Q=="",""e"":""AQAB""";
 
                             CancellationTokenSource cts = new CancellationTokenSource();
                             authTask = pca.AcquireTokenInteractive(s_scopes)
