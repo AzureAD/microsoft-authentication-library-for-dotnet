@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">Identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
         /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
         /// <param name="correlationId">The correlation id of the authentication request</param>
-        /// <param name="tokenType">The token type, defaults to Bearer</param>
+        /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         public AuthenticationResult(
             string accessToken,
             bool isExtendedLifeTimeToken,
