@@ -6,7 +6,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 namespace Microsoft.Identity.Client.SSHCertificates
 {
     /// <summary>
-    /// TODO: comments
+    /// Extensions that add support for SSH certificates
     /// </summary>
     public static class SSHExtenions
     {
