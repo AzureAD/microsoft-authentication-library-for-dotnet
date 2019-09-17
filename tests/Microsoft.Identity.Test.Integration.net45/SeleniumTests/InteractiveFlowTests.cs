@@ -20,7 +20,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
     [TestClass]
-    public class InteractiveFlowTests
+    public partial class InteractiveFlowTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
         private static readonly string[] s_scopes = new[] { "user.read" };
@@ -337,7 +337,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         }
 
-        private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint, bool adfsOnly = false)
+        private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
         {
             return new SeleniumWebUI((driver) =>
             {

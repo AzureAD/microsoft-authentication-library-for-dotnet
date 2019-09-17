@@ -278,6 +278,7 @@ namespace Microsoft.Identity.Client
             " Potential issue: the redirect URI is valid, but it has been configured for the wrong app type." +
             " Check the configuration of the app being used in the app registration portal." +
             " See https://aka.ms/msal-net-invalid-client for details. ";
+        public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
 
         public static string NoUserInstanceMetadataEntry(string environment)
         {

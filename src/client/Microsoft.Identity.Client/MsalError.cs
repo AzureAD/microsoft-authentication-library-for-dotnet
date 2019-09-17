@@ -692,6 +692,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidClient = "invalid_client";
 
+        /// <summary>
+        /// <para>What happens?</para>You have configured MSAL to request SSH certificates from AAD, and you are trying to format an HTTP authentication header. 
+        /// <para>Mitigation</para>SSH certificates should not used as Bearer tokens. Developers are responsible for sending the certificates to the target machines.
+        /// </summary>
+        public const string SSHCertUsedAsHttpHeader = "ssh_cert_used_as_http_header";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
