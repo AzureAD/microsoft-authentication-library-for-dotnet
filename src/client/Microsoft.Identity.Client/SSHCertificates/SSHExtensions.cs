@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.SSHCertificates
         /// <summary>
         /// Instructs AAD to return an SSH certificate instead of a Bearer token. The SSH certificate 
         /// (not the same as public / private key pair used by SSH), can be used to securely deploy 
-        /// a public SSH key to a machine. See https://aka.ms/msal-net-shh for details.
+        /// a public SSH key to a machine. See https://aka.ms/msal-net-ssh for details.
         /// </summary>
         /// <param name="builder">Interactive authentication builder</param>
         /// <param name="publicKeyJwk">The public SSH key in JWK format (https://tools.ietf.org/html/rfc7517). 
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.SSHCertificates
         /// <summary>
         /// Instructs AAD to return an SSH certificate instead of a Bearer token. Attempts to retrive
         /// the certificate from the token cache, and if one is not found, attempts to acquire one silently, 
-        /// using the refresh token. See https://aka.ms/msal-net-shh for details.
+        /// using the refresh token. See https://aka.ms/msal-net-ssh for details.
         /// </summary>
         /// <remarks>
         /// The same keyID must be used to distinguish between various 
