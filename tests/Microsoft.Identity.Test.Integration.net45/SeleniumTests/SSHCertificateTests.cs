@@ -4,22 +4,16 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.SSHCertificates;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
@@ -32,11 +26,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                    .Create(labResponse.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                    .Build();
+                .Create(labResponse.AppId)
+                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                .Build();
 
-            var userCacheAccess = pca.UserTokenCache.RecordAccess();
+            TokenCacheAccessRecorder userCacheAccess = pca.UserTokenCache.RecordAccess();
 
             Trace.WriteLine("Part 1 - Acquire an SSH cert interactively ");
             string jwk = CreateJwk();
@@ -84,8 +78,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
             RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
 
-
-            string modulus = Convert.ToBase64String(rsaKeyInfo.Modulus); //TODO- this is a bug, params should be base64 url encoded as described here https://www.rfc-editor.org/rfc/rfc7515.html#appendix-C
+            // TODO- this is a bug, params should be base64 url encoded as described here https://www.rfc-editor.org/rfc/rfc7515.html#appendix-C
+            // When the bug is fixed the test needs to be updated to use Base64UrlHelpers.Encode instead
+            string modulus = Convert.ToBase64String(rsaKeyInfo.Modulus); 
             string exp = Convert.ToBase64String(rsaKeyInfo.Exponent);
             string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
 

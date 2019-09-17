@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.SSHCertificates
     /// <summary>
     /// Extensions that add support for SSH certificates
     /// </summary>
-    public static class SSHExtenions
+    public static class SSHExtensions
     {
         /// <summary>
         /// Instructs AAD to return an SSH certificate instead of a Bearer token. The SSH certificate 
