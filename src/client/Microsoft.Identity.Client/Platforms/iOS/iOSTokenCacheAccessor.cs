@@ -28,15 +28,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private string _keychainGroup;
         private readonly RequestContext _requestContext;
-
-        private string GetBundleId()
-        {
-            return NSBundle.MainBundle.BundleIdentifier;
-        }
-
+        
         public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
         {
-            if (String.IsNullOrEmpty(keychainSecurityGroup))
+            if (string.IsNullOrEmpty(keychainSecurityGroup))
             {
                 _keychainGroup = GetTeamId() + '.' + DefaultKeychainAccessGroup;
             }

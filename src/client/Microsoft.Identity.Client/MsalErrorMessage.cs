@@ -59,6 +59,9 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseHashMismatch =
             "Unencrypted broker response hash did not match the expected hash";
 
+        public const string BrokerNonceMismatch = "Broker response nonce does not match the request nonce sent by MSAL.NET." +
+            "Please see https://aka.ms/msal-net-ios-13-broker for more details. ";
+
         public const string StsMetadataRequestFailed =
             "Metadata request to Access Control service failed. Check InnerException for more details";
 

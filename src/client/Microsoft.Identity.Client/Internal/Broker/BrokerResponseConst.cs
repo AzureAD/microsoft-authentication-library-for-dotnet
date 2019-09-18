@@ -8,6 +8,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string ErrorMetadata = "error_metadata";
         public const string BrokerErrorDomain = "broker_error_domain";
         public const string BrokerErrorCode = "broker_error_code";
+        public const string BrokerErrorDescription = "error_description";
 
         public const string Authority = "authority";
         public const string AccessToken = "access_token";
@@ -18,5 +19,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Scope = "scope";
         public const string ExpiresOn = "expires_on";
         public const string ClientInfo = "client_info";
+
+        public const string iOSBrokerNonce = "broker_nonce"; //in response from iOS Broker
     }
 }
