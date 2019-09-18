@@ -4,12 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.WsTrust
@@ -26,8 +28,10 @@ namespace Microsoft.Identity.Client.WsTrust
         /// <inheritdoc/>
         public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext)
         {
+            IDictionary<string, string> headers = CreateHttpTelemetryHeaders(requestContext);
+
             var uri = new UriBuilder(federationMetadataUrl);
-            HttpResponse httpResponse = await _httpManager.SendGetAsync(uri.Uri, null, requestContext.Logger).ConfigureAwait(false);
+            HttpResponse httpResponse = await _httpManager.SendGetAsync(uri.Uri, headers, requestContext.Logger).ConfigureAwait(false);
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string message = string.Format(CultureInfo.CurrentCulture,
@@ -109,16 +113,37 @@ namespace Microsoft.Identity.Client.WsTrust
         {
             requestContext.Logger.Info("Sending request to userrealm endpoint.");
 
-             var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
+            IDictionary<string, string> headers = CreateHttpTelemetryHeaders(requestContext);
 
+            var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
+            
             var httpResponse = await _httpManager.SendGetAsync(
                 uri,
-                MsalIdHelper.GetMsalIdParameters(requestContext.Logger),
+                headers,
                 requestContext.Logger).ConfigureAwait(false);
 
             return httpResponse.StatusCode == System.Net.HttpStatusCode.OK
                 ? JsonHelper.DeserializeFromJson<UserRealmDiscoveryResponse>(httpResponse.Body)
                 : null;
+        }
+
+        private IDictionary<string, string> CreateHttpTelemetryHeaders(RequestContext requestContext)
+        {
+            IDictionary<string, string> httpTelemetryHeader = new Dictionary<string, string>();
+            httpTelemetryHeader[TelemetryConstants.XClientLastRequest] = requestContext.ServiceBundle.TelemetryManager.FetchAndResetPreviousHttpTelemetryContent();
+            httpTelemetryHeader[TelemetryConstants.XClientCurrentTelemetry] = requestContext.ServiceBundle.TelemetryManager.FetchAndResetCurrentHttpTelemetryContent();
+
+            IDictionary<string, string> msalParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
+
+            foreach (var kvp in msalParams)
+            {
+                if (!httpTelemetryHeader.ContainsKey(kvp.Key))
+                {
+                    httpTelemetryHeader.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return httpTelemetryHeader;
         }
     }
 }

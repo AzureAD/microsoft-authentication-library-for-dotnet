@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (string.IsNullOrEmpty(msalTokenResponse.Scope))
             {
                 msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                AuthenticationRequestParameters.RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result");
+                AuthenticationRequestParameters.RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
             }
 
             return msalTokenResponse;

@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,6 +22,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public IDictionary<string, string> ExpectedQueryParams { get; set; }
         public IDictionary<string, string> ExpectedPostData { get; set; }
         public IDictionary<string, object> ExpectedPostDataObject { get; set; }
+        public IDictionary<string, string> ExpectedHeaders { get; set; }
         public HttpMethod ExpectedMethod { get; set; }
         public Exception ExceptionToThrow { get; set; }
         public Action<HttpRequestMessage> AdditionalRequestValidation { get; set; }
@@ -28,11 +30,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <summary>
         /// Once the http message is executed, this property holds the request message
         /// </summary>
-        public HttpRequestMessage ActualRequestMessge { get; private set; }
+        public HttpRequestMessage ActualRequestMessage { get; private set; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            ActualRequestMessge = request;
+            ActualRequestMessage = request;
 
             if (ExceptionToThrow != null)
             {
@@ -94,6 +96,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         Assert.AreEqual(ExpectedPostData[key], requestPostDataPairs[key]);
                     }
                 }
+            }
+
+            if (ExpectedHeaders != null)
+            {
+                Assert.IsTrue(ActualRequestMessage.Headers.Contains(TelemetryConstants.XClientLastRequest));
+                Assert.IsTrue(ActualRequestMessage.Headers.Contains(TelemetryConstants.XClientCurrentTelemetry));
+                ExpectedHeaders = null;
             }
 
             AdditionalRequestValidation?.Invoke(request);

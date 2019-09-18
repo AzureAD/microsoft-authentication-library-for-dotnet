@@ -6,6 +6,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -14,6 +15,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -384,7 +386,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             TestConstants.UniqueId,
                             TestConstants.DisplayableId,
-                            TestConstants.s_scope.ToArray())
+                            TestConstants.s_scope.ToArray()),
+                        ExpectedHeaders = new Dictionary<string, string>
+                        {
+                            {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
+                            {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
+                        }
+
                     });
 
                 Task<AuthenticationResult> task = app

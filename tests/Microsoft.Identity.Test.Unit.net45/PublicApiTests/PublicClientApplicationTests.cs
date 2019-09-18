@@ -132,9 +132,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
             Assert.AreEqual(TestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
-
         }
-
 
         [TestMethod]
         public async Task NoStateReturnedTestAsync()
@@ -186,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task ClaimsAreSentTo_AuthroizationEndpoint_And_TokenEndpoint_Async()
+        public async Task ClaimsAreSentTo_AuthorizationEndpoint_And_TokenEndpoint_Async()
         {
             // Arrange
             using (var harness = CreateTestHarness())
@@ -247,12 +245,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 try
-                {
+                {                    
                     AuthenticationResult result = await app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
-
+                         
                     Assert.Fail("API should have failed here");
                 }
                 catch (MsalClientException exc)
@@ -1355,7 +1353,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.OnPremiseDisplayableId, result.Account.Username);
 
                 //Find token in cache now
-
                 AuthenticationResult cachedAuth = null;
                 try
                 {

@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -234,6 +235,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 authorizationRequestParameters[OAuth2Parameter.Prompt] = _interactiveParameters.Prompt.PromptValue;
             }
+
+            authorizationRequestParameters[TelemetryConstants.XClientLastRequest] = ServiceBundle.TelemetryManager.FetchAndResetPreviousHttpTelemetryContent();
+            authorizationRequestParameters[TelemetryConstants.XClientCurrentTelemetry] = ServiceBundle.TelemetryManager.FetchAndResetCurrentHttpTelemetryContent();
 
             return authorizationRequestParameters;
         }

@@ -77,6 +77,9 @@ namespace Microsoft.Identity.Client.OAuth2
                 _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
             }
 
+            _headers.Add(TelemetryConstants.XClientLastRequest, _telemetryManager.FetchAndResetPreviousHttpTelemetryContent());
+            _headers.Add(TelemetryConstants.XClientCurrentTelemetry, _telemetryManager.FetchAndResetCurrentHttpTelemetryContent()); //This will become x-client-current-telemetry
+
             HttpResponse response = null;
             Uri endpointUri = CreateFullEndpointUri(endPoint);
             var httpEvent = new HttpEvent(requestContext.CorrelationId.AsMatsCorrelationId())

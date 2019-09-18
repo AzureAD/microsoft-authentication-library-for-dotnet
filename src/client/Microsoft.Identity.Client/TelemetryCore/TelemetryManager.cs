@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
@@ -27,6 +29,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private readonly bool _onlySendFailureTelemetry;
         private readonly IPlatformProxy _platformProxy;
         private readonly IApplicationConfiguration _applicationConfiguration;
+        internal readonly HttpTelemetryContent _currentTelemetryPayload;
+        internal readonly HttpTelemetryContent _previousTelemetryPayload;
 
         public TelemetryManager(
             IApplicationConfiguration applicationConfiguration,
@@ -38,6 +42,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
             _platformProxy = platformProxy;
             Callback = telemetryCallback;
             _onlySendFailureTelemetry = onlySendFailureTelemetry;
+            _currentTelemetryPayload = new HttpTelemetryContent();
+            _previousTelemetryPayload = new HttpTelemetryContent();
         }
 
         public TelemetryCallback Callback { get; }
@@ -54,6 +60,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public void StartEvent(EventBase eventToStart)
         {
+            ProcessEventsForCurrentHttpTelemetryContent(eventToStart);
+
             if (!HasReceiver())
             {
                 return;
@@ -64,6 +72,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public void StopEvent(EventBase eventToStop)
         {
+            ProcessEventsForPreviousHttpTelemetryContent(eventToStop); //try movnig up to start
+
             if (!HasReceiver())
             {
                 return;
@@ -83,7 +93,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 return;
             }
 
-            // Set execution time properties on the event adn increment the event count.
+            // Set execution time properties on the event and increment the event count.
             eventToStop.Stop();
             IncrementEventCount(eventToStop);
 
@@ -137,6 +147,93 @@ namespace Microsoft.Identity.Client.TelemetryCore
             Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
         }
 
+        public string FetchAndResetPreviousHttpTelemetryContent()
+        {
+            if (!string.IsNullOrEmpty(_previousTelemetryPayload.ApiId))
+            {
+                string csv = CreateCSVForPreviousHttpTelem();
+                _currentTelemetryPayload.ResetLastErrorCode();
+                return csv;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        public string FetchAndResetCurrentHttpTelemetryContent()
+        {
+            if (!string.IsNullOrEmpty(_currentTelemetryPayload.ApiId))
+            {               
+                string csv = CreateCSVForCurrentHttpTelem();
+                _currentTelemetryPayload.ResetLastErrorCode();
+                return csv;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        private string CreateCSVForPreviousHttpTelem()
+        {
+            // csv expected format:
+            // 1|api_id, correlation_id, last_error_code
+            string[] myValues = new string[] {
+                _previousTelemetryPayload.ApiId,
+                _previousTelemetryPayload.CorrelationId,
+                _previousTelemetryPayload.LastErrorCode};
+
+            string csvString = string.Join(",", myValues);
+            csvString = TelemetryConstants.HttpTelemetrySchemaVersion1 + csvString;
+            return csvString;
+        }
+
+        private string CreateCSVForCurrentHttpTelem()
+        {
+            // csv expected format:
+            // 1|api_id|platform_config
+            string csvString = TelemetryConstants.HttpTelemetrySchemaVersion1 + _currentTelemetryPayload.ApiId;
+            return csvString;
+        }
+
+        private void ProcessEventsForCurrentHttpTelemetryContent(EventBase events)
+        {
+            foreach (var ev in events)
+            {
+                if (string.Equals(ev.Key, MsalTelemetryBlobEventNames.ApiIdConstStrKey))
+                {
+                    _currentTelemetryPayload.ApiId = ev.Value;
+                }
+
+                if (string.Equals(ev.Key, MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey))
+                {
+                    _currentTelemetryPayload.CorrelationId = ev.Value;
+                }
+            }
+        }
+
+        private void ProcessEventsForPreviousHttpTelemetryContent(EventBase events)
+        {
+            foreach (var ev in events)
+            {
+                if (string.Equals(ev.Key, MsalTelemetryBlobEventNames.ApiIdConstStrKey))
+                {
+                    _previousTelemetryPayload.ApiId = ev.Value;
+                }
+
+                if (string.Equals(ev.Key, MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey))
+                {
+                    _previousTelemetryPayload.LastErrorCode = ev.Value;
+                }
+
+                if (string.Equals(ev.Key, MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey))
+                {
+                    _previousTelemetryPayload.CorrelationId = ev.Value;
+                }
+            }
+        }
+
         private IEnumerable<EventBase> CollateOrphanedEvents(string correlationId)
         {
             var orphanedEvents = new List<EventBase>();
@@ -159,7 +256,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private void IncrementEventCount(EventBase eventToIncrement)
         {
             string eventName;
-            if (eventToIncrement[EventBase.EventNameKey].Substring(0,10) == MsalCacheEventValuePrefix)
+            if (eventToIncrement[EventBase.EventNameKey].Substring(0, 10) == MsalCacheEventValuePrefix)
             {
                 eventName = MsalCacheEventName;
             }
@@ -216,7 +313,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 unchecked
                 {
                     // Choose large primes to avoid hashing collisions
-                    const int HashingBase = (int) 2166136261;
+                    const int HashingBase = (int)2166136261;
                     const int HashingMultiplier = 16777619;
 
                     int hash = HashingBase;
