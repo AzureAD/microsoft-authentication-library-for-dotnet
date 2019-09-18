@@ -14,14 +14,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public HomeDomain? HomeDomain { get; set; }
         public HomeUPN? HomeUPN { get; set; }
         public B2CIdentityProvider? B2CIdentityProvider { get; set; }
-        public FederationProvider? FederationProvider { get; set; }
+        public FederationProvider? FederationProvider { get; set; } //Requires userType to be set to federated
         public AzureEnvironment? AzureEnvironment { get; set; }
         public SignInAudience? SignInAudience { get; set; }
 
-        public static UserQuery DefaultUserQuery => new UserQuery
-        {
-            FederationProvider = LabInfrastructure.FederationProvider.None
-        };
+        public static UserQuery DefaultUserQuery = new UserQuery();
 
         public static UserQuery B2CLocalAccountUserQuery => new UserQuery
         {
