@@ -1,8 +1,5 @@
 4.4.0
 =============
-New Features:
-- **MSAL.NET now sends telemetry data to the /token endpoint in regards to the error code of the previous request, if applicable**. This will enable the MSAL.NET team to compute reliablity across public client application calls, and to proactively detect issues with the Microsoft identity platform.
-
 Bug Fixes:
 - **Ensures that MSAL.NET works fine with brokers on iOS 13**. On iOS 13, iOS, the broker, may or may not return the source application, which is used by MSAL.NET to verify the response is coming from broker. To maintain secure calls, MSAL.NET will now also create a nonce to send in the broker request and will verify the same nonce is returned in the broker response in the case of a missing source application. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1375)
 - **After MSAL.NET acquired a token for a user, and the user signed-out - remove account, MSAL.NET was attempting to acquire the token with the same tenant as the first account, instead of using the tenant specified in the authority when building the application**. MSAL.NET now uses the specified tenant. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1365)
@@ -10,7 +7,7 @@ Bug Fixes:
 - **MSAL.NET on Xamarin iOS now returns the top-level view controller, which allows calling AcquireAuthorizationAsync() with an app RootViewController as a UINavigationController with an empty navigation stack**. [See PR for more details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1378)
 
 Experimental:
-- **MSAL.NET now provides two extension methods, enabling you to acquire an SSH certificate (to login to Linux Azure VMs) interactively or silently**.
+- **MSAL.NET now provides two extension methods, enabling you to acquire an SSH certificate**.
 
 4.3.1
 =============
