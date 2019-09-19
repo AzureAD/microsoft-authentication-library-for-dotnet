@@ -15,6 +15,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         void StopEvent(EventBase eventToStop);
         void Flush(string correlationId);
         string FetchAndResetPreviousHttpTelemetryContent();
-        string FetchAndResetCurrentHttpTelemetryContent();
+        string FetchCurrentHttpTelemetryContent(string currentRequestCorrelationId);
     }
 }
