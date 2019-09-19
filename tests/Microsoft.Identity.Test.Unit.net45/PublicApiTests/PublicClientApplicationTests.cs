@@ -323,14 +323,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
-                Guid correlationId = new Guid();
-
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
-
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                Guid correlationId = Guid.NewGuid();
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithCorrelationId(correlationId)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -357,7 +357,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
-                    .WithCorrelationId(correlationId)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 

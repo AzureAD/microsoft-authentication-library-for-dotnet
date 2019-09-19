@@ -104,7 +104,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 if (ActualRequestMessage.Headers.Contains(TelemetryConstants.XClientLastRequest))
                 {
                     Assert.AreEqual(HttpTelemetryHeaders[TelemetryConstants.XClientLastRequest], ReturnValueFromRequestHeader(TelemetryConstants.XClientLastRequest));
-
                     Assert.AreEqual(HttpTelemetryHeaders[TelemetryConstants.XClientCurrentTelemetry], ReturnValueFromRequestHeader(TelemetryConstants.XClientCurrentTelemetry));
                 }
             }

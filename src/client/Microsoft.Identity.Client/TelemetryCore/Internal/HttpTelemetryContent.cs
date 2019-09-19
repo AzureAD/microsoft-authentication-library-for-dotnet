@@ -1,28 +1,57 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Runtime.Serialization;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal
 {
-    [DataContract]
     internal class HttpTelemetryContent
     {
-        [DataMember]
-        public string LastErrorCode { get; set; }
-
-        [DataMember]
-        public int UnreportedErrorCount { get; set; }
-
-        [DataMember]
-        public string ApiId { get; set; }
-
-        [DataMember]
-        public string CorrelationId { get; set; }
-
-        public void ResetLastErrorCode()
+        public HttpTelemetryContent(EventBase evt)
         {
-            LastErrorCode = string.Empty;
+            if (evt != null)
+            {
+                evt.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
+                evt.TryGetValue(MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey, out string correlationId);
+                evt.TryGetValue(MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey, out string errorCode);
+
+                ApiId = apiId ?? string.Empty;
+                CorrelationId = correlationId ?? string.Empty;
+                LastErrorCode = errorCode ?? string.Empty;
+            }
+        }
+
+        public string LastErrorCode { get; set; } = string.Empty;
+        //public int UnreportedErrorCount { get; set; }
+        public string ApiId { get; set; } = string.Empty;
+        public string CorrelationId { get; set; } = string.Empty;
+
+        public string GetCsvAsPrevious()
+        {
+            if (string.IsNullOrWhiteSpace(ApiId))
+            {
+                return string.Empty;
+            }
+
+            // csv expected format:
+            // 1|api_id,correlation_id,last_error_code
+            string[] myValues = new string[] {
+                ApiId,
+                CorrelationId,
+                LastErrorCode};
+
+            string csvString = string.Join(",", myValues);
+            csvString = $"{TelemetryConstants.HttpTelemetrySchemaVersion1}{TelemetryConstants.HttpTelemetryPipe}{csvString}";
+            return csvString;
+        }
+
+        public string GetCsvAsCurrent()
+        {
+            // csv expected format:
+            // 1|api_id,platform_config
+            string csvString = $"{TelemetryConstants.HttpTelemetrySchemaVersion1}{TelemetryConstants.HttpTelemetryPipe}{ApiId}";
+            return csvString;
         }
     }
 }
