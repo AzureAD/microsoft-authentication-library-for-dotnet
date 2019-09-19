@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -16,10 +17,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     public class LabServiceApi : ILabService, IDisposable
     {
         private readonly HttpClient _httpClient;
+        private string _labAccessAppId;
+        private string _labAccessClientSecret;
 
         public LabServiceApi()
         {
             _httpClient = new HttpClient();
+            KeyVaultSecretsProvider _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
+            _labAccessAppId = _keyVaultSecretsProvider.GetMsidLabSecret("LabVaultAppID").Value;
+            _labAccessClientSecret = _keyVaultSecretsProvider.GetMsidLabSecret("LabVaultAppSecret").Value;
         }
 
         /// <summary>
@@ -146,6 +152,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             {
                 Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()))
             };
+
+            var res = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret).ConfigureAwait(false);
+
+            _httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", res));
             return await _httpClient.GetStringAsync(uriBuilder.ToString()).ConfigureAwait(false);
         }
 
