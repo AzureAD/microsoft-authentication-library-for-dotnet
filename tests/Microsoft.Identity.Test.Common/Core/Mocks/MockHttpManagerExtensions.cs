@@ -65,12 +65,27 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     ExpectedMethod = HttpMethod.Post,
                     ExpectedPostData = bodyParameters,
                     ExpectedQueryParams = queryParameters,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(foci)
+                });
+        }
+
+        public static void AddSuccessfulTokenResponseWithHttpTelemetryMockHandlerForPost(
+           this MockHttpManager httpManager,
+           string authority,
+           IDictionary<string, string> bodyParameters = null,
+           IDictionary<string, string> queryParameters = null,
+           IDictionary<string, string> httpTelemetryHeaders = null,
+           bool foci = false)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = authority + "oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedPostData = bodyParameters,
+                    ExpectedQueryParams = queryParameters,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(foci),
-                    ExpectedHeaders = new Dictionary<string, string>
-                    {
-                        {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
-                        {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
-                    }
+                    HttpTelemetryHeaders = httpTelemetryHeaders
                 });
         }
 
@@ -98,12 +113,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 new MockHttpMessageHandler()
                 {
                     ExpectedMethod = httpMethod,
-                    ResponseMessage = MockHelpers.CreateResiliencyMessage(httpStatusCode),
-                    ExpectedHeaders = new Dictionary<string, string>
-                    {
-                        {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
-                        {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
-                    }
+                    ResponseMessage = MockHelpers.CreateResiliencyMessage(httpStatusCode)
                 });
         }
 
@@ -114,12 +124,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 {
                     ExpectedMethod = httpMethod,
                     ResponseMessage = MockHelpers.CreateRequestTimeoutResponseMessage(),
-                    ExceptionToThrow = new TaskCanceledException("request timed out"),
-                    ExpectedHeaders = new Dictionary<string, string>
-                    {
-                        {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
-                        {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
-                    }
+                    ExceptionToThrow = new TaskCanceledException("request timed out")
                 });
         }
 
@@ -130,12 +135,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 {
                     ExpectedUrl = authority + "v2.0/.well-known/openid-configuration",
                     ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(authority, qp),
-                    ExpectedHeaders = new Dictionary<string, string>
-                    {
-                        {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
-                        {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
-                    }
+                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(authority, qp)
                 });
         }
 
@@ -173,12 +173,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     {
                         Content = new StringContent("Foo")
                     },
-                    ExceptionToThrow = new InvalidOperationException("Error"),
-                    ExpectedHeaders = new Dictionary<string, string>
-                    {
-                        {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
-                        {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
-                    }
+                    ExceptionToThrow = new InvalidOperationException("Error")
                 });
         }
 
@@ -201,23 +196,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.OnPremiseAuthority),
-                ExpectedHeaders = new Dictionary<string, string>
-                {
-                    {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
-                    {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
-                }
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.OnPremiseAuthority)
             });
 
             httpManager.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateAdfsSuccessTokenResponseMessage(),
-                ExpectedHeaders = new Dictionary<string, string>
-                {
-                    {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
-                    {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
-                }
+                ResponseMessage = MockHelpers.CreateAdfsSuccessTokenResponseMessage()
             });
         }
     }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public IDictionary<string, string> ExpectedQueryParams { get; set; }
         public IDictionary<string, string> ExpectedPostData { get; set; }
         public IDictionary<string, object> ExpectedPostDataObject { get; set; }
-        public IDictionary<string, string> ExpectedHeaders { get; set; }
+        public IDictionary<string, string> HttpTelemetryHeaders { get; set; }
         public HttpMethod ExpectedMethod { get; set; }
         public Exception ExceptionToThrow { get; set; }
         public Action<HttpRequestMessage> AdditionalRequestValidation { get; set; }
@@ -98,16 +99,27 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
             }
 
-            if (ExpectedHeaders != null)
+            if (HttpTelemetryHeaders != null)
             {
-                Assert.IsTrue(ActualRequestMessage.Headers.Contains(TelemetryConstants.XClientLastRequest));
-                Assert.IsTrue(ActualRequestMessage.Headers.Contains(TelemetryConstants.XClientCurrentTelemetry));
-                ExpectedHeaders = null;
+                if (ActualRequestMessage.Headers.Contains(TelemetryConstants.XClientLastRequest))
+                {
+                    Assert.AreEqual(HttpTelemetryHeaders[TelemetryConstants.XClientLastRequest], ReturnValueFromRequestHeader(TelemetryConstants.XClientLastRequest));
+
+                    Assert.AreEqual(HttpTelemetryHeaders[TelemetryConstants.XClientCurrentTelemetry], ReturnValueFromRequestHeader(TelemetryConstants.XClientCurrentTelemetry));
+                }
             }
 
             AdditionalRequestValidation?.Invoke(request);
 
             return new TaskFactory().StartNew(() => ResponseMessage, cancellationToken);
+        }
+
+        private string ReturnValueFromRequestHeader(string telemRequest)
+        {
+            IEnumerable<string> telemRequestValue = ActualRequestMessage.Headers.GetValues(telemRequest);
+            List<string> telemRequestValueAsList = telemRequestValue.ToList();
+            string value = telemRequestValueAsList[0];
+            return value;
         }
     }
 }

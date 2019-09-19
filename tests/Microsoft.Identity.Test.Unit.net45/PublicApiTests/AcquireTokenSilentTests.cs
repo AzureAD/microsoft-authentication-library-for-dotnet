@@ -386,13 +386,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             TestConstants.UniqueId,
                             TestConstants.DisplayableId,
-                            TestConstants.s_scope.ToArray()),
-                        ExpectedHeaders = new Dictionary<string, string>
-                        {
-                            {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
-                            {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
-                        }
-
+                            TestConstants.s_scope.ToArray())
                     });
 
                 Task<AuthenticationResult> task = app

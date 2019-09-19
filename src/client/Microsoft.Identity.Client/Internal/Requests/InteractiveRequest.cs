@@ -236,9 +236,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.Prompt] = _interactiveParameters.Prompt.PromptValue;
             }
 
-            authorizationRequestParameters[TelemetryConstants.XClientLastRequest] = ServiceBundle.TelemetryManager.FetchAndResetPreviousHttpTelemetryContent();
-            authorizationRequestParameters[TelemetryConstants.XClientCurrentTelemetry] = ServiceBundle.TelemetryManager.FetchAndResetCurrentHttpTelemetryContent();
-
             return authorizationRequestParameters;
         }
 

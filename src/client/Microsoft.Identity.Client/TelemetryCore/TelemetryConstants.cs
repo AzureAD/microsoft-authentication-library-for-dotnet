@@ -19,7 +19,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
     internal static class TelemetryConstants
     {
-        public const string HttpTelemetrySchemaVersion1 = "1|";
+        public const string HttpTelemetrySchemaVersion1 = "1";
+        public const string HttpTelemetryPipe = "|";
         public const string XClientCurrentTelemetry = "x-client-current-telemetry";
         public const string XClientLastRequest = "x-client-last-request";
     }

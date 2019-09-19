@@ -201,12 +201,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                      app.ServiceBundle.PlatformProxy,
                      AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                mockUi.QueryParamsToValidate = new Dictionary<string, string>{ { OAuth2Parameter.Claims, TestConstants.Claims} };
-                
+                mockUi.QueryParamsToValidate = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
+
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
-                    TestConstants.AuthorityCommonTenant, 
+                    TestConstants.AuthorityCommonTenant,
                     queryParameters: mockUi.QueryParamsToValidate);
 
                 AuthenticationResult result = await app
@@ -245,12 +245,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 try
-                {                    
+                {
                     AuthenticationResult result = await app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
-                         
+
                     Assert.Fail("API should have failed here");
                 }
                 catch (MsalClientException exc)
@@ -323,7 +323,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
+                Guid correlationId = new Guid();
+
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app
@@ -343,10 +346,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+                harness.HttpManager.AddSuccessfulTokenResponseWithHttpTelemetryMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant,
+                    null,
+                    null,
+                    HttpTelemetryTests.CreateHttpTelemetryHeaders(
+                        correlationId,
+                        TestConstants.InteractiveRequestApiId,
+                        null));
 
                 result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithCorrelationId(correlationId)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 

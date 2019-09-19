@@ -375,11 +375,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(content)
-                },
-                ExpectedHeaders = new Dictionary<string, string>
-                {
-                    {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
-                    {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
                 }
             };
         }

@@ -59,9 +59,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         }
 
         public void StartEvent(EventBase eventToStart)
-        {
-            ProcessEventsForCurrentHttpTelemetryContent(eventToStart);
-
+        {        
             if (!HasReceiver())
             {
                 return;
@@ -72,7 +70,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public void StopEvent(EventBase eventToStop)
         {
-            ProcessEventsForPreviousHttpTelemetryContent(eventToStop); //try movnig up to start
+            ProcessEventsForCurrentHttpTelemetryContent(eventToStop);
+            ProcessEventsForPreviousHttpTelemetryContent(eventToStop);
 
             if (!HasReceiver())
             {
@@ -152,7 +151,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             if (!string.IsNullOrEmpty(_previousTelemetryPayload.ApiId))
             {
                 string csv = CreateCSVForPreviousHttpTelem();
-                _currentTelemetryPayload.ResetLastErrorCode();
+               // _previousTelemetryPayload.ResetLastErrorCode();
                 return csv;
             }
             else
@@ -164,9 +163,9 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public string FetchAndResetCurrentHttpTelemetryContent()
         {
             if (!string.IsNullOrEmpty(_currentTelemetryPayload.ApiId))
-            {               
+            {
                 string csv = CreateCSVForCurrentHttpTelem();
-                _currentTelemetryPayload.ResetLastErrorCode();
+               //_currentTelemetryPayload.ResetLastErrorCode();
                 return csv;
             }
             else
@@ -185,7 +184,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 _previousTelemetryPayload.LastErrorCode};
 
             string csvString = string.Join(",", myValues);
-            csvString = TelemetryConstants.HttpTelemetrySchemaVersion1 + csvString;
+            csvString = TelemetryConstants.HttpTelemetrySchemaVersion1 + TelemetryConstants.HttpTelemetryPipe + csvString;
             return csvString;
         }
 
@@ -193,7 +192,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             // csv expected format:
             // 1|api_id|platform_config
-            string csvString = TelemetryConstants.HttpTelemetrySchemaVersion1 + _currentTelemetryPayload.ApiId;
+            string csvString = TelemetryConstants.HttpTelemetrySchemaVersion1 + TelemetryConstants.HttpTelemetryPipe + _currentTelemetryPayload.ApiId;
             return csvString;
         }
 
