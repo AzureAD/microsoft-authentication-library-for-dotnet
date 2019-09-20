@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             const string comma = ",";
             IDictionary<string, string> httpTelemetryHeaders = new Dictionary<string, string>
                 {
-                    { TelemetryConstants.XClientLastRequest,
+                    { TelemetryConstants.XClientLastTelemetry,
                         TelemetryConstants.HttpTelemetrySchemaVersion1 +
                         TelemetryConstants.HttpTelemetryPipe +
                         apiId +

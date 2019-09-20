@@ -22,6 +22,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string HttpTelemetrySchemaVersion1 = "1";
         public const string HttpTelemetryPipe = "|";
         public const string XClientCurrentTelemetry = "x-client-current-telemetry";
-        public const string XClientLastRequest = "x-client-last-request";
+        public const string XClientLastTelemetry = "x-client-last-telemetry";
     }
 }

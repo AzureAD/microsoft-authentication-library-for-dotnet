@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
     {
         readonly Dictionary<string, string> _httpTelemetryHeaders = new Dictionary<string, string>
         {
-            {TelemetryConstants.XClientLastRequest, TelemetryConstants.HttpTelemetrySchemaVersion1},
+            {TelemetryConstants.XClientLastTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1},
             {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
         };
 
