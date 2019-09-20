@@ -78,10 +78,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
             RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
 
-            // TODO- this is a bug, params should be base64 url encoded as described here https://www.rfc-editor.org/rfc/rfc7515.html#appendix-C
-            // When the bug is fixed the test needs to be updated to use Base64UrlHelpers.Encode instead
-            string modulus = Convert.ToBase64String(rsaKeyInfo.Modulus); 
-            string exp = Convert.ToBase64String(rsaKeyInfo.Exponent);
+            string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus); 
+            string exp = Base64UrlHelpers.Encode(rsaKeyInfo.Exponent);
             string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
 
             return jwk;
