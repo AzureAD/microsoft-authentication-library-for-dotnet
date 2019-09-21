@@ -67,9 +67,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public static IDictionary<string, string> CreateHttpTelemetryHeaders(
            Guid correlationId,
            string apiId,
-           string errorCode)
+           string errorCode,
+           string forceRefresh)
         {
             const string comma = ",";
+
             IDictionary<string, string> httpTelemetryHeaders = new Dictionary<string, string>
                 {
                     { TelemetryConstants.XClientLastTelemetry,
@@ -79,12 +81,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         comma +
                         correlationId.ToString() +
                         comma +
-                        errorCode
+                        errorCode +
+                        TelemetryConstants.HttpTelemetryPipe
                         },
                     { TelemetryConstants.XClientCurrentTelemetry,
                         TelemetryConstants.HttpTelemetrySchemaVersion1 +
                         TelemetryConstants.HttpTelemetryPipe +
-                        apiId }
+                        apiId +
+                        comma +
+                        forceRefresh +
+                        TelemetryConstants.HttpTelemetryPipe}
                 };
             return httpTelemetryHeaders;
         }
@@ -138,7 +144,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         CreateHttpTelemetryHeaders(
                             _correlationId,
                             TestConstants.InteractiveRequestApiId,
-                            exc.ErrorCode));
+                            exc.ErrorCode,
+                            TelemetryConstants.Zero));
 
                     result = app
                          .AcquireTokenInteractive(TestConstants.s_scope)

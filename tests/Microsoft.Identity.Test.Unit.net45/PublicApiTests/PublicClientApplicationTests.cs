@@ -23,6 +23,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using System.IO;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -353,7 +354,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     HttpTelemetryTests.CreateHttpTelemetryHeaders(
                         correlationId,
                         TestConstants.InteractiveRequestApiId,
-                        null));
+                        null,
+                        TelemetryConstants.Zero));
 
                 result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)

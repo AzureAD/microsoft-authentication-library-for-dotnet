@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenOnBehalfOfParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C, withSendX5C);
             Parameters.SendX5C = withSendX5C;
             return this;
         }
