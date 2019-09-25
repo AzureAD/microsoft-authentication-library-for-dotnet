@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private static LabResponse CreateLabResponseFromResultString(string result)
         {
-            LabResponse response = JsonConvert.DeserializeObject<LabResponse>(result);
+            LabResponse response = JsonConvert.DeserializeObject<LabResponse>(StripBracketsFromLabResponse(result));
             LabUser user = JsonConvert.DeserializeObject<LabUser>(result);
 
             if (!string.IsNullOrEmpty(user.HomeTenantId) && !string.IsNullOrEmpty(user.HomeUPN))
@@ -74,7 +74,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 user.InitializeHomeUser();
             }
 
-            return response;
+            return null;
+        }
+
+        private static string StripBracketsFromLabResponse(string response)
+        {
+            var startingIndex = response.IndexOf("{");
+            var end = response.LastIndexOf("\r\n]");
+            return response.Substring(startingIndex, response.Length - startingIndex - (response.Length - end));
         }
 
         private Task<string> RunQueryAsync(UserQuery query)

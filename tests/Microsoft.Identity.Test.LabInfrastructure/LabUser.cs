@@ -34,8 +34,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("mam")]
         public bool IsMam { get; set; }
 
-        [JsonProperty("licenses")]
-        public ISet<string> Licenses { get; set; }
+        //[JsonProperty("licenses")]
+        //public ISet<string> Licenses { get; set; }
 
         [JsonProperty("isFederated")]
         public bool IsFederated { get; set; }
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             labHomeUser.IsExternal = IsExternal;
             labHomeUser.IsMfa = IsMfa;
             labHomeUser.IsMam = IsMam;
-            labHomeUser.Licenses = Licenses;
+            //labHomeUser.Licenses = Licenses;
             labHomeUser.IsFederated = IsFederated;
             labHomeUser.FederationProvider = FederationProvider;
             labHomeUser.HomeTenantId = HomeTenantId;
@@ -89,5 +89,51 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             labHomeUser.Upn = HomeUPN;
             labHomeUser.B2CIdentityProvider = B2CIdentityProvider;
         }
+    }
+
+    public class LabUser2
+    {
+        public LabUser2() { }
+
+        [JsonProperty("objectId")]
+        public Guid ObjectId { get; set; }
+
+        [JsonProperty("userType")]
+        public UserType UserType { get; set; }
+
+        [JsonProperty("upn")]
+        public string Upn { get; set; }
+
+        [JsonProperty("displayname")]
+        public string displayname { get; set; }
+
+        //public LabUser HomeUser { get; set; }
+
+        [JsonProperty("mfa")]
+        public string mfa { get; set; }
+
+        [JsonProperty("protectionpolicy")]
+        public string protectionpolicy { get; set; }
+
+        //[JsonProperty("licenses")]
+        //public ISet<string> Licenses { get; set; }
+
+        [JsonProperty("homedomain")]
+        public string homedomain { get; set; }
+
+        [JsonProperty("homeupn")]
+        public string homeupn { get; set; }
+
+        [JsonProperty("b2cprovider")]
+        public string b2cprovider { get; set; }
+
+        [JsonProperty("labname")]
+        public string labname { get; set; }
+
+        [JsonProperty("lastupdatedby")]
+        public string lastupdatedby { get; set; }
+
+        [JsonProperty("lastupdateddate")]
+        public string lastupdateddate { get; set; }
     }
 }

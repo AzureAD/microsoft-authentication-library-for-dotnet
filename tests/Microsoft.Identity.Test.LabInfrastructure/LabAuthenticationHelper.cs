@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static async Task<string> GetAccessTokenForLabAPIAsync(string labAccessClientId, string labAccessSecret)
         {
-            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
+            string[] scopes = new string[] { "https://user.msidlab.com/.default" };
 
             return await GetLabAccessTokenAsync(
                 "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/", 
