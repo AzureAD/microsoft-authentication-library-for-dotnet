@@ -138,10 +138,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             //Acquire AT for MSA account
             LabResponse labResponseMsa = await LabUserHelper.GetB2CMSAAccountAsync().ConfigureAwait(false);
-            labResponseMsa.AppId = LabApiConstants.MSAOutlookAccountClientID;
+            labResponseMsa.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
             var msaAccountResult = await RunTestForUserAsync(labResponseMsa).ConfigureAwait(false);
 
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponseDefault.AppId).BuildConcrete();
+            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponseDefault.App.AppId).BuildConcrete();
 
             AuthenticationResult authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, defaultAccountResult.Account)
                                                        .ExecuteAsync()
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
 
-            pca = PublicClientApplicationBuilder.Create(labResponseFederated.AppId).BuildConcrete();
+            pca = PublicClientApplicationBuilder.Create(labResponseFederated.App.AppId).BuildConcrete();
 
             authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, federatedAccountResult.Account)
                                   .ExecuteAsync()
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             else
             {
                 pca = PublicClientApplicationBuilder
-                    .Create(labResponse.AppId)
+                    .Create(labResponse.App.AppId)
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .Build();
             }
@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task RunPromptTestForUserAsync(LabResponse labResponse, Prompt prompt, bool useLoginHint)
         {
             var pca = PublicClientApplicationBuilder
-               .Create(labResponse.AppId)
+               .Create(labResponse.App.AppId)
                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                .Build();
 

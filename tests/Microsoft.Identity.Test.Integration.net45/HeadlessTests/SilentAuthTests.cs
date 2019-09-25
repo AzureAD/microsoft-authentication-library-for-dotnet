@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var user = labResponse.User;
 
             var pca = PublicClientApplicationBuilder
-                .Create(labResponse.AppId)
+                .Create(labResponse.App.AppId)
                 .WithAuthority("https://login.microsoftonline.com/organizations")
                 .Build();
 
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 cacheFilePath = Path.GetTempFileName();
 
                 var pca1 = PublicClientApplicationBuilder
-                   .Create(labResponse.AppId)
+                   .Create(labResponse.App.AppId)
                    .WithAuthority("https://login.microsoftonline.com/organizations")
                    .Build();
 
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 // simulate a restart by creating a new client
                 var pca2 = PublicClientApplicationBuilder
-                 .Create(labResponse.AppId)
+                 .Create(labResponse.App.AppId)
                  .Build();
 
                 SetCacheSerializationToFile(pca2, cacheFilePath);

@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     }
                 }
 
-                if (user.FederationProvider == FederationProvider.AdfsV2 && user.IsFederated)
+                if (user.FederationProvider == FederationProvider.AdfsV2 && (user.UserType == UserType.Federated))
                 {
                     Trace.WriteLine("Logging in ... AFDSv2 - Entering the username again, this time in the ADFSv2 form");
                     driver.FindElementById(CoreUiTestConstants.AdfsV2WebUsernameInputId).SendKeys(user.Upn);

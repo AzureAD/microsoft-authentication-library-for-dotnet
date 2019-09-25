@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             LabUser user = labResponse.User;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.AppId)
+                .Create(labResponse.App.AppId)
                 .WithLogging((lvl, msg, pii) => TestContext.WriteLine($"{lvl} - {msg}"), LogLevel.Verbose, true)
                 .Build();
 
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             LabUser user = labResponse.User;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.AppId)
+                .Create(labResponse.App.AppId)
                 .WithAuthority("https://bogus.microsoft.com/common")
                 .WithLogging((lvl, msg, pii) => TestContext.WriteLine($"{lvl} - {msg}"), LogLevel.Verbose, true)
                 .Build();

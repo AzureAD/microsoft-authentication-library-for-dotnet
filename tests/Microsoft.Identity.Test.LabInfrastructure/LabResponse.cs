@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public LabApp App { get; set; }
 
         [JsonProperty("user")]
-        public LabUser2 User { get; set; }
+        public LabUser User { get; set; }
 
         [JsonProperty("lab")]
         public Lab Lab { get; set; }
@@ -25,6 +25,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
     public class Lab
     {
+        [JsonProperty("TenantId")]
+        public string TenantId { get; set; }
+
+        [JsonProperty("federationprovider")]
+        public FederationProvider FederationProvider { get; set; }
+
         public string CredentialVaultkeyName { get; set; }
     }
 }

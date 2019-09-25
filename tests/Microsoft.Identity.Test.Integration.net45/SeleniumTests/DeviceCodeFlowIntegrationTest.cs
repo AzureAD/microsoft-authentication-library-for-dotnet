@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
             Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
-            var pca = PublicClientApplicationBuilder.Create(labResponse.AppId).Build();
+            var pca = PublicClientApplicationBuilder.Create(labResponse.App.AppId).Build();
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
 
             var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>

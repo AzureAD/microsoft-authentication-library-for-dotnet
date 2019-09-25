@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static async Task<LabResponse> GetB2CMSAAccountAsync()
         {
             var response = await GetLabUserDataAsync(UserQuery.B2CMSAUserQuery).ConfigureAwait(false);
-            if (String.IsNullOrEmpty(response.User.HomeUPN))
+            if (string.IsNullOrEmpty(response.User.HomeUPN))
             {
                 response.User.HomeUPN = response.User.Upn;
             }

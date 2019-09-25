@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         private void DetermineFieldIds(bool isB2CTest)
         {
-            if (_user.IsFederated)
+            if (_user.UserType == UserType.Federated)
             {
                 if (_user.FederationProvider == FederationProvider.AdfsV2)
                 {
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         private void DetermineB2CFieldIds()
         {
-            switch (_user.B2CIdentityProvider)
+            switch (_user.B2cProvider)
             {
             case B2CIdentityProvider.Local:
                 _passwordInputId = CoreUiTestConstants.B2CWebPasswordId;

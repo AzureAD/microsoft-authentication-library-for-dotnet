@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
               .Build();
 
             pca_nonFam = PublicClientApplicationBuilder
-              .Create(labResponse.AppId)
+              .Create(labResponse.App.AppId)
               .Build();
 
             SetCacheSerializationToFile(pca_fam1, cacheFilePath);

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 Console.WriteLine($"User '{user.Upn}' has invalid Credential URL: '{user.CredentialUrl}'");
             }
 
-            if (user.IsExternal && user.HomeUser == null)
+            if (user.HomeUPN == null)
             {
                 Console.WriteLine($"User '{user.Upn}' has no matching home user.");
             }
@@ -67,12 +67,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private static LabResponse CreateLabResponseFromResultString(string result)
         {
             LabResponse response = JsonConvert.DeserializeObject<LabResponse>(StripBracketsFromLabResponse(result));
-            LabUser user = JsonConvert.DeserializeObject<LabUser>(result);
+            response.User.CredentialUrl = response.Lab.CredentialVaultkeyName;
+            response.User.TenantId = response.Lab.TenantId;
+            response.User.FederationProvider = response.Lab.FederationProvider;
 
-            if (!string.IsNullOrEmpty(user.HomeTenantId) && !string.IsNullOrEmpty(user.HomeUPN))
-            {
-                user.InitializeHomeUser();
-            }
+            //if (!string.IsNullOrEmpty(response.User.HomeTenantId) && !string.IsNullOrEmpty(response.User.HomeUpn))
+            //{
+            //    response.User.InitializeHomeUser();
+            //}
 
             return null;
         }
