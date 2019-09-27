@@ -116,10 +116,6 @@
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
 
-  <ItemGroup Label="Dependency overrides due to security vulnerabilities">
-   
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
     <Compile Include="$(PathToMsalSources)\Platforms\Shared\Desktop\**\*.cs" />
