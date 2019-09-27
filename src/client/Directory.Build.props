@@ -5,10 +5,10 @@
     <TargetFrameworkNetDesktop>net45</TargetFrameworkNetDesktop>
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
-    <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
+    <!--<TargetFrameworkUap>uap10.0</TargetFrameworkUap>
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
-    <TargetFrameworkAndroid>MonoAndroid9.0</TargetFrameworkAndroid>
+    <TargetFrameworkAndroid>MonoAndroid9.0</TargetFrameworkAndroid>-->
 
     <!--<TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkMac)</TargetFrameworks>-->
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid);$(TargetFrameworkMac)</TargetFrameworks>
@@ -118,12 +118,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Dependency overrides due to security vulnerabilities">
-    <!-- 4.3.0 has CVE-2019-0657 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
-    <!-- 4.1.3 has CVE-2018-0786 -->
-    <PackageReference Include="System.ServiceModel.Http" Version="4.5.3" Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)'" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.5.3" Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)'" />
-    <PackageReference Include="System.ServiceModel.Security" Version="4.5.3" Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)'" />
+   
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
@@ -142,6 +137,8 @@
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
+    <!-- 4.3.0 has CVE-2019-0657 -->
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />    
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
@@ -157,6 +154,8 @@
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+    <!-- 4.3.0 has CVE-2019-0657 -->
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />
@@ -189,6 +188,12 @@
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+
+    <!-- 4.1.3 has CVE-2018-0786 -->
+    <PackageReference Include="System.ServiceModel.Http" Version="4.5.3" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.5.3" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.5.3" />
+    
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
