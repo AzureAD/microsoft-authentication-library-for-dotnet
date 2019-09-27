@@ -285,7 +285,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey)
         {
             return MsalIdTokenCacheItem.FromJsonString(GetPayload(idTokenKey));
-
         }
 
         public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)

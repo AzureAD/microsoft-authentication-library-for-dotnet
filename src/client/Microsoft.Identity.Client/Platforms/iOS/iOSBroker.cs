@@ -186,18 +186,18 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             byte[] rawHash = Convert.FromBase64String(responseActualHash);
             string hash = BitConverter.ToString(rawHash);
 
-            if (!ValidateBrokerResponseNonceWithRequestNonce(responseDictionary))
-            {
-                return new MsalTokenResponse
-                {
-                    Error = MsalError.BrokerNonceMismatch,
-                    ErrorDescription = MsalErrorMessage.BrokerNonceMismatch
-                };
-            }
-
             if (expectedHash.Equals(hash.Replace("-", ""), StringComparison.OrdinalIgnoreCase))
             {
                 responseDictionary = CoreHelpers.ParseKeyValueList(decryptedResponse, '&', false, null);
+
+                if (!ValidateBrokerResponseNonceWithRequestNonce(responseDictionary))
+                {
+                    return new MsalTokenResponse
+                    {
+                        Error = MsalError.BrokerNonceMismatch,
+                        ErrorDescription = MsalErrorMessage.BrokerNonceMismatch
+                    };
+                }
                 brokerTokenResponse = MsalTokenResponse.CreateFromBrokerResponse(responseDictionary);
             }
             else
