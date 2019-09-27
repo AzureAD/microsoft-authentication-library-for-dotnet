@@ -71,12 +71,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             response.User.TenantId = response.Lab.TenantId;
             response.User.FederationProvider = response.Lab.FederationProvider;
 
-            //if (!string.IsNullOrEmpty(response.User.HomeTenantId) && !string.IsNullOrEmpty(response.User.HomeUpn))
-            //{
-            //    response.User.InitializeHomeUser();
-            //}
-
-            return null;
+            return response;
         }
 
         private static string StripBracketsFromLabResponse(string response)
@@ -120,12 +115,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
             }
 
-            //if (!string.IsNullOrWhiteSpace(query.Upn))
-            //{
-            //    queryDict.Add(LabApiConstants.Upn, query.Upn);
-            //    return SendLabRequestAsync(LabApiConstants.LabEndpoint, queryDict);
-            //}
-
             if (query.AzureEnvironment != null)
             {
                 queryDict.Add(LabApiConstants.AzureEnvironment, query.AzureEnvironment.ToString());
@@ -135,22 +124,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             {
                 queryDict.Add(LabApiConstants.SignInAudience, query.SignInAudience.ToString());
             }
-
-            //if (query.Licenses != null && query.Licenses.Count > 0)
-            //{
-            //    queryDict.Add(LabApiConstants.License, query.Licenses.ToArray().ToString());
-            //}
-
-            //queryDict.Add(LabApiConstants.FederatedUser, query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? LabApiConstants.True : LabApiConstants.False);
-
-            //queryDict.Add(LabApiConstants.External, query.IsExternalUser != null && (bool)(query.IsExternalUser) ? LabApiConstants.True : LabApiConstants.False);
-
-
-
-            //if (!string.IsNullOrEmpty(query.UserSearch))
-            //{
-            //    queryDict.Add(LabApiConstants.UserContains, query.UserSearch);
-            //}
 
             return SendLabRequestAsync(LabApiConstants.LabEndPoint, queryDict);
         }

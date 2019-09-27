@@ -23,8 +23,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("displayname")]
         public string displayname { get; set; }
 
-        //public LabUser HomeUser { get; set; }
-
         [JsonProperty("mfa")]
         public MFA mfa { get; set; }
 
@@ -71,27 +69,5 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             return _password;
         }
-
-        //public void InitializeHomeUser()
-        //{
-        //    HomeUser = new LabUser();
-        //    var labHomeUser = (LabUser)HomeUser;
-
-        //    labHomeUser.ObjectId = ObjectId;
-        //    labHomeUser.UserType = UserType;
-        //    labHomeUser.CredentialUrl = CredentialUrl;
-        //    labHomeUser.HomeUser = labHomeUser;
-        //    labHomeUser.IsExternal = IsExternal;
-        //    labHomeUser.IsMfa = IsMfa;
-        //    labHomeUser.IsMam = IsMam;
-        //    //labHomeUser.Licenses = Licenses;
-        //    labHomeUser.IsFederated = IsFederated;
-        //    labHomeUser.FederationProvider = FederationProvider;
-        //    labHomeUser.HomeTenantId = HomeTenantId;
-        //    labHomeUser.HomeUPN = HomeUPN;
-        //    labHomeUser.CurrentTenantId = HomeTenantId;
-        //    labHomeUser.Upn = HomeUPN;
-        //    labHomeUser.B2CIdentityProvider = B2CIdentityProvider;
-        //}
     }
 }
