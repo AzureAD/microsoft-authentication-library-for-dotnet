@@ -242,6 +242,9 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
             "\"refresh_token\":\"rt_secret\"," +
             "\"id_token\":\"idtoken.\"," +
             "\"client_info\":\"eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0\"}";
+
+        public const string InteractiveRequestApiIdPlusCorrelationId = "1005,ad8c894a-557f-48c0-b045-c129590c344e,";
+        public const string InteractiveRequestApiId = "1005";
     }
 
     internal static class Adfs2019LabConstants

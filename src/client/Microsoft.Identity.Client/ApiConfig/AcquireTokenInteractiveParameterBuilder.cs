@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithEmbeddedWebView);
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithEmbeddedWebView, useEmbeddedWebView);
             Parameters.UseEmbeddedWebView = useEmbeddedWebView ?
                 WebViewPreference.Embedded :
                 WebViewPreference.System;

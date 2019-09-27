@@ -23,6 +23,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using System.IO;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -132,9 +133,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
             Assert.AreEqual(TestConstants.ClientId, app.AppConfig.ClientId);
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
-
         }
-
 
         [TestMethod]
         public async Task NoStateReturnedTestAsync()
@@ -186,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task ClaimsAreSentTo_AuthroizationEndpoint_And_TokenEndpoint_Async()
+        public async Task ClaimsAreSentTo_AuthorizationEndpoint_And_TokenEndpoint_Async()
         {
             // Arrange
             using (var harness = CreateTestHarness())
@@ -203,12 +202,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                      app.ServiceBundle.PlatformProxy,
                      AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                mockUi.QueryParamsToValidate = new Dictionary<string, string>{ { OAuth2Parameter.Claims, TestConstants.Claims} };
-                
+                mockUi.QueryParamsToValidate = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
+
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
-                    TestConstants.AuthorityCommonTenant, 
+                    TestConstants.AuthorityCommonTenant,
                     queryParameters: mockUi.QueryParamsToValidate);
 
                 AuthenticationResult result = await app
@@ -328,8 +327,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
+                Guid correlationId = Guid.NewGuid();
+
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithCorrelationId(correlationId)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
 
@@ -345,7 +347,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+                harness.HttpManager.AddSuccessfulTokenResponseWithHttpTelemetryMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant,
+                    null,
+                    null,
+                    HttpTelemetryTests.CreateHttpTelemetryHeaders(
+                        correlationId,
+                        TestConstants.InteractiveRequestApiId,
+                        null,
+                        TelemetryConstants.Zero));
 
                 result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
@@ -1355,7 +1365,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.OnPremiseDisplayableId, result.Account.Username);
 
                 //Find token in cache now
-
                 AuthenticationResult cachedAuth = null;
                 try
                 {

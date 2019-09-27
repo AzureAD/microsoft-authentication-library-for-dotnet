@@ -203,7 +203,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             case ApiTelemetryFeature.WithAccount:
                 return ApiTelemetryFeatureKey.WithAccount;
             case ApiTelemetryFeature.WithRedirectUri:
-                return ApiTelemetryFeatureKey.WithForceRefresh;
+                return ApiTelemetryFeatureKey.WithRedirectUri;
+            case ApiTelemetryFeature.WithForceRefresh:
+                 return ApiTelemetryFeatureKey.WithForceRefresh;
             case ApiTelemetryFeature.WithLoginHint:
                 return ApiTelemetryFeatureKey.WithLoginHint;
             case ApiTelemetryFeature.WithExtraScopesToConsent:

@@ -12,12 +12,19 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
 using NSubstitute;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
     public class HttpManagerTests
     {
+        readonly Dictionary<string, string> _httpTelemetryHeaders = new Dictionary<string, string>
+        {
+            {TelemetryConstants.XClientLastTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1},
+            {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion1}
+        };
+
         [TestInitialize]
         public void TestInitialize()
         {
@@ -29,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityHomeTenant);
+                httpManager.AddResponseMockHandlerForPost(MockHelpers.CreateSuccessTokenResponseMessage());
 
                 var response = httpManager.SendPostAsync(
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
@@ -59,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityHomeTenant, bodyParameters, queryParams);
+                httpManager.AddResponseMockHandlerForPost(MockHelpers.CreateSuccessTokenResponseMessage(), bodyParameters, queryParams);
 
                 var response = httpManager.SendPostAsync(
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
@@ -109,7 +116,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 {
                     var msalHttpResponse = await httpManager.SendGetAsync(
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                                new Dictionary<string, string>(),
+                                                                _httpTelemetryHeaders,
                                                                 Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
@@ -126,13 +133,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         public async Task TestSendGetWithHttp500TypeFailure2Async()
         {
             using (var httpManager = new MockHttpManager())
-            {
+            {                
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.BadGateway);
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.BadGateway);
 
                 var msalHttpResponse = await httpManager.SendPostForceResponseAsync(
                                                             new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                            new Dictionary<string, string>(),
+                                                            _httpTelemetryHeaders,
                                                             new StringContent("body"),
                                                             Substitute.For<ICoreLogger>())
                                                         .ConfigureAwait(false);
@@ -153,7 +160,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 {
                     var msalHttpResponse = await httpManager.SendPostAsync(
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                                new Dictionary<string, string>(),
+                                                                _httpTelemetryHeaders,
                                                                 (IDictionary<string, string>)null,
                                                                Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);

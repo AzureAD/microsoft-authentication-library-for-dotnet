@@ -285,11 +285,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
-                Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessge.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), TestConstants.XClientSku,
+                Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
                     "Client info header should contain " + TestConstants.XClientSku,
                     StringComparison.OrdinalIgnoreCase);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), TestConstants.XClientVer,
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
                     "Client info header should contain " + TestConstants.XClientVer,
                     StringComparison.OrdinalIgnoreCase);
             }
@@ -367,11 +367,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(TestConstants.s_user.Username, result.Account.Username);
-                Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessge.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), TestConstants.XClientSku,
+                Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
                     "Client info header should contain " + TestConstants.XClientSku,
                     StringComparison.OrdinalIgnoreCase);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), TestConstants.XClientVer,
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
                     "Client info header should contain " + TestConstants.XClientVer,
                     StringComparison.OrdinalIgnoreCase);
             }

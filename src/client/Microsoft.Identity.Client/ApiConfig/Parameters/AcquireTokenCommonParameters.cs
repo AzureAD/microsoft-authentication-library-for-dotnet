@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
@@ -25,7 +26,18 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
         {
-            _apiTelemetry[MatsConverter.AsString(feature)] = "true";
+            _apiTelemetry[MatsConverter.AsString(feature)] = TelemetryConstants.True;
+        }
+
+        public void AddApiTelemetryFeature(ApiTelemetryFeature feature, bool isTrue)
+        {
+            string telemetryEnabled = TelemetryConstants.False;
+            if (isTrue)
+            {
+                telemetryEnabled = TelemetryConstants.True;
+            }
+
+            _apiTelemetry[MatsConverter.AsString(feature)] = telemetryEnabled;
         }
 
         public IEnumerable<KeyValuePair<string, string>> GetApiTelemetryFeatures()

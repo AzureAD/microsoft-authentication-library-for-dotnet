@@ -122,37 +122,40 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
 
-            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(apiEvent))
+            try
             {
-                try
+                using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(apiEvent))
                 {
-                    await PreRunAsync().ConfigureAwait(false);
-                    AuthenticationRequestParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
-                    LogRequestStarted(AuthenticationRequestParameters);
+                    try
+                    {
+                        await PreRunAsync().ConfigureAwait(false);
+                        AuthenticationRequestParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
+                        LogRequestStarted(AuthenticationRequestParameters);
 
-                    AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
-                    LogReturnedToken(authenticationResult);
+                        AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                        LogReturnedToken(authenticationResult);
 
-                    apiEvent.TenantId = authenticationResult.TenantId;
-                    apiEvent.AccountId = authenticationResult.UniqueId;
-                    apiEvent.WasSuccessful = true;
-                    return authenticationResult;
+                        apiEvent.TenantId = authenticationResult.TenantId;
+                        apiEvent.AccountId = authenticationResult.UniqueId;
+                        apiEvent.WasSuccessful = true;
+                        return authenticationResult;
+                    }
+                    catch (MsalException ex)
+                    {
+                        apiEvent.ApiErrorCode = ex.ErrorCode;
+                        AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                        throw;
+                    }
                 }
-                catch (MsalException ex)
-                {
-                    apiEvent.ApiErrorCode = ex.ErrorCode;
-                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                    throw;
-                }
-                finally
-                {
-                    ServiceBundle.TelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
-                }
+            }
+            finally
+            {
+                ServiceBundle.TelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
             }
         }
 
@@ -348,7 +351,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (string.IsNullOrEmpty(msalTokenResponse.Scope))
             {
                 msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                AuthenticationRequestParameters.RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result");
+                AuthenticationRequestParameters.RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
             }
 
             return msalTokenResponse;

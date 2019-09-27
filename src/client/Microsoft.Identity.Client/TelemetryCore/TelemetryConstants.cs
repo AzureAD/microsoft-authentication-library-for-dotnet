@@ -16,4 +16,16 @@ namespace Microsoft.Identity.Client.TelemetryCore
     //    public const string MsalCacheEventCount = "msal.cache_event_count";
     //    public const string MsalUiEventCount = "msal.ui_event_count";
     //}
+
+    internal static class TelemetryConstants
+    {
+        public const string HttpTelemetrySchemaVersion1 = "1";
+        public const string HttpTelemetryPipe = "|";
+        public const string XClientCurrentTelemetry = "x-client-current-telemetry";
+        public const string XClientLastTelemetry = "x-client-last-telemetry";
+        public const string False = "false";
+        public const string True = "true";
+        public const string One = "1";
+        public const string Zero = "0";
+    }
 }

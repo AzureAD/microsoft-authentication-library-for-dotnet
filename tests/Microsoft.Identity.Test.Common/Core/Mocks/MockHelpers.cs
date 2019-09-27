@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 
@@ -100,8 +102,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(
-            string scopes, 
-            string idToken, 
+            string scopes,
+            string idToken,
             string clientInfo)
         {
             return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,

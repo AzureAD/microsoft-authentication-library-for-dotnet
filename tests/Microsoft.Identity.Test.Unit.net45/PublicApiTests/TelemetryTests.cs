@@ -203,11 +203,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             finally
             {
-                Assert.IsFalse(_telemetryManager.CompletedEvents.IsEmpty); // There are completed event(s) inside
-                Assert.IsFalse(_telemetryManager.EventsInProgress.IsEmpty); // There is an orphaned event inside
+                Assert.IsFalse(_telemetryManager._completedEvents.IsEmpty); // There are completed event(s) inside
+                Assert.IsFalse(_telemetryManager._eventsInProgress.IsEmpty); // There is an orphaned event inside
                 _telemetryManager.Flush(correlationId);
-                Assert.IsTrue(_telemetryManager.CompletedEvents.IsEmpty); // Completed event(s) have been dispatched
-                Assert.IsTrue(_telemetryManager.EventsInProgress.IsEmpty); // The orphaned event is also dispatched, so there is no memory leak here.
+                Assert.IsTrue(_telemetryManager._completedEvents.IsEmpty); // Completed event(s) have been dispatched
+                Assert.IsTrue(_telemetryManager._eventsInProgress.IsEmpty); // The orphaned event is also dispatched, so there is no memory leak here.
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                 anEvent[EventBase.EventNameKey].EndsWith("ui_event") && anEvent[EventBase.ElapsedTimeKey] == "-1"));
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             finally
             {
                 _telemetryManager.Flush(correlationId);
-                Assert.IsTrue(_telemetryManager.CompletedEvents.IsEmpty && _telemetryManager.EventsInProgress.IsEmpty); // No memory leak here
+                Assert.IsTrue(_telemetryManager._completedEvents.IsEmpty && _telemetryManager._eventsInProgress.IsEmpty); // No memory leak here
             }
             Assert.IsNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect NOT finding such an event
                 anEvent[EventBase.EventNameKey].EndsWith("ui_event")));

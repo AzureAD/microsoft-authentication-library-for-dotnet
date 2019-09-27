@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         /// avoid negatively affecting the performance of your application</remarks>
         public AcquireTokenSilentParameterBuilder WithForceRefresh(bool forceRefresh)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithRedirectUri);
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithForceRefresh, forceRefresh);
             Parameters.ForceRefresh = forceRefresh;
             return this;
         }

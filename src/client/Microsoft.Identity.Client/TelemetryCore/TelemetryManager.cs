@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
@@ -15,14 +17,17 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private const string MsalCacheEventValuePrefix = "msal.token";
         private const string MsalCacheEventName = "msal.cache_event";
 
-        internal readonly ConcurrentDictionary<string, List<EventBase>> CompletedEvents =
+        internal readonly ConcurrentDictionary<string, List<EventBase>> _completedEvents =
             new ConcurrentDictionary<string, List<EventBase>>();
 
-        internal readonly ConcurrentDictionary<EventKey, EventBase> EventsInProgress =
+        internal readonly ConcurrentDictionary<EventKey, EventBase> _eventsInProgress =
             new ConcurrentDictionary<EventKey, EventBase>();
 
-        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> EventCount =
+        internal readonly ConcurrentDictionary<string, ConcurrentDictionary<string, int>> _eventCount =
             new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
+
+        private EventBase _mostRecentStoppedApiEvent;
+        private readonly object _mostRecentStoppedApiEventLockObj = new object();
 
         private readonly bool _onlySendFailureTelemetry;
         private readonly IPlatformProxy _platformProxy;
@@ -34,6 +39,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             TelemetryCallback telemetryCallback,
             bool onlySendFailureTelemetry = false)
         {
+            _mostRecentStoppedApiEvent = null;
             _applicationConfiguration = applicationConfiguration;
             _platformProxy = platformProxy;
             Callback = telemetryCallback;
@@ -47,33 +53,17 @@ namespace Microsoft.Identity.Client.TelemetryCore
             return new TelemetryHelper(this, eventToStart);
         }
 
-        private bool HasReceiver()
-        {
-            return Callback != null;
-        }
-
         public void StartEvent(EventBase eventToStart)
-        {
-            if (!HasReceiver())
-            {
-                return;
-            }
-
-            EventsInProgress[new EventKey(eventToStart)] = eventToStart;
+        {        
+            _eventsInProgress[new EventKey(eventToStart)] = eventToStart;
         }
 
         public void StopEvent(EventBase eventToStop)
         {
-            if (!HasReceiver())
-            {
-                return;
-            }
-
             var eventKey = new EventKey(eventToStop);
 
             // Locate the same name event in the EventsInProgress map
-            EventBase eventStarted = null;
-            EventsInProgress.TryGetValue(eventKey, out eventStarted);
+            _eventsInProgress.TryGetValue(eventKey, out EventBase eventStarted);
 
             // If we did not get anything back from the dictionary, most likely its a bug that StopEvent
             // was called without a corresponding StartEvent
@@ -83,17 +73,17 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 return;
             }
 
-            // Set execution time properties on the event adn increment the event count.
+            // Set execution time properties on the event and increment the event count.
             eventToStop.Stop();
             IncrementEventCount(eventToStop);
 
-            if (CompletedEvents.TryGetValue(eventToStop.CorrelationId, out List<EventBase> events))
+            if (_completedEvents.TryGetValue(eventToStop.CorrelationId, out List<EventBase> events))
             {
                 events.Add(eventToStop);
             }
             else
             {
-                CompletedEvents.TryAdd(
+                _completedEvents.TryAdd(
                     eventToStop.CorrelationId,
                     new List<EventBase>
                     {
@@ -102,25 +92,29 @@ namespace Microsoft.Identity.Client.TelemetryCore
             }
 
             // Mark this event as no longer in progress
-            EventsInProgress.TryRemove(eventKey, out var dummy);
+            _eventsInProgress.TryRemove(eventKey, out _);
+
+            // Store the most recent API event we've stopped.
+            if (eventToStop.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out _))
+            {
+                lock (_mostRecentStoppedApiEventLockObj)
+                {
+                    _mostRecentStoppedApiEvent = eventToStop;
+                }
+            }
         }
 
         public void Flush(string correlationId)
         {
-            if (!HasReceiver())
-            {
-                return;
-            }
-
-            if (!CompletedEvents.ContainsKey(correlationId))
+            if (!_completedEvents.ContainsKey(correlationId))
             {
                 // No completed Events returned for RequestId
                 return;
             }
 
-            CompletedEvents[correlationId].AddRange(CollateOrphanedEvents(correlationId));
-            CompletedEvents.TryRemove(correlationId, out List<EventBase> eventsToFlush);
-            EventCount.TryRemove(correlationId, out ConcurrentDictionary<string, int> eventCountToFlush);
+            _completedEvents[correlationId].AddRange(CollateOrphanedEvents(correlationId));
+            _completedEvents.TryRemove(correlationId, out List<EventBase> eventsToFlush);
+            _eventCount.TryRemove(correlationId, out ConcurrentDictionary<string, int> eventCountToFlush);
 
             // Check all events, and if the ApiEvent was successful, don't dispatch.
             if (_onlySendFailureTelemetry && eventsToFlush.Any(ev => ev is ApiEvent a && a.WasSuccessful))
@@ -137,15 +131,39 @@ namespace Microsoft.Identity.Client.TelemetryCore
             Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
         }
 
+        public string FetchAndResetPreviousHttpTelemetryContent()
+        {
+            lock (_mostRecentStoppedApiEventLockObj)
+            {
+                var httpTelemetryContent = new HttpTelemetryContent(_mostRecentStoppedApiEvent);
+                _mostRecentStoppedApiEvent = null;
+                return httpTelemetryContent.GetCsvAsPrevious();
+            }
+        }
+
+        public string FetchCurrentHttpTelemetryContent(string currentRequestCorrelationId)
+        {
+            foreach (var kvp in _eventsInProgress)
+            {
+                if (string.Compare(kvp.Key.CorrelationId, currentRequestCorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    var httpTelemetryContent = new HttpTelemetryContent(kvp.Value);
+                    return httpTelemetryContent.GetCsvAsCurrent();
+                }
+            }
+
+            return string.Empty;
+        }
+
         private IEnumerable<EventBase> CollateOrphanedEvents(string correlationId)
         {
             var orphanedEvents = new List<EventBase>();
-            foreach (var key in EventsInProgress.Keys)
+            foreach (var key in _eventsInProgress.Keys)
             {
                 if (string.Compare(key.CorrelationId, correlationId, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     // The orphaned event already contains its own start time, we simply collect it
-                    if (EventsInProgress.TryRemove(key, out var orphan))
+                    if (_eventsInProgress.TryRemove(key, out var orphan))
                     {
                         IncrementEventCount(orphan);
                         orphanedEvents.Add(orphan);
@@ -159,7 +177,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private void IncrementEventCount(EventBase eventToIncrement)
         {
             string eventName;
-            if (eventToIncrement[EventBase.EventNameKey].Substring(0,10) == MsalCacheEventValuePrefix)
+            if (eventToIncrement[EventBase.EventNameKey].Substring(0, 10) == MsalCacheEventValuePrefix)
             {
                 eventName = MsalCacheEventName;
             }
@@ -168,14 +186,14 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 eventName = eventToIncrement[EventBase.EventNameKey];
             }
 
-            if (!EventCount.ContainsKey(eventToIncrement.CorrelationId))
+            if (!_eventCount.ContainsKey(eventToIncrement.CorrelationId))
             {
-                EventCount[eventToIncrement.CorrelationId] = new ConcurrentDictionary<string, int>();
-                EventCount[eventToIncrement.CorrelationId].TryAdd(eventName, 1);
+                _eventCount[eventToIncrement.CorrelationId] = new ConcurrentDictionary<string, int>();
+                _eventCount[eventToIncrement.CorrelationId].TryAdd(eventName, 1);
             }
             else
             {
-                EventCount[eventToIncrement.CorrelationId].AddOrUpdate(eventName, 1, (key, count) => count + 1);
+                _eventCount[eventToIncrement.CorrelationId].AddOrUpdate(eventName, 1, (key, count) => count + 1);
             }
         }
 
@@ -195,7 +213,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             /// <inheritdoc />
             public bool Equals(EventKey other)
             {
-                if (ReferenceEquals(null, other))
+                if (other is null)
                 {
                     return false;
                 }
@@ -216,13 +234,13 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 unchecked
                 {
                     // Choose large primes to avoid hashing collisions
-                    const int HashingBase = (int) 2166136261;
+                    const int HashingBase = (int)2166136261;
                     const int HashingMultiplier = 16777619;
 
                     int hash = HashingBase;
-                    hash = (hash * HashingMultiplier) ^ (!Object.ReferenceEquals(null, EventId) ? EventId.GetHashCode() : 0);
-                    hash = (hash * HashingMultiplier) ^ (!Object.ReferenceEquals(null, CorrelationId) ? CorrelationId.GetHashCode() : 0);
-                    hash = (hash * HashingMultiplier) ^ (!Object.ReferenceEquals(null, EventName) ? EventName.GetHashCode() : 0);
+                    hash = (hash * HashingMultiplier) ^ (EventId is object ? EventId.GetHashCode() : 0);
+                    hash = (hash * HashingMultiplier) ^ (CorrelationId is object ? CorrelationId.GetHashCode() : 0);
+                    hash = (hash * HashingMultiplier) ^ (EventName is object ? EventName.GetHashCode() : 0);
 
                     return hash;
                 }
@@ -231,7 +249,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             /// <inheritdoc />
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj))
+                if (obj is null)
                 {
                     return false;
                 }

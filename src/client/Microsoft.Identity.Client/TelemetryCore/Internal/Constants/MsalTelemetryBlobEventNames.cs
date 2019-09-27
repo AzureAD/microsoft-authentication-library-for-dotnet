@@ -22,5 +22,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Constants
         public const string ResponseTimeConstStrKey = "Microsoft_MSAL_response_time";
         public const string TenantIdConstStrKey = "Microsoft_MSAL_tenant_id";
         public const string UiEventCountTelemetryBatchKey = "Microsoft_MSAL_ui_event_count";
+        public const string ApiErrorCodeConstStrKey = "msal.api_error_code";
+        public const string ForceRefreshId = "api_with_force_refresh";
     }
 }
