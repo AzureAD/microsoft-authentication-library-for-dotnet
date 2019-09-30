@@ -100,7 +100,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "microsoft.identity.client", "microsoft.identity.client", "{4667ADF0-37FA-4306-BD2A-F55D6360143E}"
 	ProjectSection(SolutionItems) = preProject
 		src\client\Directory.Build.props = src\client\Directory.Build.props
-		src\client\Directory.Build.targets = src\client\Directory.Build.targets
 		global.json = global.json
 	EndProjectSection
 EndProject
@@ -137,10 +136,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{EA983957-DC2F-4D9E-A2E3-79ADEB5CEB26}"
 	ProjectSection(SolutionItems) = preProject
+		build\pipeline-ci.yaml = build\pipeline-ci.yaml
 		build\pipeline-pullrequest.yaml = build\pipeline-pullrequest.yaml
 		build\pipeline-releasebuild.yaml = build\pipeline-releasebuild.yaml
 		build\pipeline-uiautomation.yaml = build\pipeline-uiautomation.yaml
 		build\template-bootstrap-build.yaml = build\template-bootstrap-build.yaml
+		template-ci-and-pr.yaml = template-ci-and-pr.yaml
 		build\template-install-dotnet-core.yaml = build\template-install-dotnet-core.yaml
 		build\template-install-keyvault-secrets.yaml = build\template-install-keyvault-secrets.yaml
 		build\template-install-nuget.yaml = build\template-install-nuget.yaml
@@ -224,6 +225,7 @@ Global
 		{0B22271B-163F-429B-A472-4C7BF531CEE9}.Debug|Any CPU.Deploy.0 = Debug|x86
 		{0B22271B-163F-429B-A472-4C7BF531CEE9}.Debug|iPhone.ActiveCfg = Debug|x86
 		{0B22271B-163F-429B-A472-4C7BF531CEE9}.Debug|iPhoneSimulator.ActiveCfg = Debug|x86
+		{0B22271B-163F-429B-A472-4C7BF531CEE9}.Debug|iPhoneSimulator.Build.0 = Debug|x86
 		{0B22271B-163F-429B-A472-4C7BF531CEE9}.Release|Any CPU.ActiveCfg = Release|x86
 		{0B22271B-163F-429B-A472-4C7BF531CEE9}.Release|iPhone.ActiveCfg = Release|x86
 		{0B22271B-163F-429B-A472-4C7BF531CEE9}.Release|iPhoneSimulator.ActiveCfg = Release|x86
@@ -292,6 +294,7 @@ Global
 		{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}.Debug|Any CPU.Deploy.0 = Debug|x86
 		{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}.Debug|iPhone.ActiveCfg = Debug|x86
 		{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}.Debug|iPhoneSimulator.ActiveCfg = Debug|x86
+		{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}.Debug|iPhoneSimulator.Build.0 = Debug|x86
 		{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}.Release|Any CPU.ActiveCfg = Release|x86
 		{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}.Release|iPhone.ActiveCfg = Release|x86
 		{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}.Release|iPhoneSimulator.ActiveCfg = Release|x86
