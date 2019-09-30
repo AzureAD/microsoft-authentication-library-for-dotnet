@@ -48,15 +48,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.Scope, deviceCodeScopes.AsSingleString());
             client.AddQueryParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
 
-
-            // Talked with Shiung, devicecode will be added to the discovery endpoint "soon".
-            // Fow now, the string replace is correct.
-            // TODO: We should NOT be talking to common, need to work with henrik/bogdan on why /common is being set
-            // as default for msal.
             string deviceCodeEndpoint = AuthenticationRequestParameters.Endpoints.TokenEndpoint
-                                                                       .Replace("token", "devicecode").Replace(
-                                                                           "common",
-                                                                           "organizations");
+                                                                       .Replace("token", "devicecode");
 
             var builder = new UriBuilder(deviceCodeEndpoint);
             builder.AppendQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters);
