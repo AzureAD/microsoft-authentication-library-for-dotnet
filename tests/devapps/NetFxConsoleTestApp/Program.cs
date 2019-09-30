@@ -185,6 +185,9 @@ namespace NetFx
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
                             break;
 
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                            break;
+
                         case '6': // acquire token silent
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
                             if (account == null)
@@ -317,6 +320,8 @@ namespace NetFx
             Console.WriteLine("Token is {0}", authTask.Result.AccessToken);
             Console.ResetColor();
 
+
+            await CallGraphAsync(authTask.Result.AccessToken).ConfigureAwait(false);
 
             await CallGraphAsync(authTask.Result.AccessToken).ConfigureAwait(false);
 
