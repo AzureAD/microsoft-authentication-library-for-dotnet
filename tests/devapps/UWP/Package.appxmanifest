@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="fa29d138-68d5-4367-a859-f4059bc8af9a" Publisher="CN=bogavril" Version="1.0.0.0" />
+  <Identity Name="fa29d138-68d5-4367-a859-f4059bc8af9a" Publisher="CN=Contoso Software, O=Contoso Corporation, C=US" Version="1.0.0.0" />
   <mp:PhoneIdentity PhoneProductId="fa29d138-68d5-4367-a859-f4059bc8af9a" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>UWP</DisplayName>
