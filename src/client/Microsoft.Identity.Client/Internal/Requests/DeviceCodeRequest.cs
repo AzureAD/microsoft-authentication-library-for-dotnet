@@ -81,9 +81,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {
-                    // TODO: once we have a devicecode discovery endpoint, we should remove this modification...
                     return await SendTokenRequestAsync(
-                                   AuthenticationRequestParameters.Endpoints.TokenEndpoint.Replace("common", "organizations"),
+                                   AuthenticationRequestParameters.Endpoints.TokenEndpoint,
                                    GetBodyParameters(deviceCodeResult), cancellationToken)
                                .ConfigureAwait(false);
                 }

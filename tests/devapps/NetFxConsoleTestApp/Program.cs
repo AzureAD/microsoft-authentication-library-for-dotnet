@@ -23,6 +23,7 @@ namespace NetFx
     {
         // This app has http://localhost redirect uri registered
         private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
+        //private static readonly string s_clientIdForPublicApp = "655015be-5021-4afc-a683-a4223eb5d0e5";
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
@@ -147,7 +148,14 @@ namespace NetFx
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
+                        case '4': 
 
+                            authTask = pca.AcquireTokenInteractive(s_scopes)
+                                .WithPrompt(Prompt.Consent)
+                                .ExecuteAsync(CancellationToken.None);
+
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                            break;
 
                         case '6': // acquire token silent
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
@@ -272,9 +280,13 @@ namespace NetFx
             Console.ResetColor();
 
 
+            await CallGraphAsync(authTask.Result.AccessToken).ConfigureAwait(false);
+
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
             await DisplayAccountsAsync(pca).ConfigureAwait(false);
             Console.ResetColor();
+
+
         }
 
         private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
@@ -341,6 +353,25 @@ namespace NetFx
                 }
             }
             return pwd;
+        }
+
+        private static async Task<string> CallGraphAsync(string token)
+        {
+            var httpClient = new System.Net.Http.HttpClient();
+            System.Net.Http.HttpResponseMessage response;
+            try
+            {
+                var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, GraphAPIEndpoint);
+                //Add the token in Authorization header
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                return content;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
         }
     }
 }
