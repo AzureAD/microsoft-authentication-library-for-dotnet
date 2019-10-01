@@ -1,11 +1,8 @@
-
-# PR builds should be triggered on every branch except master (so we don't trigger again after a merge)
+# CI builds should be triggered on the master branch only
 trigger:
   branches:
     include:
-    - '*'
-    exclude:
-    - master
+    - 'master'
 
 pool:
   name: Hosted VS2017

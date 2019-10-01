@@ -1,18 +1,26 @@
-﻿using Microsoft.Identity.Client;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.Storage;
-using Windows.Storage.Streams;
+using Microsoft.Identity.Client;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using AuthenticationResult = Microsoft.Identity.Client.AuthenticationResult;
+using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Navigation;
+using Windows.Storage;
+using Windows.Storage.Streams;
+using System.Threading;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace UWP
+namespace UWP_standalone
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -27,7 +35,7 @@ namespace UWP
 
         public MainPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
             _pca = PublicClientApplicationBuilder.Create(s_clientID).WithAuthority(s_authority).Build();
 
@@ -61,11 +69,6 @@ namespace UWP
                     tokenCacheNotifcation.TokenCache.DeserializeMsalV3(result);
                 }
             });
-
-#if ARIA_TELEMETRY_ENABLED
-            Telemetry.GetInstance().RegisterReceiver(
-                (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
-#endif
         }
 
         private async void AcquireTokenIWA_ClickAsync(object sender, RoutedEventArgs e)
@@ -93,7 +96,8 @@ namespace UWP
                 Environment.NewLine +
                 string.Join(", ", accounts.Select(a => a.Username));
 
-            await DisplayMessageAsync(message).ConfigureAwait(false); ;
+            await DisplayMessageAsync(message).ConfigureAwait(false);
+            ;
 
         }
 
