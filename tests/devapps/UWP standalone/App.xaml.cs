@@ -1,11 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-namespace UWP
+namespace UWP_standalone
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
@@ -70,7 +80,9 @@ namespace UWP
         /// <param name="e">Details about the navigation failure</param>
         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
-            throw new InvalidOperationException("Failed to load Page " + e.SourcePageType.FullName);
+#pragma warning disable CA2201 // Do not raise reserved exception types
+            throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+#pragma warning restore CA2201 // Do not raise reserved exception types
         }
 
         /// <summary>
