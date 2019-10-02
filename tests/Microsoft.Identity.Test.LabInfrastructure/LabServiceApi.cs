@@ -14,15 +14,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     /// <summary>
     /// Wrapper for new lab service API
     /// </summary>
-    public class LabServiceApi : ILabService, IDisposable
+    public class LabServiceApi : ILabService
     {
-        private readonly HttpClient _httpClient;
         private string _labAccessAppId;
         private string _labAccessClientSecret;
 
         public LabServiceApi()
         {
-            _httpClient = new HttpClient();
             KeyVaultSecretsProvider _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
             _labAccessAppId = _keyVaultSecretsProvider.GetMsidLabSecret("LabVaultAppID").Value;
             _labAccessClientSecret = _keyVaultSecretsProvider.GetMsidLabSecret("LabVaultAppSecret").Value;
@@ -43,11 +41,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 Console.WriteLine($"User '{user.Upn}' has invalid Credential URL: '{user.CredentialUrl}'");
             }
 
-            if (user.HomeUPN == null)
-            {
-                Console.WriteLine($"User '{user.Upn}' has no matching home user.");
-            }
-
             return response;
         }
 
@@ -66,7 +59,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private static LabResponse CreateLabResponseFromResultString(string result)
         {
-            LabResponse response = JsonConvert.DeserializeObject<LabResponse>(StripBracketsFromLabResponse(result));
+            LabResponse[] responses = JsonConvert.DeserializeObject<LabResponse[]>(result);
+            if (responses.Length > 1)
+            {
+                throw new InvalidOperationException(
+                    "Test Setup Error: Not expecting the lab to return multiple users for a query." +
+                    " Please have rewrite the query so that it returns a single user.");
+            }
+
+            var response = responses[0];
             response.User.CredentialUrl = response.Lab.CredentialVaultkeyName;
             response.User.TenantId = response.Lab.TenantId;
             response.User.FederationProvider = response.Lab.FederationProvider;
@@ -74,12 +75,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        private static string StripBracketsFromLabResponse(string response)
-        {
-            var startingIndex = response.IndexOf("{");
-            var end = response.LastIndexOf("\r\n]");
-            return response.Substring(startingIndex, response.Length - startingIndex - (response.Length - end));
-        }
 
         private Task<string> RunQueryAsync(UserQuery query)
         {
@@ -137,13 +132,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             var res = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret).ConfigureAwait(false);
 
-            _httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", res));
-            return await _httpClient.GetStringAsync(uriBuilder.ToString()).ConfigureAwait(false);
-        }
-
-        public void Dispose()
-        {
-            _httpClient.Dispose();
+            using (HttpClient httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", res));               
+                return await httpClient.GetStringAsync(uriBuilder.ToString()).ConfigureAwait(false);               
+            }
         }
 
         public async Task<LabResponse> CreateTempLabUserAsync()

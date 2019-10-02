@@ -23,7 +23,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Linq;
 
-namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
+namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
     public class ConfidentialClientIntegrationTests

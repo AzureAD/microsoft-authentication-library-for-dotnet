@@ -21,16 +21,24 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     {
         [JsonProperty("appid")]
         public string AppId { get; set; }
+
+        // TODO: this is a list, but lab sends a string. Not used today, discuss with lab to return a list
+        //[JsonProperty("redirecturi")]
+        //public string RedirectUri { get; set; }
+
+        [JsonProperty("signinaudience")]
+        public string Audience { get; set; }
     }
 
     public class Lab
     {
-        [JsonProperty("TenantId")]
+        [JsonProperty("tenantid")]
         public string TenantId { get; set; }
 
         [JsonProperty("federationprovider")]
         public FederationProvider FederationProvider { get; set; }
 
+        [JsonProperty("credentialvaultkeyname")]
         public string CredentialVaultkeyName { get; set; }
     }
 }

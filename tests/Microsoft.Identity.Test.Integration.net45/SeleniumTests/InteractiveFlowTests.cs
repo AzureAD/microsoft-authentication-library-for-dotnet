@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     [TestClass]
     public partial class InteractiveFlowTests
     {
-        private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
+        private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(5);
         private static readonly string[] s_scopes = new[] { "user.read" };
 
         #region MSTest Hooks
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     .Create(Adfs2019LabConstants.PublicClientId)
                     .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
                     .WithAdfsAuthority(Adfs2019LabConstants.Authority)
-                    .BuildConcrete();
+                    .Build();
             }
             else
             {
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .AcquireTokenInteractive(s_scopes)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin, true, directToAdfs))
                 .WithPrompt(Prompt.ForceLogin)
-                .WithLoginHint(labResponse.User.HomeUPN)
+                .WithLoginHint(labResponse.User.Upn)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(2, 3);

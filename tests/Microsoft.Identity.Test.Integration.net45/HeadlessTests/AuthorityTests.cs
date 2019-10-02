@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 // BugBug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/776308/
                 // sts.windows.net fails when doing instance discovery, e.g.: 
                 // https://sts.windows.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Fsts.windows.net%2Ff645ad92-e38d-4d1a-b510-d1b09a74a8ca%2Foauth2%2Fv2.0%2Fauthorize
-                .WithAuthority("https://login.windows.net/" + user.CurrentTenantId + "/")
+                .WithAuthority("https://login.windows.net/" + user.TenantId + "/")
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

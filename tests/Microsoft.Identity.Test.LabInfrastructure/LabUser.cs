@@ -9,8 +9,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public class LabUser
     {
-        public LabUser() { }
-
         [JsonProperty("objectId")]
         public Guid ObjectId { get; set; }
 
@@ -21,16 +19,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public string Upn { get; set; }
 
         [JsonProperty("displayname")]
-        public string displayname { get; set; }
+        public string DisplayName { get; set; }
 
         [JsonProperty("mfa")]
-        public MFA mfa { get; set; }
+        public MFA Mfa { get; set; }
 
         [JsonProperty("protectionpolicy")]
-        public ProtectionPolicy protectionpolicy { get; set; }
-
-        [JsonProperty("licenses")]
-        public ISet<string> Licenses { get; set; }
+        public ProtectionPolicy ProtectionPolicy { get; set; }
 
         [JsonProperty("homedomain")]
         public HomeDomain HomeDomain { get; set; }
@@ -42,21 +37,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public B2CIdentityProvider B2cProvider { get; set; }
 
         [JsonProperty("labname")]
-        public string labname { get; set; }
-
-        [JsonProperty("lastupdatedby")]
-        public string lastupdatedby { get; set; }
-
-        [JsonProperty("lastupdateddate")]
-        public string lastupdateddate { get; set; }
+        public string LabName { get; set; }
 
         public FederationProvider FederationProvider { get; set; }
 
         public string CredentialUrl { get; set; }
 
         public string TenantId { get; set; }
-
-        public string CurrentTenantId { get; set; }
 
         private string _password = null;
 

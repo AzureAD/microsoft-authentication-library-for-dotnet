@@ -14,7 +14,7 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 
-namespace Microsoft.Identity.Test.Integration.net45.SeleniumTests
+namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
     [TestClass]
     public class SeleniumInfrastructureTests

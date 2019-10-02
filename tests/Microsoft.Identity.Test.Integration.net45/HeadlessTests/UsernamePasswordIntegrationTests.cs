@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            Assert.AreEqual(user.Upn, authResult.Account.Username);
+            Assert.IsTrue(string.Equals(user.Upn, authResult.Account.Username, System.StringComparison.InvariantCultureIgnoreCase));
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.

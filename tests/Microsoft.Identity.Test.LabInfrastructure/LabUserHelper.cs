@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static async Task<LabResponse> GetB2CMSAAccountAsync()
         {
             var response = await GetLabUserDataAsync(UserQuery.B2CMSAUserQuery).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(response.User.HomeUPN))
+            if (string.IsNullOrEmpty(response.User.HomeUPN) || 
+                string.Equals("None", response.User.HomeUPN, StringComparison.OrdinalIgnoreCase))
             {
                 response.User.HomeUPN = response.User.Upn;
             }
@@ -83,6 +84,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             var query = UserQuery.DefaultUserQuery;
             query.FederationProvider = federationProvider;
+            query.UserType = federated ? UserType.Federated : UserType.OnPrem;
             return GetLabUserDataAsync(query);
         }
 
