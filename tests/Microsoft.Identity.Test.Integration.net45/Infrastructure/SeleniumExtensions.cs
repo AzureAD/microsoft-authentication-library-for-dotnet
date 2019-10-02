@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         SeleniumExtensions.ByIds(fields.AADSignInButtonId, continueId));
                     continueBtn?.Click();
 
-                    seleniumDriver.PerformLogin(user, Prompt.SelectAccount, isAdfs);
+                    seleniumDriver.PerformLogin(user, Prompt.SelectAccount, false, isAdfs);
                     Thread.Sleep(1000); // allow the browser to redirect
 
                     Trace.WriteLine("Authentication complete");
