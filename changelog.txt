@@ -1,3 +1,12 @@
+4.4.1
+=============
+New Features: 
+MSAL now supports the device code grant for ADFS 2019 [#1403](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1403)
+MSAL now supports the device code grant for personal accounts [#1367](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1367)
+
+Bug Fixes: 
+Fixed iOS broker issue where authentication was failing due to a mismatched nonce.
+
 4.4.0
 =============
 Bug Fixes:
