@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
-            if (adfsOnly && !withLoginHint)
+            if (adfsOnly && !withLoginHint || user.FederationProvider == FederationProvider.ADFSv2019)
             {
                 Trace.WriteLine("Logging in ... Entering username");
                 driver.FindElement(By.Id(CoreUiTestConstants.AdfsV4UsernameInputdId)).SendKeys(user.Upn);
