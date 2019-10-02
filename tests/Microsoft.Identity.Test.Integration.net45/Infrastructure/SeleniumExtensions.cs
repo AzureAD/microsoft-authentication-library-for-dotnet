@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
-            if (adfsOnly && !withLoginHint || user.FederationProvider == FederationProvider.ADFSv2019)
+            if (adfsOnly && !withLoginHint)
             {
                 Trace.WriteLine("Logging in ... Entering username");
                 driver.FindElement(By.Id(CoreUiTestConstants.AdfsV4UsernameInputdId)).SendKeys(user.Upn);
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         SeleniumExtensions.ByIds(fields.AADSignInButtonId, continueId));
                     continueBtn?.Click();
 
-                    seleniumDriver.PerformLogin(user, Prompt.SelectAccount, isAdfs);
+                    seleniumDriver.PerformLogin(user, Prompt.SelectAccount, false, isAdfs);
                     Thread.Sleep(1000); // allow the browser to redirect
 
                     Trace.WriteLine("Authentication complete");
