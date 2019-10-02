@@ -47,6 +47,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserDataAsync(UserQuery.DefaultUserQuery);
         }
 
+        public static Task<LabResponse> GetMSAUserAsync()
+        {
+            return GetLabUserDataAsync(UserQuery.MSAUserQuery);
+        }
+
         public static Task<LabResponse> GetB2CLocalAccountAsync()
         {
             return GetLabUserDataAsync(UserQuery.B2CLocalAccountUserQuery);

@@ -30,6 +30,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             B2CIdentityProvider = LabInfrastructure.B2CIdentityProvider.Local
         };
 
+        public static UserQuery MSAUserQuery => new UserQuery
+        {
+            UserType = LabInfrastructure.UserType.MSA    
+        };
+
         public static UserQuery B2CFacebookUserQuery => new UserQuery
         {
             UserType = LabInfrastructure.UserType.B2C,

@@ -46,7 +46,20 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task DeviceCodeFlowTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await RunDeviceCodeTestAsync(labResponse).ConfigureAwait(false);
+        }
 
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [Ignore] // Test currently fails because Lab app is mis-configured
+        public async Task DeviceCodeFlowMSATestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetMSAUserAsync().ConfigureAwait(false);
+            await RunDeviceCodeTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        private async Task RunDeviceCodeTestAsync(LabResponse labResponse)
+        {
             Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
             var pca = PublicClientApplicationBuilder.Create(labResponse.App.AppId).Build();
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
