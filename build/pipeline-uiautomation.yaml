@@ -4,8 +4,6 @@ trigger:
   branches:
     include:
     - master
-    exclude:
-    - markzuber/*
 
 pr:
 - master
@@ -30,7 +28,7 @@ stages:
   jobs:
   - job: 'Build'
     pool:
-        name: Hosted VS2017
+        vmImage: 'windows-latest'
         demands:
         - msbuild
         - visualstudio
@@ -96,7 +94,7 @@ stages:
 
   - job: 'BuildiOSAppCenterApp'
     pool:
-        name: Hosted Mac Internal
+        vmImage: 'macOS-latest'
         demands:
         - Xamarin.iOS
     steps:
@@ -160,7 +158,7 @@ stages:
   - job: 'AppCenterAndroidMsalTests'
     dependsOn: 'Build'
     pool:
-        name: Hosted VS2017
+      vmImage: 'windows-latest'
     steps:
 
     - powershell: '$Import = $(FastRun)'
@@ -206,7 +204,7 @@ stages:
     - 'Build'
     - 'BuildiOSAppCenterApp'
     pool:
-        name: Hosted VS2017
+      vmImage: 'windows-latest'
     steps:
 
     - task: DownloadBuildArtifacts@0
