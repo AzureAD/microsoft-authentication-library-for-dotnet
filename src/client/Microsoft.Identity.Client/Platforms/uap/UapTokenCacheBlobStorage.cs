@@ -23,10 +23,12 @@ namespace Microsoft.Identity.Client.Platforms.uap
         private const string CacheFileName = "msalcache.dat";
 
         private readonly ICryptographyManager _cryptographyManager;
+        private readonly ICoreLogger _logger;
 
         public UapTokenCacheBlobStorage(ICryptographyManager cryptographyManager, ICoreLogger logger)
         {
             _cryptographyManager = cryptographyManager;
+            _logger = logger;
         }
 
         public void OnBeforeWrite(TokenCacheNotificationArgs args)
@@ -36,16 +38,48 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
-            OnBeforeAccessAsync(args);
+            IStorageFile cacheFile = ApplicationData.Current.LocalFolder.TryGetItemAsync(CacheFileName)
+                                .AsTask().GetAwaiter().GetResult() as IStorageFile;
+
+
+            if (cacheFile != null)
+            {
+                byte[] decryptedBlob = null;
+
+                try
+                {
+                    decryptedBlob = ReadAndDecrypt(cacheFile);                   
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error("The UWP cache file could not be decrypted. Corrupted files cannot be restored. Deleting the file.");
+                    _logger.ErrorPii(ex);
+
+                    cacheFile.DeleteAsync(StorageDeleteOption.PermanentDelete).AsTask().GetAwaiter().GetResult();
+                    return;
+                }
+
+                if (decryptedBlob != null)
+                {
+                    args.TokenCache.DeserializeMsalV3(decryptedBlob);
+                }
+            }
+        }
+
+        private byte[] ReadAndDecrypt(IStorageFile cacheFile)
+        {
+            IBuffer buffer = FileIO.ReadBufferAsync(cacheFile).AsTask().GetAwaiter().GetResult();
+
+            if (buffer.Length != 0)
+            {
+                byte[] encryptedblob = buffer.ToArray();
+                return _cryptographyManager.Decrypt(encryptedblob);
+            }
+
+            return null;
         }
 
         public void OnAfterAccess(TokenCacheNotificationArgs args)
-        {
-            OnAfterAccessAsync(args);
-        }
-
-
-        private void OnAfterAccessAsync(TokenCacheNotificationArgs args)
         {
             if (args.HasStateChanged)
             {
@@ -59,24 +93,5 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 FileIO.WriteBytesAsync(cacheFile, encryptedBlob).GetAwaiter().GetResult();
             }
         }
-
-        private void OnBeforeAccessAsync(TokenCacheNotificationArgs args)
-        {
-            var cacheFile = ApplicationData.Current.LocalFolder.TryGetItemAsync(CacheFileName)
-                                .AsTask().GetAwaiter().GetResult() as IStorageFile;
-
-            if (cacheFile != null)
-            {
-                IBuffer buffer = FileIO.ReadBufferAsync(cacheFile).AsTask().GetAwaiter().GetResult();
-
-                if (buffer.Length != 0)
-                {
-                    byte[] encryptedblob = buffer.ToArray();
-                    byte[] decryptedBlob = _cryptographyManager.Decrypt(encryptedblob);
-                    args.TokenCache.DeserializeMsalV3(decryptedBlob);
-                }
-            }
-        }
-
     }
 }
