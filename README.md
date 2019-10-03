@@ -15,7 +15,7 @@ Released     | Nightly
 
 ## Build Status
  
-![DEV Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20&%20PR%20&%20Nightly?branchName=master)
+[![Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20(YAML)?branchName=master)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=922&branchName=master)
 
 ## Roadmap and SLA
 
