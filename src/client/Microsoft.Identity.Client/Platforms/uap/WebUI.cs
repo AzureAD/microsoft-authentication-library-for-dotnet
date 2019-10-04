@@ -3,15 +3,14 @@
 
 using System;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Core;
-using Windows.Networking.Connectivity;
-using Windows.Security.Authentication.Web;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using System.Threading;
+using Windows.ApplicationModel.Core;
+using Windows.Security.Authentication.Web;
 
 
 namespace Microsoft.Identity.Client.Platforms.uap
@@ -51,8 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
             try
             {
-                webAuthenticationResult =   await
-                RetryOperationHelper.ExecuteWithRetryAsync(
+                webAuthenticationResult = await RetryOperationHelper.ExecuteWithRetryAsync(
                     () => InvokeWABOnMainThreadAsync(authorizationUri, redirectUri, ssoMode, options),
                     WABRetryAttempts,
                     onAttemptFailed: (attemptNumber, exception) =>
@@ -60,7 +58,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
                         _requestContext.Logger.Warning($"Attempt {attemptNumber} to call WAB failed");
                         _requestContext.Logger.WarningPii(exception);
                     })
-                .ConfigureAwait(false);
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -74,7 +72,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
             AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult);
             return result;
         }
-
 
         public async Task<WebAuthenticationResult> InvokeWABOnMainThreadAsync(Uri authorizationUri,
             Uri redirectUri,
