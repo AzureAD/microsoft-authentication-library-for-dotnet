@@ -50,11 +50,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return false;
             }
 
-            viewController.InvokeOnMainThread(() =>
-            {
-                authorizationResult = AuthorizationResult.FromUri(url);
-                returnedUriReady.Release();
-            });
+            authorizationResult = AuthorizationResult.FromUri(url);
+            returnedUriReady.Release();
 
             return true;
         }

@@ -1,9 +1,6 @@
 
-# UI Automation builds should be triggered on every push to master, and on any PR making its way to master.
-trigger:
-  branches:
-    include:
-    - master
+# Do not run on CI, PR is enough
+trigger: none
 
 pr:
 - master
@@ -94,7 +91,7 @@ stages:
 
   - job: 'BuildiOSAppCenterApp'
     pool:
-        vmImage: 'macOS-latest'
+        vmImage: 'macOS-latests'
         demands:
         - Xamarin.iOS
     steps:

@@ -4,6 +4,8 @@ trigger:
     include:
     - 'master'
 
+pr: none
+
 pool:
   name: Hosted VS2019
   demands:

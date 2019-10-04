@@ -1,4 +1,7 @@
 
+# Do not run on CI
+trigger: none
+
 pr:
   autoCancel: false
   branches:
