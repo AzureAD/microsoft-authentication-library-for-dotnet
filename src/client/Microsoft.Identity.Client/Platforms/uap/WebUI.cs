@@ -73,7 +73,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return result;
         }
 
-        public async Task<WebAuthenticationResult> InvokeWABOnMainThreadAsync(Uri authorizationUri,
+        private async Task<WebAuthenticationResult> InvokeWABOnMainThreadAsync(
+            Uri authorizationUri,
             Uri redirectUri,
             bool ssoMode,
             WebAuthenticationOptions options)
