@@ -134,6 +134,20 @@ namespace Microsoft.Identity.Client
         }
 #endif // !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
 
+//#if ANDROID
+//        /// <summary>
+//        /// 
+//        /// </summary>
+//        /// <param name="activity"></param>
+//        /// <returns></returns>
+//        [CLSCompliant(false)]
+//        public PublicClientApplicationBuilder WithActivity(Activity activity)
+//        {
+//            Config.BrokerActivity = activity;
+//            return this;
+//        }
+//#endif
+
 #if WINDOWS_APP
         /// <summary>
         /// Flag to enable authentication with the user currently logged-in in Windows.

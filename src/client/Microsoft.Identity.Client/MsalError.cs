@@ -405,6 +405,11 @@ namespace Microsoft.Identity.Client
         public const string CannotInvokeBroker = "cannot_invoke_broker";
 
         /// <summary>
+        /// MSAL is not able to find a suitable account to use with broker
+        /// </summary>
+        public const string NoBrokerAccountFound = "no_broker_account_found";
+
+        /// <summary>
         /// Error code used when the HTTP response returns HttpStatusCode.NotFound
         /// </summary>
         public const string HttpStatusNotFound = "not_found";

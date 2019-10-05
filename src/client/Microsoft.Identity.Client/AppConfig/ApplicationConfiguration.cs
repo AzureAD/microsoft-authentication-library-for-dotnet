@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Android.App;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -93,5 +94,9 @@ namespace Microsoft.Identity.Client
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
         /// </summary>
         internal string Instance { get; set; }
+
+#if ANDROID
+        internal Activity BrokerActivity { get; set; }
+#endif
     }
 }

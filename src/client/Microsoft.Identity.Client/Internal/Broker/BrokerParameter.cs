@@ -31,6 +31,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Claims = "claims";
         public const string ExtraConsentScopes = "extra_consent_scopes";
         public const string Prompt = "prompt";
+        public const string BrokerAccountName = "broker_account_name";
+        public const string SilentBrokerFlow = "silent_broker_flow";
 
         public const string Force = "force";
 
