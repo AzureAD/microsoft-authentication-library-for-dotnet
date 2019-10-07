@@ -204,9 +204,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
             {
                 RequestContext.Logger.Error(string.Format(CultureInfo.InvariantCulture,
                     "Redirection to non-HTTPS scheme ({0}) found! Webview will fail...", url.Scheme));
-                Result = AuthorizationResult.FromStatus(AuthorizationStatus.ErrorHttp);
-                Result.Error = MsalError.NonHttpsRedirectNotSupported;
-                Result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
+                Result = AuthorizationResult.FromStatus(
+                    AuthorizationStatus.ErrorHttp,
+                    MsalError.NonHttpsRedirectNotSupported,
+                    MsalErrorMessage.NonHttpsRedirectNotSupported);
                 readyToClose = true;
             }
 

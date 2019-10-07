@@ -22,6 +22,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class InteractiveRequest : RequestBase
     {
+        internal const string UnknownError = "Unknown error";
+
         private readonly SortedSet<string> _extraScopesToConsent;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
@@ -274,7 +276,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 ServiceBundle.DefaultLogger.InfoPii(
                     LogMessages.AuthorizationResultWasNotSuccessful + _authorizationResult.ErrorDescription ?? "Unknown error.", 
                     LogMessages.AuthorizationResultWasNotSuccessful);
-                throw new MsalServiceException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "Unknown error.");
+                throw new MsalServiceException(
+                    _authorizationResult.Error,
+                    !string.IsNullOrEmpty(_authorizationResult.ErrorDescription) ?
+                    _authorizationResult.ErrorDescription :
+                    UnknownError);
             }
         }
 

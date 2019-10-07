@@ -290,5 +290,13 @@ namespace Microsoft.Identity.Client
                 "The json containing instance metadata does not contain details about the authority in use: {0}. See https://aka.ms/msal-net-custom-instance-metadata for more details.", 
                 environment);
         }
+
+        public static string WABError(string status, string errorDetail, string responseData)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "WAB responded with: status = {0}, error detail = {1}, response data = {2}", 
+                status ?? "", errorDetail ?? "", responseData ?? "");
+        }
     }
 }

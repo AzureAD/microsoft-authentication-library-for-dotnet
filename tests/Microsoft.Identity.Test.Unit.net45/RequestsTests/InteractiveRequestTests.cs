@@ -22,6 +22,7 @@ using Microsoft.Identity.Test.Unit.PublicApiTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Client.Internal.Broker;
+using NSubstitute.Core;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -37,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
-                    TestConstants.s_scope, 
+                    TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle));
 
                 var interactiveParameters = new AcquireTokenInteractiveParameters
@@ -216,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle));
                 parameters.IsBrokerEnabled = false;
-                
+
                 InteractiveRequest request = new InteractiveRequest(
                     harness.ServiceBundle,
                     parameters,
@@ -338,6 +339,40 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual("invalid_request", ((MsalException)exc.InnerException).ErrorCode);
                     Assert.AreEqual("some error description", ((MsalException)exc.InnerException).Message);
                 }
+            }
+        }
+
+        [TestMethod]
+        [WorkItem(1418)] // test for bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1418
+        public async Task VerifyAuthorizationResult_NoErrorDescription_Async()
+        {
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            {
+                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+
+                MockWebUI webUi = new MockWebUI()
+                {
+                    // error code and error description is empty string (not null)
+                    MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=some_error&error_description= "),
+                };
+
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
+                    new TokenCache(harness.ServiceBundle));
+
+                InteractiveRequest request = new InteractiveRequest(
+                    harness.ServiceBundle,
+                    parameters,
+                    new AcquireTokenInteractiveParameters(),
+                    webUi);
+
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => request.ExecuteAsync(CancellationToken.None))
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("some_error", ex.ErrorCode);
+                Assert.AreEqual(InteractiveRequest.UnknownError, ex.Message);
             }
         }
 
