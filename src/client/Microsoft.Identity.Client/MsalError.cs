@@ -703,6 +703,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string SSHCertUsedAsHttpHeader = "ssh_cert_used_as_http_header";
 
+        /// <summary>
+        /// <para>What happens?</para>Windows Authentication Broker, which handles the interaction between the user and AAD, has failed.
+        /// <para>Mitigation</para>See the error message for more details. 
+        /// </summary>
+        public const string WABError = "wab_error";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

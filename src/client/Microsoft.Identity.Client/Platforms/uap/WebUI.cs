@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             catch (Exception ex)
             {
                 requestContext.Logger.ErrorPii(ex);
-                throw new MsalException(
+                throw new MsalClientException(
                     MsalError.AuthenticationUiFailedError,
                     "Web Authentication Broker (WAB) authentication failed. To collect WAB logs, please follow https://aka.ms/msal-net-wab-logs",
                     ex);
@@ -116,7 +116,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
                     result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
                     break;
                 default:
-                    result = AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
+                    result = AuthorizationResult.FromStatus(
+                        AuthorizationStatus.UnknownError,
+                        MsalError.WABError,
+                        MsalErrorMessage.WABError(
+                            webAuthenticationResult.ResponseStatus.ToString(),
+                            webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture),
+                            webAuthenticationResult.ResponseData));
                     break;
             }
 
