@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual("some_error", ex.ErrorCode);
-                Assert.AreEqual(InteractiveRequest.UnkownError, ex.Message);
+                Assert.AreEqual(InteractiveRequest.UnknownError, ex.Message);
             }
         }
 

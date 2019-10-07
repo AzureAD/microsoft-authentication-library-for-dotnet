@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class InteractiveRequest : RequestBase
     {
-        internal const string UnkownError = "Unknown error";
+        internal const string UnknownError = "Unknown error";
 
         private readonly SortedSet<string> _extraScopesToConsent;
         private readonly IWebUI _webUi;
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _authorizationResult.Error,
                     !string.IsNullOrEmpty(_authorizationResult.ErrorDescription) ?
                     _authorizationResult.ErrorDescription :
-                    UnkownError);
+                    UnknownError);
             }
         }
 
