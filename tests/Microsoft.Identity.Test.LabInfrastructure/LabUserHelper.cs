@@ -85,6 +85,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             var query = UserQuery.DefaultUserQuery;
             query.FederationProvider = federationProvider;
             query.UserType = federated ? UserType.Federated : UserType.OnPrem;
+
+            if (!federated &&
+                federationProvider != FederationProvider.ADFSv2019 )
+            {
+                throw new InvalidOperationException("Test Setup Error: MSAL only supports ADFS2019 direct (non-federated) access. " +
+                    "Support for older versions of ADFS is exclusively via federation");
+            }
+
             return GetLabUserDataAsync(query);
         }
 

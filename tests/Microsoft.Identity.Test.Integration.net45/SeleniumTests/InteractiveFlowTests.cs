@@ -56,13 +56,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #if DESKTOP // no point in running these tests on NetCore - the code path is similar
 
         [TestMethod]
-        public async Task Interactive_AdfsV3_NotFederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, false).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [TestMethod]
         public async Task Interactive_AdfsV3_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
@@ -73,13 +66,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task Interactive_AdfsV2_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV2, true).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task Interactive_AdfsV4_NotFederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 

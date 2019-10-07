@@ -60,9 +60,7 @@ namespace Test.Microsoft.Identity.UIAutomation
                 AcquireTokenInteractiveAndSilentTest,
 
                 AcquireTokenADFSV3InteractiveFederatedTest,
-                AcquireTokenADFSV3InteractiveNonFederatedTest,
                 AcquireTokenADFSV4InteractiveFederatedTest,
-                AcquireTokenADFSV4InteractiveNonFederatedTest,
                 AcquireTokenADFSV2019InteractiveFederatedTest,
                 AcquireTokenADFSV2019InteractiveNonFederatedTest,
 
@@ -260,20 +258,6 @@ namespace Test.Microsoft.Identity.UIAutomation
         }
 
         /// <summary>
-        /// Runs through the standard acquire token ADFSV4 Non-Federated flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenADFSV4InteractiveNonFederatedTest()
-        {
-            TestCommon.ResetInternalStaticCaches();
-
-            _mobileTestHelper.AcquireTokenTestHelper(
-                _xamarinController,
-                LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).GetAwaiter().GetResult(),
-                CoreUiTestConstants.ADFSv4NonFederated);
-        }
-
-        /// <summary>
         /// Runs through the standard acquire token ADFSV2019 Non-Federated flow
         /// </summary>
         [Test]
@@ -285,20 +269,6 @@ namespace Test.Microsoft.Identity.UIAutomation
                 _xamarinController,
                 LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, false).GetAwaiter().GetResult(),
                 CoreUiTestConstants.ADFSv2019NonFederated);
-        }
-
-        /// <summary>
-        /// Runs through the standard acquire token ADFSV3 Non-Federated flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenADFSV3InteractiveNonFederatedTest()
-        {
-            TestCommon.ResetInternalStaticCaches();
-
-            _mobileTestHelper.AcquireTokenTestHelper(
-                _xamarinController,
-                LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).GetAwaiter().GetResult(),
-                CoreUiTestConstants.ADFSv3NonFederated);
         }
 
         private static void LogMessage(string message, StringBuilder stringBuilderMessage)
