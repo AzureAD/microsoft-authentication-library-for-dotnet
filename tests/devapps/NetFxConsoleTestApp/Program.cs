@@ -23,15 +23,21 @@ namespace NetFx
     {
         // This app has http://localhost redirect uri registered
         private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
-        //private static readonly string s_clientIdForPublicApp = "655015be-5021-4afc-a683-a4223eb5d0e5";
+        private static readonly string s_clientIdForConfidentialApp =
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID") ??
+            throw new ArgumentException("Please configure a client id");
+
+        private static readonly string s_confidentialClientSecret =
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET") ??
+            throw new ArgumentException("Please configure a client secret");
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly IEnumerable<string> s_scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
-        //private static readonly IEnumerable<string> s_scopes = new[] { "https://sshservice.azure.net/.default" }; // used for WIA and U/P, can be empty
+        private static readonly IEnumerable<string> s_scopes = new[] { "user.read", "Openid", "profile" }; // used for WIA and U/P, can be empty
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
-        public static readonly string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.json";
+        public static readonly string UserCacheFile = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.user.json";
+        public static readonly string AppCacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.app.json";
 
 
         private static readonly string[] s_tids = new[]  {
@@ -46,7 +52,8 @@ namespace NetFx
             Console.ResetColor();
             Console.BackgroundColor = ConsoleColor.Black;
             var pca = CreatePca();
-            RunConsoleAppLogicAsync(pca).Wait();
+            var cca = CreateCca();
+            RunConsoleAppLogicAsync(pca, cca).Wait();
         }
 
         private static string GetAuthority()
@@ -55,6 +62,18 @@ namespace NetFx
             return $"https://login.microsoftonline.com/{tenant}";
         }
 
+        private static IConfidentialClientApplication CreateCca()
+        {
+            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                .Create(s_clientIdForConfidentialApp)
+                .WithClientSecret(s_confidentialClientSecret)
+                .Build();
+
+            BindCache(cca.UserTokenCache, UserCacheFile);
+            //BindCache(cca.AppTokenCache, AppCacheFilePath);
+
+            return cca;
+        }
         private static IPublicClientApplication CreatePca()
         {
             IPublicClientApplication pca = PublicClientApplicationBuilder
@@ -64,18 +83,25 @@ namespace NetFx
                             .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();
 
-            pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
+            BindCache(pca.UserTokenCache, UserCacheFile);
+            return pca;
+        }
+
+        private static void BindCache(ITokenCache tokenCache, string file)
+        {
+            tokenCache.SetBeforeAccess(notificationArgs =>
             {
                 //Console.BackgroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine($"SetBeforeAccess invoked for {notificationArgs?.Account?.Username ?? "null"} ");
                 Debug.WriteLine($"SetBeforeAccess invoked for {notificationArgs?.Account?.Username ?? "null"} ");
                 Console.ResetColor();
 
-                notificationArgs.TokenCache.DeserializeMsalV3(File.Exists(CacheFilePath)
-                    ? File.ReadAllBytes(CacheFilePath)
+                notificationArgs.TokenCache.DeserializeMsalV3(File.Exists(file)
+                    ? File.ReadAllBytes(UserCacheFile)
                     : null);
             });
-            pca.UserTokenCache.SetAfterAccess(notificationArgs =>
+
+            tokenCache.SetAfterAccess(notificationArgs =>
             {
                 //Console.BackgroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine($"SetAfterAccess invoked for {notificationArgs?.Account?.Username ?? "null" } " +
@@ -88,13 +114,14 @@ namespace NetFx
                 if (notificationArgs.HasStateChanged)
                 {
                     // reflect changes in the persistent store
-                    File.WriteAllBytes(CacheFilePath, notificationArgs.TokenCache.SerializeMsalV3());
+                    File.WriteAllBytes(file, notificationArgs.TokenCache.SerializeMsalV3());
                 }
             });
-            return pca;
         }
 
-        private static async Task RunConsoleAppLogicAsync(IPublicClientApplication pca)
+        private static async Task RunConsoleAppLogicAsync(
+            IPublicClientApplication pca, 
+            IConfidentialClientApplication cca)
         {
             while (true)
             {
@@ -113,6 +140,7 @@ namespace NetFx
                         6. Acquire Token Silently
                         7. Acquire Token Silently - multiple requests in parallel
                         8. Acquire SSH Cert Interactive
+                        9. Client Credentials 
                         c. Clear cache
                         r. Rotate Tenant ID
                         e. Expire all ATs
@@ -148,7 +176,7 @@ namespace NetFx
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
-                        case '4': 
+                        case '4':
 
                             authTask = pca.AcquireTokenInteractive(s_scopes)
                                 .WithPrompt(Prompt.Consent)
@@ -187,7 +215,7 @@ namespace NetFx
                             break;
                         case '5': // Acquire Token Interactive via NetStandard lib
                             CancellationTokenSource cts2 = new CancellationTokenSource();
-                            var authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
+                            var authenticator = new NetStandardAuthenticator(Log, UserCacheFile);
                             await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
                             break;
                         case '8': // acquire SSH cert
@@ -217,6 +245,15 @@ namespace NetFx
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
+                        case '9':
+
+                            authTask = cca.AcquireTokenForClient(
+                                new[] { "https://graph.microsoft.com/.default" }).
+                                ExecuteAsync();
+
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                            break;
+
                         case 'c':
                             var accounts2 = await pca.GetAccountsAsync().ConfigureAwait(false);
                             foreach (var acc in accounts2)
@@ -229,7 +266,8 @@ namespace NetFx
 
                             s_currentTid = (s_currentTid + 1) % s_tids.Length;
                             pca = CreatePca();
-                            RunConsoleAppLogicAsync(pca).Wait();
+                            cca = CreateCca();
+                            RunConsoleAppLogicAsync(pca, cca).Wait();
                             break;
 
                         case 'e': // expire all ATs

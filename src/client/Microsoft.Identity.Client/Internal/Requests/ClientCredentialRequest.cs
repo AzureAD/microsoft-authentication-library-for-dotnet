@@ -83,6 +83,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.IsConfidentialClient = true;
         }
 
+        protected override SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
+        {
+            // Client credentails should not add the reserved scopes
+            // "openid", "profile" and "offline_access" 
+            // becaue AT is on behalf of an app (no profile, no IDToken, no RT)
+            return new SortedSet<string>(inputScope);
+        }
+
         private Dictionary<string, string> GetBodyParameters()
         {
             var dict = new Dictionary<string, string>

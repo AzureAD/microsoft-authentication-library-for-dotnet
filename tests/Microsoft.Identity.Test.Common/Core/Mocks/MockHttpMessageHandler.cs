@@ -22,7 +22,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public string ExpectedUrl { get; set; }
         public IDictionary<string, string> ExpectedQueryParams { get; set; }
         public IDictionary<string, string> ExpectedPostData { get; set; }
-        public IDictionary<string, object> ExpectedPostDataObject { get; set; }
         public IDictionary<string, string> HttpTelemetryHeaders { get; set; }
         public HttpMethod ExpectedMethod { get; set; }
         public Exception ExceptionToThrow { get; set; }

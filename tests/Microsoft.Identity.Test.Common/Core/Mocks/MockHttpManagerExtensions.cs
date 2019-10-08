@@ -153,14 +153,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 });
         }
 
-        public static void AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(this MockHttpManager httpManager)
+        public static MockHttpMessageHandler AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(this MockHttpManager httpManager)
         {
-            httpManager.AddMockHandler(
-                new MockHttpMessageHandler()
-                {
-                    ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
-                });
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+            };
+
+            httpManager.AddMockHandler(handler);
+
+            return handler;
         }
 
         public static void AddFailingRequest(this MockHttpManager httpManager, Exception exceptionToThrow)
