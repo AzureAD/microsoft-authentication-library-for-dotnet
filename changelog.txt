@@ -3,6 +3,7 @@
 New Features: 
 **MSAL now supports the device code grant for ADFS 2019**. [#1403](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1403)
 **MSAL now supports the device code grant for Microsoft personal accounts**. [#1367](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1367)
+ **MSAL.NET now sends telemetry data to the /token endpoint in regards to the error code of the previous request, if applicable**. This will enable MSAL.NET to determine reliablity across public client application calls.
 
 Bug Fixes: 
 - **Customers reported a nonce mismatch error when signing in with the Authenticator app on iOS 13**. The issue has been resolved and increased logging included in the iOS broker scenario. See [issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1421) for more details.
