@@ -86,13 +86,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
-        public async Task Interactive_AdfsV2019_NotFederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, false).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [TestMethod]
         public async Task Interactive_AdfsV2019_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
@@ -102,6 +95,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #endif
 
         [TestMethod]
+        [Ignore] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1426
         public async Task Interactive_AdfsV2019_DirectAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);

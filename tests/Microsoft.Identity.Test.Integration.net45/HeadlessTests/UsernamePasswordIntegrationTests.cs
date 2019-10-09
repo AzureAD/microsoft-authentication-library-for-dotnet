@@ -57,18 +57,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task ROPC_ADFSv3Managed_Async()
-        {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, false).ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [TestMethod]
         [TestCategory("UsernamePasswordIntegrationTests")]
+        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1426
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
-
 
             var user = labResponse.User;
 

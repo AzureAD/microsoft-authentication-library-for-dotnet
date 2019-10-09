@@ -313,6 +313,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [TestCategory("ClientSecretIntegrationTests")]
+        [Ignore] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1426
         public async Task AcquireTokenWithClientSecretFromAdfsAsync()
         {
             KeyVaultSecretsProvider secretProvider = new KeyVaultSecretsProvider();
