@@ -23,11 +23,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public string AppId { get; set; }
 
         // TODO: this is a list, but lab sends a string. Not used today, discuss with lab to return a list
-        //[JsonProperty("redirecturi")]
-        //public string RedirectUri { get; set; }
+        [JsonProperty("redirecturi")]
+        public string RedirectUri { get; set; }
 
         [JsonProperty("signinaudience")]
         public string Audience { get; set; }
+
+        // TODO: this is a list, but lab sends a string. Not used today, discuss with lab to return a list
+        [JsonProperty("authority")]
+        public string Authority { get; set; }
     }
 
     public class Lab

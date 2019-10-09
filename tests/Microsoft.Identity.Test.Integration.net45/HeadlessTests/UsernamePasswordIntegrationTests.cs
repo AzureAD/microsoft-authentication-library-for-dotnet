@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -111,7 +112,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AcquireTokenWithFederatedUsernameIncorrectPasswordAsync()
         {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, false).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();
@@ -120,10 +121,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
 
-            var result = Assert.ThrowsExceptionAsync<MsalException>(async () => await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectSecurePassword)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false));
+            var result = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => 
+                msalPublicClient
+                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectSecurePassword)
+                    .ExecuteAsync(CancellationToken.None)
+                    )
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(result.ErrorCode, "invalid_grant");
         }
 
         private async Task RunHappyPathTestAsync(LabResponse labResponse)
