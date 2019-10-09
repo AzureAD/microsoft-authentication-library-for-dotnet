@@ -1,3 +1,19 @@
+4.5.0
+=============
+New Features: 
+**MSAL now supports the device code grant for ADFS 2019**. [#1403](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1403)
+**MSAL now supports the device code grant for Microsoft personal accounts**. [#1367](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1367)
+
+Bug Fixes: 
+- **Customers reported a nonce mismatch error when signing in with the Authenticator app on iOS 13**. The issue has been resolved and increased logging included in the iOS broker scenario. See [issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1421) for more details.
+- **On iOS 13, when using the system browser, authentication was broken**. This was because Apple now requires a presentationContext when signing in with the system browser. More information on this requirement [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/iOS-13-issue-with-system-browser-on-MSAL-.NET). And more details in the [issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1399)
+- **At times, MSAL.NET would randomly fail on UWP.** MSAL.NET now implements retry logic and has improved logging around the cache in UWP. See this [issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1098) and this [issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1064) for more details.
+- **During a client credential flow, MSAL.NET would throw a client exception stating the users should not add their own reserved scopes.** MSAL.NET now merges the scopes if they are already in the reserved list and does not throw. See [issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1422) for more details.
+- **At times, during an interative authentication, MSAL.NET would throw an ArgumentNullException**. MSAL.NET now checks for null values when handling the authorization result parsing. See [issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1418) for details. 
+
+Fundamentals:
+- **MSAL.NET now uses the new internal Lab API for automated and manual testing**. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1375)
+
 4.4.0
 =============
 Bug Fixes:
