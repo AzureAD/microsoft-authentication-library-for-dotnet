@@ -27,7 +27,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1427
         public async Task ROPC_B2C_Async()
         {
             var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);

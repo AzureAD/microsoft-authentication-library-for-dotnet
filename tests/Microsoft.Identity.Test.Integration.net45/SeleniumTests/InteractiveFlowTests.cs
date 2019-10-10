@@ -95,7 +95,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 #endif
 
         [TestMethod]
-        [Ignore] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1426
         public async Task Interactive_AdfsV2019_DirectAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);

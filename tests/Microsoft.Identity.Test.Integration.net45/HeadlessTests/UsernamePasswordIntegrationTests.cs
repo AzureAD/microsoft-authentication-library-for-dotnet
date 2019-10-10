@@ -59,7 +59,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [TestCategory("UsernamePasswordIntegrationTests")]
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1426
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
