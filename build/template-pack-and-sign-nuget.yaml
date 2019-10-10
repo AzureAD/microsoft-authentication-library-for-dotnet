@@ -6,10 +6,15 @@ parameters:
   HasRefAssembly: 'false'
 
 steps:
+
+# Pack unsigned bits first to workaround an issue with msbuild.extras.sdk 
+# where /t:pack always rebuilds the project. See https://github.com/onovotny/MSBuildSdkExtras/issues/136
 - template: template-nuget-pack.yaml
   parameters:
+    NoBuild: 'false'
     BuildConfiguration: ${{ parameters.BuildConfiguration }}
     ProjectPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj'
+
 
 - template: template-sign-binary.yaml
   parameters:
@@ -24,5 +29,6 @@ steps:
 
 - template: template-nuget-pack.yaml
   parameters:
+    NoBuild: 'true'
     BuildConfiguration: ${{ parameters.BuildConfiguration }}
     ProjectPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj'

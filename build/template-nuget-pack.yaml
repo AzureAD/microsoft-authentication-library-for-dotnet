@@ -2,6 +2,7 @@
 parameters:
   BuildConfiguration: 'release'
   ProjectPath: ''
+  NoBuild: 'true'
 
 steps:
 - task: VSBuild@1
@@ -9,5 +10,5 @@ steps:
   inputs:
     solution: ${{ parameters.ProjectPath }}
     vsVersion: '15.0'
-    msbuildArgs: '/t:pack /p:nobuild=true /p:IncludeSymbols=true'
+    msbuildArgs: '/t:pack /p:nobuild=${{parameters.NoBuild}} /p:IncludeSymbols=true'
     configuration: ${{ parameters.BuildConfiguration }}
