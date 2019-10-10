@@ -7,7 +7,7 @@ trigger:
 pr: none
 
 pool:
-  name: Hosted VS2019
+  vmImage: 'windows-latest'
   demands:
   - msbuild
   - visualstudio
