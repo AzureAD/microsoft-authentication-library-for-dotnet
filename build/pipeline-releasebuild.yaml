@@ -26,7 +26,6 @@ steps:
   inputs:
     version: 2.2.402
 
-
 # Run pre-build code analysis (policheck, credscan, etc)
 - template: template-prebuild-code-analysis.yaml
 
@@ -41,7 +40,8 @@ steps:
     MsalClientSemVer: $(MsalClientSemVer)
 
 # Run Post-build code analysis (e.g. Roslyn)
-- template: template-postbuild-code-analysis.yaml
+# Currently disabled because it times out // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1430
+#- template: template-postbuild-code-analysis.yaml
 
 # Pack and sign all of the nuget packages
 - template: template-pack-and-sign-all-nugets.yaml
