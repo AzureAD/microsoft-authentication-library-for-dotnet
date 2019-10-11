@@ -4,6 +4,8 @@
 steps:
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
   displayName: 'Run Roslyn Analyzers'
+  inputs:
+    microsoftAnalyzersVersion: 2.9.4
   continueOnError: true
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
