@@ -41,7 +41,7 @@ steps:
 
 # Run Post-build code analysis (e.g. Roslyn)
 # Currently disabled because it times out // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1430
-#- template: template-postbuild-code-analysis.yaml
+- template: template-postbuild-code-analysis.yaml
 
 # Pack and sign all of the nuget packages
 - template: template-pack-and-sign-all-nugets.yaml
