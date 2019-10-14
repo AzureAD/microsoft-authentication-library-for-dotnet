@@ -72,10 +72,14 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                         {
                             asWebAuthenticationSession.PresentationContextProvider =
                             new ASWebAuthenticationPresentationContextProviderWindow();
+                            asWebAuthenticationSession.Start();
                         });
                     }
 
-                    asWebAuthenticationSession.Start();
+                    else
+                    {
+                        asWebAuthenticationSession.Start();
+                    }
                 }
 
                 else if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
@@ -131,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                 requestContext.Logger.ErrorPii(ex);
                 throw new MsalClientException(
                     MsalError.AuthenticationUiFailedError,
-                    "Failed to invoke SFSafariViewController",
+                    ex.Message,
                     ex);
             }
         }
