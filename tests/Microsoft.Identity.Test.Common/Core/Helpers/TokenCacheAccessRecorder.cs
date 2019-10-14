@@ -20,6 +20,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         private int _afterAccessTotalCount = 0;
         private int _afterAccessWriteCount = 0;
 
+        public TokenCacheNotificationArgs LastNotificationArgs { get; private set; }
+
         public TokenCacheAccessRecorder(TokenCache tokenCache)
         {
             _tokenCache = tokenCache;
@@ -28,6 +30,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             _tokenCache.BeforeAccess = (args) =>
             {
                 _beforeAccessCount++;
+                LastNotificationArgs = args;
                 existingBeforeAccessCallback?.Invoke(args);
             };
 
@@ -35,6 +38,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             _tokenCache.BeforeWrite = (args) =>
             {
                 _beforeWriteCount++;
+                LastNotificationArgs = args;
+
                 existingBeforeWriteCallback?.Invoke(args);
             };
 
@@ -42,6 +47,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             _tokenCache.AfterAccess = (args) =>
             {
                 _afterAccessTotalCount++;
+                LastNotificationArgs = args;
+
                 if (args.HasStateChanged)
                 {
                     _afterAccessWriteCount++;

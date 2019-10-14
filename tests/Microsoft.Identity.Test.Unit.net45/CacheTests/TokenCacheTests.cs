@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness(isExtendedTokenLifetimeEnabled: true))
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -315,7 +315,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var rtItem = new MsalRefreshTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
                 var rtItem = new MsalRefreshTokenCacheItem(
                     TestConstants.SovereignNetworkEnvironment,
                     TestConstants.ClientId,
@@ -379,7 +379,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -423,7 +423,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
 
             var serviceBundle = ServiceBundle.Create(appConfig);
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
@@ -453,7 +453,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -494,7 +494,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -535,7 +535,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -574,7 +574,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public async Task SaveAccessAndRefreshTokenWithEmptyCacheTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
@@ -611,7 +611,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 harness.ServiceBundle.PlatformProxy.SetFeatureFlags(testFlags);
 
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
                 MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
                 var requestParams = CreateAuthenticationRequestParameters(harness.ServiceBundle);
                 requestParams.TenantUpdatedCanonicalAuthority = Authority.CreateAuthorityWithTenant(
@@ -639,7 +639,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public async Task SaveMultipleAppmetadataAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle,false);
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
             MsalTokenResponse response2 = TestConstants.CreateMsalTokenResponse();
@@ -690,7 +690,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public async Task SaveAccessAndRefreshTokenWithMoreScopesTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
             var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
@@ -725,7 +725,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public async Task SaveAccessAndRefreshTokenWithLessScopesTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
             var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
@@ -754,7 +754,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public async Task SaveAccessAndRefreshTokenWithIntersectingScopesTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
             var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
@@ -786,7 +786,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = CreateTestHarness())
             {
                 var serviceBundle = harness.ServiceBundle;
-                ITokenCacheInternal adfsCache = new TokenCache(serviceBundle);
+                ITokenCacheInternal adfsCache = new TokenCache(serviceBundle, false);
                 var authority = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
 
                 MsalTokenResponse response = new MsalTokenResponse();
@@ -828,7 +828,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public async Task SaveAccessAndRefreshTokenWithDifferentAuthoritySameUserTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
             var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
@@ -861,7 +861,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void CanDeserializeTokenCacheInNet462()
         {
-            var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle())
+            var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle(), false)
             {
                 AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
             };
@@ -876,7 +876,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public async Task SerializeDeserializeCacheTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
 
@@ -931,7 +931,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void FindAccessToken_ScopeCaseInsensitive()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
 
             _tokenCacheHelper.PopulateCacheWithOneAccessToken(cache.Accessor);
 
@@ -955,7 +955,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
                 string tenantID = "someTenantID";
                 Authority authority = Authority.CreateAuthority(
@@ -990,7 +990,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             return new AuthenticationRequestParameters(
                 serviceBundle,
-                new TokenCache(serviceBundle),
+                new TokenCache(serviceBundle, false),
                 commonParameters,
                 requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid()))
             {
@@ -999,21 +999,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [Ignore]  // todo(migration): need to figure out cache issue
-        [TestCategory("TokenCacheTests")]
-        public void TestCacheDeserializeWithoutServiceBundle()
-        {
-            var tokenCache = new TokenCache();
-            ((ITokenCacheSerializer)tokenCache).DeserializeMsalV3(new byte[0]);
-        }
-
-        [TestMethod]
         public void TestIsFociMember()
         {
             // Arrange
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
@@ -1051,7 +1042,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Arrange
             using (var harness = CreateTestHarness())
             {
-                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,

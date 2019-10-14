@@ -21,6 +21,8 @@ namespace Microsoft.Identity.Client
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
 
+        bool IsApplicationTokenCache { get; }
+
         #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
         Task<IEnumerable<IAccount>> GetAccountsAsync(string authority, RequestContext requestContext);

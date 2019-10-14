@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 _mockHttpAndServiceBundle = new MockHttpAndServiceBundle();
                 Authority = Authority.CreateAuthority(authorityUri);
-                Cache = new TokenCache(ServiceBundle);
+                Cache = new TokenCache(ServiceBundle, false);
             }
 
             public IServiceBundle ServiceBundle => _mockHttpAndServiceBundle.ServiceBundle;

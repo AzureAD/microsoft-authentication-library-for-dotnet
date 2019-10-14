@@ -45,6 +45,9 @@ namespace Microsoft.Identity.Client
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
 
+        bool IsAppTokenCache { get; }
+        bool ITokenCacheInternal.IsApplicationTokenCache => IsAppTokenCache;
+
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
         SemaphoreSlim ITokenCacheInternal.Semaphore => _semaphoreSlim;
@@ -54,11 +57,12 @@ namespace Microsoft.Identity.Client
         /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
         /// and <c>IConfidentialClientApplication.AppTokenCache</c> once the app is created.
         /// </summary>
-        public TokenCache() : this((IServiceBundle)null)
+        [Obsolete("The recommended way to get a cache is by using IClientApplicationBase.UserTokenCache or IClientApplicationBase.AppTokenCache")]
+        public TokenCache() : this((IServiceBundle)null, false)
         {
         }
 
-        internal TokenCache(IServiceBundle serviceBundle)
+        internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache)
         {
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             _accessor = proxy.CreateTokenCacheAccessor();
@@ -81,6 +85,8 @@ namespace Microsoft.Identity.Client
             SetIosKeychainSecurityGroup(serviceBundle.Config.IosKeychainSecurityGroup);
 #endif // iOS
 
+            IsAppTokenCache = isApplicationTokenCache;
+
             // Must happen last, this code can access things like _accessor and such above.
             ServiceBundle = serviceBundle;
         }
@@ -88,12 +94,10 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// This method is so we can inject test ILegacyCachePersistence...
         /// </summary>
-        /// <param name="serviceBundle"></param>
-        /// <param name="legacyCachePersistenceForTest"></param>
-        internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest)
-            : this(serviceBundle)
+        internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest, bool isApplicationTokenCache)
+            : this(serviceBundle, isApplicationTokenCache)
         {
-            LegacyCachePersistence = legacyCachePersistenceForTest;
+            LegacyCachePersistence = legacyCachePersistenceForTest;            
         }
 
         /// <inheritdoc />

@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Client
 {
     public sealed partial class TokenCache : ITokenCacheInternal
     {
+
         async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> ITokenCacheInternal.SaveTokenResponseAsync(
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
@@ -118,7 +119,7 @@ namespace Microsoft.Identity.Client
                                           username,
                                           instanceDiscoveryMetadata.PreferredCache);
                     }
-                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
+                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true, (this as ITokenCacheInternal).IsApplicationTokenCache);
 
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = true;
@@ -613,7 +614,7 @@ namespace Microsoft.Identity.Client
 
                 try
                 {
-                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
+                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true, (this as ITokenCacheInternal).IsApplicationTokenCache);
 
                     await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                     try
@@ -700,7 +701,7 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true);
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true, (this as ITokenCacheInternal).IsApplicationTokenCache);
 
                 await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try

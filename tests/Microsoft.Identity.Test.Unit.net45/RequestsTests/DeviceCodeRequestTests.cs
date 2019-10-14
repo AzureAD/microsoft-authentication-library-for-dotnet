@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             out HashSet<string> expectedScopes,
             bool isAdfs = false)
         {
-            var cache = new TokenCache(harness.ServiceBundle);
+            var cache = new TokenCache(harness.ServiceBundle, false);
             var parameters = harness.CreateAuthenticationRequestParameters(
                 isAdfs ? TestConstants.OnPremiseAuthority : TestConstants.AuthorityHomeTenant,
                 null,

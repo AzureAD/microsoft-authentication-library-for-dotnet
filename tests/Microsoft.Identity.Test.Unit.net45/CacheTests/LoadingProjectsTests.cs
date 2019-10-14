@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void CanDeserializeTokenCache()
         {
-            TokenCache tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle())
+            TokenCache tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle(), false)
             {
                 AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
             };
