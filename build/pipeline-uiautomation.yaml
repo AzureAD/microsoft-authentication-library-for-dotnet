@@ -91,7 +91,7 @@ stages:
 
   - job: 'BuildiOSAppCenterApp'
     pool:
-        vmImage: 'macOS-latests'
+        vmImage: 'macOS-latest'
         demands:
         - Xamarin.iOS
     steps:

@@ -1,6 +1,7 @@
 
 # Release builds are only manually triggered.
 trigger: none
+pr: none
 
 # Create a daily midnight build for release builds on master to ensure our release builds function
 schedules:
