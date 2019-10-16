@@ -10,12 +10,13 @@ using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
+#pragma warning disable AvoidAsyncVoid // Avoid async void
 
 namespace MacCocoaApp
 {
     public partial class ViewController : NSViewController
     {
-        private const string ClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        private const string ClientId = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
         private const string Authority = "https://login.microsoftonline.com/common";
         private readonly string[] _scopes = new[] { "User.Read" };
         // Consider having a single object for the entire app.
@@ -30,6 +31,7 @@ namespace MacCocoaApp
             _pca = PublicClientApplicationBuilder
                 .Create(ClientId)
                 .WithAuthority(new Uri(Authority))
+                .WithRedirectUri("http://localhost")
                 .WithLogging((level, message, pii) =>
                 {
                     Console.WriteLine($"MSAL {level} {pii} {message}");
@@ -69,7 +71,6 @@ namespace MacCocoaApp
         }
 
 
-#pragma warning disable AvoidAsyncVoid // Avoid async void
         async partial void GetTokenClickAsync(NSObject sender)
 #pragma warning restore AvoidAsyncVoid // Avoid async void
         {
@@ -98,6 +99,7 @@ namespace MacCocoaApp
                 {
                     result = await _pca
                         .AcquireTokenInteractive(_scopes)
+                        .WithUseEmbeddedWebView(false)
                         .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false);
                 }
@@ -112,9 +114,7 @@ namespace MacCocoaApp
             }
         }
 
-#pragma warning disable AvoidAsyncVoid // Avoid async void
         async partial void ShowCacheStatusAsync(NSObject sender)
-#pragma warning restore AvoidAsyncVoid // Avoid async void
         {
             var existingAccounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
             if (!existingAccounts.Any())
@@ -128,9 +128,7 @@ namespace MacCocoaApp
             }
         }
 
-#pragma warning disable AvoidAsyncVoid // Avoid async void
         async partial void ClearCacheClickAsync(Foundation.NSObject sender)
-#pragma warning restore AvoidAsyncVoid // Avoid async void
         {
             var accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
             foreach (var acc in accounts)
@@ -141,9 +139,7 @@ namespace MacCocoaApp
             ShowCacheStatusAsync(sender);
         }
 
-#pragma warning disable AvoidAsyncVoid // Avoid async void
         async partial void GetTokenDeviceCodeAsync(NSObject sender)
-#pragma warning restore AvoidAsyncVoid // Avoid async void
         {
             try
             {
@@ -174,3 +170,5 @@ namespace MacCocoaApp
         }
     }
 }
+#pragma warning restore AvoidAsyncVoid // Avoid async void
+
