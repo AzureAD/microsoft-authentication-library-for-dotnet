@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
-        private static readonly string[] s_adfsScopes = { string.Format(CultureInfo.CurrentCulture, "{0}/email openid", Adfs2019LabConstants.AppId) };
+        private static readonly string[] s_adfsScopes = { "openid", "profile" };
         //TODO: acquire scenario specific client ids from the lab resonse
         private const string ConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
@@ -313,7 +313,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [TestCategory("ClientSecretIntegrationTests")]
-        [Ignore] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1426
         public async Task AcquireTokenWithClientSecretFromAdfsAsync()
         {
             KeyVaultSecretsProvider secretProvider = new KeyVaultSecretsProvider();
