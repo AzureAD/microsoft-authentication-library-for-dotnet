@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             string host = ExtractHost(httpRequest, logger);
             var hostParts = host.Split(':');
 
+            logger.VerbosePii("Host:" + host + "Query: " + getQuery, "Host: " + host);
             var uriBuilder = new UriBuilder();
             if (hostParts.Count() == 2)
             {
@@ -51,7 +52,6 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             }
 
             uriBuilder.Query = getQuery;
-
 
             return uriBuilder.Uri;
         }
