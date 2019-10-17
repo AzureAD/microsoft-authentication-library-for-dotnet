@@ -1,3 +1,8 @@
+4.5.1
+=============
+Bug Fix:
+- **Starting in v4.5.0 of MSAL.NET, when using Xamarin Android, a System.TypeInitializationException would be thrown**. This is due to the Resource.designer.cs class being included automatically by the MSBuildExtrasSdk. See [MSAL.NET issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1449) and [Xamarin Android issue](https://github.com/xamarin/xamarin-android/issues/3812) for details.
+
 4.5.0
 =============
 New Features: 
