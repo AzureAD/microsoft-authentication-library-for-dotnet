@@ -79,6 +79,7 @@
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AndroidResgenClass>Resource</AndroidResgenClass>
+    <!-- Ensures that the Resources.designer.cs do not end up in the dll, see #1449 -->
     <AndroidUseIntermediateDesignerFile>false</AndroidUseIntermediateDesignerFile>
     <TargetFrameworkVersion>v9.0</TargetFrameworkVersion>
   </PropertyGroup>
