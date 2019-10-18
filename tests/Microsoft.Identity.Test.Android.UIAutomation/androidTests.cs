@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenADFSV3InteractiveFederatedTest,
                 AcquireTokenADFSV4InteractiveFederatedTest,
                 AcquireTokenADFSV2019InteractiveFederatedTest,
-                AcquireTokenADFSV2019InteractiveNonFederatedTest,
+                //AcquireTokenADFSV2019InteractiveNonFederatedTest,
 
                 B2CLocalAccountAcquireTokenTest,
                 //B2CFacebookMicrosoftLoginAcquireTokenTest,

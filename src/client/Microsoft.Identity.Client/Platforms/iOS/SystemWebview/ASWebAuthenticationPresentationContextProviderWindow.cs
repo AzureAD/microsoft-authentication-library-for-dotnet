@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if !IS_APPCENTER_BUILD
 using AuthenticationServices;
+#endif
 using Foundation;
 using UIKit;
 

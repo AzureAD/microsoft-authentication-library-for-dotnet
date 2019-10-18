@@ -38,7 +38,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
   <!-- Set this env variable locally to overcome issue with VS not being able to run Nunit 2.6 tests-->
   <Target Name="NunitHack" BeforeTargets="Build">
@@ -70,11 +69,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AndroidTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

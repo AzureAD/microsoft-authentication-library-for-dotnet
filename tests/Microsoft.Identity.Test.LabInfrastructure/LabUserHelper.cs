@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             var query = UserQuery.DefaultUserQuery;
             query.FederationProvider = federationProvider;
-            query.UserType = federated ? UserType.Federated : UserType.OnPrem;
+            query.UserType = federated ? UserType.Federated : UserType.Cloud;
 
             if (!federated &&
                 federationProvider != FederationProvider.ADFSv2019 )
