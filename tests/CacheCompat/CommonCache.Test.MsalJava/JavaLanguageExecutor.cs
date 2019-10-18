@@ -25,7 +25,7 @@ namespace CommonCache.Test.MsalJava
             CancellationToken cancellationToken)
         {
             var processUtils = new ProcessUtils();
-            string executablePath = "mvn.exe";
+            string executablePath = "mvn.cmd";
 
             string pomFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "pom.xml");
 
