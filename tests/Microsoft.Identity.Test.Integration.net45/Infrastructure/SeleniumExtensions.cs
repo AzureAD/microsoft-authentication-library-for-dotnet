@@ -205,13 +205,12 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     driver.FindElementById(fields.AADUsernameInputId).SendKeys(user.Upn.Contains("EXT") ? user.HomeUPN : user.Upn);
 
                     Trace.WriteLine("Logging in ... Clicking <Next> after username");
-                    driver.FindElementById(fields.AADSignInButtonId).Click();
+                    driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.AADSignInButtonId)).Click();
 
                     try
                     {
                         driver.FindElementById(fields.AADSignInButtonId).Click();
                         Trace.WriteLine("Yes, workaround ok");
-
                     }
                     catch
                     {
