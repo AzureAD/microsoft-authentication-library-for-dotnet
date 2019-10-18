@@ -53,6 +53,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             }
             finally
             {
+                _logger.Verbose("TcpInterceptor: Stopping");
+
                 tcpListener.Stop();
 
 #if DESKTOP || NET_CORE

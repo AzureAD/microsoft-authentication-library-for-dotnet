@@ -9,9 +9,10 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 
@@ -21,6 +22,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
     {
         private readonly Action<IWebDriver> _seleniumAutomationLogic;
         private readonly TestContext _testContext;
+        private readonly ICoreLogger _logger;
         private const string CloseWindowSuccessHtml = @"<html>
   <head><title>Authentication Complete</title></head>
   <body>
@@ -37,10 +39,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
   </body>
 </html>";
 
-        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext)
+        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext, ICoreLogger logger = null)
         {
             _seleniumAutomationLogic = seleniumAutomationLogic;
             _testContext = testContext;
+            _logger = logger ?? new TraceLogger("[SeleniumWebUi]");
         }
 
         public async Task<Uri> AcquireAuthorizationCodeAsync(
@@ -93,12 +96,15 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Uri redirectUri,
             CancellationToken cancellationToken)
         {
-            NullLogger nullLogger = new NullLogger();
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
             {
-                var listener = new TcpInterceptor(nullLogger);
+                var listener = new TcpInterceptor(_logger);
                 Uri authCodeUri = null;
-                var listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
+
+                // Run the TCP listener and the selenium automation in parallel
+                // but make sure to start the TCP listener first
+
+                Task<Uri> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
                     redirectUri.Port,
                     (uri) =>
                     {
@@ -109,10 +115,15 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     },
                     cancellationToken);
 
-                // Run the TCP listener and the selenium automation in parallel
-                var seleniumAutomationTask = Task.Factory.StartNew(() => _seleniumAutomationLogic(driver));
+                var seleniumAutomationTask = Task.Factory.StartNew(() =>
+                    {
+                        _seleniumAutomationLogic(driver);
+                        _logger.Info("Selenium automation finished");
+                    });
 
-                await Task.WhenAny(seleniumAutomationTask, listenForAuthCodeTask)
+                // There is no guarantee over which task will finish first - TCP listener or Selenium automation
+                // as the TCP listener has some post processing to do (extracting the url etc.) 
+                await Task.WhenAll(seleniumAutomationTask, listenForAuthCodeTask)
                     .ConfigureAwait(false);
 
                 if (listenForAuthCodeTask.Status == TaskStatus.RanToCompletion)
@@ -138,7 +149,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     throw new OperationCanceledException(cancellationToken);
                 }
 
-                if (listenForAuthCodeTask.IsFaulted )
+                if (listenForAuthCodeTask.IsFaulted)
                 {
                     Trace.WriteLine("The TCP listener failed.");
                     RecordException(driver, listenForAuthCodeTask.Exception);
