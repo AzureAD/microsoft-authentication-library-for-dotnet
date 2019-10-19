@@ -25,9 +25,23 @@ namespace CommonCache.Test.MsalJava
             CancellationToken cancellationToken)
         {
             var processUtils = new ProcessUtils();
-            string executablePath = "mvn.cmd";
+            string executablePath = @"C:\apache-maven-3.6.2\bin\mvn.cmd";
 
             string pomFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "pom.xml");
+
+            try
+            {
+                string findMavenArgs = $"mvn.cmd";
+                Console.WriteLine($"Calling:  where {findMavenArgs}");
+                var whereMavenResults = await processUtils.RunProcessAsync("where", findMavenArgs, cancellationToken).ConfigureAwait(false);
+                File.WriteAllText(@"C:\Users\henrikm\AppData\Local\Temp\adalcachecompattestdata\mvnishere.txt", whereMavenResults.ToString());
+
+            }
+            catch (ProcessRunException ex)
+            {
+                Console.WriteLine(ex.ProcessStandardOutput);
+                throw;
+            }
 
             try
             {
