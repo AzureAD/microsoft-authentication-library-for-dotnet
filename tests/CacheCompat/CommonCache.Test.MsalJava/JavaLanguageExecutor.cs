@@ -25,32 +25,11 @@ namespace CommonCache.Test.MsalJava
             CancellationToken cancellationToken)
         {
             var processUtils = new ProcessUtils();
-            string executablePath = @"C:\apache-maven-3.6.2\bin\mvn.cmd"; // replace with std. devops build vm location
+            string executablePath = @"mvn.cmd"; // replace with std. devops build vm location
 
             string pomFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "pom.xml");
 
-            if (!File.Exists(executablePath))
-            {
-                try
-                {
-                    string findMavenArgs = $"mvn.cmd";
-                    Console.WriteLine($"Calling:  where {findMavenArgs}");
-                    ProcessRunResults whereMavenResults = await processUtils.RunProcessAsync("where", findMavenArgs, cancellationToken).ConfigureAwait(false);
-                    if (whereMavenResults != null)
-                    {
-                        Console.WriteLine($"Maven search result: {whereMavenResults}");
-                        if (!string.IsNullOrEmpty(whereMavenResults.StandardOut))
-                        {
-                            executablePath = whereMavenResults.StandardOut.Trim();
-                        }
-                    }
-                }
-                catch (ProcessRunException ex)
-                {
-                    Console.WriteLine(ex.ProcessStandardOutput);
-                    throw;
-                }
-            }
+            executablePath = await processUtils.FindProgramAsync(executablePath, cancellationToken).ConfigureAwait(false);
 
             try
             {
