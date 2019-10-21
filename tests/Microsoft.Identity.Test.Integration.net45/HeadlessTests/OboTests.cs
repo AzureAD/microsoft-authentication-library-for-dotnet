@@ -16,7 +16,7 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
+namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
     public class OboTests

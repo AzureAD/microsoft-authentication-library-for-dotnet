@@ -9,9 +9,10 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 
@@ -21,6 +22,10 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
     {
         private readonly Action<IWebDriver> _seleniumAutomationLogic;
         private readonly TestContext _testContext;
+        private readonly ICoreLogger _logger;
+
+        private readonly TimeSpan tcpTimeoutAfterSelenium = TimeSpan.FromSeconds(3);
+
         private const string CloseWindowSuccessHtml = @"<html>
   <head><title>Authentication Complete</title></head>
   <body>
@@ -37,10 +42,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
   </body>
 </html>";
 
-        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext)
+        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext, ICoreLogger logger = null)
         {
             _seleniumAutomationLogic = seleniumAutomationLogic;
             _testContext = testContext;
+            _logger = logger ?? new TraceLogger("[SeleniumWebUi]");
         }
 
         public async Task<Uri> AcquireAuthorizationCodeAsync(
@@ -91,31 +97,44 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         private async Task<Uri> SeleniumAcquireAuthAsync(
             Uri authorizationUri,
             Uri redirectUri,
-            CancellationToken cancellationToken)
+            CancellationToken externalCancellationToken)
         {
-            NullLogger nullLogger = new NullLogger();
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
             {
-                var listener = new TcpInterceptor(nullLogger);
+                var listener = new TcpInterceptor(_logger);
                 Uri authCodeUri = null;
-                var listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
+
+                // Run the TCP listener and the selenium automation in parallel
+                // but make sure to start the TCP listener first
+                CancellationTokenSource innerSource = new CancellationTokenSource();
+                var tcpCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(
+                    innerSource.Token, 
+                    externalCancellationToken);
+
+                Task<Uri> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
                     redirectUri.Port,
                     (uri) =>
                     {
-                        Trace.WriteLine("Intercepted an auth code url: " + uri.ToString());
                         authCodeUri = uri;
 
+                        _logger.Info("Auth code intercepted. Writing message back to browser");
                         return GetMessageToShowInBroswerAfterAuth(uri);
                     },
-                    cancellationToken);
+                    tcpCancellationToken.Token);
 
-                // Run the TCP listener and the selenium automation in parallel
-                var seleniumAutomationTask = Task.Factory.StartNew(() => _seleniumAutomationLogic(driver));
+                var seleniumAutomationTask = Task.Factory.StartNew(() =>
+                    {
+                        _seleniumAutomationLogic(driver);
+                        _logger.Info("Selenium automation finished");
+                    });
 
+                // There is no guarantee over which task will finish first - TCP listener or Selenium automation
+                // as the TCP listener has some post processing to do (extracting the url etc.) 
                 await Task.WhenAny(seleniumAutomationTask, listenForAuthCodeTask)
                     .ConfigureAwait(false);
 
-                if (listenForAuthCodeTask.Status == TaskStatus.RanToCompletion)
+                // No need to wait to post a nice message in the browser
+                if (authCodeUri != null)
                 {
                     return authCodeUri;
                 }
@@ -130,21 +149,35 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 if (listenForAuthCodeTask.IsCanceled)
                 {
                     Trace.WriteLine("The TCP listener has timed out (or was canceled).");
-                    if (!cancellationToken.IsCancellationRequested)
+                    if (!externalCancellationToken.IsCancellationRequested)
                     {
                         Assert.Fail("The TCP listener is in a canceled state, but cancellation has not been requested!");
                     }
 
-                    throw new OperationCanceledException(cancellationToken);
+                    throw new OperationCanceledException(externalCancellationToken);
                 }
 
-                if (listenForAuthCodeTask.IsFaulted )
+                if (listenForAuthCodeTask.IsFaulted)
                 {
                     Trace.WriteLine("The TCP listener failed.");
                     RecordException(driver, listenForAuthCodeTask.Exception);
                     throw listenForAuthCodeTask.Exception;
                 }
 
+                _logger.Info($"Selenium finished, but TCP listener is still going. " +
+                    $"Selenium status: {seleniumAutomationTask.Status} " +
+                    $"TCP listener status: { listenForAuthCodeTask.Status}. ");
+
+                // At this point we need to give the TcpListener some time to complete
+                // but not too much as it should be fast
+                await Task.WhenAny(Task.Delay(tcpTimeoutAfterSelenium), listenForAuthCodeTask).ConfigureAwait(false);
+
+                if (authCodeUri != null)
+                {
+                    return authCodeUri;
+                }
+
+                innerSource.Cancel();
                 throw new InvalidOperationException(
                     $"Unknown exception: selenium status: {seleniumAutomationTask.Status} TCP listener status: {listenForAuthCodeTask.Status}. " +
                     $"Possible cause - the redirect Uri used is not the one configured." +
