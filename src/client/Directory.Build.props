@@ -35,6 +35,7 @@
     <Authors>Microsoft</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
+    <PackageReleaseNotes>A changelog is available at https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/dev/changelog.txt </PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>
       This package contains the binaries of the Microsoft Authentication Library for .NET (MSAL.NET).
