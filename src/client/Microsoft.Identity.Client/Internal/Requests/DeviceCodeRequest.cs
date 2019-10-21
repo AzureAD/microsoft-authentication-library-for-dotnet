@@ -51,7 +51,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var response = await client.ExecuteRequestAsync<DeviceCodeResponse>(
                                builder.Uri,
                                HttpMethod.Post,
-                               AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                               AuthenticationRequestParameters.RequestContext, 
+                               // Normally AAD responds with an error HTTP code, but /devicecode endpoint sends errors on 200OK
+                               expectErrorsOn200OK: true).ConfigureAwait(false);
 
             var deviceCodeResult = response.GetResult(AuthenticationRequestParameters.ClientId, deviceCodeScopes);
             await _deviceCodeParameters.DeviceCodeResultCallback(deviceCodeResult).ConfigureAwait(false);

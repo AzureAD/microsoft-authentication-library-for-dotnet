@@ -58,27 +58,12 @@ namespace Microsoft.Identity.Client.OAuth2
             return await ExecuteRequestAsync<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext).ConfigureAwait(false);
         }
 
-        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext)
+
+
+        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false)
         {
             bool addCorrelationId = requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
-            if (addCorrelationId)
-            {
-                _headers.Add(OAuth2Header.CorrelationId, requestContext.Logger.CorrelationId.ToString());
-                _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
-            }
-
-            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName))
-            {
-                _headers.Add(OAuth2Header.AppName, requestContext.Logger.ClientName);
-            }
-
-            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
-            {
-                _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
-            }
-
-            _headers.Add(TelemetryConstants.XClientLastTelemetry, _telemetryManager.FetchAndResetPreviousHttpTelemetryContent());
-            _headers.Add(TelemetryConstants.XClientCurrentTelemetry, _telemetryManager.FetchCurrentHttpTelemetryContent(requestContext.CorrelationId.AsMatsCorrelationId()));
+            AddCommonHeaders(requestContext, addCorrelationId);
 
             HttpResponse response = null;
             Uri endpointUri = CreateFullEndpointUri(endPoint);
@@ -100,34 +85,9 @@ namespace Microsoft.Identity.Client.OAuth2
                     response = await _httpManager.SendGetAsync(endpointUri, _headers, requestContext.Logger).ConfigureAwait(false);
                 }
 
-                httpEvent.HttpResponseStatus = (int)response.StatusCode;
-                httpEvent.UserAgent = response.UserAgent;
-                httpEvent.HttpMethod = method.Method;
+                DecorateHttpEvent(method, requestContext, response, httpEvent);
 
-                IDictionary<string, string> headersAsDictionary = response.HeadersAsDictionary;
-                if (headersAsDictionary.ContainsKey("x-ms-request-id") &&
-                    headersAsDictionary["x-ms-request-id"] != null)
-                {
-                    httpEvent.RequestIdHeader = headersAsDictionary["x-ms-request-id"];
-                }
-
-                if (headersAsDictionary.ContainsKey("x-ms-clitelem") &&
-                    headersAsDictionary["x-ms-clitelem"] != null)
-                {
-                    XmsCliTelemInfo xmsCliTeleminfo = new XmsCliTelemInfoParser().ParseXMsTelemHeader(
-                        headersAsDictionary["x-ms-clitelem"],
-                        requestContext.Logger);
-
-                    if (xmsCliTeleminfo != null)
-                    {
-                        httpEvent.TokenAge = xmsCliTeleminfo.TokenAge;
-                        httpEvent.SpeInfo = xmsCliTeleminfo.SpeInfo;
-                        httpEvent.ServerErrorCode = xmsCliTeleminfo.ServerErrorCode;
-                        httpEvent.ServerSubErrorCode = xmsCliTeleminfo.ServerSubErrorCode;
-                    }
-                }
-
-                if (response.StatusCode != HttpStatusCode.OK)
+                if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
                 {
                     try
                     {
@@ -139,7 +99,14 @@ namespace Microsoft.Identity.Client.OAuth2
                             var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
                             if (msalTokenResponse != null)
                             {
-                                httpEvent.OauthErrorCode = msalTokenResponse.Error;
+                                httpEvent.OauthErrorCode = msalTokenResponse?.Error;
+                            }
+
+                            if (response.StatusCode == HttpStatusCode.OK &&
+                                expectErrorsOn200OK &&
+                                !string.IsNullOrEmpty(msalTokenResponse.Error))
+                            {
+                                ThrowServerException(response, requestContext);
                             }
                         }
                     }
@@ -153,11 +120,64 @@ namespace Microsoft.Identity.Client.OAuth2
             return CreateResponse<T>(response, requestContext, addCorrelationId);
         }
 
+        private bool AddCommonHeaders(RequestContext requestContext, bool addCorrelationId)
+        {
+            if (addCorrelationId)
+            {
+                _headers.Add(OAuth2Header.CorrelationId, requestContext.Logger.CorrelationId.ToString());
+                _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
+            }
+
+            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName))
+            {
+                _headers.Add(OAuth2Header.AppName, requestContext.Logger.ClientName);
+            }
+
+            if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
+            {
+                _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
+            }
+
+            _headers.Add(TelemetryConstants.XClientLastTelemetry, _telemetryManager.FetchAndResetPreviousHttpTelemetryContent());
+            _headers.Add(TelemetryConstants.XClientCurrentTelemetry, _telemetryManager.FetchCurrentHttpTelemetryContent(requestContext.CorrelationId.AsMatsCorrelationId()));
+            return addCorrelationId;
+        }
+
+        private void DecorateHttpEvent(HttpMethod method, RequestContext requestContext, HttpResponse response, HttpEvent httpEvent)
+        {
+            httpEvent.HttpResponseStatus = (int)response.StatusCode;
+            httpEvent.UserAgent = response.UserAgent;
+            httpEvent.HttpMethod = method.Method;
+
+            IDictionary<string, string> headersAsDictionary = response.HeadersAsDictionary;
+            if (headersAsDictionary.ContainsKey("x-ms-request-id") &&
+                headersAsDictionary["x-ms-request-id"] != null)
+            {
+                httpEvent.RequestIdHeader = headersAsDictionary["x-ms-request-id"];
+            }
+
+            if (headersAsDictionary.ContainsKey("x-ms-clitelem") &&
+                headersAsDictionary["x-ms-clitelem"] != null)
+            {
+                XmsCliTelemInfo xmsCliTeleminfo = new XmsCliTelemInfoParser().ParseXMsTelemHeader(
+                    headersAsDictionary["x-ms-clitelem"],
+                    requestContext.Logger);
+
+                if (xmsCliTeleminfo != null)
+                {
+                    httpEvent.TokenAge = xmsCliTeleminfo.TokenAge;
+                    httpEvent.SpeInfo = xmsCliTeleminfo.SpeInfo;
+                    httpEvent.ServerErrorCode = xmsCliTeleminfo.ServerErrorCode;
+                    httpEvent.ServerSubErrorCode = xmsCliTeleminfo.ServerSubErrorCode;
+                }
+            }
+        }
+
         public static T CreateResponse<T>(HttpResponse response, RequestContext requestContext, bool addCorrelationId)
         {
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                CreateErrorResponse(response, requestContext);
+                ThrowServerException(response, requestContext);
             }
 
             if (addCorrelationId)
@@ -168,15 +188,14 @@ namespace Microsoft.Identity.Client.OAuth2
             return JsonHelper.DeserializeFromJson<T>(response.Body);
         }
 
-        public static void CreateErrorResponse(HttpResponse response, RequestContext requestContext)
+        private static void ThrowServerException(HttpResponse response, RequestContext requestContext)
         {
             bool shouldLogAsError = true;
 
             var httpErrorCodeMessage = string.Format(CultureInfo.InvariantCulture, "HttpStatusCode: {0}: {1}", (int)response.StatusCode, response.StatusCode.ToString());
             requestContext.Logger.Info(httpErrorCodeMessage);
 
-            Exception exceptionToThrow = null;
-
+            Exception exceptionToThrow;
             try
             {
                 exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError);
