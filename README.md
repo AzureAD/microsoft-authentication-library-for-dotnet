@@ -17,9 +17,9 @@ Released     | Nightly
  
 [![Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20(YAML)?branchName=master)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=922&branchName=master)
 
-## Roadmap and SLA
+## Release notes, roadmap and SLA
 
-### Roadmap
+### Release notes and roadmap
 
 MSAL.NET roadmap is available from [Roadmap](../../wiki#roadmap) in the [Wiki pages](https://aka.ms/msal-net), along with release notes.
 
