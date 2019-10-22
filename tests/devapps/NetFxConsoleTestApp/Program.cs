@@ -288,7 +288,7 @@ namespace NetFx
                             }
 
                             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
-                                pca.UserTokenCache as ITokenCacheInternal, s_clientIdForPublicApp, null, true);
+                                pca.UserTokenCache as ITokenCacheInternal, s_clientIdForPublicApp, null, true, false);
 
                             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
 
