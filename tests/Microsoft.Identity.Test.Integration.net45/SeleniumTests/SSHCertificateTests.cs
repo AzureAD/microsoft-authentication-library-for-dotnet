@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.AppId)
+                .Create(labResponse.App.AppId)
                 .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                 .Build();
 

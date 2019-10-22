@@ -39,7 +39,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create("e3b9ad76-9763-4827-b088-80c7a7888f79").WithB2CAuthority(_b2CROPCAuthority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithB2CAuthority(_b2CROPCAuthority)
+                .Build();
 
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_b2cScopes, user.Upn, securePassword)

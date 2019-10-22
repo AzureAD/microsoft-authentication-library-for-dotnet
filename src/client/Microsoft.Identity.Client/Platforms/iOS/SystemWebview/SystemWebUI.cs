@@ -65,7 +65,19 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                             }
                         });
 
-                    asWebAuthenticationSession.Start();
+                    asWebAuthenticationSession.BeginInvokeOnMainThread(() =>
+                    {
+                        if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+                        {
+                            // If the presentationContext is missing from the session,
+                            // MSAL.NET will pick up an "authentication cancelled" error
+                            // With the addition of the presentationContext, .Start() must
+                            // be called on the main UI thread
+                            asWebAuthenticationSession.PresentationContextProvider =
+                            new ASWebAuthenticationPresentationContextProviderWindow();
+                        }
+                        asWebAuthenticationSession.Start();
+                    });
                 }
 
                 else if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
@@ -121,7 +133,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                 requestContext.Logger.ErrorPii(ex);
                 throw new MsalClientException(
                     MsalError.AuthenticationUiFailedError,
-                    "Failed to invoke SFSafariViewController",
+                    ex.Message,
                     ex);
             }
         }

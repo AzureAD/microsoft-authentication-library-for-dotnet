@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -93,7 +94,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (_brokerV3Installed)
             {
-                _brokerRequestNonce = string.Empty;
                 _brokerRequestNonce = Guid.NewGuid().ToString();
                 brokerPayload[iOSBrokerConstants.BrokerNonce] = _brokerRequestNonce;
             }
@@ -219,15 +219,27 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private bool ValidateBrokerResponseNonceWithRequestNonce(Dictionary<string, string> brokerResponseDictionary)
         {
-            if (!string.IsNullOrEmpty(_brokerRequestNonce))
+            if (_brokerV3Installed)
             {
-                string brokerResponseNonce = brokerResponseDictionary.ContainsKey(BrokerResponseConst.iOSBrokerNonce)
-                   ? brokerResponseDictionary[BrokerResponseConst.iOSBrokerNonce]
-                   : null;
+                string brokerResponseNonce = brokerResponseDictionary[BrokerResponseConst.iOSBrokerNonce];
 
-                return string.Equals(brokerResponseNonce, _brokerRequestNonce);
+                bool ok = string.Equals(
+                    brokerResponseNonce, 
+                    _brokerRequestNonce, 
+                    StringComparison.InvariantCultureIgnoreCase);
+
+                if (!ok)
+                {
+                    _logger.Error(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            "Nonce check failed! Broker response nonce is:  {0}, \nBroker request nonce is: {1}",
+                            brokerResponseNonce,
+                            _brokerRequestNonce));
+                }
+                return ok;
             }
-            return false;
+            return true;
         }
 
         public static void SetBrokerResponse(NSUrl responseUrl)

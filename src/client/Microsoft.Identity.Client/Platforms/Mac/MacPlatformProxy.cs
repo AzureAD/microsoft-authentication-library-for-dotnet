@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
@@ -168,5 +169,11 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             return MatsConverter.AsInt(OsPlatform.Mac);
         }
         protected override IFeatureFlags CreateFeatureFlags() => new MacFeatureFlags();
+
+        public override Task StartDefaultOsBrowserAsync(string url)
+        {
+            Process.Start("open", url);
+            return Task.FromResult(0);
+        }
     }
 }

@@ -16,7 +16,7 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
+namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
     public class OboTests
@@ -54,16 +54,7 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
         public async Task OBO_WithCache_MultipleUsers_Async()
         {
             var aadUser1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
-
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.AdfsV2,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = true
-            };
-
-            var aadUser2 = (await LabUserHelper.GetLabUserDataAsync(query).ConfigureAwait(false)).User;
+            var aadUser2 = (await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV2, true).ConfigureAwait(false)).User;
             var adfsUser = (await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019).ConfigureAwait(false)).User;
 
             await RunOnBehalfOfTestAsync(adfsUser, false).ConfigureAwait(false);

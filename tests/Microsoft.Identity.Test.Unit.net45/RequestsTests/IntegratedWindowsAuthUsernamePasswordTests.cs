@@ -641,11 +641,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        ExpectedPostDataObject = new Dictionary<string, object>
+                        ExpectedPostData = new Dictionary<string, string>
                         {
                             {"grant_type", "password"},
                             {"username", TestConstants.s_user.Username},
-                            {"password", _secureString}
                         }
                     });
 
@@ -715,11 +714,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(),
-                        ExpectedPostDataObject = new Dictionary<string, object>
+                        ExpectedPostData = new Dictionary<string, string>
                         {
                             {"grant_type", "password"},
                             {"username", TestConstants.s_user.Username},
-                            {"password", _secureString}
+                            {"password", "y"}
                         }
                     });
 

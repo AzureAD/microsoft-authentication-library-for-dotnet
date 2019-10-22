@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static async Task<LabResponse> GetB2CMSAAccountAsync()
         {
             var response = await GetLabUserDataAsync(UserQuery.B2CMSAUserQuery).ConfigureAwait(false);
-            if (String.IsNullOrEmpty(response.User.HomeUPN))
+            if (string.IsNullOrEmpty(response.User.HomeUPN) || 
+                string.Equals("None", response.User.HomeUPN, StringComparison.OrdinalIgnoreCase))
             {
                 response.User.HomeUPN = response.User.Upn;
             }
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static Task<LabResponse> GetSpecificUserAsync(string upn)
         {
             var query = new UserQuery();
-            query.Upn = upn;
+            //query.Upn = upn;
             return GetLabUserDataAsync(query);
         }
 
@@ -83,7 +84,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             var query = UserQuery.DefaultUserQuery;
             query.FederationProvider = federationProvider;
-            query.IsFederatedUser = federated;
+            query.UserType = federated ? UserType.Federated : UserType.Cloud;
+
+            if (!federated &&
+                federationProvider != FederationProvider.ADFSv2019 )
+            {
+                throw new InvalidOperationException("Test Setup Error: MSAL only supports ADFS2019 direct (non-federated) access. " +
+                    "Support for older versions of ADFS is exclusively via federation");
+            }
+
             return GetLabUserDataAsync(query);
         }
 

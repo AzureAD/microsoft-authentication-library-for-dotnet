@@ -672,7 +672,7 @@ namespace DesktopTestApp
                 return;
             }
             LabResponse labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
-            _b2CClientId = labResponse.AppId;
+            _b2CClientId = labResponse.App.AppId;
         }
     }
 }

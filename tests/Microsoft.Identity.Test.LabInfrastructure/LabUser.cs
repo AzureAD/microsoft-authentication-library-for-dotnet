@@ -9,8 +9,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public class LabUser
     {
-        public LabUser() { }
-
         [JsonProperty("objectId")]
         public Guid ObjectId { get; set; }
 
@@ -20,41 +18,32 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("upn")]
         public string Upn { get; set; }
 
-        [JsonProperty("credentialVaultKeyName")]
-        public string CredentialUrl { get; set; }
-
-        public LabUser HomeUser { get; set; }
-
-        [JsonProperty("external")]
-        public bool IsExternal { get; set; }
+        [JsonProperty("displayname")]
+        public string DisplayName { get; set; }
 
         [JsonProperty("mfa")]
-        public bool IsMfa { get; set; }
+        public MFA Mfa { get; set; }
 
-        [JsonProperty("mam")]
-        public bool IsMam { get; set; }
+        [JsonProperty("protectionpolicy")]
+        public ProtectionPolicy ProtectionPolicy { get; set; }
 
-        [JsonProperty("licenses")]
-        public ISet<string> Licenses { get; set; }
+        [JsonProperty("homedomain")]
+        public HomeDomain HomeDomain { get; set; }
 
-        [JsonProperty("isFederated")]
-        public bool IsFederated { get; set; }
-
-        [JsonProperty("federationProvider")]
-        public FederationProvider FederationProvider { get; set; }
-
-        [JsonProperty("tenantId")]
-        public string CurrentTenantId { get; set; }
-
-        [JsonProperty("hometenantId")]
-        public string HomeTenantId { get; set; }
-
-        [JsonProperty("homeUPN")]
+        [JsonProperty("homeupn")]
         public string HomeUPN { get; set; }
 
-        [JsonProperty("b2cProvider")]
-        public B2CIdentityProvider B2CIdentityProvider { get; set; }
+        [JsonProperty("b2cprovider")]
+        public B2CIdentityProvider B2cProvider { get; set; }
 
+        [JsonProperty("labname")]
+        public string LabName { get; set; }
+
+        public FederationProvider FederationProvider { get; set; }
+
+        public string CredentialUrl { get; set; }
+
+        public string TenantId { get; set; }
 
         private string _password = null;
 
@@ -66,28 +55,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
 
             return _password;
-        }
-
-        public void InitializeHomeUser()
-        {
-            HomeUser = new LabUser();
-            var labHomeUser = (LabUser)HomeUser;
-
-            labHomeUser.ObjectId = ObjectId;
-            labHomeUser.UserType = UserType;
-            labHomeUser.CredentialUrl = CredentialUrl;
-            labHomeUser.HomeUser = labHomeUser;
-            labHomeUser.IsExternal = IsExternal;
-            labHomeUser.IsMfa = IsMfa;
-            labHomeUser.IsMam = IsMam;
-            labHomeUser.Licenses = Licenses;
-            labHomeUser.IsFederated = IsFederated;
-            labHomeUser.FederationProvider = FederationProvider;
-            labHomeUser.HomeTenantId = HomeTenantId;
-            labHomeUser.HomeUPN = HomeUPN;
-            labHomeUser.CurrentTenantId = HomeTenantId;
-            labHomeUser.Upn = HomeUPN;
-            labHomeUser.B2CIdentityProvider = B2CIdentityProvider;
         }
     }
 }

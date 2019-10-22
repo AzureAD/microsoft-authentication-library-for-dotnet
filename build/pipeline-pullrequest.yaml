@@ -1,17 +1,18 @@
 
-# PR builds should be triggered on every branch except master (so we don't trigger again after a merge)
-trigger:
+# Do not run on CI
+trigger: none
+
+pr:
+  autoCancel: false
   branches:
     include:
-    - '*'
-    exclude:
     - master
 
 pool:
-  name: Hosted VS2017
+  vmImage: 'windows-latest'
   demands:
   - msbuild
-  - visualstudio
+  - visualstudio    
 
 variables:
   BuildPlatform: 'any cpu'
@@ -19,4 +20,3 @@ variables:
 
 steps:  
 - template: template-ci-and-pr.yaml
-

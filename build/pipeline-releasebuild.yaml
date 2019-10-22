@@ -1,6 +1,7 @@
 
 # Release builds are only manually triggered.
 trigger: none
+pr: none
 
 # Create a daily midnight build for release builds on master to ensure our release builds function
 schedules:
@@ -11,7 +12,7 @@ schedules:
     - master
 
 pool:
-  name: Hosted VS2017
+  vmImage: 'windows-latest'
   demands:
   - msbuild
   - visualstudio
@@ -21,6 +22,11 @@ variables:
   BuildConfiguration: 'release'
 
 steps:
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 2.2.402'
+  inputs:
+    version: 2.2.402
+
 # Run pre-build code analysis (policheck, credscan, etc)
 - template: template-prebuild-code-analysis.yaml
 
@@ -33,16 +39,6 @@ steps:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
-
-# Run Unit Tests
-- template: template-run-unit-tests.yaml
-  parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
-
-# Run Integration Tests
-# - template: template-run-integration-tests.yaml
-#   parameters:
-#     BuildConfiguration: '$(BuildConfiguration)'
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml

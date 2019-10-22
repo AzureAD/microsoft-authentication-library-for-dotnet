@@ -1,11 +1,6 @@
 
-# UI Automation builds should be triggered on every push to master, and on any PR making its way to master.
-trigger:
-  branches:
-    include:
-    - master
-    exclude:
-    - markzuber/*
+# Do not run on CI, PR is enough
+trigger: none
 
 pr:
 - master
@@ -30,7 +25,7 @@ stages:
   jobs:
   - job: 'Build'
     pool:
-        name: Hosted VS2017
+        vmImage: 'windows-latest'
         demands:
         - msbuild
         - visualstudio
@@ -97,8 +92,7 @@ stages:
   - job: 'BuildiOSAppCenterApp'
     pool:
         name: Hosted Mac Internal
-        demands:
-        - Xamarin.iOS
+        demands: Xamarin.iOS
     steps:
     - task: AzureKeyVault@1
       displayName: 'Azure Key Vault: BuildAutomation'
@@ -160,7 +154,7 @@ stages:
   - job: 'AppCenterAndroidMsalTests'
     dependsOn: 'Build'
     pool:
-        name: Hosted VS2017
+      vmImage: 'windows-latest'
     steps:
 
     - powershell: '$Import = $(FastRun)'
@@ -190,11 +184,11 @@ stages:
         $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\Android\bin\Debug\data.txt
       displayName: 'Get Credentials'
 
-    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-ADAL" --devices c7afcb8d --app-path $(System.ArtifactsDirectory)\drop\bin\Release\com.Microsoft.XFormsDroid.MSAL-Signed.apk --test-series "msal" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\Android\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --include-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
+    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-ADAL" --devices ADAL-DotNet/android-9-and-10 --app-path $(System.ArtifactsDirectory)\drop\bin\Release\com.Microsoft.XFormsDroid.MSAL-Signed.apk --test-series "msal" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\Android\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --include-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
       displayName: 'Run App Center MSAL Tests (Fast)'
       condition: and(succeeded(), eq(variables['FastRun'], 'true'))
 
-    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-ADAL" --devices c7afcb8d --app-path $(System.ArtifactsDirectory)\drop\bin\Release\com.Microsoft.XFormsDroid.MSAL-Signed.apk --test-series "msal" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\Android\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --exclude-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
+    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-ADAL" --devices ADAL-DotNet/android-9-and-10 --app-path $(System.ArtifactsDirectory)\drop\bin\Release\com.Microsoft.XFormsDroid.MSAL-Signed.apk --test-series "msal" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\Android\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --exclude-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
       displayName: 'Run App Center MSAL Tests (Full)'
       condition: and(succeeded(), eq(variables['FastRun'], 'false'))
 
@@ -206,7 +200,7 @@ stages:
     - 'Build'
     - 'BuildiOSAppCenterApp'
     pool:
-        name: Hosted VS2017
+      vmImage: 'windows-latest'
     steps:
 
     - task: DownloadBuildArtifacts@0
@@ -242,10 +236,10 @@ stages:
         $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\iOS\bin\Debug\data.txt
       displayName: 'Get Credentials'
 
-    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-iOS" --devices a8568261 --app-path $(System.ArtifactsDirectory)\Xamarin.iOS\XForms.iOS.ipa --test-series "master" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\iOS\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --include-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
+    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-iOS" --devices ADAL-DotNet/ios-12-plus --app-path $(System.ArtifactsDirectory)\Xamarin.iOS\XForms.iOS.ipa --test-series "master" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\iOS\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --include-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
       displayName: 'Run App Center MSAL Tests (Fast)'
       condition: and(succeeded(), eq(variables['FastRun'], 'true'))
 
-    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-iOS" --devices a8568261 --app-path $(System.ArtifactsDirectory)\Xamarin.iOS\XForms.iOS.ipa --test-series "master" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\iOS\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --exclude-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
+    - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-iOS" --devices ADAL-DotNet/ios-12-plus --app-path $(System.ArtifactsDirectory)\Xamarin.iOS\XForms.iOS.ipa --test-series "master" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\iOS\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --exclude-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
       displayName: 'Run App Center MSAL Tests (Full)'
       condition: and(succeeded(), eq(variables['FastRun'], 'false'))

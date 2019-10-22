@@ -39,18 +39,22 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 
             try
             {
+                _logger.Verbose("TcpInterceptor: Starting to listen on localhost on port " + port);
                 tcpListener = new TcpListener(IPAddress.Loopback, port);
 
                 tcpClient =
                     await AcceptTcpClientAsync(tcpListener, cancellationToken)
                     .ConfigureAwait(false);
 
+                _logger.Verbose("TcpInterceptor: The socket received a message");
                 return await ExtractUriAndRespondAsync(tcpClient, responseProducer, cancellationToken)
                     .ConfigureAwait(false);
 
             }
             finally
             {
+                _logger.Verbose("TcpInterceptor: Stopping");
+
                 tcpListener.Stop();
 
 #if DESKTOP || NET_CORE
@@ -102,6 +106,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             string httpRequest = await GetTcpResponseAsync(tcpClient, cancellationToken).ConfigureAwait(false);
             Uri uri = HttpResponseParser.ExtractUriFromHttpRequest(httpRequest, _logger);
 
+            _logger.Verbose("TcpInterceptor: Uri extracted. Writing a response that will be displayed in the browser");
+
             // write an "OK, please close the browser message" 
             await WriteResponseAsync(responseProducer(uri), tcpClient.GetStream(), cancellationToken)
                 .ConfigureAwait(false);
@@ -109,7 +115,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             return uri;
         }
 
-        private static async Task<string> GetTcpResponseAsync(TcpClient client, CancellationToken cancellationToken)
+        private async Task<string> GetTcpResponseAsync(TcpClient client, CancellationToken cancellationToken)
         {
             NetworkStream networkStream = client.GetStream();
 
@@ -128,7 +134,11 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             }
             while (networkStream.DataAvailable);
 
-            return stringBuilder.ToString();
+            string response = stringBuilder.ToString();
+            _logger.VerbosePii("TcpInterceptor: Message received - " + response, 
+                "TcpInterceptor: Message received. Size: " + response.Length);
+
+            return response;
         }
 
         private async Task WriteResponseAsync(

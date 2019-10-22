@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrWhiteSpace(Message))
             {
-                throw new ArgumentNullException(nameof(Message));
+                throw new ArgumentNullException(nameof(errorMessage));
             }
             ErrorCode = errorCode;
         }
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrWhiteSpace(Message))
             {
-                throw new ArgumentNullException(nameof(Message));
+                throw new ArgumentNullException(nameof(errorMessage));
             }
 
             ErrorCode = errorCode;
@@ -96,7 +96,12 @@ namespace Microsoft.Identity.Client
         public string ErrorCode
         {
             get => _errorCode;
-            private set => _errorCode = string.IsNullOrWhiteSpace(value) ? throw new ArgumentNullException() : value;
+            private set
+            {
+                _errorCode = string.IsNullOrWhiteSpace(value) ? 
+                    throw new ArgumentNullException("ErrorCode") : 
+                    value;
+            }
         }
 
         /// <summary>

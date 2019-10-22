@@ -35,6 +35,7 @@
     <Authors>Microsoft</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
+    <PackageReleaseNotes>The changelog is available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/changelog.txt and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap </PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>
       This package contains the binaries of the Microsoft Authentication Library for .NET (MSAL.NET).
@@ -79,6 +80,8 @@
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AndroidResgenClass>Resource</AndroidResgenClass>
+    <!-- Ensures that the Resources.designer.cs do not end up in the dll, see #1449 -->
+    <AndroidUseIntermediateDesignerFile>false</AndroidUseIntermediateDesignerFile>
     <TargetFrameworkVersion>v9.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
@@ -118,7 +121,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\Desktop\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Shared\NetStdCore\**\*.cs" />
 
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
@@ -138,7 +141,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\Desktop\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Shared\NetStdCore\**\*.cs" />
 
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
@@ -154,7 +157,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\Desktop\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
 
     <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
@@ -210,7 +213,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkMac)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\Mac\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Shared\Apple\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\Desktop\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
     <Reference Include="System" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

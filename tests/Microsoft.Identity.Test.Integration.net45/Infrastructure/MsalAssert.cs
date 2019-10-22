@@ -19,7 +19,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));
             var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
-            Assert.AreEqual(labResponse.User.HomeUPN.ToLower(CultureInfo.InvariantCulture), account.Username.ToLower(CultureInfo.InvariantCulture));
+            Assert.IsTrue(
+                    string.Equals(
+                        labResponse.User.Upn,
+                        result.Account.Username,
+                        System.StringComparison.InvariantCultureIgnoreCase));
 
             return account;
         }
@@ -31,7 +35,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             if (user != null)
             {
-                Assert.AreEqual(user.Upn, result.Account.Username);
+                Assert.IsTrue(
+                    string.Equals(
+                        user.Upn, 
+                        result.Account.Username, 
+                        System.StringComparison.InvariantCultureIgnoreCase));
             }
         }
     }

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+
 namespace Microsoft.Identity.Client.OAuth2
 {
     internal static class OAuth2Parameter
@@ -88,7 +90,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
     internal static class OAuth2Value
     {
-        public static readonly string[] ReservedScopes = { ScopeOpenId, ScopeProfile, ScopeOfflineAccess };
+        public static readonly SortedSet<string> ReservedScopes = 
+            new SortedSet<string> { ScopeOpenId, ScopeProfile, ScopeOfflineAccess };
         public const string CodeChallengeMethodValue = "S256";
         public const string ScopeOpenId = "openid";
         public const string ScopeOfflineAccess = "offline_access";
