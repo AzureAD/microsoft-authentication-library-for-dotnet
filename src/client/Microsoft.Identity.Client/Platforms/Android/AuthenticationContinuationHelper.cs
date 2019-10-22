@@ -56,7 +56,13 @@ namespace Microsoft.Identity.Client
             case (int)Result.Canceled:
                 return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
 
-            default:
+                case BrokerResponseCode.ResponseReceived:
+                case BrokerResponseCode.BrowserCodeError:
+                case BrokerResponseCode.UserCancelled:
+                    AndroidBroker.SetBrokerResult(data, (int)resultCode);
+                    return null;
+
+                default:
                 return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
             }
         }

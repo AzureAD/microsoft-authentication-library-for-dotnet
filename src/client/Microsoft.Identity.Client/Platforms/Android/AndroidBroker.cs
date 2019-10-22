@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -181,17 +182,24 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             else
             {
-                var tokenResponse = new MsalTokenResponse
-                {
-                    Authority = data.GetStringExtra(BrokerConstants.AccountAuthority),
-                    AccessToken = data.GetStringExtra(BrokerConstants.AccountAccessToken),
-                    IdTokenString = data.GetStringExtra(BrokerConstants.AccountIdToken),
-                    TokenType = "Bearer",
-                    ExpiresOn = data.GetLongExtra(BrokerConstants.AccountExpireDate, 0)
-                };
+                //var response = new MsalTokenResponse()
+                Dictionary<string, string> response = new Dictionary<string, string>();
 
-                resultEx = tokenResponse.GetResult(AndroidBrokerProxy.ConvertFromTimeT(tokenResponse.ExpiresOn),
-                    AndroidBrokerProxy.ConvertFromTimeT(tokenResponse.ExpiresOn));
+                response.Add(BrokerConstants.AccountAuthority, data.GetStringExtra(BrokerConstants.AccountAuthority));
+                response.Add(BrokerConstants.AccountAccessToken, data.GetStringExtra(BrokerConstants.AccountAccessToken));
+                response.Add(BrokerConstants.AccountIdToken, data.GetStringExtra(BrokerConstants.AccountIdToken));
+                response.Add(BrokerConstants.AccountExpireDate, data.GetLongExtra(BrokerConstants.AccountExpireDate, 0).ToString(CultureInfo.InvariantCulture));
+
+                //var tokenResponse = new MsalTokenResponse
+                //{
+                //    Authority = data.GetStringExtra(BrokerConstants.AccountAuthority),
+                //    AccessToken = data.GetStringExtra(BrokerConstants.AccountAccessToken),
+                //    IdTokenString = data.GetStringExtra(BrokerConstants.AccountIdToken),
+                //    TokenType = "Bearer",
+                //    ExpiresOn = data.GetLongExtra(BrokerConstants.AccountExpireDate, 0)
+                //};
+
+                resultEx = MsalTokenResponse.CreateFromBrokerResponse(response);
             }
 
             readyForResponse.Release();
