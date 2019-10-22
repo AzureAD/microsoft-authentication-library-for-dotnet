@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -23,6 +24,41 @@ namespace CommonCache.Test.Common
 
         public ProcessUtils()
         {
+
+        }
+
+        public async Task<string> FindProgramAsync(string findArgs, CancellationToken cancellationToken)
+        {
+            if (File.Exists(findArgs))
+            {
+                return findArgs;
+            }
+
+            var executable = findArgs;
+            try
+            {
+                Console.WriteLine($"Calling:  where {findArgs}");
+                ProcessRunResults whereResults = await RunProcessAsync("where", findArgs, cancellationToken).ConfigureAwait(false);
+                if (whereResults != null)
+                {
+                    Console.WriteLine($"Search result: {whereResults}");
+                    if (!string.IsNullOrEmpty(whereResults.StandardOut))
+                    {
+                        var results = whereResults.StandardOut.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                        if (results.Length > 0)
+                            executable = results[0].Trim();
+                        else
+                            executable = whereResults.StandardOut.Trim();
+                    }
+                }
+            }
+            catch (ProcessRunException ex)
+            {
+                Console.WriteLine(ex.ProcessStandardOutput);
+                throw;
+            }
+
+            return executable;
         }
 
         public void KillAllChildProcesses()

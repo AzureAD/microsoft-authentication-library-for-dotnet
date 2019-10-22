@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CommonCache.Test.MsalJava": {
+      "commandName": "Project",
+      "commandLineArgs": "--inputPath \"C:\\Users\\henrikm\\AppData\\Local\\Temp\\tmpDDB4.tmp\" "
+    }
+  }
+}

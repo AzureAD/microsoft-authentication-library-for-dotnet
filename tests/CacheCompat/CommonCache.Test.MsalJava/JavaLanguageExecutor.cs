@@ -25,9 +25,11 @@ namespace CommonCache.Test.MsalJava
             CancellationToken cancellationToken)
         {
             var processUtils = new ProcessUtils();
-            string executablePath = "mvn.exe";
+            string executablePath = @"mvn.cmd"; // replace with std. devops build vm location
 
             string pomFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "pom.xml");
+
+            executablePath = await processUtils.FindProgramAsync(executablePath, cancellationToken).ConfigureAwait(false);
 
             try
             {

@@ -250,3 +250,5 @@ msal/tests/dev apps/XForms/XForms.UWP/BundleArtifacts/x86.txt
 
 /msal/src/Microsoft.Identity.Client/docfx_project
 /msal/src/Microsoft.Identity.Client/_api
+/tests/CacheCompat/CommonCache.Test.MsalJava/target
+/tests/CacheCompat/CommonCache.Test.MsalPython/Properties/launchSettings.json

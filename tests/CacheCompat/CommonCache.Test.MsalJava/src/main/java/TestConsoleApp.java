@@ -100,10 +100,10 @@ public class TestConsoleApp {
                             (new TestOutput.Result(user.upn, result.account().username(), false));
 
                     System.out.println("got token for (" + result.account().username() + ") by signing in with credentials");
-                } catch (AuthenticationException ex) {
+                } catch (MsalException ex) {
                     System.out.println("**TOKEN ACQUIRE FAILURE**");
                     System.out.println(ex.getMessage());
-                    System.out.println(ex.getErrorCode());
+                    System.out.println(ex.errorCode());
                     testOutput.results.add
                             (new TestOutput.Result(user.upn, null, false));
                 }
