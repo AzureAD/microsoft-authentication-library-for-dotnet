@@ -415,6 +415,11 @@ namespace Microsoft.Identity.Client
         public const string NoBrokerInstalledOnDevice = "No_Broker_Installed_On_Device";
 
         /// <summary>
+        /// Null intent was requrned so broker activity cannot be launched
+        /// </summary>
+        public const string NullIntentReturnedFromBroker = "null_intent_returned_from_broker";
+
+        /// <summary>
         /// Error code used when the HTTP response returns HttpStatusCode.NotFound
         /// </summary>
         public const string HttpStatusNotFound = "not_found";

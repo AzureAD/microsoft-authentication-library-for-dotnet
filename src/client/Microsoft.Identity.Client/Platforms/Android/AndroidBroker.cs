@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private static SemaphoreSlim readyForResponse = null;
         private static MsalTokenResponse resultEx = null;
 
-        private readonly AndroidBrokerProxy _brokerProxy;
+        private readonly AndroidBrokerHelper _brokerProxy;
         private readonly ICoreLogger _logger;
 
         private Activity _activity;
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public AndroidBroker(ICoreLogger logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _brokerProxy = new AndroidBrokerProxy(Application.Context, logger);
+            _brokerProxy = new AndroidBrokerHelper(Application.Context, logger);
         }
 
         public bool CanInvokeBroker(CoreUIParent uiParent)
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 if (string.IsNullOrEmpty(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Claims)) && hasAccountNameOrUserId)
                 {
                     _logger.Verbose("User is specified for silent token request");
-                    resultEx = _brokerProxy.GetAuthTokenSilently(brokerPayload, _activity);
+                    //resultEx = _brokerProxy.GetAuthTokenSilently(brokerPayload, _activity);
                 }
                 else
                 {
@@ -98,7 +98,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 {
                     _logger.Verbose("Token is not returned from silent backgroud call");
                 }
-
 
                 _logger.Verbose("Starting Authentication Activity");
 
