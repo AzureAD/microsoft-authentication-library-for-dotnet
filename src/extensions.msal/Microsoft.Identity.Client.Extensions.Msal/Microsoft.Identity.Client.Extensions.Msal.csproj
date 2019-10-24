@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  
   <PropertyGroup>
     <TargetFrameworkNetDesktop>net45</TargetFrameworkNetDesktop>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
@@ -19,17 +20,22 @@
 
   <PropertyGroup>
     <!-- The MSAL.snk has both private and public keys -->
-    <DelaySign>false</DelaySign>
+    <DelaySign>false</DelaySign>    
   </PropertyGroup>
 
   <PropertyGroup>
 
-    <!--This should be passed from the VSTS build-->
-    <ClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.0.0-localbuild</ClientSemVer>
     <!-- For now, the Extensions.Msal libraries are ALWAYS in preview mode -->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' != ''">$(MsalClientSemVer)-preview</MsalClientSemVer>
-    <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
-    <Version>$(MsalClientSemVer)</Version>
+    <DesktopExtensionVersion Condition="'$(ExtensionUsesMsalFromNuGetVersion)' == '' and '$(MsalClientSemVer)' != ''">
+      $(MsalClientSemVer)-preview
+    </DesktopExtensionVersion>
+    <DesktopExtensionVersion  Condition="'$(ExtensionUsesMsalFromNuGetVersion)' != ''" >
+      $(ExtensionUsesMsalFromNuGetVersion)-preview
+    </DesktopExtensionVersion>
+    <DesktopExtensionVersion Condition="$(DesktopExtensionVersion) == ''">4.5.0-internal</DesktopExtensionVersion>
+
+  <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
+    <Version>$(DesktopExtensionVersion)</Version>
 
     <DefineConstants>$(DefineConstants);MSAL</DefineConstants>
     <Authors>Microsoft</Authors>
@@ -82,8 +88,12 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- Set the variable MsalPackageReferenceVersion to an MSAL version to relesae the extension out of band with MSAL-->
+  <ItemGroup Condition="$(MsalPackageReferenceVersion) == ''">
     <ProjectReference Include="..\..\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$(MsalPackageReferenceVersion) != ''">
+    <PackageReference Include="Microsoft.Identity.Client" Version="$(MsalPackageReferenceVersion)" />
   </ItemGroup>
 
 </Project>
