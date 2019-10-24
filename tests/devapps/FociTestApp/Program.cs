@@ -15,12 +15,8 @@ namespace FociTestApp
 {
     public class Program
     {
-        // TODO: replace with FOCI family members IDs
-        // DO NOT CHECK THESE IN
-        private const string FAMILY_MEMBER_1 = "";  // Office
-        private const string FAMILY_MEMBER_2 = "";  // Teams
-
-
+        private const string FAMILY_MEMBER_1 = "7660e4d6-d3f3-4385-9851-bc9027ef4a03";
+        private const string FAMILY_MEMBER_2 = "9668f2bd-6103-4292-9024-84fa2d1b6fb2";
         private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
 
 
@@ -37,17 +33,19 @@ namespace FociTestApp
         {
             s_pcaFam1 = PublicClientApplicationBuilder
                 .Create(FAMILY_MEMBER_1)
+                .WithRedirectUri("http://localhost")
                 .WithLogging(Log, LogLevel.Verbose, true)
                 .Build();
 
             s_pcaFam2 = PublicClientApplicationBuilder
                .Create(FAMILY_MEMBER_2)
-               .WithRedirectUri("https://dev.local")
+               .WithRedirectUri("http://localhost")
                .WithLogging(Log, LogLevel.Verbose, true)
                .Build();
 
             s_pcaNonFam = PublicClientApplicationBuilder
              .Create(NON_FAMILY_MEMBER)
+             .WithRedirectUri("http://localhost")
              .WithLogging(Log, LogLevel.Verbose, true)
              .Build();
 
@@ -108,59 +106,59 @@ namespace FociTestApp
                 {
                     switch (selection)
                     {
-                    case 1:
-                        authTask = StartInteractiveAuthAsync(s_pcaFam1);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
-                        break;
-                    case 2:
-                        authTask = StartInteractiveAuthAsync(s_pcaFam2);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
-                        break;
-                    case 3:
-                        authTask = StartInteractiveAuthAsync(s_pcaNonFam);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
-                        break;
-                    case 4:
-                        authTask = StartSilentAuthAsync(s_pcaFam1);
-                        FetchTokenAsync(s_pcaFam1, authTask).GetAwaiter().GetResult();
-                        break;
-                    case 5:
-                        authTask = StartSilentAuthAsync(s_pcaFam2);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
-                        break;
-                    case 6:
-                        authTask = StartSilentAuthAsync(s_pcaNonFam);
-                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
-                        break;
+                        case 1:
+                            authTask = StartInteractiveAuthAsync(s_pcaFam1);
+                            FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                            break;
+                        case 2:
+                            authTask = StartInteractiveAuthAsync(s_pcaFam2);
+                            FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                            break;
+                        case 3:
+                            authTask = StartInteractiveAuthAsync(s_pcaNonFam);
+                            FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                            break;
+                        case 4:
+                            authTask = StartSilentAuthAsync(s_pcaFam1);
+                            FetchTokenAsync(s_pcaFam1, authTask).GetAwaiter().GetResult();
+                            break;
+                        case 5:
+                            authTask = StartSilentAuthAsync(s_pcaFam2);
+                            FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                            break;
+                        case 6:
+                            authTask = StartSilentAuthAsync(s_pcaNonFam);
+                            FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                            break;
 
-                    case 7:
-                        var accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
-                        var accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
-                        var accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
-                         
-
-                        foreach (var acc in accounts1)
-                        {
-                            await s_pcaFam1.RemoveAsync(acc).ConfigureAwait(false);
-                        }
-
-                        break;
-                    case 8:
-                       accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
-                       accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
-                       accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
+                        case 7:
+                            var accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
+                            var accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
+                            var accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
 
 
-                        foreach (var acc in accounts2)
-                        {
-                            await s_pcaFam2.RemoveAsync(acc).ConfigureAwait(false);
-                        }
+                            foreach (var acc in accounts1)
+                            {
+                                await s_pcaFam1.RemoveAsync(acc).ConfigureAwait(false);
+                            }
 
-                        break;
-                    case 0:
-                        return;
-                    default:
-                        break;
+                            break;
+                        case 8:
+                            accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
+                            accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
+                            accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
+
+
+                            foreach (var acc in accounts2)
+                            {
+                                await s_pcaFam2.RemoveAsync(acc).ConfigureAwait(false);
+                            }
+
+                            break;
+                        case 0:
+                            return;
+                        default:
+                            break;
                     }
 
                 }
@@ -177,7 +175,7 @@ namespace FociTestApp
 
         private static Task<AuthenticationResult> StartInteractiveAuthAsync(IPublicClientApplication pca)
         {
-            return pca.AcquireTokenInteractive(s_scopes).ExecuteAsync();
+            return pca.AcquireTokenInteractive(s_scopes).WithUseEmbeddedWebView(false).ExecuteAsync();
         }
 
         private static Task<AuthenticationResult> StartSilentAuthAsync(IPublicClientApplication pca)
@@ -242,17 +240,17 @@ namespace FociTestApp
 
             switch (level)
             {
-            case LogLevel.Error:
-                Console.ForegroundColor = ConsoleColor.Red;
-                break;
-            case LogLevel.Warning:
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                break;
-            case LogLevel.Verbose:
-                Console.ForegroundColor = ConsoleColor.Gray;
-                break;
-            default:
-                break;
+                case LogLevel.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case LogLevel.Warning:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case LogLevel.Verbose:
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    break;
+                default:
+                    break;
             }
 
             Console.WriteLine($"{level} {message}");
