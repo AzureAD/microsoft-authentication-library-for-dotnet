@@ -39,9 +39,10 @@ steps:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
-    # Leave empty to release the desktop extenion with a project refrence to msal
-    # Or set a version to take a dependency on a pre-released MSAL NuGet package
+    # Leave empty to release the desktop extension with a project refrence to MSAL
+    # Or set a version to take a dependency on a previously released MSAL NuGet package
     ExtensionUsesMsalFromNuGetVersion: $(ExtensionUsesMsalFromNuGetVersion)
+    ExtensionVersion: $(ExtensionVersion)
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml

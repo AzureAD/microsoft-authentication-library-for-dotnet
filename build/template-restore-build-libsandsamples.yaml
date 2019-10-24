@@ -6,6 +6,7 @@ parameters:
   BuildConfiguration: 'debug'
   MsalClientSemVer: '4.0.0-devopsbuild'
   ExtensionUsesMsalFromNuGetVersion: ''
+  ExtensionVersion: ''
 
 steps:
 - task: VSBuild@1
@@ -22,7 +23,7 @@ steps:
   inputs:
     solution: LibsAndSamples.sln
     vsVersion: '15.0'
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:ExtensionUsesMsalFromNuGetVersion=${{ parameters.ExtensionUsesMsalFromNuGetVersion }} /p:SourceLinkCreate=true'
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:ExtensionUsesMsalFromNuGetVersion=${{ parameters.ExtensionUsesMsalFromNuGetVersion }} /p:ExtensionVersion=${{ paramters.ExtensionVersion}} /p:SourceLinkCreate=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 

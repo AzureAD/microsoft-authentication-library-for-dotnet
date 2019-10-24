@@ -1,41 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  
   <PropertyGroup>
     <TargetFrameworkNetDesktop>net45</TargetFrameworkNetDesktop>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNetCore2>netcoreapp2.1</TargetFrameworkNetCore2>
-    <TargetFrameworkNetCore3>netcoreapp3.0</TargetFrameworkNetCore3>
+    <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
 
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-      $(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)
+      $(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);
     </TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">
-      $(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)
+      $(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);
     </TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux'))">
-      $(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)
+      $(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);
     </TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- The MSAL.snk has both private and public keys -->
-    <DelaySign>false</DelaySign>    
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
 
   <PropertyGroup>
 
-    <!-- For now, the Extensions.Msal libraries are ALWAYS in preview mode -->
+    <!-- These properties should be passed from the Azure DevOps build-->
     <DesktopExtensionVersion Condition="'$(ExtensionUsesMsalFromNuGetVersion)' == '' and '$(MsalClientSemVer)' != ''">
       $(MsalClientSemVer)-preview
     </DesktopExtensionVersion>
-    <DesktopExtensionVersion  Condition="'$(ExtensionUsesMsalFromNuGetVersion)' != ''" >
-      $(ExtensionUsesMsalFromNuGetVersion)-preview
+    <DesktopExtensionVersion  Condition="'$(ExtensionUsesMsalFromNuGetVersion)' != '' and '$(ExtensionVersion)' != ''" >
+      $(ExtensionVersion)-preview
     </DesktopExtensionVersion>
-    <DesktopExtensionVersion Condition="$(DesktopExtensionVersion) == ''">4.5.0-internal</DesktopExtensionVersion>
-
-  <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
-    <Version>$(DesktopExtensionVersion)</Version>
 
     <DefineConstants>$(DefineConstants);MSAL</DefineConstants>
     <Authors>Microsoft</Authors>
@@ -51,17 +45,16 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>Full</DebugType>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore2)' ">
-    <DefineConstants>$(DefineConstants);NET_CORE_2</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore3)' ">
-    <DefineConstants>$(DefineConstants);NET_CORE_3</DefineConstants>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
+    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
@@ -70,9 +63,21 @@
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="**\*.cs" Exclude="obj\**\*"/>
+    <Compile Include="**\*.cs" Exclude="Providers\*.cs;obj\**\*" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
-    <Compile Remove="Providers/*.cs" />
     <Reference Include="System.Security" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
+    <Compile Include="Providers\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+    <Compile Include="Providers\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
@@ -88,12 +93,8 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All" />
   </ItemGroup>
 
-  <!-- Set the variable MsalPackageReferenceVersion to an MSAL version to relesae the extension out of band with MSAL-->
-  <ItemGroup Condition="$(MsalPackageReferenceVersion) == ''">
+  <ItemGroup>
     <ProjectReference Include="..\..\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="$(MsalPackageReferenceVersion) != ''">
-    <PackageReference Include="Microsoft.Identity.Client" Version="$(MsalPackageReferenceVersion)" />
   </ItemGroup>
 
 </Project>
