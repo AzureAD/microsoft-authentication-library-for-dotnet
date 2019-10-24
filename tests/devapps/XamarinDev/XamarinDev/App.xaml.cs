@@ -13,18 +13,18 @@ namespace XamarinDev
 
         public static object RootViewController { get; set; }
 
-        public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
+        public const string DefaultClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         // For system browser
         //public const string DefaultClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
 
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
 
-        public static string RedirectUriOnAndroid = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; // will not work with system browser
+        //public static string RedirectUriOnAndroid = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; // will not work with system browser
         // For system browser
-        //public static string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
+        public static string RedirectUriOnAndroid = "msauth://com.microsoft.identity.client/2RJuUvgnnEn0C0I0IOd1qHqOUMg%3D";
 
-        public const string BrokerRedirectUriOnIos = "msauth.com.companyname.XamarinDev://auth";
+        public const string BrokerRedirectUriOnIos = "msauth://com.microsoft.identity.client/2RJuUvgnnEn0C0I0IOd1qHqOUMg%3D";
 
         public static string RedirectUriOnIos = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri;
         // For system browser
@@ -38,7 +38,7 @@ namespace XamarinDev
         public const string B2CEditProfilePolicyAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
         public const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
 
-        public static string[] DefaultScopes = { "User.Read" };
+        public static string[] DefaultScopes = { "https://graph.microsoft.com" };
         public static string[] B2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
 
         public const bool DefaultValidateAuthority = true;

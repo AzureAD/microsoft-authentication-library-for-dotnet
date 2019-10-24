@@ -10,6 +10,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public const string BrokerRequest = "com.microsoft.aadbroker.adal.broker.request";
 
+        public const string BrokerRequestV2 = "broker_request_v2";
+
         public const string BrokerRequestResume = "com.microsoft.aadbroker.adal.broker.request.resume";
 
         /**

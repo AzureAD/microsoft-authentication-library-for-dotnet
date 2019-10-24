@@ -49,102 +49,67 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             resultEx = null;
             readyForResponse = new SemaphoreSlim(0);
+
             try
             {
-                await Task.Run(() => AcquireTokenInternal(brokerPayload)).ConfigureAwait(false);
+                await Task.Run(() => AcquireTokenInternalAsync(brokerPayload)).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _logger.ErrorPii(ex);
                 throw;
             }
+
             await readyForResponse.WaitAsync().ConfigureAwait(false);
             return resultEx;
         }
 
-        private void AcquireTokenInternal(IDictionary<string, string> brokerPayload)
+        private async Task AcquireTokenInternalAsync(IDictionary<string, string> brokerPayload)
         {
-            if (brokerPayload.ContainsKey(BrokerParameter.BrokerInstallUrl))
-            {
-                _logger.Info("Android Broker - broker payload contains install url");
-
-                string url = brokerPayload[BrokerParameter.BrokerInstallUrl];
-                Uri uri = new Uri(url);
-                string query = uri.Query;
-                if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Substring(1);
-                }
-
-                Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-
-                var appLink = keyPair["app_link"];
-                _logger.Info("Android Broker - Starting ActionView activity to " + appLink);
-                _activity.StartActivity(new Intent(Intent.ActionView, AndroidNative.Net.Uri.Parse(appLink)));
-
-                //throw new AdalException(AdalErrorAndroidEx.BrokerApplicationRequired, AdalErrorMessageAndroidEx.BrokerApplicationRequired);
-            }
-
             Context mContext = Application.Context;
 
-            // BROKER flow intercepts here
-            // cache and refresh call happens through the authenticator service
-            if (_brokerProxy.VerifyUser(brokerPayload[BrokerParameter.LoginHint],
-                brokerPayload[BrokerParameter.Username]))
+            if (_brokerProxy.VerifyUser(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint),
+                GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username)))
             {
-
-                brokerPayload[BrokerParameter.BrokerAccountName] = brokerPayload[BrokerParameter.LoginHint];
+                brokerPayload[BrokerParameter.BrokerAccountName] = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
                 _logger.InfoPii(
-                    "It switched to broker for context: " + mContext.PackageName + " login hint: " + brokerPayload[BrokerParameter.BrokerAccountName],
+                    "It switched to broker for context: " + mContext.PackageName + " login hint: " + GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerAccountName),
                     "It switched to broker for context");
 
-                // Don't send background request, if prompt flag is always or
-                // refresh_session
-                bool hasAccountNameOrUserId = !string.IsNullOrEmpty(brokerPayload[BrokerParameter.BrokerAccountName]) || !string.IsNullOrEmpty(brokerPayload[BrokerParameter.Username]);
-                if (string.IsNullOrEmpty(brokerPayload[BrokerParameter.Claims]) && hasAccountNameOrUserId)
+                // Don't send silent background request if account information is not provided
+                bool hasAccountNameOrUserId = !string.IsNullOrEmpty(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerAccountName)) || !string.IsNullOrEmpty(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username));
+                if (string.IsNullOrEmpty(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Claims)) && hasAccountNameOrUserId)
                 {
-                    _logger.Verbose("User is specified for background token request");
-                    resultEx = _brokerProxy.GetAuthTokenInBackground(brokerPayload, _activity);
+                    _logger.Verbose("User is specified for silent token request");
+                    resultEx = _brokerProxy.GetAuthTokenSilently(brokerPayload, _activity);
                 }
                 else
                 {
-                    _logger.Verbose("User is not specified for background token request");
+                    _logger.Verbose("User is not specified for silent token request");
                 }
 
                 if (resultEx != null && !string.IsNullOrEmpty(resultEx.AccessToken))
                 {
-                    _logger.Verbose("Token is returned from background call");
+                    _logger.Verbose("Token is returned from silent call");
                     readyForResponse.Release();
                     return;
                 }
+                else
+                {
+                    _logger.Verbose("Token is not returned from silent backgroud call");
+                }
 
-                // Launch broker activity
-                // if cache and refresh request is not handled.
-                // Initial request to authenticator needs to launch activity to
-                // record calling uid for the account. This happens for Prompt auto
-                // or always behavior.
-                _logger.Verbose("Token is not returned from backgroud call");
-
-                // Only happens with callback since silent call does not show UI
-                _logger.Verbose("Launch activity for Authenticator");
 
                 _logger.Verbose("Starting Authentication Activity");
 
                 if (resultEx == null)
                 {
-                    _logger.Verbose("Initial request to authenticator");
+                    _logger.Verbose("Initial request to broker");
                     // Log the initial request but not force a prompt
                 }
 
-                if (brokerPayload.ContainsKey(BrokerParameter.SilentBrokerFlow))
-                {
-                    _logger.Error("Can't invoke the broker in interactive mode because this is a silent flow");
-                    throw new MsalException(MsalError.FailedToAcquireTokenSilentlyFromBroker);
-                }
-
-                // onActivityResult will receive the response
-                // Activity needs to launch to record calling app for this
-                // account
+                // onActivityResult will receive the response for this activity.
+                // Lauching this activity will switch to the broker app.
                 Intent brokerIntent = _brokerProxy.GetIntentForBrokerActivity(brokerPayload, _activity);
                 if (brokerIntent != null)
                 {
@@ -162,12 +127,24 @@ namespace Microsoft.Identity.Client.Platforms.Android
                         _logger.ErrorPii(e);
                     }
                 }
-            }
+        }
             else
             {
                 throw new MsalException(MsalError.NoBrokerAccountFound, "PLease add the selected account to the broker");
-                //throw new AdalException(AdalErrorAndroidEx.NoBrokerAccountFound, "Add requested account as a Workplace account via Settings->Accounts or set UseBroker=true.");
             }
+
+            await readyForResponse.WaitAsync().ConfigureAwait(false);
+        }
+
+        public string GetValueFromBrokerPayload(IDictionary<string, string> brokerPayload, string key)
+        {
+            string value;
+            if (brokerPayload.TryGetValue(key, out value))
+            {
+                return value;
+            }
+
+            return string.Empty;
         }
 
         internal static void SetBrokerResult(Intent data, int resultCode)
@@ -182,22 +159,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             else
             {
-                //var response = new MsalTokenResponse()
                 Dictionary<string, string> response = new Dictionary<string, string>();
-
+                string results = data.GetStringExtra("BROKER_RESULT_V2");
                 response.Add(BrokerConstants.AccountAuthority, data.GetStringExtra(BrokerConstants.AccountAuthority));
                 response.Add(BrokerConstants.AccountAccessToken, data.GetStringExtra(BrokerConstants.AccountAccessToken));
                 response.Add(BrokerConstants.AccountIdToken, data.GetStringExtra(BrokerConstants.AccountIdToken));
                 response.Add(BrokerConstants.AccountExpireDate, data.GetLongExtra(BrokerConstants.AccountExpireDate, 0).ToString(CultureInfo.InvariantCulture));
-
-                //var tokenResponse = new MsalTokenResponse
-                //{
-                //    Authority = data.GetStringExtra(BrokerConstants.AccountAuthority),
-                //    AccessToken = data.GetStringExtra(BrokerConstants.AccountAccessToken),
-                //    IdTokenString = data.GetStringExtra(BrokerConstants.AccountIdToken),
-                //    TokenType = "Bearer",
-                //    ExpiresOn = data.GetLongExtra(BrokerConstants.AccountExpireDate, 0)
-                //};
 
                 resultEx = MsalTokenResponse.CreateFromBrokerResponse(response);
             }
