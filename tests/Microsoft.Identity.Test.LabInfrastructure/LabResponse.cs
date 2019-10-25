@@ -47,6 +47,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         [JsonProperty("credentialvaultkeyname")]
         public string CredentialVaultkeyName { get; set; }
+
+        [JsonProperty("authority")]
+        public string Authority { get; set; }
     }
 
     public class LabCredentialResponse

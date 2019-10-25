@@ -39,22 +39,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("labname")]
         public string LabName { get; set; }
 
-        //TODO: request the lab to add the federation provider to the lab user response
-        public FederationProvider FederationProvider
-        {
-            get
-            {
-                switch (LabName)
-                {
-                    //We are only reacting when the federation provider is ADFS V2. Will be removed once the federation provider si removed by the lab
-                    case "msidlab7.com":
-                    case "msidlab2.com":
-                        return FederationProvider.AdfsV2;
-                    default:
-                        return FederationProvider.Unknown;
-                }
-            }
-        }
+        public FederationProvider FederationProvider { get; set; }
 
         public string Credential { get; set; }
 

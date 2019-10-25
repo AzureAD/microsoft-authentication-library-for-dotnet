@@ -66,20 +66,19 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             var user = userResponses[0];
 
             var appResponse = await GetLabResponseAsync(LabApiConstants.LabAppEndpoint + user.AppId).ConfigureAwait(false);
-            LabApp labApp = JsonConvert.DeserializeObject<LabApp>(StripBracketsFromLabResponse(appResponse));
+            LabApp[] labApps = JsonConvert.DeserializeObject<LabApp[]>(appResponse);
+
+            var labInfoResponse = await GetLabResponseAsync(LabApiConstants.LabInfoEndpoint + user.LabName).ConfigureAwait(false);
+            Lab[] labs = JsonConvert.DeserializeObject<Lab[]>(labInfoResponse);
+
+            user.TenantId = labs[0].TenantId;
+            user.FederationProvider = labs[0].FederationProvider;
 
             return new LabResponse
             {
                 User = user,
-                App = labApp
+                App = labApps[0]
             };
-        }
-
-        private static string StripBracketsFromLabResponse(string response)
-        {
-            var startingIndex = response.IndexOf("{");
-            var end = response.LastIndexOf("\r\n]");
-            return response.Substring(startingIndex, response.Length - startingIndex - (response.Length - end));
         }
 
         private Task<string> RunQueryAsync(UserQuery query)
