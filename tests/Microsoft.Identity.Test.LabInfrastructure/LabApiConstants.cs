@@ -41,5 +41,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         //public const string LabEndpoint = "http://api.msidlab.com/api/user";
         public const string CreateLabUser = "https://request.msidlab.com/api/CreateLabUser";
         public const string LabEndPoint = "https://user.msidlab.com/api/user";
+        public const string LabUserCredentialEndpoint = "https://msidlab.com/api/LabUserSecret";
+        public const string LabAppEndpoint = "https://msidlab.com/api/app/";
     }
 }

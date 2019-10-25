@@ -39,19 +39,37 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("labname")]
         public string LabName { get; set; }
 
-        public FederationProvider FederationProvider { get; set; }
+        //TODO: request the lab to add the federation provider to the lab user response
+        public FederationProvider FederationProvider
+        {
+            get
+            {
+                switch (LabName)
+                {
+                    //We are only reacting when the federation provider is ADFS V2. Will be removed once the federation provider si removed by the lab
+                    case "msidlab7.com":
+                    case "msidlab2.com":
+                        return FederationProvider.AdfsV2;
+                    default:
+                        return FederationProvider.Unknown;
+                }
+            }
+        }
 
-        public string CredentialUrl { get; set; }
+        public string Credential { get; set; }
 
         public string TenantId { get; set; }
 
         private string _password = null;
 
+        [JsonProperty("appid")]
+        public string AppId { get; set; }
+
         public string GetOrFetchPassword()
         {
             if (_password == null)
             {
-                _password = LabUserHelper.FetchUserPassword(CredentialUrl);
+                _password = LabUserHelper.FetchUserPassword(LabName);
             }
 
             return _password;
