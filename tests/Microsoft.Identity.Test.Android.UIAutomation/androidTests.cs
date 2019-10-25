@@ -64,7 +64,6 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenADFSV3InteractiveFederatedTest,
                 AcquireTokenADFSV4InteractiveFederatedTest,
                 AcquireTokenADFSV2019InteractiveFederatedTest,
-                //AcquireTokenADFSV2019InteractiveNonFederatedTest,
 
                 B2CLocalAccountAcquireTokenTest,
                 //B2CFacebookMicrosoftLoginAcquireTokenTest,
@@ -274,20 +273,6 @@ namespace Microsoft.Identity.Test.UIAutomation
                 _xamarinController,
                 LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3).GetAwaiter().GetResult(),
                 CoreUiTestConstants.ADFSv3Federated);
-        }
-
-        /// <summary>
-        /// Runs through the standard acquire token ADFSV2019 Non-Federated flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenADFSV2019InteractiveNonFederatedTest()
-        {
-            TestCommon.ResetInternalStaticCaches();
-
-            _mobileTestHelper.AcquireTokenTestHelper(
-                _xamarinController,
-                LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, false).GetAwaiter().GetResult(),
-                CoreUiTestConstants.ADFSv2019NonFederated);
         }
 
         private static void LogMessage(string message, StringBuilder stringBuilderMessage)
