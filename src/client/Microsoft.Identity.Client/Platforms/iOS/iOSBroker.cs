@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 _brokerRequestNonce = Guid.NewGuid().ToString();
                 brokerPayload[iOSBrokerConstants.BrokerNonce] = _brokerRequestNonce;
 
-                string applicationToken = ReadBrokerApplicationTokenFromKeychain(brokerPayload);
+                string applicationToken = TryReadBrokerApplicationTokenFromKeychain(brokerPayload);
 
                 if (!string.IsNullOrEmpty(applicationToken))
                 {
@@ -273,22 +273,33 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
             catch(Exception ex)
             {
-                throw new MsalClientException(MsalError.WritingApplicationTokenToKeychainFailed, MsalErrorMessage.WritingApplicationTokenToKeychainFailed + ex.Message);
+                throw new MsalClientException(
+                    MsalError.WritingApplicationTokenToKeychainFailed, 
+                    MsalErrorMessage.WritingApplicationTokenToKeychainFailed + ex.Message);
             }
         }
 
-        private string ReadBrokerApplicationTokenFromKeychain(Dictionary<string, string> brokerPayload)
+        private string TryReadBrokerApplicationTokenFromKeychain(Dictionary<string, string> brokerPayload)
         {
             iOSTokenCacheAccessor iOSTokenCacheAccessor = new iOSTokenCacheAccessor();
 
-            SecStatusCode secStatusCode = iOSTokenCacheAccessor.TryGetBrokerApplicationToken(brokerPayload[BrokerParameter.ClientId], out string appToken);
+            try
+            {
+                SecStatusCode secStatusCode = iOSTokenCacheAccessor.TryGetBrokerApplicationToken(brokerPayload[BrokerParameter.ClientId], out string appToken);
 
-            _logger.Info(string.Format(
-                CultureInfo.CurrentCulture,
-                iOSBrokerConstants.SecStatusCodeFromTryGetBrokerApplicationToken + "SecStatusCode: {0}",
-                secStatusCode));
+                _logger.Info(string.Format(
+                    CultureInfo.CurrentCulture,
+                    iOSBrokerConstants.SecStatusCodeFromTryGetBrokerApplicationToken + "SecStatusCode: {0}",
+                    secStatusCode));
 
-            return appToken;
+                return appToken;
+            }
+            catch(Exception ex)
+            {
+                throw new MsalClientException(
+                    MsalError.ReadingApplicationTokenFromKeychainFailed, 
+                    MsalErrorMessage.ReadingApplicationTokenFromKeychainFailed + ex.Message);
+            }
         }
 
         public static void SetBrokerResponse(NSUrl responseUrl)
