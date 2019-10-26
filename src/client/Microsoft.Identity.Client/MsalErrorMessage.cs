@@ -275,6 +275,9 @@ namespace Microsoft.Identity.Client
         public const string InvalidUserInstanceMetadata = "The json containing instance metadata could not be parsed. See https://aka.ms/msal-net-custom-instance-metadata for details.";
 
         public const string UIViewControllerIsRequiredToInvokeiOSBroker = "UIViewController is null, so MSAL.NET cannot invoke the iOS broker. See https://aka.ms/msal-net-ios-broker";
+        public const string WritingApplicationTokenToKeychainFailed = "This error indidates that the writing of the application token from iOS broker to the keychain threw an exception. No SecStatusCode was returned. ";
+        public const string ReadingApplicationTokenFromKeychainFailed = "This error indicates that the reading of the application token from the keychain threw an exception. No SecStatusCode was returned. ";
+
         public const string ValidateAuthorityOrCustomMetadata = "You have configured custom instance metadata, but the validateAuthority flag is set to true. These are mutually exclusive. Set the validateAuthority flag to false. See https://aka.ms/msal-net-custom-instance-metadata for more details.";
 
         public const string InvalidClient = "The wrong application (public or confidential) is being used with this authentication flow." +

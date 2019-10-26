@@ -12,6 +12,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public const string Authority = "authority";
         public const string AccessToken = "access_token";
+        public const string ClientId = "client_id";
         public const string RefreshToken = "refresh_token";
         public const string IdToken = "id_token";
         public const string Bearer = "Bearer";
@@ -19,7 +20,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Scope = "scope";
         public const string ExpiresOn = "expires_on";
         public const string ClientInfo = "client_info";
-
-        public const string iOSBrokerNonce = "broker_nonce"; //in response from iOS Broker
+       
+        public const string iOSBrokerNonce = "broker_nonce"; // included in request and response with iOS Broker v3
     }
 }

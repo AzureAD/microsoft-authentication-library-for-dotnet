@@ -735,6 +735,22 @@ namespace Microsoft.Identity.Client
         /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
         /// </summary>
         public const string UIViewControllerRequiredForiOSBroker = "uiviewcontroller_required_for_ios_broker";
+
+        /// <summary>
+        /// Xamarin.iOS + broker specific. This error indicates that the writing of the application token from iOS broker
+        /// to the keychain threw an exception. No SecStatusCode was returned.
+        /// <para>Mitigation</para> Check the logs.
+        /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
+        /// </summary>
+        public const string WritingApplicationTokenToKeychainFailed = "writing_application_token_to_keychain_failed";
+
+        /// <summary>
+        /// Xamarin.iOS + broker specific. This error indicates that the reading of the application token from 
+        /// the keychain threw an exception. No SecStatusCode was returned.
+        /// <para>Mitigation</para> Check the logs.
+        /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
+        /// </summary>
+        public const string ReadingApplicationTokenFromKeychainFailed = "reading_application_token_from_keychain_failed";
 #endif
 
 #if ANDROID

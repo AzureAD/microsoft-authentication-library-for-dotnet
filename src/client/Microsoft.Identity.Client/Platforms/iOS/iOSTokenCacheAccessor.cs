@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     {
         public const string CacheKeyDelimiter = "-";
 
-
         private const bool _defaultSyncSetting = false;
         private const SecAccessible _defaultAccessiblityPolicy = SecAccessible.AfterFirstUnlockThisDeviceOnly;
 
@@ -28,7 +27,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private string _keychainGroup;
         private readonly RequestContext _requestContext;
-        
+
         public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
         {
             if (string.IsNullOrEmpty(keychainSecurityGroup))
@@ -147,6 +146,27 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 .ToList();
         }
 
+        internal SecStatusCode TryGetBrokerApplicationToken(string clientId, out string appToken)
+        {
+            var queryRecord = new SecRecord(SecKind.GenericPassword)
+            {
+                AccessGroup = _keychainGroup,
+                Account = clientId,
+                Service = iOSBrokerConstants.iOSBroker,
+            };
+
+            SecRecord record = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);
+
+            appToken = null;
+
+            if (resultCode == SecStatusCode.Success)
+            {
+                appToken = record.ValueData.ToString(NSStringEncoding.UTF8);
+            }
+
+            return resultCode;
+        }
+
         private string GetPayload(IiOSKey key)
         {
             var queryRecord = new SecRecord(SecKind.GenericPassword)
@@ -222,6 +242,34 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return secStatusCode;
         }
 
+        internal SecStatusCode SaveBrokerApplicationToken(string clientIdAsKey, string applicationToken)
+        {
+            // The broker application token is used starting w/iOS broker 6.3.19+ (v3)
+            // If the application cannot be verified, an additional user consent dialog will be required the first time 
+            // when the application is using the iOS broker. 
+            // After initial user consent, the iOS broker will issue a token to the application that will 
+            // grant application access to its own cache on subsequent broker invocations.
+            // On subsequent calls, the application presents the application token to the iOS broker, this will prevent
+            // the showing of the consent dialog.
+            var recordToSave = new SecRecord(SecKind.GenericPassword)
+            {
+                Account = clientIdAsKey,
+                Service = iOSBrokerConstants.iOSBroker,
+                ValueData = NSData.FromString(applicationToken, NSStringEncoding.UTF8),
+                AccessGroup = _keychainGroup,
+                Accessible = _defaultAccessiblityPolicy,
+                Synchronizable = _defaultSyncSetting
+            };
+
+            SecStatusCode secStatusCode = Update(recordToSave);
+
+            if (secStatusCode == SecStatusCode.ItemNotFound)
+            {
+                secStatusCode = SecKeyChain.Add(recordToSave);
+            }
+
+            return secStatusCode;
+        }
 
         private SecStatusCode Remove(IiOSKey key)
         {
