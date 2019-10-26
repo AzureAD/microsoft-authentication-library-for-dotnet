@@ -96,11 +96,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserDataAsync(query);
         }
 
-        public static string FetchUserPassword(string passwordUri)
+        public static string FetchUserPassword(string userLabName)
         {
-            if (string.IsNullOrWhiteSpace(passwordUri))
+            if (string.IsNullOrWhiteSpace(userLabName))
             {
-                throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
+                throw new InvalidOperationException("Error: lab name is not set on user. Password retrieval failed.");
             }
 
             if (s_keyVaultSecretsProvider == null)
@@ -110,8 +110,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             try
             {
-                var secret = s_keyVaultSecretsProvider.GetSecret(passwordUri);
-                return secret.Value;
+                return s_labService.GetUserSecretAsync(userLabName).Result;
             }
             catch (Exception e)
             {
