@@ -708,66 +708,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        //[TestMethod]
-        //[DeploymentItem(@"Resources\MultiTenantTokenCache.json")]
-        //public async Task FooAsync()
-        //{
-        //    const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
-        //    const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
-        //    string tenantedAuthority1 = $"https://login.microsoftonline.com/{tenant1}/";
-        //    string tenantedAuthority2 = $"https://login.microsoftonline.com/{tenant2}/";
-
-        //    using (var httpManager = new MockHttpManager())
-        //    {
-        //        // Arrange
-        //        PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, tenant1);
-
-        //        // Act
-        //        var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-        //        AuthenticationResult response = await
-        //            pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
-        //            .ExecuteAsync()
-        //            .ConfigureAwait(false);
-
-        //        //// Assert
-        //        //Assert.AreEqual(tenant1, response.TenantId);
-
-        //        //// Act
-        //        //accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-        //        //response = await
-        //        //    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
-        //        //    .WithAuthority(tenantedAuthority2)
-        //        //    .ExecuteAsync()
-        //        //    .ConfigureAwait(false);
-
-        //        //// Assert
-        //        //Assert.AreEqual(tenant2, response.TenantId);
-        //    }
-        //}
-
-        //private static PublicClientApplication CreatePcaFromFileWithAuthority(
-        //  MockHttpManager httpManager,
-        //  string authority = null)
-        //{
-        //    const string clientIdInFile = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
-        //    const string tokenCacheFile = "MultiTenantTokenCache.json";
-
-        //    var pcaBuilder = PublicClientApplicationBuilder
-        //        .Create(clientIdInFile)
-        //        .WithTelemetry(new TraceTelemetryConfig())
-        //        .WithHttpManager(httpManager);
-
-        //    if (authority != null)
-        //    {
-        //        pcaBuilder = pcaBuilder.WithAuthority(authority);
-        //    }
-
-        //    var pca = pcaBuilder.BuildConcrete();
-        //    pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile), true);
-        //    pca.UserTokenCacheInternal.Accessor.AssertItemCount(3, 2, 3, 3, 1);
-        //    return pca;
-        //}
-
         #endregion
     }
 }

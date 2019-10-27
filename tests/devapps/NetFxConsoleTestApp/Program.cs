@@ -179,12 +179,8 @@ namespace NetFx
                         case '4':
 
                             authTask = pca.AcquireTokenInteractive(s_scopes)
-                                //.WithPrompt(Prompt.Consent)
-                                .WithExtraQueryParameters("dc=PROD-WST-CORP")
+                                .WithPrompt(Prompt.Consent)
                                 .ExecuteAsync(CancellationToken.None);
-
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-                            break;
 
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
                             break;
