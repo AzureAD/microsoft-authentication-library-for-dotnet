@@ -63,6 +63,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     app.UserTokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
                 }
 
+                Assert.AreEqual(0, httpManager.QueueSize);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
+
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
@@ -76,6 +79,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                             TestConstants.DisplayableId,
                             TestConstants.s_scope.ToArray())
                     });
+
 
                 // Using RT from Adal cache for silent call
                 AuthenticationResult result1 = app

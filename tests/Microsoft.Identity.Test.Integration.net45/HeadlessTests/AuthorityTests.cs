@@ -8,10 +8,12 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -83,6 +85,56 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsTrue(exception.Message.Contains("AADSTS50049"));
             Assert.AreEqual("invalid_instance", exception.ErrorCode);
+        }
+
+        [TestMethod]
+        public void FooTest()
+        {
+            var commonAuthority = AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, true);
+            var utidAuthority = AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityUtidTenant, true);
+            var utid2Authority = AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityUtid2Tenant, true);
+            var utid = TestConstants.Utid;
+            var utid2 = TestConstants.Utid2;
+
+            VerifyAuthority(
+                config: commonAuthority, 
+                request:null, 
+                accountTid: null, 
+                resultTid: "common");
+
+            VerifyAuthority(
+               config: commonAuthority,
+               request: commonAuthority,
+               accountTid: null,
+               resultTid: "common");
+
+            VerifyAuthority(
+              config: commonAuthority,
+              request: commonAuthority,
+              accountTid: utid,
+              resultTid: utid);
+
+            VerifyAuthority(
+             config: commonAuthority,
+             request: utidAuthority,
+             accountTid: null,
+             resultTid: utid);
+
+            VerifyAuthority(
+             config: commonAuthority,
+             request: utid2Authority,
+             accountTid: utid,
+             resultTid: utid2);
+        }
+
+        private static void VerifyAuthority(
+            AuthorityInfo config, 
+            AuthorityInfo request, 
+            string accountTid, 
+            string resultTid)
+        {
+            var resultAuthority = Authority.CreateAuthorityForRequest(config, request, accountTid);
+            Assert.AreEqual(resultTid, resultAuthority.GetTenantId());
         }
 
         /// <summary>

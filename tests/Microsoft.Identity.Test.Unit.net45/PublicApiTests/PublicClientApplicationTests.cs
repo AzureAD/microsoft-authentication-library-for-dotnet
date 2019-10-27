@@ -1200,6 +1200,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+       
+
         /// <summary>
         /// Cache state:
         ///

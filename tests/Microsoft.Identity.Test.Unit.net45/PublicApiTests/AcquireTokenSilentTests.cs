@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-
+       
 
         [TestMethod]
         [TestCategory("Regression")]
@@ -422,7 +422,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -553,22 +553,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                // PopulateCache() creates two access tokens3
+                // PopulateCache() creates two access tokens
                 var tokenCacheHelper = new TokenCacheHelper();
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
-
-                httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
-
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            TestConstants.UniqueId,
-                            TestConstants.DisplayableId,
-                            TestConstants.s_scope.ToArray())
-                    });
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
@@ -582,12 +569,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(0, httpManager.QueueSize);
 
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
+                httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant2);
-
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
@@ -604,7 +592,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant2)
+                    .WithAuthority(TestConstants.AuthorityGuidTenant2)                    
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -659,7 +647,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
 
                 //populate cache
                 var tokenCacheHelper = new TokenCacheHelper();
@@ -693,5 +681,93 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }
             }
         }
+
+        #region Tests around tenant ID
+        [TestMethod]
+        [TestCategory("Regression")]
+        [WorkItem(1456)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1456
+        public async Task AcquireTokenSilent_OverrideWithCommon_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(ClientApplicationBase.DefaultAuthority)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                var tokenCacheHelper = new TokenCacheHelper();
+                tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
+                var cacheAccess = app.UserTokenCache.RecordAccess();
+
+                var acc = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
+
+                AuthenticationResult result = await app
+                    .AcquireTokenSilent(TestConstants.s_scope, acc)
+                    .WithAuthority(ClientApplicationBase.DefaultAuthority) // this override should do nothing, it's mean to specify a tenant id
+                    .ExecuteAsync().ConfigureAwait(false);
+            }
+        }
+
+        //[TestMethod]
+        //[DeploymentItem(@"Resources\MultiTenantTokenCache.json")]
+        //public async Task FooAsync()
+        //{
+        //    const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+        //    const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
+        //    string tenantedAuthority1 = $"https://login.microsoftonline.com/{tenant1}/";
+        //    string tenantedAuthority2 = $"https://login.microsoftonline.com/{tenant2}/";
+
+        //    using (var httpManager = new MockHttpManager())
+        //    {
+        //        // Arrange
+        //        PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, tenant1);
+
+        //        // Act
+        //        var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+        //        AuthenticationResult response = await
+        //            pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+        //            .ExecuteAsync()
+        //            .ConfigureAwait(false);
+
+        //        //// Assert
+        //        //Assert.AreEqual(tenant1, response.TenantId);
+
+        //        //// Act
+        //        //accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+        //        //response = await
+        //        //    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+        //        //    .WithAuthority(tenantedAuthority2)
+        //        //    .ExecuteAsync()
+        //        //    .ConfigureAwait(false);
+
+        //        //// Assert
+        //        //Assert.AreEqual(tenant2, response.TenantId);
+        //    }
+        //}
+
+        //private static PublicClientApplication CreatePcaFromFileWithAuthority(
+        //  MockHttpManager httpManager,
+        //  string authority = null)
+        //{
+        //    const string clientIdInFile = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
+        //    const string tokenCacheFile = "MultiTenantTokenCache.json";
+
+        //    var pcaBuilder = PublicClientApplicationBuilder
+        //        .Create(clientIdInFile)
+        //        .WithTelemetry(new TraceTelemetryConfig())
+        //        .WithHttpManager(httpManager);
+
+        //    if (authority != null)
+        //    {
+        //        pcaBuilder = pcaBuilder.WithAuthority(authority);
+        //    }
+
+        //    var pca = pcaBuilder.BuildConcrete();
+        //    pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile), true);
+        //    pca.UserTokenCacheInternal.Accessor.AssertItemCount(3, 2, 3, 3, 1);
+        //    return pca;
+        //}
+
+        #endregion
     }
 }

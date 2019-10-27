@@ -107,88 +107,89 @@ namespace NetCoreTestApp
                 {
                     switch (selection)
                     {
-                    case 1: // acquire token
-                        authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                        case 1: // acquire token
+                            authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                        break;
-                    case 2: // acquire token u/p
-                        SecureString password = GetPasswordFromConsole();
-                        authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                            break;
+                        case 2: // acquire token u/p
+                            SecureString password = GetPasswordFromConsole();
+                            authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                        break;
-                    case 3:
-                        authTask = pca.AcquireTokenWithDeviceCode(
-                            s_scopes,
-                            deviceCodeResult =>
+                            break;
+                        case 3:
+                            authTask = pca.AcquireTokenWithDeviceCode(
+                                s_scopes,
+                                deviceCodeResult =>
+                                {
+                                    Console.WriteLine(deviceCodeResult.Message);
+                                    return Task.FromResult(0);
+                                }).ExecuteAsync(CancellationToken.None);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+
+                            break;
+                        case 4: // acquire token interactive with custom web ui
+
+                            authTask = pca.AcquireTokenInteractive(s_scopes)
+                                .WithCustomWebUi(new DefaultOsBrowserWebUi()) // make sure you've configured a redirect uri of "http://localhost" or "http://localhost:1234" in the _pca builder
+                                .ExecuteAsync(CancellationToken.None);
+
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+
+                            break;
+                        case 5: // acquire token interactive
+
+                            var options = new SystemWebViewOptions()
                             {
-                                Console.WriteLine(deviceCodeResult.Message);
-                                return Task.FromResult(0);
-                            }).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                                BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
+                            };
 
-                        break;
-                    case 4: // acquire token interactive with custom web ui
+                            var cts = new CancellationTokenSource();
+                            authTask = pca.AcquireTokenInteractive(s_scopes)
+                                .WithSystemWebViewOptions(options)
+                                 .WithExtraQueryParameters("dc=PROD-WST-CORP")
+                                .ExecuteAsync(cts.Token);
 
-                        authTask = pca.AcquireTokenInteractive(s_scopes)
-                            .WithCustomWebUi(new DefaultOsBrowserWebUi()) // make sure you've configured a redirect uri of "http://localhost" or "http://localhost:1234" in the _pca builder
-                            .ExecuteAsync(CancellationToken.None);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
+                            break;
+                        case 6: // acquire token silent
+                            IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
+                            if (account == null)
+                            {
+                                Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
+                            }
 
-                        break;
-                    case 5: // acquire token interactive
+                            authTask = pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                        var options = new SystemWebViewOptions()
-                        {
-                            BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
-                        };
+                            break;
+                        case 7:
+                            CancellationTokenSource cts2 = new CancellationTokenSource();
+                            NetStandardAuthenticator authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
+                            await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
+                            break;
+                        case 8:
+                            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                            foreach (var acc in accounts)
+                            {
+                                await pca.RemoveAsync(acc).ConfigureAwait(false);
+                            }
 
-                        var cts = new CancellationTokenSource();
-                        authTask = pca.AcquireTokenInteractive(s_scopes)
-                            .WithSystemWebViewOptions(options)
-                            .ExecuteAsync(cts.Token);
+                            break;
+                        case 9:
 
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
-                        break;
-                    case 6: // acquire token silent
-                        IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
-                        if (account == null)
-                        {
-                            Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
-                        }
-
-                        authTask = pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
-                        await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
-                        break;
-                    case 7:
-                        CancellationTokenSource cts2 = new CancellationTokenSource();
-                        NetStandardAuthenticator authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
-                        await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
-                        break;
-                    case 8:
-                        var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-                        foreach (var acc in accounts)
-                        {
-                            await pca.RemoveAsync(acc).ConfigureAwait(false);
-                        }
-
-                        break;
-                    case 9:
-
-                        s_currentTid = (s_currentTid + 1) % s_tids.Length;
-                        pca = CreatePca();
-                        RunConsoleAppLogicAsync(pca).Wait();
-                        break;
+                            s_currentTid = (s_currentTid + 1) % s_tids.Length;
+                            pca = CreatePca();
+                            RunConsoleAppLogicAsync(pca).Wait();
+                            break;
 
 
-                    case 0:
-                        return;
-                    default:
-                        break;
+                        case 0:
+                            return;
+                        default:
+                            break;
                     }
 
                 }
@@ -257,17 +258,17 @@ namespace NetCoreTestApp
 
             switch (level)
             {
-            case LogLevel.Error:
-                Console.ForegroundColor = ConsoleColor.Red;
-                break;
-            case LogLevel.Warning:
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                break;
-            case LogLevel.Verbose:
-                Console.ForegroundColor = ConsoleColor.Gray;
-                break;
-            default:
-                break;
+                case LogLevel.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case LogLevel.Warning:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case LogLevel.Verbose:
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    break;
+                default:
+                    break;
             }
 
             Console.WriteLine($"{level} {message}");
