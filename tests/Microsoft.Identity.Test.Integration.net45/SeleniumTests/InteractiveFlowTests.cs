@@ -169,7 +169,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
 
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
-            Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
 
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
