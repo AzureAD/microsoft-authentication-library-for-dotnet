@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
-            appCacheRecorder.AssertAccessCounts(1, 1);
+            appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
         }
 
