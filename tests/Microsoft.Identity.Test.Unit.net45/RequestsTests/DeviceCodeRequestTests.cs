@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle),
+                    new TokenCache(harness.ServiceBundle, false),
                     account: null);
 
                 DeviceCodeResult actualDeviceCodeResult = null;
