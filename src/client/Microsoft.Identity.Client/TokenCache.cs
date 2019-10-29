@@ -19,6 +19,7 @@ namespace Microsoft.Identity.Client
 #if !DESKTOP && !NET_CORE
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
+
     /// <summary>
     /// Token cache storing access and refresh tokens for accounts
     /// This class is used in the constructors of <see cref="PublicClientApplication"/> and <see cref="ConfidentialClientApplication"/>.
@@ -45,8 +46,8 @@ namespace Microsoft.Identity.Client
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
 
-        bool IsAppTokenCache { get; }
-        bool ITokenCacheInternal.IsApplicationTokenCache => IsAppTokenCache;
+        private bool IsAppTokenCache { get; }
+        bool ITokenCacheInternal.IsApplicationCache => IsAppTokenCache;
 
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
@@ -97,7 +98,7 @@ namespace Microsoft.Identity.Client
         internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest, bool isApplicationTokenCache)
             : this(serviceBundle, isApplicationTokenCache)
         {
-            LegacyCachePersistence = legacyCachePersistenceForTest;            
+            LegacyCachePersistence = legacyCachePersistenceForTest;
         }
 
         /// <inheritdoc />
@@ -161,8 +162,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-    
-
         private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             return string.Format(
@@ -173,7 +172,6 @@ namespace Microsoft.Identity.Client
                 msalAccessTokenCacheItem.ExtendedExpiresOn);
         }
 
-
         private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account)
         {
             bool homeAccIdMatch = rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase);
@@ -183,7 +181,6 @@ namespace Microsoft.Identity.Client
 
             return homeAccIdMatch && clientIdMatch;
         }
-
 
         private static List<IAccount> UpdateWithAdalAccounts(
             string envFromRequest,
@@ -227,7 +224,6 @@ namespace Microsoft.Identity.Client
                 ? refreshTokens.Where(x => x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
                 : refreshTokens;
         }
-
 
         private IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokensWithNoLocks(bool filterByClientId)
         {

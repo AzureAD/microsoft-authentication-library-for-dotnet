@@ -6,7 +6,8 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Contains parameters used by the MSAL call accessing the cache.
     /// See also <see cref="T:ITokenCacheSerializer"/> which contains methods
-    /// to customize the cache serialization
+    /// to customize the cache serialization.
+    /// For more details about the token cache see https://aka.ms/msal-net-web-token-cache
     /// </summary>
     public sealed partial class TokenCacheNotificationArgs
     {
@@ -14,14 +15,14 @@ namespace Microsoft.Identity.Client
             ITokenCacheSerializer tokenCacheSerializer,
             string clientId,
             IAccount account,
-            bool hasStateChanged, 
+            bool hasStateChanged,
             bool isAppCache)
         {
             TokenCache = tokenCacheSerializer;
             ClientId = clientId;
             Account = account;
             HasStateChanged = hasStateChanged;
-            IsApplicationTokenCache = isAppCache;
+            IsApplicationCache = isAppCache;
         }
 
         /// <summary>
@@ -47,10 +48,12 @@ namespace Microsoft.Identity.Client
         public bool HasStateChanged { get; internal set; }
 
         /// <summary>
-        /// Indicates whether the cache change occured in the UserTokenCache
-        /// or in the AppTokenCache. The latter is used in Client Credential grant, 
-        /// which is not available on all platforms.
+        /// Indicates whether the cache change occurred in the UserTokenCache or in the AppTokenCache.
         /// </summary>
-        public bool IsApplicationTokenCache { get; }
+        /// <remarks>
+        /// The Application Cache is used in Client Credential grant,  which is not available on all platforms.
+        /// See https://aka.ms/msal-net-app-cache-serialization for details.
+        /// </remarks>
+        public bool IsApplicationCache { get; }
     }
 }
