@@ -1,22 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using System.Globalization;
 
 namespace Microsoft.Identity.Client
 {
@@ -68,7 +66,7 @@ namespace Microsoft.Identity.Client
                 preferredUsername = idToken.PreferredUsername;
             }
 
-            // Do a full instance discovery when saving tokens (if not cached), 
+            // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
             var instanceDiscoveryMetadata = await ServiceBundle.InstanceDiscoveryManager
                                 .GetMetadataEntryAsync(
@@ -118,7 +116,7 @@ namespace Microsoft.Identity.Client
                                           username,
                                           instanceDiscoveryMetadata.PreferredCache);
                     }
-                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
+                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true, (this as ITokenCacheInternal).IsApplicationCache);
 
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = true;
@@ -192,7 +190,6 @@ namespace Microsoft.Identity.Client
                                 authorityWithPrefferedCache.AuthorityInfo.CanonicalAuthority,
                                 msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
                         }
-
                     }
                     finally
                     {
@@ -273,7 +270,7 @@ namespace Microsoft.Identity.Client
 
             string requestTenantId = requestParams.Authority.GetTenantId();
 
-            tokenCacheItems = tokenCacheItems.FilterWithLogging(item => 
+            tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                 string.Equals(item.TenantId ?? string.Empty, requestTenantId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
                 requestParams.RequestContext.Logger,
                 "Filtering by tenant id");
@@ -290,11 +287,9 @@ namespace Microsoft.Identity.Client
         }
 
         private MsalAccessTokenCacheItem GetUnexpiredAccessTokenOrNull(AuthenticationRequestParameters requestParams, MsalAccessTokenCacheItem msalAccessTokenCacheItem)
-        { 
+        {
             if (msalAccessTokenCacheItem != null)
             {
-
-
                 if (msalAccessTokenCacheItem.ExpiresOn >
                     DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                 {
@@ -346,7 +341,6 @@ namespace Microsoft.Identity.Client
 
         private async Task<IEnumerable<MsalAccessTokenCacheItem>> FilterByEnvironmentAsync(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> filteredItems)
         {
-
             // at this point we need env aliases, try to get them without a discovery call
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                                      requestParams.AuthorityInfo.CanonicalAuthority,
@@ -354,7 +348,7 @@ namespace Microsoft.Identity.Client
                                      requestParams.RequestContext)
                             .ConfigureAwait(false);
 
-            // In case we're sharing the cache with an MSAL that does not implement env aliasing, 
+            // In case we're sharing the cache with an MSAL that does not implement env aliasing,
             // it's possible (but unlikely), that we have multiple ATs from the same alias family.
             // To overcome some of these use cases, try to filter just by preferred cache alias
             var filteredByPreferredAlias = filteredItems.Where(
@@ -392,10 +386,10 @@ namespace Microsoft.Identity.Client
             authenticationRequest.RequestContext.Logger.Info(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "A token bound to the wrong key was found. Token key id: {0} Request key id: {1}", 
-                        item.KeyId, 
+                        "A token bound to the wrong key was found. Token key id: {0} Request key id: {1}",
+                        item.KeyId,
                         requestKid));
-                return null;
+            return null;
         }
 
         async Task<MsalRefreshTokenCacheItem> ITokenCacheInternal.FindRefreshTokenAsync(
@@ -476,8 +470,8 @@ namespace Microsoft.Identity.Client
                 .FirstOrDefault(item => item != null);
 
             // From a FOCI perspective, an app has 3 states - in the family, not in the family or unknown
-            // Unknown is a valid state, where we never fetched tokens for that app or when we used an older 
-            // version of MSAL which did not record app metadata. 
+            // Unknown is a valid state, where we never fetched tokens for that app or when we used an older
+            // version of MSAL which did not record app metadata.
             if (appMetadata == null)
             {
                 logger.Warning("No app metadata found. Returning unknown");
@@ -494,8 +488,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <remarks>
-        /// Get accounts should not make a network call, if possible. This can be achieved if 
-        /// all the environments in the token cache are known to MSAL, as MSAL keeps a list of 
+        /// Get accounts should not make a network call, if possible. This can be achieved if
+        /// all the environments in the token cache are known to MSAL, as MSAL keeps a list of
         /// known environments in <see cref="KnownMetadataProvider"/>
         /// </remarks>
         async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(string authority, RequestContext requestContext)
@@ -613,7 +607,7 @@ namespace Microsoft.Identity.Client
 
                 try
                 {
-                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true);
+                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true, (this as ITokenCacheInternal).IsApplicationCache);
 
                     await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                     try
@@ -700,7 +694,7 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true);
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true, (this as ITokenCacheInternal).IsApplicationCache);
 
                 await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try
@@ -737,4 +731,3 @@ namespace Microsoft.Identity.Client
         }
     }
 }
-

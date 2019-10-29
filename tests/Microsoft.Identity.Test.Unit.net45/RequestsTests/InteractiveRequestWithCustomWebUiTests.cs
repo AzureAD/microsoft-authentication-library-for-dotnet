@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope, 
-                    new TokenCache(harness.ServiceBundle));
+                    new TokenCache(harness.ServiceBundle, false));
                 parameters.RedirectUri = new Uri(ExpectedRedirectUri);
                 parameters.LoginHint = TestConstants.DisplayableId;
                 var interactiveParameters = new AcquireTokenInteractiveParameters

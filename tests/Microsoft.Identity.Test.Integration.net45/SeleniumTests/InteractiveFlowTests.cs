@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private static readonly string[] s_scopes = new[] { "user.read" };
 
         #region MSTest Hooks
+
         /// <summary>
         /// Initialized by MSTest (do not make private or readonly)
         /// </summary>
@@ -43,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        #endregion
+        #endregion MSTest Hooks
 
         [TestMethod]
         public async Task Interactive_AADAsync()
@@ -179,12 +180,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             userCacheAccess.AssertAccessCounts(0, 1);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(1, 1); // the assert calls GetAccounts
+            Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
 
             Trace.WriteLine("Part 2 - Clear the cache");
             await pca.RemoveAsync(account).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(1, 2);
             Assert.IsFalse((await pca.GetAccountsAsync().ConfigureAwait(false)).Any());
             userCacheAccess.AssertAccessCounts(2, 2);
+            Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
 
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
@@ -198,6 +201,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(3, 3);
+            Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
 
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca
@@ -206,6 +210,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .ConfigureAwait(false);
 
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
 
             return result;
         }
@@ -232,7 +237,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                .ConfigureAwait(false);
 
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-
         }
 
         private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)

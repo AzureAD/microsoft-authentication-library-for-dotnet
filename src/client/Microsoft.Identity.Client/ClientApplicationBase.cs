@@ -70,11 +70,11 @@ namespace Microsoft.Identity.Client
 
             if (config.UserTokenLegacyCachePersistenceForTest != null)
             {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest);
+                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest, false);
             }
             else
             {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle);
+                UserTokenCacheInternal = new TokenCache(ServiceBundle, false);
             }
         }
 

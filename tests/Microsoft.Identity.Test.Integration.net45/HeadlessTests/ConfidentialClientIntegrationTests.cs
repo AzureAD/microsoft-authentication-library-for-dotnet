@@ -4,8 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net;
 using System.Security;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,9 +22,6 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Linq;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -32,8 +32,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
         private static readonly string[] s_adfsScopes = { "openid", "profile" };
+
         //TODO: acquire scenario specific client ids from the lab resonse
         private const string ConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+
         private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
 
         [ClassInitialize]
@@ -86,12 +88,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             X509Certificate2 cert = GetCertificate();
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
 
-
             confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithCertificate(cert)
                 .Build();
+
+            var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
             authResult = await confidentialApp
                 .AcquireTokenForClient(s_keyvaultScope)
@@ -99,6 +102,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
+            appCacheRecorder.AssertAccessCounts(1, 1);
+            Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+
+            // Call again to ensure token cache is hit
+            authResult = await confidentialApp
+               .AcquireTokenForClient(s_keyvaultScope)
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult);
+            appCacheRecorder.AssertAccessCounts(2, 1);
+            Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
         }
 
         [TestMethod]
@@ -114,6 +129,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithCertificate(cert)
                 .Build();
+            var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
             authResult = await confidentialApp
                 .AcquireTokenForClient(s_keyvaultScope)
@@ -121,6 +137,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
+            appCacheRecorder.AssertAccessCounts(1, 1);
+            Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+
+            // Call again to ensure token cache is hit
+            authResult = await confidentialApp
+               .AcquireTokenForClient(s_keyvaultScope)
+               .ExecuteAsync(CancellationToken.None)
+               .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult);
+            appCacheRecorder.AssertAccessCounts(2, 1);
+            Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
         }
 
         [TestMethod]
@@ -135,19 +163,30 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientSecret(secret)
                 .Build();
+            var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
+            appCacheRecorder.AssertAccessCounts(1, 1);
+            Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+
+            // Call again to ensure token cache is hit
+            authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult);
+            appCacheRecorder.AssertAccessCounts(2, 1);
+            Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
         }
 
         [TestMethod]
         public async Task ConfidentialClientWithNoDefaultClaimsTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
             var claims = GetClaims();
 
@@ -202,11 +241,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ConfidentialClientWithSignedAssertionTestAsync()
         {
             var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
             var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
             var claims = GetClaims();
-
-            X509Certificate2 cert = GetCertificate();
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
@@ -214,13 +250,24 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithClientAssertion(GetSignedClientAssertion(ConfidentialClientID, claims))
                 .Build();
 
+            var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
+
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
+            appCacheRecorder.AssertAccessCounts(1, 1);
+            Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
             ValidateClaimsInAssertion(claims, ((ConfidentialClientApplication)confidentialApp).ClientCredential.SignedAssertion);
-
             MsalAssert.AssertAuthResult(authResult);
+
+            // call again to ensure cache is hit
+            authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+               .ExecuteAsync(CancellationToken.None)
+               .ConfigureAwait(false);
+
+            appCacheRecorder.AssertAccessCounts(2, 1);
+            Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
         }
 
         private void ValidateClaimsInAssertion(IDictionary<string, string> claims, string assertion)
@@ -249,7 +296,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static IDictionary<string, string> GetClaims(bool useDefaultClaims = true)
         {
-            if(useDefaultClaims)
+            if (useDefaultClaims)
             {
                 DateTime validFrom = DateTime.UtcNow;
                 var nbf = ConvertToTimeT(validFrom);
@@ -289,7 +336,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static X509Certificate2 GetCertificate(bool useRSACert = false)
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert? TestConstants.RSATestCertThumbprint : TestConstants.AutomationTestThumbprint);
+            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert ? TestConstants.RSATestCertThumbprint : TestConstants.AutomationTestThumbprint);
             if (cert == null)
             {
                 throw new InvalidOperationException(

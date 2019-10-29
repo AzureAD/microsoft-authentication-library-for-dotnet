@@ -17,9 +17,9 @@ namespace Microsoft.Identity.Client
     internal interface ITokenCacheInternal : ITokenCache, ITokenCacheSerializer
     {
         SemaphoreSlim Semaphore { get; }
-
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
+        bool IsApplicationCache { get; }
 
         #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, RequestContext requestContext);

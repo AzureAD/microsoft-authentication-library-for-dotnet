@@ -11,7 +11,6 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
@@ -28,6 +27,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private static readonly string[] s_scopes = { "User.Read" };
 
         #region MSTest Hooks
+
         /// <summary>
         /// Initialized by MSTest (do not make private or readonly)
         /// </summary>
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        #endregion
+        #endregion MSTest Hooks
 
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
@@ -60,6 +60,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Running asserts");
 
             userCacheAccess.AssertAccessCounts(0, 1);
+            Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
+
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
         }

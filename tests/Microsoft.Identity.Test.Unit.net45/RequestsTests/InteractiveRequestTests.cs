@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle));
+                    new TokenCache(harness.ServiceBundle, false));
 
                 var interactiveParameters = new AcquireTokenInteractiveParameters
                 {
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
-                var cache = new TokenCache(harness.ServiceBundle);
+                var cache = new TokenCache(harness.ServiceBundle, false);
 
                 var ui = new MockWebUI()
                 {
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             using (MockHttpAndServiceBundle harness = CreateTestHarness(telemetryCallback: myReceiver.HandleTelemetryEvents))
             {
-                TokenCache cache = new TokenCache(harness.ServiceBundle);
+                TokenCache cache = new TokenCache(harness.ServiceBundle, false);
 
                 MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle));
+                    new TokenCache(harness.ServiceBundle, false));
                 parameters.IsBrokerEnabled = false;
 
                 InteractiveRequest request = new InteractiveRequest(
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                         TestConstants.AuthorityHomeTenant,
                         TestConstants.s_scope,
-                        new TokenCache(harness.ServiceBundle),
+                        new TokenCache(harness.ServiceBundle, false),
                         extraQueryParameters: new Dictionary<string, string>
                         {
                             {"extra", "qp"}
@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle),
+                    new TokenCache(harness.ServiceBundle, false),
                     extraQueryParameters: new Dictionary<string, string> { { "extra", "qp" } });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = TestConstants.DisplayableId;
@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle));
+                    new TokenCache(harness.ServiceBundle, false));
 
                 InteractiveRequest request = new InteractiveRequest(
                     harness.ServiceBundle,
@@ -387,7 +387,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle),
+                    new TokenCache(harness.ServiceBundle, false),
                     extraQueryParameters: new Dictionary<string, string> { { "extra", "qp" }, { "prompt", "login" } });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = TestConstants.DisplayableId;

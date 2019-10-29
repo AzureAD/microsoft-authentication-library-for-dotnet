@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal.UnitTests
 
             var thread1 = new Thread(() =>
             {
-                var args = new TokenCacheNotificationArgs(cache1, string.Empty, null, false);
+                var args = new TokenCacheNotificationArgs(cache1, string.Empty, null, false, false);
 
                 helper1.BeforeAccessNotification(args);
                 resetEvent3.Set();
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal.UnitTests
 
             var thread2 = new Thread(() =>
             {
-                var args = new TokenCacheNotificationArgs(cache2, string.Empty, null, false);
+                var args = new TokenCacheNotificationArgs(cache2, string.Empty, null, false, false);
                 helper2.BeforeAccessNotification(args);
                 resetEvent4.Set();
                 resetEvent2.Wait();
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal.UnitTests
 
             var thread1 = new Thread(() =>
             {
-                var args = new TokenCacheNotificationArgs(cache1, string.Empty, null, false);
+                var args = new TokenCacheNotificationArgs(cache1, string.Empty, null, false, false);
 
                 helper1.BeforeAccessNotification(args);
                 // Indicate we are waiting
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal.UnitTests
 
             var thread2 = new Thread(() =>
             {
-                var args = new TokenCacheNotificationArgs(cache2, string.Empty, null, false);
+                var args = new TokenCacheNotificationArgs(cache2, string.Empty, null, false, false);
                 getTime.Start();
                 try
                 {
@@ -226,9 +226,9 @@ namespace Microsoft.Identity.Client.Extensions.Msal.UnitTests
             Assert.IsNull(cache2.LastDeserializedString);
             Assert.IsNull(cache3.LastDeserializedString);
 
-            var args1 = new TokenCacheNotificationArgs(cache1, string.Empty, null, false);
-            var args2 = new TokenCacheNotificationArgs(cache2, string.Empty, null, false);
-            var args3 = new TokenCacheNotificationArgs(cache3, string.Empty, null, false);
+            var args1 = new TokenCacheNotificationArgs(cache1, string.Empty, null, false, false);
+            var args2 = new TokenCacheNotificationArgs(cache2, string.Empty, null, false, false);
+            var args3 = new TokenCacheNotificationArgs(cache3, string.Empty, null, false, false);
 
             var changedString = "Hey look, the file changed";
 
