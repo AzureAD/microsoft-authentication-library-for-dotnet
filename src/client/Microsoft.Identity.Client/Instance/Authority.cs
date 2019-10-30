@@ -2,13 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     internal abstract class Authority
     {
@@ -29,22 +27,18 @@ namespace Microsoft.Identity.Client.Instance
         #region Builders
 
         /// <summary>
-        /// Figures out the authority based on the authority from the config and the authority from the request, 
+        /// Figures out the authority based on the authority from the config and the authority from the request,
         /// and optionally the homeAccountTenantId, which has an impact on AcquireTokenSilent
-        /// 
-        /// The algorithm is: 
-        /// 
-        /// 1. If there is no request authority (i.e. no authority override), use the config authority. 
+        ///
+        /// The algorithm is:
+        ///
+        /// 1. If there is no request authority (i.e. no authority override), use the config authority.
         ///     1.1. For AAD, if the config authority is "common" etc, try to use the tenanted version with the home account tenant ID
-        /// 2. If there is a request authority, try to use it. 
+        /// 2. If there is a request authority, try to use it.
         ///     2.1. If the request authority is not "common", then use it
         ///     2.2  If the request authority is "common", ignore it, and use 1.1
-        /// 
+        ///
         /// </summary>
-        /// <param name="configAuthorityInfo"></param>
-        /// <param name="requestAuthorityInfo"></param>
-        /// <param name="requestHomeAccountTenantId"></param>
-        /// <returns></returns>
         public static Authority CreateAuthorityForRequest(
             AuthorityInfo configAuthorityInfo,
             AuthorityInfo requestAuthorityInfo,
@@ -57,10 +51,10 @@ namespace Microsoft.Identity.Client.Instance
 
             switch (configAuthorityInfo.AuthorityType)
             {
-                // ADFS and B2C are tenantless, no need to consider tenant 
+                // ADFS and B2C are tenantless, no need to consider tenant
                 case AuthorityType.Adfs:
-                    return requestAuthorityInfo == null ? 
-                        new AdfsAuthority(configAuthorityInfo) : 
+                    return requestAuthorityInfo == null ?
+                        new AdfsAuthority(configAuthorityInfo) :
                         new AdfsAuthority(requestAuthorityInfo);
 
                 case AuthorityType.B2C:
@@ -143,7 +137,7 @@ namespace Microsoft.Identity.Client.Instance
             return CreateAuthority(uriBuilder.Uri.AbsoluteUri, authorityInfo.ValidateAuthority);
         }
 
-        #endregion
+        #endregion Builders
 
         internal static string GetFirstPathSegment(string authority)
         {
@@ -154,7 +148,6 @@ namespace Microsoft.Identity.Client.Instance
             }
             return string.Empty;
         }
-
 
         internal static AuthorityType GetAuthorityType(string authority)
         {
@@ -177,7 +170,7 @@ namespace Microsoft.Identity.Client.Instance
         internal abstract string GetTenantId();
 
         /// <summary>
-        /// Gets a tenanted authority if the current authority is tenantless. 
+        /// Gets a tenanted authority if the current authority is tenantless.
         /// Returns the original authority on B2C and ADFS
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId);

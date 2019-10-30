@@ -23,13 +23,13 @@ namespace NetCoreTestApp
         private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
+
         private static readonly IEnumerable<string> s_scopes = new[] {
             "user.read", "openid" }; // used for WIA and U/P, can be empty
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
         public static readonly string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.json";
-
 
         private static readonly string[] s_tids = new[]  {
             "common",
@@ -92,7 +92,7 @@ namespace NetCoreTestApp
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
                         4. Acquire Token Interactive (via CustomWebUI)
-                        5. Acquire Token Interactive 
+                        5. Acquire Token Interactive
                         6. Acquire Token Silently
                         7. Acquire Interactive (logic in netstandard, default authority)
                         8. Clear cache
@@ -112,12 +112,14 @@ namespace NetCoreTestApp
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
+
                         case 2: // acquire token u/p
                             SecureString password = GetPasswordFromConsole();
                             authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
+
                         case 3:
                             authTask = pca.AcquireTokenWithDeviceCode(
                                 s_scopes,
@@ -129,6 +131,7 @@ namespace NetCoreTestApp
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
+
                         case 4: // acquire token interactive with custom web ui
 
                             authTask = pca.AcquireTokenInteractive(s_scopes)
@@ -138,6 +141,7 @@ namespace NetCoreTestApp
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
+
                         case 5: // acquire token interactive
 
                             var options = new SystemWebViewOptions()
@@ -148,12 +152,12 @@ namespace NetCoreTestApp
                             var cts = new CancellationTokenSource();
                             authTask = pca.AcquireTokenInteractive(s_scopes)
                                 .WithSystemWebViewOptions(options)
-                                 .WithExtraQueryParameters("dc=PROD-WST-CORP")
                                 .ExecuteAsync(cts.Token);
 
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
+
                         case 6: // acquire token silent
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
                             if (account == null)
@@ -165,11 +169,13 @@ namespace NetCoreTestApp
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
+
                         case 7:
                             CancellationTokenSource cts2 = new CancellationTokenSource();
                             NetStandardAuthenticator authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
                             await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
                             break;
+
                         case 8:
                             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                             foreach (var acc in accounts)
@@ -178,6 +184,7 @@ namespace NetCoreTestApp
                             }
 
                             break;
+
                         case 9:
 
                             s_currentTid = (s_currentTid + 1) % s_tids.Length;
@@ -185,13 +192,12 @@ namespace NetCoreTestApp
                             RunConsoleAppLogicAsync(pca).Wait();
                             break;
 
-
                         case 0:
                             return;
+
                         default:
                             break;
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -212,7 +218,6 @@ namespace NetCoreTestApp
             Console.WriteLine("Token is {0}", authTask.Result.AccessToken);
             Console.ResetColor();
 
-
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
             await DisplayAccountsAsync(pca).ConfigureAwait(false);
             var callGraphTask = CallGraphAsync(authTask.Result.AccessToken);
@@ -220,7 +225,6 @@ namespace NetCoreTestApp
             Console.WriteLine("Result from calling the ME endpoint of the graph: " + callGraphTask.Result);
             Console.ResetColor();
         }
-
 
         private static X509Certificate2 GetCertificateByThumbprint(string thumbprint)
         {
@@ -235,7 +239,6 @@ namespace NetCoreTestApp
                 throw new InvalidOperationException($"Cannot find certificate with thumbprint '{thumbprint}'");
             }
         }
-
 
         private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
         {
@@ -261,12 +264,15 @@ namespace NetCoreTestApp
                 case LogLevel.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
                     break;
+
                 case LogLevel.Warning:
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     break;
+
                 case LogLevel.Verbose:
                     Console.ForegroundColor = ConsoleColor.Gray;
                     break;
+
                 default:
                     break;
             }
@@ -321,7 +327,5 @@ namespace NetCoreTestApp
                 return ex.ToString();
             }
         }
-
-
     }
 }
