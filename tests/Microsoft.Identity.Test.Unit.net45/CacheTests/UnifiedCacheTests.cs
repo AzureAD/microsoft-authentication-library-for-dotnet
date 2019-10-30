@@ -5,25 +5,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using System.Threading;
-using Microsoft.Identity.Client.Instance;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
     public class UnifiedCacheTests : TestBase
-    {    
+    {
         [TestMethod]
         [Description("Test unified token cache")]
         public void UnifiedCache_MsalStoresToAndReadRtFromAdalCache()
@@ -62,6 +58,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 {
                     app.UserTokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
                 }
+
+                Assert.AreEqual(0, httpManager.QueueSize);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()

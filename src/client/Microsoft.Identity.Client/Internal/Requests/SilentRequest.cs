@@ -76,11 +76,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
 
-            AuthenticationRequestParameters.Authority = AuthenticationRequestParameters.AuthorityOverride == null
-                ? Authority.CreateAuthorityWithTenant(ServiceBundle.Config.AuthorityInfo, account?.HomeAccountId?.TenantId)
-                : Authority.CreateAuthorityWithOverride(
-                    AuthenticationRequestParameters.AuthorityOverride, 
-                    ServiceBundle.Config.AuthorityInfo);
+            AuthenticationRequestParameters.Authority = Authority.CreateAuthorityForRequest(
+                ServiceBundle.Config.AuthorityInfo,
+                AuthenticationRequestParameters.AuthorityOverride,
+                account?.HomeAccountId?.TenantId);
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)

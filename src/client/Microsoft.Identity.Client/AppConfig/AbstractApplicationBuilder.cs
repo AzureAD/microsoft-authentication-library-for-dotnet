@@ -314,7 +314,7 @@ namespace Microsoft.Identity.Client
             }
 
             //Adfs does not require client id to be in the form of a Guid
-            if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
+            if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
             {
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
