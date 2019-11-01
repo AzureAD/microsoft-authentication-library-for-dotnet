@@ -12,6 +12,8 @@ Bug Fixes:
 Fundamentals:
 - Added tests which check cache format interoperability between MSAL Java and MSAL .NET
 
+See the [MSAL .NET 4.6.0 blog post](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.6) for more details.
+
 4.5.1
 =============
 Bug Fix:
