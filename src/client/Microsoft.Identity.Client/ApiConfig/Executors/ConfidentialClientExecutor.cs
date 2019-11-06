@@ -33,6 +33,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal);
+            requestParams.SendX5C = authorizationCodeParameters.SendX5C;
 
             var handler = new AuthorizationCodeRequest(
                 ServiceBundle,
