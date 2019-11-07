@@ -1,7 +1,7 @@
 4.7.0
 ============
 New Features:
-**Added Subject Name + Issuer authentication to the acquire token by authorization code and acquire token by refresh token flows with the WithSendX5C() api on the confidential client application.** All confidential client authentication flows will not have acces to this feature. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1490)
+**Added Subject Name + Issuer authentication to the acquire token by authorization code and acquire token by refresh token flows with the WithSendX5C() api on the confidential client application.** All confidential client authentication flows will now have acces to this feature. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1490)
 
 4.6.0
 ============
