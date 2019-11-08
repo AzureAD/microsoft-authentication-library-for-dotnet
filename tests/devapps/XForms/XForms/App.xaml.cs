@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.Identity.Client;
 using Xamarin.Forms;
 
@@ -13,7 +12,7 @@ namespace XForms
 
         public static object RootViewController { get; set; }
 
-        public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
+        public const string DefaultClientId = "9668f2bd-6103-4292-9024-84fa2d1b6fb2";
 
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 

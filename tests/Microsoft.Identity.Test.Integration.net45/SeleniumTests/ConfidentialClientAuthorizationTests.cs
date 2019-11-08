@@ -76,6 +76,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{TenantId}").ConfigureAwait(false);
         }
 
+        [TestMethod]
+        // Regression test for: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891
+        public async Task SeleniumGetAuthCode_RedeemForAt_CommonAuthority_MsaUser_Async()
+        {
+            // Arrange
+            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
+            labResponse.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
+            await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common").ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{TenantId}").ConfigureAwait(false);
+        }
+
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, string authority)
         {
             var cert = s_secretProvider.GetCertificateWithPrivateMaterial(CertificateName);

@@ -49,9 +49,22 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         /// <remarks>The FOCI flag does not appear in the U/P flow, an interactive flow is required. Interactive flow
         /// cannot be automated because http://localhost cannot currently be added to the family apps</remarks>
         [TestMethod]
-        public async Task FociSingInSignOutAsync()
+        public async Task FociSignInSignOutAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await FociSignInSignOutAsync(labResponse).ConfigureAwait(false);          
+        }
+
+        [TestMethod]
+        public async Task FociSignInSignOutMsaUserAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
+            labResponse.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
+            await FociSignInSignOutAsync(labResponse).ConfigureAwait(false);
+        }
+
+        private async Task FociSignInSignOutAsync(LabResponse labResponse)
+        {
             LabUser user = labResponse.User;
             string cacheFilePath = null;
 
@@ -102,7 +115,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 userCacheAccess2.AssertAccessCounts(1, 1);
                 userCacheAccess3.AssertAccessCounts(1, 0);
 
-                Trace.WriteLine("Sing-out from one app - sign out of all apps in the family");
+                Trace.WriteLine("Sign-out from one app - sign out of all apps in the family");
                 System.Collections.Generic.IEnumerable<IAccount> accounts = await pca_fam1.GetAccountsAsync().ConfigureAwait(false);
                 await pca_fam1.RemoveAsync(accounts.Single()).ConfigureAwait(false);
                 System.Collections.Generic.IEnumerable<IAccount> acc2 = await pca_fam2.GetAccountsAsync().ConfigureAwait(false);

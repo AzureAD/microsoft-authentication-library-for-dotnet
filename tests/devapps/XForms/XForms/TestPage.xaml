@@ -19,11 +19,11 @@
                             <x:String>Acquire Token Interactive</x:String>
                             <x:String>Acquire Token Silent</x:String>
                             <x:String>ADFSv3 Federated</x:String>
-                            <x:String>ADFSv3 NonFederated</x:String>
+                            <x:String>ADFSv3 Managed</x:String>
                             <x:String>ADFSv4 Federated</x:String>
-                            <x:String>ADFSv4 NonFederated</x:String>
+                            <x:String>ADFSv4 Managed</x:String>
                             <x:String>ADFSv2019 Federated</x:String>
-                            <x:String>ADFSv2019 NonFederated</x:String>
+                            <x:String>ADFSv2019 Managed</x:String>
                             <x:String>B2C FB b2clogin.com</x:String>
                             <x:String>B2C Local edit profile</x:String>
                             <x:String>B2C FB microsoftonline.com</x:String>

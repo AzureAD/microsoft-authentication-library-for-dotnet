@@ -88,5 +88,31 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
         }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        public async Task DeviceCodeFlowMsaTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
+            labResponse.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
+
+            Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync for an MSA user");
+            var pca = PublicClientApplicationBuilder.Create(labResponse.App.AppId).Build();
+            var userCacheAccess = pca.UserTokenCache.RecordAccess();
+
+            var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
+            {
+                SeleniumExtensions.PerformDeviceCodeLogin(deviceCodeResult, labResponse.User, TestContext, false);
+                return Task.FromResult(0);
+            }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+            Trace.WriteLine("Running asserts");
+
+            userCacheAccess.AssertAccessCounts(0, 1);
+            Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public string GetPasswordSignInButtonId()
         {
 
-            if (String.IsNullOrWhiteSpace(_passwordSignInButtonId))
+            if (string.IsNullOrWhiteSpace(_passwordSignInButtonId))
             {
                 DetermineFieldIds();
             }

@@ -74,7 +74,7 @@ namespace XForms
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 3: // ADFSv3 NonFederated
+                case 3: // ADFSv3 Managed
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
@@ -82,7 +82,7 @@ namespace XForms
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 5: //ADFSv4 NonFederated
+                case 5: //ADFSv4 Managed
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
@@ -90,7 +90,7 @@ namespace XForms
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 7: //ADFSv2019 NonFederated
+                case 7: //ADFSv2019 Managed
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;

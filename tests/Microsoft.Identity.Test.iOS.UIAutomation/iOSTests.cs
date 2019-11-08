@@ -60,15 +60,19 @@ namespace Test.Microsoft.Identity.UIAutomation
                 AcquireTokenInteractiveAndSilentTest,
 
                 AcquireTokenADFSV3InteractiveFederatedTest,
+                AcquireTokenADFSV3InteractiveManagedTest,
+                AcquireTokenMsaUserTest,
                 AcquireTokenADFSV4InteractiveFederatedTest,
+                AcquireTokenADFSV4InteractiveManagedTest,
                 AcquireTokenADFSV2019InteractiveFederatedTest,
-
+                AcquireTokenADFSV2019InteractiveManagedTest,
+                
                 //B2CLocalAccountAcquireTokenTest,
                 //B2CGoogleB2CLoginAuthorityAcquireTokenTest,
                 //B2CGoogleMicrosoftAuthorityAcquireTokenTest,
                 //B2CFacebookMicrosoftLoginAcquireTokenTest,
                 //B2CFacebookB2CLoginAcquireTokenTest,
-                //B2CFacebookEditPolicyAcquireTokenTest
+                //B2CFacebookEditPolicyAcquireTokenTest,
             };
 
             var hasFailed = false;
@@ -108,6 +112,21 @@ namespace Test.Microsoft.Identity.UIAutomation
                 _xamarinController,
                 LabUserHelper.GetDefaultUserAsync().GetAwaiter().GetResult(),
                 CoreUiTestConstants.AcquireTokenSilent);
+        }
+
+        /// <summary>
+        /// Runs through the standard acquire token silent flow
+        /// for an Msa user
+        /// </summary>
+        [Test]
+        public void AcquireTokenMsaUserTest()
+        {
+            TestCommon.ResetInternalStaticCaches();
+
+            _mobileTestHelper.AcquireTokenTestHelper(
+                _xamarinController,
+                LabUserHelper.GetMsaUserAsync().GetAwaiter().GetResult(),
+                CoreUiTestConstants.AcquireTokenInteractive);
         }
 
         /// <summary>
@@ -229,6 +248,20 @@ namespace Test.Microsoft.Identity.UIAutomation
         }
 
         /// <summary>
+        /// Runs through the standard acquire token ADFSV4 Managed flow
+        /// </summary
+        [Test]
+        public void AcquireTokenADFSV4InteractiveManagedTest()
+        {
+            TestCommon.ResetInternalStaticCaches();
+
+            _mobileTestHelper.AcquireTokenTestHelper(
+                _xamarinController,
+                LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4).GetAwaiter().GetResult(),
+                CoreUiTestConstants.ADFSv4NonFederated);
+        }
+
+        /// <summary>
         /// Runs through the standard acquire token ADFSV2019 Federated flow
         /// </summary
         [Test]
@@ -243,6 +276,20 @@ namespace Test.Microsoft.Identity.UIAutomation
         }
 
         /// <summary>
+        /// Runs through the standard acquire token ADFSV2019 Managed flow
+        /// </summary
+        [Test]
+        public void AcquireTokenADFSV2019InteractiveManagedTest()
+        {
+            TestCommon.ResetInternalStaticCaches();
+
+            _mobileTestHelper.AcquireTokenTestHelper(
+                _xamarinController,
+                LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019).GetAwaiter().GetResult(),
+                CoreUiTestConstants.ADFSv2019NonFederated);
+        }
+
+        /// <summary>
         /// Runs through the standard acquire token ADFSV3 Federated flow
         /// </summary>
         [Test]
@@ -254,6 +301,20 @@ namespace Test.Microsoft.Identity.UIAutomation
                 _xamarinController,
                 LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3).GetAwaiter().GetResult(),
                 CoreUiTestConstants.ADFSv3Federated);
+        }
+
+        /// <summary>
+        /// Runs through the standard acquire token ADFSV3 Managed flow
+        /// </summary>
+        [Test]
+        public void AcquireTokenADFSV3InteractiveManagedTest()
+        {
+            TestCommon.ResetInternalStaticCaches();
+
+            _mobileTestHelper.AcquireTokenTestHelper(
+                _xamarinController,
+                LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3).GetAwaiter().GetResult(),
+                CoreUiTestConstants.ADFSv3NonFederated);
         }
 
         private static void LogMessage(string message, StringBuilder stringBuilderMessage)
