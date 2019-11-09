@@ -121,7 +121,7 @@ stages:
       inputs:
         restoreSolution: LibsMacOS.sln
 
-    - task: XamariniOS@1
+    - task: XamariniOS@2
       displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
       inputs:
         solutionFile: LibsMacOS.sln

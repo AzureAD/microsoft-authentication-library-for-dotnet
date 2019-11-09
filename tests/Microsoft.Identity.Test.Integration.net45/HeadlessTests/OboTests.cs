@@ -31,6 +31,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider();
 
+        /// <summary>
+        /// Initialized by MSTest (do not make private or readonly)
+        /// </summary>
+        public TestContext TestContext { get; set; }
+
         #region Test Hooks
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -63,6 +68,60 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunOnBehalfOfTestAsync(aadUser2, false).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(adfsUser, true).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(aadUser2, true).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        public async Task OBO_WithCache_MSA_Async()
+        {
+            var msaUser = (await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false)).User;
+
+            var pca = PublicClientApplicationBuilder
+              .Create(LabApiConstants.MSAOutlookAccountClientID)
+              .WithAuthority(AadAuthorityAudience.PersonalMicrosoftAccount)
+              .Build();
+            s_inMemoryTokenCache.Bind(pca.UserTokenCache);
+
+            AuthenticationResult authResult = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
+            {
+                SeleniumExtensions.PerformDeviceCodeLogin(
+                    deviceCodeResult,
+                    msaUser,
+                    TestContext,
+                    false);
+
+                return Task.FromResult(0);
+            }).ExecuteAsync()
+              .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult, msaUser);
+            Assert.IsTrue(authResult.Scopes.Any(s => string.Equals(s, s_oboServiceScope.Single(), StringComparison.OrdinalIgnoreCase)));
+
+            var cca = ConfidentialClientApplicationBuilder
+               .Create(OboConfidentialClientID)
+               .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
+               .WithClientSecret(_confidentialClientSecret)
+               .Build();
+            s_inMemoryTokenCache.Bind(cca.UserTokenCache);
+
+            try
+            {
+                authResult = await cca
+                  .AcquireTokenSilent(s_scopes, msaUser.Upn)
+                  .ExecuteAsync()
+                  .ConfigureAwait(false);
+            }
+            catch (MsalUiRequiredException)
+            {
+                Assert.IsFalse(false, "ATS should have found a token, but it didn't");
+
+                authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(authResult.AccessToken))
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            }
+
+            MsalAssert.AssertAuthResult(authResult, msaUser);
+            Assert.IsTrue(authResult.Scopes.Any(s => string.Equals(s, s_scopes.Single(), StringComparison.OrdinalIgnoreCase)));
         }
 
         private async Task<IConfidentialClientApplication> RunOnBehalfOfTestAsync(LabUser user, bool silentCallShouldSucceed)

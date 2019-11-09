@@ -74,63 +74,51 @@ namespace XForms
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 3: // ADFSv3 Managed
+                case 3: // ADFSv4 Federated
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 4: // ADFSv4 Federated
+                case 4: // ADFSv2019 Federated
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 5: //ADFSv4 Managed
-                    PrepareTestEnvironmentAsync().ConfigureAwait(false);
-                    AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
-                    break;
-                case 6: // ADFSv2019 Federated
-                    PrepareTestEnvironmentAsync().ConfigureAwait(false);
-                    AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
-                    break;
-                case 7: //ADFSv2019 Managed
-                    PrepareTestEnvironmentAsync().ConfigureAwait(false);
-                    AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
-                    break;
-                case 8: // B2C Facebook b2clogin.com
+                case 5: // B2C Facebook b2clogin.com
                     _isB2CTest = true;
                     App.s_authority = App.B2CLoginAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 9: // B2C Local b2clogin.com edit profile
+                case 6: // B2C Local b2clogin.com edit profile
                     _isB2CTest = true;
                     App.s_authority = App.B2cAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireEditProfileTokenAsync().ConfigureAwait(false);
                     break;
-                case 10: // B2C Facebook microsoftonline.com
+                case 7: // B2C Facebook microsoftonline.com
                     _isB2CTest = true;
                     App.s_authority = App.B2cAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 11: // B2C Local b2clogin.com
+                case 8: // B2C Local b2clogin.com
                     _isB2CTest = true;
                     App.s_authority = App.B2CLoginAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 12: // B2C Local microsoftonline.com
+                case 9: // B2C Local microsoftonline.com
                     _isB2CTest = true;
                     App.s_authority = App.B2cAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 13: // B2C Google b2clogin.com
+                case 10: // B2C Google b2clogin.com
                     _isB2CTest = true;
                     App.s_authority = App.B2CLoginAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);
                     AcquireTokenInteractiveAsync(Prompt.ForceLogin).ConfigureAwait(false);
                     break;
-                case 14: // B2C Google microsoftonline.com
+                case 11: // B2C Google microsoftonline.com
                     _isB2CTest = true;
                     App.s_authority = App.B2cAuthority;
                     PrepareTestEnvironmentAsync().ConfigureAwait(false);

@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string SelectUser = "userList";
         public const string UserNotSelected = "not selected";
         public const string UserMissingFromResponse = "Missing from the token response";
-        public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
+        public const string RedirectUriOnAndroid = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         public const string RedirectUriEntryId = "redirectUriEntry";
         public const string ConsentAcceptId = "idBtn_Accept";
         public const string PasswordInput = "password";
