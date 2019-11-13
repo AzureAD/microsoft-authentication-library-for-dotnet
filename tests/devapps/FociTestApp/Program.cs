@@ -20,7 +20,7 @@ namespace FociTestApp
         private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
 
 
-        private static readonly string[] s_scopes = new[] { "https://graph.microsoft.com/.default" };
+        private static readonly string[] s_scopes = new[] { "user.read" };
 
         private static readonly string s_cacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.json";
 
