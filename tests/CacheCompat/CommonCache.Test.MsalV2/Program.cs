@@ -22,18 +22,15 @@ namespace CommonCache.Test.MsalV2
             /// <inheritdoc />
             protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
-                var v1App = PreRegisteredApps.CommonCacheTestV1;
-                string resource = PreRegisteredApps.MsGraph;
                 string[] scopes = new[]
                 {
-                    resource + "/user.read"
+                    TestInputData.MsGraph + "/user.read"
                 };
 
                 Logger.LogCallback = (LogLevel level, string message, bool containsPii) =>
                 {
                     Console.WriteLine("{0}: {1}", level, message);
                 };
-
 
                 var tokenCache = new TokenCache();
 
@@ -43,16 +40,18 @@ namespace CommonCache.Test.MsalV2
                     CommonCacheTestUtils.AdalV3CacheFilePath,
                     CommonCacheTestUtils.MsalV2CacheFilePath);
 
-                var app = new PublicClientApplication(v1App.ClientId, v1App.Authority, tokenCache)
-                {
-                    ValidateAuthority = true
-                };
-
-                IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 var results = new List<CacheExecutorAccountResult>();
 
                 foreach (var labUserData in testInputData.LabUserDatas)
                 {
+
+                    var app = new PublicClientApplication(labUserData.ClientId, labUserData.Authority, tokenCache)
+                    {
+                        ValidateAuthority = true
+                    };
+
+                    IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+
                     IAccount accountToReference = accounts.FirstOrDefault(x => x.Username.Equals(labUserData.Upn, StringComparison.OrdinalIgnoreCase));
                     try
                     {

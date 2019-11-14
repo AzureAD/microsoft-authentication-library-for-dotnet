@@ -23,36 +23,37 @@ namespace CommonCache.Test.MsalV2
             /// <inheritdoc />
             protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
-                var v1App = PreRegisteredApps.CommonCacheTestV1;
-                string resource = PreRegisteredApps.MsGraph;
+                string resource = TestInputData.MsGraph;
                 string[] scopes = new[]
                 {
                     resource + "/user.read"
                 };
 
-                var app = PublicClientApplicationBuilder
-                    .Create(v1App.ClientId)
-                    .WithAuthority(new Uri(v1App.Authority), true)
-                    .WithLogging((LogLevel level, string message, bool containsPii) =>
-                    {
-                        Console.WriteLine("{0}: {1}", level, message);
-                    })
-                    .WithTelemetry(new TraceTelemetryConfig())
-                    .Build();
-
-                FileBasedTokenCacheHelper.ConfigureUserCache(
-                    testInputData.StorageType,
-                    app.UserTokenCache,
-                    CommonCacheTestUtils.AdalV3CacheFilePath,
-                    CommonCacheTestUtils.MsalV2CacheFilePath,
-                    CommonCacheTestUtils.MsalV3CacheFilePath);
-
-                IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+               
 
                 var results = new List<CacheExecutorAccountResult>();
 
                 foreach (var labUserData in testInputData.LabUserDatas)
                 {
+                    var app = PublicClientApplicationBuilder
+                       .Create(labUserData.ClientId)
+                       .WithAuthority(new Uri(labUserData.Authority), true)
+                       .WithLogging((LogLevel level, string message, bool containsPii) =>
+                       {
+                           Console.WriteLine("{0}: {1}", level, message);
+                       })
+                       .WithTelemetry(new TraceTelemetryConfig())
+                       .Build();
+
+                    FileBasedTokenCacheHelper.ConfigureUserCache(
+                        testInputData.StorageType,
+                        app.UserTokenCache,
+                        CommonCacheTestUtils.AdalV3CacheFilePath,
+                        CommonCacheTestUtils.MsalV2CacheFilePath,
+                        CommonCacheTestUtils.MsalV3CacheFilePath);
+
+                    IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+
                     IAccount accountToReference = accounts.FirstOrDefault(x => x.Username.Equals(labUserData.Upn, StringComparison.OrdinalIgnoreCase));
 
                     try

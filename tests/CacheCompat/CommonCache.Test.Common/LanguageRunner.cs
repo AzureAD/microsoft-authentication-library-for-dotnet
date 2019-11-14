@@ -20,17 +20,14 @@ namespace CommonCache.Test.Common
         {
             try
             {
-                var v1App = PreRegisteredApps.CommonCacheTestV1;
-                string resource = PreRegisteredApps.MsGraph;
+
+                string resource = TestInputData.MsGraph;
                 string scope = resource + "/user.read";
 
-                var languageTestInputData = new LanguageTestInputData(testInputData)
-                {
-                    Authority = v1App.Authority,
-                    ClientId = v1App.ClientId,
-                    Scope = scope,
-                    CacheFilePath = CommonCacheTestUtils.MsalV3CacheFilePath
-                };
+                var languageTestInputData = new LanguageTestInputData(
+                    testInputData, 
+                    scope, 
+                    CommonCacheTestUtils.MsalV3CacheFilePath);
 
                 var inputDataJson = JsonConvert.SerializeObject(languageTestInputData);
                 string inputFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());

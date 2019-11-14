@@ -5,12 +5,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class TestInput {
 
-    @SerializedName("Authority")
-    String authority;
-
-    @SerializedName("ClientId")
-    String clientId;
-
     @SerializedName("Scope")
     String scope;
 
@@ -29,5 +23,11 @@ public class TestInput {
 
         @SerializedName("Password")
         String password;
+
+         @SerializedName("Authority")
+        String authority;
+
+        @SerializedName("ClientId")
+        String clientId;
     }
 }

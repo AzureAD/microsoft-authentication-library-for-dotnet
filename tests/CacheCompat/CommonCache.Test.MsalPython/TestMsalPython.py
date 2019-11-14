@@ -33,6 +33,13 @@ class ExecutionContext:
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
+# To run locally uncomment the next 2 lines and use a file containing the following json (update the password!)
+#
+# {"Scope":"https://graph.microsoft.com/user.read","CacheFilePath":"C:\\Temp\\adalcachecompattestdata\\msalCacheV3.bin","LabUserDatas":[{"Upn":"idlab@msidlab4.onmicrosoft.com","Password":"password","ClientId":"4b0db8c2-9f26-4417-8bde-3f0e3656f8e0","TenantId":"f645ad92-e38d-4d1a-b510-d1b09a74a8ca","Authority":"https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/"}],"ResultsFilePath":"C:Temp\\adalcachecompattestdata\\msal_python_results.json","StorageType":4}
+#
+#sys.argv.append("--input")
+#sys.argv.append("c:\\temp\\tmp2B95.tmp")
+
 cmdlineargs = {}
 cmdlineargs["inputFilePath"] = sys.argv[2]
 
@@ -58,11 +65,12 @@ atexit.register(lambda:
 if os.path.exists(cacheFilePath):
     cache.deserialize(open(cacheFilePath, 'r').read())
 
-app = msal.PublicClientApplication(testInput['ClientId'], authority=testInput['Authority'], token_cache=cache)
-
 results = []
 
 for labUserData in testInput['LabUserDatas']:
+
+    app = msal.PublicClientApplication(labUserData['ClientId'], authority=labUserData['Authority'], token_cache=cache)
+
     upn = labUserData['Upn']
     print('Handling labUserData.Upn = ' + upn)
     accounts = app.get_accounts(username=upn)

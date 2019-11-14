@@ -33,8 +33,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("authority")]
         public string Authority { get; set; }
 
-        [JsonProperty("tenantid")]
-        public string TenantId { get; set; }
     }
 
     public class Lab

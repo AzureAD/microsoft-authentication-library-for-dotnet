@@ -5,16 +5,16 @@ namespace CommonCache.Test.Common
 {
     internal class LanguageTestInputData : TestInputData
     {
-        public LanguageTestInputData(TestInputData testInputData)
+        public LanguageTestInputData(TestInputData testInputData, string scope, string cacheFilePath)
         {
             LabUserDatas = testInputData.LabUserDatas;
             ResultsFilePath = testInputData.ResultsFilePath;
             StorageType = testInputData.StorageType;
+            Scope = scope;
+            CacheFilePath = cacheFilePath;
         }
 
-        public string ClientId { get; set; }
-        public string Authority { get; set; }
-        public string Scope { get; set; }
-        public string CacheFilePath { get; set; }
+        public string Scope { get; }
+        public string CacheFilePath { get; }
     }
 }

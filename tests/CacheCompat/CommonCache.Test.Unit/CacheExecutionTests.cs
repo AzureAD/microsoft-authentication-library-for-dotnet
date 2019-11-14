@@ -17,32 +17,22 @@ namespace CommonCache.Test.Unit
     {
         private static readonly List<LabUserData> s_labUsers = new List<LabUserData>();
 
-        private static async Task<LabUserData> GetTempLabUserDataAsync()
+        private static async Task<LabUserData> GetPublicAadUserDataAsync()
         {
             var api = new LabServiceApi();
-            var labUser = (await api.CreateTempLabUserAsync().ConfigureAwait(false)).User;
-            return new LabUserData(labUser.Upn, labUser.GetOrFetchPassword());
-        }
-
-        private static async Task<LabUserData> GetLabUserDataAsync(string upn)
-        {
-            var api = new LabServiceApi();
-            var labUser = (await api.GetLabResponseAsync(new UserQuery()).ConfigureAwait(false)).User;
-            return new LabUserData(labUser.Upn, labUser.GetOrFetchPassword());
+            LabResponse labResponse = (await api.GetLabResponseAsync(UserQuery.PublicAadUserQuery).ConfigureAwait(false));
+            return new LabUserData(
+                labResponse.User.Upn, 
+                labResponse.User.GetOrFetchPassword(), 
+                labResponse.User.AppId,
+                labResponse.User.TenantId);
         }
 
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext testContext)
         {
-            // TODO: these other users throw MsalUiRequiredException invalid_grant.
-            // Are they MFA-required users?  What is different about them?
-            // s_labUsers.Add(GetLabUserData("idlab@msidlab2.onmicrosoft.com"));
-            // s_labUsers.Add(GetLabUserData("idlab@msidlab3.onmicrosoft.com"));
-            // "idlab@msidlab4.onmicrosoft.com"
-            s_labUsers.Add(GetLabUserDataAsync("idlab@msidlab4.onmicrosoft.com").GetAwaiter().GetResult());
-            //s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
-            //s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
-            //s_labUsers.Add(GetTempLabUserDataAsync().GetAwaiter().GetResult());
+            // TODO: add other users to the mix
+            s_labUsers.Add(GetPublicAadUserDataAsync().GetAwaiter().GetResult());
         }
 
         [DataTestMethod]
@@ -141,7 +131,7 @@ namespace CommonCache.Test.Unit
         [DataTestMethod]
         [DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalV3 msal v3 cache")]
         [DataRow(CacheProgramType.MsalPython, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalPython->AdalV5 msal v3 cache")]
-        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalPython msal v3 cache")] 
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalPython msal v3 cache")]
         [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalPython msal v3 cache")]
         public async Task TestMsalPythonCacheCompatibilityAsync(
             CacheProgramType interactiveType,
@@ -154,11 +144,11 @@ namespace CommonCache.Test.Unit
 
         [DataTestMethod]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalJava msal v3 cache")]
-        [DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalV3 msal v3 cache")]
-        [DataRow(CacheProgramType.MsalJava, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalJava->AdalV5 msal v3 cache")]
-        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalJava msal v3 cache")]
-        [DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalPython msal v3 cache")]
-        [DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalJava msal v3 cache")]
+        //[DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalV3 msal v3 cache")]
+        //[DataRow(CacheProgramType.MsalJava, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalJava->AdalV5 msal v3 cache")]
+        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalJava msal v3 cache")]
+        //[DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalPython msal v3 cache")]
+        //[DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalJava msal v3 cache")]
         public async Task TestMsalJavaCacheCompatibilityAsync(
             CacheProgramType interactiveType,
             CacheProgramType silentType,
