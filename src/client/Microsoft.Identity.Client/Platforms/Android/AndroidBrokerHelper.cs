@@ -54,12 +54,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             // authenticator
             // 4- signature of the broker is valid
             // 5- account exists
-            return VerifyManifestPermissions()
-                   && VerifyAuthenticator(_androidAccountManager)
-                   && CheckForBrokerAccount(_androidAccountManager, "", "")
-                   && !packageName.Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase)
-                   && !packageName
-                       .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase);
+            return true;
         }
 
         public bool VerifyUser(string username, string uniqueid)
@@ -77,7 +72,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 // Callback is not passed since it is making a blocking call to get
                 // intent. Activity needs to be launched from calling app
                 // to get the calling app's metadata if needed at BrokerActivity.
-                Bundle addAccountOptions = GetBrokerOptions(brokerPayload);
+
+                Bundle addAccountOptions = new Bundle();
+                addAccountOptions.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetIntentForInteractiveRequest);
 
                 _logger.Info("BrokerProxy: Broker Account Name: " + GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username));
 
@@ -106,6 +103,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     _logger.Info("BrokerProxy: Intent created from BundleResult is null. ");
                     throw new MsalException(MsalError.NullIntentReturnedFromBroker, MsalErrorMessage.NullIntentReturnedFromBroker);
                 }
+
+                intent = GetBrokerIntent(brokerPayload, intent);
             }
             catch (Exception e)
             {
@@ -114,6 +113,52 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
 
             return intent;
+        }
+
+        public bool SayHelloToBroker(Activity callerActivity)
+        {
+            try
+            {
+                IAccountManagerFuture result = null;
+                // Callback is not passed since it is making a blocking call to get
+                // intent. Activity needs to be launched from calling app
+                // to get the calling app's metadata if needed at BrokerActivity.
+
+                Bundle HelloBundle = new Bundle();
+                HelloBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
+                HelloBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
+                HelloBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
+
+                result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+                    BrokerConstants.AuthtokenType, null, HelloBundle, null,
+                    null, GetPreferredLooper(callerActivity));
+
+                if (result == null)
+                {
+                    _logger.Info("BrokerProxy: Android account manager AddAccount didn't return any results. ");
+                }
+
+                Bundle bundleResult = (Bundle)result?.Result;
+
+                var bpKey = bundleResult.GetString(BrokerConstants.NegotiatedBPVersionKey);
+                var test = bundleResult.GetString("common.protocol.version");
+                if (!String.IsNullOrEmpty(bpKey))
+                {
+                    //Log Message Here with version
+                    return true;
+                }
+                else
+                {
+#pragma warning disable CA2201 // Do not raise reserved exception types
+                    throw new Exception();
+#pragma warning restore CA2201 // Do not raise reserved exception types
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error when trying to acquire intent for broker authentication.");
+                throw e;
+            }
         }
 
         private Handler GetPreferredLooper(Activity callerActivity)
@@ -262,29 +307,27 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return null;
         }
 
-        private Bundle GetBrokerOptions(IDictionary<string, string> brokerPayload)
+        private Intent GetBrokerIntent(IDictionary<string, string> brokerPayload, Intent brokerIntent)
         {
-            Bundle brokerOptions = new Bundle();
-            brokerOptions.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
-
-            ValidateBrokerRedirectURI(brokerPayload);
+            //ValidateBrokerRedirectURI(brokerPayload);
 
             BrokerRequest request = new BrokerRequest
             {
                 Authority = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Authority),
-                Scopes = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Scope),
+                Scopes = "user.read",
                 RedirectUri = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri),
                 ClientId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientId),
-                ClientAppName = "XForms.Droid",
+                ClientAppName = "com.microsoft.identity.client",
                 ClientAppVersion = "1",
-                CleintVersion = "4.4.0",
-                CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId)
+                ClientVersion = "4.4.0",
+                CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
+                Prompt = "NONE"
             };
 
             var test = JsonHelper.SerializeToJson(request);
-            brokerOptions.PutString(BrokerConstants.BrokerRequestV2, test);
+            brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, test);
 
-            return brokerOptions;
+            return brokerIntent;
         }
 
         private bool CheckForBrokerAccount(AccountManager am, string username, string uniqueId)
@@ -299,27 +342,27 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     AndroidNative.Accounts.Account[] accountList = _androidAccountManager
                         .GetAccountsByType(BrokerConstants.BrokerAccountType);
 
-                    _logger.Verbose("BrokerProxy: Getting the account list " + (accountList?.Length ?? 0));
+                    //_logger.Verbose("BrokerProxy: Getting the account list " + (accountList?.Length ?? 0));
 
-                    string packageName;
+                    //string packageName;
 
-                    if (authenticator.PackageName
-                        .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        packageName = BrokerConstants.AzureAuthenticatorAppPackageName;
-                    }
-                    else if (authenticator.PackageName
-                        .Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        packageName = BrokerConstants.PackageName;
-                    }
-                    else
-                    {
-                        _logger.Warning("BrokerProxy: Could not find the broker package so checking the account failed");
-                        return false;
-                    }
+                    //if (authenticator.PackageName
+                    //    .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    packageName = BrokerConstants.AzureAuthenticatorAppPackageName;
+                    //}
+                    //else if (authenticator.PackageName
+                    //    .Equals("BROKER_ACCOUNT_MANAGER_OPERATION_KEY", StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    packageName = BrokerConstants.PackageName;
+                    //}
+                    //else
+                    //{
+                    //    _logger.Warning("BrokerProxy: Could not find the broker package so checking the account failed");
+                    //    return false;
+                    //}
 
-                    _logger.Verbose("BrokerProxy: Package name is " + packageName);
+                    //_logger.Verbose("BrokerProxy: Package name is " + packageName);
 
                     return VerifyBrokerAccountExists(accountList, username, uniqueId);
                 }

@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         [DataMember(Name = "client_app_version")]
         public string ClientAppVersion { get; set; }
         [DataMember(Name = "client_version")]
-        public string CleintVersion { get; set; }
+        public string ClientVersion { get; set; }
         [DataMember(Name = "environment")]
         public string Environment { get; set; }
     }

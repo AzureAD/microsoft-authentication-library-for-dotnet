@@ -158,5 +158,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
         // Claims step-up. Skip cache look up
         public const string SkipCache = "skip.cache";
         public const string Claims = "account.claims";
+        public const string BrokerAccountManagerOperationKey = "com.microsoft.broker_accountmanager_operation_key";
+        public const string GetIntentForInteractiveRequest = "GET_INTENT_FOR_INTERACTIVE_REQUEST";
+        public const string ClientAdvertisedMaximumBPVersionKey = "broker.protocol.version.name";
+        public const string BrokerProtocalVersionCode = "3.0";
+        public const string ClientConfiguredMinimumBPVersionKey = "required.broker.protocol.version.name";
+        public const string NegotiatedBPVersionKey = "common.broker.protocol.version.name";
+        public const string BrokerResultV2 = "broker_result_v2";
+
     }
 }

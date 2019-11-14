@@ -17,6 +17,8 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using System.Globalization;
+using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -66,6 +68,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         private async Task AcquireTokenInternalAsync(IDictionary<string, string> brokerPayload)
         {
+            _brokerProxy.SayHelloToBroker(_activity);
+
             Context mContext = Application.Context;
 
             if (_brokerProxy.VerifyUser(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint),
@@ -148,6 +152,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         internal static void SetBrokerResult(Intent data, int resultCode)
         {
+            if (data == null)
+            {
+                readyForResponse.Release();
+                return;
+            }
+
             if (resultCode != BrokerResponseCode.ResponseReceived)
             {
                 resultEx = new MsalTokenResponse
@@ -158,14 +168,25 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             else
             {
-                Dictionary<string, string> response = new Dictionary<string, string>();
-                string results = data.GetStringExtra("BROKER_RESULT_V2");
-                response.Add(BrokerConstants.AccountAuthority, data.GetStringExtra(BrokerConstants.AccountAuthority));
-                response.Add(BrokerConstants.AccountAccessToken, data.GetStringExtra(BrokerConstants.AccountAccessToken));
-                response.Add(BrokerConstants.AccountIdToken, data.GetStringExtra(BrokerConstants.AccountIdToken));
-                response.Add(BrokerConstants.AccountExpireDate, data.GetLongExtra(BrokerConstants.AccountExpireDate, 0).ToString(CultureInfo.InvariantCulture));
+                try
+                {
+                    Dictionary<string, string> response = new Dictionary<string, string>();
+                    string results = data.GetStringExtra(BrokerConstants.BrokerResultV2);
+                    //var /*authResult*/ = JsonHelper.DeserializeFromJson<Dictionary<string, string>>(results);
+                    //TODO: fix deserialization here
+                    Dictionary<string, string> authResult = JsonConvert.DeserializeObject<Dictionary<string, string>>(results);
 
-                resultEx = MsalTokenResponse.CreateFromBrokerResponse(response);
+                    response.Add(BrokerConstants.AccountAuthority, authResult["authority"]);
+                    response.Add(BrokerConstants.AccountAccessToken, authResult["access_token"]);
+                    response.Add(BrokerConstants.AccountIdToken, authResult["id_token"]);
+                    response.Add(BrokerConstants.AccountExpireDate, authResult["expires_on"]);
+
+                    resultEx = MsalTokenResponse.CreateFromBrokerResponse(response);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
             }
 
             readyForResponse.Release();
