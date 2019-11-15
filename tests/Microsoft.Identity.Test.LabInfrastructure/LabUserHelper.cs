@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetDefaultUserAsync()
         {
-            return GetLabUserDataAsync(UserQuery.DefaultUserQuery);
+            return GetLabUserDataAsync(UserQuery.PublicAadUserQuery);
         }
 
         public static Task<LabResponse> GetB2CLocalAccountAsync()
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
         {
-            var query = UserQuery.DefaultUserQuery;
+            var query = UserQuery.PublicAadUserQuery;
             query.FederationProvider = federationProvider;
             query.UserType = federated ? UserType.Federated : UserType.Cloud;
 

@@ -53,9 +53,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacCocoaApp", "tests\devapps\MacCocoaApp\MacCocoaApp.csproj", "{AF8E60B7-04C3-4EF8-AFA3-1202F9DC5638}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CacheCompat", "CacheCompat", "{58B95AA7-BE17-40F2-9C9A-FA27C282A10A}"
-	ProjectSection(SolutionItems) = preProject
-		tests\CacheCompat\CacheTest.props = tests\CacheCompat\CacheTest.props
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.AdalV3", "tests\CacheCompat\CommonCache.Test.AdalV3\CommonCache.Test.AdalV3.csproj", "{A8C2D397-BA21-4BD2-93AA-801B0E0804BC}"
 EndProject

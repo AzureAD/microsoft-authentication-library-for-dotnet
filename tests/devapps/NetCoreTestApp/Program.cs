@@ -146,7 +146,8 @@ namespace NetCoreTestApp
 
                             var options = new SystemWebViewOptions()
                             {
-                                BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
+                                //BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
+                                OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
                             };
 
                             var cts = new CancellationTokenSource();

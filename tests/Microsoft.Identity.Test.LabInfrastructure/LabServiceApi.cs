@@ -77,7 +77,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return new LabResponse
             {
                 User = user,
-                App = labApps[0]
+                App = labApps[0],
+                Lab = labs[0]
             };
         }
 

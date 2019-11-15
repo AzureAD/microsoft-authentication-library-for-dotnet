@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -22,26 +21,23 @@ namespace CommonCache.Test.AdalV3
             /// <inheritdoc />
             protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
-                var app = PreRegisteredApps.CommonCacheTestV1;
-                string resource = PreRegisteredApps.MsGraph;
-
                 LoggerCallbackHandler.LogCallback = (LogLevel level, string message, bool containsPii) =>
                 {
                     Console.WriteLine("{0}: {1}", level, message);
                 };
 
-                var tokenCache = new FileBasedAdalV3TokenCache(CommonCacheTestUtils.AdalV3CacheFilePath);
-                var authenticationContext = new AuthenticationContext(app.Authority, tokenCache);
-
                 var results = new List<CacheExecutorAccountResult>();
 
                 foreach (var labUserData in testInputData.LabUserDatas)
                 {
+                    var tokenCache = new FileBasedAdalV3TokenCache(CommonCacheTestUtils.AdalV3CacheFilePath);
+                    var authenticationContext = new AuthenticationContext(labUserData.Authority, tokenCache);
+
                     try
                     {
                         var result = await authenticationContext.AcquireTokenSilentAsync(
-                            resource,
-                            app.ClientId,
+                            TestInputData.MsGraph,
+                            labUserData.ClientId,
                             new UserIdentifier(labUserData.Upn, UserIdentifierType.RequiredDisplayableId)).ConfigureAwait(false);
 
                         Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' from the cache");
@@ -53,8 +49,8 @@ namespace CommonCache.Test.AdalV3
                     catch (AdalSilentTokenAcquisitionException)
                     {
                         var result = await authenticationContext.AcquireTokenAsync(
-                            resource,
-                            app.ClientId,
+                            TestInputData.MsGraph,
+                            labUserData.ClientId,
                             new UserPasswordCredential(labUserData.Upn, labUserData.Password)).ConfigureAwait(false);
 
                         if (string.IsNullOrWhiteSpace(result.AccessToken))
