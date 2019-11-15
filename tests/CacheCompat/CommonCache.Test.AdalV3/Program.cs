@@ -26,7 +26,6 @@ namespace CommonCache.Test.AdalV3
                     Console.WriteLine("{0}: {1}", level, message);
                 };
 
-
                 var results = new List<CacheExecutorAccountResult>();
 
                 foreach (var labUserData in testInputData.LabUserDatas)

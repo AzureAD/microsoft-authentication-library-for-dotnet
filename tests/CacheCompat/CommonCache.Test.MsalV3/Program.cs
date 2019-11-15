@@ -29,8 +29,6 @@ namespace CommonCache.Test.MsalV2
                     resource + "/user.read"
                 };
 
-               
-
                 var results = new List<CacheExecutorAccountResult>();
 
                 foreach (var labUserData in testInputData.LabUserDatas)

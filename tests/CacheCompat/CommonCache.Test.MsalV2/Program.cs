@@ -44,7 +44,6 @@ namespace CommonCache.Test.MsalV2
 
                 foreach (var labUserData in testInputData.LabUserDatas)
                 {
-
                     var app = new PublicClientApplication(labUserData.ClientId, labUserData.Authority, tokenCache)
                     {
                         ValidateAuthority = true

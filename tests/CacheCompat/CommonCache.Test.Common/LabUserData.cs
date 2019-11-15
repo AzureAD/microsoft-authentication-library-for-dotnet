@@ -10,14 +10,13 @@ namespace CommonCache.Test.Common
         public LabUserData(string upn, string password, string clientId, string tenantId)
         {
             Upn = upn ?? throw new ArgumentNullException(nameof(upn));
-            Password = password ?? throw new ArgumentNullException(nameof(clientId));
+            Password = password ?? throw new ArgumentNullException(nameof(password));
             ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
             TenantId = tenantId ?? throw new ArgumentNullException(nameof(tenantId));
         }
 
         public string Upn { get; set; }
         public string Password { get; set; }
-
         public string ClientId { get; }
         public string TenantId { get; }
         public string Authority => $"https://login.microsoftonline.com/{TenantId}/";

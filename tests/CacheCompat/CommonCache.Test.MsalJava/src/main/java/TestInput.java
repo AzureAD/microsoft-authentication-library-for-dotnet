@@ -24,7 +24,7 @@ public class TestInput {
         @SerializedName("Password")
         String password;
 
-         @SerializedName("Authority")
+        @SerializedName("Authority")
         String authority;
 
         @SerializedName("ClientId")

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -26,14 +25,6 @@ namespace CommonCache.Test.AdalV5
                 {
                     Console.WriteLine("{0}: {1}", level, message);
                 };
-
-                //var items = authenticationContext.TokenCache.ReadItems().ToList();
-                //Console.WriteLine("here come the cache items!: {0}", tokenCache.Count);
-                //foreach (var item in items)
-                //{
-                //    Console.WriteLine("here's a cache item!");
-                //    Console.WriteLine(item.DisplayableId);
-                //}
 
                 var results = new List<CacheExecutorAccountResult>();
 

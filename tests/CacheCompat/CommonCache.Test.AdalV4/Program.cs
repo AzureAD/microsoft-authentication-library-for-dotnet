@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -26,8 +25,6 @@ namespace CommonCache.Test.AdalV4
                 {
                     Console.WriteLine("{0}: {1}", level, message);
                 };
-
-              
 
                 var results = new List<CacheExecutorAccountResult>();
 
