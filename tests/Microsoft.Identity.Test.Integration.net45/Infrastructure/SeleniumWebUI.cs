@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -101,7 +102,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
             {
-                var listener = new TcpInterceptor(_logger);
+                var listener = new HttpListnerInterceptor(_logger);
                 Uri authCodeUri = null;
 
                 // Run the TCP listener and the selenium automation in parallel

@@ -5,12 +5,20 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 {
     internal class HttpListnerInterceptor : IUriInterceptor
     {
+        private ICoreLogger _logger;
+
+        public HttpListnerInterceptor(ICoreLogger logger)
+        {
+            _logger = logger;
+        }
+
         public async Task<Uri> ListenToSingleRequestAndRespondAsync(
             int port,
             Func<Uri, string> responseProducer,

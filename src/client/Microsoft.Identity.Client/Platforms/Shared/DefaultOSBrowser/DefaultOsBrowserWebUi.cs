@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
   </body>
 </html>";
 
-        private readonly IUriInterceptor _tcpInterceptor;
+        private readonly IUriInterceptor _uriInterceptor;
         private readonly ICoreLogger _logger;
         private readonly SystemWebViewOptions _webViewOptions;
         private readonly IPlatformProxy _platformProxy;
@@ -42,13 +43,13 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             IPlatformProxy proxy,
             ICoreLogger logger,
             SystemWebViewOptions webViewOptions,
-            /* for test */ IUriInterceptor tcpInterceptor = null)
+            /* for test */ IUriInterceptor uriInterceptor = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _webViewOptions = webViewOptions;
             _platformProxy = proxy ?? throw new ArgumentNullException(nameof(proxy));
 
-            _tcpInterceptor = tcpInterceptor ?? new TcpInterceptor(_logger);
+            _uriInterceptor = uriInterceptor ?? new HttpListnerInterceptor(_logger);
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
@@ -134,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 
             await openBrowserAction(authorizationUri).ConfigureAwait(false);
 
-            return await _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
+            return await _uriInterceptor.ListenToSingleRequestAndRespondAsync(
                 redirectUri.Port,
                 GetResponseMessage,
                 cancellationToken)
