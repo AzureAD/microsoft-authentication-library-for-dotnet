@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             .ConfigureAwait(false);
         }
 
-        internal /* internal for testing only */ string GetResponseMessage(Uri authCodeUri)
+        internal /* internal for testing only */ MessageAndHttpCode GetResponseMessage(Uri authCodeUri)
         {
             // Parse the uri to understand if an error was returned. This is done just to show the user a nice error message in the browser.
             var authorizationResult = AuthorizationResult.FromUri(authCodeUri.OriginalString);
@@ -166,14 +166,14 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 _webViewOptions?.HtmlMessageSuccess ?? DefaultSuccessHtml);
         }
 
-        private string GetMessage(Uri redirectUri, string message)
+        private MessageAndHttpCode GetMessage(Uri redirectUri, string message)
         {
             if (redirectUri != null)
             {
-                return $"HTTP/1.1 302 Found\r\nLocation: {redirectUri.ToString()}";
+                return new MessageAndHttpCode(HttpStatusCode.Found, redirectUri.ToString());
             }
 
-            return $"HTTP/1.1 200 OK\r\n\r\n{message}";
+            return new MessageAndHttpCode(HttpStatusCode.OK, message);
         }
     }
 }

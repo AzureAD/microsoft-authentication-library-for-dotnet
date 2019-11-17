@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 
         public async Task<Uri> ListenToSingleRequestAndRespondAsync(
             int port,
-            Func<Uri, string> responseProducer,
+            Func<Uri, MessageAndHttpCode> responseProducer,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -34,11 +34,11 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                 httpListener = new HttpListener();
                 httpListener.Prefixes.Add(urlToListenTo);
                 httpListener.Start();
-                Console.WriteLine("Listening to " + urlToListenTo);
+                _logger.Info("Listening for authorization code on " + urlToListenTo);
 
                 using (cancellationToken.Register(() =>
                 {
-                    Console.WriteLine("HttpListener stopped because cancellation was requested.");
+                    _logger.Warning("HttpListener stopped because cancellation was requested.");
                     TryStopListening(httpListener);
                 }))
                 {
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     cancellationToken.ThrowIfCancellationRequested();
 
                     Respond(responseProducer, context);
-                    Console.WriteLine("HttpListner received a message on " + urlToListenTo);
+                    _logger.Verbose("HttpListner received a message on " + urlToListenTo);
 
                     // the request URL should now contain the auth code and pkce
                     return context.Request.Url;
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                 // If cancellation is requested before GetContextAsync is called
                 // then an ObjectDisposedException is fired by GetContextAsync.
                 // This is still just cancellation
-
+                _logger.Warning("ObjectDisposedException - cancellation requested? " + cancellationToken.IsCancellationRequested);
                 cancellationToken.ThrowIfCancellationRequested();
 
                 throw;
@@ -81,17 +81,26 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             }
         }
 
-        private void Respond(Func<Uri, string> responseProducer, HttpListenerContext context)
+        private void Respond(Func<Uri, MessageAndHttpCode> responseProducer, HttpListenerContext context)
         {
-            string responseMessage = responseProducer(context.Request.Url);
+            MessageAndHttpCode messageAndCode = responseProducer(context.Request.Url);
+            _logger.Info("Processing a response message to the browser. HttpStatus:" + messageAndCode.HttpCode);
 
-            // TODO: handle redirects
-            //response.StatusCode = 302;
-            //response.RedirectLocation = @"https://www.google.com";
-            ////// Construct a response.
-            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
-            context.Response.ContentLength64 = buffer.Length;
-            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+            switch (messageAndCode.HttpCode)
+            {
+                case HttpStatusCode.Found:
+                    context.Response.StatusCode = (int)HttpStatusCode.Found;
+                    context.Response.RedirectLocation = messageAndCode.Message;
+                    break;
+                case HttpStatusCode.OK:
+                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(messageAndCode.Message);
+                    context.Response.ContentLength64 = buffer.Length;
+                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    break;
+                default:
+                    throw new NotImplementedException("HttpCode not supported" + messageAndCode.HttpCode);
+            }
+
             context.Response.OutputStream.Close();
         }
     }

@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
     {
         Task<Uri> ListenToSingleRequestAndRespondAsync(
             int port,
-            Func<Uri, string> responseProducer,
+            Func<Uri, MessageAndHttpCode> responseProducer,
             CancellationToken cancellationToken);
     }
 }
