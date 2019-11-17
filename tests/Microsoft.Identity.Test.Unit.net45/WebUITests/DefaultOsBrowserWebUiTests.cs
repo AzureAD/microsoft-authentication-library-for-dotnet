@@ -19,7 +19,7 @@ using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.WebUITests
 {
-    public class TestTcpInterceptor : ITcpInterceptor
+    public class TestTcpInterceptor : IUriInterceptor
     {
         private readonly Uri _expectedUri;
         public Func<Uri, string> ResponseProducer { get; }
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         private const string TestAuthorizationResponseUri = "http://localhost:50997/?code=OAQABAAIAAADCoMpjJXrxTq9VG9te-7FX1n0H3n1cOvvLstfUYt_wAqcm96iwQKYzTWLqkz44aUnx4mswa7tn53DFy03fIJie9zOUjk5y6R9vU-rhCSUTLTJR6wUdqsbZfqgRpcCHRPHgmOFk7c3MqJ6WF5Y9AfQgXLaXsZN5vy7ZqS9viU0-NXxKDuBx17yqsT0FPvuoO_0yEZkuVkwd_x_fuUpejHqmORRPfdS-rN6e-7TwfbpsjvUl_eZ2BbzOSJu9rRltWqK-cBVkBhmt3jYEXVWsuTFRD9GHPELscdMJxkwqeOyA8-Lt6zCskKQMq_aAwSPR34CxA9YXoLy-psqjeMDLA5ieP5rmdoNcGBPSXS-imNMKfFSxHN_df6rqpQCOShJ_SmuBFY6qfcARgXpAlobRiUHat-K5heDVJTude47uE_NCSdmRJVZzY1dOeVEJ6f6O1TgR8EHq_MOSyc9HTUU0CpYvf8zePZIjn4jFPv4CZwvdmc4sOCntWrPxxj0JfRval58-aueRgnyhkm9G23FG4oCWWjydaKp5EytHhyYYf_qztsycUkL3Z2Ox7brQ8_Sj1IQr14J3G2FUYgwjuvi6RYK3cvXPM6oUrhOlQcvx03y10xAtizogcA5UR2m8GIpDkm4GEMYX4yYcvBUI6y0qKHmjnZuS5UsymUhUbNG8kEsnI0WTODZ4zYlEHweTsTXq1QNawZqxAW-ZsQ9EbrEbuDFaybJtNYFuHkm1kUjUwpsbZXFLnTUI6CKKDNlUdvPpbiENgapB_p_AgLl3L5KihfY8AkVbVgHZVAcpDClEu_autQZa2jGvPEQka-oKpHqIFZbDEi4qB4yrkU_hDsjf-EqnIAA&state=901e7d87-6f49-4f9f-9fa7-e6b8c32d5b9595bc1797-dacc-4ff1-b9e9-0df81be286c7&session_state=1b37b349-61fe-4ad5-a049-9f8eadfded26";
         private const string TestErrorAuthorizationResponseUri = "http://localhost:50997/?error=errorMsg&error_description=errorDesc";
         private const int TestPort = 50997;
-        private ITcpInterceptor _tcpInterceptor;
+        private IUriInterceptor _tcpInterceptor;
         private IPlatformProxy _platformProxy;
         private ICoreLogger _logger;
 
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public override void TestInitialize()
         {
             base.TestInitialize();
-            _tcpInterceptor = Substitute.For<ITcpInterceptor>();
+            _tcpInterceptor = Substitute.For<IUriInterceptor>();
             _platformProxy = Substitute.For<IPlatformProxy>();
             _logger = Substitute.For<ICoreLogger>();
 
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public void NewRedirectUriCanBeGenerated()
         {
             // Arrange
-            var tcpInterceptor = Substitute.For<ITcpInterceptor>();
+            var tcpInterceptor = Substitute.For<IUriInterceptor>();
 
             IWebUI webUi = new DefaultOsBrowserWebUi(_platformProxy, _logger, null, tcpInterceptor);
 
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public void ValidateRedirectUri()
         {
             // Arrange
-            var tcpInterceptor = Substitute.For<ITcpInterceptor>();
+            var tcpInterceptor = Substitute.For<IUriInterceptor>();
 
             IWebUI webUi = new DefaultOsBrowserWebUi(_platformProxy, _logger, null, tcpInterceptor);
 
@@ -260,7 +260,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         private void ValidateResponse(SystemWebViewOptions options, bool successResponse, string expectedMessage, string expectedRedirect)
         {
             // Arrange
-            var tcpInterceptor = Substitute.For<ITcpInterceptor>();
+            var tcpInterceptor = Substitute.For<IUriInterceptor>();
             var webUi = new DefaultOsBrowserWebUi(_platformProxy, _logger, options, tcpInterceptor);
 
             Uri successAuthCodeUri = successResponse ?

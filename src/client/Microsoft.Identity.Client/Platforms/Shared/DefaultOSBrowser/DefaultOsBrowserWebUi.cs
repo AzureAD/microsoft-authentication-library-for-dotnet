@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
   </body>
 </html>";
 
-        private readonly ITcpInterceptor _tcpInterceptor;
+        private readonly IUriInterceptor _tcpInterceptor;
         private readonly ICoreLogger _logger;
         private readonly SystemWebViewOptions _webViewOptions;
         private readonly IPlatformProxy _platformProxy;
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             IPlatformProxy proxy,
             ICoreLogger logger,
             SystemWebViewOptions webViewOptions,
-            /* for test */ ITcpInterceptor tcpInterceptor = null)
+            /* for test */ IUriInterceptor tcpInterceptor = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _webViewOptions = webViewOptions;

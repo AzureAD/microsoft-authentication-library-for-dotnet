@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
-    internal interface ITcpInterceptor
+    internal interface IUriInterceptor
     {
         Task<Uri> ListenToSingleRequestAndRespondAsync(
             int port,
