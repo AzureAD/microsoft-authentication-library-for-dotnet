@@ -10,11 +10,17 @@ using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 {
-    internal class HttpListnerInterceptor : IUriInterceptor
+    internal class HttpListenerInterceptor : IUriInterceptor
     {
         private ICoreLogger _logger;
 
-        public HttpListnerInterceptor(ICoreLogger logger)
+        #region Test Hooks 
+        public Action TestBeforeTopLevelCall { get; set; }
+        public Action TestBeforeStart { get; set; }
+        public Action TestBeforeGetContext { get; set; }
+        #endregion
+
+        public HttpListenerInterceptor(ICoreLogger logger)
         {
             _logger = logger;
         }
@@ -24,6 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             Func<Uri, MessageAndHttpCode> responseProducer,
             CancellationToken cancellationToken)
         {
+            TestBeforeTopLevelCall?.Invoke();
             cancellationToken.ThrowIfCancellationRequested();
 
             HttpListener httpListener = null;
@@ -33,6 +40,9 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 
                 httpListener = new HttpListener();
                 httpListener.Prefixes.Add(urlToListenTo);
+
+                TestBeforeStart?.Invoke();
+
                 httpListener.Start();
                 _logger.Info("Listening for authorization code on " + urlToListenTo);
 
@@ -42,6 +52,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     TryStopListening(httpListener);
                 }))
                 {
+                    TestBeforeGetContext?.Invoke();
                     HttpListenerContext context = await httpListener.GetContextAsync()
                         .ConfigureAwait(false);
 

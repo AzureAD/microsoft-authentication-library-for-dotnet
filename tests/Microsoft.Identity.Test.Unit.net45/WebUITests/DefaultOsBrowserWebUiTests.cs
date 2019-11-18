@@ -19,7 +19,7 @@ using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.WebUITests
 {
-    public class TestTcpInterceptor : IUriInterceptor
+    internal class TestTcpInterceptor : IUriInterceptor
     {
         private readonly Uri _expectedUri;
         public Func<Uri, string> ResponseProducer { get; }
@@ -29,12 +29,10 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             _expectedUri = expectedUri;
         }
 
-        public Task<Uri> ListenToSingleRequestAndRespondAsync(
-            int port,
-            Func<Uri, string> responseProducer,
-            CancellationToken cancellationToken)
+        public Task<Uri> ListenToSingleRequestAndRespondAsync(int port, Func<Uri, MessageAndHttpCode> responseProducer, CancellationToken cancellationToken)
         {
             return Task.FromResult(_expectedUri);
+
         }
     }
 
@@ -77,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Assert.IsFalse(string.IsNullOrEmpty(authorizationResult.Code));
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
-                TestPort, Arg.Any<Func<Uri, string>>(), CancellationToken.None).ConfigureAwait(false);
+                TestPort, Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -99,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
-                Arg.Any<Func<Uri, string>>(),
+                Arg.Any<Func<Uri, MessageAndHttpCode>>(),
                 CancellationToken.None)
                .Returns(Task.FromResult(responseUri));
 
@@ -115,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 .ConfigureAwait(false);
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
-                TestPort, Arg.Any<Func<Uri, string>>(), CancellationToken.None).ConfigureAwait(false);
+                TestPort, Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
 
             Assert.IsTrue(customOpenBrowserCalled);
         }
@@ -144,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
                 TestPort,
-                Arg.Any<Func<Uri, string>>(),
+                Arg.Any<Func<Uri, MessageAndHttpCode>>(),
                 CancellationToken.None)
                .Returns(Task.FromResult(responseUri));
 
@@ -242,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                options: new SystemWebViewOptions() { HtmlMessageSuccess = "all good", BrowserRedirectSuccess = new Uri("http://bing.com") },
                successResponse: true,
                expectedMessage: null,
-               expectedRedirect: "http://bing.com");
+               expectedRedirect: "http://bing.com/");
 
             ValidateResponse(
                 options: new SystemWebViewOptions()
@@ -253,7 +251,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 },
                 successResponse: true,
                 expectedMessage: null,
-                expectedRedirect: "http://bing.com");
+                expectedRedirect: "http://bing.com/");
 
         }
 
@@ -268,19 +266,19 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 new Uri(TestErrorAuthorizationResponseUri);
 
             // Act
-            string message = webUi.GetResponseMessage(successAuthCodeUri);
+            MessageAndHttpCode messageAndCode = webUi.GetResponseMessage(successAuthCodeUri);
 
             // Assert
             if (expectedMessage != null)
             {
-                Assert.IsTrue(message.StartsWith("HTTP/1.1 200 OK"));
-                Assert.IsTrue(message.Contains(expectedMessage));
+                Assert.AreEqual(messageAndCode.HttpCode, HttpStatusCode.OK);
+                Assert.IsTrue(messageAndCode.Message.Equals(expectedMessage, StringComparison.OrdinalIgnoreCase));
             }
 
             if (expectedRedirect != null)
             {
-                Assert.IsTrue(message.StartsWith("HTTP/1.1 302 Found"));
-                Assert.IsTrue(message.Contains($"Location: {expectedRedirect}"));
+                Assert.AreEqual(messageAndCode.HttpCode, HttpStatusCode.Found);
+                Assert.IsTrue(messageAndCode.Message.Equals(expectedRedirect, StringComparison.OrdinalIgnoreCase));
             }
         }
 

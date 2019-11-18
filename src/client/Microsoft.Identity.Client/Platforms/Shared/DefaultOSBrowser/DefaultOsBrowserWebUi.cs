@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             _webViewOptions = webViewOptions;
             _platformProxy = proxy ?? throw new ArgumentNullException(nameof(proxy));
 
-            _uriInterceptor = uriInterceptor ?? new HttpListnerInterceptor(_logger);
+            _uriInterceptor = uriInterceptor ?? new HttpListenerInterceptor(_logger);
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
@@ -110,7 +110,6 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             {
                 return redirectUri;
             }
-
 
             TcpListener listner = new TcpListener(IPAddress.Loopback, 0);
             try

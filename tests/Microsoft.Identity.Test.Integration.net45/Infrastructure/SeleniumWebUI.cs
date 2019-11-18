@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
             {
-                var listener = new HttpListnerInterceptor(_logger);
+                var listener = new HttpListenerInterceptor(_logger);
                 Uri authCodeUri = null;
 
                 // Run the TCP listener and the selenium automation in parallel
