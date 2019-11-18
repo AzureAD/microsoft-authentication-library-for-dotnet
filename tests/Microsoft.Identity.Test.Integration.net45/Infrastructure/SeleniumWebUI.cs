@@ -202,21 +202,22 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             driver.SaveScreenshot(_testContext);
         }
 
-        private static string GetMessageToShowInBroswerAfterAuth(Uri uri)
+        private static MessageAndHttpCode GetMessageToShowInBroswerAfterAuth(Uri uri)
         {
             // Parse the uri to understand if an error was returned. This is done just to show the user a nice error message in the browser.
             var authCodeQueryKeyValue = HttpUtility.ParseQueryString(uri.Query);
             string errorString = authCodeQueryKeyValue.Get("error");
             if (!string.IsNullOrEmpty(errorString))
             {
-                return string.Format(
+                string message = string.Format(
                     CultureInfo.InvariantCulture,
                     CloseWindowFailureHtml,
                     errorString,
                     authCodeQueryKeyValue.Get("error_description"));
+                return new MessageAndHttpCode(HttpStatusCode.OK, message);
             }
 
-            return CloseWindowSuccessHtml;
+            return new MessageAndHttpCode(HttpStatusCode.OK, CloseWindowSuccessHtml);
         }
     }
 }
