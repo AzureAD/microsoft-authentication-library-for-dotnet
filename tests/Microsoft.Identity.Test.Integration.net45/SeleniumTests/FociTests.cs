@@ -55,14 +55,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await FociSignInSignOutAsync(labResponse).ConfigureAwait(false);          
         }
 
-        [TestMethod]
-        public async Task FociSignInSignOutMsaUserAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-            labResponse.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
-            await FociSignInSignOutAsync(labResponse).ConfigureAwait(false);
-        }
-
         private async Task FociSignInSignOutAsync(LabResponse labResponse)
         {
             LabUser user = labResponse.User;
