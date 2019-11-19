@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 * Until the agents are updated, appcenter build will need to ignore the use of 'ASWebAuthenticationSession' for iOS 12.*/
 
 #if !IS_APPCENTER_BUILD
-    internal class ASWebAuthenticationPresentationContextProviderWindow : NSObject, IASWebAuthenticationPresentationContextProviding
+    internal class ASWebAuthenticationPresentationContextProviderWindow : NSObject
     {
         public UIWindow GetPresentationAnchor(ASWebAuthenticationSession session)
         {

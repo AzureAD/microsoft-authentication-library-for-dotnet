@@ -420,6 +420,11 @@ namespace Microsoft.Identity.Client
         public const string NullIntentReturnedFromBroker = "null_intent_returned_from_broker";
 
         /// <summary>
+        /// 
+        /// </summary>
+        public const string BrokerSignatureVerificationFailed = "broker_signature_verification_failed";
+
+        /// <summary>
         /// Error code used when the HTTP response returns HttpStatusCode.NotFound
         /// </summary>
         public const string HttpStatusNotFound = "not_found";

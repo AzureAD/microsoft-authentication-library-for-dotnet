@@ -73,8 +73,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                             // MSAL.NET will pick up an "authentication cancelled" error
                             // With the addition of the presentationContext, .Start() must
                             // be called on the main UI thread
-                            asWebAuthenticationSession.PresentationContextProvider =
-                            new ASWebAuthenticationPresentationContextProviderWindow();
+                            //asWebAuthenticationSession.PresentationContextProvider =
+                            //new ASWebAuthenticationPresentationContextProviderWindow();
                         }
                         asWebAuthenticationSession.Start();
                     });
