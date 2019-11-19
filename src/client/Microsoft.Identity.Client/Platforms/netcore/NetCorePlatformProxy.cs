@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return new InMemoryTokenCacheAccessor();
         }
 
-        protected override IWebUIFactory CreateWebUiFactory() => new NetStandardWebUIFactory();
+        protected override IWebUIFactory CreateWebUiFactory() => new NetCoreWebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetCoreCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 

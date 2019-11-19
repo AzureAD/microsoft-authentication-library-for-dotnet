@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Utils
@@ -21,9 +23,10 @@ namespace Microsoft.Identity.Client.Utils
         /// <param name="maxAttempts">The maximum number of attempts.</param>
         /// <param name="retryInterval">Timespan to wait between attempts of the operation</param>
         /// <param name="onAttemptFailed">The callback executed when an attempt is failed.</param>
+        /// <param name="allowedExceptions">Allowed exceptions</param>
         /// <typeparam name="T">The result type.</typeparam>
         /// <returns>The <see cref="Task"/> producing the result.</returns>
-        public static async Task<T> ExecuteWithRetryAsync<T>(Func<Task<T>> func, int maxAttempts, TimeSpan? retryInterval = null, Action<int, Exception> onAttemptFailed = null)
+        public static async Task<T> ExecuteWithRetryAsync<T>(Func<Task<T>> func, int maxAttempts, TimeSpan? retryInterval = null, Action<int, Exception> onAttemptFailed = null, ISet<Type> allowedExceptions = null)
         {
             if (func == null)
             {
@@ -51,6 +54,12 @@ namespace Microsoft.Identity.Client.Utils
                 }
                 catch (Exception exception)
                 {
+                    if (allowedExceptions != null && 
+                        !allowedExceptions.Contains(exception.GetType()))
+                    {
+                        throw;
+                    }
+
                     attempt++;
 
                     onAttemptFailed?.Invoke(attempt, exception);
@@ -68,8 +77,9 @@ namespace Microsoft.Identity.Client.Utils
         /// <param name="maxAttempts">The maximum number of attempts.</param>
         /// <param name="retryInterval">Timespan to wait between attempts of the operation</param>
         /// <param name="onAttemptFailed">The retry handler.</param>
+        /// <param name="allowedExceptions"></param>
         /// <returns>The <see cref="Task"/> producing the result.</returns>
-        public static async Task ExecuteWithRetryAsync(Func<Task> func, int maxAttempts, TimeSpan? retryInterval = null, Action<int, Exception> onAttemptFailed = null)
+        public static async Task ExecuteWithRetryAsync(Func<Task> func, int maxAttempts, TimeSpan? retryInterval = null, Action<int, Exception> onAttemptFailed = null, ISet<Type> allowedExceptions = null)
         {
             if (func == null)
             {
@@ -82,7 +92,7 @@ namespace Microsoft.Identity.Client.Utils
                 return true;
             };
 
-            await ExecuteWithRetryAsync(wrapper, maxAttempts, retryInterval, onAttemptFailed).ConfigureAwait(true);
+            await ExecuteWithRetryAsync(wrapper, maxAttempts, retryInterval, onAttemptFailed, allowedExceptions).ConfigureAwait(true);
         }
     }
 }
