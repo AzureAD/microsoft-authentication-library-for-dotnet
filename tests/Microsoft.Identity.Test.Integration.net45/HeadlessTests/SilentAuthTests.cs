@@ -18,6 +18,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
 
+        /// <summary>
+        /// Initialized by MSTest (do not make private or readonly)
+        /// </summary>
+        public TestContext TestContext { get; set; }
 
         [TestMethod]
         public async Task SilentAuth_ForceRefresh_Async()

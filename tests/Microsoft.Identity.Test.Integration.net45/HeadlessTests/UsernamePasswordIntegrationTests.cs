@@ -76,6 +76,39 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         #endregion
 
+        /// <summary>
+        /// ROPC does not support MSA accounts
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task ROPC_MSA_Async()
+        {
+            var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
+            var user = labResponse.User;
+            labResponse.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
+
+            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
+
+            try
+            {
+                var result = await msalPublicClient
+                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (MsalServiceException ex)
+            {
+                Assert.AreEqual(406, ex.StatusCode);
+                Assert.AreEqual("accessing_ws_metadata_exchange_failed", ex.ErrorCode);
+
+                return;
+            }
+
+            Assert.Fail("Bad exception or no exception thrown");
+        }
+
         [TestMethod]
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {

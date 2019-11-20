@@ -24,11 +24,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task Interactive_SSHCert_Async()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await CreateSSHCertTestAsync(labResponse).ConfigureAwait(false);
+        }
 
+        private async Task CreateSSHCertTestAsync(LabResponse labResponse)
+        {
             IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                .Build();
+            .Create(labResponse.App.AppId)
+            .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+            .Build();
 
             TokenCacheAccessRecorder userCacheAccess = pca.UserTokenCache.RecordAccess();
 
@@ -73,12 +77,20 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
         }
 
+
+        [TestMethod]
+        public async Task Interactive_SSHCert_MsaUser_Async()
+        {
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            labResponse.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
+            await CreateSSHCertTestAsync(labResponse).ConfigureAwait(false);
+        }
         private string CreateJwk()
         {
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
             RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
 
-            string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus); 
+            string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus);
             string exp = Base64UrlHelpers.Encode(rsaKeyInfo.Exponent);
             string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
 
