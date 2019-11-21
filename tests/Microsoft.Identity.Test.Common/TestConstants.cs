@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Name = "First Last";
         public const string Claims = "claim1claim2";
         public const string DisplayableId = "displayable@id.com";
-        public const string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        public const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         public const string ClientSecret = "client_secret";
         public const string DefaultPassword = "password";
         public const string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
@@ -179,7 +179,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string FabrikamDisplayableId = "displayable@fabrikam.com";
         public const string OnPremiseHomeObjectId = OnPremiseUniqueId;
         public const string OnPremisePolicy = "on_premise_policy";
-        public const string OnPremiseRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        public const string OnPremiseRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         public const string OnPremiseClientSecret = "on_premise_client_secret";
         public const string OnPremiseUid = "my-OnPremise-UID";
         public const string OnPremiseUtid = "my-OnPremise-UTID";
