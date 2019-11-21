@@ -84,17 +84,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ROPC_MSA_Async()
         {
             var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-            var user = labResponse.User;
-            labResponse.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
 
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+            SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
 
             var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
 
             try
             {
                 var result = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }

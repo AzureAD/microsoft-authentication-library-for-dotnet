@@ -77,14 +77,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
         }
 
-
-        [TestMethod]
-        public async Task Interactive_SSHCert_MsaUser_Async()
-        {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            labResponse.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
-            await CreateSSHCertTestAsync(labResponse).ConfigureAwait(false);
-        }
         private string CreateJwk()
         {
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);

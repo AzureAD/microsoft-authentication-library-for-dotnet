@@ -59,7 +59,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-            labResponse.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
