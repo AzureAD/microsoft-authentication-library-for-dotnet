@@ -89,22 +89,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
 
-            try
-            {
-                var result = await msalPublicClient
+            var result = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
-                    .ExecuteAsync(CancellationToken.None)
+                    .ExecuteAsync(CancellationToken.None))
                     .ConfigureAwait(false);
-            }
-            catch (MsalServiceException ex)
-            {
-                Assert.AreEqual(406, ex.StatusCode);
-                Assert.AreEqual("accessing_ws_metadata_exchange_failed", ex.ErrorCode);
-
-                return;
-            }
-
-            Assert.Fail("Bad exception or no exception thrown");
         }
 
         [TestMethod]

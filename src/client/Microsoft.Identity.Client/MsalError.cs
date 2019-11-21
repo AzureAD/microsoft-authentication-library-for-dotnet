@@ -466,7 +466,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Non HTTPS redirects are not supported
         /// <para>What happens?</para>This error happens when you have registered a non-HTTPS redirect URI for the
-        /// public client application other than <c>https://login.microsoftonline.com/common/oauth2/nativeclient</c>
+        /// public client application other than <c>urn:ietf:wg:oauth:2.0:oob</c>
         /// <para>Mitigation [App registration and development]</para>Register in the application a Reply URL starting with "https://"
         /// </summary>
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";

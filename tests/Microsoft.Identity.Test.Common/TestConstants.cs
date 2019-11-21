@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Name = "First Last";
         public const string Claims = "claim1claim2";
         public const string DisplayableId = "displayable@id.com";
-        public const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
+        public const string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public const string ClientSecret = "client_secret";
         public const string DefaultPassword = "password";
         public const string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
