@@ -461,7 +461,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Validate new default redirect uri
 #if DESKTOP
-                Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
+                Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
 #elif NET_CORE
                 Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
 #endif
