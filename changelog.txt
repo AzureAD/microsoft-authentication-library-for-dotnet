@@ -1,3 +1,8 @@
+4.7.1.
+============
+Bug fix:
+**Interactive auth with Edge system browser sometimes hanged. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1506)
+
 4.7.0
 ============
 New Features:
