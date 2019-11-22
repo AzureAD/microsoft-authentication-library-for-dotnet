@@ -31,16 +31,6 @@ namespace Microsoft.Identity.Client
 
         public AccountId HomeAccountId { get; }
 
-        public string UniqueId { get; internal set; }
-
-        public string DisplayableId { get; internal set; }
-
-        public string GivenName { get; internal set; }
-
-        public string FamilyName { get; internal set; }
-
-        public string IdentityProvider { get; internal set; }
-
         public override string ToString()
         {
             return string.Format(

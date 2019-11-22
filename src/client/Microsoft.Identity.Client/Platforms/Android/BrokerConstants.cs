@@ -155,6 +155,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public const string CallerInfoUID = "caller.info.uid";
 
+        public const string GetAccounts = "GET_ACCOUNTS";
+
+        public const string BrokerAccounts = "broker_accounts";
+
+        public const string CommonProtocolVersion = "common.protocol.version";
+
         // Claims step-up. Skip cache look up
         public const string SkipCache = "skip.cache";
         public const string Claims = "account.claims";

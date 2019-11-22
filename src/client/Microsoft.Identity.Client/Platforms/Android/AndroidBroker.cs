@@ -26,13 +26,18 @@ namespace Microsoft.Identity.Client.Platforms.Android
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
     internal class AndroidBroker : IBroker
     {
+        //Since the response for the broker interactive call is returned in the AuthenticationContinuationHelper, this class needs to send the response to 
+        //the broker and wait for the AuthenticationContinuationHelper to return the response to the broker thread. This sephamore is used to make the MSAL code wait
+        //for the response. The AuthenticationContinuationHelper will trigger the continueation of the broker thread once it sets the rsultEX value. 
+        //Because of this, resultEX is made to be static. However, there will only ever be one broker authentication happening at once.
         private static SemaphoreSlim readyForResponse = null;
         private static MsalTokenResponse resultEx = null;
+        //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and reinjected into the response at the end.
+        private static string _correlationId;
         private readonly AndroidBrokerHelper _brokerHelper;
         private readonly ICoreLogger _logger;
         private Activity _activity;
-        //TODO: Temp variable to hold data not requrned from the broker due to a bug. Will be removed.
-        private static Dictionary<string, string> _brokerPayload;
+
 
         public AndroidBroker(ICoreLogger logger)
         {
@@ -52,17 +57,17 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             resultEx = null;
             readyForResponse = new SemaphoreSlim(0);
-            _brokerPayload = brokerPayload;
+            _correlationId = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId);
             //Need to disable warning for non awaited async call.
 #pragma warning disable 4014
             try
             {
                 Task.Run(() => AcquireTokenInternalAsync(brokerPayload));
             }
-            catch (MsalException Ex)
+            catch
             {
                 _logger.Error("Broker Operation Failed to complete.");
-                throw Ex;
+                throw;
             }
 #pragma warning restore 4014
             await readyForResponse.WaitAsync().ConfigureAwait(false);
@@ -75,70 +80,54 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             Context mContext = Application.Context;
 
-            if (_brokerHelper.VerifyUser(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint),
-                AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username)))
+            brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
+            _logger.InfoPii(
+                "It switched to broker for context: " + mContext.PackageName + " login hint: " +
+                AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerAccountName),
+                "It switched to broker for context");
+
+            // Don't send silent background request if account information is not provided
+            bool hasAccountNameOrUserId = !string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerAccountName)) ||
+                !string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username));
+            if (hasAccountNameOrUserId)
             {
-                brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
-                _logger.InfoPii(
-                    "It switched to broker for context: " + mContext.PackageName + " login hint: " + 
-                    AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerAccountName),
-                    "It switched to broker for context");
-
-                // Don't send silent background request if account information is not provided
-                bool hasAccountNameOrUserId = !string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerAccountName)) ||
-                    !string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username));
-                if (string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Claims)) && hasAccountNameOrUserId)
-                {
-                    _logger.Verbose("User is specified for silent token request");
-                    Bundle SilentResult = _brokerHelper.GetAuthTokenSilently(brokerPayload, _activity);
-                }
-                else
-                {
-                    _logger.Verbose("User is not specified for silent token request");
-                }
-
-                if (resultEx != null && !string.IsNullOrEmpty(resultEx.AccessToken))
-                {
-                    _logger.Verbose("Token is returned from silent call");
-                    readyForResponse.Release();
-                    return;
-                }
-                else
-                {
-                    _logger.Verbose("Token is not returned from silent backgroud call");
-                }
-
-                _logger.Verbose("Starting Authentication Activity");
-
-                if (resultEx == null)
-                {
-                    _logger.Verbose("Initial request to broker");
-                    // Log the initial request but not force a prompt
-                }
-
-                // onActivityResult will receive the response for this activity.
-                // Lauching this activity will switch to the broker app.
-                Intent brokerIntent = _brokerHelper.GetIntentForInteractiveBrokerRequest(brokerPayload, _activity);
-                if (brokerIntent != null)
-                {
-                    try
-                    {
-                        _logger.Verbose(
-                            "Calling activity pid:" + AndroidNative.OS.Process.MyPid()
-                            + " tid:" + AndroidNative.OS.Process.MyTid() + "uid:"
-                            + AndroidNative.OS.Process.MyUid());
-
-                        _activity.StartActivityForResult(brokerIntent, 1001);
-                    }
-                    catch (ActivityNotFoundException e)
-                    {
-                        _logger.ErrorPii(e);
-                    }
-                }
-        }
+                _logger.Verbose("User is specified for silent token request");
+                string silentResult = _brokerHelper.GetAuthTokenSilently(brokerPayload, _activity);
+                resultEx = CreateMsalTokenResponseFromResult(silentResult);
+                readyForResponse.Release();
+                return;
+            }
             else
             {
-                throw new MsalException(MsalError.NoBrokerAccountFound, "Please add the selected account to the broker");
+                _logger.Verbose("User is not specified for silent token request");
+            }
+
+            _logger.Verbose("Starting Authentication Activity");
+
+            if (resultEx == null)
+            {
+                _logger.Verbose("Initial request to broker");
+                // Log the initial request but not force a prompt
+            }
+
+            // onActivityResult will receive the response for this activity.
+            // Lauching this activity will switch to the broker app.
+            Intent brokerIntent = _brokerHelper.GetIntentForInteractiveBrokerRequest(brokerPayload, _activity);
+            if (brokerIntent != null)
+            {
+                try
+                {
+                    _logger.Verbose(
+                        "Calling activity pid:" + AndroidNative.OS.Process.MyPid()
+                        + " tid:" + AndroidNative.OS.Process.MyTid() + "uid:"
+                        + AndroidNative.OS.Process.MyUid());
+
+                    _activity.StartActivityForResult(brokerIntent, 1001);
+                }
+                catch (ActivityNotFoundException e)
+                {
+                    _logger.ErrorPii(e);
+                }
             }
 
             await readyForResponse.WaitAsync().ConfigureAwait(false);
@@ -170,25 +159,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         private static MsalTokenResponse CreateMsalTokenResponseFromResult(string brokerResult)
         {
+            if (string.IsNullOrEmpty(brokerResult))
+            {
+                return null;
+            }
             Dictionary<string, string> response = new Dictionary<string, string>();
             dynamic authResult = JObject.Parse(brokerResult);
 
             response.Add(BrokerResponseConst.Authority, authResult[BrokerResponseConst.Authority].ToString());
             response.Add(BrokerResponseConst.AccessToken, authResult[BrokerResponseConst.AccessToken].ToString());
             response.Add(BrokerResponseConst.IdToken, authResult[BrokerResponseConst.IdToken].ToString());
-            response.Add(BrokerResponseConst.CorrelationId, AndroidBrokerHelper.GetValueFromBrokerPayload(_brokerPayload, BrokerParameter.CorrelationId));
+            response.Add(BrokerResponseConst.CorrelationId, _correlationId);
             response.Add(BrokerResponseConst.Scope, authResult[BrokerResponseConst.AndroidScopes].ToString());
             response.Add(BrokerResponseConst.ExpiresOn, authResult[BrokerResponseConst.ExpiresOn].ToString());
             response.Add(BrokerResponseConst.ClientInfo, authResult[BrokerResponseConst.ClientInfo].ToString());
 
             return MsalTokenResponse.CreateFromBrokerResponse(response);
         }
-    }
-
-    internal static class BrokerResponseCode
-    {
-        public const int UserCancelled = 2001;
-        public const int BrowserCodeError = 2002;
-        public const int ResponseReceived = 2004;
     }
 }

@@ -22,5 +22,10 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string ClientInfo = "client_info";
 
         public const string iOSBrokerNonce = "broker_nonce"; //in response from iOS Broker
+
+        public const string Account = "mAccount";
+        public const string HomeAccountId = "home_account_id";
+        public const string LocalAccountId = "local_account_id";
+        public const string UserName = "username";
     }
 }

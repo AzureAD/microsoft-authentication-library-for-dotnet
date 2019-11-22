@@ -74,6 +74,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async override Task PreRunAsync()
         {
+            if (AuthenticationRequestParameters.IsBrokerEnabled)
+                return;
+
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
 
@@ -94,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
             // Look for access token
-            else if (!_silentParameters.ForceRefresh)
+            if (!_silentParameters.ForceRefresh)
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 

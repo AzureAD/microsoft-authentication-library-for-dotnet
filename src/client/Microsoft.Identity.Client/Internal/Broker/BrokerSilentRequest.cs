@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -15,29 +18,27 @@ namespace Microsoft.Identity.Client.Internal.Broker
 {
     internal class BrokerSilentRequest
     {
-        internal Dictionary<string, string> BrokerPayload { get; set; } = new Dictionary<string, string>();
-        internal IBroker Broker { get; }
+        private Dictionary<string, string> _brokerPayload = new Dictionary<string, string>();
+        private IBroker Broker { get; }
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
-        //private readonly AuthorizationResult _authorizationResult;
 
         internal BrokerSilentRequest(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters,
             IServiceBundle serviceBundle,
-            //AuthorizationResult authorizationResult,
             IBroker broker)
         {
             _authenticationRequestParameters = authenticationRequestParameters;
             _silentParameters = acquireTokenSilentParameters;
             _serviceBundle = serviceBundle;
-            //_authorizationResult = authorizationResult;
             Broker = broker;
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
+            //TODO: call can invoke broker here
             _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
             return await SendAndVerifyResponseAsync().ConfigureAwait(false);
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             CreateRequestParametersForBroker();
 
             MsalTokenResponse msalTokenResponse =
-                await Broker.AcquireTokenUsingBrokerAsync(BrokerPayload).ConfigureAwait(false);
+                await Broker.AcquireTokenUsingBrokerAsync(_brokerPayload).ConfigureAwait(false);
 
             ValidateResponseFromBroker(msalTokenResponse);
             return msalTokenResponse;
@@ -56,24 +57,21 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         internal void CreateRequestParametersForBroker()
         {
-            BrokerPayload.Clear();
-            BrokerPayload.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+            _brokerPayload.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
             string scopes = EnumerableExtensions.AsSingleString(_authenticationRequestParameters.Scope);
 
-            BrokerPayload.Add(BrokerParameter.Scope, scopes);
-            BrokerPayload.Add(BrokerParameter.ClientId, _authenticationRequestParameters.ClientId);
-            BrokerPayload.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString());
-            BrokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
-            BrokerPayload.Add(BrokerParameter.RedirectUri, _serviceBundle.Config.RedirectUri);
-
+            _brokerPayload.Add(BrokerParameter.Scope, scopes);
+            _brokerPayload.Add(BrokerParameter.ClientId, _authenticationRequestParameters.ClientId);
+            _brokerPayload.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString());
+            _brokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
+            _brokerPayload.Add(BrokerParameter.RedirectUri, _serviceBundle.Config.RedirectUri);
             string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
-            BrokerPayload.Add(BrokerParameter.ExtraQp, extraQP);
-
-            BrokerPayload.Add(BrokerParameter.Username, _authenticationRequestParameters.Account?.Username ?? string.Empty);
-            BrokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
-            BrokerPayload.Add(BrokerParameter.HomeAccountId, _silentParameters.Account.HomeAccountId.Identifier);
-            BrokerPayload.Add(BrokerParameter.LocalAccountId, _silentParameters.Account.HomeAccountId.TenantId);
-            BrokerPayload.Add(BrokerParameter.ForceRefresh, _silentParameters.ForceRefresh.ToString(CultureInfo.InvariantCulture));
+            _brokerPayload.Add(BrokerParameter.ExtraQp, extraQP);
+            _brokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
+            _brokerPayload.Add(BrokerParameter.LoginHint, _silentParameters.LoginHint);
+#pragma warning disable CA1305 // Specify IFormatProvider
+            _brokerPayload.Add(BrokerParameter.ForceRefresh, _silentParameters.ForceRefresh.ToString());
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
 
         internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
@@ -86,16 +84,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
                     msalTokenResponse.AccessToken.Count());
                 return;
             }
-            else if (msalTokenResponse.Error != null)
+            if (msalTokenResponse.Error != null)
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
                 throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
-            }
-            else
-            {
-                _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
-                throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
             }
         }
     }
