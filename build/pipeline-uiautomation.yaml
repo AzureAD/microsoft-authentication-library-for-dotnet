@@ -100,6 +100,7 @@ stages:
         azureSubscription: 'MSID MSAL.NET Automation KeyVault'
         KeyVaultName: BuildAutomation
         SecretsFilter: iOSAppcenterSigningCertPW
+      enabled: false
 
     - task: DownloadSecureFile@1
       displayName: 'Download Certificate'
@@ -120,6 +121,7 @@ stages:
       displayName: 'NuGet restore'
       inputs:
         restoreSolution: LibsMacOS.sln
+      enabled: false
 
     - task: XamariniOS@1
       displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
@@ -133,6 +135,7 @@ stages:
         signingP12File: '$(Agent.TempDirectory)/AppCenteriOSTestCert.p12'
         signingP12Password: '$(iOSAppcenterSigningCertPW)'
         signingProvisioningProfileFile: '$(Agent.TempDirectory)/iOS_Team_Provisioning_Profile.mobileprovision'
+      enabled: false
 
     - task: CopyFiles@2
       displayName: 'Copy ipa to staging directory'
@@ -142,6 +145,7 @@ stages:
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
         CleanTargetFolder: true
         OverWrite: true
+      enabled: false
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: Xamarin.iOS'
@@ -175,9 +179,9 @@ stages:
     - task: AzureKeyVault@1
       displayName: 'Azure Key Vault: AzureADIdentityDivisionTestAgentSecret'
       inputs:
-        azureSubscription: 'MSID MSAL.NET Automation KeyVault'
-        KeyVaultName: BuildAutomation
-        SecretsFilter: AzureADIdentityDivisionTestAgentSecret
+        azureSubscription: '.NET Keyvault'
+        KeyVaultName: buildautomation
+        SecretsFilter: 'AzureADIdentityDivisionTestAgent'
 
     - powershell: |
         $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
@@ -208,21 +212,25 @@ stages:
       inputs:
         artifactName: Xamarin.iOS
         itemPattern: '**/*'
+      enabled: false
 
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Drop'
       inputs:
         artifactName: drop
         itemPattern: '**/*'
+      enabled: false
 
     - powershell: '$Import = $(FastRun)'
       errorActionPreference: silentlyContinue
       displayName: 'Import Variables'
       continueOnError: true
+      enabled: false
 
     - powershell: 'npm install -g appcenter-cli'
       errorActionPreference: silentlyContinue
       displayName: 'Install Appcenter Cli'
+      enabled: false
 
     - task: AzureKeyVault@1
       displayName: 'Azure Key Vault: AzureADIdentityDivisionTestAgentSecret'
@@ -230,16 +238,20 @@ stages:
         azureSubscription: 'MSID MSAL.NET Automation KeyVault'
         KeyVaultName: BuildAutomation
         SecretsFilter: AzureADIdentityDivisionTestAgentSecret
+      enabled: false
 
     - powershell: |
         $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
         $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\iOS\bin\Debug\data.txt
       displayName: 'Get Credentials'
+      enabled: false
 
     - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-iOS" --devices ADAL-DotNet/ios-12-plus --app-path $(System.ArtifactsDirectory)\Xamarin.iOS\XForms.iOS.ipa --test-series "master" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\iOS\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --include-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
       displayName: 'Run App Center MSAL Tests (Fast)'
       condition: and(succeeded(), eq(variables['FastRun'], 'true'))
+      enabled: false
 
     - powershell: 'appcenter test run uitest --app "ADAL-DotNet/DotNet-Xamarin-iOS" --devices ADAL-DotNet/ios-12-plus --app-path $(System.ArtifactsDirectory)\Xamarin.iOS\XForms.iOS.ipa --test-series "master" --locale "en_US" --build-dir $(System.ArtifactsDirectory)\drop\Appcenter\MSAL\iOS\bin\Debug --uitest-tools-dir $(System.ArtifactsDirectory)\drop --exclude-category FastRun --include data.txt --token b3f171ce2e9ed2cfc11b8748ea8c7d3e4c9d37f5'
       displayName: 'Run App Center MSAL Tests (Full)'
       condition: and(succeeded(), eq(variables['FastRun'], 'false'))
+      enabled: false
