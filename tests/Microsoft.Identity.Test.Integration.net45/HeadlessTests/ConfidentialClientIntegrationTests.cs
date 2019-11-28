@@ -20,7 +20,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -57,7 +56,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             if (_keyVault == null)
             {
                 _keyVault = new KeyVaultSecretsProvider();
-                _ccaSecret = _keyVault.GetSecret(TestConstants.SecretForCCATests).Value; 
+                _ccaSecret = _keyVault.GetSecret(TestConstants.SecretForCCATests).Value;
             }
         }
 
@@ -341,8 +340,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static X509Certificate2 GetCertificate(bool useRSACert = false)
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert ? 
-                TestConstants.RSATestCertThumbprint : 
+            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert ?
+                TestConstants.RSATestCertThumbprint :
                 TestConstants.AutomationTestThumbprint);
             if (cert == null)
             {
@@ -362,7 +361,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
-            await RunOnBehalfOfTestAsync(await LabUserHelper.GetFederatedAdfsUserAsync(FederationProvider.ADFSv2019).ConfigureAwait(false)).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         [TestMethod]
