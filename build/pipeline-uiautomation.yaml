@@ -100,6 +100,7 @@ stages:
         azureSubscription: 'MSID MSAL.NET Automation KeyVault'
         KeyVaultName: BuildAutomation
         SecretsFilter: iOSAppcenterSigningCertPW
+      enabled:false
 
     - task: DownloadSecureFile@1
       displayName: 'Download Certificate'
