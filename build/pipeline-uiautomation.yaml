@@ -212,12 +212,14 @@ stages:
       inputs:
         artifactName: Xamarin.iOS
         itemPattern: '**/*'
+      enabled: false
 
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Drop'
       inputs:
         artifactName: drop
         itemPattern: '**/*'
+      enabled: false
 
     - powershell: '$Import = $(FastRun)'
       errorActionPreference: silentlyContinue
