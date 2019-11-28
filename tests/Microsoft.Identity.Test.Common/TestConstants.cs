@@ -128,7 +128,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                 {"key2", "value2"}
             };
 
-        public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/e360740b3411452b887e6c3097cb1037";
+        public const string SecretForCCATests = "https://buildautomation.vault.azure.net/secrets/SecretForCCATests/c2086f353f984df2baf3caab2052c75e";
         public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/243c858fe7b9411cbcf05a2a284d8a84";
         public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/eacfd82bdd1c4cdba47d188511a00800";
         public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/e9f89e8f95aa47e69725a32b661d9546";
