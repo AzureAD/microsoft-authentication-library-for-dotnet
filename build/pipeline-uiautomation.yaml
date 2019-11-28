@@ -145,6 +145,7 @@ stages:
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
         CleanTargetFolder: true
         OverWrite: true
+      enabled: false
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: Xamarin.iOS'
