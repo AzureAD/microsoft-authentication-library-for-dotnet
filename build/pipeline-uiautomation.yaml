@@ -181,7 +181,7 @@ stages:
       inputs:
         azureSubscription: '.NET Keyvault'
         KeyVaultName: buildautomation
-        SecretsFilter: 'AzureADIdentityDivisionTestAgent
+        SecretsFilter: 'AzureADIdentityDivisionTestAgent'
 
     - powershell: |
         $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
