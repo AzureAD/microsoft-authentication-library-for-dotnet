@@ -7,7 +7,7 @@ using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
 {
-    internal class NetStandardWebUIFactory : IWebUIFactory
+    internal class NetCoreWebUIFactory : IWebUIFactory
     {
         public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {

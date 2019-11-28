@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(app);
             Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
             Assert.AreEqual(TestConstants.ClientId, app.AppConfig.ClientId);
-            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
+            Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
         }
 
         [TestMethod]
@@ -450,7 +450,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .BuildConcrete();
                 //Validate legacy default uri
-                Assert.AreEqual(app.AppConfig.RedirectUri, "urn:ietf:wg:oauth:2.0:oob");
+                Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
 
                 app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
@@ -461,7 +461,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Validate new default redirect uri
 #if DESKTOP
-                Assert.AreEqual(app.AppConfig.RedirectUri, "https://login.microsoftonline.com/common/oauth2/nativeclient");
+                Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
 #elif NET_CORE
                 Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
 #endif

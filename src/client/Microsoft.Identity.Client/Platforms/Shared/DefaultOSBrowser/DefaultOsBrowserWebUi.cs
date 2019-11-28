@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
   </body>
 </html>";
 
-        private readonly ITcpInterceptor _tcpInterceptor;
+        private readonly IUriInterceptor _uriInterceptor;
         private readonly ICoreLogger _logger;
         private readonly SystemWebViewOptions _webViewOptions;
         private readonly IPlatformProxy _platformProxy;
@@ -42,13 +43,13 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             IPlatformProxy proxy,
             ICoreLogger logger,
             SystemWebViewOptions webViewOptions,
-            /* for test */ ITcpInterceptor tcpInterceptor = null)
+            /* for test */ IUriInterceptor uriInterceptor = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _webViewOptions = webViewOptions;
             _platformProxy = proxy ?? throw new ArgumentNullException(nameof(proxy));
 
-            _tcpInterceptor = tcpInterceptor ?? new TcpInterceptor(_logger);
+            _uriInterceptor = uriInterceptor ?? new HttpListenerInterceptor(_logger);
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
@@ -110,7 +111,6 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 return redirectUri;
             }
 
-
             TcpListener listner = new TcpListener(IPAddress.Loopback, 0);
             try
             {
@@ -134,14 +134,14 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 
             await openBrowserAction(authorizationUri).ConfigureAwait(false);
 
-            return await _tcpInterceptor.ListenToSingleRequestAndRespondAsync(
+            return await _uriInterceptor.ListenToSingleRequestAndRespondAsync(
                 redirectUri.Port,
                 GetResponseMessage,
                 cancellationToken)
             .ConfigureAwait(false);
         }
 
-        internal /* internal for testing only */ string GetResponseMessage(Uri authCodeUri)
+        internal /* internal for testing only */ MessageAndHttpCode GetResponseMessage(Uri authCodeUri)
         {
             // Parse the uri to understand if an error was returned. This is done just to show the user a nice error message in the browser.
             var authorizationResult = AuthorizationResult.FromUri(authCodeUri.OriginalString);
@@ -165,14 +165,14 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 _webViewOptions?.HtmlMessageSuccess ?? DefaultSuccessHtml);
         }
 
-        private string GetMessage(Uri redirectUri, string message)
+        private MessageAndHttpCode GetMessage(Uri redirectUri, string message)
         {
             if (redirectUri != null)
             {
-                return $"HTTP/1.1 302 Found\r\nLocation: {redirectUri.ToString()}";
+                return new MessageAndHttpCode(HttpStatusCode.Found, redirectUri.ToString());
             }
 
-            return $"HTTP/1.1 200 OK\r\n\r\n{message}";
+            return new MessageAndHttpCode(HttpStatusCode.OK, message);
         }
     }
 }

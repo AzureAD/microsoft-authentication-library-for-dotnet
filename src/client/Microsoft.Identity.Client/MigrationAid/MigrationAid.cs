@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client
         /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
         /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
         /// <list type="bullet">
-        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
+        /// <item><description><c>https://login.microsoftonline.com/common/oauth2/nativeclient</c> for desktop (.NET Framework and .NET Core) applications</description></item>
         /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
         /// platforms to call back the application)
         /// </description></item>
@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Client
         /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app).
         /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
         /// <list type="bullet">
-        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
+        /// <item><description><c>https://login.microsoftonline.com/common/oauth2/nativeclient</c> for desktop (.NET Framework and .NET Core) applications</description></item>
         /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
         /// platforms to call back the application)
         /// </description></item>
