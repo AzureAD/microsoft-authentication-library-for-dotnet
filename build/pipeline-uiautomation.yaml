@@ -179,9 +179,9 @@ stages:
     - task: AzureKeyVault@1
       displayName: 'Azure Key Vault: AzureADIdentityDivisionTestAgentSecret'
       inputs:
-        azureSubscription: 'MSID MSAL.NET Automation KeyVault'
-        KeyVaultName: BuildAutomation
-        SecretsFilter: AzureADIdentityDivisionTestAgentSecret
+        azureSubscription: '.NET Keyvault'
+        KeyVaultName: buildautomation
+        SecretsFilter: 'AzureADIdentityDivisionTestAgent
 
     - powershell: |
         $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
