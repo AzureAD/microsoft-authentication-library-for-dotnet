@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             _clientApplicationBase = clientApplicationBase;
         }
 
-        protected IServiceBundle ServiceBundle { get; }
+        public IServiceBundle ServiceBundle { get; }
 
         protected RequestContext CreateRequestContextAndLogVersionInfo(Guid correlationId)
         {
