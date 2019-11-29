@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         WithB2CAuthority,
         WithCustomWebUi,
         WithSystemBrowserOptions,
-        WithSSHAuthenticationScheme
+        WithSSHAuthenticationScheme,
+        WithPoPScheme
     }
 }
