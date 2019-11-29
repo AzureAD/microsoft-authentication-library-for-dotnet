@@ -11,13 +11,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     public static class LabUserHelper
     {
         private static readonly LabServiceApi s_labService;
-        private static readonly KeyVaultSecretsProvider s_keyVaultSecretsProvider;
         private static readonly IDictionary<UserQuery, LabResponse> s_userCache =
             new Dictionary<UserQuery, LabResponse>();
 
+        public static KeyVaultSecretsProvider KeyVaultSecretsProvider { get; }
+
         static LabUserHelper()
         {
-            s_keyVaultSecretsProvider = new KeyVaultSecretsProvider();
+            KeyVaultSecretsProvider = new KeyVaultSecretsProvider();
             s_labService = new LabServiceApi();
         }
 
@@ -107,7 +108,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 throw new InvalidOperationException("Error: lab name is not set on user. Password retrieval failed.");
             }
 
-            if (s_keyVaultSecretsProvider == null)
+            if (KeyVaultSecretsProvider == null)
             {
                 throw new InvalidOperationException("Error: Keyvault secrets provider is not set");
             }
