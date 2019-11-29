@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.Internal
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
             {
-                get { return JsonWebTokenConstants.HeaderType; }
+                get { return JsonWebTokenConstants.JWTHeaderType; }
 
                 set
                 {
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Client.Internal
 #endif
             }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificateThumbprint)]
+            [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.KeyId)]
             public string X509CertificateThumbprint { get; set; }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue, EmitDefaultValue = false)]

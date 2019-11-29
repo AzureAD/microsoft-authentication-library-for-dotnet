@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net47</TargetFramework>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-    <ProjectReference Include="..\NetStandardShared\NetStandard\NetStandardLib.csproj" />
   </ItemGroup>
 
   <!-- Set this env variable locally to enable Telemetry on developer applications-->
