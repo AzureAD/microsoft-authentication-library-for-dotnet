@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.PoP;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
@@ -86,6 +87,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         IPlatformLogger PlatformLogger { get; }
 
         IWebUIFactory GetWebUiFactory();
+
+        IPoPCryptoProvider GetDefaultPoPCryptoProvider();
 
         // MATS related data
         string GetDevicePlatformTelemetryId();
