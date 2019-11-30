@@ -20,7 +20,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -38,6 +37,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string ConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
 
         private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
+        private const string TestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+
+        private KeyVaultSecretsProvider _keyVault;
+        private string _ccaSecret;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -49,6 +52,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+
+            if (_keyVault == null)
+            {
+                _keyVault = new KeyVaultSecretsProvider();
+                _ccaSecret = _keyVault.GetSecret(TestConstants.SecretForCCATests).Value;
+            }
         }
 
         [TestMethod]
@@ -87,7 +96,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
             X509Certificate2 cert = GetCertificate();
-            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            var confidentialClientAuthority = TestAuthority;
 
             confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
@@ -123,7 +132,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
             X509Certificate2 cert = GetCertificate(true);
-            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            var confidentialClientAuthority = TestAuthority;
 
             confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
@@ -155,14 +164,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ConfidentialClientWithClientSecretTestAsync()
         {
-            var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
-            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            var confidentialClientAuthority = TestAuthority;
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(ConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithClientSecret(secret)
+                .WithClientSecret(_ccaSecret)
                 .Build();
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
@@ -187,8 +194,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ConfidentialClientWithNoDefaultClaimsTestAsync()
         {
-            var keyvault = new KeyVaultSecretsProvider();
-            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            var confidentialClientAuthority = TestAuthority;
             var claims = GetClaims();
 
             X509Certificate2 cert = GetCertificate();
@@ -211,9 +217,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ConfidentialClientWithDefaultClaimsTestAsync()
         {
-            var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
-            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            var confidentialClientAuthority = TestAuthority;
             var claims = GetClaims(false);
 
             X509Certificate2 cert = GetCertificate();
@@ -241,8 +245,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ConfidentialClientWithSignedAssertionTestAsync()
         {
-            var keyvault = new KeyVaultSecretsProvider();
-            var confidentialClientAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+            var confidentialClientAuthority = TestAuthority;
             var claims = GetClaims();
 
             var confidentialApp = ConfidentialClientApplicationBuilder
@@ -337,7 +340,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static X509Certificate2 GetCertificate(bool useRSACert = false)
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert ? TestConstants.RSATestCertThumbprint : TestConstants.AutomationTestThumbprint);
+            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(useRSACert ?
+                TestConstants.RSATestCertThumbprint :
+                TestConstants.AutomationTestThumbprint);
             if (cert == null)
             {
                 throw new InvalidOperationException(
@@ -356,15 +361,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
-            await RunOnBehalfOfTestAsync(await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019).ConfigureAwait(false)).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
         [TestMethod]
         [TestCategory("ClientSecretIntegrationTests")]
         public async Task AcquireTokenWithClientSecretFromAdfsAsync()
         {
-            KeyVaultSecretsProvider secretProvider = new KeyVaultSecretsProvider();
-            SecretBundle secret = secretProvider.GetSecret(Adfs2019LabConstants.ADFS2019ClientSecretURL);
+            SecretBundle secret = _keyVault.GetSecret(Adfs2019LabConstants.ADFS2019ClientSecretURL);
 
             ConfidentialClientApplication msalConfidentialClient = ConfidentialClientApplicationBuilder.Create(Adfs2019LabConstants.ConfidentialClientId)
                                             .WithAdfsAuthority(Adfs2019LabConstants.Authority, true)
@@ -383,8 +387,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user = labResponse.User;
 
-            var keyvault = new KeyVaultSecretsProvider();
-            var secret = keyvault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
+            var secret = _keyVault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
             //TODO: acquire scenario specific client ids from the lab resonse
             var publicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
             var oboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
