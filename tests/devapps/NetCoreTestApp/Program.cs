@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
 using NetCoreTestApp.Experimental;
-using NetStandard;
 
 namespace NetCoreTestApp
 {
@@ -94,7 +93,6 @@ namespace NetCoreTestApp
                         4. Acquire Token Interactive (via CustomWebUI)
                         5. Acquire Token Interactive
                         6. Acquire Token Silently
-                        7. Acquire Interactive (logic in netstandard, default authority)
                         8. Clear cache
                         9. Rotate Tenant ID
                         0. Exit App
@@ -169,12 +167,6 @@ namespace NetCoreTestApp
                             authTask = pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync(CancellationToken.None);
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                            break;
-
-                        case 7:
-                            CancellationTokenSource cts2 = new CancellationTokenSource();
-                            NetStandardAuthenticator authenticator = new NetStandardAuthenticator(Log, CacheFilePath);
-                            await FetchTokenAndCallGraphAsync(pca, authenticator.GetTokenInteractiveAsync(cts2.Token)).ConfigureAwait(false);
                             break;
 
                         case 8:

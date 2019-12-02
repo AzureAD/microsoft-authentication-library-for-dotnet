@@ -30,11 +30,11 @@ namespace Microsoft.Identity.Test.Unit
         {
             Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
             HttpMethod method = HttpMethod.Post;
+            HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
             var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
 
-            AssertException.Throws<ArgumentException>(() => new PoPAuthenticationScheme(null, method, popCryptoProvider));
-            AssertException.Throws<ArgumentException>(() => new PoPAuthenticationScheme(uri, null, popCryptoProvider));
-            AssertException.Throws<ArgumentException>(() => new PoPAuthenticationScheme(uri, method, null));
+            AssertException.Throws<ArgumentException>(() => new PoPAuthenticationScheme(null,  popCryptoProvider));
+            AssertException.Throws<ArgumentException>(() => new PoPAuthenticationScheme(httpRequest, null));
         }
 
         [TestMethod]
@@ -43,6 +43,8 @@ namespace Microsoft.Identity.Test.Unit
             // Arrange
             Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
             HttpMethod method = HttpMethod.Post;
+            HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
+
             var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
             popCryptoProvider.CannonicalPublicKeyJwk.Returns(JWK);
             const string AtSecret = "secret";
@@ -52,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit
             };
 
             // Act
-            PoPAuthenticationScheme authenticationScheme = new PoPAuthenticationScheme(uri, method, popCryptoProvider);
+            PoPAuthenticationScheme authenticationScheme = new PoPAuthenticationScheme(httpRequest, popCryptoProvider);
             var tokenParams = authenticationScheme.GetTokenRequestParams();
             var popTokenString = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
             JwtSecurityToken decodedPopToken = new JwtSecurityToken(popTokenString);

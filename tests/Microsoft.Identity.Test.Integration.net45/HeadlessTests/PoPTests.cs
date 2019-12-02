@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult = await pca
                 .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
                 .WithExtraQueryParameters(GetTestSliceParams())
-                .WithPoPAuthenticationScheme(protectedResournceUri1, HttpMethod.Get)
+                .WithPoPAuthenticationScheme(new HttpRequestMessage(HttpMethod.Get, protectedResournceUri1))
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             authResult = await pca
                 .AcquireTokenSilent(s_scopes, accounts.Single())
-                .WithPoPAuthenticationScheme(protectedResournceUri1, HttpMethod.Get)
+                .WithPoPAuthenticationScheme(new HttpRequestMessage(HttpMethod.Get, protectedResournceUri1))
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Call some other Uri - the same pop assertion can be reused, i.e. no need to call Evo
             authResult = await pca
               .AcquireTokenSilent(s_scopes, accounts.Single())
-              .WithPoPAuthenticationScheme(protectedResournceUri2, HttpMethod.Post)
+              .WithPoPAuthenticationScheme(new HttpRequestMessage(HttpMethod.Post, protectedResournceUri2))
               .ExecuteAsync()
               .ConfigureAwait(false);
 
