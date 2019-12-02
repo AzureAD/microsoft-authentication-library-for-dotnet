@@ -462,7 +462,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string jsonContent = File.ReadAllText(jsonFilePath);
             byte[] cache = Encoding.UTF8.GetBytes(jsonContent);
 
-            var tokenCache = new TokenCache();
+            var tokenCache = new TokenCache(null, true);
             tokenCache.SetBeforeAccess(notificationArgs =>
             {
                 notificationArgs.TokenCache.DeserializeMsalV3(cache);

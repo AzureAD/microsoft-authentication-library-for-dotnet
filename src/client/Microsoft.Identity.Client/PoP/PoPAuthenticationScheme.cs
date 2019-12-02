@@ -19,8 +19,7 @@ namespace Microsoft.Identity.Client.PoP
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        private readonly HttpMethod _httpMethod;
-        private readonly Uri _requestUri;
+        private readonly HttpRequestMessage _httpRequestMessage;
         private readonly IPoPCryptoProvider _popCryptoProvider;
         private readonly byte[] _keyThumbprint;
 
@@ -31,10 +30,9 @@ namespace Microsoft.Identity.Client.PoP
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public PoPAuthenticationScheme(Uri requestUri, HttpMethod httpMethod, IPoPCryptoProvider popCryptoProvider)
+        public PoPAuthenticationScheme(HttpRequestMessage httpRequestMessage, IPoPCryptoProvider popCryptoProvider)
         {
-            _httpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
-            _requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            _httpRequestMessage = httpRequestMessage ?? throw new ArgumentNullException(nameof(httpRequestMessage));
             _popCryptoProvider = popCryptoProvider ?? throw new ArgumentNullException(nameof(popCryptoProvider));
 
             _keyThumbprint = ComputeRsaThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
@@ -69,9 +67,9 @@ namespace Microsoft.Identity.Client.PoP
 
             var payload = new JObject(
                 new JProperty(PoPClaimTypes.At, atItem.Secret),
-                new JProperty(PoPClaimTypes.HttpMethod, _httpMethod.ToString()),
-                new JProperty(PoPClaimTypes.Host, _requestUri.Host),
-                new JProperty(PoPClaimTypes.Path, _requestUri.AbsolutePath),
+                new JProperty(PoPClaimTypes.HttpMethod, _httpRequestMessage.Method.ToString()),
+                new JProperty(PoPClaimTypes.Host, _httpRequestMessage.RequestUri.Host),
+                new JProperty(PoPClaimTypes.Path, _httpRequestMessage.RequestUri.AbsolutePath),
                 new JProperty(PoPClaimTypes.Nonce, CreateNonce()),
                 new JProperty(PoPClaimTypes.Cnf, new JObject(
                     new JProperty(PoPClaimTypes.JWK, popAssertion))));

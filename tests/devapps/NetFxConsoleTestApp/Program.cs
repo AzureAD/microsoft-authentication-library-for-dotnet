@@ -218,7 +218,7 @@ namespace NetFx
                             {
                                 silentBuilder = silentBuilder
                                     .WithExtraQueryParameters(GetTestSliceParams())
-                                    .WithPoPAuthenticationScheme(new Uri(PoPUri), s_popMethod);
+                                    .WithPoPAuthenticationScheme(new HttpRequestMessage(s_popMethod, PoPUri));
                             }
 
                             await FetchTokenAndCallApiAsync(pca, silentBuilder.ExecuteAsync()).ConfigureAwait(false);
@@ -235,7 +235,7 @@ namespace NetFx
                                     {
                                         silentBuilder = silentBuilder
                                             .WithExtraQueryParameters(GetTestSliceParams())
-                                            .WithPoPAuthenticationScheme(new Uri(PoPUri), s_popMethod);
+                                            .WithPoPAuthenticationScheme(new HttpRequestMessage(s_popMethod, PoPUri));
                                     }
                                     return silentBuilder.ExecuteAsync();
                                 })
@@ -353,7 +353,7 @@ namespace NetFx
             {
                 builder = builder
                     .WithExtraQueryParameters(GetTestSliceParams())
-                    .WithPoPAuthenticationScheme(new Uri(PoPUri), s_popMethod);
+                    .WithPoPAuthenticationScheme(new HttpRequestMessage(s_popMethod, new Uri(PoPUri)));
             }
 
             return builder as T;
@@ -433,7 +433,7 @@ namespace NetFx
 
         /// <summary>
         /// This calls a special endpoint that validates any POP token against a configurable http request.
-        /// The http request is configured through headers.
+        /// The HTTP request is configured through headers.
         /// </summary>
         private static async Task CallPoPVerificationAPIAsync(string authHeader)
         {

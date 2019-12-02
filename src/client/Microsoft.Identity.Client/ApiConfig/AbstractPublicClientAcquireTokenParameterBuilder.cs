@@ -29,32 +29,30 @@ namespace Microsoft.Identity.Client
 #if DESKTOP
         /// <summary>
         ///  Modifies the token acquisition request so that the acquired token is a Proof of Possession token (PoP), rather than a Bearer token. 
-        ///  Pop specific cypto key pair is generated and stored by MSAL.NET on behalf of the user. See https://aka.ms/msal-net-pop
+        ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
+        ///  See https://aka.ms/msal-net-pop
         /// </summary>
+        /// <param name="httpRequestMessage">An HTTP request to the protected resource which requires a PoP token. The PoP token will be cryptographically bound to the request.</param>
         /// <remarks>
         /// <list type="bullet">
         /// <item>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</item>
         /// <item> Add the PoP token in an Authorization header, just like a bearer token. See <seealso cref="AuthenticationResult.CreateAuthorizationHeader"/> for details.</item>
-        /// <item> The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET or POST) and to the Uri (path and query). </item>
+        /// <item> The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters). </item>
+        /// <item> MSAL creates, reads and stores a key securely on behalf of the Windows user. </item>
         /// </list>
         /// </remarks>
-        public T WithPoPAuthenticationScheme(Uri requestUri, HttpMethod httpMethod) 
+        public T WithPoPAuthenticationScheme(HttpRequestMessage httpRequestMessage) 
         {
             var defaultCryptoProvider = this.PublicClientApplicationExecutor.ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
-            return WithPoPAuthenticationScheme(requestUri, httpMethod, defaultCryptoProvider);
+            return WithPoPAuthenticationScheme(httpRequestMessage, defaultCryptoProvider);
         }
 
         // Allows testing the PoP flow with any crypto. Consider making this public.
-        internal T WithPoPAuthenticationScheme(Uri requestUri, HttpMethod httpMethod, IPoPCryptoProvider popCryptoProvider) 
+        internal T WithPoPAuthenticationScheme(HttpRequestMessage httpRequestMessage, IPoPCryptoProvider popCryptoProvider) 
         {
-            if (requestUri is null)
+            if (httpRequestMessage is null)
             {
-                throw new ArgumentNullException(nameof(requestUri));
-            }
-
-            if (httpMethod is null)
-            {
-                throw new ArgumentNullException(nameof(httpMethod));
+                throw new ArgumentNullException(nameof(httpRequestMessage));
             }
 
             if (popCryptoProvider == null)
@@ -63,7 +61,7 @@ namespace Microsoft.Identity.Client
             }
 
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPoPScheme);
-            CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(requestUri, httpMethod,  popCryptoProvider);
+            CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(httpRequestMessage,  popCryptoProvider);
 
             return this as T;
         }

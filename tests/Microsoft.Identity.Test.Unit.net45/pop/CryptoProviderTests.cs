@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if DESKTOP
 
 using System.Security.Cryptography;
 using System.Text;
@@ -9,7 +10,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
 {
-#if DESKTOP
 
     [TestClass]
     public class NetDesktopPoPCryptoProviderTests
@@ -48,6 +48,6 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsTrue(crypto.VerifyData(payloadInClear, CryptoConfig.MapNameToOID("SHA256"), signature));
         }
     }
-#endif
 
 }
+#endif
