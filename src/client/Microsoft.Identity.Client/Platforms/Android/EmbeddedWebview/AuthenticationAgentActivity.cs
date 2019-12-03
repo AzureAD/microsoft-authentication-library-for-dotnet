@@ -10,7 +10,6 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Webkit;
 using Android.Widget;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
@@ -26,25 +25,27 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             base.OnCreate(bundle);
             // Create your application here
 
-            WebView webView = new WebView(ApplicationContext);
-            var relativeLayout = new RelativeLayout(ApplicationContext);
-            webView.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.MatchParent);
+            WebView webView = new WebView(this);
+            var relativeLayout = new RelativeLayout(this);
+            webView.LayoutParameters = new RelativeLayout.LayoutParams(global::Android.Views.ViewGroup.LayoutParams.MatchParent, global::Android.Views.ViewGroup.LayoutParams.MatchParent);
 
             relativeLayout.AddView(webView);
             SetContentView(relativeLayout);
 
             string url = Intent.GetStringExtra("Url");
+
+            //Console.WriteLine("url is: {0}", url); // for debugging
+
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
             webSettings.UserAgentString = userAgent + BrokerConstants.ClientTlsNotSupported;
             // TODO(migration): Figure out how to get logger into this class.  MsalLogger.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
-
+            
             webSettings.JavaScriptEnabled = true;
-
             webSettings.LoadWithOverviewMode = true;
             webSettings.DomStorageEnabled = true;
             webSettings.UseWideViewPort = true;
-            webSettings.BuiltInZoomControls = true;
+            webSettings.BuiltInZoomControls = true;            
 
             _client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
             webView.SetWebViewClient(_client);
@@ -161,6 +162,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
                 string link = externalBrowserUrlBuilder.Uri.AbsoluteUri;
                 Intent intent = new Intent(Intent.ActionView, global::Android.Net.Uri.Parse(link));
+                //Console.WriteLine("Open external browser {0}", link); //for debugging
                 activity.StartActivity(intent);
             }
 
@@ -188,7 +190,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             private void Finish(Activity activity, string url)
             {
                 ReturnIntent = new Intent("ReturnFromEmbeddedWebview");
+                //Console.WriteLine("ReturnFromEmbeddedWebview, {0}", ReturnIntent); //for debugging
                 ReturnIntent.PutExtra("ReturnedUrl", url);
+                //Console.WriteLine("ReturnedUrl, {0}", url); //for debugging
                 activity.Finish();
             }
         }
