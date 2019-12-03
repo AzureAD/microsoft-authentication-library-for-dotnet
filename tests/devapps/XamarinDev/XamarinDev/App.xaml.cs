@@ -18,6 +18,7 @@ namespace XamarinDev
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
         public const string BrokerRedirectUriOnIos = "msauth.com.companyname.XamarinDev://auth";
+        public static string DefaultMobileRedirectUri = Microsoft.Identity.Client.Core.Constants.MobileDefaultRedirectUri;
 
         public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
 
@@ -67,7 +68,7 @@ namespace XamarinDev
 
             else
             {
-                builder.WithRedirectUri(Microsoft.Identity.Client.Core.Constants.MobileDefaultRedirectUri);
+                builder.WithRedirectUri(DefaultMobileRedirectUri);
 
                 if (Device.RuntimePlatform == Device.iOS)
                 {               
