@@ -52,7 +52,6 @@ namespace Microsoft.Identity.Client
             case (int)Result.Ok:
                 return AuthorizationResult.FromUri(data.GetStringExtra("ReturnedUrl"));
 
-
             case (int)Result.Canceled:
                 return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
 
