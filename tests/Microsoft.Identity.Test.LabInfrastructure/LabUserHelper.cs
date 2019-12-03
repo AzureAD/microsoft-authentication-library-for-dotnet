@@ -15,7 +15,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private static readonly IDictionary<UserQuery, LabResponse> s_userCache =
             new Dictionary<UserQuery, LabResponse>();
 
-
         static LabUserHelper()
         {
             s_keyVaultSecretsProvider = new KeyVaultSecretsProvider();
