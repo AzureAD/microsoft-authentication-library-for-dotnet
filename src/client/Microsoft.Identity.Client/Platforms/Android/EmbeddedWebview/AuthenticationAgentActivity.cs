@@ -34,8 +34,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
             string url = Intent.GetStringExtra("Url");
 
-            //Console.WriteLine("url is: {0}", url); // for debugging
-
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
             webSettings.UserAgentString = userAgent + BrokerConstants.ClientTlsNotSupported;
@@ -162,7 +160,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
                 string link = externalBrowserUrlBuilder.Uri.AbsoluteUri;
                 Intent intent = new Intent(Intent.ActionView, global::Android.Net.Uri.Parse(link));
-                //Console.WriteLine("Open external browser {0}", link); //for debugging
                 activity.StartActivity(intent);
             }
 
@@ -190,9 +187,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             private void Finish(Activity activity, string url)
             {
                 ReturnIntent = new Intent("ReturnFromEmbeddedWebview");
-                //Console.WriteLine("ReturnFromEmbeddedWebview, {0}", ReturnIntent); //for debugging
                 ReturnIntent.PutExtra("ReturnedUrl", url);
-                //Console.WriteLine("ReturnedUrl, {0}", url); //for debugging
                 activity.Finish();
             }
         }
