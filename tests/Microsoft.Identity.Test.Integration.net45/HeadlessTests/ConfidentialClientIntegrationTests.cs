@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             if (_keyVault == null)
             {
                 _keyVault = new KeyVaultSecretsProvider();
-                _ccaSecret = _keyVault.GetSecret(TestConstants.SecretForCCATests).Value;
+                _ccaSecret = _keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
             }
         }
 
