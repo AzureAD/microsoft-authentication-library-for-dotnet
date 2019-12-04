@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
             WebView webView = new WebView(this);
             var relativeLayout = new RelativeLayout(this);
-            webView.LayoutParameters = new RelativeLayout.LayoutParams(global::Android.Views.ViewGroup.LayoutParams.MatchParent, global::Android.Views.ViewGroup.LayoutParams.MatchParent);
+            webView.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.MatchParent);
 
             relativeLayout.AddView(webView);
             SetContentView(relativeLayout);
