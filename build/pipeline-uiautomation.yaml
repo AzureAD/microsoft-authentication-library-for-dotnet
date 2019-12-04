@@ -104,7 +104,7 @@ stages:
     - task: DownloadSecureFile@1
       displayName: 'Download Certificate'
       inputs:
-        secureFile: AppCenteriOSTestCert.p12
+        secureFile: AppCenteriOSBuildCert.p12
 
     - task: DownloadSecureFile@1
       displayName: 'Download Provisioning Provile'
