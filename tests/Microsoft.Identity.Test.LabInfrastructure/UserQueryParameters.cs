@@ -24,6 +24,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 AzureEnvironment = LabInfrastructure.AzureEnvironment.azurecloud
             };
 
+        public static UserQuery MsaUserQuery => new UserQuery
+        {
+            UserType = LabInfrastructure.UserType.MSA
+        };
+
         public static UserQuery B2CLocalAccountUserQuery => new UserQuery
         {
             UserType = LabInfrastructure.UserType.B2C,

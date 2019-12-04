@@ -54,6 +54,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
+        [TestMethod]
+        public async Task Interactive_MsaUser_Async()
+        {
+            // Arrange
+            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
 #if DESKTOP // no point in running these tests on NetCore - the code path is similar
 
         [TestMethod]
@@ -117,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, false).ConfigureAwait(false);
 
             //Acquire AT for MSA account
-            LabResponse labResponseMsa = await LabUserHelper.GetB2CMSAAccountAsync().ConfigureAwait(false);
+            LabResponse labResponseMsa = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
             labResponseMsa.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
             var msaAccountResult = await RunTestForUserAsync(labResponseMsa).ConfigureAwait(false);
 

@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(ImplicitTimeoutSeconds);
+            driver.Manage().Window.Maximize();
 
             return driver;
         }
@@ -109,6 +110,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         if (elementToBeDisplayed.Displayed && elementToBeDisplayed.Enabled)
                         {
                             Trace.WriteLine($"[Selenium UI][DEBUG] Element {by.ToString()} found and is visible");
+                            // If element is not view, Selenium can't click on it
+                            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                            js.ExecuteScript("arguments[0].scrollIntoView(true);", elementToBeDisplayed);
                             return elementToBeDisplayed;
                         }
 
@@ -169,7 +173,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             if (user.Upn.Contains("outlook.com"))
             {
                 Trace.WriteLine("Logging in ... clicking accept prompts for outlook.com MSA user");
-                driver.WaitForElementToBeVisibleAndEnabled(By.Id(CoreUiTestConstants.ConsentAcceptId)).Click();
+                driver.WaitForElementToBeVisibleAndEnabled(By.Id(CoreUiTestConstants.ConsentAcceptId))?.Click();
             }
 
             if (prompt == Prompt.Consent)
