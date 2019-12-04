@@ -131,7 +131,7 @@ stages:
         args: '/p:APPCENTER_BUILD=1'
         buildToolOption: msbuild
         signingP12File: '$(Agent.TempDirectory)/AppCenteriOSTestCert.p12'
-        signingP12Password: '$(iOSAppcenterSigningCertPW)'
+        signingP12Password: '$(AppCenterDotNetiOSTestCertPassword)'
         signingProvisioningProfileFile: '$(Agent.TempDirectory)/iOS_Team_Provisioning_Profile.mobileprovision'
 
     - task: CopyFiles@2
