@@ -99,8 +99,7 @@ stages:
       inputs:
         azureSubscription: 'MSID MSAL.NET Automation KeyVault'
         KeyVaultName: BuildAutomation
-        SecretsFilter: iOSAppcenterSigningCertPW
-      enabled: false
+        SecretsFilter: AppCenterDotNetiOSTestCertPassword
 
     - task: DownloadSecureFile@1
       displayName: 'Download Certificate'
@@ -121,7 +120,6 @@ stages:
       displayName: 'NuGet restore'
       inputs:
         restoreSolution: LibsMacOS.sln
-      enabled: false
 
     - task: XamariniOS@1
       displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
@@ -135,7 +133,6 @@ stages:
         signingP12File: '$(Agent.TempDirectory)/AppCenteriOSTestCert.p12'
         signingP12Password: '$(iOSAppcenterSigningCertPW)'
         signingProvisioningProfileFile: '$(Agent.TempDirectory)/iOS_Team_Provisioning_Profile.mobileprovision'
-      enabled: false
 
     - task: CopyFiles@2
       displayName: 'Copy ipa to staging directory'
@@ -145,7 +142,6 @@ stages:
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
         CleanTargetFolder: true
         OverWrite: true
-      enabled: false
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: Xamarin.iOS'
