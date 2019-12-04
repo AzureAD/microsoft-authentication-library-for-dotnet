@@ -130,7 +130,7 @@ stages:
         runNugetRestore: false
         args: '/p:APPCENTER_BUILD=1'
         buildToolOption: msbuild
-        signingP12File: '$(Agent.TempDirectory)/AppCenteriOSTestCert.p12'
+        signingP12File: '$(Agent.TempDirectory)/AppCenteriOSBuildCert.p12'
         signingP12Password: '$(AppCenterDotNetiOSTestCertPassword)'
         signingProvisioningProfileFile: '$(Agent.TempDirectory)/iOS_Team_Provisioning_Profile.mobileprovision'
 
