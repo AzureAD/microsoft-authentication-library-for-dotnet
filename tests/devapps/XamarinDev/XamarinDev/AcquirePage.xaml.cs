@@ -270,7 +270,7 @@ namespace XamarinDev
                 acquireResponseLabel.Text = resText;
                 RefreshUsers();
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 CreateExceptionMessage(exception);
             }

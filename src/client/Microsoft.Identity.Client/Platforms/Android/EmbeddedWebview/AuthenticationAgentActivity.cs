@@ -10,7 +10,6 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Webkit;
 using Android.Widget;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
@@ -26,25 +25,25 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             base.OnCreate(bundle);
             // Create your application here
 
-            WebView webView = new WebView(ApplicationContext);
-            var relativeLayout = new RelativeLayout(ApplicationContext);
+            WebView webView = new WebView(this);
+            var relativeLayout = new RelativeLayout(this);
             webView.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.MatchParent);
 
             relativeLayout.AddView(webView);
             SetContentView(relativeLayout);
 
             string url = Intent.GetStringExtra("Url");
+
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
             webSettings.UserAgentString = userAgent + BrokerConstants.ClientTlsNotSupported;
             // TODO(migration): Figure out how to get logger into this class.  MsalLogger.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
-
+            
             webSettings.JavaScriptEnabled = true;
-
             webSettings.LoadWithOverviewMode = true;
             webSettings.DomStorageEnabled = true;
             webSettings.UseWideViewPort = true;
-            webSettings.BuiltInZoomControls = true;
+            webSettings.BuiltInZoomControls = true;            
 
             _client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
             webView.SetWebViewClient(_client);

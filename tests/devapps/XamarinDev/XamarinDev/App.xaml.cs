@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Unit;
 using Xamarin.Forms;
 
 namespace XamarinDev
@@ -13,22 +14,12 @@ namespace XamarinDev
 
         public static object RootViewController { get; set; }
 
-        public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
-        // For system browser
-        //public const string DefaultClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+        public const string DefaultClientId = "4a1aa1d5-c567-49d0-ad0b-cd957a47f842"; // in msidentity-samples-testing tenant -> PublicClientSample
 
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
-
-        public static string RedirectUriOnAndroid = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; // will not work with system browser
-        // For system browser
-        //public static string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
-
         public const string BrokerRedirectUriOnIos = "msauth.com.companyname.XamarinDev://auth";
-
-        public static string RedirectUriOnIos = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri;
-        // For system browser
-        //public static string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
+        public static string DefaultMobileRedirectUri = TestConstants.MobileDefaultRedirectUri;
 
         public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
 
@@ -78,16 +69,11 @@ namespace XamarinDev
 
             else
             {
-                // Let Android set its own redirect uri
-                switch (Device.RuntimePlatform)
-                {
-                case "iOS":
-                    builder = builder.WithRedirectUri(RedirectUriOnIos);
+                builder.WithRedirectUri(DefaultMobileRedirectUri);
+
+                if (Device.RuntimePlatform == Device.iOS)
+                {               
                     builder = builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
-                    break;
-                case "Android":
-                    builder = builder.WithRedirectUri(RedirectUriOnAndroid);
-                    break;
                 }
             }
 
