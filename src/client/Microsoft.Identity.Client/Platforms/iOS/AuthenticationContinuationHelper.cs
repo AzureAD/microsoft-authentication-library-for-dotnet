@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using Foundation;
 using Microsoft.Identity.Client.Platforms.iOS;
 
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Client
         {
             Debug.WriteLine("IsBrokerResponse called with sourceApplication {0}", sourceApplication);
 
-            if (sourceApplication != null && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(sourceApplication) && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -58,7 +59,13 @@ namespace Microsoft.Identity.Client
         public static void SetBrokerContinuationEventArgs(NSUrl url)
         {
             Debug.WriteLine("SetBrokercontinuationEventArgs Called with Url {0}", url);
-            iOSBroker.SetBrokerResponse(url);
+
+            string urlString = url.AbsoluteString;
+            
+            if (urlString.Contains(iOSBrokerConstants.IdentifyiOSBrokerFromResponseUrl))
+            {
+                iOSBroker.SetBrokerResponse(url);
+            }
         }
     }
 }
