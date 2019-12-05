@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using Foundation;
 using Microsoft.Identity.Client.Platforms.iOS;
 
@@ -57,8 +58,21 @@ namespace Microsoft.Identity.Client
         /// <param name="url"></param>
         public static void SetBrokerContinuationEventArgs(NSUrl url)
         {
+            // url should always be present
+            // if coming from broker, will be the broker response
+            // check to prevent null ref later
+            if (url == null)
+            {
+                return;
+            }
+
             Debug.WriteLine("SetBrokercontinuationEventArgs Called with Url {0}", url);
-            iOSBroker.SetBrokerResponse(url);
+
+            string urlString = string.Format(CultureInfo.CurrentCulture, url.ToString());
+            if (urlString.Contains(iOSBrokerConstants.IdentifyiOSBrokerFromResponseUrl))
+            {
+                iOSBroker.SetBrokerResponse(url);
+            }
         }
     }
 }
