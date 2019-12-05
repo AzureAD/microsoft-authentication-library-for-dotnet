@@ -67,6 +67,7 @@ namespace Microsoft.Identity.Client.PoP
 
             var payload = new JObject(
                 new JProperty(PoPClaimTypes.At, atItem.Secret),
+                new JProperty(PoPClaimTypes.Ts, (long)(DateTime.UtcNow - s_jwtBaselineTime).TotalSeconds ),
                 new JProperty(PoPClaimTypes.HttpMethod, _httpRequestMessage.Method.ToString()),
                 new JProperty(PoPClaimTypes.Host, _httpRequestMessage.RequestUri.Host),
                 new JProperty(PoPClaimTypes.Path, _httpRequestMessage.RequestUri.AbsolutePath),
