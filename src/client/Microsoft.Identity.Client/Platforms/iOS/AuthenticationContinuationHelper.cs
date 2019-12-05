@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
         {
             Debug.WriteLine("IsBrokerResponse called with sourceApplication {0}", sourceApplication);
 
-            if (sourceApplication != null && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(sourceApplication) && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -58,17 +58,10 @@ namespace Microsoft.Identity.Client
         /// <param name="url"></param>
         public static void SetBrokerContinuationEventArgs(NSUrl url)
         {
-            // url should always be present
-            // if coming from broker, will be the broker response
-            // check to prevent null ref later
-            if (url == null)
-            {
-                return;
-            }
-
             Debug.WriteLine("SetBrokercontinuationEventArgs Called with Url {0}", url);
 
-            string urlString = string.Format(CultureInfo.CurrentCulture, url.ToString());
+            string urlString = url.AbsoluteString;
+            
             if (urlString.Contains(iOSBrokerConstants.IdentifyiOSBrokerFromResponseUrl))
             {
                 iOSBroker.SetBrokerResponse(url);
