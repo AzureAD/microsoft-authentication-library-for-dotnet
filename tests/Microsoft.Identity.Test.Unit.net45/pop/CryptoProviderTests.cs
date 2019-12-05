@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Platforms.net45;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit
+namespace Microsoft.Identity.Test.Unit.PoP
 {
 
     [TestClass]
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit
             };
 
             var crypto = new RSACryptoServiceProvider(
-                NetDesktopPoPCryptoProvider.RsaKeySize, 
+                NetDesktopPoPCryptoProvider.RsaKeySize,
                 reuseKeyParams);
 
             Assert.IsTrue(crypto.VerifyData(payloadInClear, CryptoConfig.MapNameToOID("SHA256"), signature));

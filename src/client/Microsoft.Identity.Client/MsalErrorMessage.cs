@@ -301,5 +301,14 @@ namespace Microsoft.Identity.Client
                 "WAB responded with: status = {0}, error detail = {1}, response data = {2}", 
                 status ?? "", errorDetail ?? "", responseData ?? "");
         }
+
+       public static string TokenTypeMismatch(string requestTokenType, string responseTokenType)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "You asked for token type {0}, but receive {1}. This occurs if the Identity Provider (AAD, B2C, ADFS etc.) does not support the requested token type. If using ADFS, consider upgrading to the latest version.",
+                requestTokenType, responseTokenType);
+        }
+
     }
 }

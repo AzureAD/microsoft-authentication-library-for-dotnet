@@ -41,6 +41,9 @@ namespace Microsoft.Identity.Client.PoP
 
         public string AuthorizationHeaderPrefix => PoPRequestParameters.PoPAuthHeaderPrefix;
 
+        public string ExpectedTokenType => PoPRequestParameters.PoPTokenType;
+
+
         /// <summary>
         /// For PoP, we chose to use the base64(jwk_thumbprint)
         /// </summary>
