@@ -10,6 +10,8 @@ namespace Microsoft.Identity.Client
     {
         public string AuthorizationHeaderPrefix => "Bearer";
 
+        public string ExpectedTokenType => "bearer";
+
         public string KeyId => null;
 
         public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)

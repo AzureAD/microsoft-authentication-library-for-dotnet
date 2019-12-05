@@ -33,6 +33,8 @@ namespace Microsoft.Identity.Client.SSHCertificates
             throw new MsalClientException(
                 MsalError.SSHCertUsedAsHttpHeader,
                 MsalErrorMessage.SSHCertUsedAsHttpHeader);
+        public string ExpectedTokenType => SSHCertTokenType;
+
 
         public string KeyId { get; }
 

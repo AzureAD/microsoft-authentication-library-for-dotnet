@@ -5,18 +5,14 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.PoP;
 using Microsoft.Identity.Json.Linq;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
-namespace Microsoft.Identity.Test.Unit
+namespace Microsoft.Identity.Test.Unit.PoP
 {
     [TestClass]
     public class PopAuthenticationSchemeTests
@@ -33,8 +29,8 @@ namespace Microsoft.Identity.Test.Unit
             HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
             var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
 
-            AssertException.Throws<ArgumentException>(() => new PoPAuthenticationScheme(null,  popCryptoProvider));
-            AssertException.Throws<ArgumentException>(() => new PoPAuthenticationScheme(httpRequest, null));
+            AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(null, popCryptoProvider));
+            AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(httpRequest, null));
         }
 
         [TestMethod]
@@ -81,10 +77,12 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsFalse(string.IsNullOrEmpty(nonce));
             string jwk = AssertSimpleClaim(decodedPopToken, "cnf");
             var jwkFromPopAssertion = JToken.Parse(jwk);
-            
+
             var initialJwk = JToken.Parse(JWK);
             Assert.IsTrue(jwkFromPopAssertion["jwk"].DeepEquals(initialJwk));
         }
+
+       
 
         private static string AssertSimpleClaim(JwtSecurityToken jwt, string expectedKey, string optionalExpectedValue = null)
         {

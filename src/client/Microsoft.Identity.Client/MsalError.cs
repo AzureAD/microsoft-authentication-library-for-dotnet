@@ -709,6 +709,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string WABError = "wab_error";
 
+        /// <summary>
+        /// <para>What happens?</para>You asked for one type of token, but did not receive it. 
+        /// <para>Mitigation</para>This happens if the Identity Provider (AAD, B2C, ADFS etc.) does not support / implement the requested token type. In case of ADFS, consider upgrading to the latest version.
+        /// </summary>
+        public const string TokenTypeMismatch = "token_type_mismatch";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

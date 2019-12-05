@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client
         string AuthorizationHeaderPrefix { get; }
 
         /// <summary>
-        /// Extra paramters that are added to the request to the /token endpoint
+        /// Extra parameters that are added to the request to the /token endpoint. 
         /// </summary>
         /// <returns>Name and values of params</returns>
         IDictionary<string, string> GetTokenRequestParams();
@@ -33,5 +33,7 @@ namespace Microsoft.Identity.Client
         /// Creates the access token that goes into an Authorization HTTP header. 
         /// </summary>
         string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
+
+        string ExpectedTokenType { get; }
     }
 }
