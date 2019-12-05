@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Newtonsoft.Json;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {

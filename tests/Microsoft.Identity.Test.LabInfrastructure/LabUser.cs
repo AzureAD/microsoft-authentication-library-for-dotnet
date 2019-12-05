@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {

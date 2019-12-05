@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
