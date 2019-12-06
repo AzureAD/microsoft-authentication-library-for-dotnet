@@ -36,19 +36,19 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// <list type="bullet">
         /// <item>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</item>
-        /// <item> Add the PoP token in an Authorization header, just like a bearer token. See <seealso cref="AuthenticationResult.CreateAuthorizationHeader"/> for details.</item>
+        /// <item> An Authentication header is automatically added to the request</item>
         /// <item> The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters). </item>
         /// <item> MSAL creates, reads and stores a key securely on behalf of the Windows user. </item>
         /// </list>
         /// </remarks>
-        public T WithPoPAuthenticationScheme(HttpRequestMessage httpRequestMessage) 
+        public T WithProofOfPosession(HttpRequestMessage httpRequestMessage) 
         {
             var defaultCryptoProvider = this.PublicClientApplicationExecutor.ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
-            return WithPoPAuthenticationScheme(httpRequestMessage, defaultCryptoProvider);
+            return WithProofOfPosession(httpRequestMessage, defaultCryptoProvider);
         }
 
         // Allows testing the PoP flow with any crypto. Consider making this public.
-        internal T WithPoPAuthenticationScheme(HttpRequestMessage httpRequestMessage, IPoPCryptoProvider popCryptoProvider) 
+        internal T WithProofOfPosession(HttpRequestMessage httpRequestMessage, IPoPCryptoProvider popCryptoProvider) 
         {
             if (httpRequestMessage is null)
             {

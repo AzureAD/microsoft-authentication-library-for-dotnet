@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Identity.Client.Cache.Items;
@@ -78,7 +79,14 @@ namespace Microsoft.Identity.Client.PoP
                 new JProperty(PoPClaimTypes.Cnf, new JObject(
                     new JProperty(PoPClaimTypes.JWK, popAssertion))));
 
-            return CreateJWS(payload.ToString(Json.Formatting.None), header.ToString(Json.Formatting.None));
+            string popToken =  CreateJWS(payload.ToString(Json.Formatting.None), header.ToString(Json.Formatting.None));
+
+            // For POP, we can also update the HttpRequest with the authentication header
+            _httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(
+                AuthorizationHeaderPrefix,
+                popToken);
+
+            return popToken;
         }
 
         private static string CreateNonce()

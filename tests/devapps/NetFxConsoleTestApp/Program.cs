@@ -353,7 +353,7 @@ namespace NetFx
             {
                 builder = builder
                     .WithExtraQueryParameters(GetTestSliceParams())
-                    .WithPoPAuthenticationScheme(new HttpRequestMessage(s_popMethod, new Uri(PoPUri)));
+                    .WithProofOfPosession(new HttpRequestMessage(s_popMethod, new Uri(PoPUri)));
             }
 
             return builder as T;
