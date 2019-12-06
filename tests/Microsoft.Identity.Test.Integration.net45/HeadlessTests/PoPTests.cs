@@ -9,6 +9,7 @@ using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -28,8 +29,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static readonly string[] s_scopes = { "User.Read" };
 
-        Uri protectedResournceUri1 = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
-        Uri protectedResournceUri2 = new Uri("https://www.bing.com/path3/path4?queryParam5=c&queryParam6=d");
 
         // Doesn't exist, but the POP validator endpoint will check if the POP token matches this HTTP request 
 
@@ -61,6 +60,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private async Task RunHappyPathTestAsync(LabResponse labResponse)
         {
+            HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            HttpRequestMessage request2 = new HttpRequestMessage(HttpMethod.Post, new Uri("https://www.bing.com/path3/path4?queryParam5=c&queryParam6=d"));
+
             var user = labResponse.User;
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             string clientId = labResponse.App.AppId;
@@ -68,18 +70,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var pca = PublicClientApplicationBuilder.Create(clientId).WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
             ConfigureInMemoryCache(pca);
 
-            AuthenticationResult authResult = await pca
+            await pca
                 .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
                 .WithExtraQueryParameters(GetTestSliceParams())
-                .WithPoPAuthenticationScheme(new HttpRequestMessage(HttpMethod.Get, protectedResournceUri1))
+                .WithProofOfPosession(request1)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
+            Assert.AreEqual("POP", request1.Headers.Authorization.Scheme);
             await VerifyPoPTokenAsync(
                  clientId,
-                 authResult.CreateAuthorizationHeader(),
-                 protectedResournceUri1,
-                 HttpMethod.Get).ConfigureAwait(false);
+                 request1).ConfigureAwait(false);
 
             // recreate the pca to ensure that the silent call is served from the cache, i.e. the key remains stable
             pca = PublicClientApplicationBuilder
@@ -89,30 +90,28 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ConfigureInMemoryCache(pca);
 
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-            authResult = await pca
+            await pca
                 .AcquireTokenSilent(s_scopes, accounts.Single())
-                .WithPoPAuthenticationScheme(new HttpRequestMessage(HttpMethod.Get, protectedResournceUri1))
+                .WithProofOfPosession(request1)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
+            Assert.AreEqual("POP", request1.Headers.Authorization.Scheme);
             await VerifyPoPTokenAsync(
-                clientId, 
-                authResult.CreateAuthorizationHeader(),
-                protectedResournceUri1,
-                HttpMethod.Get).ConfigureAwait(false);
+                clientId,
+                request1).ConfigureAwait(false);
 
             // Call some other Uri - the same pop assertion can be reused, i.e. no need to call Evo
-            authResult = await pca
+            await pca
               .AcquireTokenSilent(s_scopes, accounts.Single())
-              .WithPoPAuthenticationScheme(new HttpRequestMessage(HttpMethod.Post, protectedResournceUri2))
+              .WithProofOfPosession(request2)
               .ExecuteAsync()
               .ConfigureAwait(false);
 
+            Assert.AreEqual("POP", request2.Headers.Authorization.Scheme);
             await VerifyPoPTokenAsync(
                 clientId,
-                authResult.CreateAuthorizationHeader(),
-                protectedResournceUri2,
-                HttpMethod.Post).ConfigureAwait(false);
+                request2).ConfigureAwait(false);
         }
 
         private class NoAccessHttpClientFactory : IMsalHttpClientFactory
@@ -130,22 +129,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// This calls a special endpoint that validates any POP token against a configurable HTTP request.
         /// The HTTP request is configured through headers.
         /// </summary>
-        private async Task VerifyPoPTokenAsync(string clientId, string popAuthHeader, Uri uri, HttpMethod httpMethod)
+        private async Task VerifyPoPTokenAsync(string clientId, HttpRequestMessage initialRequest)
         {
             var httpClient = new HttpClient();
             HttpResponseMessage response;
             var request = new HttpRequestMessage(HttpMethod.Post, PoPValidatorEndpoint);
 
-            request.Headers.Add("Authorization", popAuthHeader);
             request.Headers.Add("Secret", _popValidationEndpointSecret);
             request.Headers.Add("Authority", "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/");
             request.Headers.Add("ClientId", clientId);
+            request.Headers.Authorization = initialRequest.Headers.Authorization;
 
             // the URI the POP token is bound to
-            request.Headers.Add("ShrUri", uri.ToString());
+            request.Headers.Add("ShrUri", initialRequest.RequestUri.ToString());
 
             // the method the POP token in bound to
-            request.Headers.Add("ShrMethod", httpMethod.ToString());
+            request.Headers.Add("ShrMethod", initialRequest.Method.ToString());
 
             response = await httpClient.SendAsync(request).ConfigureAwait(false);
 
