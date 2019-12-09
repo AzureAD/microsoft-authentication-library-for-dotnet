@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.AuthScheme;
 
 namespace Microsoft.Identity.Client
 {

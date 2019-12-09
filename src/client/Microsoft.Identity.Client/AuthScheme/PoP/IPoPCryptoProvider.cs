@@ -1,13 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using Microsoft.Identity.Client.Utils;
-
-namespace Microsoft.Identity.Client.PoP
+namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     // TODO: we can expose this interface to users for a simple but low-level extensibility mechanism.
     // For a more complex extensibility mechanism, we should allow users to configure SigningCredentials, 

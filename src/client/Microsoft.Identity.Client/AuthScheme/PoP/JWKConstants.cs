@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.PoP
+namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     /// <summary>
     /// Names for Json Web Key Values
