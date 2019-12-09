@@ -144,15 +144,22 @@ namespace XamarinDev
             try
             {
                 var selectedUser = GetSelectedUsername();
-                if (selectedUser == null)
+                var authority = PassAuthoritySwitch.IsToggled ? App.Authority : null;
+                AcquireTokenSilentParameterBuilder builder;
+                if (selectedUser != null)
+                {
+                    builder = App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount());
+                }
+                else if (!string.IsNullOrEmpty(UserName.Text))
+                {
+                    builder = App.MsalPublicClient.AcquireTokenSilent(GetScopes(), UserName.Text);
+                }
+                else
                 {
                     acquireResponseLabel.Text = "User was not selected";
                     return;
                 }
-
-                var authority = PassAuthoritySwitch.IsToggled ? App.Authority : null;
-
-                var builder = App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount());
+                
                 if (PassAuthoritySwitch.IsToggled)
                 {
                     builder = builder.WithAuthority(App.Authority);

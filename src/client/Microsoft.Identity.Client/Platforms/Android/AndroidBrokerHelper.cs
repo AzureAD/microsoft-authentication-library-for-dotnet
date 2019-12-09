@@ -22,6 +22,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
+using System.Text;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -40,7 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             _androidContext = androidContext ?? throw new ArgumentNullException(nameof(androidContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _logger.Verbose("Getting the Android context");
+            _logger.Verbose("Getting the Android context for broker request");
             _androidAccountManager = AccountManager.Get(_androidContext);
         }
 
@@ -49,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             string packageName = _androidContext.PackageName;
 
             // ADAL switches broker for following conditions:
-            // 1- app is not skipping the broker
+            // 1- broker app is installed
             // 2- signature of the broker is valid
             // 3- account exists
 
@@ -75,15 +76,17 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 Bundle addAccountOptions = new Bundle();
                 addAccountOptions.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetIntentForInteractiveRequest);
 
-                _logger.Info("Broker Account Name: " + GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username));
-
                 result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-                    BrokerConstants.AuthtokenType, null, addAccountOptions, null,
-                    null, GetPreferredLooper(callerActivity));
+                    BrokerConstants.AuthtokenType, 
+                    null, 
+                    addAccountOptions, 
+                    null,
+                    null, 
+                    GetPreferredLooper(callerActivity));
 
                 if (result == null)
                 {
-                    _logger.Info("Android account manager AddAccount didn't return any results. ");
+                    _logger.Info("Android account manager didn't return any results for interactive broker request.");
                 }
 
                 Bundle bundleResult = (Bundle)result?.Result;
@@ -93,7 +96,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 //Validate that the intent was created succsesfully.
                 if (intent != null)
                 {
-                    _logger.Info("Intent created from BundleResult is not null. ");
+                    _logger.Info("Intent created from BundleResult is not null. Starting interactive broker request");
                     // Need caller info UID for broker communication
                     intent.PutExtra(BrokerConstants.CallerInfoUID, Binder.CallingUid);
                 }
@@ -114,17 +117,19 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return intent;
         }
 
-        public string GetAuthTokenSilently(IDictionary<string, string> brokerPayload, Activity callerActivity)
+        public string GetBrokerAuthTokenSilently(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
             GetBrokerAccountInfo(brokerPayload, callerActivity);
             Bundle silentOperationBundle = GetSilentBrokerBundle(brokerPayload);
             silentOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.AcquireTokenSilent);
 
-            _logger.Info("Broker Account Name: " + GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username));
-
             var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-                BrokerConstants.AuthtokenType, null, silentOperationBundle, null,
-                null, GetPreferredLooper(callerActivity));
+                BrokerConstants.AuthtokenType,
+                null, 
+                silentOperationBundle, 
+                null,
+                null, 
+                GetPreferredLooper(callerActivity));
 
             if (result == null)
             {
@@ -134,7 +139,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             Bundle bundleResult = (Bundle)result?.Result;
             if (bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success))
             {
-                _logger.Info("Android Broker succsesfully refreshd the access token.");
+                _logger.Info("Android Broker succsesfully refreshed the access token.");
                 return bundleResult.GetString(BrokerConstants.BrokerResultV2);
             }
 
@@ -147,11 +152,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
             Bundle getAccountsBundle = GetBrokerAccountBundle(brokerPayload);
             getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
 
-            _logger.Info("Broker Account Name: " + loginHint);
-
             var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-                BrokerConstants.AuthtokenType, null, getAccountsBundle, null,
-                null, GetPreferredLooper(callerActivity));
+                BrokerConstants.AuthtokenType,
+                null,
+                getAccountsBundle,
+                null,
+                null,
+                GetPreferredLooper(callerActivity));
 
             if (result == null)
             {
@@ -160,7 +167,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
 
             Bundle bundleResult = (Bundle)result?.Result;
-            var accounts = bundleResult.GetString(BrokerConstants.BrokerAccounts);
+            var accounts = bundleResult?.GetString(BrokerConstants.BrokerAccounts);
 
             if (!string.IsNullOrEmpty(accounts))
             {
@@ -180,23 +187,25 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
         }
 
-        public bool SayHelloToBroker(Activity callerActivity)
+        //Inorder for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.
+        public bool InitiateBrokerHandshake(Activity callerActivity)
         {
             try
             {
                 IAccountManagerFuture result = null;
-                // Callback is not passed since it is making a blocking call to get
-                // intent. Activity needs to be launched from calling app
-                // to get the calling app's metadata if needed at BrokerActivity.
 
-                Bundle HelloBundle = new Bundle();
-                HelloBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
-                HelloBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
-                HelloBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
+                Bundle helloRequestBundle = new Bundle();
+                helloRequestBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
+                helloRequestBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
+                helloRequestBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
 
                 result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-                    BrokerConstants.AuthtokenType, null, HelloBundle, null,
-                    null, GetPreferredLooper(callerActivity));
+                    BrokerConstants.AuthtokenType, 
+                    null, 
+                    helloRequestBundle, 
+                    null,
+                    null, 
+                    GetPreferredLooper(callerActivity));
 
                 if (result == null)
                 {
@@ -205,9 +214,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
                 Bundle bundleResult = (Bundle)result?.Result;
 
-                var bpKey = bundleResult.GetString(BrokerConstants.NegotiatedBPVersionKey);
-                var test = bundleResult.GetString(BrokerConstants.CommonProtocolVersion);
-                if (!String.IsNullOrEmpty(bpKey))
+                var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
+
+                if (!string.IsNullOrEmpty(bpKey))
                 {
                     _logger.Info("Using broker protocol version: " + bpKey);
                     return true;
@@ -241,17 +250,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         private void ValidateBrokerRedirectURI(IDictionary<string, string> brokerPayload)
         {
-            //During the silent broker flow, the redirect URI will be null.
-            if (string.IsNullOrEmpty(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri)))
-            {
-                return;
-            }
-
             string computedRedirectUri = GetRedirectUriForBroker();
 
             if (!string.Equals(computedRedirectUri, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri), StringComparison.OrdinalIgnoreCase))
             {
-                //ADD Broker Error for redirect URI on andorid
+                //ADD Broker Error for redirect URI on android
                 string msg = string.Format(CultureInfo.CurrentCulture, MsalError.CannotInvokeBroker, computedRedirectUri);
                 _logger.Info(msg);
                 throw new MsalClientException(MsalError.CannotInvokeBroker, msg);
@@ -309,13 +312,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
             {
                 Authority = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Authority),
                 Scopes = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Scope),
-                RedirectUri = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri),
+                RedirectUri = GetEncodedRedirectUri(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri)),
                 ClientId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientId),
                 ClientAppName = Application.Context.PackageName,
                 ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MatchAll).VersionName,
-                ClientVersion = "4.4.0",
+                ClientVersion = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientVersion),
                 CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
-                Prompt = "NONE"
+                Prompt = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Prompt)
             };
 
             brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(request));
@@ -325,19 +328,20 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         private Bundle GetSilentBrokerBundle(IDictionary<string, string> brokerPayload)
         {
+            ValidateBrokerRedirectURI(brokerPayload);
             Bundle bundle = new Bundle();
 
             BrokerRequest request = new BrokerRequest
             {
                 Authority = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Authority),
                 Scopes = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Scope),
-                RedirectUri = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri),
+                RedirectUri = GetEncodedRedirectUri(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri)),
                 ClientId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientId),
                 ClientAppName = Application.Context.PackageName,
                 ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MatchAll).VersionName,
-                ClientVersion = "4.4.0",
+                ClientVersion = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientVersion),
                 CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
-                Prompt = "NONE",
+                Prompt = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Prompt),
                 HomeAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId),
                 LocalAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LocalAccountId)
             };
@@ -346,6 +350,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
             bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
 
             return bundle;
+        }
+
+        private string GetEncodedRedirectUri(string redirectUri)
+        {
+            Uri uri = new Uri(redirectUri);
+            var test = "msauth://" + uri.Host + "/" + System.Net.WebUtility.UrlEncode(uri.AbsolutePath.Split("/")[1]);
+            return "msauth://" + uri.Host + "/" + System.Net.WebUtility.UrlEncode(uri.AbsolutePath.Split("/")[1]);
         }
 
         private Bundle GetBrokerAccountBundle(IDictionary<string, string> brokerPayload)

@@ -29,7 +29,7 @@ namespace XamarinDev.Droid
 
 		public AcquirePageRenderer(Context context) : base(context)
 		{
-            ActivityCompat.RequestPermissions(this.Context as Activity, new String[] { Manifest.Permission.GetAccounts }, 154);
+
         }
 
 		protected override void OnElementChanged(ElementChangedEventArgs<Page> e)

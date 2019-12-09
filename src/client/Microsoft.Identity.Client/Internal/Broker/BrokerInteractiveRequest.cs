@@ -83,6 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             BrokerPayload.Add(BrokerParameter.Username, _authenticationRequestParameters.Account?.Username ?? string.Empty);
             BrokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
+            BrokerPayload.Add(BrokerParameter.Prompt, _interactiveParameters.Prompt.PromptValue);
         }
         
         internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
