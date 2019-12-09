@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
-namespace Microsoft.Identity.Client.PoP
+namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     internal class PoPAuthenticationScheme : IAuthenticationScheme
     {
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.PoP
 
         public string AuthorizationHeaderPrefix => PoPRequestParameters.PoPAuthHeaderPrefix;
 
-        public string ExpectedTokenType => PoPRequestParameters.PoPTokenType;
+        public string AccessTokenType => PoPRequestParameters.PoPTokenType;
 
 
         /// <summary>

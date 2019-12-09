@@ -334,13 +334,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (!string.Equals(
                     response.TokenType, 
-                    AuthenticationRequestParameters.AuthenticationScheme.ExpectedTokenType, 
+                    AuthenticationRequestParameters.AuthenticationScheme.AccessTokenType, 
                     StringComparison.OrdinalIgnoreCase))
             {
                 throw new MsalClientException(
                     MsalError.TokenTypeMismatch,
                     MsalErrorMessage.TokenTypeMismatch(
-                        AuthenticationRequestParameters.AuthenticationScheme.ExpectedTokenType,
+                        AuthenticationRequestParameters.AuthenticationScheme.AccessTokenType,
                         response.TokenType));
             }
 

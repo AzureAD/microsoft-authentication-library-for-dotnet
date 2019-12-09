@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.AuthScheme
 {
     /// <summary>
     /// Used to modify the experience depending on the type of token asked. 
@@ -34,6 +34,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
 
-        string ExpectedTokenType { get; }
+        /// <summary>
+        /// Expected to match the token_type parameter returned by ESTS. Used to disambiguate
+        /// between ATs of different types (e.g. Bearer and PoP) when loading from cache etc.
+        /// </summary>
+        string AccessTokenType { get; }
     }
 }

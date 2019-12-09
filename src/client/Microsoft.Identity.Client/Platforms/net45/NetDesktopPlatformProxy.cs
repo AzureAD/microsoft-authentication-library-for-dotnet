@@ -18,7 +18,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
-using Microsoft.Identity.Client.PoP;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Microsoft.Identity.Client.PoP
+namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     internal static class PoPClaimTypes
     {
