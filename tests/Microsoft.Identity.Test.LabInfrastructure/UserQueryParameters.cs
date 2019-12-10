@@ -17,6 +17,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public FederationProvider? FederationProvider { get; set; } //Requires userType to be set to federated
         public AzureEnvironment? AzureEnvironment { get; set; }
         public SignInAudience? SignInAudience { get; set; }
+        public string AppId { get; set; }
+
 
         public static UserQuery PublicAadUserQuery => new UserQuery()
             {
@@ -26,7 +28,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static UserQuery MsaUserQuery => new UserQuery
         {
-            UserType = LabInfrastructure.UserType.MSA
+            UserType = LabInfrastructure.UserType.MSA,
+            AppId = "9668f2bd-6103-4292-9024-84fa2d1b6fb2"
         };
 
         public static UserQuery B2CLocalAccountUserQuery => new UserQuery
