@@ -151,18 +151,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
 
-        public async Task<LabResponse> CreateTempLabUserAsync()
-        {
-            IDictionary<string, string> queryDict = new Dictionary<string, string>
-            {
-                { "code", "HC1Tud9RHGK12VoBPH3sbeyyPHfjmACKbyq8bFlhIiEwpMbWYR4zTQ==" },
-                { "userType", "Basic" }
-            };
-
-            string result = await SendLabRequestAsync(LabApiConstants.CreateLabUser, queryDict).ConfigureAwait(false);
-            return CreateLabResponseFromResultStringAsync(result).Result;
-        }
-
         public async Task<string> GetUserSecretAsync(string lab)
         {
             IDictionary<string, string> queryDict = new Dictionary<string, string>
