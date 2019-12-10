@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
         /// <item> MSAL creates, reads and stores a key securely on behalf of the Windows user. </item>
         /// </list>
         /// </remarks>
-        public T WithProofOfPosession(HttpRequestMessage httpRequestMessage) 
+        internal T WithProofOfPosession(HttpRequestMessage httpRequestMessage) 
         {
             var defaultCryptoProvider = this.PublicClientApplicationExecutor.ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
             return WithProofOfPosession(httpRequestMessage, defaultCryptoProvider);

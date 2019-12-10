@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.AuthScheme;
 
 namespace Microsoft.Identity.Client.Cache.Keys
 {
@@ -17,13 +18,19 @@ namespace Microsoft.Identity.Client.Cache.Keys
         private readonly string _homeAccountId;
         private readonly string _normalizedScopes; // space separated, lowercase and ordered alphabetically
         private readonly string _tenantId;
+        private readonly string _tokenType;
+        private readonly string _credentialDescriptor;
+
+        // Note: when using multiple parts, ordering is important
+        private readonly string[] _extraKeyParts;
 
         internal MsalAccessTokenCacheKey(
             string environment,
             string tenantId,
             string userIdentifier,
             string clientId,
-            string scopes)
+            string scopes,
+            string tokenType)
         {
             if (string.IsNullOrEmpty(environment))
             {
@@ -35,31 +42,46 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 throw new ArgumentNullException(nameof(clientId));
             }
 
+            if (string.IsNullOrEmpty(tokenType))
+            {
+                throw new ArgumentNullException(nameof(tokenType));
+            }
+
             _environment = environment;
             _homeAccountId = userIdentifier;
             _clientId = clientId;
             _normalizedScopes = scopes;
+            _tokenType = tokenType;
             _tenantId = tenantId;
+            _credentialDescriptor = StorageJsonValues.CredentialTypeAccessToken;
+
+            if (AuthSchemeHelper.StoreTokenTypeInCacheKey(tokenType))
+            {
+                _extraKeyParts = new[] { _tokenType };
+                _credentialDescriptor = StorageJsonValues.CredentialTypeAccessTokenWithAuthScheme;
+            }
         }
 
         public override string ToString()
         {
+
             return MsalCacheKeys.GetCredentialKey(
                 _homeAccountId,
                 _environment,
-                StorageJsonValues.CredentialTypeAccessToken,
+                _credentialDescriptor,
                 _clientId,
                 _tenantId,
-                _normalizedScopes);
+                _normalizedScopes,
+                _extraKeyParts);
         }
 
         #region iOS
 
         public string iOSAccount => MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
 
-        public string iOSService => MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeAccessToken, _clientId, _tenantId, _normalizedScopes);
+        public string iOSService => MsalCacheKeys.GetiOSServiceKey(_credentialDescriptor, _clientId, _tenantId, _normalizedScopes, _extraKeyParts);
 
-        public string iOSGeneric => MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeAccessToken, _clientId, _tenantId);
+        public string iOSGeneric => MsalCacheKeys.GetiOSGenericKey(_credentialDescriptor, _clientId, _tenantId);
 
         public int iOSType => (int)MsalCacheKeys.iOSCredentialAttrType.AccessToken;
 

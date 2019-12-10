@@ -207,7 +207,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TenantId,
                 HomeAccountId,
                 ClientId,
-                NormalizedScopes);
+                NormalizedScopes,
+                TokenType);
         }
 
         internal MsalIdTokenCacheKey GetIdTokenItemKey()

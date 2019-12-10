@@ -218,7 +218,7 @@ namespace NetFx
                             {
                                 silentBuilder = silentBuilder
                                     .WithExtraQueryParameters(GetTestSliceParams())
-                                    .WithPoPAuthenticationScheme(new HttpRequestMessage(s_popMethod, PoPUri));
+                                    .WithProofOfPosession(new HttpRequestMessage(s_popMethod, PoPUri));
                             }
 
                             await FetchTokenAndCallApiAsync(pca, silentBuilder.ExecuteAsync()).ConfigureAwait(false);
@@ -235,7 +235,7 @@ namespace NetFx
                                     {
                                         silentBuilder = silentBuilder
                                             .WithExtraQueryParameters(GetTestSliceParams())
-                                            .WithPoPAuthenticationScheme(new HttpRequestMessage(s_popMethod, PoPUri));
+                                            .WithProofOfPosession(new HttpRequestMessage(s_popMethod, PoPUri));
                                     }
                                     return silentBuilder.ExecuteAsync();
                                 })

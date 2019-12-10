@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AuthScheme.Bearer;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
@@ -14,6 +15,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -39,32 +41,7 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger.Warning("Subject not present in Id token");
             }
 
-            string preferredUsername;
-
-            // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
-            // It will be set to "preferred_username not in idtoken"
-            if (idToken == null)
-            {
-                preferredUsername = NullPreferredUsernameDisplayLabel;
-            }
-            else if (string.IsNullOrWhiteSpace(idToken.PreferredUsername))
-            {
-                if (isAdfsAuthority)
-                {
-                    //The direct to adfs scenario does not return preferred_username in the id token so it needs to be set to the upn
-                    preferredUsername = !string.IsNullOrEmpty(idToken.Upn)
-                        ? idToken.Upn
-                        : NullPreferredUsernameDisplayLabel;
-                }
-                else
-                {
-                    preferredUsername = NullPreferredUsernameDisplayLabel;
-                }
-            }
-            else
-            {
-                preferredUsername = idToken.PreferredUsername;
-            }
+            string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
 
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
@@ -132,7 +109,8 @@ namespace Microsoft.Identity.Client
                             instanceDiscoveryMetadata.Aliases,
                             tenantId,
                             msalAccessTokenCacheItem.ScopeSet,
-                            msalAccessTokenCacheItem.HomeAccountId);
+                            msalAccessTokenCacheItem.HomeAccountId, 
+                            msalAccessTokenCacheItem.TokenType);
 
                         _accessor.SaveAccessToken(msalAccessTokenCacheItem);
 
@@ -211,7 +189,32 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        async Task<MsalAccessTokenCacheItem> ITokenCacheInternal.FindAccessTokenAsync(AuthenticationRequestParameters requestParams)
+        private static string GetPreferredUsernameFromIdToken(bool isAdfsAuthority, IdToken idToken)
+        {
+            // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
+            // It will be set to "preferred_username not in idtoken"
+            if (idToken == null)
+            {
+                return NullPreferredUsernameDisplayLabel;
+            }
+
+            if (string.IsNullOrWhiteSpace(idToken.PreferredUsername))
+            {
+                if (isAdfsAuthority)
+                {
+                    //The direct to adfs scenario does not return preferred_username in the id token so it needs to be set to the upn
+                    return !string.IsNullOrEmpty(idToken.Upn)
+                        ? idToken.Upn
+                        : NullPreferredUsernameDisplayLabel;
+                }
+                return NullPreferredUsernameDisplayLabel;
+            }
+
+            return idToken.PreferredUsername;
+        }
+
+        async Task<MsalAccessTokenCacheItem> ITokenCacheInternal.FindAccessTokenAsync(
+            AuthenticationRequestParameters requestParams)
         {
             // no authority passed
             if (requestParams?.AuthorityInfo?.CanonicalAuthority == null)
@@ -224,6 +227,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
+            tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
 
             // no match found after initial filtering
             if (!tokenCacheItems.Any())
@@ -251,6 +255,18 @@ namespace Microsoft.Identity.Client
             msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
 
             return GetUnexpiredAccessTokenOrNull(requestParams, msalAccessTokenCacheItem);
+        }
+
+        private static IEnumerable<MsalAccessTokenCacheItem> FilterByTokenType(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
+        {
+            tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
+                            string.Equals(
+                                item.TokenType ?? BearerAuthenticationScheme.BearerTokenType,
+                                requestParams.AuthenticationScheme.AccessTokenType,
+                                StringComparison.OrdinalIgnoreCase),
+                            requestParams.RequestContext.Logger,
+                            "Filtering by token type");
+            return tokenCacheItems;
         }
 
         private static IEnumerable<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(

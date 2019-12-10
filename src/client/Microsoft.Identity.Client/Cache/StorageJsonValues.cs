@@ -12,6 +12,7 @@ namespace Microsoft.Identity.Client.Cache
         public const string TokenTypeBearer = "Bearer";
         public const string CredentialTypeRefreshToken = "RefreshToken";
         public const string CredentialTypeAccessToken = "AccessToken";
+        public const string CredentialTypeAccessTokenWithAuthScheme = "AccessToken_With_AuthScheme";
         public const string CredentialTypeIdToken = "IdToken";
         public const string AccountRootKey = "Account";
         public const string CredentialTypeOther = "Other";

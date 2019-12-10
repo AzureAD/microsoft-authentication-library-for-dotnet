@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public async Task<LabResponse> GetLabResponseAsync(UserQuery query)
         {
             var response = await GetLabResponseFromApiAsync(query).ConfigureAwait(false);
-            var user = response.User;
 
             return response;
         }
