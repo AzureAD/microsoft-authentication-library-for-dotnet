@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Cache.Keys
@@ -10,8 +12,14 @@ namespace Microsoft.Identity.Client.Cache.Keys
     {
         public const string CacheKeyDelimiter = "-";
 
-
-        public static string GetCredentialKey(string homeAccountId, string environment, string keyDescriptor, string clientId, string tenantId, string scopes)
+        public static string GetCredentialKey(
+            string homeAccountId, 
+            string environment, 
+            string keyDescriptor, 
+            string clientId, 
+            string tenantId, 
+            string scopes, 
+            params string[] additionalKeys /* for extensibility */)
         {
             var stringBuilder = new StringBuilder();
 
@@ -32,6 +40,12 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
             stringBuilder.Append(scopes ?? "");
 
+            foreach (var additionalKey in additionalKeys ?? Enumerable.Empty<string>())
+            {
+                stringBuilder.Append(CacheKeyDelimiter);
+                stringBuilder.Append(additionalKey);
+            }
+
             return stringBuilder.ToString().ToLowerInvariant();
         }
 
@@ -40,7 +54,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(homeAccountId ?? "");
-            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(CacheKeyDelimiter);
 
             stringBuilder.Append(environment);
 
@@ -48,20 +62,31 @@ namespace Microsoft.Identity.Client.Cache.Keys
         }
 
 
-        public static string GetiOSServiceKey(string keyDescriptor, string clientId, string tenantId, string scopes)
+        public static string GetiOSServiceKey(
+            string keyDescriptor, 
+            string clientId, 
+            string tenantId, 
+            string scopes,
+            params string[] extraKeyParts)
         {
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(keyDescriptor);
-            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(CacheKeyDelimiter);
 
             stringBuilder.Append(clientId);
-            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(CacheKeyDelimiter);
 
             stringBuilder.Append(tenantId ?? "");
-            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(CacheKeyDelimiter);
 
             stringBuilder.Append(scopes ?? "");
+
+            foreach (var additionalKey in extraKeyParts ?? Enumerable.Empty<string>())
+            {
+                stringBuilder.Append(CacheKeyDelimiter);
+                stringBuilder.Append(additionalKey);
+            }
 
             return stringBuilder.ToString().ToLowerInvariant();
         }
@@ -71,10 +96,10 @@ namespace Microsoft.Identity.Client.Cache.Keys
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(keyDescriptor);
-            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(CacheKeyDelimiter);
 
             stringBuilder.Append(clientId);
-            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(CacheKeyDelimiter);
 
             stringBuilder.Append(tenantId ?? "");
 

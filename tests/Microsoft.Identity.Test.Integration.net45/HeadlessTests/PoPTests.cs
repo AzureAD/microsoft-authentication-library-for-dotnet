@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -52,13 +53,75 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task POPAsync()
+        public async Task PoP_AcquireAndAcquireSilent_MultipleKeys_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            await AcquireAndAcquireSilent_MultipleKeys_Async(labResponse).ConfigureAwait(false);
         }
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse)
+        [TestMethod]
+        public async Task PoP_BearerAndPoP_CanCoexist_Async()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await BearerAndPoP_CanCoexist_Async(labResponse).ConfigureAwait(false);
+        }
+
+        private async Task BearerAndPoP_CanCoexist_Async(LabResponse labResponse)
+        {
+            // Arrange 
+            HttpRequestMessage request = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+
+            var user = labResponse.User;
+            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+            string clientId = labResponse.App.AppId;
+
+            var pca = PublicClientApplicationBuilder.Create(clientId).WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
+            ConfigureInMemoryCache(pca);
+
+            // Act - acquire both a PoP and a Bearer token
+            Trace.WriteLine("Getting a PoP token");
+            AuthenticationResult result = await pca
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .WithExtraQueryParameters(GetTestSliceParams())
+                .WithProofOfPosession(request)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("POP", request.Headers.Authorization.Scheme);
+            Assert.AreEqual("pop", result.TokenType);
+            await VerifyPoPTokenAsync(clientId, request).ConfigureAwait(false);
+
+            Trace.WriteLine("Getting a Bearer token");
+            result = await pca
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            Assert.AreEqual("Bearer", result.TokenType);
+            Assert.AreEqual(
+                2,
+                (pca as PublicClientApplication).UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+
+            // Arrange - block HTTP requests to make sure AcquireTokenSilent does not refresh the RT
+            pca = PublicClientApplicationBuilder
+                           .Create(clientId)
+                           .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
+                           .Build();
+            ConfigureInMemoryCache(pca);
+
+            var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
+            result = await pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("Bearer", result.TokenType);
+
+            result = await pca.AcquireTokenSilent(s_scopes, account)
+                .WithProofOfPosession(request)
+                .ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("pop", result.TokenType);
+
+        }
+
+        private async Task AcquireAndAcquireSilent_MultipleKeys_Async(LabResponse labResponse)
         {
             HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
             HttpRequestMessage request2 = new HttpRequestMessage(HttpMethod.Post, new Uri("https://www.bing.com/path3/path4?queryParam5=c&queryParam6=d"));

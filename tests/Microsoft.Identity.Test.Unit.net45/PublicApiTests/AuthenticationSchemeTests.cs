@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             var authScheme = Substitute.For<IAuthenticationScheme>();
             authScheme.AuthorizationHeaderPrefix.Returns("BearToken");
-            authScheme.ExpectedTokenType.Returns("bearer");
+            authScheme.AccessTokenType.Returns("bearer");
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
             authScheme.FormatAccessToken(default).ReturnsForAnyArgs(x => "enhanced_secret_" + ((MsalAccessTokenCacheItem)x[0]).Secret);

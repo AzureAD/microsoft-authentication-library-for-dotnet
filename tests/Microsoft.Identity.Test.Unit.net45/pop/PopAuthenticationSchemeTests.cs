@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.PoP;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

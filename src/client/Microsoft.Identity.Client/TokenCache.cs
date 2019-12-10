@@ -124,7 +124,8 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> environmentAliases,
             string tenantId,
             SortedSet<string> scopeSet,
-            string homeAccountId)
+            string homeAccountId, 
+            string tokenType)
         {
             // delete all cache entries with intersecting scopes.
             // this should not happen but we have this as a safe guard
@@ -136,6 +137,7 @@ namespace Microsoft.Identity.Client
             {
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
+                    string.Equals(accessToken.TokenType ?? "",  tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
                     (accessToken.IsAdfs || accessToken.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase)) &&
                     accessToken.ScopeSet.Overlaps(scopeSet))
                 {
