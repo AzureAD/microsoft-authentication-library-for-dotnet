@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            requestParams.RequestContext.Logger.Info("Matching entry count -" + tokenCacheItems.Count());
+            requestParams.RequestContext.Logger.Info("Matching entry count - " + tokenCacheItems.Count());
 
             IEnumerable<MsalAccessTokenCacheItem> filteredItems =
                 tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
