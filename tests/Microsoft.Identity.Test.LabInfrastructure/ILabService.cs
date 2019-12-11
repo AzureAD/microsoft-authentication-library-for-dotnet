@@ -8,6 +8,5 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     public interface ILabService
     {
         Task<LabResponse> GetLabResponseAsync(UserQuery query);
-        Task<LabResponse> CreateTempLabUserAsync();
     }
 }
