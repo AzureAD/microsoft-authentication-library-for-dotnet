@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.IsTrue(!string.IsNullOrWhiteSpace(ex.CorrelationId));
                 Assert.AreEqual(400, ex.StatusCode);
                 Assert.AreEqual("invalid_grant", ex.ErrorCode);
-                Assert.IsTrue(ex.Message.StartsWith("AADSTS50126: Invalid username or password"));
+                Assert.IsTrue(ex.Message.StartsWith("AADSTS50126"));
 
                 return;
             }
