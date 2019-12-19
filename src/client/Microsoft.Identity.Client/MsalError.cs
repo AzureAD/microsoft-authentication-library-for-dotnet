@@ -715,6 +715,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string TokenTypeMismatch = "token_type_mismatch";
 
+        /// <summary>
+        /// <para>What happens?</para>You are trying to use a feature which was marked as experimental
+        /// <para>Mitigation</para>When creating the PublicClientApplication or ConfidentialClientApplication, use .WithExperimentalFeatures() option. 
+        /// </summary>
+        public const string ExperimentalFeature = "experimental_feature";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

@@ -104,6 +104,13 @@ namespace Microsoft.Identity.Client
         // Allows testing the PoP flow with any crypto. Consider making this public.
         internal AcquireTokenSilentParameterBuilder WithProofOfPosession(HttpRequestMessage httpRequestMessage, IPoPCryptoProvider popCryptoProvider)
         {
+            if (!this.ClientApplicationBaseExecutor.ServiceBundle.Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithProofOfPosession)));
+            }
+
             if (httpRequestMessage is null)
             {
                 throw new ArgumentNullException(nameof(httpRequestMessage));
