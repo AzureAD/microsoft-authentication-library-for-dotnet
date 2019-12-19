@@ -127,9 +127,9 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-#if iOS || ANDROID
+#if iOS
             Config.IsBrokerEnabled = enableBroker;
-#endif // iOS || ANDROID
+#endif // iOS
             return this;
         }
 #endif // !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME

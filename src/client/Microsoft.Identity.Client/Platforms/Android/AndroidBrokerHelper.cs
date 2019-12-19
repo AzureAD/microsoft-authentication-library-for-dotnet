@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MatchAll).VersionName,
                 ClientVersion = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientVersion),
                 CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
-                Prompt = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Prompt)
+                Prompt = "NONE"
             };
 
             brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(request));
@@ -341,7 +341,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MatchAll).VersionName,
                 ClientVersion = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientVersion),
                 CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
-                Prompt = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Prompt),
                 HomeAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId),
                 LocalAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LocalAccountId)
             };
