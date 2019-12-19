@@ -75,6 +75,9 @@ namespace Microsoft.Identity.Client
         public bool MergeWithDefaultClaims { get; internal set; }
         internal int ConfidentialClientCredentialCount;
 
+        public bool ExperimentalFeaturesEnabled { get; set; }
+
+
 #endif
 
         #region Authority

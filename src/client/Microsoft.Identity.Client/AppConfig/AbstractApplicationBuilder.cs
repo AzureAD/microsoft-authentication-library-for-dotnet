@@ -295,6 +295,24 @@ namespace Microsoft.Identity.Client
             }
             return (T)this;
         }
+
+        /// <summary>
+        /// Allows usage of experimental features and APIs. If this flag is not set, experimental features 
+        /// will throw an exception. 
+        /// </summary>
+        /// <remarks>
+        /// Changes in the public API of experimental features will not result in an increment of the major version of this library.
+        /// The same level of support is given to experimental features as to all other features.
+        /// Affected APIs are clearly documented as being experimental. 
+        /// </remarks>
+        /// <param name="enableExperimentalFeatues"></param>
+        /// <returns></returns>
+        public T WithExperimentalFeatues(bool enableExperimentalFeatues = true)
+        {
+            Config.ExperimentalFeaturesEnabled = enableExperimentalFeatues;
+            return (T)this;
+        }
+
         /// <summary>
         /// Generate telemetry aggregation events.
         /// </summary>
