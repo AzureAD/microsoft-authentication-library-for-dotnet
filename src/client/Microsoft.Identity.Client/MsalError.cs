@@ -717,7 +717,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>You are trying to use a feature which was marked as experimental
-        /// <para>Mitigation</para>When creating the PublicClientApplication or ConfidentialClientApplication, use .WithExperimentalFeatures() option. 
+        /// <para>Mitigation</para>When creating the PublicClientApplication or ConfidentialClientApplication, use .WithExperimentalFeatures() option. See https://aka.ms/msal-net-experimental-features for details.
         /// </summary>
         public const string ExperimentalFeature = "experimental_feature";
 

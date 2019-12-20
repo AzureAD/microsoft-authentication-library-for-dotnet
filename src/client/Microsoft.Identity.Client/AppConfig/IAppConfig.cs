@@ -85,7 +85,9 @@ namespace Microsoft.Identity.Client
         ITelemetryConfig TelemetryConfig { get; }
 
         /// <summary>
-        /// Allows usage of features that are documented as experimental and would otherwise throw a specific exception
+        /// Allows usage of features that are experimental and would otherwise throw a specific exception. 
+        /// Use of experimental features in production is not recommended and are subject to be removed between builds. 
+        /// For details see https://aka.ms/msal-net-experimental-features
         /// </summary>
         bool ExperimentalFeaturesEnabled { get; }
 
