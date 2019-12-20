@@ -286,11 +286,21 @@ namespace Microsoft.Identity.Client
             " See https://aka.ms/msal-net-invalid-client for details. ";
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
 
+        public static string ExperimentalFeature(string methodName)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "The API {0} is marked as experimental and you should be mindful about using it in production. " +
+                "It may change without incrementing the major version of the library. " +
+                "Call .WithExperimentalFeatures() when creating the public / confidential client to bypass this. See https://aka.ms/msal-net-experimental-features for details.",
+                methodName);
+        }
+
         public static string NoUserInstanceMetadataEntry(string environment)
         {
             return string.Format(
-                CultureInfo.InvariantCulture, 
-                "The json containing instance metadata does not contain details about the authority in use: {0}. See https://aka.ms/msal-net-custom-instance-metadata for more details.", 
+                CultureInfo.InvariantCulture,
+                "The json containing instance metadata does not contain details about the authority in use: {0}. See https://aka.ms/msal-net-custom-instance-metadata for more details.",
                 environment);
         }
 
@@ -298,11 +308,11 @@ namespace Microsoft.Identity.Client
         {
             return string.Format(
                 CultureInfo.InvariantCulture,
-                "WAB responded with: status = {0}, error detail = {1}, response data = {2}", 
+                "WAB responded with: status = {0}, error detail = {1}, response data = {2}",
                 status ?? "", errorDetail ?? "", responseData ?? "");
         }
 
-       public static string TokenTypeMismatch(string requestTokenType, string responseTokenType)
+        public static string TokenTypeMismatch(string requestTokenType, string responseTokenType)
         {
             return string.Format(
                 CultureInfo.InvariantCulture,

@@ -77,7 +77,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             string clientId = labResponse.App.AppId;
 
-            var pca = PublicClientApplicationBuilder.Create(clientId).WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
+            var pca = PublicClientApplicationBuilder
+                .Create(clientId)
+                .WithExperimentalFeatues()
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
             ConfigureInMemoryCache(pca);
 
             // Act - acquire both a PoP and a Bearer token
@@ -106,6 +109,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Arrange - block HTTP requests to make sure AcquireTokenSilent does not refresh the RT
             pca = PublicClientApplicationBuilder
                            .Create(clientId)
+                           .WithExperimentalFeatues()
                            .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                            .Build();
             ConfigureInMemoryCache(pca);
@@ -130,7 +134,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             string clientId = labResponse.App.AppId;
 
-            var pca = PublicClientApplicationBuilder.Create(clientId).WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
+            var pca = PublicClientApplicationBuilder.Create(clientId)
+                .WithExperimentalFeatues()
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
             ConfigureInMemoryCache(pca);
 
             await pca
@@ -148,6 +154,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // recreate the pca to ensure that the silent call is served from the cache, i.e. the key remains stable
             pca = PublicClientApplicationBuilder
                 .Create(clientId)
+                .WithExperimentalFeatues()
                 .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                 .Build();
             ConfigureInMemoryCache(pca);

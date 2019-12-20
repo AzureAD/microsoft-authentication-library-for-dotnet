@@ -65,6 +65,9 @@ namespace Microsoft.Identity.Client
         internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
         internal ILegacyCachePersistence AppTokenLegacyCachePersistenceForTest { get; set; }
 
+        public bool ExperimentalFeaturesEnabled { get; set; } = false;
+
+
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
         public ClientCredentialWrapper ClientCredential { get; internal set; }
@@ -74,6 +77,8 @@ namespace Microsoft.Identity.Client
         public IDictionary<string, string> ClaimsToSign { get; internal set; }
         public bool MergeWithDefaultClaims { get; internal set; }
         internal int ConfidentialClientCredentialCount;
+
+
 
 #endif
 

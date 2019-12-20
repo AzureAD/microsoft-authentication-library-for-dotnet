@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
         /// <item> MSAL creates, reads and stores a key securely on behalf of the Windows user. </item>
         /// </list>
         /// </remarks>
-        internal T WithProofOfPosession(HttpRequestMessage httpRequestMessage) 
+        public T WithProofOfPosession(HttpRequestMessage httpRequestMessage) 
         {
             var defaultCryptoProvider = this.PublicClientApplicationExecutor.ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
             return WithProofOfPosession(httpRequestMessage, defaultCryptoProvider);
@@ -49,6 +49,13 @@ namespace Microsoft.Identity.Client
         // Allows testing the PoP flow with any crypto. Consider making this public.
         internal T WithProofOfPosession(HttpRequestMessage httpRequestMessage, IPoPCryptoProvider popCryptoProvider) 
         {
+            if (!this.PublicClientApplicationExecutor.ServiceBundle.Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature, 
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithProofOfPosession)));
+            }
+
             if (httpRequestMessage is null)
             {
                 throw new ArgumentNullException(nameof(httpRequestMessage));
