@@ -17,8 +17,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
     [TestClass]
     public class ExperimentalFeatureTests
     {
-
-
+#if DESKTOP
         [TestMethod]
         public async Task ExperimentalFeatureExceptionAsync()
         {
@@ -29,6 +28,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             Assert.AreEqual(MsalError.ExperimentalFeature, ex.ErrorCode);
         }
-
+#endif
     }
 }
