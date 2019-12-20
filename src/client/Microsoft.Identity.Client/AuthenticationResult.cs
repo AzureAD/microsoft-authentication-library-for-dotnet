@@ -160,9 +160,6 @@ namespace Microsoft.Identity.Client
         /// Identifies the type of access token. By default tokens returned by Azure Active Directory are Bearer tokens.        
         /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
         /// </summary>
-        /// <remarks>This API is experimental and may change without a major version upgrade. 
-        /// The values returned by this property are not guaranteed to remain the same.
-        /// Please use <seealso cref="CreateAuthorizationHeader"/> instead.</remarks>
         internal string TokenType { get; }
 
         /// <summary>

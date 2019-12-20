@@ -57,7 +57,6 @@ namespace Microsoft.Identity.Client
         /// will use this when opening the browser. Leave it null and the user configured browser will be used.
         /// Consider using the static helpers OpenWithEdgeBrowserAsync and OpenWithChromeEdgeBrowserAsync
         /// </summary>
-        /// <remarks>This property is experimental and the signature may change without a major version increment.</remarks>
         public Func<Uri, Task> OpenBrowserAsync { get; set; }
 
         internal void LogParameters(ICoreLogger logger)
@@ -80,7 +79,6 @@ namespace Microsoft.Identity.Client
         /// Use Microsoft Edge to navigate to the given uri. On non-windows platforms it uses 
         /// whatever browser is the default
         /// </summary>
-        /// <remarks>This helper is experimental and the signature may change without a major version increment.</remarks>
         public static async Task OpenWithEdgeBrowserAsync(Uri uri)
         {
             if (uri == null)
@@ -115,7 +113,6 @@ namespace Microsoft.Identity.Client
         /// Use Microsoft Edge Chromium to navigate to the given uri. Requires the browser to be installed.
         /// On Linux, uses the default system browser instead, as Edge is not available.
         /// </summary>
-        /// <remarks>This helper is experimental and the signature may change without a major version increment.</remarks>
         public static async Task OpenWithChromeEdgeBrowserAsync(Uri uri)
         {
             if (uri == null)
