@@ -15,7 +15,6 @@ namespace NetCoreTestApp.Experimental
 {
     internal class DefaultOsBrowserWebUi : ICustomWebUi
     {
-        // TODO: expose these as settings
         private const string CloseWindowSuccessHtml = @"<html>
   <head><title>Authentication Complete</title></head>
   <body>
