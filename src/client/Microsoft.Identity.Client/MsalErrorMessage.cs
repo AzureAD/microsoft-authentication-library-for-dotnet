@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Client
                 CultureInfo.InvariantCulture,
                 "The API {0} is marked as experimental and you should be mindful about using it in production. " +
                 "It may change without incrementing the major version of the library. " +
-                "Call .WithExperimentalFeatures() when creating the public / confidential client to bypass this.",
+                "Call .WithExperimentalFeatures() when creating the public / confidential client to bypass this. See https://aka.ms/msal-net-experimental-features for details.",
                 methodName);
         }
 
