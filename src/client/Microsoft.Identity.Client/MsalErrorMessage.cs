@@ -280,10 +280,8 @@ namespace Microsoft.Identity.Client
 
         public const string ValidateAuthorityOrCustomMetadata = "You have configured custom instance metadata, but the validateAuthority flag is set to true. These are mutually exclusive. Set the validateAuthority flag to false. See https://aka.ms/msal-net-custom-instance-metadata for more details.";
 
-        public const string InvalidClient = "The wrong application (public or confidential) is being used with this authentication flow." +
-            " Potential issue: the redirect URI is valid, but it has been configured for the wrong app type." +
-            " Check the configuration of the app being used in the app registration portal." +
-            " See https://aka.ms/msal-net-invalid-client for details. ";
+        public const string InvalidClient = "A configuration issue is preventing authentication - check the error message from the server for details." +
+            "You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details. ";
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
 
         public static string ExperimentalFeature(string methodName)

@@ -690,9 +690,8 @@ namespace Microsoft.Identity.Client
         public const string TelemetryConfigOrTelemetryCallback = "telemetry_config_or_telemetry_callback";
 
         /// <summary>
-        /// AAD service error indicating that the configured client is not valid
-        /// <para>Migigation</para>In the AAD app registration portal, make sure the correct client (Public or
-        /// Confidential) is selected for the respective authentication flow.
+        /// Azure AD service error indicating a configuration issue. 
+        /// <para>Mitigation</para>See error message for details, then take corrective action in the app registration portal
         /// See https://aka.ms/msal-net-invalid-client for details.
         /// </summary>
         public const string InvalidClient = "invalid_client";
