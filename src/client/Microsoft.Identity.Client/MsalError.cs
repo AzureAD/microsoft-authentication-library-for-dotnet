@@ -690,7 +690,7 @@ namespace Microsoft.Identity.Client
         public const string TelemetryConfigOrTelemetryCallback = "telemetry_config_or_telemetry_callback";
 
         /// <summary>
-        /// AAD service error indicating a configuration issue. 
+        /// Azure AD service error indicating a configuration issue. 
         /// <para>Mitigation</para>See error message for details, then take corrective action in the app registration portal
         /// See https://aka.ms/msal-net-invalid-client for details.
         /// </summary>
