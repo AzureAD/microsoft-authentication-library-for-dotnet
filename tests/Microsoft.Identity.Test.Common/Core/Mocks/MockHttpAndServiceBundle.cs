@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public AuthenticationRequestParameters CreateAuthenticationRequestParameters(
             string authority,
-            SortedSet<string> scopes,
+            IEnumerable<string> scopes,
             ITokenCacheInternal tokenCache,
             IAccount account = null,
             IDictionary<string, string> extraQueryParameters = null,
