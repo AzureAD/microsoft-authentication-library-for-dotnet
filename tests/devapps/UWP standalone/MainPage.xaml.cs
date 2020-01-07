@@ -29,8 +29,7 @@ namespace UWP_standalone
     public sealed partial class MainPage : Page
     {
         private IPublicClientApplication _pca;
-        private static readonly string s_clientID = "4a1aa1d5-c567-49d0-ad0b-cd957a47f842"; //"9058d700-ccd7-4dd4-a029-aec31995add0";
-        //private static readonly string s_clientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
+        private static readonly string s_clientID = "4a1aa1d5-c567-49d0-ad0b-cd957a47f842";
         private static readonly string s_authority = "https://login.microsoftonline.com/common/";
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";
@@ -49,8 +48,7 @@ namespace UWP_standalone
         {
             _pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
-                //.WithRedirectUri(GetRedirectUri())
-                //.WithDefaultRedirectUri()
+                .WithRedirectUri(GetRedirectUri())
                 .Build();
 
             // custom serialization - this is very similar to what MSAL is doing
