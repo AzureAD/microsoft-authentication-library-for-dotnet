@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.Utils;
 using Windows.ApplicationModel.Core;
 using Windows.Security.Authentication.Web;
 
-
 namespace Microsoft.Identity.Client.Platforms.uap
 {
     internal class WebUI : IWebUI
@@ -22,6 +21,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         private readonly bool _useCorporateNetwork;
         private readonly bool _silentMode;
         private readonly RequestContext _requestContext;
+        private bool _ssoMode = false;
 
         public WebUI(CoreUIParent parent, RequestContext requestContext)
         {
@@ -29,17 +29,16 @@ namespace Microsoft.Identity.Client.Platforms.uap
             _silentMode = parent.UseHiddenBrowser;
             _requestContext = requestContext;
         }
+
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri,
             Uri redirectUri,
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            bool ssoMode = string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase);
-
             WebAuthenticationResult webAuthenticationResult;
             WebAuthenticationOptions options = (_useCorporateNetwork &&
-                                                (ssoMode || redirectUri.Scheme == Constants.MsAppScheme))
+                                                (_ssoMode || redirectUri.Scheme == Constants.MsAppScheme))
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
 
@@ -51,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             try
             {
                 webAuthenticationResult = await RetryOperationHelper.ExecuteWithRetryAsync(
-                    () => InvokeWABOnMainThreadAsync(authorizationUri, redirectUri, ssoMode, options),
+                    () => InvokeWABOnMainThreadAsync(authorizationUri, redirectUri, options),
                     WABRetryAttempts,
                     onAttemptFailed: (attemptNumber, exception) =>
                     {
@@ -76,13 +75,12 @@ namespace Microsoft.Identity.Client.Platforms.uap
         private async Task<WebAuthenticationResult> InvokeWABOnMainThreadAsync(
             Uri authorizationUri,
             Uri redirectUri,
-            bool ssoMode,
             WebAuthenticationOptions options)
         {
             return await CoreApplication.MainView.CoreWindow.Dispatcher.RunTaskAsync(
                 async () =>
                 {
-                    if (ssoMode)
+                    if (_ssoMode)
                     {
                         return await
                             WebAuthenticationBroker.AuthenticateAsync(options, authorizationUri)
@@ -131,8 +129,16 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public Uri UpdateRedirectUri(Uri redirectUri)
         {
-            RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
-            return redirectUri;
+            if (string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase))
+            {
+                _ssoMode = true;
+                return WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
+            }
+            else
+            {
+                RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+                return redirectUri;
+            }
         }
     }
 }
