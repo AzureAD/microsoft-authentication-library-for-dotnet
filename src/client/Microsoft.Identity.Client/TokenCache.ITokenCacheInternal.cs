@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client
                             instanceDiscoveryMetadata.Aliases,
                             tenantId,
                             msalAccessTokenCacheItem.ScopeSet,
-                            msalAccessTokenCacheItem.HomeAccountId, 
+                            msalAccessTokenCacheItem.HomeAccountId,
                             msalAccessTokenCacheItem.TokenType);
 
                         _accessor.SaveAccessToken(msalAccessTokenCacheItem);
@@ -238,23 +238,34 @@ namespace Microsoft.Identity.Client
 
             requestParams.RequestContext.Logger.Info("Matching entry count - " + tokenCacheItems.Count());
 
-            IEnumerable<MsalAccessTokenCacheItem> filteredItems =
-                tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
-
-            requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
-            filteredItems = await FilterByEnvironmentAsync(requestParams, filteredItems).ConfigureAwait(false);
+            tokenCacheItems = FilterByScopes(requestParams, tokenCacheItems);
+            tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);
 
             // no match
-            if (!filteredItems.Any())
+            if (!tokenCacheItems.Any())
             {
                 requestParams.RequestContext.Logger.Info("No tokens found for matching authority, client_id, user and scopes.");
                 return null;
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, filteredItems);
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, tokenCacheItems);
             msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
 
             return GetUnexpiredAccessTokenOrNull(requestParams, msalAccessTokenCacheItem);
+        }
+
+        private static IEnumerable<MsalAccessTokenCacheItem> FilterByScopes(
+            AuthenticationRequestParameters requestParams,
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
+        {
+            var requestScopes = requestParams.Scope.Except(OAuth2Value.ReservedScopes, StringComparer.OrdinalIgnoreCase);
+
+            tokenCacheItems = tokenCacheItems.FilterWithLogging(
+                item => ScopeHelper.ScopeContains(item.ScopeSet, requestScopes),
+                requestParams.RequestContext.Logger,
+                "Filtering by scopes");
+
+            return tokenCacheItems;
         }
 
         private static IEnumerable<MsalAccessTokenCacheItem> FilterByTokenType(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)

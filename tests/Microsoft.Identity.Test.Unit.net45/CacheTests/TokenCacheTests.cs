@@ -34,7 +34,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
         public void GetExactScopesMatchedAccessTokenTest()
         {
             using (var harness = CreateTestHarness())
@@ -69,7 +68,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
         public void GetSubsetScopesMatchedAccessTokenTest()
         {
             using (var harness = CreateTestHarness())
@@ -107,7 +105,73 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [WorkItem(1548)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1548
+        public void FFF()
+        {
+            VerifyAccessTokenIsFound("openid profile user.read", new[] { "User.Read" });
+            VerifyAccessTokenIsFound("openid profile User.Read", new[] { "User.Read", "offline_access" });
+            VerifyAccessTokenIsFound("openid profile User.Read", new[] { "offline_access" });
+            VerifyAccessTokenIsFound("non_graph_scope", new[] { "profile" });
+            VerifyAccessTokenIsFound("non_graph_scope", new[] { "openid" });
+            VerifyAccessTokenIsFound("non_graph_scope", new[] { "offline_access" });
+            VerifyAccessTokenIsFound("non_graph_scope", new[] { "OFFline_access" });
+            VerifyAccessTokenIsFound("non_graph_scope", new[] { "non_graph_scope", "offline_access" }); // regression
+            VerifyAccessTokenIsFound("non_graph_scope", new[] { "offline_access", "profile" });
+            VerifyAccessTokenIsFound("non_graph_scope", new[] { "offline_access", "profile", "openid" });
+            VerifyAccessTokenIsFound("non_graph_scope", new[] { "non_graph_scope", "offline_access", "profile", "openid" });
+
+            VerifyAccessTokenIsFound("", new string[0]);
+            VerifyAccessTokenIsFound(null, new string[0]);
+            VerifyAccessTokenIsFound("non_graph_scope", new string[0]);
+            VerifyAccessTokenIsFound("openid profile User.Read", new string[0]);
+            VerifyAccessTokenIsFound("openid profile User.Read", new[] { "User.Read" });
+
+            VerifyAccessTokenIsNotFound("", new[] { "" });
+            VerifyAccessTokenIsNotFound("openid profile user.read", new[] { "non_graph_scope" });
+            VerifyAccessTokenIsNotFound("openid profile user.read", new[] { "email" });
+            VerifyAccessTokenIsNotFound("openid profile user.read", new[] { "user.read", "email" });
+        }
+
+        private void VerifyAccessTokenIsFound(string cachedAtScopes, string[] queryScopes, bool expectFind = true)
+        {
+            using (var harness = CreateTestHarness())
+            {
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
+
+                var atItem = new MsalAccessTokenCacheItem(
+                    TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ClientId,
+                    cachedAtScopes,
+                    TestConstants.Utid,
+                    null,
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
+                    MockHelpers.CreateClientInfo());
+
+                cache.Accessor.SaveAccessToken(atItem);
+
+                var param = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityTestTenant,
+                    queryScopes,
+                    cache,
+                    account: TestConstants.s_user);
+
+
+                var item = cache.FindAccessTokenAsync(param).Result;
+
+                if (expectFind == true)
+                    Assert.IsNotNull(item) ;
+                else
+                    Assert.IsNull(item);
+            }
+        }
+
+        private void VerifyAccessTokenIsNotFound(string cachedAtScopes, string[] queryScopes)
+        {
+            VerifyAccessTokenIsFound(cachedAtScopes, queryScopes, false);
+        }
+
+        [TestMethod]
         public void GetIntersectedScopesMatchedAccessTokenTest()
         {
             using (var harness = CreateTestHarness())
@@ -186,7 +250,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
                     tokenResponse,
-                    TestConstants.TenantId, 
+                    TestConstants.TenantId,
                     keyId: "kid1");
 
             // Assert
@@ -213,7 +277,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
         public void GetExpiredAccessTokenTest()
         {
             using (var harness = CreateTestHarness())
@@ -244,7 +307,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
         public void GetExpiredAccessToken_WithExtendedExpireStillValid_Test()
         {
             using (var harness = CreateTestHarness(isExtendedTokenLifetimeEnabled: true))
@@ -429,7 +491,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var requestParams = CreateAuthenticationRequestParameters(serviceBundle, authority: Authority.CreateAuthority(TestConstants.B2CAuthority));
             requestParams.TenantUpdatedCanonicalAuthority = Authority.CreateAuthorityWithTenant(
-                requestParams.AuthorityInfo, 
+                requestParams.AuthorityInfo,
                 TestConstants.Utid);
 
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);
@@ -580,7 +642,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
             requestParams.TenantUpdatedCanonicalAuthority = Authority.CreateAuthorityWithTenant(
-                requestParams.AuthorityInfo, 
+                requestParams.AuthorityInfo,
                 TestConstants.Utid);
 
             AddHostToInstanceCache(serviceBundle, TestConstants.ProductionPrefNetworkEnvironment);
@@ -639,7 +701,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public async Task SaveMultipleAppmetadataAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle,false);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
 
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
             MsalTokenResponse response2 = TestConstants.CreateMsalTokenResponse();
