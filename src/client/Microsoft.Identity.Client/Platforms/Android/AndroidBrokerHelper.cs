@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 else
                 {
                     _logger.Info("Intent created from BundleResult is null. ");
-                    throw new MsalException(MsalError.NullIntentReturnedFromBroker, MsalErrorMessage.NullIntentReturnedFromBroker);
+                    throw new MsalException(MsalError.NullIntentReturnedFromAndroidBroker, MsalErrorMessage.NullIntentReturnedFromBroker);
                 }
 
                 intent = GetInteractiveBrokerIntent(brokerPayload, intent);
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             if (result == null)
             {
                 _logger.Info("Android account manager AddAccount didn't return any accounts. ");
-                throw new MsalException(MsalError.NoBrokerAccountFound, "Please add the selected account to the broker");
+                throw new MsalException(MsalError.NoAndroidBrokerAccountFound, "Please add the selected account to the broker");
             }
 
             Bundle bundleResult = (Bundle)result?.Result;
@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             if (!validSignatureFound)
             {
-                throw new MsalException(MsalError.BrokerSignatureVerificationFailed, "No matching signature found");
+                throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed, "No matching signature found");
             }
         }
 
@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     {
                         if (chainStatus.Status != X509ChainStatusFlags.UntrustedRoot)
                         {
-                            throw new MsalException(MsalError.BrokerSignatureVerificationFailed, 
+                            throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed, 
                                 string.Format(CultureInfo.InvariantCulture,"app certificate validation failed with {0}", chainStatus.Status));
                         }
                     }
@@ -442,12 +442,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 PackageInfoFlags.Signatures);
             if (packageInfo == null)
             {
-                throw new MsalException(MsalError.BrokerSignatureVerificationFailed, "No broker package found");
+                throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed, "No broker package found");
             }
 
             if (packageInfo.Signatures == null || packageInfo.Signatures.Count == 0)
             {
-                throw new MsalException(MsalError.BrokerSignatureVerificationFailed, "No signature associated with the broker package.");
+                throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed, "No signature associated with the broker package.");
             }
 
             List<X509Certificate2> certificates = new List<X509Certificate2>(packageInfo.Signatures.Count);
