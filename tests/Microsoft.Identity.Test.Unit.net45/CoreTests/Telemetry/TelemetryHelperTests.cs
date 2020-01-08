@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
     {
         private const string CorrelationId = "thetelemetrycorrelationid";
         private const string ClientId = "theclientid";
-        private _TestEvent _trackingEvent;
+        internal _TestEvent _trackingEvent;
         private TelemetryManager _telemetryManager;
         private _TestReceiver _testReceiver;
 
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
             }
         }
 
-        private class _TestEvent : EventBase
+        internal class _TestEvent : EventBase
         {
             public _TestEvent(string eventName, string correlationId) : base(eventName, correlationId)
             {

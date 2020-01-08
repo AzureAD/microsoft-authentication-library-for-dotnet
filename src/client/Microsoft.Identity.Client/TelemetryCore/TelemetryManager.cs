@@ -32,12 +32,13 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private readonly bool _onlySendFailureTelemetry;
         private readonly IPlatformProxy _platformProxy;
         private readonly IApplicationConfiguration _applicationConfiguration;
+        public int SuccessfulSilentCallCount { get; set; } = 0;
 
         public TelemetryManager(
             IApplicationConfiguration applicationConfiguration,
             IPlatformProxy platformProxy,
             TelemetryCallback telemetryCallback,
-            bool onlySendFailureTelemetry = false)
+            bool onlySendFailureTelemetry = false)        
         {
             _mostRecentStoppedApiEvent = null;
             _applicationConfiguration = applicationConfiguration;
@@ -137,7 +138,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             {
                 var httpTelemetryContent = new HttpTelemetryContent(_mostRecentStoppedApiEvent);
                 _mostRecentStoppedApiEvent = null;
-                return httpTelemetryContent.GetCsvAsPrevious();
+                return httpTelemetryContent.GetCsvAsPrevious(SuccessfulSilentCallCount);
             }
         }
 

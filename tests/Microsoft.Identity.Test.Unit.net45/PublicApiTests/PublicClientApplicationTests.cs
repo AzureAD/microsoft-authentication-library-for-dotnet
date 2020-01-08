@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 Guid correlationId = Guid.NewGuid();
-
+                
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .WithCorrelationId(correlationId)
@@ -259,15 +259,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddSuccessfulTokenResponseWithHttpTelemetryMockHandlerForPost(
-                    TestConstants.AuthorityCommonTenant,
-                    null,
-                    null,
-                    HttpTelemetryTests.CreateHttpTelemetryHeaders(
-                        correlationId,
-                        TestConstants.InteractiveRequestApiId,
-                        null,
-                        TelemetryConstants.Zero));
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
