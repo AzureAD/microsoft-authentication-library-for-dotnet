@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
             : base(configuration)
         {
             GuardMobileFrameworks();
-            AppTokenCacheInternal = new TokenCache(ServiceBundle);
+            AppTokenCacheInternal = new TokenCache(ServiceBundle, true);
         }
 
         /// <summary>

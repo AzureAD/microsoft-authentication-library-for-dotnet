@@ -41,17 +41,20 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public FederationProvider FederationProvider { get; set; }
 
-        public string CredentialUrl { get; set; }
+        public string Credential { get; set; }
 
         public string TenantId { get; set; }
 
         private string _password = null;
 
+        [JsonProperty("appid")]
+        public string AppId { get; set; }
+
         public string GetOrFetchPassword()
         {
             if (_password == null)
             {
-                _password = LabUserHelper.FetchUserPassword(CredentialUrl);
+                _password = LabUserHelper.FetchUserPassword(LabName);
             }
 
             return _password;

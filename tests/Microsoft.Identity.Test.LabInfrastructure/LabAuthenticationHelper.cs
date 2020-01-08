@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private static InMemoryTokenCache s_staticCache = new InMemoryTokenCache();
         private const string LabAccessConfidentialClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string LabAccessPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
-        private const string LabAccessThumbPrint = "79FBCBEB5CD28994E50DAFF8035BACF764B14306";
+        private const string LabAccessThumbPrint = "3051A5BE699BC4596EE47E9FEBBF48DBA85BE67B";
         private const string DataFileName = "data.txt";
         private static LabAccessAuthenticationType s_defaultAuthType = LabAccessAuthenticationType.ClientCertificate;
         private static string s_secret;
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static async Task<string> GetAccessTokenForLabAPIAsync(string labAccessClientId, string labAccessSecret)
         {
-            string[] scopes = new string[] { "https://user.msidlab.com/.default" };
+            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
 
             return await GetLabAccessTokenAsync(
                 "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/", 

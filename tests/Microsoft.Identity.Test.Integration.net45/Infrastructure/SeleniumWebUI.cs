@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -101,7 +102,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
             {
-                var listener = new TcpInterceptor(_logger);
+                var listener = new HttpListenerInterceptor(_logger);
                 Uri authCodeUri = null;
 
                 // Run the TCP listener and the selenium automation in parallel
@@ -201,21 +202,22 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             driver.SaveScreenshot(_testContext);
         }
 
-        private static string GetMessageToShowInBroswerAfterAuth(Uri uri)
+        private static MessageAndHttpCode GetMessageToShowInBroswerAfterAuth(Uri uri)
         {
             // Parse the uri to understand if an error was returned. This is done just to show the user a nice error message in the browser.
             var authCodeQueryKeyValue = HttpUtility.ParseQueryString(uri.Query);
             string errorString = authCodeQueryKeyValue.Get("error");
             if (!string.IsNullOrEmpty(errorString))
             {
-                return string.Format(
+                string message = string.Format(
                     CultureInfo.InvariantCulture,
                     CloseWindowFailureHtml,
                     errorString,
                     authCodeQueryKeyValue.Get("error_description"));
+                return new MessageAndHttpCode(HttpStatusCode.OK, message);
             }
 
-            return CloseWindowSuccessHtml;
+            return new MessageAndHttpCode(HttpStatusCode.OK, CloseWindowSuccessHtml);
         }
     }
 }

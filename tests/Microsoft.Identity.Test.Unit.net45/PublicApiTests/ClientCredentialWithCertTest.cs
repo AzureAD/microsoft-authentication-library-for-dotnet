@@ -190,6 +190,84 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [Description("Test for client assertion with X509 public certificate using Auth code")]
+        public async Task JsonWebTokenWithX509PublicCertSendCertificateByAuthCodeTestAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                SetupMocks(harness.HttpManager);
+
+                var certificate = new X509Certificate2(
+                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                    TestConstants.DefaultPassword);
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithRedirectUri(TestConstants.RedirectUri)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
+
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                //Check for x5c claim
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
+                AuthenticationResult result = await app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .WithSendX5C(true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+
+                appCacheAccess.AssertAccessCounts(0, 0);
+                userCacheAccess.AssertAccessCounts(0, 1);
+            }
+        }
+
+        [TestMethod]
+        [Description("Test for client assertion with X509 public certificate using acquire token by refresh token")]
+        public async Task JsonWebTokenWithX509PublicCertSendCertificateByRefreshTokenTestAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                SetupMocks(harness.HttpManager);
+
+                var certificate = new X509Certificate2(
+                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                    TestConstants.DefaultPassword);
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithRedirectUri(TestConstants.RedirectUri)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
+
+                var appCacheAccess = app.AppTokenCache.RecordAccess();
+                var userCacheAccess = app.UserTokenCache.RecordAccess();
+
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                //Check for x5c claim
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
+                AuthenticationResult result = await ((IByRefreshToken)app)
+                    .AcquireTokenByRefreshToken(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .WithSendX5C(true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+                Assert.IsNotNull(result.AccessToken);
+
+                appCacheAccess.AssertAccessCounts(0, 0);
+                userCacheAccess.AssertAccessCounts(0, 1);
+            }
+        }
+
+        [TestMethod]
         [Description("Test for acqureTokenSilent with X509 public certificate using sendCertificate")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateSilentTestAsync()
         {

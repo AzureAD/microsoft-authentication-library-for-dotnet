@@ -18,11 +18,16 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public AzureEnvironment? AzureEnvironment { get; set; }
         public SignInAudience? SignInAudience { get; set; }
 
-        public static UserQuery DefaultUserQuery => new UserQuery()
+        public static UserQuery PublicAadUserQuery => new UserQuery()
             {
                 UserType = LabInfrastructure.UserType.Cloud,
                 AzureEnvironment = LabInfrastructure.AzureEnvironment.azurecloud
             };
+
+        public static UserQuery MsaUserQuery => new UserQuery
+        {
+            UserType = LabInfrastructure.UserType.MSA
+        };
 
         public static UserQuery B2CLocalAccountUserQuery => new UserQuery
         {

@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle),
+                    new TokenCache(harness.ServiceBundle, false),
                     null,
                     TestConstants.s_extraQueryParams);
 
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle),
+                    new TokenCache(harness.ServiceBundle, false),
                     extraQueryParameters: TestConstants.s_extraQueryParams,
                     claims: TestConstants.Claims);
 

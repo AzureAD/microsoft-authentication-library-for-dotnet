@@ -15,7 +15,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private static readonly IDictionary<UserQuery, LabResponse> s_userCache =
             new Dictionary<UserQuery, LabResponse>();
 
-
         static LabUserHelper()
         {
             s_keyVaultSecretsProvider = new KeyVaultSecretsProvider();
@@ -44,7 +43,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetDefaultUserAsync()
         {
-            return GetLabUserDataAsync(UserQuery.DefaultUserQuery);
+            return GetLabUserDataAsync(UserQuery.PublicAadUserQuery);
+        }
+
+        public static Task<LabResponse> GetMsaUserAsync()
+        {
+            return GetLabUserDataAsync(UserQuery.MsaUserQuery);
         }
 
         public static Task<LabResponse> GetB2CLocalAccountAsync()
@@ -82,7 +86,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
         {
-            var query = UserQuery.DefaultUserQuery;
+            var query = UserQuery.PublicAadUserQuery;
             query.FederationProvider = federationProvider;
             query.UserType = federated ? UserType.Federated : UserType.Cloud;
 
@@ -96,11 +100,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserDataAsync(query);
         }
 
-        public static string FetchUserPassword(string passwordUri)
+        public static string FetchUserPassword(string userLabName)
         {
-            if (string.IsNullOrWhiteSpace(passwordUri))
+            if (string.IsNullOrWhiteSpace(userLabName))
             {
-                throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
+                throw new InvalidOperationException("Error: lab name is not set on user. Password retrieval failed.");
             }
 
             if (s_keyVaultSecretsProvider == null)
@@ -110,8 +114,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             try
             {
-                var secret = s_keyVaultSecretsProvider.GetSecret(passwordUri);
-                return secret.Value;
+                return s_labService.GetUserSecretAsync(userLabName).Result;
             }
             catch (Exception e)
             {

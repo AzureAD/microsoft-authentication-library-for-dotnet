@@ -9,17 +9,6 @@ namespace DesktopTestApp
 {
     static class TokenCacheHelper
     {
-        public static readonly TokenCache UserTokenCache = new TokenCache()
-        {
-            BeforeAccess = BeforeAccessNotification,
-            AfterAccess = AfterAccessNotification
-        };
-
-        public static TokenCache GetUserCache()
-        {
-            return UserTokenCache;
-        }
-
         public static string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + "msalcache.txt";
 
         private static readonly object FileLock = new object();

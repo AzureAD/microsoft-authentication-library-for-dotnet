@@ -11,7 +11,6 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
@@ -28,6 +27,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private static readonly string[] s_scopes = { "User.Read" };
 
         #region MSTest Hooks
+
         /// <summary>
         /// Initialized by MSTest (do not make private or readonly)
         /// </summary>
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        #endregion
+        #endregion MSTest Hooks
 
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
@@ -47,7 +47,30 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
-            Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
+            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        public async Task DeviceCodeFlowAdfsTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
+
+            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        public async Task DeviceCodeFlowMsaTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
+
+            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user").ConfigureAwait(false);
+        }
+
+        private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType)
+        {
+            Trace.WriteLine($"Calling AcquireTokenWithDeviceCodeAsync with {0}", userType);
             var pca = PublicClientApplicationBuilder.Create(labResponse.App.AppId).Build();
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
 
@@ -60,28 +83,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Running asserts");
 
             userCacheAccess.AssertAccessCounts(0, 1);
-            Assert.IsNotNull(result);
-            Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-        }
-
-        [TestMethod]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        public async Task DeviceCodeFlowAdfsTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
-
-            Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(Adfs2019LabConstants.PublicClientId)
-                                                                        .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
-                                                                        .WithAdfsAuthority(Adfs2019LabConstants.Authority)
-                                                                        .BuildConcrete();
-            var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
-            {
-                SeleniumExtensions.PerformDeviceCodeLogin(deviceCodeResult, labResponse.User, TestContext, true);
-                return Task.FromResult(0);
-            }).ExecuteAsync().ConfigureAwait(false);
-
-            Trace.WriteLine("Running asserts");
+            Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));

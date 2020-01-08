@@ -1,0 +1,4 @@
+﻿1. Install Java, e.g. install the latest JDK recommended by Microsoft https://docs.microsoft.com/en-us/java/azure/jdk/java-jdk-install?view=azure-java-stable
+2. Make sure java is added to path, e.g. "java -version" should print the version
+3. Install Maven https://maven.apache.org/download.cgi (unzip it to some location and add it to the path)
+4. Make sure Maven is installed by calling mvn.cmd

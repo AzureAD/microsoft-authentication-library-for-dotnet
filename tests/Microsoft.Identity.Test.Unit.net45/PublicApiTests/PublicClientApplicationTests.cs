@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security;
@@ -11,19 +12,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using System.IO;
-using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(app);
             Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
             Assert.AreEqual(TestConstants.ClientId, app.AppConfig.ClientId);
-            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
+            Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
         }
 
         [TestMethod]
@@ -203,7 +203,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                      AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 mockUi.QueryParamsToValidate = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
-
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
@@ -432,7 +431,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
 
-
                 var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() => app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync(CancellationToken.None))
@@ -452,7 +450,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .BuildConcrete();
                 //Validate legacy default uri
-                Assert.AreEqual(app.AppConfig.RedirectUri, "urn:ietf:wg:oauth:2.0:oob");
+                Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
 
                 app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
@@ -463,7 +461,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Validate new default redirect uri
 #if DESKTOP
-                Assert.AreEqual(app.AppConfig.RedirectUri, "https://login.microsoftonline.com/common/oauth2/nativeclient");
+                Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
 #elif NET_CORE
                 Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
 #endif
@@ -689,14 +687,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-
         [TestMethod]
         public async Task HttpRequestExceptionIsNotSuppressedAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-
 
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -997,7 +993,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
@@ -1285,10 +1280,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync().ConfigureAwait(false);
                 Assert.AreEqual(ClientApplicationBase.DefaultAuthority, app.ServiceBundle.Config.AuthorityInfo.CanonicalAuthority);
-
             }
         }
-
 
         private static PublicClientApplication CreatePcaFromFileWithAuthority(
             MockHttpManager httpManager,

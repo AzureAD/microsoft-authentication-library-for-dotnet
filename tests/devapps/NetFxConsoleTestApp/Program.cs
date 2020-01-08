@@ -185,9 +185,6 @@ namespace NetFx
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
                             break;
 
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-                            break;
-
                         case '6': // acquire token silent
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
                             if (account == null)
@@ -288,7 +285,7 @@ namespace NetFx
                             }
 
                             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
-                                pca.UserTokenCache as ITokenCacheInternal, s_clientIdForPublicApp, null, true);
+                                pca.UserTokenCache as ITokenCacheInternal, s_clientIdForPublicApp, null, true, false);
 
                             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
 

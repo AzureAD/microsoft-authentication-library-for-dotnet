@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit
                 var parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle),
+                    new TokenCache(harness.ServiceBundle, false),
                     null, 
                     TestConstants.s_extraQueryParams);
 

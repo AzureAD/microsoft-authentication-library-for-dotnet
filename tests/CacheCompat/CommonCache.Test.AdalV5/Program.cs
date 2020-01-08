@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -22,40 +21,29 @@ namespace CommonCache.Test.AdalV5
             /// <inheritdoc />
             protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
-                var app = PreRegisteredApps.CommonCacheTestV1;
-                string resource = PreRegisteredApps.MsGraph;
-
                 LoggerCallbackHandler.LogCallback = (LogLevel level, string message, bool containsPii) =>
                 {
                     Console.WriteLine("{0}: {1}", level, message);
                 };
 
-                var tokenCache = new FileBasedTokenCache(
-                    testInputData.StorageType,
-                    CommonCacheTestUtils.AdalV3CacheFilePath,
-                    CommonCacheTestUtils.MsalV2CacheFilePath,
-                    CommonCacheTestUtils.MsalV3CacheFilePath);
-
-                var authenticationContext = new AuthenticationContext(app.Authority, tokenCache);
-
-                var items = authenticationContext.TokenCache.ReadItems().ToList();
-                Console.WriteLine("here come the cache items!: {0}", tokenCache.Count);
-                foreach (var item in items)
-                {
-                    Console.WriteLine("here's a cache item!");
-                    Console.WriteLine(item.DisplayableId);
-                }
-
                 var results = new List<CacheExecutorAccountResult>();
 
                 foreach (var labUserData in testInputData.LabUserDatas)
                 {
+                    var tokenCache = new FileBasedTokenCache(
+                        testInputData.StorageType,
+                        CommonCacheTestUtils.AdalV3CacheFilePath,
+                        CommonCacheTestUtils.MsalV2CacheFilePath,
+                        CommonCacheTestUtils.MsalV3CacheFilePath);
+
+                    var authenticationContext = new AuthenticationContext(labUserData.Authority, tokenCache);
+
                     try
                     {
                         Console.WriteLine("Calling ATS with username: {0}", labUserData.Upn);
                         var result = await authenticationContext.AcquireTokenSilentAsync(
-                            resource,
-                            app.ClientId,
+                            TestInputData.MsGraph,
+                            labUserData.ClientId,
                             new UserIdentifier(labUserData.Upn, UserIdentifierType.RequiredDisplayableId)).ConfigureAwait(false);
 
                         Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' from the cache");
@@ -68,8 +56,8 @@ namespace CommonCache.Test.AdalV5
                     catch (AdalSilentTokenAcquisitionException)
                     {
                         var result = await authenticationContext.AcquireTokenAsync(
-                                         resource,
-                                         app.ClientId,
+                                         TestInputData.MsGraph,
+                                         labUserData.ClientId,
                                          new UserPasswordCredential(labUserData.Upn, labUserData.Password)).ConfigureAwait(false);
 
                         if (string.IsNullOrWhiteSpace(result.AccessToken))

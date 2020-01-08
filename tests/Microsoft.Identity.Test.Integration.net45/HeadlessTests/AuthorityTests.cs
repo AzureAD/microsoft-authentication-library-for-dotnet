@@ -8,10 +8,12 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -43,7 +45,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 // BugBug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/776308/
                 // sts.windows.net fails when doing instance discovery, e.g.: 
                 // https://sts.windows.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Fsts.windows.net%2Ff645ad92-e38d-4d1a-b510-d1b09a74a8ca%2Foauth2%2Fv2.0%2Fauthorize
-                .WithAuthority("https://login.windows.net/" + user.TenantId + "/")
+                .WithAuthority("https://login.windows.net/" + labResponse.Lab.TenantId + "/")
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -84,6 +86,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(exception.Message.Contains("AADSTS50049"));
             Assert.AreEqual("invalid_instance", exception.ErrorCode);
         }
+
 
         /// <summary>
         /// If this test fails, please update the <see cref="KnownMetadataProvider"/> to 

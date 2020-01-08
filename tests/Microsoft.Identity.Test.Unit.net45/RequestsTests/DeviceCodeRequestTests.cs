@@ -126,7 +126,45 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [Ignore("Adfs does not currently support device code flow")]
+        [WorkItem(1407)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1407
+        public async Task DeviceCodeExceptionsOn200OKAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+                var handler = new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateInvalidClientResponseMessage()
+                };
+
+                harness.HttpManager.AddMockHandler(handler);
+
+                var parameters = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityHomeTenant,
+                    TestConstants.s_scope,
+                    new TokenCache(harness.ServiceBundle, false),
+                    account: null);
+
+                DeviceCodeResult actualDeviceCodeResult = null;
+
+                var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
+                {
+                    DeviceCodeResultCallback = result =>
+                    {
+                        actualDeviceCodeResult = result;
+                        return Task.FromResult(0);
+                    }
+                };
+
+                var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
+
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
         public void TestDeviceCodeAuthSuccessWithAdfs()
         {
             const int NumberOfAuthorizationPendingRequestsToInject = 1;
@@ -291,7 +329,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             out HashSet<string> expectedScopes,
             bool isAdfs = false)
         {
-            var cache = new TokenCache(harness.ServiceBundle);
+            var cache = new TokenCache(harness.ServiceBundle, false);
             var parameters = harness.CreateAuthenticationRequestParameters(
                 isAdfs ? TestConstants.OnPremiseAuthority : TestConstants.AuthorityHomeTenant,
                 null,

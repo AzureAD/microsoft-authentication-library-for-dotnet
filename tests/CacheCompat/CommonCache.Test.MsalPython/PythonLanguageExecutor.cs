@@ -29,9 +29,11 @@ namespace CommonCache.Test.MsalPython
 
             string executablePath = "python.exe";
 
-            Console.WriteLine($"Calling:  {executablePath} {finalArguments}");
             var processUtils = new ProcessUtils();
-            var processRunResults = await processUtils.RunProcessAsync(executablePath, finalArguments, cancellationToken).ConfigureAwait(false);
+            executablePath = await processUtils.FindProgramAsync(executablePath, cancellationToken).ConfigureAwait(false);
+
+            Console.WriteLine($"Calling:  {executablePath} {finalArguments}");
+            ProcessRunResults processRunResults = await processUtils.RunProcessAsync(executablePath, finalArguments, cancellationToken).ConfigureAwait(false);
             return processRunResults;
         }
     }

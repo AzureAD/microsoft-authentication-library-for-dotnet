@@ -2,28 +2,17 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     internal abstract class Authority
     {
-        protected static readonly HashSet<string> TenantlessTenantNames = new HashSet<string>(
-            new[]
-            {
-                "common",
-                "organizations",
-                "consumers"
-            },
-            StringComparer.OrdinalIgnoreCase);
-
         protected Authority(AuthorityInfo authorityInfo)
         {
-            if (authorityInfo==null)
+            if (authorityInfo == null)
             {
                 throw new ArgumentNullException(nameof(authorityInfo));
             }
@@ -36,22 +25,61 @@ namespace Microsoft.Identity.Client.Instance
         public AuthorityInfo AuthorityInfo { get; }
 
         #region Builders
-        public static Authority CreateAuthorityWithOverride(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
+
+        /// <summary>
+        /// Figures out the authority based on the authority from the config and the authority from the request,
+        /// and optionally the homeAccountTenantId, which has an impact on AcquireTokenSilent
+        ///
+        /// The algorithm is:
+        ///
+        /// 1. If there is no request authority (i.e. no authority override), use the config authority.
+        ///     1.1. For AAD, if the config authority is "common" etc, try to use the tenanted version with the home account tenant ID
+        /// 2. If there is a request authority, try to use it.
+        ///     2.1. If the request authority is not "common", then use it
+        ///     2.2  If the request authority is "common", ignore it, and use 1.1
+        ///
+        /// </summary>
+        public static Authority CreateAuthorityForRequest(
+            AuthorityInfo configAuthorityInfo,
+            AuthorityInfo requestAuthorityInfo,
+            string requestHomeAccountTenantId = null)
         {
-            switch (requestAuthorityInfo.AuthorityType)
+            if (configAuthorityInfo == null)
             {
+                throw new ArgumentNullException(nameof(configAuthorityInfo));
+            }
+
+            switch (configAuthorityInfo.AuthorityType)
+            {
+                // ADFS and B2C are tenantless, no need to consider tenant
                 case AuthorityType.Adfs:
-                    return new AdfsAuthority(requestAuthorityInfo);
+                    return requestAuthorityInfo == null ?
+                        new AdfsAuthority(configAuthorityInfo) :
+                        new AdfsAuthority(requestAuthorityInfo);
 
                 case AuthorityType.B2C:
-                    if (configAuthorityInfo != null)
+
+                    if (requestAuthorityInfo != null)
                     {
                         CheckB2CAuthorityHost(requestAuthorityInfo, configAuthorityInfo);
+                        return new B2CAuthority(requestAuthorityInfo);
                     }
-                    return new B2CAuthority(requestAuthorityInfo);
+                    return new B2CAuthority(configAuthorityInfo);
 
                 case AuthorityType.Aad:
-                    return new AadAuthority(requestAuthorityInfo);
+
+                    if (requestAuthorityInfo == null)
+                    {
+                        return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
+                    }
+
+                    var requestAuthority = new AadAuthority(requestAuthorityInfo);
+                    if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant())
+                    {
+                        return requestAuthority;
+                    }
+
+                    return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
 
                 default:
                     throw new MsalClientException(
@@ -62,12 +90,27 @@ namespace Microsoft.Identity.Client.Instance
 
         public static Authority CreateAuthority(string authority, bool validateAuthority = false)
         {
-            return CreateAuthorityWithOverride(AuthorityInfo.FromAuthorityUri(authority, validateAuthority), null);
+            return CreateAuthority(AuthorityInfo.FromAuthorityUri(authority, validateAuthority));
         }
 
         public static Authority CreateAuthority(AuthorityInfo authorityInfo)
         {
-            return CreateAuthorityWithOverride(authorityInfo, null);
+            switch (authorityInfo.AuthorityType)
+            {
+                case AuthorityType.Adfs:
+                    return new AdfsAuthority(authorityInfo);
+
+                case AuthorityType.B2C:
+                    return new B2CAuthority(authorityInfo);
+
+                case AuthorityType.Aad:
+                    return new AadAuthority(authorityInfo);
+
+                default:
+                    throw new MsalClientException(
+                        MsalError.InvalidAuthorityType,
+                        "Unsupported authority type " + authorityInfo.AuthorityType);
+            }
         }
 
         internal static Authority CreateAuthorityWithTenant(AuthorityInfo authorityInfo, string tenantId)
@@ -91,21 +134,10 @@ namespace Microsoft.Identity.Client.Instance
                 Host = environment
             };
 
-           return CreateAuthority(uriBuilder.Uri.AbsoluteUri, authorityInfo.ValidateAuthority);
+            return CreateAuthority(uriBuilder.Uri.AbsoluteUri, authorityInfo.ValidateAuthority);
         }
 
-        //internal static string CreateAuthorityWithEnvironment(string authority, string environment)
-        //{
-        //    var uriBuilder = new UriBuilder(authority)
-        //    {
-        //        Host = environment
-        //    };
-
-        //    return uriBuilder.Uri.AbsoluteUri;
-        //}
-
-
-        #endregion
+        #endregion Builders
 
         internal static string GetFirstPathSegment(string authority)
         {
@@ -116,7 +148,6 @@ namespace Microsoft.Identity.Client.Instance
             }
             return string.Empty;
         }
-
 
         internal static AuthorityType GetAuthorityType(string authority)
         {
@@ -139,11 +170,10 @@ namespace Microsoft.Identity.Client.Instance
         internal abstract string GetTenantId();
 
         /// <summary>
-        /// Gets a tenanted authority if the current authority is tenantless. 
+        /// Gets a tenanted authority if the current authority is tenantless.
         /// Returns the original authority on B2C and ADFS
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId);
-
 
         private static void CheckB2CAuthorityHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
         {

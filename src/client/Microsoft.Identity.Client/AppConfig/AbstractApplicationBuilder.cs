@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -307,19 +308,18 @@ namespace Microsoft.Identity.Client
 
         internal virtual void Validate()
         {
-            // Validate that we have a client id
             if (string.IsNullOrWhiteSpace(Config.ClientId))
             {
                 throw new MsalClientException(MsalError.NoClientId, MsalErrorMessage.NoClientIdWasSpecified);
             }
 
+            CreateAuthorityInfoFromEnums();
+
             //Adfs does not require client id to be in the form of a Guid
-            if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
+            if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
             {
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
-
-            TryAddDefaultAuthority();
 
             if (Config.AuthorityInfo.ValidateAuthority && Config.CustomInstanceDiscoveryMetadata != null)
             {
@@ -328,7 +328,7 @@ namespace Microsoft.Identity.Client
 
             if (Config.TelemetryCallback != null && Config.TelemetryConfig != null)
             {
-                throw new MsalClientException(MsalError.TelemetryConfigOrTelemetryCallback, 
+                throw new MsalClientException(MsalError.TelemetryConfigOrTelemetryCallback,
                     MsalErrorMessage.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously);
             }
         }
@@ -339,23 +339,24 @@ namespace Microsoft.Identity.Client
             return Config;
         }
 
-        private void TryAddDefaultAuthority()
+        #region Authority
+        private void CreateAuthorityInfoFromEnums()
         {
             if (Config.AuthorityInfo != null)
             {
                 return;
             }
 
-            string defaultAuthorityInstance = GetDefaultAuthorityInstance();
-            string defaultAuthorityAudience = GetDefaultAuthorityAudience();
+            string authorityInstance = GetAuthorityInstance();
+            string authorityAudience = GetAuthorityAudience();
 
             Config.AuthorityInfo = new AuthorityInfo(
                     AuthorityType.Aad,
-                    new Uri($"{defaultAuthorityInstance}/{defaultAuthorityAudience}").ToString(),
-                    false /* default authority is well known, there is no need for validation */);
+                    new Uri($"{authorityInstance}/{authorityAudience}").ToString(),
+                    Config.ValidateAuthority);
         }
 
-        private string GetDefaultAuthorityAudience()
+        private string GetAuthorityAudience()
         {
             if (!string.IsNullOrWhiteSpace(Config.TenantId) &&
                 Config.AadAuthorityAudience != AadAuthorityAudience.None &&
@@ -378,7 +379,7 @@ namespace Microsoft.Identity.Client
             return AuthorityInfo.GetAadAuthorityAudienceValue(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, string.Empty);
         }
 
-        private string GetDefaultAuthorityInstance()
+        private string GetAuthorityInstance()
         {
             // Check if there's enough information in the existing config to build up a default authority.
             if (!string.IsNullOrWhiteSpace(Config.Instance) && Config.AzureCloudInstance != AzureCloudInstance.None)
@@ -412,7 +413,13 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(Uri authorityUri, bool validateAuthority = true)
         {
+            if (authorityUri == null)
+            {
+                throw new ArgumentNullException(nameof(authorityUri));
+            }
+
             Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), validateAuthority);
+
             return (T)this;
         }
 
@@ -429,7 +436,10 @@ namespace Microsoft.Identity.Client
             Guid tenantId,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenantId, validateAuthority);
+#pragma warning disable CA1305 // Specify IFormatProvider (this overload is missing on netstandard 1.3)
+            WithAuthority(cloudInstanceUri, tenantId.ToString("D"), validateAuthority);
+#pragma warning restore CA1305 // Specify IFormatProvider
+
             return (T)this;
         }
 
@@ -453,7 +463,20 @@ namespace Microsoft.Identity.Client
             string tenant,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenant, validateAuthority);
+            if (string.IsNullOrWhiteSpace(cloudInstanceUri))
+            {
+                throw new ArgumentNullException(nameof(cloudInstanceUri));
+            }
+            if (string.IsNullOrWhiteSpace(tenant))
+            {
+                throw new ArgumentNullException(nameof(tenant));
+            }
+
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(
+                new Uri(cloudInstanceUri),
+                tenant,
+                validateAuthority);
+
             return (T)this;
         }
 
@@ -472,7 +495,10 @@ namespace Microsoft.Identity.Client
             Guid tenantId,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(azureCloudInstance, tenantId, validateAuthority);
+#pragma warning disable CA1305 // Specify IFormatProvider - this overload is missing on netstandard
+            WithAuthority(azureCloudInstance, tenantId.ToString("D"), validateAuthority);
+#pragma warning restore CA1305 // Specify IFormatProvider
+
             return (T)this;
         }
 
@@ -492,7 +518,15 @@ namespace Microsoft.Identity.Client
             string tenant,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(azureCloudInstance, tenant, validateAuthority);
+            if (string.IsNullOrWhiteSpace(tenant))
+            {
+                throw new ArgumentNullException(nameof(tenant));
+            }
+
+            Config.AzureCloudInstance = azureCloudInstance;
+            Config.TenantId = tenant;
+            Config.ValidateAuthority = validateAuthority;
+
             return (T)this;
         }
 
@@ -509,7 +543,10 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(azureCloudInstance, authorityAudience, validateAuthority);
+            Config.AzureCloudInstance = azureCloudInstance;
+            Config.AadAuthorityAudience = authorityAudience;
+            Config.ValidateAuthority = validateAuthority;
+
             return (T)this;
         }
 
@@ -524,7 +561,8 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);
+            Config.AadAuthorityAudience = authorityAudience;
+            Config.ValidateAuthority = validateAuthority;
             return (T)this;
         }
 
@@ -546,7 +584,13 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
+            if (string.IsNullOrWhiteSpace(authorityUri))
+            {
+                throw new ArgumentNullException(authorityUri);
+            }
+
             Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityUri, validateAuthority);
+
             return (T)this;
         }
 
@@ -575,6 +619,8 @@ namespace Microsoft.Identity.Client
             Config.AuthorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
             return (T)this;
         }
+
+        #endregion
 
         private static string GetValueIfNotEmpty(string original, string value)
         {

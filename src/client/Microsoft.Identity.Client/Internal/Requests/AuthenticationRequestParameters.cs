@@ -26,9 +26,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             _commonParameters = commonParameters;
 
-            Authority = commonParameters.AuthorityOverride == null
-                ? Authority.CreateAuthority(serviceBundle.Config.AuthorityInfo)
-                : Authority.CreateAuthorityWithOverride(commonParameters.AuthorityOverride, serviceBundle.Config.AuthorityInfo);
+            Authority = Authority.CreateAuthorityForRequest(serviceBundle.Config.AuthorityInfo, commonParameters.AuthorityOverride);
 
             ClientId = serviceBundle.Config.ClientId;
             CacheSessionManager = new CacheSessionManager(tokenCache, this, serviceBundle.TelemetryManager);

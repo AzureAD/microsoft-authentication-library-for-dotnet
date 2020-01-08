@@ -1,3 +1,29 @@
+4.7.1.
+============
+Bug fix:
+**Interactive auth with Edge system browser sometimes hanged. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1506)
+
+4.7.0
+============
+New Features:
+**Added Subject Name + Issuer authentication to the acquire token by authorization code and acquire token by refresh token flows with the WithSendX5C() api on the confidential client application.** All confidential client authentication flows will now have acces to this feature. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1490)
+
+4.6.0
+============
+New Features:
+**MSAL .NET now stores the application token returned from the iOS broker (Authenticator)**. This may result in the user experiencing less prompts. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1396)
+**New TokenCacheNotificationArgs.IsApplicationCache property simplifies the development of token cache serialization**. TokenCacheNotificationArgs now include a flag named `IsApplicationCache`, which disambiguates between the app token cache and the user token cache. 
+
+Bug Fixes:
+- **Device Code Flow would fail with a misleading error message if the app was misconfigured in the Azure Application Portal**. MSAL.NET now provides a better error message. - #1407
+- **Setting a non tenanted authority when calling AcquireTokenXX is now ignored**. #1456 
+- **Setting an authority audience of `AzureADMyOrg` and a tenant ID would fail**. It's now possible to specify `.WithAuthority(audience)` and `.WithTenantId()` #1320 
+ 
+Fundamentals:
+- Added tests which check cache format interoperability between MSAL Java and MSAL .NET
+
+See the [MSAL .NET 4.6.0 blog post](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.6) for more details.
+
 4.5.1
 =============
 Bug Fix:

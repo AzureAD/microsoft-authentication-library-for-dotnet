@@ -76,6 +76,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         #endregion
 
+        /// <summary>
+        /// ROPC does not support MSA accounts
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task ROPC_MSA_Async()
+        {
+            var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
+
+            SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
+
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
+
+            var result = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                msalPublicClient
+                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
+                    .ExecuteAsync(CancellationToken.None))
+                    .ConfigureAwait(false);
+        }
+
         [TestMethod]
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {

@@ -412,21 +412,56 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestAuthorityInvalidTenant()
+        [TestCategory("Regression")]
+        [WorkItem(1320)]
+        public void TestAuthorityWithTenant()
         {
-            try
-            {
-                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                    .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
-                                                    .WithTenantId("contoso.com")
-                                                    .Build();
-                Assert.Fail("Should not reach here, exception should be thrown");
-            }
-            catch (Exception ex)
-            {
-                Assert.IsTrue(ex is InvalidOperationException);
-                Assert.AreEqual(MsalErrorMessage.AzureAdMyOrgRequiresSpecifyingATenant, ex.Message);
-            }
+            var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
+                                                .WithTenantId("contoso.com")
+                                                .Build();
+
+            Assert.AreEqual("https://login.microsoftonline.com/contoso.com/", app.Authority);
+        }
+
+        [TestMethod]
+        public void AuthorityNullArgs()
+        {
+            AssertException.Throws<ArgumentNullException>(() =>
+                PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                              .WithAuthority((Uri)null));
+
+            AssertException.Throws<ArgumentNullException>(() =>
+                PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                  .WithAuthority((string)null));
+
+            AssertException.Throws<ArgumentNullException>(() =>
+                PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                  .WithAuthority("  "));
+
+            AssertException.Throws<ArgumentNullException>(() =>
+               PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                 .WithAuthority((string)null, "tid"));
+
+            AssertException.Throws<ArgumentNullException>(() =>
+             PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                               .WithAuthority("", "tid"));
+
+            AssertException.Throws<ArgumentNullException>(() =>
+            PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                              .WithAuthority("", Guid.NewGuid()));
+
+            AssertException.Throws<ArgumentNullException>(() =>
+                PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                .WithAuthority("https://login.microsoftonline.com/", null));
+
+            AssertException.Throws<ArgumentNullException>(() =>
+                PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                              .WithAuthority("https://login.microsoftonline.com/", " "));
+
+            AssertException.Throws<ArgumentNullException>(() =>
+                PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithAuthority(AzureCloudInstance.AzureChina, ""));
         }
 
         [TestMethod]

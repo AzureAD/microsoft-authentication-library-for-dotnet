@@ -28,8 +28,8 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
-        public const string AutomationTestThumbprint = "79fbcbeb5cd28994e50daff8035bacf764b14306";
-        public const string RSATestCertThumbprint = "9498C1B91CA4F2CFFEA10C53DCC8301F9A8D4BDE";
+        public const string AutomationTestThumbprint = "57B11F2FDBCDA0FDF34837FC7E89A90AD7CBBC1E";
+        public const string RSATestCertThumbprint = "3051A5BE699BC4596EE47E9FEBBF48DBA85BE67B";
 
         public static readonly SortedSet<string> s_scopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly SortedSet<string> s_cacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
@@ -83,6 +83,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Claims = "claim1claim2";
         public const string DisplayableId = "displayable@id.com";
         public const string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        public const string MobileDefaultRedirectUri = "msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842://auth"; // in msidentity-samples-testing tenant -> PublicClientSample
         public const string ClientSecret = "client_secret";
         public const string DefaultPassword = "password";
         public const string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
@@ -128,10 +129,10 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                 {"key2", "value2"}
             };
 
-        public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/e360740b3411452b887e6c3097cb1037";
-        public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/243c858fe7b9411cbcf05a2a284d8a84";
-        public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/466ec9e219f2412b8664a92446a8f3bc";
-        public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/214a15bf554e41a7aef4e44707311cfb";
+        public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
+        public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
+        public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/";
+        public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/";
 
         public enum AuthorityType { B2C };
         public static string[] s_prodEnvAliases = new string[] {
@@ -179,7 +180,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string FabrikamDisplayableId = "displayable@fabrikam.com";
         public const string OnPremiseHomeObjectId = OnPremiseUniqueId;
         public const string OnPremisePolicy = "on_premise_policy";
-        public const string OnPremiseRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+        public const string OnPremiseRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         public const string OnPremiseClientSecret = "on_premise_client_secret";
         public const string OnPremiseUid = "my-OnPremise-UID";
         public const string OnPremiseUtid = "my-OnPremise-UTID";

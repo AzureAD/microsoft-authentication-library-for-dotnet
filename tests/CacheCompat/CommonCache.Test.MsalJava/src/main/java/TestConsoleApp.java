@@ -41,32 +41,33 @@ public class TestConsoleApp {
 
         System.out.println("Java app, CacheFilePath - " + testInput.cacheFilePath);
         System.out.println("Java app, ResultsFilePath - " + testInput.resultsFilePath);
-        System.out.println("Java app, testInput.clientId - " + testInput.clientId);
 
-        IPublicClientApplication app = PublicClientApplication.builder(testInput.clientId)
-                .authority(testInput.authority)
-                .setTokenCacheAccessAspect(new ITokenCacheAccessAspect() {
-                    public void beforeCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
-                        try {
-                            String data = new String(Files.readAllBytes(Paths.get(testInput.cacheFilePath)));
-                            iTokenCacheAccessContext.tokenCache().deserialize(data);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    public void afterCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
-                        try (PrintWriter out = new PrintWriter(testInput.cacheFilePath)) {
-                            out.println(iTokenCacheAccessContext.tokenCache().serialize());
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).build();
 
         TestOutput testOutput = new TestOutput();
 
         for (TestInput.LabUserData user : testInput.users) {
+            System.out.println("Java app, user.clientId - " + user.clientId);        
+            IPublicClientApplication app = PublicClientApplication.builder(user.clientId)
+                    .authority(user.authority)
+                    .setTokenCacheAccessAspect(new ITokenCacheAccessAspect() {
+                        public void beforeCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
+                            try {
+                                String data = new String(Files.readAllBytes(Paths.get(testInput.cacheFilePath)));
+                                iTokenCacheAccessContext.tokenCache().deserialize(data);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        public void afterCacheAccess(ITokenCacheAccessContext iTokenCacheAccessContext) {
+                            try (PrintWriter out = new PrintWriter(testInput.cacheFilePath)) {
+                                out.println(iTokenCacheAccessContext.tokenCache().serialize());
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).build();
+
             System.out.println("Java app, process user - " + user.upn);
 
             IAccount account = getAccount(app, user.upn);
@@ -100,10 +101,10 @@ public class TestConsoleApp {
                             (new TestOutput.Result(user.upn, result.account().username(), false));
 
                     System.out.println("got token for (" + result.account().username() + ") by signing in with credentials");
-                } catch (AuthenticationException ex) {
+                } catch (MsalException ex) {
                     System.out.println("**TOKEN ACQUIRE FAILURE**");
                     System.out.println(ex.getMessage());
-                    System.out.println(ex.getErrorCode());
+                    System.out.println(ex.errorCode());
                     testOutput.results.add
                             (new TestOutput.Result(user.upn, null, false));
                 }
