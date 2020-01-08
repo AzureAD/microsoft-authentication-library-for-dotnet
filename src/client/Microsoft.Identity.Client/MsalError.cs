@@ -407,22 +407,22 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// MSAL is not able to find a suitable account to use with broker
         /// </summary>
-        public const string NoBrokerAccountFound = "no_broker_account_found";
+        public const string NoAndroidBrokerAccountFound = "no_broker_account_found";
 
         /// <summary>
         /// MSAL cannot find the broker application to authenticate accounts.
         /// </summary>
-        public const string NoBrokerInstalledOnDevice = "No_Broker_Installed_On_Device";
+        public const string NoAndroidBrokerInstalledOnDevice = "No_Broker_Installed_On_Device";
 
         /// <summary>
         /// Null intent was returned so broker activity cannot be launched
         /// </summary>
-        public const string NullIntentReturnedFromBroker = "null_intent_returned_from_broker";
+        public const string NullIntentReturnedFromAndroidBroker = "null_intent_returned_from_broker";
 
         /// <summary>
         /// Failed to validate android broker signature
         /// </summary>
-        public const string BrokerSignatureVerificationFailed = "broker_signature_verification_failed";
+        public const string AndroidBrokerSignatureVerificationFailed = "broker_signature_verification_failed";
 
         /// <summary>
         /// Failed To Complete Android Broker Operation
