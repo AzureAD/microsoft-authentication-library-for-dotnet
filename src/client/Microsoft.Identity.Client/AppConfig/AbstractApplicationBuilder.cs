@@ -304,9 +304,9 @@ namespace Microsoft.Identity.Client
         /// Changes in the public API of experimental features will not result in an increment of the major version of this library.
         /// For these reason we advise against using these features in production.
         /// </remarks>
-        public T WithExperimentalFeatues(bool enableExperimentalFeatues = true)
+        public T WithExperimentalFeatures(bool enableExperimentalFeatures = true)
         {
-            Config.ExperimentalFeaturesEnabled = enableExperimentalFeatues;
+            Config.ExperimentalFeaturesEnabled = enableExperimentalFeatures;
             return (T)this;
         }
 

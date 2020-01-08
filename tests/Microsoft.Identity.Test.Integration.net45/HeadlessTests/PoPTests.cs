@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var pca = PublicClientApplicationBuilder
                 .Create(clientId)
-                .WithExperimentalFeatues()
+                .WithExperimentalFeatures()
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
             ConfigureInMemoryCache(pca);
 
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Arrange - block HTTP requests to make sure AcquireTokenSilent does not refresh the RT
             pca = PublicClientApplicationBuilder
                            .Create(clientId)
-                           .WithExperimentalFeatues()
+                           .WithExperimentalFeatures()
                            .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                            .Build();
             ConfigureInMemoryCache(pca);
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string clientId = labResponse.App.AppId;
 
             var pca = PublicClientApplicationBuilder.Create(clientId)
-                .WithExperimentalFeatues()
+                .WithExperimentalFeatures()
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
             ConfigureInMemoryCache(pca);
 
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // recreate the pca to ensure that the silent call is served from the cache, i.e. the key remains stable
             pca = PublicClientApplicationBuilder
                 .Create(clientId)
-                .WithExperimentalFeatues()
+                .WithExperimentalFeatures()
                 .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                 .Build();
             ConfigureInMemoryCache(pca);
