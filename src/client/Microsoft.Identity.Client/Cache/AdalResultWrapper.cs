@@ -3,25 +3,25 @@
 
 using System;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
 using System.Text;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    [DataContract]
+    [JsonObject]
     internal class AdalResultWrapper
     {
-        [DataMember]
+        [JsonProperty]
         public AdalResult Result { get; set; }
 
-        [DataMember]
+        [JsonProperty]
         public string RawClientInfo { get; set; }
 
         /// <summary>
         /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string RefreshToken { get; set; }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Cache
 
         // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
         // to get it from the STS response.
-        [DataMember]
+        [JsonProperty]
         internal string ResourceInResponse { get; set; }
 
         /// <summary>
@@ -40,15 +40,7 @@ namespace Microsoft.Identity.Client.Cache
         /// <returns>Deserialized authentication result</returns>
         public static AdalResultWrapper Deserialize(string serializedObject)
         {
-            AdalResultWrapper resultEx;
-            var serializer = new DataContractJsonSerializer(typeof(AdalResultWrapper));
-            byte[] serializedObjectBytes = Encoding.UTF8.GetBytes(serializedObject);
-            using (var stream = new MemoryStream(serializedObjectBytes))
-            {
-                resultEx = (AdalResultWrapper)serializer.ReadObject(stream);
-            }
-
-            return resultEx;
+            return JsonHelper.DeserializeFromJson<AdalResultWrapper>(serializedObject);
         }
 
         /// <summary>
@@ -57,20 +49,12 @@ namespace Microsoft.Identity.Client.Cache
         /// <returns>Serialized authentication result</returns>
         public string Serialize()
         {
-            string serializedObject;
-            var serializer = new DataContractJsonSerializer(typeof(AdalResultWrapper));
-            using (MemoryStream stream = new MemoryStream())
-            {
-                serializer.WriteObject(stream, this);
-                serializedObject = Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
-            }
-
-            return serializedObject;
+            return JsonHelper.SerializeToJson(this);
         }
 
         internal Exception Exception { get; set; }
 
-        [DataMember]
+        [JsonProperty]
         public string UserAssertionHash { get; set; }
 
         internal AdalResultWrapper Clone()

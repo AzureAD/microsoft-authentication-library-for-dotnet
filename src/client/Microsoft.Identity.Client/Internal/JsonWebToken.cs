@@ -3,13 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Linq;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -118,7 +117,7 @@ namespace Microsoft.Identity.Client.Internal
             return string.Concat(encodedHeader, ".", encodedPayload);
         }
 
-        [DataContract]
+        [JsonObject]
         internal class JWTHeader
         {
             public JWTHeader(ClientCredentialWrapper credential)
@@ -128,18 +127,18 @@ namespace Microsoft.Identity.Client.Internal
 
             protected ClientCredentialWrapper Credential { get; }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
             {
                 get { return JsonWebTokenConstants.JWTHeaderType; }
 
                 set
                 {
-                    // This setter is required by DataContractJsonSerializer
+                    // This setter is required by the serializer
                 }
             }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.Algorithm)]
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.Algorithm)]
             public string Algorithm
             {
                 get
@@ -151,36 +150,38 @@ namespace Microsoft.Identity.Client.Internal
 
                 set
                 {
-                    // This setter is required by DataContractJsonSerializer
+                    // This setter is required by the serializer
                 }
             }
         }
 
-        [DataContract]
+        [JsonObject]
         internal class JWTPayload
         {
-            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.Audience)]
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedClaims.Audience)]
             public string Audience { get; set; }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.Issuer)]
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedClaims.Issuer)]
             public string Issuer { get; set; }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.NotBefore)]
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedClaims.NotBefore)]
             public long ValidFrom { get; set; }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.ExpiresOn)]
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedClaims.ExpiresOn)]
             public long ValidTo { get; set; }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.Subject, IsRequired = false,
-                EmitDefaultValue = false)]
+            [JsonProperty(
+                PropertyName = JsonWebTokenConstants.ReservedClaims.Subject, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
             public string Subject { get; set; }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.JwtIdentifier, IsRequired = false,
-                EmitDefaultValue = false)]
+            [JsonProperty(
+                PropertyName = JsonWebTokenConstants.ReservedClaims.JwtIdentifier,
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
             public string JwtIdentifier { get; set; }
         }
 
-        [DataContract]
+        [JsonObject]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
             public JWTHeaderWithCertificate(ClientCredentialWrapper credential, bool sendCertificate)
@@ -201,10 +202,12 @@ namespace Microsoft.Identity.Client.Internal
 #endif
             }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.KeyId)]
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.KeyId)]
             public string X509CertificateThumbprint { get; set; }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue, EmitDefaultValue = false)]
+            [JsonProperty(
+                PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
             public string X509CertificatePublicCertValue { get; set; }
         }
     }

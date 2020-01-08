@@ -2,17 +2,22 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Runtime.Serialization;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
     /// Contains the results of one token acquisition operation.
     /// </summary>
-    [DataContract]
+    [JsonObject]
     internal sealed class AdalResult
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
+
+        internal AdalResult() 
+        { 
+            // for serialization
+        } 
 
         /// <summary>
         /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
@@ -47,51 +52,51 @@ namespace Microsoft.Identity.Client.Cache
         /// <summary>
         /// Gets the type of the Access Token returned.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string AccessTokenType { get; private set; }
 
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string AccessToken { get; internal set; }
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid.
         /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the service.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public DateTimeOffset ExpiresOn { get; internal set; }
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in ADAL's extended LifeTime.
         /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         internal DateTimeOffset ExtendedExpiresOn { get; set; }
 
         /// <summary>
         /// Gives information to the developer whether token returned is during normal or extended lifetime.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public bool ExtendedLifeTimeToken { get; internal set; }
 
         /// <summary>
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is not returned by the service.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string TenantId { get; internal set; }
 
         /// <summary>
         /// Gets user information including user Id. Some elements in UserInfo might be null if not returned by the service.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public AdalUserInfo UserInfo { get; internal set; }
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string IdToken { get; internal set; }
 
         /// <summary>

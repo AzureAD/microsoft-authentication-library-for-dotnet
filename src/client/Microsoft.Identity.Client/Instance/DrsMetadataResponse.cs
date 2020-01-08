@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -13,17 +13,17 @@ namespace Microsoft.Identity.Client.Instance
         public const string IdentityProviderService = "IdentityProviderService";
     }
 
-    [DataContract]
+    [JsonObject]
     internal class IdentityProviderService
     {
-        [DataMember(Name = DrsMetadataResponseClaim.PassiveAuthEndpoint, IsRequired = false)]
+        [JsonProperty(PropertyName = DrsMetadataResponseClaim.PassiveAuthEndpoint)]
         public Uri PassiveAuthEndpoint { get; set; }
     }
 
-    [DataContract]
+    [JsonObject]
     internal class DrsMetadataResponse : OAuth2ResponseBase
     {
-        [DataMember(Name = DrsMetadataResponseClaim.IdentityProviderService, IsRequired = false)]
+        [JsonProperty(PropertyName = DrsMetadataResponseClaim.IdentityProviderService)]
         public IdentityProviderService IdentityProviderService { get; set; }
     }
 }

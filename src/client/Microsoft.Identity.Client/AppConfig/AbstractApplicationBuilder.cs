@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client
 {
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Client
                 Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
                 return (T)this;
             }
-            catch (System.Runtime.Serialization.SerializationException ex)
+            catch (JsonException ex)
             {
                 throw new MsalClientException(
                     MsalError.InvalidUserInstanceMetadata,
