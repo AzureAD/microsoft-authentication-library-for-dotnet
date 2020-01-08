@@ -3,7 +3,6 @@
 
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
@@ -12,10 +11,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -110,7 +109,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             }
                         }
                     }
-                    catch (SerializationException) // in the rare case we get an error response we cannot deserialize
+                    catch (JsonException) // in the rare case we get an error response we cannot deserialize
                     {
                         // CreateErrorResponse does the same validation. Will be logging the error there.
                     }
@@ -200,7 +199,7 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError);
             }
-            catch (SerializationException) // in the rare case we get an error response we cannot deserialize
+            catch (JsonException) // in the rare case we get an error response we cannot deserialize
             {
                 exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.NonParsableOAuthError,

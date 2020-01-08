@@ -3,10 +3,8 @@
 
 using System;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -25,40 +23,40 @@ namespace Microsoft.Identity.Client.Core
         public const string Upn = "upn";
     }
 
-    [DataContract]
+    [JsonObject]
     internal class IdToken
     {
-        [DataMember(Name = IdTokenClaim.Issuer, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.Issuer)]
         public string Issuer { get; set; }
 
-        [DataMember(Name = IdTokenClaim.ObjectId, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.ObjectId)]
         public string ObjectId { get; set; }
 
-        [DataMember(Name = IdTokenClaim.Subject, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.Subject)]
         public string Subject { get; set; }
 
-        [DataMember(Name = IdTokenClaim.TenantId, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.TenantId)]
         public string TenantId { get; set; }
 
-        [DataMember(Name = IdTokenClaim.Version, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.Version)]
         public string Version { get; set; }
 
-        [DataMember(Name = IdTokenClaim.PreferredUsername, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.PreferredUsername)]
         public string PreferredUsername { get; set; }
 
-        [DataMember(Name = IdTokenClaim.Name, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.Name)]
         public string Name { get; set; }
 
-        [DataMember(Name = IdTokenClaim.HomeObjectId, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.HomeObjectId)]
         public string HomeObjectId { get; set; }
 
-        [DataMember(Name = IdTokenClaim.Upn, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.Upn)]
         public string Upn { get; set; }
 
-        [DataMember(Name = IdTokenClaim.GivenName)]
+        [JsonProperty(PropertyName = IdTokenClaim.GivenName)]
         public string GivenName { get; set; }
 
-        [DataMember(Name = IdTokenClaim.FamilyName, IsRequired = false)]
+        [JsonProperty(PropertyName = IdTokenClaim.FamilyName)]
         public string FamilyName { get; set; }
 
         public static IdToken Parse(string idToken)
@@ -81,13 +79,9 @@ namespace Microsoft.Identity.Client.Core
             try
             {
                 byte[] idTokenBytes = Base64UrlHelpers.DecodeToBytes(idTokenSegments[1]);
-                using (var stream = new MemoryStream(idTokenBytes))
-                {
-                    var serializer = new DataContractJsonSerializer(typeof(IdToken));
-                    idTokenBody = (IdToken) serializer.ReadObject(stream);
-                }
+                idTokenBody = JsonHelper.DeserializeFromJson<IdToken>(idTokenBytes);
             }
-            catch (Exception exc)
+            catch (JsonException exc)
             {
                 throw new MsalClientException(
                     MsalError.JsonParseError,

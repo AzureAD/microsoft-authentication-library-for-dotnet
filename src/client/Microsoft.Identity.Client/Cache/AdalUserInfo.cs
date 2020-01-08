@@ -3,13 +3,14 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
     /// Contains information of a single user. This information is used for token cache lookup. Also if created with userId, userId is sent to the service when login_hint is accepted.
     /// </summary>
-    [DataContract]
+    [JsonObject]
     internal sealed class AdalUserInfo
     {
         /// <summary>
@@ -39,43 +40,43 @@ namespace Microsoft.Identity.Client.Cache
         /// <summary>
         /// Gets identifier of the user authenticated during token acquisition.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string UniqueId { get; internal set; }
 
         /// <summary>
         /// Gets a displayable value in UserPrincipalName (UPN) format. The value can be null.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string DisplayableId { get; internal set; }
 
         /// <summary>
         /// Gets given name of the user if provided by the service. If not, the value is null.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string GivenName { get; internal set; }
 
         /// <summary>
         /// Gets family name of the user if provided by the service. If not, the value is null.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string FamilyName { get; internal set; }
 
         /// <summary>
         /// Gets the time when the password expires. Default value is 0.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public DateTimeOffset? PasswordExpiresOn { get; internal set; }
 
         /// <summary>
         /// Gets the url where the user can change the expiring password. The value can be null.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public Uri PasswordChangeUrl { get; internal set; }
 
         /// <summary>
         /// Gets identity provider if returned by the service. If not, the value is null.
         /// </summary>
-        [DataMember]
+        [JsonProperty]
         public string IdentityProvider { get; internal set; }
     }
 }

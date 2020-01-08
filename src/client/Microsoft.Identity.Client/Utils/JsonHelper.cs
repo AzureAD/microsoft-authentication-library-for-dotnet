@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System.IO;
-using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Utils
 {
@@ -12,12 +12,7 @@ namespace Microsoft.Identity.Client.Utils
     {
         internal static string SerializeToJson<T>(T toEncode)
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof (T));
-                ser.WriteObject(stream, toEncode);
-                return Encoding.UTF8.GetString(stream.ToArray(), 0, (int) stream.Position);
-            }
+            return JsonConvert.SerializeObject(toEncode);
         }
 
         internal static T DeserializeFromJson<T>(string json)
@@ -27,7 +22,7 @@ namespace Microsoft.Identity.Client.Utils
                 return default;
             }
 
-            return DeserializeFromJson<T>(json.ToByteArray());
+            return JsonConvert.DeserializeObject<T>(json);
         }
 
         internal static T TryToDeserializeFromJson<T>(string json, RequestContext requestContext = null)
@@ -42,7 +37,7 @@ namespace Microsoft.Identity.Client.Utils
             {
                 result = DeserializeFromJson<T>(json.ToByteArray());
             }
-            catch (System.Runtime.Serialization.SerializationException ex)
+            catch (JsonException ex)
             {
                 requestContext?.Logger?.WarningPii(ex);
             }
@@ -57,14 +52,9 @@ namespace Microsoft.Identity.Client.Utils
                 return default;
             }
 
-            T response;
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
-            using (MemoryStream stream = new MemoryStream(jsonByteArray))
-            {
-                response = (T) serializer.ReadObject(stream);
-            }
-
-            return response;
+            using (var stream = new MemoryStream(jsonByteArray))
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
+                return (T)JsonSerializer.Create().Deserialize(reader, typeof(T));
         }
     }
 }
