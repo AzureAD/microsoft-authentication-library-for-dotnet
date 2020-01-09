@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 }
 
                 Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-                string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
+                string responseHeader = DeviceAuthManager.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
 
                 var newRequest = (NSMutableUrlRequest)request.MutableCopy();
                 newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);

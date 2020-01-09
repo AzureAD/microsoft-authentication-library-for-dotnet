@@ -16,22 +16,30 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using System.Linq;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
     internal class OAuth2Client
     {
+        private const string DeviceAuthHeaderName = "x-ms-PKeyAuth";
+        private const string DeviceAuthHeaderValue = "1.0";
+        private const string WwwAuthenticateHeader = "WWW-Authenticate";
+        private const string PKeyAuthName = "PKeyAuth";
         private readonly Dictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _headers;
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
         private readonly ITelemetryManager _telemetryManager;
+        private readonly IDeviceAuthManager _deviceAuthManager;
 
-        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, ITelemetryManager telemetryManager)
+        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, ITelemetryManager telemetryManager, IDeviceAuthManager deviceAuthHelper)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
+            _deviceAuthManager = deviceAuthHelper ?? throw new ArgumentNullException(nameof(deviceAuthHelper));
         }
 
         public void AddQueryParameter(string key, string value)
@@ -89,7 +97,23 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
                 {
-                    bool isDeviceCode = IsDeviceAuthChallenge(response, respondToDeviceAuthChallenge);
+                    //Check if we can perform device auth
+                    if (IsDeviceAuthChallenge(response, respondToDeviceAuthChallenge))
+                    {
+                        IDictionary<string, string> responseDictionary = ParseChallengeData(response);
+
+                        if (!responseDictionary.ContainsKey("SubmitUrl"))
+                        {
+                            responseDictionary["SubmitUrl"] = endpointUri.AbsoluteUri;
+                        }
+
+                        string responseHeader = await _deviceAuthManager.CreateDeviceAuthChallengeResponseAsync(responseDictionary)
+                            .ConfigureAwait(false);
+
+                        //Injecting PKeyAuth response here and replaying request to attempt device auth
+                        _headers["Authorization"] = responseHeader;
+                        return await ExecuteRequestAsync<T>(endPoint, method, requestContext, expectErrorsOn200OK, false).ConfigureAwait(false);
+                    }
 
                     try
                     {
@@ -142,6 +166,9 @@ namespace Microsoft.Identity.Client.OAuth2
 
             _headers.Add(TelemetryConstants.XClientLastTelemetry, _telemetryManager.FetchAndResetPreviousHttpTelemetryContent());
             _headers.Add(TelemetryConstants.XClientCurrentTelemetry, _telemetryManager.FetchCurrentHttpTelemetryContent(requestContext.CorrelationId.AsMatsCorrelationId()));
+
+            //add pkeyauth header
+            _headers.Add(DeviceAuthHeaderName, DeviceAuthHeaderValue);
             return addCorrelationId;
         }
 
@@ -314,9 +341,24 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
+        private IDictionary<string, string> ParseChallengeData(HttpResponse response)
+        {
+            IDictionary<string, string> data = new Dictionary<string, string>();
+            string wwwAuthenticate = response.Headers.GetValues(WwwAuthenticateHeader).FirstOrDefault();
+            wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthName.Length + 1);
+            List<string> headerPairs = CoreHelpers.SplitWithQuotes(wwwAuthenticate, ',');
+            foreach (string pair in headerPairs)
+            {
+                List<string> keyValue = CoreHelpers.SplitWithQuotes(pair, '=');
+                data.Add(keyValue[0].Trim(), keyValue[1].Trim().Replace("\"", ""));
+            }
+
+            return data;
+        }
+
         private bool IsDeviceAuthChallenge(HttpResponse response, bool respondToDeviceAuthChallenge)
         {
-            return DeviceAuthHelper.CanHandleDeviceAuthChallenge
+            return _deviceAuthManager.CanHandleDeviceAuthChallenge
                    && response != null
                    && respondToDeviceAuthChallenge
                    && response?.Headers != null

@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     }
 
                     Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-                    string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
+                    string responseHeader = DeviceAuthManager.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
                     Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>
                     {
                         [BrokerConstants.ChallangeResponseHeader] = responseHeader

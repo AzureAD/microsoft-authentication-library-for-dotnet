@@ -7,9 +7,11 @@ using System.IdentityModel.Tokens;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Permissions;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.net45.Native;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Win32.SafeHandles;
@@ -146,7 +148,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// </summary>
         /// <permission cref="SecurityPermission">The caller of this method must have SecurityPermission/UnmanagedCode.</permission>
         [SecurityCritical]
-        public static CngKey GetCngPrivateKey(X509Certificate2 certificate)
+        internal static CngKey GetCngPrivateKey(X509Certificate2 certificate)
         {
             using (var certContext = GetCertificateContext(certificate))
             using (SafeNCryptKeyHandle privateKeyHandle = X509Native.AcquireCngPrivateKey(certContext))
@@ -168,7 +170,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         ///     The immediate caller must have SecurityPermission/UnmanagedCode to use this method
         /// </permission>
         [SecurityCritical]
-        public static SafeCertContextHandle GetCertificateContext(X509Certificate certificate)
+        internal static SafeCertContextHandle GetCertificateContext(X509Certificate certificate)
         {
             SafeCertContextHandle certContext = X509Native.DuplicateCertContext(certificate.Handle);
 

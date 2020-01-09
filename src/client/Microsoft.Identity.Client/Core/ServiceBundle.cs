@@ -74,6 +74,8 @@ namespace Microsoft.Identity.Client.Core
         /// <inheritdoc />
         public ITelemetryClient Mats { get; }
 
+        public IDeviceAuthManager DeviceAuthManager { get; }
+
         public static ServiceBundle Create(ApplicationConfiguration config)
         {
             return new ServiceBundle(config);

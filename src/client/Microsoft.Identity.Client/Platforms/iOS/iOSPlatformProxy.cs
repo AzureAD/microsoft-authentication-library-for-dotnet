@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using UIKit;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Shared.Apple;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -166,6 +167,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
 
             return new iOSBroker(Logger, CryptographyManager);
+        }
+
+        public IDeviceAuthManager CreateDeviceAuthManager()
+        {
+            return new DeviceAuthManager();
         }
     }
 }

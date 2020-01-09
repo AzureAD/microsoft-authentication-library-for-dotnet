@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 }
 
                 Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-                string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
+                string responseHeader = DeviceAuthManager.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
 
                 NSMutableUrlRequest newRequest = (NSMutableUrlRequest)navigationAction.Request.MutableCopy();
                 newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);

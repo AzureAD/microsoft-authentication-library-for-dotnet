@@ -1,21 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Permissions;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Platforms.net45.Native;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
-    internal static class DeviceAuthHelper
+    internal class DeviceAuthManager : IDeviceAuthManager
     {
-        public static bool CanHandleDeviceAuthChallenge
+        public bool CanHandleDeviceAuthChallenge
         {
             get { return true; }
         }
 
-        public static async Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
+        public async Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
 
@@ -34,7 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
-            CngKey key = SigningHelper.GetCngPrivateKey(certificate);
+            CngKey key = NetDesktopCryptographyManager.GetCngPrivateKey(certificate);
             byte[] sig = null;
             using (RSACng rsa = new RSACng(key))
             {
@@ -99,8 +105,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     false);
                 if (signingCert.Count == 0)
                 {
-                    throw new AdalException(AdalError.DeviceCertificateNotFound,
-                        string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.DeviceCertificateNotFoundTemplate,
+                    throw new MsalException(MsalError.DeviceCertificateNotFound,
+                        string.Format(CultureInfo.CurrentCulture, MsalErrorMessage.DeviceCertificateNotFoundTemplate,
                             "Cert thumbprint:" + challengeData["CertThumbprint"]));
                 }
 
@@ -137,9 +143,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             if (signingCert == null || signingCert.Count == 0)
             {
-                throw new AdalException(AdalError.DeviceCertificateNotFound,
+                throw new MsalException(MsalError.DeviceCertificateNotFound,
                     string.Format(CultureInfo.CurrentCulture,
-                        AdalErrorMessage.DeviceCertificateNotFoundTemplate,
+                        MsalErrorMessage.DeviceCertificateNotFoundTemplate,
                         "Cert Authorities:" + challengeData["CertAuthorities"]));
             }
 
