@@ -720,6 +720,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ExperimentalFeature = "experimental_feature";
 
+        /// <summary>
+        /// Device certificate not found.
+        /// </summary>
+        public const string DeviceCertificateNotFound = "device_certificate_not_found";
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

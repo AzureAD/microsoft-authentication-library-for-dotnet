@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
 
 
-        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false)
+        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool respondToDeviceAuthChallenge = true)
         {
             bool addCorrelationId = requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
             AddCommonHeaders(requestContext, addCorrelationId);
@@ -89,6 +89,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
                 {
+                    bool isDeviceCode = IsDeviceAuthChallenge(response, respondToDeviceAuthChallenge);
+
                     try
                     {
                         httpEvent.OauthErrorCode = MsalError.UnknownError;
@@ -310,6 +312,18 @@ namespace Microsoft.Identity.Client.OAuth2
                     break;
                 }
             }
+        }
+
+        private bool IsDeviceAuthChallenge(HttpResponse response, bool respondToDeviceAuthChallenge)
+        {
+            return DeviceAuthHelper.CanHandleDeviceAuthChallenge
+                   && response != null
+                   && respondToDeviceAuthChallenge
+                   && response?.Headers != null
+                   && response.StatusCode == HttpStatusCode.Unauthorized
+                   && response.Headers.Contains(WwwAuthenticateHeader)
+                   && response.Headers.GetValues(WwwAuthenticateHeader).FirstOrDefault()
+                       .StartsWith(PKeyAuthName, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
