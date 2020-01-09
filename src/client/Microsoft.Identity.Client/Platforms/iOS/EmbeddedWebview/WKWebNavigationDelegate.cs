@@ -55,26 +55,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 return;
             }
 
-            if (requestUrlString.StartsWith(iOSBrokerConstants.DeviceAuthChallengeRedirect, StringComparison.OrdinalIgnoreCase))
-            {
-                Uri uri = new Uri(requestUrlString);
-                string query = uri.Query;
-                if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Substring(1);
-                }
-
-                Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-                string responseHeader = DeviceAuthManager.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
-
-                NSMutableUrlRequest newRequest = (NSMutableUrlRequest)navigationAction.Request.MutableCopy();
-                newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);
-                newRequest[iOSBrokerConstants.ChallengeResponseHeader] = responseHeader;
-                webView.LoadRequest(newRequest);
-                decisionHandler(WKNavigationActionPolicy.Cancel);
-                return;
-            }
-
             if (!navigationAction.Request.Url.AbsoluteString.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase)
                 && !navigationAction.Request.Url.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
             {

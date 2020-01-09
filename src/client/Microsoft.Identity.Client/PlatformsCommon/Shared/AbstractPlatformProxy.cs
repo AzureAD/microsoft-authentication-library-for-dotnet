@@ -199,5 +199,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             throw new NotImplementedException();
         }
+
+        public virtual IDeviceAuthManager CreateDeviceAuthManager()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

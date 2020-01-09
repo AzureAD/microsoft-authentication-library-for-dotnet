@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -217,5 +218,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         public override bool UseEmbeddedWebViewDefault => false;
+
+        public IDeviceAuthManager CreateDeviceAuthManager()
+        {
+            return new AndroidDeviceAuthManager();
+        }
     }
 }

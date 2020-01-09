@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.Apple
 {
-    internal class DeviceAuthManager : IDeviceAuthManager
+    internal class AppleDeviceAuthManager : IDeviceAuthManager
     {
         public bool CanHandleDeviceAuthChallenge { get { return false; } }
 

@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
@@ -18,15 +19,18 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private readonly IHttpManager _httpManager;
         private readonly ITelemetryManager _telemetryManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
+        private readonly IDeviceAuthManager _deviceAuthManager;
 
         public NetworkMetadataProvider(
             IHttpManager httpManager,
             ITelemetryManager telemetryManager,
-            INetworkCacheMetadataProvider networkCacheMetadataProvider)
+            INetworkCacheMetadataProvider networkCacheMetadataProvider,
+            IDeviceAuthManager deviceAuthManager)
         {
             _httpManager = httpManager;
             _telemetryManager = telemetryManager;
             _networkCacheMetadataProvider = networkCacheMetadataProvider;
+            _deviceAuthManager = deviceAuthManager;
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
@@ -73,7 +77,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           Uri authority,
           RequestContext requestContext)
         {
-            var client = new OAuth2Client(requestContext.Logger, _httpManager, _telemetryManager);
+            var client = new OAuth2Client(requestContext.Logger, _httpManager, _telemetryManager, _deviceAuthManager);
 
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority));

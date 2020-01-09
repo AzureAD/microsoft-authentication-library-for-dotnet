@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
@@ -39,13 +40,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           IHttpManager httpManager,
           ITelemetryManager telemetryManager,
           bool /* for test */ shouldClearCaches,
-          InstanceDiscoveryResponse userProviderInstanceDiscoveryResponse) :
+          InstanceDiscoveryResponse userProviderInstanceDiscoveryResponse,
+          IDeviceAuthManager deviceAuthManager) :
             this(
                 httpManager,
                 telemetryManager,
                 shouldClearCaches,
                 userProviderInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProviderInstanceDiscoveryResponse) : null,
-                null, null, null)
+                null, null, null, deviceAuthManager)
         {
         }
 
@@ -56,7 +58,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             IUserMetadataProvider userMetadataProvider = null,
             IKnownMetadataProvider knownMetadataProvider = null,
             INetworkCacheMetadataProvider networkCacheMetadataProvider = null,
-            INetworkMetadataProvider networkMetadataProvider = null)
+            INetworkMetadataProvider networkMetadataProvider = null,
+            IDeviceAuthManager deviceAuthManager = null)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
@@ -64,8 +67,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             _userMetadataProvider = userMetadataProvider;
             _knownMetadataProvider = knownMetadataProvider ?? new KnownMetadataProvider();
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
+            
             _networkMetadataProvider = networkMetadataProvider ?? 
-                new NetworkMetadataProvider(_httpManager, _telemetryManager, _networkCacheMetadataProvider);
+                new NetworkMetadataProvider(_httpManager, _telemetryManager, _networkCacheMetadataProvider, deviceAuthManager);
 
             if (shouldClearCaches)
             {

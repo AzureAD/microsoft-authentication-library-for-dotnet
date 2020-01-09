@@ -9,7 +9,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {
     [global::Android.Runtime.Preserve(AllMembers = true)]
-    internal class DeviceAuthManager : IDeviceAuthManager
+    internal class AndroidDeviceAuthManager : IDeviceAuthManager
     {
         public bool CanHandleDeviceAuthChallenge {
             get { return false; }

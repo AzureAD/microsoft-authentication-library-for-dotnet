@@ -108,6 +108,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         IBroker CreateBroker();
 
+        IDeviceAuthManager CreateDeviceAuthManager();
+
         void /* for test */ SetBrokerForTest(IBroker broker);
     }
 }

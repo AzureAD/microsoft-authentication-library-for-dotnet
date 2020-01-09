@@ -31,13 +31,13 @@
     <Folder Include="Platforms\net45\Native\" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Platforms\net45\DeviceAuthManager.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="PlatformsCommon\Interfaces\IDeviceAuthManager.cs" />
-    <Compile Include="Platforms\net45\DeviceAuthManager.cs" />
+    <Compile Include="Platforms\net45\NetDesktopDeviceAuthManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="PlatformsCommon\Interfaces\IDeviceAuthManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Platforms\net45\NetDesktopDeviceAuthManager.cs" />
   </ItemGroup>
 </Project>

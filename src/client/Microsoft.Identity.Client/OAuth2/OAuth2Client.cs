@@ -34,12 +34,12 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly ITelemetryManager _telemetryManager;
         private readonly IDeviceAuthManager _deviceAuthManager;
 
-        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, ITelemetryManager telemetryManager, IDeviceAuthManager deviceAuthHelper)
+        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, ITelemetryManager telemetryManager, IDeviceAuthManager deviceAuthManager)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
-            _deviceAuthManager = deviceAuthHelper ?? throw new ArgumentNullException(nameof(deviceAuthHelper));
+            _deviceAuthManager = deviceAuthManager ?? throw new ArgumentNullException(nameof(deviceAuthManager));
         }
 
         public void AddQueryParameter(string key, string value)
@@ -65,8 +65,6 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             return await ExecuteRequestAsync<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext).ConfigureAwait(false);
         }
-
-
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool respondToDeviceAuthChallenge = true)
         {

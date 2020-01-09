@@ -109,24 +109,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     return true;
                 }
 
-                if (url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.OrdinalIgnoreCase))
-                {
-                    string query = uri.Query;
-                    if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
-                    {
-                        query = query.Substring(1);
-                    }
-
-                    Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-                    string responseHeader = DeviceAuthManager.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
-                    Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>
-                    {
-                        [BrokerConstants.ChallangeResponseHeader] = responseHeader
-                    };
-                    view.LoadUrl(keyPair["SubmitUrl"], pkeyAuthEmptyResponse);
-                    return true;
-                }
-
                 if (url.StartsWith(_callback, StringComparison.OrdinalIgnoreCase))
                 {
                     Finish(Activity, url);

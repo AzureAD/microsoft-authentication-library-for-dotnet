@@ -216,5 +216,10 @@ namespace Microsoft.Identity.Client.Platforms.uap
         protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
 
         public override bool IsSystemWebViewAvailable => false;
+
+        public override IDeviceAuthManager CreateDeviceAuthManager()
+        {
+            return new UapDeviceAuthManager();
+        }
     }
 }

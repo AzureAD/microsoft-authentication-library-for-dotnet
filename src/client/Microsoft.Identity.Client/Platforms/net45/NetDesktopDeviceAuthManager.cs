@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Threading.Tasks;
+#if DESKTOP
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.net45.Native;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -14,7 +15,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
-    internal class DeviceAuthManager : IDeviceAuthManager
+    internal class NetDesktopDeviceAuthManager : IDeviceAuthManager
     {
         public bool CanHandleDeviceAuthChallenge
         {
@@ -153,3 +154,4 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
     }
 }
+#endif
