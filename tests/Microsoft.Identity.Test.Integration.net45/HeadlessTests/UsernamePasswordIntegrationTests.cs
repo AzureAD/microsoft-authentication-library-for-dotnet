@@ -1,12 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -140,7 +149,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
 
-            var result = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => 
+            var result = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
                 msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectSecurePassword)
                     .ExecuteAsync(CancellationToken.None)
@@ -150,19 +159,30 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(result.ErrorCode, "invalid_grant");
         }
 
+
         private async Task RunHappyPathTestAsync(LabResponse labResponse)
         {
             var user = labResponse.User;
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
+            var factory = new TestHttpClientFactory();
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithHttpClientFactory(factory)
+                .WithAuthority(_authority)
+                .Build();
+
 
             //AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+
+            // TODO: you can now assert each request and response
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token");
+            var telemetryValue = req.Headers.Where(h => h.Key == "x-client-last-telemetry");
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
@@ -175,6 +195,46 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+        }
+    }
+
+
+    public class TestHttpClientFactory : IMsalHttpClientFactory
+    {
+        HttpClient _httpClient;
+
+        public IList<(HttpRequestMessage, HttpResponseMessage)> RequestsAndResponses { get; }
+        
+        public TestHttpClientFactory()
+        {
+            RequestsAndResponses = new List<(HttpRequestMessage, HttpResponseMessage)>();
+
+            var recordingHandler = new RecordingHandler((req, res)=> RequestsAndResponses.Add((req, res)));
+            recordingHandler.InnerHandler = new HttpClientHandler();
+            _httpClient = new HttpClient(recordingHandler);
+        }
+
+        public HttpClient GetHttpClient()
+        {
+            return _httpClient;
+        }
+
+    }
+
+    public class RecordingHandler : DelegatingHandler
+    {
+        private readonly Action<HttpRequestMessage, HttpResponseMessage> _recordingAction;
+
+        public RecordingHandler(Action<HttpRequestMessage, HttpResponseMessage> recordingAction)
+        {
+            _recordingAction = recordingAction;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            _recordingAction.Invoke(request, response);
+            return response;
         }
     }
 }

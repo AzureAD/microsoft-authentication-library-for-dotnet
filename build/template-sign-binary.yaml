@@ -22,11 +22,11 @@ steps:
          "parameters": [
          {
            "parameterName": "OpusName",
-           "parameterValue": "TestSign"
+           "parameterValue": "Microsoft.Identity.Client"
          },
          {
            "parameterName": "OpusInfo",
-           "parameterValue": "http://test"
+           "parameterValue": "https://www.nuget.org/packages/Microsoft.Identity.Client/"
          },
          {
            "parameterName": "PageHash",

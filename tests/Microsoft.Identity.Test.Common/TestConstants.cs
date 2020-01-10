@@ -233,19 +233,19 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                         ]
                 }";
 
-        public const string TokenResponseJson =
-            "{\"token_type\":\"Bearer\"," +
-            "\"scope\":\"user_impersonation\"," +
-            "\"expires_in\":\"3600\"," +
-            "\"ext_expires_in\":\"3600\"," +
-            "\"expires_on\":\"1566165638\"," +
-            "\"not_before\":\"1566161738\"," +
-            "\"resource\":\"user.read\"," +
-            "\"access_token\":\"at_secret\"," +
-            "\"refresh_token\":\"rt_secret\"," +
-            "\"id_token\":\"idtoken.\"," +
-            "\"client_info\":\"eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0\"}";
-
+        public const string TokenResponseJson = @"{
+                                                   ""token_type"": ""Bearer"",
+                                                   ""scope"": ""user_impersonation"",
+                                                   ""expires_in"": ""3600"",
+                                                   ""ext_expires_in"": ""3600"",
+                                                   ""expires_on"": ""1566165638"",
+                                                   ""not_before"": ""1566161738"",
+                                                   ""resource"": ""user.read"",
+                                                   ""access_token"": ""at_secret"",
+                                                   ""refresh_token"": ""rt_secret"",
+                                                   ""id_token"": ""idtoken."",
+                                                   ""client_info"": ""eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0""
+                                                }";
         public const string InteractiveRequestApiIdPlusCorrelationId = "1005,ad8c894a-557f-48c0-b045-c129590c344e,";
         public const string InteractiveRequestApiId = "1005";
     }
