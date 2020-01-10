@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Cache
                 uniqueId, idItem.IdToken.PreferredUsername);
                 AdalResultWrapper wrapper = new AdalResultWrapper()
                 {
-                    Result = new AdalResult(null, null, DateTimeOffset.MinValue)
+                    Result = new AdalResult()
                     {
                         UserInfo = new AdalUserInfo()
                         {

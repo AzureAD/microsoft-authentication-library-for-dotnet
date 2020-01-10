@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var wrapper = new AdalResultWrapper()
             {
-                Result = new AdalResult(null, null, DateTimeOffset.MinValue)
+                Result = new AdalResult()
                 {
                     UserInfo = new AdalUserInfo()
                     {
