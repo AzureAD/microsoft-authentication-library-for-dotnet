@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client;
 using System;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -30,12 +31,20 @@ namespace Microsoft.Identity.Test.Unit
                     TestConstants.s_extraQueryParams);
 
                 // Act
-                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
                 BrokerInteractiveRequest brokerInteractiveRequest = 
                     new BrokerInteractiveRequest(
                         parameters, 
                         null, 
                         harness.ServiceBundle, 
+                        null,
+                        broker);
+
+                BrokerInteractiveRequest brokerSilentRequest =
+                    new BrokerInteractiveRequest(
+                        parameters,
+                        null,
+                        harness.ServiceBundle,
                         null,
                         broker);
 
@@ -60,6 +69,51 @@ namespace Microsoft.Identity.Test.Unit
 
                 //Assert.AreEqual(TestConstants.BrokerClaims, brokerInteractiveRequest._brokerPayload[BrokerParameter.Claims]); //TODO
                 Assert.AreEqual(BrokerParameter.OidcScopesValue, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
+
+
+            }
+        }
+
+        [TestMethod]
+        [Description("Test setting of the broker parameters in the BrokerSilentRequest constructor.")]
+        public void BrokerSilentRequest_CreateBrokerParametersTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                var parameters = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityTestTenant,
+                    TestConstants.s_scope,
+                    new TokenCache(harness.ServiceBundle, false),
+                    null,
+                    TestConstants.s_extraQueryParams);
+
+                // Act
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+                BrokerSilentRequest brokerSilentRequest =
+                    new BrokerSilentRequest(
+                        parameters,
+                        null,
+                        harness.ServiceBundle,
+                        broker);
+
+                brokerSilentRequest.CreateRequestParametersForBroker();
+
+                // Assert
+                Assert.AreEqual(10, brokerSilentRequest.BrokerPayload.Count);
+
+                Assert.AreEqual(s_canonicalizedAuthority, brokerSilentRequest.BrokerPayload[BrokerParameter.Authority]);
+                Assert.AreEqual(TestConstants.ScopeStr, brokerSilentRequest.BrokerPayload[BrokerParameter.Scope]);
+                Assert.AreEqual(TestConstants.ClientId, brokerSilentRequest.BrokerPayload[BrokerParameter.ClientId]);
+
+                Assert.IsFalse(string.IsNullOrEmpty(brokerSilentRequest.BrokerPayload[BrokerParameter.CorrelationId]));
+                Assert.AreNotEqual(Guid.Empty.ToString(), brokerSilentRequest.BrokerPayload[BrokerParameter.CorrelationId]);
+                Assert.AreEqual(MsalIdHelper.GetMsalVersion(), brokerSilentRequest.BrokerPayload[BrokerParameter.ClientVersion]);
+                Assert.AreEqual(TestConstants.RedirectUri, brokerSilentRequest.BrokerPayload[BrokerParameter.RedirectUri]);
+                Assert.AreEqual(TestConstants.BrokerExtraQueryParameters, brokerSilentRequest.BrokerPayload[BrokerParameter.ExtraQp]);
+                Assert.AreEqual(TestConstants.BrokerOIDCScopes, brokerSilentRequest.BrokerPayload[BrokerParameter.OidcScopesValue]);
+                Assert.AreEqual(TestConstants.LoginHint, brokerSilentRequest.BrokerPayload[BrokerParameter.LoginHint]);
+                Assert.AreEqual(false, brokerSilentRequest.BrokerPayload[BrokerParameter.ForceRefresh]);
             }
         }
     }

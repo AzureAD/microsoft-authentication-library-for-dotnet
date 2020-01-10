@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     public class BrokerRequestTests : TestBase
     {
         private BrokerInteractiveRequest _brokerInteractiveRequest;
+        private BrokerSilentRequest _brokerSilentRequest;
 
         [TestMethod]
         public void BrokerResponseTest()
@@ -125,16 +126,56 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        [TestMethod]
+        public void BrokerSilentRequestTest()
+        {
+            string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(TestConstants.AuthorityTestTenant));
+
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                var parameters = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityTestTenant,
+                    TestConstants.s_scope,
+                    new TokenCache(harness.ServiceBundle, false),
+                    null,
+                    TestConstants.s_extraQueryParams);
+
+                // Act
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+                _brokerSilentRequest =
+                    new BrokerSilentRequest(
+                        parameters,
+                        null,
+                        harness.ServiceBundle,
+                        broker);
+                Assert.AreEqual(false, _brokerSilentRequest.Broker.CanInvokeBroker());
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerSilentRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
+            }
+        }
+
         private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, Action<Exception> validationHandler)
         {
             try
             {
+                //Testing interactive respose
                 _brokerInteractiveRequest.ValidateResponseFromBroker(msalTokenResponse);
 
                 Assert.Fail("MsalServiceException should have been thrown here");
             }
             catch (MsalServiceException exc)
             {
+                try
+                {
+                    //Testing silent respose
+                    _brokerSilentRequest.ValidateResponseFromBroker(msalTokenResponse);
+
+                    Assert.Fail("MsalServiceException should have been thrown here");
+                }
+                catch (MsalServiceException exc2)
+                {
+                    validationHandler(exc2);
+                }
                 validationHandler(exc);
             }
 

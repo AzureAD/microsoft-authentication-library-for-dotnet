@@ -18,8 +18,9 @@ namespace Microsoft.Identity.Client.Internal.Broker
 {
     internal class BrokerSilentRequest
     {
-        private Dictionary<string, string> _brokerPayload = new Dictionary<string, string>();
-        private IBroker _broker;
+        public Dictionary<string, string> BrokerPayload
+            = new Dictionary<string, string>();
+        internal IBroker Broker { get; }
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             _authenticationRequestParameters = authenticationRequestParameters;
             _silentParameters = acquireTokenSilentParameters;
             _serviceBundle = serviceBundle;
-            _broker = broker;
+            Broker = broker;
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
@@ -49,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             CreateRequestParametersForBroker();
 
             MsalTokenResponse msalTokenResponse =
-                await _broker.AcquireTokenUsingBrokerAsync(_brokerPayload).ConfigureAwait(false);
+                await Broker.AcquireTokenUsingBrokerAsync(BrokerPayload).ConfigureAwait(false);
 
             ValidateResponseFromBroker(msalTokenResponse);
             return msalTokenResponse;
@@ -57,20 +58,19 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         internal void CreateRequestParametersForBroker()
         {
-            _brokerPayload.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+            BrokerPayload.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
             string scopes = EnumerableExtensions.AsSingleString(_authenticationRequestParameters.Scope);
-
-            _brokerPayload.Add(BrokerParameter.Scope, scopes);
-            _brokerPayload.Add(BrokerParameter.ClientId, _authenticationRequestParameters.ClientId);
-            _brokerPayload.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString());
-            _brokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
-            _brokerPayload.Add(BrokerParameter.RedirectUri, _serviceBundle.Config.RedirectUri);
+            BrokerPayload.Add(BrokerParameter.Scope, scopes);
+            BrokerPayload.Add(BrokerParameter.ClientId, _authenticationRequestParameters.ClientId);
+            BrokerPayload.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString());
+            BrokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
+            BrokerPayload.Add(BrokerParameter.RedirectUri, _serviceBundle.Config.RedirectUri);
             string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
-            _brokerPayload.Add(BrokerParameter.ExtraQp, extraQP);
-            _brokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
-            _brokerPayload.Add(BrokerParameter.LoginHint, _silentParameters.LoginHint);
+            BrokerPayload.Add(BrokerParameter.ExtraQp, extraQP);
+            BrokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
+            BrokerPayload.Add(BrokerParameter.LoginHint, _silentParameters.LoginHint);
 #pragma warning disable CA1305 // Specify IFormatProvider
-            _brokerPayload.Add(BrokerParameter.ForceRefresh, _silentParameters.ForceRefresh.ToString());
+            BrokerPayload.Add(BrokerParameter.ForceRefresh, _silentParameters.ForceRefresh.ToString());
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
