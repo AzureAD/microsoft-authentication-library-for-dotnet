@@ -195,6 +195,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 parameters.IsBrokerEnabled = true;
 
                 AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
+                AcquireTokenSilentParameters acquireTokenSilentParameters = new AcquireTokenSilentParameters();
 
                 InteractiveRequest request = new InteractiveRequest(
                     harness.ServiceBundle,
@@ -209,6 +210,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         interactiveParameters,
                         harness.ServiceBundle,
                         null,
+                        broker);
+
+                _brokerSilentRequest =
+                    new BrokerSilentRequest(
+                        parameters,
+                        acquireTokenSilentParameters,
+                        harness.ServiceBundle,
                         broker);
             }
         }
