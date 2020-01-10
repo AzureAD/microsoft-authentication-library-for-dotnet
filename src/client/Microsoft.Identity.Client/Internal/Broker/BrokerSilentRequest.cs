@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
     internal class BrokerSilentRequest
     {
         private Dictionary<string, string> _brokerPayload = new Dictionary<string, string>();
-        private IBroker Broker { get; }
+        private IBroker _broker;
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             _authenticationRequestParameters = authenticationRequestParameters;
             _silentParameters = acquireTokenSilentParameters;
             _serviceBundle = serviceBundle;
-            Broker = broker;
+            _broker = broker;
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             CreateRequestParametersForBroker();
 
             MsalTokenResponse msalTokenResponse =
-                await Broker.AcquireTokenUsingBrokerAsync(_brokerPayload).ConfigureAwait(false);
+                await _broker.AcquireTokenUsingBrokerAsync(_brokerPayload).ConfigureAwait(false);
 
             ValidateResponseFromBroker(msalTokenResponse);
             return msalTokenResponse;
@@ -77,18 +77,18 @@ namespace Microsoft.Identity.Client.Internal.Broker
         internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
         {
             _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CheckMsalTokenResponseReturnedFromBroker);
+            if (msalTokenResponse.Error != null)
+            {
+                _authenticationRequestParameters.RequestContext.Logger.Info(
+                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
+                throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
+            }
             if (msalTokenResponse.AccessToken != null)
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(
                     LogMessages.BrokerResponseContainsAccessToken +
                     msalTokenResponse.AccessToken.Count());
                 return;
-            }
-            if (msalTokenResponse.Error != null)
-            {
-                _authenticationRequestParameters.RequestContext.Logger.Info(
-                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
-                throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
             }
         }
     }

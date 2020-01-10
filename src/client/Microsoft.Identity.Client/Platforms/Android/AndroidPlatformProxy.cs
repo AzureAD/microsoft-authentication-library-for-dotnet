@@ -219,14 +219,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public override bool UseEmbeddedWebViewDefault => false;
 
-        public override IBroker CreateBroker()
+        public override IBroker CreateBroker(CoreUIParent uIParent)
         {
             if (OverloadBrokerForTest != null)
             {
                 return OverloadBrokerForTest;
             }
 
-            return new AndroidBroker(Logger);
+            return new AndroidBroker(uIParent, Logger);
         }
     }
 }

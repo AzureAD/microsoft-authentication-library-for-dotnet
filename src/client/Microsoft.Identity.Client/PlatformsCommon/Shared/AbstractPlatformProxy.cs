@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new NotImplementedException();
         }
 
-        public virtual IBroker CreateBroker()
+        public virtual IBroker CreateBroker(CoreUIParent uIParent)
         {
             return OverloadBrokerForTest ?? new NullBroker();
         }

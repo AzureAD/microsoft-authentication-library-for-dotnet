@@ -29,18 +29,20 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private readonly ICoreLogger _logger;
         private readonly ICryptographyManager _cryptoManager;
+        private readonly CoreUIParent _uIParent;
         private string _brokerRequestNonce;
         private bool _brokerV3Installed = false;
 
-        public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager)
+        public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
         {
             _logger = logger;
             _cryptoManager = cryptoManager;
+            _uIParent = uIParent;
         }
 
-        public bool CanInvokeBroker(CoreUIParent uiParent)
+        public bool CanInvokeBroker()
         {
-            if (uiParent?.CallerViewController == null)
+            if (_uIParent?.CallerViewController == null)
             {
                 _logger.Error(iOSBrokerConstants.CallerViewControllerIsNullCannotInvokeBroker);
                 throw new MsalClientException(MsalError.UIViewControllerRequiredForiOSBroker, MsalErrorMessage.UIViewControllerIsRequiredToInvokeiOSBroker);
@@ -48,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             bool canStartBroker = false;
 
-            uiParent.CallerViewController.InvokeOnMainThread(() =>
+            _uIParent.CallerViewController.InvokeOnMainThread(() =>
             {
                 if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV3))
                 {
@@ -60,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (!canStartBroker)
             {
-                uiParent.CallerViewController.InvokeOnMainThread(() =>
+                _uIParent.CallerViewController.InvokeOnMainThread(() =>
                 {
                     if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV2))
                     {

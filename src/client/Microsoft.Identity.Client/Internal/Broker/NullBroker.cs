@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
     /// </summary>
     internal class NullBroker : IBroker
     {
-        public bool CanInvokeBroker(CoreUIParent uiParent)
+        public bool CanInvokeBroker()
         {
             return false;
         }

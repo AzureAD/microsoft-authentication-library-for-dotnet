@@ -38,26 +38,25 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private readonly ICoreLogger _logger;
         private Activity _activity;
 
-
-        public AndroidBroker(ICoreLogger logger)
+        public AndroidBroker(CoreUIParent uiParent, ICoreLogger logger)
         {
+            _activity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
+            _readyForResponse = new SemaphoreSlim(0);
         }
 
-        public bool CanInvokeBroker(CoreUIParent uiParent)
+        public bool CanInvokeBroker()
         {
             bool canInvoke = _brokerHelper.CanSwitchToBroker();
             _logger.Verbose("Can invoke broker? " + canInvoke);
 
-            _activity = uiParent?.Activity;
             return canInvoke;
         }
 
         public async Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
         {
             _androidBrokerTokenResponse = null;
-            _readyForResponse = new SemaphoreSlim(0);
             _correlationId = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId);
             //Need to disable warning for non awaited async call.
             try

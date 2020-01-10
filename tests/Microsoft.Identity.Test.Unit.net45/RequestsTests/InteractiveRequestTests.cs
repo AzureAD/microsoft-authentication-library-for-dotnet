@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private IBroker CreateMockBroker()
         {
             IBroker mockBroker = Substitute.For<IBroker>();
-            mockBroker.CanInvokeBroker(null).ReturnsForAnyArgs(true);
+            mockBroker.CanInvokeBroker().ReturnsForAnyArgs(true);
             mockBroker.AcquireTokenUsingBrokerAsync(null).ReturnsForAnyArgs(TestConstants.CreateMsalTokenResponse());
             return mockBroker;
         }

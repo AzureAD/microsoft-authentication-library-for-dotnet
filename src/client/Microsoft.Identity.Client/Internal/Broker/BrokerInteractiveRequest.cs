@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
-            if (Broker.CanInvokeBroker(_interactiveParameters.UiParent))
+            if (Broker.CanInvokeBroker())
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 

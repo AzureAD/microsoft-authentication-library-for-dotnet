@@ -74,9 +74,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async override Task PreRunAsync()
         {
+#if ANDROID
             if (AuthenticationRequestParameters.IsBrokerEnabled)
                 return;
-
+#endif
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
 
@@ -132,7 +133,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> ExecuteBrokerAsync(CancellationToken cancellationToken)
         {
-            IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker();
+            IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker(null);
 
             var brokerSilentRequest = new BrokerSilentRequest(
                 AuthenticationRequestParameters,
