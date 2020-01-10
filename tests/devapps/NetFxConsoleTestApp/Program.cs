@@ -50,7 +50,7 @@ namespace NetFx
             throw new ArgumentException("Please configure the pop validation api secret");
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly IEnumerable<string> s_scopes = new[] { "user.read", "Openid", "profile" }; // used for WIA and U/P, can be empty
+        private static readonly IEnumerable<string> s_scopes = new[] { "user.read" }; 
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -202,7 +202,7 @@ namespace NetFx
                             var interactiveBuilder = pca.AcquireTokenInteractive(s_scopes);
                             interactiveBuilder = ConfigurePoP(interactiveBuilder);
 
-                            await FetchTokenAndCallPoPApiAsync(interactiveBuilder.ExecuteAsync()).ConfigureAwait(false);
+                            await FetchTokenAndCallApiAsync(pca, interactiveBuilder.ExecuteAsync()).ConfigureAwait(false);
 
                             break;
 
@@ -357,16 +357,6 @@ namespace NetFx
             }
 
             return builder as T;
-        }
-
-        private static async Task FetchTokenAndCallPoPApiAsync(Task<AuthenticationResult> authTask)
-        {
-            var result = await authTask.ConfigureAwait(false);
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("Token type: {0} Token: {1}", result.TokenType, result.AccessToken);
-            Console.ResetColor();
-
-            await CallPoPVerificationAPIAsync(result.CreateAuthorizationHeader()).ConfigureAwait(false);
         }
 
         private static async Task FetchTokenAndCallApiAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
