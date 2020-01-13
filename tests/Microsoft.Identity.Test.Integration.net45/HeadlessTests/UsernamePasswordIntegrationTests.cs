@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -15,9 +14,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,8 +29,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class UsernamePasswordIntegrationTests
     {
-        private const string _authority = "https://login.microsoftonline.com/organizations/";
+        private const string Authority = "https://login.microsoftonline.com/organizations/";
         private static readonly string[] s_scopes = { "User.Read" };
+        public static Guid CorrelationId = new Guid();
+        public string CurrentApiId { get; set; }
+        private const string XClientCurrentTelemetryROPC = "2|1003,0|";
+        private string XClientLastTelemetryROPC = "2|0|||";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -82,7 +86,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
         }
-
         #endregion
 
         /// <summary>
@@ -96,7 +99,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(Authority).Build();
 
             var result = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
                 msalPublicClient
@@ -115,7 +118,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(Authority).Build();
 
             try
             {
@@ -147,7 +150,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(Authority).Build();
 
             var result = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
                 msalPublicClient
@@ -170,24 +173,37 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithHttpClientFactory(factory)
-                .WithAuthority(_authority)
+                .WithAuthority(Authority)
                 .Build();
 
-
-            //AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .WithCorrelationId(CorrelationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
             // TODO: you can now assert each request and response
             var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token");
-            var telemetryValue = req.Headers.Where(h => h.Key == "x-client-last-telemetry");
+            var telemetryLastValue = req.Headers.Single(h => h.Key == "x-client-last-telemetry").Value;
+            var telemetryCurrentValue = req.Headers.Single(h => h.Key == "x-client-current-telemetry").Value;
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            Assert.IsTrue(string.Equals(user.Upn, authResult.Account.Username, System.StringComparison.InvariantCultureIgnoreCase));
+            Assert.AreEqual(XClientCurrentTelemetryROPC, telemetryCurrentValue.FirstOrDefault());
+            Assert.AreEqual(XClientLastTelemetryROPC, telemetryLastValue.FirstOrDefault());
+
+            HttpTelemetryRecorder httpTelemetryRecorder = new HttpTelemetryRecorder();
+            httpTelemetryRecorder.SplitCurrentCsv(telemetryCurrentValue.FirstOrDefault());
+            httpTelemetryRecorder.SplitPreviousCsv(telemetryLastValue.FirstOrDefault());
+
+            Assert.AreEqual(0, httpTelemetryRecorder.CorrelationIdPrevious.Count());
+            Assert.AreEqual("1003", httpTelemetryRecorder.ApiId.FirstOrDefault());
+            Assert.AreEqual(0, httpTelemetryRecorder.ErrorCode.Count());
+            Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.SilentCallSuccessfulCount);
+            Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.ForceRefresh);
+
+            Assert.IsTrue(string.Equals(user.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
@@ -195,46 +211,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
-        }
-    }
-
-
-    public class TestHttpClientFactory : IMsalHttpClientFactory
-    {
-        HttpClient _httpClient;
-
-        public IList<(HttpRequestMessage, HttpResponseMessage)> RequestsAndResponses { get; }
-        
-        public TestHttpClientFactory()
-        {
-            RequestsAndResponses = new List<(HttpRequestMessage, HttpResponseMessage)>();
-
-            var recordingHandler = new RecordingHandler((req, res)=> RequestsAndResponses.Add((req, res)));
-            recordingHandler.InnerHandler = new HttpClientHandler();
-            _httpClient = new HttpClient(recordingHandler);
-        }
-
-        public HttpClient GetHttpClient()
-        {
-            return _httpClient;
-        }
-
-    }
-
-    public class RecordingHandler : DelegatingHandler
-    {
-        private readonly Action<HttpRequestMessage, HttpResponseMessage> _recordingAction;
-
-        public RecordingHandler(Action<HttpRequestMessage, HttpResponseMessage> recordingAction)
-        {
-            _recordingAction = recordingAction;
-        }
-
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            _recordingAction.Invoke(request, response);
-            return response;
         }
     }
 }

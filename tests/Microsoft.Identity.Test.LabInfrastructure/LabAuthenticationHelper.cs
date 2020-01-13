@@ -57,9 +57,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 authority,
                 scopes,
                 s_defaultAuthType,
-                String.Empty,
-                String.Empty,
-                String.Empty).ConfigureAwait(false);
+                string.Empty,
+                string.Empty,
+                string.Empty).ConfigureAwait(false);
         }
 
         public static async Task<string> GetLabAccessTokenAsync(string authority, string[] scopes, LabAccessAuthenticationType authType, string clientId, string certThumbprint, string clientSecret)
@@ -71,8 +71,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             switch (authType)
             {
                 case LabAccessAuthenticationType.ClientCertificate:
-                    var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
-                    var certThumbprintForLab = String.IsNullOrEmpty(clientId) ? LabAccessThumbPrint : certThumbprint;
+                    var clientIdForCertAuth = string.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
+                    var certThumbprintForLab = string.IsNullOrEmpty(clientId) ? LabAccessThumbPrint : certThumbprint;
 
                     cert = CertificateHelper.FindCertificateByThumbprint(certThumbprintForLab);
                     if (cert == null)
@@ -95,8 +95,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                         .ConfigureAwait(false);
                     break;
                 case LabAccessAuthenticationType.ClientSecret:
-                    var clientIdForSecretAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
-                    var clientSecretForLab = String.IsNullOrEmpty(clientId) ? s_secret : clientSecret;
+                    var clientIdForSecretAuth = string.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
+                    var clientSecretForLab = string.IsNullOrEmpty(clientId) ? s_secret : clientSecret;
 
                     confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientIdForSecretAuth)
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                         .ConfigureAwait(false);
                     break;
                 case LabAccessAuthenticationType.UserCredential:
-                    var clientIdForPublicClientAuth = String.IsNullOrEmpty(clientId) ? LabAccessPublicClientId : clientId;
+                    var clientIdForPublicClientAuth = string.IsNullOrEmpty(clientId) ? LabAccessPublicClientId : clientId;
                     var publicApp = PublicClientApplicationBuilder
                         .Create(clientIdForPublicClientAuth)
                         .WithAuthority(new Uri(authority), true)

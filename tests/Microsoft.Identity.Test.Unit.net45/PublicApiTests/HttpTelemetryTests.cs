@@ -9,7 +9,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -22,6 +21,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class HttpTelemetryTests : TestBase
     {
         private TokenCacheHelper _tokenCacheHelper;
+        private HttpTelemetryContent _httpTelemetryContent;
         private Guid _correlationId;
         private const string Comma = ",";
 
@@ -31,6 +31,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             base.TestInitialize();
             _tokenCacheHelper = new TokenCacheHelper();
             new HttpTelemetryContent(true);
+            _httpTelemetryContent = new HttpTelemetryContent(
+               new TelemetryHelperTests._TestEvent("tracking event", TestConstants.ClientId));
         }
 
         [TestMethod]
@@ -81,32 +83,32 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void CheckPreviousHttpTelemetryHeaderContentWithAuthFailed()
         {
             const string csvString =
-                "2|0|" +
-                ",1005,1005" +
-                ",d3adb33f-c0de-ed0c-c0de-deadb33fc0d3,0a69ff54-3e00-4244-a6c8-09ccc1efa707|" +
+                "2|" +
+                "0|" +
+                ",1005,1005,d3adb33f-c0de-ed0c-c0de-deadb33fc0d3,0a69ff54-3e00-4244-a6c8-09ccc1efa707|" +
                 ",authentication_failed|";
 
-            HttpTelemetryContent httpTelemetryContent = CreateHttpTelemetryContent();
             List<string> errorCodes = new List<string>(new string[] { MsalError.AuthenticationFailed });
             PopulateHttpTelemetryContent(errorCodes);
 
-            Assert.AreEqual(csvString, httpTelemetryContent.GetCsvAsPrevious(0));
+            Assert.AreEqual(csvString, _httpTelemetryContent.GetCsvAsPrevious(0));
         }
 
         [TestMethod]
         public void CheckPreviousHttpTelemetryHeaderContentWithTwoFailures()
         {
             const string csvString =
-                "2|0|" +
-                ",1005,1005" +
-                ",d3adb33f-c0de-ed0c-c0de-deadb33fc0d3,0a69ff54-3e00-4244-a6c8-09ccc1efa707|" +
+                "2|" +
+                "0|" +
+                ",1005,1005,d3adb33f-c0de-ed0c-c0de-deadb33fc0d3,0a69ff54-3e00-4244-a6c8-09ccc1efa707|" +
                 ",authentication_failed,user_mismatch|";
-
-            HttpTelemetryContent httpTelemetryContent = CreateHttpTelemetryContent();
-            List<string> errorCodes = new List<string>(new string[] { MsalError.AuthenticationFailed, MsalError.UserMismatch });
+            
+            List<string> errorCodes = new List<string>(new string[] { 
+                MsalError.AuthenticationFailed, 
+                MsalError.UserMismatch });
             PopulateHttpTelemetryContent(errorCodes);
 
-            Assert.AreEqual(csvString, httpTelemetryContent.GetCsvAsPrevious(0));
+            Assert.AreEqual(csvString, _httpTelemetryContent.GetCsvAsPrevious(0));
         }
 
         [TestMethod]
@@ -118,24 +120,25 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ",d3adb33f-c0de-ed0c-c0de-deadb33fc0d3,0a69ff54-3e00-4244-a6c8-09ccc1efa707,b1e662cf-8efb-4e13-b89a-71e845bbb62f|" +
                 ",authentication_failed,user_mismatch,invalid_grant|";
 
-            HttpTelemetryContent httpTelemetryContent = CreateHttpTelemetryContent();
-            List<string> errorCodes = new List<string>(new string[] { MsalError.AuthenticationFailed, MsalError.UserMismatch, MsalError.InvalidGrantError });
+            List<string> errorCodes = new List<string>(new string[] { 
+                MsalError.AuthenticationFailed, 
+                MsalError.UserMismatch,
+                MsalError.InvalidGrantError });
             PopulateHttpTelemetryContent(errorCodes);
-            HttpTelemetryContent.ApiId.Add("1005");
-            HttpTelemetryContent.CorrelationId.Add("b1e662cf-8efb-4e13-b89a-71e845bbb62f");
+            _httpTelemetryContent.ApiId.Add("1005");
+            _httpTelemetryContent.CorrelationId.Add("b1e662cf-8efb-4e13-b89a-71e845bbb62f");
 
-            Assert.AreEqual(csvString, httpTelemetryContent.GetCsvAsPrevious(1));
+            Assert.AreEqual(csvString, _httpTelemetryContent.GetCsvAsPrevious(1));
         }
 
         [TestMethod]
         public void CheckHttpPreviousTelemetryHeaderSize()
         {
             string hugeString = new string('*', 3757);
-            HttpTelemetryContent.ApiId.Add(hugeString);
-            HttpTelemetryContent httpTelemetryContent = CreateHttpTelemetryContent();
-            string previousCsvString = httpTelemetryContent.GetCsvAsPrevious(0);
+            _httpTelemetryContent.ApiId.Add(hugeString);
+            string previousCsvString = _httpTelemetryContent.GetCsvAsPrevious(0);
 
-            Assert.IsTrue(previousCsvString.Length <= 3800);
+            Assert.IsTrue(string.IsNullOrEmpty(previousCsvString));
         }
 
         private HttpTelemetryContent CreateHttpTelemetryContent()
@@ -148,10 +151,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void PopulateHttpTelemetryContent(List<string> errorCodes)
         {
-            HttpTelemetryContent.ApiId.Add("1005");
-            HttpTelemetryContent.ApiId.Add("1005");
-            HttpTelemetryContent.CorrelationId.Add("0a69ff54-3e00-4244-a6c8-09ccc1efa707");
-            HttpTelemetryContent.LastErrorCode.AddRange(errorCodes);
+            _httpTelemetryContent.ApiId.Add("1005");
+            _httpTelemetryContent.ApiId.Add("1005");
+            _httpTelemetryContent.CorrelationId.Add("0a69ff54-3e00-4244-a6c8-09ccc1efa707");
+            _httpTelemetryContent.LastErrorCode.AddRange(errorCodes);
         }
 
         public static IDictionary<string, string> CreateHttpTelemetryHeaders(
@@ -191,20 +194,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private static string CreateRepeatInTelemetryHeader(
             string stringToRepeat)
         {
-            return stringToRepeat + Comma + stringToRepeat + Comma + stringToRepeat + Comma;
+            return stringToRepeat + Comma;
         }
 
         private static string CreateErrorCodeRepeatHeader(
             string errorCode1,
             string errorCode2)
         {
-            string DoubleComma = ",,";
-
             if (!string.IsNullOrEmpty(errorCode2))
             {
-                return DoubleComma + errorCode1 + Comma + errorCode2;
+                return errorCode1 + Comma + errorCode2;
             }
-            return DoubleComma + errorCode1;
+            return errorCode1;
         }
 
         private async Task CreateFailedAndThenSuccessfulResponseToVerifyErrorCodesInHttpTelemetryDataAsync(string errorCode)

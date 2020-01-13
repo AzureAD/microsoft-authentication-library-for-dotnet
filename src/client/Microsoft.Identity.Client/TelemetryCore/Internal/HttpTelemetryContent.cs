@@ -38,9 +38,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
         }
 
         public string ForceRefresh { get; set; } = string.Empty;
-        public static List<string> ApiId { get; set; } = new List<string>();
-        public static List<string> CorrelationId { get; set; } = new List<string>();
-        public static List<string> LastErrorCode { get; set; } = new List<string>();
+        public List<string> ApiId { get; set; } = new List<string>();
+        public List<string> CorrelationId { get; set; } = new List<string>();
+        public List<string> LastErrorCode { get; set; } = new List<string>();
 
         public string GetCsvAsPrevious(int successfulSilentCallCount)
         {
@@ -65,7 +65,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             }
             else
             {
-                return data.Substring(0, length: 3800);
+                ApiId?.Clear();
+                CorrelationId?.Clear();
+                LastErrorCode?.Clear();
+                return string.Empty;
             }                
         }
 
@@ -85,7 +88,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
         public string GetCsvAsCurrent()
         {
             // csv expected format:
-            // 1|api_id,force_refresh|platform_config
+            // 2|api_id,force_refresh|platform_config
             string[] myValues = new string[] {
                 ApiId.FirstOrDefault(),
                 ConvertFromStringToBitwise(ForceRefresh)};

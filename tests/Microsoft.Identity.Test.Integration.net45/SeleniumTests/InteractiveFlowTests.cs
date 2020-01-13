@@ -5,13 +5,17 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -24,6 +28,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(5);
         private static readonly string[] s_scopes = new[] { "user.read" };
+        public static Guid CorrelationId = new Guid();
+        public string CurrentApiId { get; set; }
+        public bool IsAdfsTest { get; set; } = false;
+        private const string XClientCurrentTelemetryROPC = "2|1005,0|";
+        private const string LastRequestExpectedTelemetryBasic = "2|0|||";
+        private const string LastRequestExpectedTelemetryApiCorId = "2|0|1005,00000000-0000-0000-0000-000000000000||";
 
         #region MSTest Hooks
 
@@ -42,6 +52,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+            new HttpTelemetryContent(true);
         }
 
         #endregion MSTest Hooks
@@ -89,7 +100,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task InteractiveConsentPromptAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, true).ConfigureAwait(false);
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
         }
@@ -106,6 +116,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [TestMethod]
         public async Task Interactive_AdfsV2019_DirectAsync()
         {
+            IsAdfsTest = true;
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
         }
@@ -160,12 +171,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
         {
             IPublicClientApplication pca;
+            var factory = new TestHttpClientFactory();
             if (directToAdfs)
             {
                 pca = PublicClientApplicationBuilder
                     .Create(Adfs2019LabConstants.PublicClientId)
                     .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
                     .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                    .WithHttpClientFactory(factory)
                     .Build();
             }
             else
@@ -173,6 +186,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithHttpClientFactory(factory)
                     .Build();
             }
 
@@ -181,6 +195,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
                 .AcquireTokenInteractive(s_scopes)
+                .WithCorrelationId(CorrelationId)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.SelectAccount, false, directToAdfs))
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
@@ -189,6 +204,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(1, 1); // the assert calls GetAccounts
             Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
+
+            AssertTelemetryHeaders(factory, LastRequestExpectedTelemetryBasic);
 
             Trace.WriteLine("Part 2 - Clear the cache");
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -200,6 +217,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
                 .AcquireTokenInteractive(s_scopes)
+                .WithCorrelationId(CorrelationId)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin, true, directToAdfs))
                 .WithPrompt(Prompt.ForceLogin)
                 .WithLoginHint(labResponse.User.Upn)
@@ -211,9 +229,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             userCacheAccess.AssertAccessCounts(3, 3);
             Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
 
+            AssertTelemetryHeaders(factory, LastRequestExpectedTelemetryApiCorId);
+
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca
                 .AcquireTokenSilent(s_scopes, account)
+                .WithCorrelationId(CorrelationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -254,6 +275,33 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 Trace.WriteLine("Starting Selenium automation");
                 driver.PerformLogin(user, prompt, withLoginHint, adfsOnly);
             }, TestContext);
+        }
+
+        private void AssertTelemetryHeaders(
+            TestHttpClientFactory factory,
+            string xclientLastTelemetry)
+        {
+            string tokenEndpoint = string.Empty;
+
+            if (!IsAdfsTest)
+            {
+                tokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+
+            }
+            else
+            {
+                tokenEndpoint = "https://fs.msidlab8.com/adfs/oauth2/token/";
+            }
+
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == tokenEndpoint);
+
+            var telemetryLastValue = req.Headers.Single(h => h.Key == "x-client-last-telemetry").Value;
+            var telemetryCurrentValue = req.Headers.Single(h => h.Key == "x-client-current-telemetry").Value;
+
+            Assert.AreEqual(XClientCurrentTelemetryROPC, telemetryCurrentValue.FirstOrDefault());
+            Assert.AreEqual(xclientLastTelemetry, telemetryLastValue.FirstOrDefault());
+
+            factory.RequestsAndResponses.Clear();
         }
     }
 }
