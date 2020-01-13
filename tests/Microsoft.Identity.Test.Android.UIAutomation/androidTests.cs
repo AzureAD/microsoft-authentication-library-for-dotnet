@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Text;
 using Xamarin.UITest;
 using Microsoft.Identity.Test.Common;
+using System.IO;
 
 //NOTICE! Inorder to run UI automation tests for xamarin locally, you may need to upgrade nunit to 3.0 and above for this project and the core ui Automation project.
 //It is set to 2.6.4 because that is the maximum version that appcenter can support.
@@ -107,10 +108,19 @@ namespace Microsoft.Identity.Test.UIAutomation
         {
             TestCommon.ResetInternalStaticCaches();
 
-            _mobileTestHelper.AcquireTokenTestHelper(
-                _xamarinController,
-                LabUserHelper.GetDefaultUserAsync().GetAwaiter().GetResult(),
-                CoreUiTestConstants.AcquireTokenInteractive);
+            try
+            {
+                _mobileTestHelper.AcquireTokenTestHelper(
+                    _xamarinController,
+                    LabUserHelper.GetDefaultUserAsync().GetAwaiter().GetResult(),
+                    CoreUiTestConstants.AcquireTokenInteractive);
+            }
+            catch (FileLoadException ex)
+            {
+#pragma warning disable CA2201 // Do not raise reserved exception types
+                throw new Exception(ex.FusionLog);
+#pragma warning restore CA2201 // Do not raise reserved exception types
+            }
         }
 
         /// <summary>
