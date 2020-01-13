@@ -4,12 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
-    [DataContract]
+    [JsonObject]
     internal class DeviceAuthHeader
     {
         public DeviceAuthHeader(string base64EncodedCertificate)
@@ -20,17 +20,17 @@ namespace Microsoft.Identity.Client.OAuth2
             this.X5c.Add(base64EncodedCertificate);
         }
 
-        [DataMember(Name = "x5c", IsRequired = true)]
-        public List<string> X5c { get; set; }
+        [JsonProperty("x5c")]
+        public IList<string> X5c { get; set; }
 
-        [DataMember(Name = "typ", IsRequired = true)]
+        [JsonProperty("typ")]
         public string Type { get; set; }
 
-        [DataMember(Name = "alg", IsRequired = true)]
+        [JsonProperty("alg")]
         public string Alg { get; private set; }
     }
 
-    [DataContract]
+    [JsonObject]
     internal class DeviceAuthPayload
     {
         public DeviceAuthPayload(string audience, string nonce)
@@ -41,13 +41,13 @@ namespace Microsoft.Identity.Client.OAuth2
             this.Iat = (long)timeSpan.TotalSeconds;
         }
 
-        [DataMember(Name = "iat", IsRequired = true)]
+        [JsonProperty("iat")]
         public long Iat { get; set; }
 
-        [DataMember(Name = "aud", IsRequired = true)]
+        [JsonProperty("aud")]
         public string Audience { get; set; }
 
-        [DataMember(Name = "nonce", IsRequired = true)]
+        [JsonProperty("nonce")]
         public string Nonce { get; private set; }
     }
 

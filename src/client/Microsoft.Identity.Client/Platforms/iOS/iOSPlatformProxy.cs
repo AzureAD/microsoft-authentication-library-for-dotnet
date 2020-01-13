@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public override IDeviceAuthManager CreateDeviceAuthManager()
         {
-            return new AppleDeviceAuthManager();
+            return new iOSDeviceAuthManager();
         }
     }
 }

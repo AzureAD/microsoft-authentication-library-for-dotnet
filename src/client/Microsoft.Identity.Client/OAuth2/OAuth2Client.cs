@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
-            _deviceAuthManager = deviceAuthManager ?? throw new ArgumentNullException(nameof(deviceAuthManager));
+            _deviceAuthManager = deviceAuthManager;
         }
 
         public void AddQueryParameter(string key, string value)
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
                 {
                     //Check if we can perform device auth
-                    if (IsDeviceAuthChallenge(response, respondToDeviceAuthChallenge))
+                    if (_deviceAuthManager != null && IsDeviceAuthChallenge(response, respondToDeviceAuthChallenge))
                     {
                         IDictionary<string, string> responseDictionary = ParseChallengeData(response);
 
@@ -105,12 +105,15 @@ namespace Microsoft.Identity.Client.OAuth2
                             responseDictionary["SubmitUrl"] = endpointUri.AbsoluteUri;
                         }
 
-                        string responseHeader = await _deviceAuthManager.CreateDeviceAuthChallengeResponseAsync(responseDictionary)
-                            .ConfigureAwait(false);
+                        if (_deviceAuthManager != null)
+                        {
+                            string responseHeader = await _deviceAuthManager.CreateDeviceAuthChallengeResponseAsync(responseDictionary)
+                                .ConfigureAwait(false);
 
-                        //Injecting PKeyAuth response here and replaying request to attempt device auth
-                        _headers["Authorization"] = responseHeader;
-                        return await ExecuteRequestAsync<T>(endPoint, method, requestContext, expectErrorsOn200OK, false).ConfigureAwait(false);
+                            //Injecting PKeyAuth response here and replaying request to attempt device auth
+                            _headers["Authorization"] = responseHeader;
+                            return await ExecuteRequestAsync<T>(endPoint, method, requestContext, expectErrorsOn200OK, false).ConfigureAwait(false);
+                        }
                     }
 
                     try
@@ -359,7 +362,7 @@ namespace Microsoft.Identity.Client.OAuth2
             return _deviceAuthManager.CanHandleDeviceAuthChallenge
                    && response != null
                    && respondToDeviceAuthChallenge
-                   && response?.Headers != null
+                   && response.Headers != null
                    && response.StatusCode == HttpStatusCode.Unauthorized
                    && response.Headers.Contains(WwwAuthenticateHeader)
                    && response.Headers.GetValues(WwwAuthenticateHeader).FirstOrDefault()

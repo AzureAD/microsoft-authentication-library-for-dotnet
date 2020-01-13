@@ -21,23 +21,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Platforms\net45\Native\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="PlatformsCommon\Interfaces\IDeviceAuthManager.cs" />
-    <Compile Include="Platforms\net45\NetDesktopDeviceAuthManager.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="PlatformsCommon\Interfaces\IDeviceAuthManager.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Platforms\net45\NetDesktopDeviceAuthManager.cs" />
   </ItemGroup>
 </Project>

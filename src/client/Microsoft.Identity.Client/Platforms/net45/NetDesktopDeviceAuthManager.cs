@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Threading.Tasks;
-#if DESKTOP
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.net45.Native;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -52,16 +51,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
             string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", response.GetResponseToSign(),
                 Base64UrlHelpers.Encode(sig));
             string authToken = string.Format(CultureInfo.InvariantCulture, " AuthToken=\"{0}\"", signedJwt);
-            Task<string> resultTask =
-                Task.Factory.StartNew(
-                    () =>
-                    {
-                        return string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken,
-                            challengeData["Context"],
-                            challengeData["Version"]);
-                    });
 
-            return await resultTask.ConfigureAwait(false);
+            var resultString = string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken,
+                challengeData["Context"],
+                challengeData["Version"]);
+
+            return Task.FromResult(resultString).Result;
         }
 
         private static CngKey GetCngPrivateKey(X509Certificate2 certificate)
@@ -154,4 +149,3 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
     }
 }
-#endif

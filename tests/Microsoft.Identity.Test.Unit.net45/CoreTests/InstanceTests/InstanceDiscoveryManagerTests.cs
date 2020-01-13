@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             // Arrange
             INetworkMetadataProvider networkMetadataProvider = new NetworkMetadataProvider(
-                Substitute.For<IHttpManager>(), Substitute.For<ITelemetryManager>(), _networkCacheMetadataProvider, _harness.ServiceBundle.PlatformProxy.CreateDeviceAuthManager());
+                Substitute.For<IHttpManager>(), Substitute.For<ITelemetryManager>(), _networkCacheMetadataProvider);
 
             _networkCacheMetadataProvider.GetMetadata("some_env.com", Arg.Any<ICoreLogger>()).Returns(_expectedResult);
 

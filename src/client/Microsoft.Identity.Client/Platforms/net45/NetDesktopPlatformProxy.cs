@@ -304,7 +304,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return NetDesktopPoPCryptoProvider.Instance;
         }
 
-        public IDeviceAuthManager CreateDeviceAuthManager()
+        public override IDeviceAuthManager CreateDeviceAuthManager()
         {
             return new NetDesktopDeviceAuthManager();
         }
