@@ -77,22 +77,24 @@ namespace Microsoft.Identity.Client.Internal.Broker
         internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
         {
             _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CheckMsalTokenResponseReturnedFromBroker);
-            if (string.IsNullOrEmpty(msalTokenResponse.Error))
-            {
-                _authenticationRequestParameters.RequestContext.Logger.Info(
-                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
-                throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
-            }
-            if (string.IsNullOrEmpty(msalTokenResponse.AccessToken))
+            if (msalTokenResponse.AccessToken != null)
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(
                     LogMessages.BrokerResponseContainsAccessToken +
                     msalTokenResponse.AccessToken.Count());
                 return;
             }
-
-            _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
-            throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
+            else if (msalTokenResponse.Error != null)
+            {
+                _authenticationRequestParameters.RequestContext.Logger.Info(
+                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
+                throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
+            }
+            else
+            {
+                _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
+                throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
+            }
         }
     }
 }
