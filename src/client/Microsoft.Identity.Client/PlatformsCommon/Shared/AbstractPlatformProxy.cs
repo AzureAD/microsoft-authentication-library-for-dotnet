@@ -193,5 +193,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return OverloadBrokerForTest ?? new NullBroker();
         }
+
+        public virtual bool CanBrokerSupportSilentAuth()
+        {
+            return false;
+        }
     }
 }

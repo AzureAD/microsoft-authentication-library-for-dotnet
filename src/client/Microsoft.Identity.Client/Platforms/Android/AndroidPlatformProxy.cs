@@ -228,5 +228,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             return new AndroidBroker(uIParent, Logger);
         }
+
+        public override bool CanBrokerSupportSilentAuth()
+        {
+            return true;
+        }
     }
 }

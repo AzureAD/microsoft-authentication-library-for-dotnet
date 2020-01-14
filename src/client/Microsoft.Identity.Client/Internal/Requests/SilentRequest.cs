@@ -74,10 +74,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async override Task PreRunAsync()
         {
-#if ANDROID
-            if (AuthenticationRequestParameters.IsBrokerEnabled)
+
+            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && AuthenticationRequestParameters.IsBrokerEnabled)
                 return;
-#endif
+
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
 
