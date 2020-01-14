@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
     class NetStandardDeviceAuthManager : IDeviceAuthManager
     {
-        public bool CanHandleDeviceAuthChallenge => throw new NotImplementedException();
+        public bool CanHandleDeviceAuthChallenge { get { return false; } }
 
         public Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
         {

@@ -11,9 +11,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
     [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class AndroidDeviceAuthManager : IDeviceAuthManager
     {
-        public bool CanHandleDeviceAuthChallenge {
-            get { return false; }
-        }
+        public bool CanHandleDeviceAuthChallenge { get { return false; } }
 
         public Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
         {

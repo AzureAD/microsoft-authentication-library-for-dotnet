@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
@@ -310,6 +311,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Content = new StringContent(TooManyRequestsContent)
             };
             httpResponse.Headers.RetryAfter = new RetryConditionHeaderValue(TestRetryAfterDuration);
+
+            return httpResponse;
+        }
+
+
+        public static HttpResponseMessage CreatePKeyAuthChallengeResponse()
+        {
+            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)401)
+            {
+                Content = new StringContent("SomeContent")
+            };
+            httpResponse.Headers.Add("WWW-Authenticate", @"PKeyAuth  Nonce=""nonce"",  Version=""1.0"", CertThumbprint=""thumbprint"",  Context=""context""");
 
             return httpResponse;
         }

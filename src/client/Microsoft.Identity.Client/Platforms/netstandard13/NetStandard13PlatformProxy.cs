@@ -162,6 +162,11 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             return Task.FromResult(0);
         }
 
+        public override IDeviceAuthManager CreateDeviceAuthManager()
+        {
+            return new NetStandard13DeviceAuthManager();
+        }
+
         public override bool UseEmbeddedWebViewDefault => false;
 
     }

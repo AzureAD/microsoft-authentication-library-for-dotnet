@@ -69,7 +69,11 @@ namespace Microsoft.Identity.Client.OAuth2
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool respondToDeviceAuthChallenge = true)
         {
             bool addCorrelationId = requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
-            AddCommonHeaders(requestContext, addCorrelationId);
+            //No need to re-add headers for the replayed PKeyAuth request
+            if (respondToDeviceAuthChallenge)
+            {
+                AddCommonHeaders(requestContext, addCorrelationId);
+            }
 
             HttpResponse response = null;
             Uri endpointUri = CreateFullEndpointUri(endPoint);

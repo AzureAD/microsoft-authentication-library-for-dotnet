@@ -12,10 +12,13 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using static Microsoft.Identity.Test.Unit.RequestsTests.InteractiveRequestTests;
 
 namespace Microsoft.Identity.Test.Unit
@@ -162,6 +165,54 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.IsNotNull(serverEx.ResponseBody);
                     Assert.AreEqual(MsalError.HttpStatusNotFound, serverEx.ErrorCode);
                 });
+        }
+
+        [TestMethod]
+        public void PKeyAuthSuccsesResponseTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+
+                //Initiates PKeyAuth challenge which will trigger an additional request sent to AAD to satisfy the PKeyAuth challenge
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreatePKeyAuthChallengeResponse()
+                    });
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+                Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
+                Assert.AreEqual(TestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
+                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.AreEqual(TestConstants.Utid, result.TenantId);
+            }
+        }
+
+        private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
+        {
+            mockHttpManager.AddInstanceDiscoveryMockHandler();
+            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
         }
 
         private void ValidateOathClient(HttpResponseMessage httpResponseMessage, Action<Exception> validationHandler)
