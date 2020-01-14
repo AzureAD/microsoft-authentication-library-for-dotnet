@@ -167,6 +167,7 @@ namespace Microsoft.Identity.Test.Unit
                 });
         }
 
+#if DESKTOP
         [TestMethod]
         public void PKeyAuthSuccsesResponseTest()
         {
@@ -208,6 +209,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.Utid, result.TenantId);
             }
         }
+#endif
 
         private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
