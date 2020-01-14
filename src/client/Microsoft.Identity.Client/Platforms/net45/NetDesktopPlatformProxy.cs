@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -298,6 +299,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
 
             return Task.FromResult(0);
+        }
+
+        public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
+        {
+            return NetDesktopPoPCryptoProvider.Instance;
         }
     }
 }

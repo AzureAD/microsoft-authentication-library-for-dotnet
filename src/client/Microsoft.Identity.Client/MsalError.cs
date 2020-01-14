@@ -715,9 +715,8 @@ namespace Microsoft.Identity.Client
         public const string TelemetryConfigOrTelemetryCallback = "telemetry_config_or_telemetry_callback";
 
         /// <summary>
-        /// AAD service error indicating that the configured client is not valid
-        /// <para>Migigation</para>In the AAD app registration portal, make sure the correct client (Public or
-        /// Confidential) is selected for the respective authentication flow.
+        /// Azure AD service error indicating a configuration issue. 
+        /// <para>Mitigation</para>See error message for details, then take corrective action in the app registration portal
         /// See https://aka.ms/msal-net-invalid-client for details.
         /// </summary>
         public const string InvalidClient = "invalid_client";
@@ -733,6 +732,18 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>See the error message for more details. 
         /// </summary>
         public const string WABError = "wab_error";
+
+        /// <summary>
+        /// <para>What happens?</para>You asked for one type of token, but did not receive it. 
+        /// <para>Mitigation</para>This happens if the Identity Provider (AAD, B2C, ADFS etc.) does not support / implement the requested token type. In case of ADFS, consider upgrading to the latest version.
+        /// </summary>
+        public const string TokenTypeMismatch = "token_type_mismatch";
+
+        /// <summary>
+        /// <para>What happens?</para>You are trying to use a feature which was marked as experimental
+        /// <para>Mitigation</para>When creating the PublicClientApplication or ConfidentialClientApplication, use .WithExperimentalFeatures() option. See https://aka.ms/msal-net-experimental-features for details.
+        /// </summary>
+        public const string ExperimentalFeature = "experimental_feature";
 
 #if iOS
         /// <summary>

@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.UI
 {
@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.UI
         UnknownError
     }
 
-    [DataContract]
+    [JsonObject]
     internal class AuthorizationResult
     {
         public static AuthorizationResult FromUri(string webAuthenticationResult)
@@ -125,16 +125,16 @@ namespace Microsoft.Identity.Client.UI
 
         public AuthorizationStatus Status { get; private set; }
 
-        [DataMember]
+        [JsonProperty]
         public string Code { get; set; }
 
-        [DataMember]
+        [JsonProperty]
         public string Error { get; set; }
 
-        [DataMember]
+        [JsonProperty]
         public string ErrorDescription { get; set; }
 
-        [DataMember]
+        [JsonProperty]
         public string CloudInstanceHost { get; set; }
 
         /// <summary>

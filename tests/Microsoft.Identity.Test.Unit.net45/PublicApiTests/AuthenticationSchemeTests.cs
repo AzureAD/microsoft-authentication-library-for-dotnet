@@ -7,9 +7,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -32,6 +34,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             var authScheme = Substitute.For<IAuthenticationScheme>();
             authScheme.AuthorizationHeaderPrefix.Returns("BearToken");
+            authScheme.AccessTokenType.Returns("bearer");
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
             authScheme.FormatAccessToken(default).ReturnsForAnyArgs(x => "enhanced_secret_" + ((MsalAccessTokenCacheItem)x[0]).Secret);
@@ -86,6 +89,41 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     scheme: null,
                     expectRtRefresh: true).ConfigureAwait(false);
                 ValidateBearerToken(httpManager, silentResult);
+            }
+        }
+
+        [TestMethod]
+        public async Task WrongTokenType_Async()
+        {
+            // Arrange
+            var authScheme = Substitute.For<IAuthenticationScheme>();
+            authScheme.AuthorizationHeaderPrefix.Returns("BearToken");
+            authScheme.KeyId.Returns("keyid");
+            authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
+            authScheme.FormatAccessToken(default).ReturnsForAnyArgs(x => "enhanced_secret_" + ((MsalAccessTokenCacheItem)x[0]).Secret);
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                // Act
+               var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() => app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithAuthenticationScheme(authScheme)
+                    .ExecuteAsync()).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.TokenTypeMismatch, ex.ErrorCode);
             }
         }
 

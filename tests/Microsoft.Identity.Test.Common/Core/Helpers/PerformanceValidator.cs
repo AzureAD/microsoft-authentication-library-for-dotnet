@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
             else
             {
-                Debug.WriteLine(
+                Trace.WriteLine(
                     $"Measured performance time OK.  Max allowed: {_maxMilliseconds}ms.  Elapsed:  {elapsedMilliseconds}.  {_message}");
             }
         }

@@ -84,6 +84,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         ITelemetryConfig TelemetryConfig { get; }
 
+        /// <summary>
+        /// Allows usage of features that are experimental and would otherwise throw a specific exception. 
+        /// Use of experimental features in production is not recommended and are subject to be removed between builds. 
+        /// For details see https://aka.ms/msal-net-experimental-features
+        /// </summary>
+        bool ExperimentalFeaturesEnabled { get; }
+
+
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
         /// </summary>

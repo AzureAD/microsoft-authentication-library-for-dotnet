@@ -329,9 +329,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
-            return await SendHttpMessageAsync(client, tokenEndpoint).ConfigureAwait(false);
-        }
+            MsalTokenResponse response = await SendHttpMessageAsync(client, tokenEndpoint)
+                .ConfigureAwait(false);
 
+            if (!string.Equals(
+                    response.TokenType, 
+                    AuthenticationRequestParameters.AuthenticationScheme.AccessTokenType, 
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new MsalClientException(
+                    MsalError.TokenTypeMismatch,
+                    MsalErrorMessage.TokenTypeMismatch(
+                        AuthenticationRequestParameters.AuthenticationScheme.AccessTokenType,
+                        response.TokenType));
+            }
+
+            return response;
+        }
 
         private async Task<MsalTokenResponse> SendHttpMessageAsync(OAuth2Client client, string tokenEndpoint)
         {

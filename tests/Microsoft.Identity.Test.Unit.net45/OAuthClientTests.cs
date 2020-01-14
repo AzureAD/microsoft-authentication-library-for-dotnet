@@ -6,17 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static Microsoft.Identity.Test.Unit.RequestsTests.InteractiveRequestTests;
 
 namespace Microsoft.Identity.Test.Unit
 {

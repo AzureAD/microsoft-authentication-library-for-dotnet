@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public const string ExpectedHash = "hash";
         public const string EncryptedResponsed = "response";
         public const string BrokerNonce = "broker_nonce";
+        public const string IdentifyiOSBrokerFromResponseUrl = "broker";
 
         public const string BrokerKeyService = "Broker Key Service";
         public const string BrokerKeyAccount = "Broker Key Account";

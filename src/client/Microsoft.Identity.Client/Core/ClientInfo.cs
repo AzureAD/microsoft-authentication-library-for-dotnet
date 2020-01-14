@@ -3,18 +3,18 @@
 
 using System;
 using System.Globalization;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Core
 {
-    [DataContract]
+    [JsonObject]
     internal class ClientInfo
     {
-        [DataMember(Name = ClientInfoClaim.UniqueIdentifier, IsRequired = false)]
+        [JsonProperty(PropertyName = ClientInfoClaim.UniqueIdentifier )]
         public string UniqueObjectIdentifier { get; set; }
 
-        [DataMember(Name = ClientInfoClaim.UniqueTenantIdentifier, IsRequired = false)]
+        [JsonProperty(PropertyName = ClientInfoClaim.UniqueTenantIdentifier)]
         public string UniqueTenantIdentifier { get; set; }
 
         public static ClientInfo CreateFromJson(string clientInfo)
@@ -37,11 +37,6 @@ namespace Microsoft.Identity.Client.Core
                      "Failed to parse the returned client info.",
                      exc);
             }
-        }
-
-        public string ToEncodedJson()
-        {
-            return Base64UrlHelpers.Encode(JsonHelper.SerializeToJson<ClientInfo>(this));
         }
 
         public string ToAccountIdentifier()

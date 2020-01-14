@@ -101,7 +101,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         TestConstants.Utid,
                         TestConstants.s_userIdentifier,
                         TestConstants.ClientId,
-                        TestConstants.ScopeForAnotherResourceStr));
+                        TestConstants.ScopeForAnotherResourceStr, 
+                        TestConstants.Bearer));
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Task<AuthenticationResult> task = app
@@ -139,7 +140,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         TestConstants.Utid,
                         TestConstants.s_userIdentifier,
                         TestConstants.ClientId,
-                        TestConstants.ScopeForAnotherResourceStr));
+                        TestConstants.ScopeForAnotherResourceStr,
+                        TestConstants.Bearer));
 
                 Task<AuthenticationResult> task = app
                     .AcquireTokenSilent(
@@ -174,7 +176,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         TestConstants.Utid,
                         TestConstants.s_userIdentifier,
                         TestConstants.ClientId,
-                        TestConstants.ScopeForAnotherResourceStr));
+                        TestConstants.ScopeForAnotherResourceStr,
+                        TestConstants.Bearer));
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuestTenant);
@@ -238,7 +241,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TestConstants.Utid,
                     TestConstants.s_userIdentifier,
                     TestConstants.ClientId,
-                    TestConstants.ScopeForAnotherResourceStr));
+                    TestConstants.ScopeForAnotherResourceStr,
+                    TestConstants.Bearer));
 
                 if (expectNetworkDiscovery)
                 {

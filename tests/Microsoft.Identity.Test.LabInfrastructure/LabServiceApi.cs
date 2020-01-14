@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public async Task<LabResponse> GetLabResponseAsync(UserQuery query)
         {
             var response = await GetLabResponseFromApiAsync(query).ConfigureAwait(false);
-            var user = response.User;
 
             return response;
         }
@@ -56,12 +55,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private async Task<LabResponse> CreateLabResponseFromResultStringAsync(string result)
         {
             LabUser[] userResponses = JsonConvert.DeserializeObject<LabUser[]>(result);
-            if (userResponses.Length > 1)
-            {
-                throw new InvalidOperationException(
-                    "Test Setup Error: Not expecting the lab to return multiple users for a query." +
-                    " Please have rewrite the query so that it returns a single user.");
-            }
 
             var user = userResponses[0];
 
@@ -149,18 +142,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", _labApiAccessToken));
                 return await httpClient.GetStringAsync(address).ConfigureAwait(false);
             }
-        }
-
-        public async Task<LabResponse> CreateTempLabUserAsync()
-        {
-            IDictionary<string, string> queryDict = new Dictionary<string, string>
-            {
-                { "code", "HC1Tud9RHGK12VoBPH3sbeyyPHfjmACKbyq8bFlhIiEwpMbWYR4zTQ==" },
-                { "userType", "Basic" }
-            };
-
-            string result = await SendLabRequestAsync(LabApiConstants.CreateLabUser, queryDict).ConfigureAwait(false);
-            return CreateLabResponseFromResultStringAsync(result).Result;
         }
 
         public async Task<string> GetUserSecretAsync(string lab)

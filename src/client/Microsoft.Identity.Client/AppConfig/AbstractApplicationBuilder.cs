@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client
 {
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Client
                 Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
                 return (T)this;
             }
-            catch (System.Runtime.Serialization.SerializationException ex)
+            catch (JsonException ex)
             {
                 throw new MsalClientException(
                     MsalError.InvalidUserInstanceMetadata,
@@ -295,6 +296,21 @@ namespace Microsoft.Identity.Client
             }
             return (T)this;
         }
+
+        /// <summary>
+        /// Allows usage of experimental features and APIs. If this flag is not set, experimental features 
+        /// will throw an exception. For details see https://aka.ms/msal-net-experimental-features
+        /// </summary>
+        /// <remarks>
+        /// Changes in the public API of experimental features will not result in an increment of the major version of this library.
+        /// For these reason we advise against using these features in production.
+        /// </remarks>
+        public T WithExperimentalFeatures(bool enableExperimentalFeatures = true)
+        {
+            Config.ExperimentalFeaturesEnabled = enableExperimentalFeatures;
+            return (T)this;
+        }
+
         /// <summary>
         /// Generate telemetry aggregation events.
         /// </summary>

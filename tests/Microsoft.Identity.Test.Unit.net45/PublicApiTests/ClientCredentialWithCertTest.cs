@@ -295,7 +295,8 @@ namespace Microsoft.Identity.Test.Unit
                         TestConstants.Utid,
                         TestConstants.s_userIdentifier,
                         TestConstants.ClientId,
-                        TestConstants.ScopeForAnotherResourceStr));
+                        TestConstants.ScopeForAnotherResourceStr,
+                        TestConstants.Bearer));
 
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));

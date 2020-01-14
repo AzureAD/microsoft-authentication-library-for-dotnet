@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public static void SetBrokerResponse(NSUrl responseUrl)
         {
             s_brokerResponse = responseUrl;
-            s_brokerResponseReady.Release();
+            s_brokerResponseReady?.Release();
         }
     }
 }

@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         #endregion
 
         [TestMethod]
-        [Ignore] //Fails when running on AzureDevOps https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1530
+       // [Ignore] //Fails when running on AzureDevOps https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1530
         public async Task OBO_WithCache_MultipleUsers_Async()
         {
             var aadUser1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;

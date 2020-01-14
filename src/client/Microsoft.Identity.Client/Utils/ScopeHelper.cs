@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.Utils
 {
     internal static class ScopeHelper
     {
-        public static bool ScopeContains(SortedSet<string> outerSet, SortedSet<string> possibleContainedSet)
+        public static bool ScopeContains(ISet<string> outerSet, IEnumerable<string> possibleContainedSet)
         {
             foreach (string key in possibleContainedSet)
             {

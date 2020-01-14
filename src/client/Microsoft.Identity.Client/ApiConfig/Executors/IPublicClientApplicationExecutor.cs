@@ -4,11 +4,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
     internal interface IPublicClientApplicationExecutor
     {
+        IServiceBundle ServiceBundle { get; }
+
         Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
             AcquireTokenInteractiveParameters interactiveParameters,

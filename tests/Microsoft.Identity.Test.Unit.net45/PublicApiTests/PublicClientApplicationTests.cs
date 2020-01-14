@@ -40,60 +40,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [Description("Tests the public interfaces can be mocked")]
-        [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
-        public void MockPublicClientApplication()
-        {
-            //// Setup up a public client application that returns a dummy result
-            //// The caller asks for two scopes, but only one is returned
-            //var mockResult = new AuthenticationResult(
-            //   accessToken: "",
-            //   isExtendedLifeTimeToken: false,
-            //   uniqueId: "",
-            //   expiresOn: DateTimeOffset.Now,
-            //   extendedExpiresOn: DateTimeOffset.Now,
-            //   tenantId: "",
-            //   account: null,
-            //   idToken: "id token",
-            //   scopes: new[] { "scope1" });
-
-            //var mockApp = Substitute.For<IPublicClientApplication>();
-            //mockApp.AcquireTokenInteractive(new string[] { "scope1", "scope2" }, null).ExecuteAsync(CancellationToken.None).ReturnsForAnyArgs(mockResult);
-
-            //// Now call the substitute with the args to get the substitute result
-            //AuthenticationResult actualResult = mockApp
-            //    .AcquireTokenInteractive(new string[] { "scope1" }, null)
-            //    .ExecuteAsync(CancellationToken.None)
-            //    .Result;
-
-            //Assert.IsNotNull(actualResult);
-            //Assert.AreEqual("id token", actualResult.IdToken, "Mock result failed to return the expected id token");
-
-            //// Check the users properties returns the dummy users
-            //IEnumerable<string> scopes = actualResult.Scopes;
-            //Assert.IsNotNull(scopes);
-            //CollectionAssert.AreEqual(new string[] { "scope1" }, actualResult.Scopes.ToArray());
-        }
-
-        [TestMethod]
-        [Description("Tests the public application interfaces can be mocked to throw MSAL exceptions")]
-        [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
-        public void MockPublicClientApplication_Exception()
-        {
-            //// Setup up a confidential client application that returns throws
-            //var mockApp = Substitute.For<IPublicClientApplication>();
-            //mockApp
-            //    .WhenForAnyArgs(x => x.AcquireTokenAsync(Arg.Any<string[]>()))
-            //    .Do(x => throw new MsalServiceException("my error code", "my message"));
-
-            //// Now call the substitute and check the exception is thrown
-            //MsalServiceException ex =
-            //    AssertException.Throws<MsalServiceException>(() => mockApp.AcquireTokenAsync(new string[] { "scope1" }));
-            //Assert.AreEqual("my error code", ex.ErrorCode);
-            //Assert.AreEqual("my message", ex.Message);
-        }
-
-        [TestMethod]
         public void ConstructorsTest()
         {
             PublicClientApplication app = PublicClientApplicationBuilder

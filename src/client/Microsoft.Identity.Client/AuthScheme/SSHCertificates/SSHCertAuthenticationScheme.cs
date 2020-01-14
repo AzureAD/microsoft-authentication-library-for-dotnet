@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Client.SSHCertificates
+namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
 {
     internal class SSHCertAuthenticationScheme : IAuthenticationScheme
     {
@@ -33,6 +33,8 @@ namespace Microsoft.Identity.Client.SSHCertificates
             throw new MsalClientException(
                 MsalError.SSHCertUsedAsHttpHeader,
                 MsalErrorMessage.SSHCertUsedAsHttpHeader);
+        public string AccessTokenType => SSHCertTokenType;
+
 
         public string KeyId { get; }
 

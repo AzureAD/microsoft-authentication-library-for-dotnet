@@ -7,11 +7,11 @@ Quick links:
 | [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/#quickstarts) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [Library Reference](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet) | [Support](README.md#community-help-and-support) |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
 
-## Nuget packages
+## Nuget package
 
 Released     | Nightly
 -----------------------------|-------------------------
- [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/) | [![MyGet](https://img.shields.io/myget/aad-clients-nightly/vpre/Microsoft.Identity.Client.svg?style=flat-square&label=myget&colorB=ff0000)](https://www.myget.org/feed/aad-clients-nightly/package/nuget/Microsoft.Identity.Client)
+ [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/) | TBD
 
 ## Build Status
  

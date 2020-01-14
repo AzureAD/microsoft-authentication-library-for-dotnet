@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.AuthScheme
 {
     /// <summary>
     /// Used to modify the experience depending on the type of token asked. 
@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client
         string AuthorizationHeaderPrefix { get; }
 
         /// <summary>
-        /// Extra paramters that are added to the request to the /token endpoint
+        /// Extra parameters that are added to the request to the /token endpoint. 
         /// </summary>
         /// <returns>Name and values of params</returns>
         IDictionary<string, string> GetTokenRequestParams();
@@ -33,5 +33,11 @@ namespace Microsoft.Identity.Client
         /// Creates the access token that goes into an Authorization HTTP header. 
         /// </summary>
         string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
+
+        /// <summary>
+        /// Expected to match the token_type parameter returned by ESTS. Used to disambiguate
+        /// between ATs of different types (e.g. Bearer and PoP) when loading from cache etc.
+        /// </summary>
+        string AccessTokenType { get; }
     }
 }

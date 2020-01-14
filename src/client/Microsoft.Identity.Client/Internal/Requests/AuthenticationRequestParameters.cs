@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
