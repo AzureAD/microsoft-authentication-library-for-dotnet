@@ -354,8 +354,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private string GetEncodedRedirectUri(string redirectUri)
         {
             Uri uri = new Uri(redirectUri);
-            var test = "msauth://" + uri.Host + "/" + System.Net.WebUtility.UrlEncode(uri.AbsolutePath.Split("/")[1]);
-            return "msauth://" + uri.Host + "/" + System.Net.WebUtility.UrlEncode(uri.AbsolutePath.Split("/")[1]);
+            var test = "msauth://" + uri.Host + "/" + System.Net.WebUtility.UrlEncode(uri.AbsolutePath.Split('/')[1]);
+            return "msauth://" + uri.Host + "/" + System.Net.WebUtility.UrlEncode(uri.AbsolutePath.Split('/')[1]);
         }
 
         private Bundle GetBrokerAccountBundle(IDictionary<string, string> brokerPayload)
