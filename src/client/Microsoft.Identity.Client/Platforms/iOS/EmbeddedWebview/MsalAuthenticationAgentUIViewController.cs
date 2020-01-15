@@ -53,7 +53,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         protected WKWebView PrepareWKWebView()
         {
             WKWebViewConfiguration wkconfg = new WKWebViewConfiguration() { };
-
+#if !IS_APPCENTER_BUILD
+            wkconfg.DefaultWebpagePreferences.PreferredContentMode = WKContentMode.Mobile;
+#endif
             _wkWebView = new WKWebView(View.Bounds, wkconfg)
             {
                 UIDelegate = new WKWebNavigationDelegate.WKWebViewUIDelegate(this),
