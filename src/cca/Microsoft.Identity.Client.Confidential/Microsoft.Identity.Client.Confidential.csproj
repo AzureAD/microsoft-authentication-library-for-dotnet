@@ -1,0 +1,66 @@
+<Project Sdk="MSBuild.Sdk.Extras">
+
+  <PropertyGroup>
+    <TargetFrameworkNetDesktop>net45</TargetFrameworkNetDesktop> <!--TODO: needed? -->
+    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
+    <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>        
+
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
+    
+    <PathToSources>$(MSBuildThisFileDirectory)</PathToSources>
+  </PropertyGroup>
+
+  <Import Project="..\..\ConstantsForLibAssemblies.props" />
+
+
+  <!-- TODO: analyze this-->
+    <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+    <Compile Include="$(PathToSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
+    <Compile Include="$(PathToSources)\Platforms\Shared\NetStdCore\**\*.cs" />
+
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" />
+    <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+    <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
+    <!-- 4.3.0 has CVE-2019-0657 -->
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />    
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
+    <Compile Include="$(PathToSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
+
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+    <!-- 4.3.0 has CVE-2019-0657 -->
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' ">
+    <Compile Include="$(PathToSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />    
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Net.Http" />    
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  
+
+</Project>

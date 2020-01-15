@@ -22,6 +22,6 @@
     <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
+    <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Public.Ref.csproj" />
   </ItemGroup>
 </Project>
