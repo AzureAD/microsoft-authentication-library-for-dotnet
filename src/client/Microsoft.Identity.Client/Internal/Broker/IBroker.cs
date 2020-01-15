@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 {
     internal interface IBroker
     {
-        bool CanInvokeBroker(CoreUIParent uiParent);
+        bool CanInvokeBroker();
 
         Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload);
     }

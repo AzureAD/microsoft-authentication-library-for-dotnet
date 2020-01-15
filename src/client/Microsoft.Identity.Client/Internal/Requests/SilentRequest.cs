@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Linq;
 using System;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -73,6 +74,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async override Task PreRunAsync()
         {
+
+            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && AuthenticationRequestParameters.IsBrokerEnabled)
+                return;
+
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
 
@@ -84,10 +89,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-           
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-
+            if (AuthenticationRequestParameters.IsBrokerEnabled)
+            {
+                var msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
+                return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            }
             // Look for access token
             if (!_silentParameters.ForceRefresh)
             {
@@ -121,6 +129,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Warning("Failed to refresh the RT and cannot use existing AT (expired or missing).");
                 throw;
             }
+        }
+
+        private async Task<MsalTokenResponse> ExecuteBrokerAsync(CancellationToken cancellationToken)
+        {
+            IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker(null);
+
+            var brokerSilentRequest = new BrokerSilentRequest(
+                AuthenticationRequestParameters,
+                _silentParameters,
+                ServiceBundle,
+                broker);
+
+            return await brokerSilentRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)

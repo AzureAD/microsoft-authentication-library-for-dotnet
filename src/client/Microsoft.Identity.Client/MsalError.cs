@@ -405,6 +405,31 @@ namespace Microsoft.Identity.Client
         public const string CannotInvokeBroker = "cannot_invoke_broker";
 
         /// <summary>
+        /// MSAL is not able to find a suitable account to use with broker
+        /// </summary>
+        public const string NoAndroidBrokerAccountFound = "no_broker_account_found";
+
+        /// <summary>
+        /// MSAL cannot find the broker application to authenticate accounts.
+        /// </summary>
+        public const string NoAndroidBrokerInstalledOnDevice = "No_Broker_Installed_On_Device";
+
+        /// <summary>
+        /// Null intent was returned so broker activity cannot be launched
+        /// </summary>
+        public const string NullIntentReturnedFromAndroidBroker = "null_intent_returned_from_broker";
+
+        /// <summary>
+        /// Failed to validate android broker signature
+        /// </summary>
+        public const string AndroidBrokerSignatureVerificationFailed = "broker_signature_verification_failed";
+
+        /// <summary>
+        /// Failed To Complete Android Broker Operation
+        /// </summary>
+        public const string AndroidBrokerOperationFailed = "android_broker_operation_failed";
+
+        /// <summary>
         /// Error code used when the HTTP response returns HttpStatusCode.NotFound
         /// </summary>
         public const string HttpStatusNotFound = "not_found";

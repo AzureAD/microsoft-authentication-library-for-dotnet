@@ -32,6 +32,9 @@ namespace Microsoft.Identity.Client
             var logger = MsalLogger.Create(Guid.Empty, null);
             logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
 
+                    AndroidBroker.SetBrokerResult(data, (int)resultCode);
+
+
             AuthorizationResult authorizationResult;
             if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
             {
@@ -55,7 +58,13 @@ namespace Microsoft.Identity.Client
             case (int)Result.Canceled:
                 return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
 
-            default:
+                case BrokerResponseCode.ResponseReceived:
+                case BrokerResponseCode.BrowserCodeError:
+                case BrokerResponseCode.UserCancelled:
+                    AndroidBroker.SetBrokerResult(data, (int)resultCode);
+                    return null;
+
+                default:
                 return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
             }
         }

@@ -117,6 +117,7 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseError = "Broker response returned error: ";
         public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
+        public const string NullIntentReturnedFromBroker = "Broker returned a null intent. Check the Xamarin Android app settings and logs for more information.";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint.";
         public const string MultipleAccountsForLoginHint = "You are trying to acquire a token silently using a login hint. Multiple accounts were found in the token cache having this login hint. Please choose an account manually an pass it in to AcquireTokenSilently.";
 

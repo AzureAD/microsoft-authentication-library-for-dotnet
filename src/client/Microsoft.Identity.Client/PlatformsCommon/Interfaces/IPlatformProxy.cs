@@ -106,8 +106,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url);
 
-        IBroker CreateBroker();
+        IBroker CreateBroker(CoreUIParent uiParent);
 
         void /* for test */ SetBrokerForTest(IBroker broker);
+
+        bool CanBrokerSupportSilentAuth();
     }
 }

@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> ExecuteBrokerAsync(CancellationToken cancellationToken)
         {
-            IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker();
+            IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker(_interactiveParameters.UiParent);
 
             var brokerInteractiveRequest = new BrokerInteractiveRequest(
                 AuthenticationRequestParameters,

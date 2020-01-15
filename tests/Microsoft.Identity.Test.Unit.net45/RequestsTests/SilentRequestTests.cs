@@ -22,6 +22,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.OAuth2;
 using System.Text;
 using NSubstitute.Routing.Handlers;
+using Microsoft.Identity.Client.Internal.Broker;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -109,6 +111,51 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public void BrokerSilentRequestBrokerRequiredTestAsync()
+        {
+            IDictionary<string, string> extraQueryParamsAndClaims =
+               TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
+
+            using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
+            {
+                _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
+                harness.ServiceBundle.PlatformProxy.SetBrokerForTest(CreateMockBroker());
+
+                var parameters = harness.CreateRequestParams(
+                    harness.Cache,
+                    null,
+                    TestConstants.s_extraQueryParams,
+                    TestConstants.Claims,
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
+                parameters.IsBrokerEnabled = false;
+
+                var silentParameters = new AcquireTokenSilentParameters()
+                {
+                    Account = new Account(TestConstants.HomeAccountId, TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment),
+                };
+
+                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler()
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                        ExpectedQueryParams = extraQueryParamsAndClaims
+                    });
+
+                var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
+
+                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
+                var result = task.Result;
+                Assert.IsNotNull(result);
+                Assert.AreEqual("some-access-token", result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+            }
+        }
+
+        [TestMethod]
         public void RequestParamsNullArg()
         {
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
@@ -154,6 +201,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual(MsalError.NoTokensFoundError, exc.ErrorCode);
                 }
             }
+        }
+
+        private IBroker CreateMockBroker()
+        {
+            IBroker mockBroker = Substitute.For<IBroker>();
+            mockBroker.CanInvokeBroker().ReturnsForAnyArgs(true);
+            mockBroker.AcquireTokenUsingBrokerAsync(null).ReturnsForAnyArgs(TestConstants.CreateMsalTokenResponse());
+            return mockBroker;
         }
 
         private class MockHttpTestHarness : IDisposable

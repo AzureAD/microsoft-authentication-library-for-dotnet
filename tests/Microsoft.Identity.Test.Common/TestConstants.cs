@@ -96,6 +96,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string XClientVer = "x-client-Ver";
         public const TokenSubjectType TokenSubjectTypeUser = 0;
         public const string TestMessage = "test message";
+        public const string LoginHint = "loginHint";
 
         public const string LocalAccountId = "test_local_account_id";
         public const string GivenName = "Joe";
@@ -191,6 +192,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
             string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
 
         public const string BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2";
+        public const string BrokerOIDCScopes = "openid offline_access profile";
         public const string BrokerClaims = "testClaims";
 
         public static readonly ClientCredentialWrapper s_onPremiseCredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
