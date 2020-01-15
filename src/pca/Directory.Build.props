@@ -116,7 +116,7 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
 
-    <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.Public.rd.xml" />
+    <!--<EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.Public.rd.xml" />-->
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">

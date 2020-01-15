@@ -1,6 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <DefineConstants>$(DefineConstants);RUNTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
@@ -20,8 +20,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
-  </PropertyGroup>
+  </PropertyGroup>-->
+
+  <Import Project="..\..\ConstantsForLibAssemblies.props" />
+
   <ItemGroup>
-    <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Public.Ref.csproj" />
+    <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Public.Ref\Microsoft.Identity.Client.Public.Ref.csproj" />
   </ItemGroup>
 </Project>
