@@ -26,6 +26,7 @@ using System.Text;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
+    [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class AndroidBrokerHelper
     {
         private const string RedirectUriScheme = "msauth";
