@@ -13,8 +13,18 @@
 
   <Import Project="..\..\ConstantsForLibAssemblies.props" />
 
-
   <!-- TODO: analyze this-->
+
+  <ItemGroup>
+    <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
+    <None Include="$(PathToSources)\**\*.cs;$(PathToSources)\**\*.xml;$(PathToSources)\**\*.axml"
+          Exclude="$(PathToSources)\obj\**\*.*;$(PathToSources)\bin\**\*.*" />
+    <!-- Manually include the cs files -->
+    <Compile Include="$(PathToSources)\**\*.cs" Exclude="$(PathToSources)\obj\**\*.*" />
+    <Compile Remove="$(PathToSources)\Platforms\**\*.*;$(PathToSources)\Resources\*.cs" />
+    
+  </ItemGroup>
+
     <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <Compile Include="$(PathToSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
     <Compile Include="$(PathToSources)\Platforms\Shared\NetStdCore\**\*.cs" />

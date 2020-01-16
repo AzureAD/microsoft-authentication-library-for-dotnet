@@ -15,11 +15,6 @@
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- The MSAL.snk has both private and public keys -->
-    <DelaySign>false</DelaySign>
-  </PropertyGroup>
-
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
     <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.4.0-localbuild</MsalClientSemVer>
@@ -57,7 +52,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PathToMsalSources>$(MSBuildThisFileDirectory)\Microsoft.Identity.Client</PathToMsalSources>
+    <PathToSources>$(MSBuildThisFileDirectory)\Microsoft.Identity.Client</PathToSources>
     <!-- Need to include / exclude / remove cs files manually so that they are present in both assemblies -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
@@ -110,18 +105,18 @@
 
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
-    <None Include="$(PathToMsalSources)\**\*.cs;$(PathToMsalSources)\**\*.xml;$(PathToMsalSources)\**\*.axml"
-          Exclude="$(PathToMsalSources)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" />
+    <None Include="$(PathToSources)\**\*.cs;$(PathToSources)\**\*.xml;$(PathToSources)\**\*.axml"
+          Exclude="$(PathToSources)\obj\**\*.*;$(PathToSources)\bin\**\*.*" />
     <!-- Manually include the cs files -->
-    <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
-    <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
+    <Compile Include="$(PathToSources)\**\*.cs" Exclude="$(PathToSources)\obj\**\*.*" />
+    <Compile Remove="$(PathToSources)\Platforms\**\*.*;$(PathToSources)\Resources\*.cs" />
 
-    <!--<EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.Public.rd.xml" />-->
+    <!--<EmbeddedResource Include="$(PathToSources)\Properties\Microsoft.Identity.Client.Public.rd.xml" />-->
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\NetStdCore\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
+    <Compile Include="$(PathToSources)\Platforms\Shared\NetStdCore\**\*.cs" />
 
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -139,9 +134,9 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\NetStdCore\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
+    <Compile Include="$(PathToSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\Shared\NetStdCore\**\*.cs" />
 
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
@@ -155,14 +150,14 @@
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />
+    <Compile Include="$(PathToSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
 
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
+    <Compile Update="$(PathToSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
+    <Compile Update="$(PathToSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
+    <Compile Update="$(PathToSources)\Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
+    <Compile Update="$(PathToSources)\Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
+    <Compile Update="$(PathToSources)\Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -176,7 +171,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\uap\**\*.cs" />
 
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
@@ -193,8 +188,8 @@
     
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\Apple\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\iOS\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\Shared\Apple\**\*.cs" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -210,9 +205,9 @@
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkMac)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\Mac\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\Apple\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\Mac\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\Shared\Apple\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
     <Reference Include="System" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -224,7 +219,7 @@
     <Reference Include="Xamarin.Mac" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
+    <Compile Include="$(PathToSources)\Platforms\Android\**\*.cs" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -240,11 +235,11 @@
 
   <!-- This is here to workaround designer issues so VS sees them appropriately -->
   <ItemGroup>
-    <None Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
-    <None Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
-    <None Update="$(PathToMsalSources)\Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
-    <None Update="$(PathToMsalSources)\Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
-    <None Update="$(PathToMsalSources)\Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
+    <None Update="$(PathToSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
+    <None Update="$(PathToSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
+    <None Update="$(PathToSources)\Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
+    <None Update="$(PathToSources)\Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
+    <None Update="$(PathToSources)\Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
   </ItemGroup>
 
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
