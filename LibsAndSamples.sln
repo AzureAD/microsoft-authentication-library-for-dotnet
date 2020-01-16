@@ -85,11 +85,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "microsoft.identity.client", "microsoft.identity.client", "{4667ADF0-37FA-4306-BD2A-F55D6360143E}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.net45", "tests\Microsoft.Identity.Test.Integration.net45\Microsoft.Identity.Test.Integration.net45.csproj", "{6A93C76A-5DEB-4A4D-A004-1F611C67B4E6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.netcore", "tests\Microsoft.Identity.Test.Integration.netcore\Microsoft.Identity.Test.Integration.netcore.csproj", "{4E2A58FD-A401-412B-9409-A4CCC60BA0D7}"
@@ -1287,7 +1282,6 @@ Global
 		{24D2AF71-A01E-4450-8C3F-B9923A81134B} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{959A47D9-07E7-4BF3-A0F7-6D9CD42A2C46} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{C44AADC0-1E9B-427F-AC02-642BDF8D936B} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
-		{4667ADF0-37FA-4306-BD2A-F55D6360143E} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
 		{6A93C76A-5DEB-4A4D-A004-1F611C67B4E6} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{4E2A58FD-A401-412B-9409-A4CCC60BA0D7} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{2EBB7FFE-47E0-46F8-A4D6-79A4CF44729C} = {384BA371-F17F-4A70-9423-D54F71BB3FCB}

@@ -4,31 +4,39 @@
     <DefineConstants>$(DefineConstants);RUNTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
-    <DefineConstants>$(DefineConstants);NET_CORE_RUNTIME</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET_CORE;NET_CORE_RUNTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
-    <DefineConstants>$(DefineConstants);WINDOWS_APP_RUNTIME</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS_APP;WINDOWS_APP_RUNTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid)'">
-    <DefineConstants>$(DefineConstants);ANDROID_RUNTIME</DefineConstants>
+    <DefineConstants>$(DefineConstants);ANDROID;ANDROID_RUNTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
-    <DefineConstants>$(DefineConstants);DESKTOP_RUNTIME</DefineConstants>
+    <DefineConstants>$(DefineConstants);DESKTOP;DESKTOP_RUNTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">
-    <DefineConstants>$(DefineConstants);iOS_RUNTIME</DefineConstants>
+    <DefineConstants>$(DefineConstants);iOS;IOS;IOS_RUNTIME;iOS_RUNTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
-    <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
+    <DefineConstants>$(DefineConstants)NETSTANDARD;NETSTANDARD_RUNTIME</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(APPCENTER_BUILD)' != ''">
+    <DefineConstants>$(DefineConstants);IS_APPCENTER_BUILD</DefineConstants>
   </PropertyGroup>-->
 
   <Import Project="..\..\ConstantsForLibAssemblies.props" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Public.Ref\Microsoft.Identity.Client.Public.Ref.csproj" />
   </ItemGroup>
 </Project>

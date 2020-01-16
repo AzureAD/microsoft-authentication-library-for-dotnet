@@ -14,10 +14,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.iOS", "tests\devapps\XForms\XForms.iOS\XForms.iOS.csproj", "{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572-BBD7-424E-81D5-E59E6884EB3A}"
-	ProjectSection(SolutionItems) = preProject
-		msal\src\MSAL.Common.props = msal\src\MSAL.Common.props
-		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Common", "tests\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj", "{BD4635E4-7A5D-4ADB-B24A-808CEBE02737}"
 EndProject
@@ -30,6 +26,22 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Shared", "src\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj", "{77EBAE6B-F293-4E98-9F18-153D624CD2A5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{281BAB47-2B4D-48FD-A52B-1D7AF0D574F6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pca", "pca", "{CD9B7E6A-A11A-494E-8701-4155C681FDA2}"
+	ProjectSection(SolutionItems) = preProject
+		src\pca\Directory.Build.props = src\pca\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "global", "global", "{F6A3AD31-571E-4C81-A4D4-6EA17B795FD9}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4F2AF2A7-332A-405C-9B6C-2B7A0AF4F646}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.build.props = src\Directory.build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -563,6 +575,9 @@ Global
 		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62} = {3761DEF3-458C-4CE2-BE94-4FC9D12217CC}
 		{BD4635E4-7A5D-4ADB-B24A-808CEBE02737} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{96A0933A-9E57-4AE4-9C35-77339CD96720} = {281BAB47-2B4D-48FD-A52B-1D7AF0D574F6}
+		{CD9B7E6A-A11A-494E-8701-4155C681FDA2} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
+		{F6A3AD31-571E-4C81-A4D4-6EA17B795FD9} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
+		{4F2AF2A7-332A-405C-9B6C-2B7A0AF4F646} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}

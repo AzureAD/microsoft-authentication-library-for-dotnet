@@ -11,6 +11,14 @@
     <PathToSources>$(MSBuildThisFileDirectory)</PathToSources>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
   <Import Project="..\..\ConstantsForLibAssemblies.props" />
 
   <!-- TODO: analyze this-->
