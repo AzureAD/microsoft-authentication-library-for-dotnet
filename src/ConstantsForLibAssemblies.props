@@ -19,7 +19,10 @@
     <DefineConstants>$(DefineConstants);iOS;IOS;IOS_RUNTIME;iOS_RUNTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
-    <DefineConstants>$(DefineConstants)NETSTANDARD;NETSTANDARD_RUNTIME</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETSTANDARD;NETSTANDARD_RUNTIME</DefineConstants>
+  </PropertyGroup>
+   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkMac)'">
+    <DefineConstants>$(DefineConstants);MAC;MAC_RUNTIME</DefineConstants>
   </PropertyGroup>
     <PropertyGroup Condition="'$(APPCENTER_BUILD)' != ''">
     <DefineConstants>$(DefineConstants);IS_APPCENTER_BUILD</DefineConstants>

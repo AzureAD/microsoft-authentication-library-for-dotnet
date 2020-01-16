@@ -36,7 +36,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Public.Ref\Microsoft.Identity.Client.Public.Ref.csproj" />
   </ItemGroup>
 </Project>
