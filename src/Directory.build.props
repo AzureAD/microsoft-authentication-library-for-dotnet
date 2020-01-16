@@ -1,26 +1,59 @@
+<!-- This file gets included in all csproj files in subdirectories. The inclusion takes place BEFORE the csproj items-->
 <Project>
-  <PropertyGroup>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-
-    <LangVersion>7.2</LangVersion>
+  <PropertyGroup Label="Signing"> 
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/../build/MSAL.snk</AssemblyOriginatorKeyFile>
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-
-    <!-- We use SemVer 2.0, and this removes the warning when building nuget packages that 2.0 semver is not compatible with semver 1.0 tools. -->
-    <NoWarn>NU5105</NoWarn>
-
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- PrivateAssets="All" is on these packages to ensure they're development dependencies
-         and aren't included as transitionary dependencies to package consumers.
-         For clarity, without PrivateAssets marked here, anyone consuming Microsoft.Identity.Client
-         would also be forced to install these dependencies.  PrivateAssets avoids this problem. -->
-    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" PrivateAssets="All" />
-  </ItemGroup>
+  <PropertyGroup Label="Versioning">
+    <!--This should be passed from the VSTS build-->
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.4.0-localbuild</MsalClientSemVer>
+    <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
+    <Version>$(MsalClientSemVer)</Version>
+  </PropertyGroup>
 
+  <PropertyGroup Label="Packaging">
+    <XamarinAndroidSupportSkipVerifyVersions>true</XamarinAndroidSupportSkipVerifyVersions>    <!--TODO move this-->
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->    
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+    <Authors>Microsoft</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
+    <PackageReleaseNotes>The changelog is available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/changelog.txt and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap </PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <!-- Each assembly needs to define the properties below 
+      <Title></Title>
+      <Description></Description>    
+    <PackageTags></PackageTags>
+    <Product></Product>
+    -->
+
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    
+    <!-- We use SemVer 2.0, and this removes the warning when building nuget packages that 2.0 semver is not compatible with semver 1.0 tools. -->
+    <NoWarn>NU5105</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Compile and Debug">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <LangVersion>7.2</LangVersion>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+     <!-- Projects need to specify their own files -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All"/>
+  </ItemGroup>
 </Project>

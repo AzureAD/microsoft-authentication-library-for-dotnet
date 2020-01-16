@@ -47,10 +47,6 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>Full</DebugType>
-  </PropertyGroup>
-
   <PropertyGroup>
     <PathToSources>$(MSBuildThisFileDirectory)\Microsoft.Identity.Client</PathToSources>
     <!-- Need to include / exclude / remove cs files manually so that they are present in both assemblies -->
