@@ -1,9 +1,6 @@
-<!-- This file gets included in all csproj files in subdirectories. The inclusion takes place BEFORE the csproj items-->
 <Project>
-  <PropertyGroup Label="Signing"> 
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/../build/MSAL.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+  <!-- Only the first Directory.Build.props is automatically loaded. The rest need to be loaded manually -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
 
   <PropertyGroup Label="Versioning">
     <!--This should be passed from the VSTS build-->
