@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-            if (AuthenticationRequestParameters.IsBrokerEnabled)
+            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && AuthenticationRequestParameters.IsBrokerEnabled)
             {
                 var msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
