@@ -1,4 +1,4 @@
-4.8.0.
+4.8.1.
 ============
 Bug fix:
 **Cannot acquire token in UWP app on HoloLens via a unity plugin as json serialization fails** Serialization now works properly in MSAL.NET. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1468)
