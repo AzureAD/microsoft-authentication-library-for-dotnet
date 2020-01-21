@@ -4,6 +4,12 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
+#if ANDROID
+using Android;
+#endif
+#if iOS
+using Foundation;
+#endif
 
 // Version and Metadata are set at build time from msbuild properties defined in the csproj
 
@@ -14,3 +20,6 @@ using System.Runtime.InteropServices;
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
+#if iOS || ANDROID
+[assembly: LinkerSafe]
+#endif
