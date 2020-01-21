@@ -1,3 +1,21 @@
+4.8.1.
+============
+Bug fix:
+**Cannot acquire token in UWP app on HoloLens via a unity plugin as json serialization fails** Serialization now works properly in MSAL.NET. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1468)
+
+**AAD Security question registration page unresponsive in Android embedded webview** MSAL.NET now properly handles the andoid activity when using the embedded webview. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1532)
+
+**"offline_access" scope causes token cache misses** MSAL.NET now properly filters the cache during silent authentication. [Issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1548)
+
+**Improved invalid client error message** MSAL.NET now has a better error message when an invalid client error is sent back from AAD. [Issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1576)
+
+New Features:
+**MSAL.NET now supports Proof of Possession** The PublicClientApplication on every target has support for this. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1488)
+
+**Token cache serialization for Mac** MSAL.NET is now able to serialize and deserialize the token cache during authentication on MAC OS. [Issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1487)
+
+**MSAL.NET now uses "mobile" configuration for iOS Xamarin embedded webview** MSAL.NET now properly uses the WKWebview on iPad when using the embedded webview. [Issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1552)
+
 4.7.1.
 ============
 Bug fix:
