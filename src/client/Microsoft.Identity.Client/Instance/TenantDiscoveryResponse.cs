@@ -4,6 +4,12 @@
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Json;
+#if iOS
+using Foundation;
+#endif
+#if ANDROID
+using Android.Runtime;
+#endif
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -15,6 +21,9 @@ namespace Microsoft.Identity.Client.Instance
     }
 
     [JsonObject]
+#if ANDROID || iOS
+    [Preserve(AllMembers = true)]
+#endif
     internal class TenantDiscoveryResponse : OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = TenantDiscoveryResponseClaim.AuthorizationEndpoint)]

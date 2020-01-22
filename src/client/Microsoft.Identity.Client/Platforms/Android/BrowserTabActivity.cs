@@ -6,6 +6,12 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
+#if iOS
+using Foundation;
+#endif
+#if ANDROID
+using Android.Runtime;
+#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -17,6 +23,9 @@ namespace Microsoft.Identity.Client
     /// </summary>
     //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
     [CLSCompliant(false)]
+#if ANDROID || iOS
+    [Preserve(AllMembers = true)]
+#endif
     public class BrowserTabActivity : Activity
     {
         /// <summary>
