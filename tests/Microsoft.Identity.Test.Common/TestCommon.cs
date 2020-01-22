@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Reflection;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -25,6 +26,11 @@ namespace Microsoft.Identity.Test.Common
                 Substitute.For<ITelemetryManager>(),
                 true);
             new AuthorityEndpointResolutionManager(null, true);
+        }
+
+        public static object GetPropValue(object src, string propName)
+        {
+            return src.GetType().GetProperty(propName).GetValue(src, null);
         }
 
         public static IServiceBundle CreateServiceBundleWithCustomHttpManager(
