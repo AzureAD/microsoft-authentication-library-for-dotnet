@@ -1,8 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Runtime.Serialization;
 using Microsoft.Identity.Json;
+#if iOS
+using Foundation;
+#endif
+#if ANDROID
+using Android.Runtime;
+#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -17,6 +22,9 @@ namespace Microsoft.Identity.Client.OAuth2
     }
 
     [JsonObject]
+#if ANDROID || iOS
+    [Preserve(AllMembers = true)]
+#endif
     internal class OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.Error)]

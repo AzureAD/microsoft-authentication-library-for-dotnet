@@ -2,10 +2,19 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Json;
+#if iOS
+using Foundation;
+#endif
+#if ANDROID
+using Android.Runtime;
+#endif
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
     [JsonObject]
+#if ANDROID || iOS
+    [Preserve(AllMembers = true)]
+#endif
     internal sealed class InstanceDiscoveryMetadataEntry
     {
         [JsonProperty(PropertyName = "preferred_network")]

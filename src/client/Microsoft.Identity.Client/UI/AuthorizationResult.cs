@@ -6,6 +6,12 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+#if iOS
+using Foundation;
+#endif
+#if ANDROID
+using Android.Runtime;
+#endif
 
 namespace Microsoft.Identity.Client.UI
 {
@@ -19,11 +25,14 @@ namespace Microsoft.Identity.Client.UI
     }
 
     [JsonObject]
+#if ANDROID || iOS
+    [Preserve(AllMembers = true)]
+#endif
     internal class AuthorizationResult
     {
         public static AuthorizationResult FromUri(string webAuthenticationResult)
         {
-            if (String.IsNullOrWhiteSpace(webAuthenticationResult))
+            if (string.IsNullOrWhiteSpace(webAuthenticationResult))
             {
                 return FromStatus(AuthorizationStatus.UnknownError,
                    MsalError.AuthenticationFailed,

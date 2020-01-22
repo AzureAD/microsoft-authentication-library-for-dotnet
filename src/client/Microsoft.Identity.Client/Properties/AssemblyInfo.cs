@@ -4,10 +4,10 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-#if ANDROID_BUILDTIME
+#if ANDROID
 using Android;
 #endif
-#if iOS_BUILDTIME
+#if iOS
 using Foundation;
 #endif
 
@@ -20,6 +20,6 @@ using Foundation;
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
-#if ANDROID_BUILDTIME || iOS_BUILDTIME
+#if ANDROID || iOS
 [assembly: LinkerSafe]
 #endif

@@ -7,6 +7,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Json;
+#if iOS
+using Foundation;
+#endif
+#if ANDROID
+using Android.Runtime;
+#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -29,6 +35,9 @@ namespace Microsoft.Identity.Client.OAuth2
     }
 
     [JsonObject]
+#if ANDROID || iOS
+    [Preserve(AllMembers = true)]
+#endif
     internal class MsalTokenResponse : OAuth2ResponseBase
     {
         private long _expiresIn;

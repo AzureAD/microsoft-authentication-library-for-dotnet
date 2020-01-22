@@ -2,14 +2,21 @@
 // Licensed under the MIT License.
 
 using System;
-using System.IO;
-using System.Text;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+#if iOS
+using Foundation;
+#endif
+#if ANDROID
+using Android.Runtime;
+#endif
 
 namespace Microsoft.Identity.Client.Cache
 {
     [JsonObject]
+#if ANDROID || iOS
+    [Preserve(AllMembers = true)]
+#endif
     internal class AdalResultWrapper
     {
         [JsonProperty]
