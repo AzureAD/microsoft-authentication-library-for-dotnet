@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Runtime.Serialization;
+using Android.Runtime;
 using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
     [JsonObject]
+    [Preserve]
     internal class BrokerRequest
     {
         [JsonProperty("authority")]

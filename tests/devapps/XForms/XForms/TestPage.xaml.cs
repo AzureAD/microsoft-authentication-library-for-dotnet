@@ -28,15 +28,19 @@ namespace XForms
 
         public void InitPublicClient()
         {
+            Console.WriteLine("[TESTLOG] - Creating the PCA - mandatory params and logging");
             var builder = PublicClientApplicationBuilder
                 .Create(App.s_clientId)
-                .WithAuthority(new Uri(App.s_authority), App.s_validateAuthority)
+                .WithAuthority(new Uri(App.s_authority), App.s_validateAuthority)                
                 .WithLogging((level, message, pii) =>
                 {
                     Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
+                    Console.WriteLine($"[MSAL LOG][{level}] {message} ");
                 },
                 LogLevel.Verbose,
                 true);
+
+            Console.WriteLine("[TESTLOG] - Creating the PCA - setting the redirect uri");
 
             // Let Android set its own redirect uri
             switch (Device.RuntimePlatform)
@@ -50,9 +54,16 @@ namespace XForms
             }
 
 #if IS_APPCENTER_BUILD
+            Console.WriteLine("[TESTLOG] - Creating the PCA - setting the ios keychain security group *");
+
             builder = builder.WithIosKeychainSecurityGroup("*");
 #endif
+            Console.WriteLine("[TESTLOG] - Creating the PCA");
+
             PublicClientApplication = builder.BuildConcrete();
+
+            Console.WriteLine("[TESTLOG] - PCA created");
+
         }
 
         private void OnPickerSelectedIndexChanged(object sender, EventArgs args)
@@ -144,17 +155,25 @@ namespace XForms
 
         private async Task PrepareTestEnvironmentAsync()
         {
+            Console.WriteLine("[TESTLOG] - Preparing test ");
+
             acquireResponseLabel.Text = "";
             acquireResponseTitleLabel.Text = EmptyResult;
 
             if (PublicClientApplication != null)
             {
+                Console.WriteLine("[TESTLOG] - Clearing the accounts. Getting the accounts");
+
                 IEnumerable<IAccount> accounts = await PublicClientApplication.GetAccountsAsync().ConfigureAwait(true);
 
                 foreach (IAccount account in accounts)
                 {
+                    Console.WriteLine($"[TESTLOG] - Clearing the account {account.Username}");
                     await PublicClientApplication.RemoveAsync(account).ConfigureAwait(true);
                 }
+
+                Console.WriteLine("[TESTLOG] - Accounts cleared");
+
             }
             if (_isB2CTest)
             {
@@ -171,6 +190,7 @@ namespace XForms
 
         private async Task AcquireTokenInteractiveAsync(Prompt prompt)
         {
+
             try
             {
                 AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
@@ -200,22 +220,38 @@ namespace XForms
         {
             try
             {
-                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
+                Console.WriteLine("[TESTLOG] - start AcquireTokenSilentAsync");
+
+                Console.WriteLine($"[TESTLOG] - PublicClientApplication? {PublicClientApplication == null}");
+
+                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(new[] { "user.read"})
                    .WithPrompt(Prompt.ForceLogin)
-                   .WithParentActivityOrWindow(App.RootViewController)
                    .WithUseEmbeddedWebView(true);
 
+                Console.WriteLine("[TESTLOG] - WithParentActivityOrWindow");
+                Console.WriteLine($"[TESTLOG] - WithParentActivityOrWindow - root view controller {App.RootViewController}");
+
+                request.WithParentActivityOrWindow(App.RootViewController);
+
+                Console.WriteLine("[TESTLOG] - after creating request");
                 AuthenticationResult result = await
                     request.ExecuteAsync().ConfigureAwait(true);
+
+                Console.WriteLine("[TESTLOG] - after executing interactive request");
 
                 AcquireTokenSilentParameterBuilder builder = PublicClientApplication.AcquireTokenSilent(
                     App.s_scopes,
                     result.Account.Username);
 
+                Console.WriteLine("[TESTLOG] - after creating silent request");
+
                 AuthenticationResult res = await builder
                     .WithForceRefresh(false)
                     .ExecuteAsync()
                     .ConfigureAwait(true);
+
+                Console.WriteLine("[TESTLOG] - after executing silent request");
+
 
                 var resText = GetResultDescription(res);
 
@@ -301,6 +337,9 @@ namespace XForms
 
         private void CreateExceptionMessage(Exception exception)
         {
+            Console.WriteLine($"[TESTLOG] EXCEPTION {exception}");
+            Console.WriteLine($"[TESTLOG] EXCEPTION_TRACE {exception.StackTrace}");
+
             if (exception is MsalException msalException)
             {
                 acquireResponseLabel.Text = string.Format(CultureInfo.InvariantCulture, "MsalException -\nError Code: {0}\nMessage: {1}",
@@ -311,7 +350,6 @@ namespace XForms
                 acquireResponseLabel.Text = "Exception - " + exception.Message;
             }
 
-            Console.WriteLine(exception.Message);
         }
     }
 }

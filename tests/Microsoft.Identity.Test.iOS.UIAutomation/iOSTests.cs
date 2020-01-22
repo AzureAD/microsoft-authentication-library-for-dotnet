@@ -81,9 +81,15 @@ namespace Test.Microsoft.Identity.UIAutomation
                     LogMessage($"Running test: {test.Method.Name}", stringBuilderMessage);
                     test();
                 }
+                catch (TypeInitializationException exT)
+                {
+                    string fusionLog = (string)TestCommon.GetPropValue(exT.InnerException, "FusionLog");
+                    LogMessage($"Fail: {test.Method.Name}, Error: {exT.InnerException.Message}, Stack Trace: {exT.InnerException.StackTrace}", stringBuilderMessage);
+                    hasFailed = true;
+                }
                 catch (Exception ex)
                 {
-                    LogMessage($"Fail: {test.Method.Name}, Error: {ex.Message}", stringBuilderMessage);
+                    LogMessage($"Fail: {test.Method.Name}, Error: {ex.Message}, Stack Trace: {ex.StackTrace}", stringBuilderMessage);
                     hasFailed = true;
                 }
                 finally

@@ -4,9 +4,11 @@
 using System;
 using Microsoft.Identity.Json;
 
+
 namespace Microsoft.Identity.Client.WsTrust
 {
     [JsonObject]
+    [Preserve]
     internal sealed class UserRealmDiscoveryResponse
     {
         [JsonProperty(PropertyName = "ver")]

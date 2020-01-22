@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Cache
@@ -11,6 +10,7 @@ namespace Microsoft.Identity.Client.Cache
     /// Contains information of a single user. This information is used for token cache lookup. Also if created with userId, userId is sent to the service when login_hint is accepted.
     /// </summary>
     [JsonObject]
+    [Preserve]
     internal sealed class AdalUserInfo
     {
         /// <summary>

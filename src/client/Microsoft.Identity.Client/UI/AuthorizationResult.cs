@@ -19,11 +19,12 @@ namespace Microsoft.Identity.Client.UI
     }
 
     [JsonObject]
+    [Preserve]
     internal class AuthorizationResult
     {
         public static AuthorizationResult FromUri(string webAuthenticationResult)
         {
-            if (String.IsNullOrWhiteSpace(webAuthenticationResult))
+            if (string.IsNullOrWhiteSpace(webAuthenticationResult))
             {
                 return FromStatus(AuthorizationStatus.UnknownError,
                    MsalError.AuthenticationFailed,
