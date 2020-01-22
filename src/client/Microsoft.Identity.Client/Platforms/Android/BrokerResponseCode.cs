@@ -3,10 +3,10 @@
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
-    internal static class BrokerResponseCode
+    internal enum BrokerResponseCode
     {
-        public const int UserCancelled = 2001;
-        public const int BrowserCodeError = 2002;
-        public const int ResponseReceived = 2004;
+        UserCancelled = 2001,
+        BrowserCodeError = 2002,
+        ResponseReceived = 2004
     }
 }
