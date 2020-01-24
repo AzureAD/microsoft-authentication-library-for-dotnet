@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 return;
             }
 
-            if (resultCode != BrokerResponseCode.ResponseReceived)
+            if (resultCode != ((int)BrokerResponseCode.ResponseReceived))
             {
                 _androidBrokerTokenResponse = new MsalTokenResponse
                 {
