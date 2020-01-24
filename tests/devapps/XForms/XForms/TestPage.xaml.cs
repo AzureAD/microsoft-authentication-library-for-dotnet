@@ -311,7 +311,7 @@ namespace XForms
                 acquireResponseLabel.Text = "Exception - " + exception.Message;
             }
 
-            Console.WriteLine(exception.Message);
+            Console.WriteLine(exception);
         }
     }
 }
