@@ -66,9 +66,20 @@ namespace Microsoft.Identity.Client
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
             IEnumerable<string> scopes)
         {
-            return AcquireTokenInteractiveParameterBuilder
-                .Create(ClientExecutorFactory.CreatePublicClientExecutor(this), scopes)
-                .WithParentActivityOrWindowFunc(ServiceBundle.Config.ParentActivityOrWindowFunc);
+            Console.WriteLine("[TESTLOG][MSAL] AcquireTokenInteractive");
+
+            var executor = ClientExecutorFactory.CreatePublicClientExecutor(this);
+
+            Console.WriteLine($"[TESTLOG][MSAL] Executor {executor == null}");
+
+            var func = ServiceBundle.Config.ParentActivityOrWindowFunc;
+            Console.WriteLine($"[TESTLOG][MSAL] Func {func == null}");
+
+            var x = AcquireTokenInteractiveParameterBuilder
+                .Create(executor, scopes);
+            Console.WriteLine($"[TESTLOG][MSAL] x {x == null}");
+
+            return x.WithParentActivityOrWindowFunc(func);
         }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
