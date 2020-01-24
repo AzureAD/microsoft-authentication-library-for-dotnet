@@ -221,13 +221,16 @@ namespace XForms
             try
             {
                 Console.WriteLine("[TESTLOG] - start AcquireTokenSilentAsync");
-                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
+                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(new[] { "user.read"})
                    .WithPrompt(Prompt.ForceLogin)
-                   .WithParentActivityOrWindow(App.RootViewController)
                    .WithUseEmbeddedWebView(true);
 
-                Console.WriteLine("[TESTLOG] - after creating request");
+                Console.WriteLine("[TESTLOG] - WithParentActivityOrWindow");
+                Console.WriteLine($"[TESTLOG] - WithParentActivityOrWindow - root view controller {App.RootViewController}");
 
+                request.WithParentActivityOrWindow(App.RootViewController);
+
+                Console.WriteLine("[TESTLOG] - after creating request");
                 AuthenticationResult result = await
                     request.ExecuteAsync().ConfigureAwait(true);
 
