@@ -3,12 +3,7 @@
 
 using System;
 using Microsoft.Identity.Json;
-#if iOS
-using Foundation;
-#endif
-#if ANDROID
-using Android.Runtime;
-#endif
+
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -17,9 +12,7 @@ namespace Microsoft.Identity.Client.Cache
     /// with MSAL, only Refresh Tokens are.
     /// </summary>
     [JsonObject]
-#if ANDROID || iOS
-    [Preserve(AllMembers = true)]
-#endif
+    [Preserve]
     internal sealed class AdalResult
     {
         internal AdalResult() 

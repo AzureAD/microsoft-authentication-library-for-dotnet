@@ -15,9 +15,7 @@ using Android.Runtime;
 namespace Microsoft.Identity.Client.Internal
 {
     [JsonObject]
-#if ANDROID || iOS
-    [Preserve(AllMembers = true)]
-#endif
+    [Preserve]
     internal class DeviceCodeResponse : OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = "user_code")]

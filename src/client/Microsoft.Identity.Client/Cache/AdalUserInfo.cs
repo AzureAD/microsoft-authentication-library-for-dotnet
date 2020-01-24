@@ -3,12 +3,6 @@
 
 using System;
 using Microsoft.Identity.Json;
-#if iOS
-using Foundation;
-#endif
-#if ANDROID
-using Android.Runtime;
-#endif
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -16,9 +10,7 @@ namespace Microsoft.Identity.Client.Cache
     /// Contains information of a single user. This information is used for token cache lookup. Also if created with userId, userId is sent to the service when login_hint is accepted.
     /// </summary>
     [JsonObject]
-#if ANDROID || iOS
-    [Preserve(AllMembers = true)]
-#endif
+    [Preserve]
     internal sealed class AdalUserInfo
     {
         /// <summary>
