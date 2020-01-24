@@ -328,8 +328,11 @@ namespace Microsoft.Identity.Client
             {
                 throw new MsalClientException(MsalError.NoClientId, MsalErrorMessage.NoClientIdWasSpecified);
             }
+            Console.WriteLine($"[TESTLOG][MSAL] before CreateAuthorityInfoFromEnums ");
 
             CreateAuthorityInfoFromEnums();
+
+            Console.WriteLine($"[TESTLOG][MSAL] after CreateAuthorityInfoFromEnums ");
 
             //Adfs does not require client id to be in the form of a Guid
             if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
@@ -351,6 +354,8 @@ namespace Microsoft.Identity.Client
 
         internal ApplicationConfiguration BuildConfiguration()
         {
+            Console.WriteLine($"[TESTLOG][MSAL] Before validate Config {Config== null}");
+
             Validate();
             return Config;
         }

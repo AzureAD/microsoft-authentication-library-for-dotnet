@@ -257,7 +257,9 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         internal PublicClientApplication BuildConcrete()
         {
-            return new PublicClientApplication(BuildConfiguration());
+            var config = BuildConfiguration();
+            Console.WriteLine($"[TESTLOG][MSAL] config {config == null}");
+            return new PublicClientApplication(config);
         }
 
         /// <inheritdoc />
