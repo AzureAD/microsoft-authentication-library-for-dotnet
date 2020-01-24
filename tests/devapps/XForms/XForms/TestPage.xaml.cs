@@ -221,6 +221,9 @@ namespace XForms
             try
             {
                 Console.WriteLine("[TESTLOG] - start AcquireTokenSilentAsync");
+
+                Console.WriteLine($"[TESTLOG] - PublicClientApplication? {PublicClientApplication == null}");
+
                 AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(new[] { "user.read"})
                    .WithPrompt(Prompt.ForceLogin)
                    .WithUseEmbeddedWebView(true);
