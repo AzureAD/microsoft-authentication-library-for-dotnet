@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Runtime.Serialization;
 using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
@@ -15,6 +16,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string CorrelationId = "correlation_id";
     }
 
+    [DataContract]
     [JsonObject]
     [Preserve]
     internal class OAuth2ResponseBase

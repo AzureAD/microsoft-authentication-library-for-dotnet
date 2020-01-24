@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Json;
 
 
@@ -12,6 +13,7 @@ namespace Microsoft.Identity.Client.Cache
     /// with MSAL, only Refresh Tokens are.
     /// </summary>
     [JsonObject]
+    [DataContract]
     [Preserve]
     internal sealed class AdalResult
     {

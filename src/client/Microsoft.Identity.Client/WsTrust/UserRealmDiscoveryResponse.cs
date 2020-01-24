@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Json;
 
 
 namespace Microsoft.Identity.Client.WsTrust
 {
     [JsonObject]
+    [DataContract]
     [Preserve]
     internal sealed class UserRealmDiscoveryResponse
     {

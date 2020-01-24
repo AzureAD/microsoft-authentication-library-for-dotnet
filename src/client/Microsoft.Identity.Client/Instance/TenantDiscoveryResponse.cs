@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Json;
 
@@ -14,6 +15,7 @@ namespace Microsoft.Identity.Client.Instance
         public const string Issuer = "issuer";
     }
 
+    [DataContract]
     [JsonObject]
     [Preserve]
     internal class TenantDiscoveryResponse : OAuth2ResponseBase

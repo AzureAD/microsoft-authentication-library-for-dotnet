@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
 
@@ -24,6 +25,7 @@ namespace Microsoft.Identity.Client.Core
     }
 
     [JsonObject]
+    [DataContract]
     [Preserve]
     internal class IdToken
     {

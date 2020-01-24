@@ -3,17 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Json;
-#if iOS
-using Foundation;
-#endif
-#if ANDROID
-using Android.Runtime;
-#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
+    [DataContract]
     [JsonObject]
     [Preserve]
     internal class DeviceCodeResponse : OAuth2ResponseBase

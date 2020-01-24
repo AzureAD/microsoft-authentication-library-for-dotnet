@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
@@ -18,6 +19,8 @@ namespace Microsoft.Identity.Client.UI
         UnknownError
     }
 
+
+    [DataContract]
     [JsonObject]
     [Preserve]
     internal class AuthorizationResult

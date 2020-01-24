@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Json;
+using System.Runtime.Serialization;
 #if iOS
 using Foundation;
 #endif
@@ -34,6 +35,8 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string RefreshIn = "refresh_in";
     }
 
+    
+    [DataContract]
     [JsonObject]
     [Preserve]
     internal class MsalTokenResponse : OAuth2ResponseBase

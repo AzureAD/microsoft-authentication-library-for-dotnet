@@ -3,11 +3,13 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Core
 {
+    [DataContract]
     [JsonObject]
     [Preserve]
     internal class ClientInfo

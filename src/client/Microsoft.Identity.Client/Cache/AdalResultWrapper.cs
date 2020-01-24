@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
 
@@ -9,6 +10,7 @@ using Microsoft.Identity.Json;
 namespace Microsoft.Identity.Client.Cache
 {
     [JsonObject]
+    [DataContract]
     [Preserve]
     internal class AdalResultWrapper
     {

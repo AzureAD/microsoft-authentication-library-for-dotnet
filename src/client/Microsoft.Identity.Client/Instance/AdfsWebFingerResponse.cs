@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Json;
 
@@ -14,7 +15,8 @@ namespace Microsoft.Identity.Client.Instance
         public const string Rel = "rel";
         public const string Href = "href";
     }
-
+    
+    [DataContract]
     [JsonObject(Title = AdfsWebFingerResponseClaim.Links)]
     [Preserve]
     internal class LinksList
@@ -27,6 +29,7 @@ namespace Microsoft.Identity.Client.Instance
     }
 
     [JsonObject]
+    [DataContract]
     [Preserve]
     internal class AdfsWebFingerResponse : OAuth2ResponseBase
     {

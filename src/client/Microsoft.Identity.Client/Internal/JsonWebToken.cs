@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Json;
+using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -117,6 +118,7 @@ namespace Microsoft.Identity.Client.Internal
             return string.Concat(encodedHeader, ".", encodedPayload);
         }
 
+        [DataContract]
         [JsonObject]
         [Preserve]
         internal class JWTHeader
@@ -156,6 +158,7 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
+        [DataContract]
         [JsonObject]
         [Preserve]
         internal class JWTPayload
@@ -183,6 +186,7 @@ namespace Microsoft.Identity.Client.Internal
             public string JwtIdentifier { get; set; }
         }
 
+        [DataContract]
         [JsonObject]
         [Preserve]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
