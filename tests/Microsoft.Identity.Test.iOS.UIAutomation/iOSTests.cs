@@ -59,9 +59,9 @@ namespace Test.Microsoft.Identity.UIAutomation
             {
                 AcquireTokenInteractiveAndSilentTest,
 
-                AcquireTokenADFSV3InteractiveFederatedTest,
-                AcquireTokenADFSV4InteractiveFederatedTest,
-                AcquireTokenADFSV2019InteractiveFederatedTest,
+                //AcquireTokenADFSV3InteractiveFederatedTest,
+                //AcquireTokenADFSV4InteractiveFederatedTest,
+                //AcquireTokenADFSV2019InteractiveFederatedTest,
 
                 //B2CLocalAccountAcquireTokenTest,
                 //B2CGoogleB2CLoginAuthorityAcquireTokenTest,
