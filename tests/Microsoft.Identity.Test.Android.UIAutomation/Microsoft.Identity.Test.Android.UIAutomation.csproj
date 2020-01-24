@@ -70,5 +70,10 @@
   <ItemGroup>
     <Compile Include="AndroidTests.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="data.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
