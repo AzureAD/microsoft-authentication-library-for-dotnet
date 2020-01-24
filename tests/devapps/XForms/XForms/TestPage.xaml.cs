@@ -331,6 +331,9 @@ namespace XForms
 
         private void CreateExceptionMessage(Exception exception)
         {
+            Console.WriteLine($"[TESTLOG] EXCEPTION {exception}");
+            Console.WriteLine($"[TESTLOG] EXCEPTION_TRACE {exception.StackTrace}");
+
             if (exception is MsalException msalException)
             {
                 acquireResponseLabel.Text = string.Format(CultureInfo.InvariantCulture, "MsalException -\nError Code: {0}\nMessage: {1}",
@@ -341,7 +344,6 @@ namespace XForms
                 acquireResponseLabel.Text = "Exception - " + exception.Message;
             }
 
-            Console.WriteLine(exception);
         }
     }
 }
