@@ -31,7 +31,7 @@ namespace XForms
             Console.WriteLine("[TESTLOG] - Creating the PCA - mandatory params and logging");
             var builder = PublicClientApplicationBuilder
                 .Create(App.s_clientId)
-                .WithAuthority(new Uri(App.s_authority), App.s_validateAuthority)                
+                .WithAuthority(new Uri(App.s_authority), App.s_validateAuthority)
                 .WithLogging((level, message, pii) =>
                 {
                     Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
@@ -190,82 +190,68 @@ namespace XForms
 
         private async Task AcquireTokenInteractiveAsync(Prompt prompt)
         {
+            AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
+                .WithPrompt(prompt)
+                .WithParentActivityOrWindow(App.RootViewController)
+                .WithUseEmbeddedWebView(true);
 
-            try
+            AuthenticationResult result = await
+                request.ExecuteAsync().ConfigureAwait(true);
+
+            var resText = GetResultDescription(result);
+
+            if (result.AccessToken != null)
             {
-                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
-                    .WithPrompt(prompt)
-                    .WithParentActivityOrWindow(App.RootViewController)
-                    .WithUseEmbeddedWebView(true);
-
-                AuthenticationResult result = await
-                    request.ExecuteAsync().ConfigureAwait(true);
-
-                var resText = GetResultDescription(result);
-
-                if (result.AccessToken != null)
-                {
-                    acquireResponseTitleLabel.Text = SuccessfulResult;
-                }
-
-                acquireResponseLabel.Text = resText;
+                acquireResponseTitleLabel.Text = SuccessfulResult;
             }
-            catch (Exception exception)
-            {
-                CreateExceptionMessage(exception);
-            }
+
+            acquireResponseLabel.Text = resText;
         }
 
         private async Task AcquireTokenSilentAsync()
         {
-            try
+            Console.WriteLine("[TESTLOG] - start AcquireTokenSilentAsync");
+
+            Console.WriteLine($"[TESTLOG] - PublicClientApplication? {PublicClientApplication == null}");
+
+            AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(new[] { "user.read" })
+               .WithPrompt(Prompt.ForceLogin)
+               .WithUseEmbeddedWebView(true);
+
+            Console.WriteLine("[TESTLOG] - WithParentActivityOrWindow");
+            Console.WriteLine($"[TESTLOG] - WithParentActivityOrWindow - root view controller {App.RootViewController}");
+
+            request.WithParentActivityOrWindow(App.RootViewController);
+
+            Console.WriteLine("[TESTLOG] - after creating request");
+            AuthenticationResult result = await
+                request.ExecuteAsync().ConfigureAwait(true);
+
+            Console.WriteLine("[TESTLOG] - after executing interactive request");
+
+            AcquireTokenSilentParameterBuilder builder = PublicClientApplication.AcquireTokenSilent(
+                App.s_scopes,
+                result.Account.Username);
+
+            Console.WriteLine("[TESTLOG] - after creating silent request");
+
+            AuthenticationResult res = await builder
+                .WithForceRefresh(false)
+                .ExecuteAsync()
+                .ConfigureAwait(true);
+
+            Console.WriteLine("[TESTLOG] - after executing silent request");
+
+
+            var resText = GetResultDescription(res);
+
+            if (res.AccessToken != null)
             {
-                Console.WriteLine("[TESTLOG] - start AcquireTokenSilentAsync");
-
-                Console.WriteLine($"[TESTLOG] - PublicClientApplication? {PublicClientApplication == null}");
-
-                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(new[] { "user.read"})
-                   .WithPrompt(Prompt.ForceLogin)
-                   .WithUseEmbeddedWebView(true);
-
-                Console.WriteLine("[TESTLOG] - WithParentActivityOrWindow");
-                Console.WriteLine($"[TESTLOG] - WithParentActivityOrWindow - root view controller {App.RootViewController}");
-
-                request.WithParentActivityOrWindow(App.RootViewController);
-
-                Console.WriteLine("[TESTLOG] - after creating request");
-                AuthenticationResult result = await
-                    request.ExecuteAsync().ConfigureAwait(true);
-
-                Console.WriteLine("[TESTLOG] - after executing interactive request");
-
-                AcquireTokenSilentParameterBuilder builder = PublicClientApplication.AcquireTokenSilent(
-                    App.s_scopes,
-                    result.Account.Username);
-
-                Console.WriteLine("[TESTLOG] - after creating silent request");
-
-                AuthenticationResult res = await builder
-                    .WithForceRefresh(false)
-                    .ExecuteAsync()
-                    .ConfigureAwait(true);
-
-                Console.WriteLine("[TESTLOG] - after executing silent request");
-
-
-                var resText = GetResultDescription(res);
-
-                if (res.AccessToken != null)
-                {
-                    acquireResponseTitleLabel.Text = SuccessfulResult;
-                }
-
-                acquireResponseLabel.Text = "Acquire Token Silent Acquisition Result....\n" + resText;
+                acquireResponseTitleLabel.Text = SuccessfulResult;
             }
-            catch (Exception exception)
-            {
-                CreateExceptionMessage(exception);
-            }
+
+            acquireResponseLabel.Text = "Acquire Token Silent Acquisition Result....\n" + resText;
+
         }
 
         private async Task AcquireEditProfileTokenAsync()
