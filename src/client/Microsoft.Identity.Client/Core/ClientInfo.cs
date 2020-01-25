@@ -9,6 +9,7 @@ using Microsoft.Identity.Json;
 namespace Microsoft.Identity.Client.Core
 {
     [JsonObject]
+    [Preserve]
     internal class ClientInfo
     {
         [JsonProperty(PropertyName = ClientInfoClaim.UniqueIdentifier )]

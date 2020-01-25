@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Json;
 
+
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
@@ -11,6 +12,7 @@ namespace Microsoft.Identity.Client.Cache
     /// with MSAL, only Refresh Tokens are.
     /// </summary>
     [JsonObject]
+    [Preserve]
     internal sealed class AdalResult
     {
         internal AdalResult() 

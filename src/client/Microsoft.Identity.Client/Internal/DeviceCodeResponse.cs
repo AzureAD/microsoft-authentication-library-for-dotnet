@@ -3,13 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Internal
 {
     [JsonObject]
+    [Preserve]
     internal class DeviceCodeResponse : OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = "user_code")]

@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
-using System.IO;
-using System.Text;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
+
 
 namespace Microsoft.Identity.Client.Cache
 {
     [JsonObject]
+    [Preserve]
     internal class AdalResultWrapper
     {
         [JsonProperty]

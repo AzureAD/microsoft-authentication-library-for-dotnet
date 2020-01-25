@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Client.Core
     }
 
     [JsonObject]
+    [Preserve]
     internal class IdToken
     {
         [JsonProperty(PropertyName = IdTokenClaim.Issuer)]
