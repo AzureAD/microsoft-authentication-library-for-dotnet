@@ -7,12 +7,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Json;
-#if iOS
-using Foundation;
-#endif
-#if ANDROID
-using Android.Runtime;
-#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {

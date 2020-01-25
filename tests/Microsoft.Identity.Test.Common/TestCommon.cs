@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Reflection;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -30,7 +30,17 @@ namespace Microsoft.Identity.Test.Common
 
         public static object GetPropValue(object src, string propName)
         {
-            return src.GetType().GetProperty(propName).GetValue(src, null);
+            object result = null;
+            try
+            {
+                result = src.GetType().GetProperty(propName).GetValue(src, null);
+            }
+            catch
+            {
+                Console.WriteLine($"Property with name {propName}");
+            }
+
+            return result;
         }
 
         public static IServiceBundle CreateServiceBundleWithCustomHttpManager(

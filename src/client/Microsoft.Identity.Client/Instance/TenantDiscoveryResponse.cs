@@ -4,7 +4,6 @@
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Json;
 
-
 namespace Microsoft.Identity.Client.Instance
 {
     internal class TenantDiscoveryResponseClaim : OAuth2ResponseBaseClaim
