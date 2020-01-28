@@ -4,7 +4,6 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Microsoft.Identity.Client;
 
 // Version and Metadata are set at build time from msbuild properties defined in the csproj
 
@@ -16,5 +15,3 @@ using Microsoft.Identity.Client;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
 
-// For Xamarin Linker to skip this assembly
-//[assembly: Preserve]
