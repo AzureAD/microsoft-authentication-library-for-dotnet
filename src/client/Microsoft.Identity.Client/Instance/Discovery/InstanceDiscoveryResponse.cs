@@ -7,7 +7,7 @@ using Microsoft.Identity.Json;
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal sealed class InstanceDiscoveryResponse : OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = "tenant_discovery_endpoint")]

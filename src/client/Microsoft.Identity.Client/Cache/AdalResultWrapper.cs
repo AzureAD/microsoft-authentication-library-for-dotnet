@@ -9,7 +9,7 @@ using Microsoft.Identity.Json;
 namespace Microsoft.Identity.Client.Cache
 {
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class AdalResultWrapper
     {
         [JsonProperty]

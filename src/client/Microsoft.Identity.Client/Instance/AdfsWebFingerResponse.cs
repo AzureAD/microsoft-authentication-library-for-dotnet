@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Instance
     }
 
     [JsonObject(Title = AdfsWebFingerResponseClaim.Links)]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class LinksList
     {
         [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Rel)]
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Instance
     }
 
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class AdfsWebFingerResponse : OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Subject)]

@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
     [CLSCompliant(false)]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     public class BrowserTabActivity : Activity
     {
         /// <summary>

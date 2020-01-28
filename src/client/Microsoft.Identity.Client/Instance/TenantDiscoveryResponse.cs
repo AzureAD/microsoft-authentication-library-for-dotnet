@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Instance
     }
 
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class TenantDiscoveryResponse : OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = TenantDiscoveryResponseClaim.AuthorizationEndpoint)]

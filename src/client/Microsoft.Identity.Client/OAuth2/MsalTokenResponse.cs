@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.OAuth2
     }
 
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase
     {
         private long _expiresIn;

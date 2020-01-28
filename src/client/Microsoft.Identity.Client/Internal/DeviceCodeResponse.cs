@@ -9,7 +9,7 @@ using Microsoft.Identity.Json;
 namespace Microsoft.Identity.Client.Internal
 {
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class DeviceCodeResponse : OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = "user_code")]

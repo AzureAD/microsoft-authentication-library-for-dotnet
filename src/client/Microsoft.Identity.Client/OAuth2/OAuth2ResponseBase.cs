@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.OAuth2
     }
 
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = OAuth2ResponseBaseClaim.Error)]
