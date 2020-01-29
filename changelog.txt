@@ -1,4 +1,11 @@
-4.8.1.
+4.8.1
+============
+
+**Fix a Null Reference bug in the main AcquireTokenInteractive scenario on Android.** This is the reason why release 4.8.0 was unlisted from NuGet -[Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1585)
+
+**Change the internal serialization library logic to prevent Mono errors with DataContract serializers** -[Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1586)
+
+4.8.0
 ============
 Bug fix:
 **Cannot acquire token in UWP app on HoloLens via a unity plugin as json serialization fails** Serialization now works properly in MSAL.NET. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1468)
