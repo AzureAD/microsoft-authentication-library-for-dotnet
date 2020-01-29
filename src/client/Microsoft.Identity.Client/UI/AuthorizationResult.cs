@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.UI
     }
 
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class AuthorizationResult
     {
         public static AuthorizationResult FromUri(string webAuthenticationResult)

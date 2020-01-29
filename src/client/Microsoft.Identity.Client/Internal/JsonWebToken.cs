@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         [JsonObject]
-        [Preserve]
+        [Preserve(AllMembers = true)]
         internal class JWTHeader
         {
             public JWTHeader(ClientCredentialWrapper credential)
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         [JsonObject]
-        [Preserve]
+        [Preserve(AllMembers = true)]
         internal class JWTPayload
         {
             [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedClaims.Audience)]
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         [JsonObject]
-        [Preserve]
+        [Preserve(AllMembers = true)]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
             public JWTHeaderWithCertificate(ClientCredentialWrapper credential, bool sendCertificate)

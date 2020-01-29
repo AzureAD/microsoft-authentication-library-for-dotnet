@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Cache
     /// with MSAL, only Refresh Tokens are.
     /// </summary>
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal sealed class AdalResult
     {
         internal AdalResult() 

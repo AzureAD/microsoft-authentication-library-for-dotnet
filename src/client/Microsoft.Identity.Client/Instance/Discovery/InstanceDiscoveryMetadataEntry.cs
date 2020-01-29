@@ -6,7 +6,7 @@ using Microsoft.Identity.Json;
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal sealed class InstanceDiscoveryMetadataEntry
     {
         [JsonProperty(PropertyName = "preferred_network")]

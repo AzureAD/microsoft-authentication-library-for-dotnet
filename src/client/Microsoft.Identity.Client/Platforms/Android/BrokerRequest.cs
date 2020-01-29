@@ -7,7 +7,7 @@ using Microsoft.Identity.Json;
 namespace Microsoft.Identity.Client.Platforms.Android
 {
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class BrokerRequest
     {
         [JsonProperty("authority")]

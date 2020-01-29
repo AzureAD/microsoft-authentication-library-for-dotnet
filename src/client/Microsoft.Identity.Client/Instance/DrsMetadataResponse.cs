@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Instance
     }
 
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class IdentityProviderService
     {
         [JsonProperty(PropertyName = DrsMetadataResponseClaim.PassiveAuthEndpoint)]
@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Instance
     }
 
     [JsonObject]
-    [Preserve]
+    [Preserve(AllMembers = true)]
     internal class DrsMetadataResponse : OAuth2ResponseBase
     {
         [JsonProperty(PropertyName = DrsMetadataResponseClaim.IdentityProviderService)]

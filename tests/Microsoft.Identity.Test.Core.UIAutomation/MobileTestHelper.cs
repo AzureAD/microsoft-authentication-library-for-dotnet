@@ -280,12 +280,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                 }
                 else if (result.Contains(CoreUiTestConstants.TestResultFailureMessage))
                 {
-                    controller.Tap("LogPage");
                     throw new ResultVerificationFailureException(VerificationError.ResultIndicatesFailure);
                 }
                 else
                 {
-                    controller.Tap("LogPage");
                     throw new ResultVerificationFailureException(VerificationError.ResultNotFound);
                 }
             });
