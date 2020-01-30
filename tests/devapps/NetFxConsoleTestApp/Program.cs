@@ -28,7 +28,7 @@ namespace NetFx
 
         private static readonly HttpMethod s_popMethod = HttpMethod.Get;
 
-        private static bool _usePoP = true;
+        private static bool s_usePoP = false;
 
         // These are not really secret as they do not protect anything, but validaton tools will complain
         // if we have secrets in the code. 
@@ -148,7 +148,7 @@ namespace NetFx
                         6. Acquire Token Silently - multiple requests in parallel
                         7. Acquire SSH Cert Interactive
                         8. Client Credentials 
-                        p. Toggle POP (currently {(_usePoP ? "ON" : "OFF")}) 
+                        p. Toggle POP (currently {(s_usePoP ? "ON" : "OFF")}) 
                         c. Clear cache
                         r. Rotate Tenant ID
                         e. Expire all ATs
@@ -214,7 +214,7 @@ namespace NetFx
                             }
 
                             AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(s_scopes, account);
-                            if (_usePoP)
+                            if (s_usePoP)
                             {
                                 silentBuilder = silentBuilder
                                     .WithExtraQueryParameters(GetTestSliceParams())
@@ -231,7 +231,7 @@ namespace NetFx
                                 .Select(acc =>
                                 {
                                     var silentBuilder = pca.AcquireTokenSilent(s_scopes, acc);
-                                    if (_usePoP)
+                                    if (s_usePoP)
                                     {
                                         silentBuilder = silentBuilder
                                             .WithExtraQueryParameters(GetTestSliceParams())
@@ -287,7 +287,7 @@ namespace NetFx
                             await FetchTokenAndCallApiAsync(pca, authTask).ConfigureAwait(false);
                             break;
                         case 'p': // toggle pop
-                            _usePoP = !_usePoP;
+                            s_usePoP = !s_usePoP;
                             break;
 
                         case 'c':
@@ -349,7 +349,7 @@ namespace NetFx
         private static T ConfigurePoP<T>(AbstractPublicClientAcquireTokenParameterBuilder<T> builder)
             where T : AbstractPublicClientAcquireTokenParameterBuilder<T>
         {
-            if (_usePoP)
+            if (s_usePoP)
             {
                 builder = builder
                     .WithExtraQueryParameters(GetTestSliceParams())
@@ -369,7 +369,7 @@ namespace NetFx
 
             string authHeader = authTask.Result.CreateAuthorizationHeader();
 
-            if (_usePoP)
+            if (s_usePoP)
             {
                 await CallPoPVerificationAPIAsync(authHeader).ConfigureAwait(false);
             }
