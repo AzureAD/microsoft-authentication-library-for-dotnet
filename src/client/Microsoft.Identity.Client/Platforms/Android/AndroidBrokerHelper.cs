@@ -255,7 +255,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             if (!string.Equals(computedRedirectUri, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri), StringComparison.OrdinalIgnoreCase))
             {
                 //ADD Broker Error for redirect URI on android
-                string msg = string.Format(CultureInfo.CurrentCulture, MsalError.CannotInvokeBroker, computedRedirectUri);
+                string msg = string.Format(CultureInfo.CurrentCulture, "The broker redirect URI is incorrect, it should be {0}. Please visit https://aka.ms/Brokered-Authentication-for-Android for more details.", computedRedirectUri);
                 _logger.Info(msg);
                 throw new MsalClientException(MsalError.CannotInvokeBroker, msg);
             }

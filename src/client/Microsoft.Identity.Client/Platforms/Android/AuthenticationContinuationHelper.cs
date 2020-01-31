@@ -32,13 +32,15 @@ namespace Microsoft.Identity.Client
             var logger = MsalLogger.Create(Guid.Empty, null);
             logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
 
-                    AndroidBroker.SetBrokerResult(data, (int)resultCode);
-
-
             AuthorizationResult authorizationResult;
             if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
             {
                 authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
+            }
+            else if (!String.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)))
+            {
+                AndroidBroker.SetBrokerResult(data, (int)resultCode);
+                return;
             }
             else
             {
@@ -52,20 +54,14 @@ namespace Microsoft.Identity.Client
         {
             switch ((int)resultCode)
             {
-            case (int)Result.Ok:
-                return AuthorizationResult.FromUri(data.GetStringExtra("ReturnedUrl"));
+                case (int)Result.Ok:
+                    return AuthorizationResult.FromUri(data.GetStringExtra("ReturnedUrl"));
 
-            case (int)Result.Canceled:
-                return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
-
-                case BrokerResponseCode.ResponseReceived:
-                case BrokerResponseCode.BrowserCodeError:
-                case BrokerResponseCode.UserCancelled:
-                    AndroidBroker.SetBrokerResult(data, (int)resultCode);
-                    return null;
+                case (int)Result.Canceled:
+                    return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
 
                 default:
-                return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
+                    return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
             }
         }
 
@@ -73,14 +69,14 @@ namespace Microsoft.Identity.Client
         {
             switch ((int)resultCode)
             {
-            case AndroidConstants.AuthCodeReceived:
-                return AuthorizationResult.FromUri(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
+                case AndroidConstants.AuthCodeReceived:
+                    return AuthorizationResult.FromUri(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
 
-            case AndroidConstants.Cancel:
-                return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
+                case AndroidConstants.Cancel:
+                    return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
 
-            default:
-                return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
+                default:
+                    return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
             }
         }
     }

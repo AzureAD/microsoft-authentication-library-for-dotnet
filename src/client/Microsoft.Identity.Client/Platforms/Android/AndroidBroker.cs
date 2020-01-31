@@ -26,11 +26,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
     internal class AndroidBroker : IBroker
     {
-        //Since the response for the broker interactive call is returned in the AuthenticationContinuationHelper, this class needs to send the response to 
-        //the broker and wait for the AuthenticationContinuationHelper to return the response to the broker thread. This sephamore is used to make the MSAL code wait
-        //for the response. The AuthenticationContinuationHelper will trigger the continueation of the broker thread once it sets the rsultEX value. 
-        //Because of this, resultEX is made to be static. However, there will only ever be one broker authentication happening at once.
-        private static SemaphoreSlim _readyForResponse = null;
         private static MsalTokenResponse _androidBrokerTokenResponse = null;
         //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and reinjected into the response at the end.
         private static string _correlationId;
@@ -43,7 +38,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
             _activity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
-            _readyForResponse = new SemaphoreSlim(0);
         }
 
         public bool CanInvokeBroker()
@@ -58,12 +52,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             _androidBrokerTokenResponse = null;
             _correlationId = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId);
-            //Need to disable warning for non awaited async call.
+
             try
             {
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                new TaskFactory().StartNew(() => AcquireTokenInternalAsync(brokerPayload));
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                await Task.Run(() => AcquireTokenInternalAsync(brokerPayload)).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -74,11 +66,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     throw new MsalException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
             }
 
-            await _readyForResponse.WaitAsync().ConfigureAwait(false);
             return _androidBrokerTokenResponse;
         }
 
-        private async Task AcquireTokenInternalAsync(IDictionary<string, string> brokerPayload)
+        private void AcquireTokenInternalAsync(IDictionary<string, string> brokerPayload)
         {
             _brokerHelper.InitiateBrokerHandshake(_activity);
 
@@ -93,7 +84,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 _logger.Verbose("User is specified for silent token request. Starting silent broker request");
                 string silentResult = _brokerHelper.GetBrokerAuthTokenSilently(brokerPayload, _activity);
                 _androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(silentResult);
-                _readyForResponse?.Release();
                 return;
             }
             else
@@ -122,19 +112,16 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     _logger.ErrorPiiWithPrefix(e, "Unable to get android activity during interactive broker request");
                 }
             }
-
-            await _readyForResponse.WaitAsync().ConfigureAwait(false);
         }
 
         internal static void SetBrokerResult(Intent data, int resultCode)
         {
             if (data == null)
             {
-                _readyForResponse?.Release();
                 return;
             }
 
-            if (resultCode != BrokerResponseCode.ResponseReceived)
+            if (resultCode != ((int)BrokerResponseCode.ResponseReceived))
             {
                 _androidBrokerTokenResponse = new MsalTokenResponse
                 {
@@ -146,8 +133,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
             {
                 _androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(data.GetStringExtra(BrokerConstants.BrokerResultV2));
             }
-
-            _readyForResponse?.Release();
         }
 
         private static MsalTokenResponse CreateMsalTokenResponseFromResult(string brokerResult)
