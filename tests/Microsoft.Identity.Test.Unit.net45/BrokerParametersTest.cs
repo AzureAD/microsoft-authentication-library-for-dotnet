@@ -37,9 +37,9 @@ namespace Microsoft.Identity.Test.Unit
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
                 BrokerInteractiveRequest brokerInteractiveRequest = 
                     new BrokerInteractiveRequest(
+                        harness.ServiceBundle,
                         parameters,
-                        interactiveParameters, 
-                        harness.ServiceBundle, 
+                        interactiveParameters,
                         null,
                         broker);
 
@@ -64,8 +64,6 @@ namespace Microsoft.Identity.Test.Unit
 
                 //Assert.AreEqual(TestConstants.BrokerClaims, brokerInteractiveRequest._brokerPayload[BrokerParameter.Claims]); //TODO
                 Assert.AreEqual(BrokerParameter.OidcScopesValue, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
-
-
             }
         }
 

@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -26,11 +27,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private readonly SortedSet<string> _extraScopesToConsent;
         private readonly IWebUI _webUi;
-        private AuthorizationResult _authorizationResult;
         private string _codeVerifier;
         private string _state;
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private MsalTokenResponse _msalTokenResponse;
+        internal AuthorizationResult AuthResult { get; private set; }
 
         public InteractiveRequest(
             IServiceBundle serviceBundle,
@@ -69,17 +70,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (AuthenticationRequestParameters.IsBrokerEnabled) // set by developer
             {
-                _msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
+                await ExecuteBrokerInteractiveRequestAsync(cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-                await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
-                VerifyAuthorizationResult();
+                await ExecuteAuthorizationAsync(cancellationToken).ConfigureAwait(false);
 
                 if (IsBrokerInvocationRequired()) // if auth code is prefixed w/msauth, broker is required due to conditional access policies
                 {
-                    _msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
+                    await ExecuteBrokerInteractiveRequestAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -88,6 +87,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(_msalTokenResponse).ConfigureAwait(false);
+        }
+
+        internal /*for tests*/ async Task<MsalTokenResponse> ExecuteBrokerInteractiveRequestAsync(CancellationToken cancellationToken)
+        {
+            IBroker broker = ServiceBundle.PlatformProxy.CreateBroker(_interactiveParameters.UiParent);
+
+            var brokerInteractiveRequest = new BrokerInteractiveRequest(
+                ServiceBundle,
+                AuthenticationRequestParameters,
+                _interactiveParameters,
+                _webUi,
+                broker);
+
+            return await brokerInteractiveRequest.ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+
+        internal virtual async Task ExecuteAuthorizationAsync(CancellationToken cancellationToken)
+        {
+            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+            await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
+            VerifyAuthorizationResult();
         }
 
         internal /* internal for test only */ async Task AcquireAuthorizationAsync(CancellationToken cancellationToken)
@@ -103,14 +124,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var uiEvent = new UiEvent(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(uiEvent))
             {
-                _authorizationResult = await _webUi.AcquireAuthorizationAsync(
+                AuthResult = await _webUi.AcquireAuthorizationAsync(
                                            authorizationUri,
                                            AuthenticationRequestParameters.RedirectUri,
                                            AuthenticationRequestParameters.RequestContext,
                                            cancellationToken).ConfigureAwait(false);
-                uiEvent.UserCancelled = _authorizationResult.Status == AuthorizationStatus.UserCancel;
-                uiEvent.AccessDenied = _authorizationResult.Status == AuthorizationStatus.ProtocolError;
+                uiEvent.UserCancelled = AuthResult.Status == AuthorizationStatus.UserCancel;
+                uiEvent.AccessDenied = AuthResult.Status == AuthorizationStatus.ProtocolError;
             }
+        }
+
+        internal /* internal for test only */ bool IsBrokerInvocationRequired()
+        {
+            if (AuthResult.Code != null &&
+               !string.IsNullOrEmpty(AuthResult.Code) &&
+               AuthResult.Code.StartsWith(BrokerParameter.AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired, StringComparison.OrdinalIgnoreCase) ||
+               AuthResult.Code.StartsWith(AuthenticationRequestParameters.RedirectUri.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationRequired);
+                return true;
+            }
+
+            AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationNotRequired);
+            return false;
         }
 
         internal async Task<Uri> CreateAuthorizationUriAsync()
@@ -119,12 +155,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return CreateAuthorizationUri();
         }
 
-        private Dictionary<string, string> GetBodyParameters()
+        internal Dictionary<string, string> GetBodyParameters()
         {
             var dict = new Dictionary<string, string>
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.AuthorizationCode,
-                [OAuth2Parameter.Code] = _authorizationResult.Code,
+                [OAuth2Parameter.Code] = AuthResult.Code,
                 [OAuth2Parameter.RedirectUri] = AuthenticationRequestParameters.RedirectUri.OriginalString,
                 [OAuth2Parameter.CodeVerifier] = _codeVerifier
             };
@@ -241,10 +277,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return authorizationRequestParameters;
         }
 
-        private void VerifyAuthorizationResult()
+        internal void VerifyAuthorizationResult()
         {
-            if (_authorizationResult.Status == AuthorizationStatus.Success &&
-                !_state.Equals(_authorizationResult.State,
+            if (AuthResult.Status == AuthorizationStatus.Success &&
+                !_state.Equals(AuthResult.State,
                     StringComparison.OrdinalIgnoreCase))
             {
                 throw new MsalClientException(
@@ -252,11 +288,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "Returned state({0}) from authorize endpoint is not the same as the one sent({1})",
-                        _authorizationResult.State,
+                        AuthResult.State,
                         _state));
             }
 
-            if (_authorizationResult.Error == OAuth2Error.LoginRequired)
+            if (AuthResult.Error == OAuth2Error.LoginRequired)
             {
                 throw new MsalUiRequiredException(
                     MsalError.NoPromptFailedError,
@@ -265,52 +301,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     UiRequiredExceptionClassification.PromptNeverFailed);
             }
 
-            if (_authorizationResult.Status == AuthorizationStatus.UserCancel)
+            if (AuthResult.Status == AuthorizationStatus.UserCancel)
             {
                 ServiceBundle.DefaultLogger.Info(LogMessages.UserCancelledAuthentication);
-                throw new MsalClientException(_authorizationResult.Error, _authorizationResult.ErrorDescription ?? "User cancelled authentication.");
+                throw new MsalClientException(AuthResult.Error, AuthResult.ErrorDescription ?? "User cancelled authentication.");
             }
 
-            if (_authorizationResult.Status != AuthorizationStatus.Success)
+            if (AuthResult.Status != AuthorizationStatus.Success)
             {
                 ServiceBundle.DefaultLogger.InfoPii(
-                    LogMessages.AuthorizationResultWasNotSuccessful + _authorizationResult.ErrorDescription ?? "Unknown error.", 
+                    LogMessages.AuthorizationResultWasNotSuccessful + AuthResult.ErrorDescription ?? "Unknown error.",
                     LogMessages.AuthorizationResultWasNotSuccessful);
                 throw new MsalServiceException(
-                    _authorizationResult.Error,
-                    !string.IsNullOrEmpty(_authorizationResult.ErrorDescription) ?
-                    _authorizationResult.ErrorDescription :
+                    AuthResult.Error,
+                    !string.IsNullOrEmpty(AuthResult.ErrorDescription) ?
+                    AuthResult.ErrorDescription :
                     UnknownError);
             }
-        }
-
-        private async Task<MsalTokenResponse> ExecuteBrokerAsync(CancellationToken cancellationToken)
-        {
-            IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker(_interactiveParameters.UiParent);
-
-            var brokerInteractiveRequest = new BrokerInteractiveRequest(
-                AuthenticationRequestParameters,
-                _interactiveParameters,
-                ServiceBundle,
-                _authorizationResult,
-                broker);
-
-            return await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
-        }
-
-        internal /* internal for test only */ bool IsBrokerInvocationRequired()
-        {
-            if (_authorizationResult.Code != null &&
-               !string.IsNullOrEmpty(_authorizationResult.Code) &&
-               _authorizationResult.Code.StartsWith(BrokerParameter.AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired, StringComparison.OrdinalIgnoreCase) ||
-               _authorizationResult.Code.StartsWith(ServiceBundle.Config.RedirectUri, StringComparison.OrdinalIgnoreCase))
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationRequired);
-                return true;
-            }
-
-            AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationNotRequired);
-            return false;
         }
     }
 }
