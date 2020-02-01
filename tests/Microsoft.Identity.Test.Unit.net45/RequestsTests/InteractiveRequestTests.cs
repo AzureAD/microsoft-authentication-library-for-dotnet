@@ -201,19 +201,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
                 MockWebUI ui = new MockWebUI()
                 {
                     // When the auth code is returned from the authorization server prefixed with msauth:// 
                     // and then a url. MSAL will look for app_link, then go to the App Store to download the Authentiator App
-                    // The user who logged requires cert based auth and broker
+                    // The user who logged in requires cert based auth and broker
                     MockResult = AuthorizationResult.FromUri(
-                        TestConstants.AuthorityHomeTenant + 
-                        "?code=msauth://wpj?username=idlabmamca%40msidlab4.onmicrosoft.com&app_link=itms%3a%2f%2fitunes.apple.com%2fapp%2fazure-authenticator%2fid983156458%3fmt%3d8")
+                        "msauth://wpj?username=idlabmamca%40msidlab4.onmicrosoft.com&app_link=itms%3a%2f%2fitunes.apple.com%2fapp%2fazure-authenticator%2fid983156458%3fmt%3d8")
                 };
-
-                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
-
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityHomeTenant);
 
                 harness.ServiceBundle.PlatformProxy.SetBrokerForTest(CreateMockBroker());
 
@@ -231,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 AuthenticationResult result = await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
-                Assert.AreEqual("some-access-token", result.AccessToken);
+                Assert.AreEqual("access-token", result.AccessToken);
             }
         }
 

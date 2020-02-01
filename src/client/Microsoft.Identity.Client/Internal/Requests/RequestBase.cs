@@ -14,12 +14,8 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Json.Linq;
-using System.Text;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {

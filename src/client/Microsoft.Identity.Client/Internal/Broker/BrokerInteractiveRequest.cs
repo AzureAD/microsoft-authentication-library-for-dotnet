@@ -7,7 +7,6 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,26 +14,37 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Broker
 {
-    internal class BrokerInteractiveRequest : InteractiveRequest
+    internal class BrokerInteractiveRequest : RequestBase
     {
         internal Dictionary<string, string> BrokerPayload { get; set; } = new Dictionary<string, string>();
         internal IBroker Broker { get; }
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
+        internal InteractiveRequest InteractiveRequest { get; }
 
         internal BrokerInteractiveRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters,
-            IWebUI webUI,
-            IBroker broker)
+            IBroker broker,
+            IWebUI webUi)
             : base(
                   serviceBundle,
                   authenticationRequestParameters,
-                  acquireTokenInteractiveParameters,
-                  webUI)
+                  acquireTokenInteractiveParameters)
         {
             _interactiveParameters = acquireTokenInteractiveParameters;
             Broker = broker;
+            InteractiveRequest = new InteractiveRequest(
+                serviceBundle,
+                authenticationRequestParameters,
+                acquireTokenInteractiveParameters,
+                webUi);
+        }
+
+        internal async override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            MsalTokenResponse msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
         internal async Task<MsalTokenResponse> ExecuteBrokerAsync(CancellationToken cancellationToken)
@@ -52,7 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             }
             else
             {
-                if (!string.IsNullOrEmpty(AuthResult?.Code)) // The user has already signed in and auth code contains msauth
+                if (!string.IsNullOrEmpty(InteractiveRequest.AuthResult?.Code)) // The user has already signed in and auth code contains msauth
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UserPreviouslySignedInBrokerRequired);
                     await BrokerRequiredToAcquireTokenAsync().ConfigureAwait(false);
@@ -61,16 +71,17 @@ namespace Microsoft.Identity.Client.Internal.Broker
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.Info("The developer set .WithBroker(true), but broker is not installed" +
                         "on the device. Will take the user through the sign-in experience to generate the auth code...");
+
                     await ExecuteAuthorizationAsync(cancellationToken).ConfigureAwait(false); // The user goes through the sign-in process
 
-                    if (IsBrokerInvocationRequired()) // If auth code is prefixed w/msauth, broker is required due to conditional access policies
+                    if (InteractiveRequest.IsBrokerInvocationRequired()) // If auth code is prefixed w/msauth, broker is required due to conditional access policies
                     {
                         await BrokerRequiredToAcquireTokenAsync().ConfigureAwait(false);
                     }
                 }
 
                 // broker not needed based on auth code result. Continue w/regular acquire token call
-                return await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+                return await SendTokenRequestAsync(InteractiveRequest.GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -78,17 +89,18 @@ namespace Microsoft.Identity.Client.Internal.Broker
         {
             BrokerPayload.Clear();
             AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.AddBrokerInstallUrlToPayload);
-            BrokerPayload[BrokerParameter.BrokerInstallUrl] = AuthResult.Code;
+            BrokerPayload[BrokerParameter.BrokerInstallUrl] = InteractiveRequest.AuthResult.Code;
             return await SendAndVerifyResponseAsync().ConfigureAwait(false);
         }
 
-        internal override async Task ExecuteAuthorizationAsync(CancellationToken cancellationToken)
+        private async Task ExecuteAuthorizationAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-            await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(AuthResult.Code)) // something failed, make sure error message is returned
+            await InteractiveRequest.AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(InteractiveRequest.AuthResult?.Code)) // something failed, make sure error message is returned
             {
-                VerifyAuthorizationResult();
+                InteractiveRequest.VerifyAuthorizationResult();
             }
         }
 

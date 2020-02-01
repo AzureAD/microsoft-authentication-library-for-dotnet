@@ -16,8 +16,6 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.TelemetryCore;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -38,7 +36,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters interactiveParameters,
             IWebUI webUi)
-            : base(serviceBundle, authenticationRequestParameters, interactiveParameters)
+            : base(
+                  serviceBundle,
+                  authenticationRequestParameters,
+                  interactiveParameters)
         {
             _webUi = webUi; // can be null just to generate the authorization uri 
 
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (AuthenticationRequestParameters.IsBrokerEnabled) // set by developer
             {
-                await ExecuteBrokerInteractiveRequestAsync(cancellationToken).ConfigureAwait(false);
+                _msalTokenResponse = await ExecuteBrokerInteractiveRequestAsync(cancellationToken).ConfigureAwait(false);
             }
             else
             {
@@ -78,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (IsBrokerInvocationRequired()) // if auth code is prefixed w/msauth, broker is required due to conditional access policies
                 {
-                    await ExecuteBrokerInteractiveRequestAsync(cancellationToken).ConfigureAwait(false);
+                    _msalTokenResponse = await ExecuteBrokerInteractiveRequestAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -97,12 +98,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 ServiceBundle,
                 AuthenticationRequestParameters,
                 _interactiveParameters,
-                _webUi,
-                broker);
+                broker,
+                _webUi);
 
             return await brokerInteractiveRequest.ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
         }
-
 
         internal virtual async Task ExecuteAuthorizationAsync(CancellationToken cancellationToken)
         {

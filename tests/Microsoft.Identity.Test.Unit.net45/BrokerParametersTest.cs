@@ -7,8 +7,9 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client;
 using System;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -33,6 +34,11 @@ namespace Microsoft.Identity.Test.Unit
 
                 AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
 
+                MockWebUI ui = new MockWebUI()
+                {
+                    MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code")
+                };
+
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
                 BrokerInteractiveRequest brokerInteractiveRequest = 
@@ -40,8 +46,8 @@ namespace Microsoft.Identity.Test.Unit
                         harness.ServiceBundle,
                         parameters,
                         interactiveParameters,
-                        null,
-                        broker);
+                        broker, 
+                        ui);
 
                 brokerInteractiveRequest.CreateRequestParametersForBroker();
 

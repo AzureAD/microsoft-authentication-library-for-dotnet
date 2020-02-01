@@ -113,6 +113,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     null,
                     TestConstants.s_extraQueryParams);
 
+                MockWebUI ui = new MockWebUI()
+                {
+                    MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code")
+                };
+
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
                 _brokerInteractiveRequest =
@@ -120,8 +125,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         harness.ServiceBundle,
                         parameters,
                         new AcquireTokenInteractiveParameters(),
-                        null,
-                        broker);
+                        broker,
+                        ui);
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.CanInvokeBroker());
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
             }
@@ -212,14 +217,19 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     interactiveParameters,
                     new MockWebUI());
 
+                MockWebUI ui = new MockWebUI()
+                {
+                    MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code")
+                };
+
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
                 _brokerInteractiveRequest =
                     new BrokerInteractiveRequest(
                         harness.ServiceBundle,
                         parameters,
                         interactiveParameters,
-                        null,
-                        broker);
+                        broker,
+                        ui);
 
                 _brokerSilentRequest =
                     new BrokerSilentRequest(
