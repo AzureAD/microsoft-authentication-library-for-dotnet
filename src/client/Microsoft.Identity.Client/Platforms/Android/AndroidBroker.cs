@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             try
             {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                new TaskFactory().StartNew(() => AcquireTokenInternalAsync(brokerPayload));
+                Task.Run(() => AcquireTokenInternalAsync(brokerPayload)).ConfigureAwait(false);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
             catch (Exception ex)
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 return;
             }
 
-            if (resultCode != BrokerResponseCode.ResponseReceived)
+            if (resultCode != (int)BrokerResponseCode.ResponseReceived)
             {
                 _androidBrokerTokenResponse = new MsalTokenResponse
                 {
