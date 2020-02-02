@@ -22,15 +22,6 @@ steps:
     ArtifactName: ${{ parameters.DropArtifactName }}''
 
 - task: NuGetCommand@2
-  displayName: 'Publish packages to MyGet'
-  inputs:
-    command: push
-    packagesToPush: '${{ parameters.NugetPackagesWildcard }}'
-    nuGetFeedType: external
-    publishFeedCredentials: 'Wilson MyGet feed'
-  continueOnError: true
-
-- task: NuGetCommand@2
   displayName: 'Publish packages to VSTS feed'
   inputs:
     command: push
