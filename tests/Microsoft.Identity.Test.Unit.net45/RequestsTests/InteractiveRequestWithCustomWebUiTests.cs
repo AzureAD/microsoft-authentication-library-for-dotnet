@@ -9,11 +9,13 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -65,11 +67,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     CustomWebUi = customWebUi
                 };
 
+                var ui = new CustomWebUiHandler(customWebUi);
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, ui);
+
                 var request = new InteractiveRequest(
-                    harness.ServiceBundle,
                     parameters,
-                    interactiveParameters,
-                    new CustomWebUiHandler(customWebUi));
+                    interactiveParameters);
 
                 await executionBehavior(request).ConfigureAwait(false);
             }
@@ -96,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 },
                 async request =>
                 {
-                    await request.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                    await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
                 }).ConfigureAwait(false);
         }
 
@@ -109,7 +112,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ReturnsForAnyArgs(Task.FromResult(new Uri("http://blech"))),
                         async request =>
                         {
-                            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+                            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                                () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
                             Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
                         }).ConfigureAwait(false);
         }
@@ -125,7 +129,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ReturnsForAnyArgs<Uri>(x => { throw new InvalidOperationException(); }),
                 async request =>
                 {
-                    await AssertException.TaskThrowsAsync<InvalidOperationException>(() => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+                    await AssertException.TaskThrowsAsync<InvalidOperationException>(
+                        () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
                 }).ConfigureAwait(false);
         }
 
@@ -140,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 async request =>
                 {
                     var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                        () => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+                        () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
                     Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
                 }).ConfigureAwait(false);
         }
@@ -159,7 +164,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 async request =>
                 {
                     var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                      () => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+                      () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
                     Assert.AreEqual(MsalError.StateMismatchError, ex.ErrorCode);
                 }).ConfigureAwait(false);
         }

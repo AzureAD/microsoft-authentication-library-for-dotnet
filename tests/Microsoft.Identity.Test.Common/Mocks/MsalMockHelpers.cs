@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Common.Mocks
             return webUi;
         }
 
-        public static void ConfigureMockWebUI(IPlatformProxy platformProxy, MockWebUI webUi)
+        public static void ConfigureMockWebUI(IPlatformProxy platformProxy, IWebUI webUi)
         {
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<CoreUIParent>(), Arg.Any<RequestContext>()).Returns(webUi);

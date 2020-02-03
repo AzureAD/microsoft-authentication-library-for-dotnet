@@ -124,35 +124,23 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 _logger.Info(iOSBrokerConstants.BrokerPayloadContainsInstallUrl);
 
-                string url = brokerPayload[BrokerParameter.BrokerInstallUrl];
-                Uri uri = new Uri(url);
-                string query = uri.Query;
+                string appLink = brokerPayload[BrokerParameter.BrokerInstallUrl];
 
-                if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Substring(1);
-                }
+                DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(appLink)));
 
-                _logger.Info(iOSBrokerConstants.InvokeIosBrokerAppLink);
-
-                Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-
-                _logger.Info(iOSBrokerConstants.StartingActionViewActivity + iOSBrokerConstants.AppLink);
-
-                DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(keyPair[iOSBrokerConstants.AppLink])));
-
-                throw new MsalClientException(MsalErrorIOSEx.BrokerApplicationRequired, MsalErrorMessageIOSEx.BrokerApplicationRequired);
+                throw new MsalClientException(
+                    MsalError.BrokerApplicationRequired, 
+                    MsalErrorMessage.BrokerApplicationRequired);
             }
-
             else
             {
                 _logger.Info(iOSBrokerConstants.InvokeTheIosBroker);
 
                 NSUrl url = new NSUrl(iOSBrokerConstants.InvokeBroker + brokerPayload.ToQueryParameter());
 
-                _logger.VerbosePii(iOSBrokerConstants.BrokerPayloadPii + brokerPayload.ToQueryParameter(),
-
-                iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
+                _logger.VerbosePii(
+                    iOSBrokerConstants.BrokerPayloadPii + brokerPayload.ToQueryParameter(),
+                    iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
 
                 DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
             }

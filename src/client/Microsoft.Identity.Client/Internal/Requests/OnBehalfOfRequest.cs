@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _onBehalfOfParameters = onBehalfOfParameters;
         }
 
-        internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
 

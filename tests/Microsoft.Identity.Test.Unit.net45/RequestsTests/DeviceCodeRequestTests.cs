@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void TestDeviceCodeAuthSuccess()
+        public async Task TestDeviceCodeAuthSuccessAsync()
         {
             const int NumberOfAuthorizationPendingRequestsToInject = 1;
 
@@ -101,10 +101,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
 
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
+                var authenticationResult = await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
 
-                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                task.Wait();
-                var authenticationResult = task.Result;
                 Assert.IsNotNull(authenticationResult);
                 Assert.IsNotNull(actualDeviceCodeResult);
 
@@ -160,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
                 var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                    () => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+                    () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
             }
         }
 

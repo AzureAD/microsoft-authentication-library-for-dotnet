@@ -16,6 +16,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string MsgProtocolVersion = "msg_protocol_ver";
         public const string MsgProtocolVersion3 = "3";
         public const string SkipCache = "YES";
+        public const string AppLink = "app_link";
 
         // not required
         public const string CorrelationId = "correlation_id";

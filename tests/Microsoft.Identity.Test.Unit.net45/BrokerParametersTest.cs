@@ -35,13 +35,12 @@ namespace Microsoft.Identity.Test.Unit
 
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
-                BrokerInteractiveRequest brokerInteractiveRequest = 
-                    new BrokerInteractiveRequest(
+                BrokerInteractiveRequestComponent brokerInteractiveRequest = 
+                    new BrokerInteractiveRequestComponent(
                         parameters,
                         interactiveParameters, 
-                        harness.ServiceBundle, 
-                        null,
-                        broker);
+                        broker, 
+                        null);
 
                 brokerInteractiveRequest.CreateRequestParametersForBroker();
 

@@ -284,6 +284,7 @@ namespace Microsoft.Identity.Client
         public const string InvalidClient = "A configuration issue is preventing authentication - check the error message from the server for details." +
             "You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details. ";
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
+        public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication";
 
         public static string ExperimentalFeature(string methodName)
         {

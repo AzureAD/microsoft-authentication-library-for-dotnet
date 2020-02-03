@@ -13,11 +13,11 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class AuthorizationCodeRequest : RequestBase
+    internal class ConfidentialAuthCodeRequest : RequestBase
     {
         private readonly AcquireTokenByAuthorizationCodeParameters _authorizationCodeParameters;
 
-        public AuthorizationCodeRequest(
+        public ConfidentialAuthCodeRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters)
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.IsConfidentialClient = true;
         }
 
-        internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
