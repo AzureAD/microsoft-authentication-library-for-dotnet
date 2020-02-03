@@ -10,48 +10,56 @@ using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Broker
 {
-    internal class BrokerInteractiveRequest
+
+    // TODO: bogavril - there is really no need for anything in this class to be public (including Broker and BrokerPayload)
+    // except for the ctor and ExecuteAsync. Everything else is testable by mocking IBroker.
+    internal class BrokerInteractiveRequestComponent : ITokenRequestComponent
     {
         internal Dictionary<string, string> BrokerPayload { get; set; } = new Dictionary<string, string>();
         internal IBroker Broker { get; }
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
+        private readonly string _optionalBrokerInstallUrl; // can be null
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
-        private readonly AuthorizationResult _authorizationResult;
 
-        internal BrokerInteractiveRequest(
+        public BrokerInteractiveRequestComponent(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters,
-            IServiceBundle serviceBundle,
-            AuthorizationResult authorizationResult,
-            IBroker broker)
+            IBroker broker,
+            string optionalBrokerInstallUrl)
         {
             _authenticationRequestParameters = authenticationRequestParameters;
             _interactiveParameters = acquireTokenInteractiveParameters;
-            _serviceBundle = serviceBundle;
-            _authorizationResult = authorizationResult;
+            _serviceBundle = authenticationRequestParameters.RequestContext.ServiceBundle;
             Broker = broker;
+            _optionalBrokerInstallUrl = optionalBrokerInstallUrl;
         }
 
-        public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
+        public async Task<MsalTokenResponse> FetchTokensAsync(CancellationToken cancellationToken)
         {
             if (Broker.CanInvokeBroker())
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
-
-                return await SendAndVerifyResponseAsync().ConfigureAwait(false);
             }
             else
             {
-                _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.AddBrokerInstallUrlToPayload);
-                BrokerPayload[BrokerParameter.BrokerInstallUrl] = _authorizationResult.Code;
+                if (string.IsNullOrEmpty(_optionalBrokerInstallUrl))
+                {
+                    _authenticationRequestParameters.RequestContext.Logger.Info("Broker is required but not installed. An app uri has not been provided.");
+                    return null;
+                }
 
-                return await SendAndVerifyResponseAsync().ConfigureAwait(false);
+                _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.AddBrokerInstallUrlToPayload);
+                BrokerPayload[BrokerParameter.BrokerInstallUrl] = _optionalBrokerInstallUrl;
             }
+
+            var tokenResponse = await SendAndVerifyResponseAsync().ConfigureAwait(false);
+            return tokenResponse;
         }
 
         private async Task<MsalTokenResponse> SendAndVerifyResponseAsync()
@@ -65,7 +73,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
             return msalTokenResponse;
         }
 
-        internal void CreateRequestParametersForBroker()
+
+        internal /* internal for test */ void CreateRequestParametersForBroker()
         {
             BrokerPayload.Clear();
             BrokerPayload.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
@@ -76,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             BrokerPayload.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString());
             BrokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
             BrokerPayload.Add(BrokerParameter.Force, "NO");
-            BrokerPayload.Add(BrokerParameter.RedirectUri, _serviceBundle.Config.RedirectUri); 
+            BrokerPayload.Add(BrokerParameter.RedirectUri, _serviceBundle.Config.RedirectUri);
 
             string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
             BrokerPayload.Add(BrokerParameter.ExtraQp, extraQP);
@@ -85,8 +94,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
             BrokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
             BrokerPayload.Add(BrokerParameter.Prompt, _interactiveParameters.Prompt.PromptValue);
         }
-        
-        internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
+
+        internal /* internal for test */ void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
         {
             _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CheckMsalTokenResponseReturnedFromBroker);
             if (msalTokenResponse.AccessToken != null)
@@ -107,6 +116,42 @@ namespace Microsoft.Identity.Client.Internal.Broker
                 _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
                 throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
             }
+        }
+
+        // Example auth code that shows that broker is required:
+        // msauth://wpj?username=joe@contoso.onmicrosoft.com&app_link=itms%3a%2f%2fitunes.apple.com%2fapp%2fazure-authenticator%2fid983156458%3fmt%3d8
+        public static bool IsBrokerRequiredAuthCode(string authCode, out string installationUri)
+        {
+            if (authCode.StartsWith(BrokerParameter.AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired, StringComparison.OrdinalIgnoreCase))
+            //|| authCode.StartsWith(_serviceBundle.Config.RedirectUri, StringComparison.OrdinalIgnoreCase) // TODO: what is this?!
+            {
+                installationUri = ExtractAppLink(authCode);
+                return true;
+            }
+
+            installationUri = null;
+            return false;
+        }
+
+        private static string ExtractAppLink(string authCode)
+        {
+            Uri authCodeUri = new Uri(authCode);
+            string query = authCodeUri.Query;
+
+            if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Substring(1);
+            }
+
+            Dictionary<string, string> queryDict = CoreHelpers.ParseKeyValueList(query, '&', true, true, null);
+
+            if (!queryDict.ContainsKey(BrokerParameter.AppLink))
+            {
+                throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.BrokerApplicationRequired);
+
+            }
+
+            return queryDict[BrokerParameter.AppLink];
         }
     }
 }

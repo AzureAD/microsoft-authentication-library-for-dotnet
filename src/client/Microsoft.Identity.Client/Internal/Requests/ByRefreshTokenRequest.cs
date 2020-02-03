@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _refreshTokenParameters = refreshTokenParameters;
         }
 
-        internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             AuthenticationRequestParameters.RequestContext.Logger.Verbose(LogMessages.BeginningAcquireByRefreshToken);
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);

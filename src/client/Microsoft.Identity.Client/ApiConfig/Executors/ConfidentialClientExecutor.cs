@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
@@ -35,10 +37,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _confidentialClientApplication.UserTokenCacheInternal);
             requestParams.SendX5C = authorizationCodeParameters.SendX5C;
 
-            var handler = new AuthorizationCodeRequest(
+            var handler = new ConfidentialAuthCodeRequest(
                 ServiceBundle,
                 requestParams,
                 authorizationCodeParameters); 
+
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -91,7 +94,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         public async Task<Uri> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
             GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken) // TODO: propagate cancellation token
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
@@ -108,14 +111,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestParameters.RedirectUri = new Uri(authorizationRequestUrlParameters.RedirectUri);
             }
 
-            var handler = new InteractiveRequest(
-                ServiceBundle,
+            await AuthorityEndpoints.UpdateAuthorityEndpointsAsync(requestParameters).ConfigureAwait(false);
+            var handler = new AuthCodeRequestComponent(
                 requestParameters,
-                authorizationRequestUrlParameters.ToInteractiveParameters(),
-                null);
+                authorizationRequestUrlParameters.ToInteractiveParameters());
 
-            // todo: need to pass through cancellation token here
-            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
+            return handler.GetAuthorizationUriWithoutPkce();
         }
     }
 #endif

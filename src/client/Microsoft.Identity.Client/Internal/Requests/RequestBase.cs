@@ -11,15 +11,10 @@ using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Json.Linq;
-using System.Text;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -56,7 +51,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
-
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
 
@@ -87,17 +81,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
             authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
         }
 
-        protected virtual SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
+        /// <summary>
+        /// Return a custom set of scopes to override the default MSAL logic of merging
+        /// input scopes with reserved scopes (openid, profile etc.)
+        /// Leave as is / return null otherwise
+        /// </summary>
+        /// <param name="inputScope"></param>
+        /// <returns></returns>
+        protected virtual SortedSet<string> GetOverridenScopes(ISet<string> inputScope)
         {
-            // OAuth spec states that scopes are case sensitive, but 
-            // merge the reserved scopes in a case insensitive way, to 
-            // avoid sending things like "openid OpenId" (note that EVO is tollerant of this)
-            SortedSet<string> set = new SortedSet<string>(
-                inputScope.ToArray(),
-                StringComparer.OrdinalIgnoreCase);
-
-            set.UnionWith(OAuth2Value.ReservedScopes);
-            return set;
+            return null;
         }
 
         protected void ValidateScopeInput(SortedSet<string> scopesToValidate)
@@ -108,14 +101,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        internal abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
+        protected abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
         internal virtual Task PreRunAsync()
         {
             return Task.FromResult(0);
         }
 
-        public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken)
+        public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
 
@@ -264,16 +257,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
         }
 
-        internal async Task ResolveAuthorityEndpointsAsync()
+        protected async Task ResolveAuthorityEndpointsAsync()
         {
-            // This will make a network call unless instance discovery is cached, but this ok
-            // GetAccounts and AcquireTokenSilent do not need this
-            await UpdateAuthorityWithPreferredNetworkHostAsync().ConfigureAwait(false);
-
-            AuthenticationRequestParameters.Endpoints = await ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
-                AuthenticationRequestParameters.AuthorityInfo,
-                AuthenticationRequestParameters.LoginHint,
-                AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+            await AuthorityEndpoints.UpdateAuthorityEndpointsAsync(AuthenticationRequestParameters)
+                .ConfigureAwait(false);
         }
 
         protected Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -291,79 +278,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
-            OAuth2Client client = new OAuth2Client(ServiceBundle.DefaultLogger, ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
-            client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
-            client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
+            string scopes = GetOverridenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
+            var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
-
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE
-            if (AuthenticationRequestParameters.ClientCredential != null)
-            {
-                Dictionary<string, string> ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
-                    AuthenticationRequestParameters.RequestContext.Logger,
-                    ServiceBundle.PlatformProxy.CryptographyManager,
-                    AuthenticationRequestParameters.ClientCredential,
-                    AuthenticationRequestParameters.ClientId,
-                    AuthenticationRequestParameters.Endpoints,
-                    AuthenticationRequestParameters.SendX5C);
-
-                foreach (var entry in ccBodyParameters)
-                {
-                    client.AddBodyParameter(entry.Key, entry.Value);
-                }
-            }
-#endif
-
-            client.AddBodyParameter(OAuth2Parameter.Scope,
-                GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());
-
-            client.AddQueryParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
-
-            foreach (var kvp in additionalBodyParameters)
-            {
-                client.AddBodyParameter(kvp.Key, kvp.Value);
-            }
-
-            foreach (var kvp in AuthenticationRequestParameters.AuthenticationScheme.GetTokenRequestParams())
-            {
-                client.AddBodyParameter(kvp.Key, kvp.Value);
-            }
-
-            MsalTokenResponse response = await SendHttpMessageAsync(client, tokenEndpoint)
+            return await tokenClient.SendTokenRequestAsync(
+                additionalBodyParameters,
+                scopes,
+                tokenEndpoint,
+                cancellationToken)
                 .ConfigureAwait(false);
-
-            if (!string.Equals(
-                    response.TokenType, 
-                    AuthenticationRequestParameters.AuthenticationScheme.AccessTokenType, 
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                throw new MsalClientException(
-                    MsalError.TokenTypeMismatch,
-                    MsalErrorMessage.TokenTypeMismatch(
-                        AuthenticationRequestParameters.AuthenticationScheme.AccessTokenType,
-                        response.TokenType));
-            }
-
-            return response;
-        }
-
-        private async Task<MsalTokenResponse> SendHttpMessageAsync(OAuth2Client client, string tokenEndpoint)
-        {
-            UriBuilder builder = new UriBuilder(tokenEndpoint);
-            builder.AppendQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters);
-            MsalTokenResponse msalTokenResponse =
-                await client
-                    .GetTokenAsync(builder.Uri,
-                        AuthenticationRequestParameters.RequestContext)
-                    .ConfigureAwait(false);
-
-            if (string.IsNullOrEmpty(msalTokenResponse.Scope))
-            {
-                msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                AuthenticationRequestParameters.RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
-            }
-
-            return msalTokenResponse;
         }
 
         private void LogReturnedToken(AuthenticationResult result)
@@ -378,17 +301,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private async Task UpdateAuthorityWithPreferredNetworkHostAsync()
-        {
-            InstanceDiscoveryMetadataEntry metadata = await
-                ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                    AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority,
-                    AuthenticationRequestParameters.RequestContext)
-                .ConfigureAwait(false);
-
-            AuthenticationRequestParameters.Authority = Authority.CreateAuthorityWithEnvironment(
-                    AuthenticationRequestParameters.AuthorityInfo,
-                    metadata.PreferredNetwork);
-        }
+       
     }
 }

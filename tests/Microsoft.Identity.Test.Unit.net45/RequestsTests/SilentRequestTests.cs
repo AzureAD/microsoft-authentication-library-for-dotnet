@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.s_extraQueryParams,
                     TestConstants.Claims,
                     authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
-                parameters.IsBrokerEnabled = false;
+                parameters.IsBrokerConfigured = false;
 
                 var silentParameters = new AcquireTokenSilentParameters()
                 {

@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     [TestClass]
     public class BrokerRequestTests : TestBase
     {
-        private BrokerInteractiveRequest _brokerInteractiveRequest;
+        private BrokerInteractiveRequestComponent _brokerInteractiveRequest;
         private BrokerSilentRequest _brokerSilentRequest;
 
         [TestMethod]
@@ -115,12 +115,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
                 _brokerInteractiveRequest =
-                    new BrokerInteractiveRequest(
+                    new BrokerInteractiveRequestComponent(
                         parameters,
                         null,
-                        harness.ServiceBundle,
-                        null,
-                        broker);
+                        broker, 
+                        "install_url");
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.CanInvokeBroker());
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
             }
@@ -158,7 +157,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             try
             {
-                //Testing interactive respose
+                //Testing interactive response
                 _brokerInteractiveRequest.ValidateResponseFromBroker(msalTokenResponse);
 
                 Assert.Fail("MsalServiceException should have been thrown here");
@@ -167,7 +166,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 try
                 {
-                    //Testing silent respose
+                    //Testing silent response
                     _brokerSilentRequest.ValidateResponseFromBroker(msalTokenResponse);
 
                     Assert.Fail("MsalServiceException should have been thrown here");
@@ -192,25 +191,23 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     extraQueryParameters: TestConstants.s_extraQueryParams,
                     claims: TestConstants.Claims);
 
-                parameters.IsBrokerEnabled = true;
+                parameters.IsBrokerConfigured = true;
 
                 AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
                 AcquireTokenSilentParameters acquireTokenSilentParameters = new AcquireTokenSilentParameters();
 
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
-                    parameters,
-                    interactiveParameters,
-                    new MockWebUI());
+                //PublicAuthCodeRequest request = new PublicAuthCodeRequest(
+                //    parameters,
+                //    interactiveParameters,
+                //    new MockWebUI());
 
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
                 _brokerInteractiveRequest =
-                    new BrokerInteractiveRequest(
+                    new BrokerInteractiveRequestComponent(
                         parameters,
                         interactiveParameters,
-                        harness.ServiceBundle,
-                        null,
-                        broker);
+                        broker, 
+                        "install_url");
 
                 _brokerSilentRequest =
                     new BrokerSilentRequest(

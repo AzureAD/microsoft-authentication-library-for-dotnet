@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _clientParameters = clientParameters;
         }
 
-        internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.IsConfidentialClient = true;
         }
 
-        protected override SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
+        protected override SortedSet<string> GetOverridenScopes(ISet<string> inputScope)
         {
             // Client credentials should not add the reserved scopes
             // "openid", "profile" and "offline_access" 

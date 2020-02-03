@@ -18,6 +18,14 @@ using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
+    /// <summary>
+    /// Responsible for talking to all the Identity provider endpoints:
+    /// - instance discovery
+    /// - endpoint metadata
+    /// - mex
+    /// - /token endpoint via TokenClient
+    /// - device code endpoint
+    /// </summary>
     internal class OAuth2Client
     {
         private readonly Dictionary<string, string> _bodyParameters = new Dictionary<string, string>();
@@ -56,8 +64,6 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             return await ExecuteRequestAsync<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext).ConfigureAwait(false);
         }
-
-
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false)
         {

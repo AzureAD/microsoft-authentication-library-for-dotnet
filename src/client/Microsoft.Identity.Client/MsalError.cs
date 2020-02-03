@@ -745,6 +745,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ExperimentalFeature = "experimental_feature";
 
+        /// <summary>
+        /// <para>What happens?</para>A broker application is required, but one could not be found.
+        /// <para>Mitigation</para>Install a broker application, such as Authenticator, from the application store
+        /// </summary>
+        public const string BrokerApplicationRequired = "broker_application_required";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

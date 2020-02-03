@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
-            IsBrokerEnabled = serviceBundle.Config.IsBrokerEnabled;
+            IsBrokerConfigured = serviceBundle.Config.IsBrokerEnabled;
 
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? new Dictionary<string, string>();
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
-        internal bool IsBrokerEnabled { get; set; }
+        internal bool IsBrokerConfigured { get; set; }
 
         public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
 
