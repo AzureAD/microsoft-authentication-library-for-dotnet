@@ -33,15 +33,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly IServiceBundle _serviceBundle;
         private readonly ICoreLogger _logger;
 
+        #region For Test
+        private readonly IAuthCodeRequestComponent _authCodeRequestComponentOverride;
+        private readonly ITokenRequestComponent _authCodeExchangeComponentOverride;
+        private readonly ITokenRequestComponent _brokerInteractiveComponent;
+        #endregion
+
         public InteractiveRequest(
             AuthenticationRequestParameters requestParams,
-            AcquireTokenInteractiveParameters interactiveParameters) :
+            AcquireTokenInteractiveParameters interactiveParameters,
+            /* for test */ IAuthCodeRequestComponent authCodeRequestComponentOverride = null,
+            /* for test */ ITokenRequestComponent authCodeExchangeComponentOverride = null, 
+            /* for test */ ITokenRequestComponent brokerExchangeComponentOverride = null) :
             base(requestParams?.RequestContext?.ServiceBundle,
                 requestParams,
                 interactiveParameters)
         {
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
             _interactiveParameters = interactiveParameters ?? throw new ArgumentNullException(nameof(interactiveParameters));
+            _authCodeRequestComponentOverride = authCodeRequestComponentOverride;
+            _authCodeExchangeComponentOverride = authCodeExchangeComponentOverride;
+            _brokerInteractiveComponent = brokerExchangeComponentOverride;
             _serviceBundle = requestParams.RequestContext.ServiceBundle;
             _logger = requestParams.RequestContext.Logger;
         }
@@ -73,11 +85,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IBroker broker = _serviceBundle.PlatformProxy.CreateBroker(
                 _interactiveParameters.UiParent);
 
-            BrokerInteractiveRequestComponent brokerInteractiveRequest = new BrokerInteractiveRequestComponent(
-                _requestParams,
-                _interactiveParameters,
-                broker,
-                brokerInstallUrl);
+            ITokenRequestComponent brokerInteractiveRequest =
+                _brokerInteractiveComponent ??
+                new BrokerInteractiveRequestComponent(
+                    _requestParams,
+                    _interactiveParameters,
+                    broker,
+                    brokerInstallUrl);
 
             return await brokerInteractiveRequest.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -106,14 +120,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            AuthCodeRequestComponent authorizationFetcher = new AuthCodeRequestComponent(
-                _requestParams,
-                _interactiveParameters);
+            IAuthCodeRequestComponent authorizationFetcher = 
+                _authCodeRequestComponentOverride ??
+                new AuthCodeRequestComponent(
+                    _requestParams,
+                    _interactiveParameters);
+
             var result = await authorizationFetcher.FetchAuthCodeAndPkceVerifierAsync(cancellationToken)
                 .ConfigureAwait(false);
 
             _logger.Info("An authorization code was retrieved from the /authorize endpoint.");
-            string authCode = result.Item1.Code;
+            string authCode = result.Item1;
             string pkceCodeVerifier = result.Item2;
 
             if (BrokerInteractiveRequestComponent.IsBrokerRequiredAuthCode(authCode, out string brokerInstallUri))
@@ -122,11 +139,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             _logger.Info("Exchanging the auth code for tokens");
-            var authCodeExchangeComponent = new AuthCodeExchangeComponent(
-                _requestParams,
-                _interactiveParameters,
-                authCode,
-                pkceCodeVerifier);
+            var authCodeExchangeComponent =
+                _authCodeExchangeComponentOverride ??
+                new AuthCodeExchangeComponent(
+                    _requestParams,
+                    _interactiveParameters,
+                    authCode,
+                    pkceCodeVerifier);
 
             return await authCodeExchangeComponent.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);

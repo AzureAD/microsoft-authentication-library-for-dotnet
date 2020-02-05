@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -37,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
         }
 
-        public async Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceVerifierAsync(
+        public async Task<Tuple<string, string>> FetchAuthCodeAndPkceVerifierAsync(
             CancellationToken cancellationToken)
         {
             var webUi = CreateWebAuthenticationDialog();
@@ -50,10 +51,12 @@ namespace Microsoft.Identity.Client.Internal
             return result.Item1;
         }
 
-        private async Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceInternalAsync(
+        private async Task<Tuple<string, string>> FetchAuthCodeAndPkceInternalAsync(
             IWebUI webUi,
             CancellationToken cancellationToken)
         {
+            RedirectUriHelper.Validate(_requestParams.RedirectUri);
+
             _requestParams.RedirectUri = webUi.UpdateRedirectUri(_requestParams.RedirectUri);
 
             Tuple<Uri, string, string> authorizationTuple = CreateAuthorizationUri(true);
@@ -75,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal
 
                 VerifyAuthorizationResult(authorizationResult, state);
 
-                return new Tuple<AuthorizationResult, string>(authorizationResult, codeVerifier);
+                return new Tuple<string, string>(authorizationResult.Code, codeVerifier);
             }
 
         }
