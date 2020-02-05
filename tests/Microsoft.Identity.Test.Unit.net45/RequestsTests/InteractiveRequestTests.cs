@@ -189,8 +189,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-    
-
         [TestMethod]
         public async Task RedirectUriContainsFragmentErrorTestAsync()
         {
@@ -223,6 +221,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.RedirectUriContainsFragment));
             }
         }
+
 
         [TestMethod]
         public async Task VerifyAuthorizationResultTestAsync()

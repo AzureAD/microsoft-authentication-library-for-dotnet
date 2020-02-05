@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _authorizationCode = authorizationCode ?? throw new ArgumentNullException(nameof(authorizationCode));
             _pkceCodeVerifier = pkceCodeVerifier ?? throw new ArgumentNullException(nameof(pkceCodeVerifier));
 
-            RedirectUriHelper.Validate(requestParams.RedirectUri);
             _tokenClient = new TokenClient(requestParams);
             _interactiveParameters.LogParameters(requestParams.RequestContext.Logger);
         }

@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             //|| authCode.StartsWith(_serviceBundle.Config.RedirectUri, StringComparison.OrdinalIgnoreCase) // TODO: what is this?!
             {
                 installationUri = ExtractAppLink(authCode);
-                return true;
+                return (installationUri != null);
             }
 
             installationUri = null;
@@ -147,8 +147,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             if (!queryDict.ContainsKey(BrokerParameter.AppLink))
             {
-                throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.BrokerApplicationRequired);
-
+                return null;
             }
 
             return queryDict[BrokerParameter.AppLink];
