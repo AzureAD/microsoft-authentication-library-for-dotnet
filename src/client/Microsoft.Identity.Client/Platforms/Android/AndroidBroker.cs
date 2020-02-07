@@ -80,6 +80,19 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         private async Task AcquireTokenInternalAsync(IDictionary<string, string> brokerPayload)
         {
+            if (brokerPayload.ContainsKey(BrokerParameter.BrokerInstallUrl))
+            {
+                _logger.Info("Android Broker - broker payload contains install url");
+
+                var appLink = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerInstallUrl);
+                _logger.Info("Android Broker - Starting ActionView activity to " + appLink);
+                _activity.StartActivity(new Intent(Intent.ActionView, AndroidNative.Net.Uri.Parse(appLink)));
+
+                throw new MsalClientException(
+                    MsalError.BrokerApplicationRequired,
+                    MsalErrorMessage.BrokerApplicationRequired);
+            }
+
             _brokerHelper.InitiateBrokerHandshake(_activity);
 
             Context mContext = Application.Context;
