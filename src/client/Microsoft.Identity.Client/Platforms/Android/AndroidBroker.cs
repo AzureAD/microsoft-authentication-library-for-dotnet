@@ -3,11 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Android.Accounts;
 using Android.App;
 using Android.Content;
 using AndroidNative = Android;
@@ -15,11 +12,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
-using System.Globalization;
 using Microsoft.Identity.Json.Linq;
-using Microsoft.Identity.Json;
-using Android.OS;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -29,14 +22,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
         // When the broker responds, we cannot correlate back to a started task. 
         // So we make a simplifying assumption - only one broker open session can exist at a time
         // This semaphore is static to enforce this
-        private static SemaphoreSlim _readyForResponse;
+        private static SemaphoreSlim s_readyForResponse = new SemaphoreSlim(0);
 
-        private static MsalTokenResponse _androidBrokerTokenResponse = null;
+        private static MsalTokenResponse s_androidBrokerTokenResponse = null;
         //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and reinjected into the response at the end.
-        private static string _correlationId;
+        private static string s_correlationId;
         private readonly AndroidBrokerHelper _brokerHelper;
         private readonly ICoreLogger _logger;
-        private Activity _activity;
+        private readonly Activity _activity;
 
         public AndroidBroker(CoreUIParent uiParent, ICoreLogger logger)
         {
@@ -55,8 +48,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public async Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
         {
-            _androidBrokerTokenResponse = null;
-            _correlationId = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId);
+            s_androidBrokerTokenResponse = null;
+            s_correlationId = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId);
             
             try
             {
@@ -73,18 +66,15 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
             }
 
-            return _androidBrokerTokenResponse;
+            return s_androidBrokerTokenResponse;
         }
 
         private async Task AcquireTokenInternalAsync(IDictionary<string, string> brokerPayload)
         {
             try
             {
-                _readyForResponse = new SemaphoreSlim(0);
 
                 await _brokerHelper.InitiateBrokerHandshakeAsync(_activity).ConfigureAwait(false);
-
-                Context mContext = Application.Context;
 
                 brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
 
@@ -94,8 +84,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 {
                     _logger.Verbose("User is specified for silent token request. Starting silent broker request");
                     string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerPayload, _activity).ConfigureAwait(false);
-                    _androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(silentResult);
-                    _readyForResponse?.Release();
+                    s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(silentResult);
+                    s_readyForResponse?.Release();
                     return;
                 }
                 else
@@ -135,11 +125,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 _logger.ErrorPiiWithPrefix(ex, "Broker invocation failed.");
 
                 
-                _readyForResponse.Release();
+                s_readyForResponse.Release();
                 throw;
             }
 
-            await _readyForResponse.WaitAsync().ConfigureAwait(false);
+            await s_readyForResponse.WaitAsync().ConfigureAwait(false);
         }
 
         internal static void SetBrokerResult(Intent data, int resultCode)
@@ -153,7 +143,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
                 if (resultCode != (int)BrokerResponseCode.ResponseReceived)
                 {
-                    _androidBrokerTokenResponse = new MsalTokenResponse
+                    s_androidBrokerTokenResponse = new MsalTokenResponse
                     {
                         Error = MsalError.BrokerResponseReturnedError,
                         ErrorDescription = data.GetStringExtra(BrokerConstants.BrokerResultV2),
@@ -161,12 +151,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 }
                 else
                 {
-                    _androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                    s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(data.GetStringExtra(BrokerConstants.BrokerResultV2));
                 }
             }
             finally
             {
-                _readyForResponse.Release();
+                s_readyForResponse.Release();
             }
         }
 
@@ -182,7 +172,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             response.Add(BrokerResponseConst.Authority, authResult[BrokerResponseConst.Authority].ToString());
             response.Add(BrokerResponseConst.AccessToken, authResult[BrokerResponseConst.AccessToken].ToString());
             response.Add(BrokerResponseConst.IdToken, authResult[BrokerResponseConst.IdToken].ToString());
-            response.Add(BrokerResponseConst.CorrelationId, _correlationId);
+            response.Add(BrokerResponseConst.CorrelationId, s_correlationId);
             response.Add(BrokerResponseConst.Scope, authResult[BrokerResponseConst.AndroidScopes].ToString());
             response.Add(BrokerResponseConst.ExpiresOn, authResult[BrokerResponseConst.ExpiresOn].ToString());
             response.Add(BrokerResponseConst.ClientInfo, authResult[BrokerResponseConst.ClientInfo].ToString());
