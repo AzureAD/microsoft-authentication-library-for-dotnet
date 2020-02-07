@@ -18,7 +18,21 @@ namespace XamarinDev
 
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
-        public const string BrokerRedirectUriOnIos = "msauth.com.companyname.XamarinDev://auth";
+        public static string BrokerRedirectUri
+        {
+            get
+            {
+                switch (Device.RuntimePlatform)
+                {
+                    case Device.iOS:
+                        return "msauth.com.companyname.XamarinDev://auth";
+                    case Device.Android:
+                        return "msauth://com.companyname.xamarindev/t+Bk/nrTiK6yhmUDgd80TS5ZZT8=";
+                    default:
+                        throw new InvalidOperationException("Broker only supported on ios and android");
+                }
+            }
+        }
         public static string DefaultMobileRedirectUri = TestConstants.MobileDefaultRedirectUri;
 
         public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
@@ -56,7 +70,8 @@ namespace XamarinDev
                 .WithAuthority(new Uri(Authority), ValidateAuthority)
                 .WithLogging((level, message, pii) =>
                 {
-                    Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
+                    //Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
+                    Console.WriteLine("[" + level + "]" + " - " + message + " - " + pii);
                 },
                 LogLevel.Verbose,
                 true);
@@ -64,7 +79,7 @@ namespace XamarinDev
             if (UseBroker)
             {
                 builder.WithBroker();
-                builder = builder.WithRedirectUri(BrokerRedirectUriOnIos);
+                builder = builder.WithRedirectUri(BrokerRedirectUri);
             }
 
             else
@@ -72,7 +87,7 @@ namespace XamarinDev
                 builder.WithRedirectUri(DefaultMobileRedirectUri);
 
                 if (Device.RuntimePlatform == Device.iOS)
-                {               
+                {
                     builder = builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
                 }
             }
