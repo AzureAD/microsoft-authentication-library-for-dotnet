@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private readonly CoreUIParent _uIParent;
         private string _brokerRequestNonce;
         private bool _brokerV3Installed = false;
+        private string _brokerInstallName = iOSBrokerConstants.InvokeV3Broker;
 
         public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
         {
@@ -67,6 +68,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV2))
                     {
                         _logger.Info(iOSBrokerConstants.iOSBrokerv2Installed);
+                        _brokerInstallName = iOSBrokerConstants.InvokeV2Broker;
                         canStartBroker = true;
                     }
                 });
@@ -136,7 +138,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 _logger.Info(iOSBrokerConstants.InvokeTheIosBroker);
 
-                NSUrl url = new NSUrl(iOSBrokerConstants.InvokeBroker + brokerPayload.ToQueryParameter());
+                NSUrl url = new NSUrl(_brokerInstallName + brokerPayload.ToQueryParameter());
 
                 _logger.VerbosePii(
                     iOSBrokerConstants.BrokerPayloadPii + brokerPayload.ToQueryParameter(),
