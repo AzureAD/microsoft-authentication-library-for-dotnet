@@ -22,6 +22,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -33,8 +34,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public const string WorkAccount = "com.microsoft.workaccount.user.info";
 
         private readonly Context _androidContext;
+
+        // Important: this object MUST be accessed on a background thread. Android will check this and throw otherwise.
         private readonly AccountManager _androidAccountManager;
         private readonly ICoreLogger _logger;
+
+        private const long AccountManagerTimeoutSeconds = 5 * 60;
 
         public AndroidBrokerHelper(Context androidContext, ICoreLogger logger)
         {
@@ -56,13 +61,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             //Force this to return true for broker test app
 
-            return VerifyAuthenticator(_androidAccountManager)
+            return VerifyAuthenticator()
                    && !packageName.Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase)
                    && !packageName
            .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase);
         }
 
-        public Intent GetIntentForInteractiveBrokerRequest(IDictionary<string, string> brokerPayload, Activity callerActivity)
+        public async Task<Intent> GetIntentForInteractiveBrokerRequestAsync(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
             Intent intent = null;
 
@@ -77,11 +82,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 addAccountOptions.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetIntentForInteractiveRequest);
 
                 result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-                    BrokerConstants.AuthtokenType, 
-                    null, 
-                    addAccountOptions, 
+                    BrokerConstants.AuthtokenType,
                     null,
-                    null, 
+                    addAccountOptions,
+                    null,
+                    null,
                     GetPreferredLooper(callerActivity));
 
                 if (result == null)
@@ -89,11 +94,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     _logger.Info("Android account manager didn't return any results for interactive broker request.");
                 }
 
-                Bundle bundleResult = (Bundle)result?.Result;
-                // Broker should throw OperationCanceledException if token is not available
+                Bundle bundleResult = (Bundle)(await result.GetResultAsync(
+                     AccountManagerTimeoutSeconds,
+                     TimeUnit.Seconds)
+                     .ConfigureAwait(false));
+
                 intent = (Intent)bundleResult?.GetParcelable(AccountManager.KeyIntent);
 
-                //Validate that the intent was created succsesfully.
+                //Validate that the intent was created successfully.
                 if (intent != null)
                 {
                     _logger.Info("Intent created from BundleResult is not null. Starting interactive broker request");
@@ -117,32 +125,35 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return intent;
         }
 
-        public string GetBrokerAuthTokenSilently(IDictionary<string, string> brokerPayload, Activity callerActivity)
+        public async Task<string> GetBrokerAuthTokenSilentlyAsync(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
             GetBrokerAccountInfo(brokerPayload, callerActivity);
             Bundle silentOperationBundle = GetSilentBrokerBundle(brokerPayload);
             silentOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.AcquireTokenSilent);
 
-            var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+            IAccountManagerFuture result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
                 BrokerConstants.AuthtokenType,
-                null, 
-                silentOperationBundle, 
                 null,
-                null, 
+                silentOperationBundle,
+                null,
+                null,
                 GetPreferredLooper(callerActivity));
 
-            if (result == null)
+            if (result != null)
             {
-                _logger.Info("Android Broker AddAccount didn't return any results. ");
+                Bundle bundleResult = (Bundle)(await result.GetResultAsync(
+                     AccountManagerTimeoutSeconds,
+                     TimeUnit.Seconds)
+                     .ConfigureAwait(false));
+
+                if (bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success))
+                {
+                    _logger.Info("Android Broker succsesfully refreshed the access token.");
+                    return bundleResult.GetString(BrokerConstants.BrokerResultV2);
+                }
             }
 
-            Bundle bundleResult = (Bundle)result?.Result;
-            if (bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success))
-            {
-                _logger.Info("Android Broker succsesfully refreshed the access token.");
-                return bundleResult.GetString(BrokerConstants.BrokerResultV2);
-            }
-
+            _logger.Info("Android Broker AddAccount didn't return any results. ");
             return null;
         }
 
@@ -188,43 +199,42 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         //Inorder for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.
-        public bool InitiateBrokerHandshake(Activity callerActivity)
+        public async Task InitiateBrokerHandshakeAsync(Activity callerActivity)
         {
             try
             {
-                IAccountManagerFuture result = null;
-
                 Bundle helloRequestBundle = new Bundle();
                 helloRequestBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
                 helloRequestBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
                 helloRequestBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
 
-                result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-                    BrokerConstants.AuthtokenType, 
-                    null, 
-                    helloRequestBundle, 
+                IAccountManagerFuture result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+                    BrokerConstants.AuthtokenType,
                     null,
-                    null, 
+                    helloRequestBundle,
+                    null,
+                    null,
                     GetPreferredLooper(callerActivity));
 
-                if (result == null)
+                if (result != null)
                 {
-                    _logger.Info("Android account manager AddAccount didn't return any results. ");
+                    Bundle bundleResult = (Bundle)(await result.GetResultAsync(
+                        AccountManagerTimeoutSeconds,
+                        TimeUnit.Seconds)
+                        .ConfigureAwait(false));
+
+                    var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
+
+                    if (!string.IsNullOrEmpty(bpKey))
+                    {
+                        _logger.Info("Using broker protocol version: " + bpKey);
+                        return;
+                    }
+
+                    throw new MsalException("Could not negotiate protocol version with broker. ");
                 }
 
-                Bundle bundleResult = (Bundle)result?.Result;
-
-                var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
-
-                if (!string.IsNullOrEmpty(bpKey))
-                {
-                    _logger.Info("Using broker protocol version: " + bpKey);
-                    return true;
-                }
-                else
-                {
-                    throw new MsalException("Could not negotiate protocol version with broker");
-                }
+                throw new MsalException("Could not communicate with broker via account manager");
             }
             catch
             {
@@ -426,8 +436,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     {
                         if (chainStatus.Status != X509ChainStatusFlags.UntrustedRoot)
                         {
-                            throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed, 
-                                string.Format(CultureInfo.InvariantCulture,"app certificate validation failed with {0}", chainStatus.Status));
+                            throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed,
+                                string.Format(CultureInfo.InvariantCulture, "app certificate validation failed with {0}", chainStatus.Status));
                         }
                     }
                 }
@@ -461,14 +471,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return certificates;
         }
 
-        private bool VerifyAuthenticator(AccountManager am)
+        private bool VerifyAuthenticator()
         {
             // there may be multiple authenticators from same package
             // , but there is only one entry for an authenticator type in
             // AccountManager.
             // If another app tries to install same authenticator type, it will
             // queue up and will be active after first one is uninstalled.
-            AuthenticatorDescription[] authenticators = am.GetAuthenticatorTypes();
+            AuthenticatorDescription[] authenticators = _androidAccountManager.GetAuthenticatorTypes();
             foreach (AuthenticatorDescription authenticator in authenticators)
             {
                 if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType, StringComparison.OrdinalIgnoreCase)
