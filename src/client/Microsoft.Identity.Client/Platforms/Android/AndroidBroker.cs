@@ -73,7 +73,18 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             try
             {
+                if (brokerPayload.ContainsKey(BrokerParameter.BrokerInstallUrl))
+                {
+                    _logger.Info("Android Broker - broker payload contains install url");
 
+                    var appLink = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerInstallUrl);
+                    _logger.Info("Android Broker - Starting ActionView activity to " + appLink);
+                    _activity.StartActivity(new Intent(Intent.ActionView, AndroidNative.Net.Uri.Parse(appLink)));
+
+                    throw new MsalClientException(
+                        MsalError.BrokerApplicationRequired,
+                        MsalErrorMessage.BrokerApplicationRequired);
+                }
                 await _brokerHelper.InitiateBrokerHandshakeAsync(_activity).ConfigureAwait(false);
 
                 brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
@@ -124,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             {
                 _logger.ErrorPiiWithPrefix(ex, "Broker invocation failed.");
 
-                
+
                 s_readyForResponse.Release();
                 throw;
             }
