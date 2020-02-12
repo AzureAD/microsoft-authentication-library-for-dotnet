@@ -15,7 +15,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     {
         internal static byte[] GetRawBrokerKey(ICoreLogger logger)
         {
-            byte[] brokerKey = null;
             SecRecord record = new SecRecord(SecKind.GenericPassword)
             {
                 Generic = NSData.FromString(iOSBrokerConstants.LocalSettingsContainerName),
@@ -27,13 +26,14 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             };
 
             NSData key = SecKeyChain.QueryAsData(record);
+            byte[] brokerKey;
             if (key == null)
             {
                 AesManaged algo = new AesManaged();
                 algo.GenerateKey();
                 byte[] rawBytes = algo.Key;
                 NSData byteData = NSData.FromArray(rawBytes);
-                record = new SecRecord(SecKind.GenericPassword)
+                SecRecord secRecord = new SecRecord(SecKind.GenericPassword)
                 {
                     Generic = NSData.FromString(iOSBrokerConstants.LocalSettingsContainerName),
                     Service = iOSBrokerConstants.BrokerKeyService,
@@ -44,7 +44,18 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     ValueData = byteData
                 };
 
-                var result = SecKeyChain.Add(record);
+                var result = SecKeyChain.Add(secRecord);
+
+                if (result == SecStatusCode.DuplicateItem)
+                {
+                    logger.Info(iOSBrokerConstants.FailedToSaveBrokerKey + result);
+                    result = SecKeyChain.Remove(record);
+                    if (result == SecStatusCode.Success)
+                    {
+                        result = SecKeyChain.Add(secRecord);
+                    }
+                }
+
                 if (result != SecStatusCode.Success)
                 {
                     logger.Info(iOSBrokerConstants.FailedToSaveBrokerKey + result);
