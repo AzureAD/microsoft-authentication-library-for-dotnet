@@ -246,7 +246,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private Handler GetPreferredLooper(Activity callerActivity)
         {
             var myLooper = Looper.MyLooper();
-            if (myLooper != null && callerActivity.MainLooper != myLooper)
+            if (myLooper != null && callerActivity != null && callerActivity.MainLooper != myLooper)
             {
                 _logger.Info("myLooper returned. Calling thread is associated with a Looper: " + myLooper.ToString());
                 return new Handler(myLooper);
