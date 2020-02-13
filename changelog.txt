@@ -1,3 +1,12 @@
+4.9.0
+============
+New Features:
+**Broker support for Xamarin Android**. MSAL.NET now supports brokered authentication with Xamarin Android. For details see https:aka.ms/msal-net-brokers, along with code snippets, and more details in the [4.9 release blog post](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/msal-net-4.9#broker-support-on-xamarinandroid). For help migrating from ADAL.NET using iOS broker to MSAL.NET using android broker, see [this page on migration](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/How-to-migrate-from-using-iOS-Broker-on-ADAL.NET-to-MSAL.NET).
+
+Bug Fixes:
+**When using `.WithBroker(true)`, but no broker is installed on the device, MSAL.NET would throw a null ref**. MSAL.NET now checks if the user is required to have their device managed, and if not, the user will be guided through the regular authentication process with no broker. If device mangagement is required, the user will be guided to the App Store to install the Authenticator App. [See more details in the issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1598).
+**Starting with version 4.8.1, MSAL.NET would throw a MonoTouchException on iOS 10 and 11 devices**. Starting with iOS 13 , all WKWebViews report their full page user agent as desktop, previously this was reported as mobile to the server. A check was added in 4.8.1 to switch to use macOS user-agent for all browsers by default. Now, for devices lower than iOS 13, this check will not occur. [See issue for more details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1621).
+
 4.8.1
 ============
 
