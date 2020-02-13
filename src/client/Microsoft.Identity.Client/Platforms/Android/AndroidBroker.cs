@@ -95,7 +95,18 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 {
                     _logger.Verbose("User is specified for silent token request. Starting silent broker request");
                     string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerPayload, _activity).ConfigureAwait(false);
-                    s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(silentResult);
+                    if (!string.IsNullOrEmpty(silentResult))
+                    {
+                        s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(silentResult);
+                    }
+                    else
+                    {
+                        s_androidBrokerTokenResponse = new MsalTokenResponse
+                        {
+                            Error = MsalError.BrokerResponseReturnedError,
+                            ErrorDescription = "Failed to acquire token silently from the broker.",
+                        };
+                    }
                     return;
                 }
                 else
