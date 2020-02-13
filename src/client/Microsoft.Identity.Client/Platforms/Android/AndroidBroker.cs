@@ -59,7 +59,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             catch (Exception ex)
             {
-                _logger.Error("Broker Operation Failed to complete.");
+                _logger.Error("Broker Operation Failed to complete. In order to perform brokered authentication on android" +
+                    " you need to ensure that you have installed either Intune Company Portal (Version 5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).");
                 if (ex is MsalException)
                     throw;
                 else
@@ -95,8 +96,19 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 {
                     _logger.Verbose("User is specified for silent token request. Starting silent broker request");
                     string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerPayload, _activity).ConfigureAwait(false);
-                    s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(silentResult);
-                    s_readyForResponse?.Release();
+                    if (!string.IsNullOrEmpty(silentResult))
+                    {
+                        s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(silentResult);
+                    }
+                    else
+                    {
+                        s_androidBrokerTokenResponse = new MsalTokenResponse
+                        {
+                            Error = MsalError.BrokerResponseReturnedError,
+                            ErrorDescription = "Failed to acquire token silently from the broker. In order to perform brokered authentication on android" +
+                    " you need to ensure that you have installed either Intune Company Portal (Version 5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).",
+                        };
+                    }
                     return;
                 }
                 else
