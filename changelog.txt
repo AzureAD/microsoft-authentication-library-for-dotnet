@@ -1,3 +1,10 @@
+4.8.2
+============
+
+Bug Fixes:
+**When using `.WithBroker(true)`, but no broker is installed on the device, MSAL.NET would throw a null ref**. MSAL.NET now checks if the user is required to have their device managed, and if not, the user will be guided through the regular authentication process with no broker. If device mangagement is required, the user will be guided to the App Store to install the Authenticator App. [See more details in the issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1598).
+**Starting with version 4.8.1, MSAL.NET would throw a MonoTouchException on iOS 10 and 11 devices**. Starting with iOS 13 , all WKWebViews report their full page user agent as desktop, previously this was reported as mobile to the server. A check was added in 4.8.1 to switch to use macOS user-agent for all browsers by default. Now, for devices lower than iOS 13, this check will not occur. [See issue for more details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1621).
+
 4.8.1
 ============
 
