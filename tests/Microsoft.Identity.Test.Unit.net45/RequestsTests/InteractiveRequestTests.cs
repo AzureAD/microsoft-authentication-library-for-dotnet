@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task WithExtraQueryParamsAndClaimsAsync()
         {
             IDictionary<string, string> extraQueryParamsAndClaims =
-                TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+                TestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
             extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
 
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var ui = new MockWebUI()
                 {
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code"),
-                    QueryParamsToValidate = TestConstants.s_extraQueryParams
+                    QueryParamsToValidate = TestConstants.ExtraQueryParams
                 };
                 MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, ui);
 
@@ -77,7 +77,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var tokenResponseHandler = new MockHttpMessageHandler
                 {
                     ExpectedMethod = HttpMethod.Post,
-                    ExpectedQueryParams = extraQueryParamsAndClaims,
+                    ExpectedQueryParams = TestConstants.ExtraQueryParams,
+                    ExpectedPostData = new Dictionary<string, string>()
+                        { {OAuth2Parameter.Claims,  TestConstants.Claims } },
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 };
                 harness.HttpManager.AddMockHandler(tokenResponseHandler);
@@ -86,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
                     cache,
-                    extraQueryParameters: TestConstants.s_extraQueryParams,
+                    extraQueryParameters: TestConstants.ExtraQueryParams,
                     claims: TestConstants.Claims);
 
                 parameters.RedirectUri = new Uri("some://uri");

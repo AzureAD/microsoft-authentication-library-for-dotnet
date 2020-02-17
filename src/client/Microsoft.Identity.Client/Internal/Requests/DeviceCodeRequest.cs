@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
             client.AddBodyParameter(OAuth2Parameter.Scope, deviceCodeScopes.AsSingleString());
-            client.AddQueryParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
+            client.AddBodyParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
 
             string deviceCodeEndpoint = AuthenticationRequestParameters.Endpoints.TokenEndpoint
                                                                        .Replace("token", "devicecode");
