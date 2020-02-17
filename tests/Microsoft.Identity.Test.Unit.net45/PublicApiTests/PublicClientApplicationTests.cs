@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityCommonTenant,
-                    queryParameters: mockUi.QueryParamsToValidate);
+                    bodyParameters: mockUi.QueryParamsToValidate);
 
                 AuthenticationResult result = await app
                     .AcquireTokenInteractive(TestConstants.s_scope)

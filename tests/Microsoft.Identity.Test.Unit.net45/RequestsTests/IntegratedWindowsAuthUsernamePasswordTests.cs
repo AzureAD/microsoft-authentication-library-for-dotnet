@@ -253,10 +253,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
         public async Task AcquireTokenByIntegratedWindowsAuthTestAsync()
         {
-            IDictionary<string, string> extraQueryParamsAndClaims =
-                TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
-            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
-
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -266,12 +262,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
                 MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
-                mockTokenRequestHttpHandler.ExpectedQueryParams = extraQueryParamsAndClaims;
+                mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParams;
+                mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.s_extraQueryParams)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParams)
                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
@@ -301,7 +298,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task AcquireTokenByIntegratedWindowsAuthInvalidClientTestAsync()
         {
             IDictionary<string, string> extraQueryParamsAndClaims =
-                TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+                TestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
             extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
 
             using (var httpManager = new MockHttpManager())
@@ -323,7 +320,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.s_extraQueryParams)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParams)
                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 

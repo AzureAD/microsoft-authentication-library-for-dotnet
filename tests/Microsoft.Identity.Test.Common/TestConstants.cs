@@ -124,13 +124,18 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
 
         public const string Bearer = "bearer";
 
-        public static readonly IDictionary<string, string> s_extraQueryParams
-            = new Dictionary<string, string>()
+        public static IDictionary<string, string> ExtraQueryParams
+        {
+            get
             {
-                {"extra", "qp" },
-                {"key1", "value1%20with%20encoded%20space"},
-                {"key2", "value2"}
-            };
+                return new Dictionary<string, string>()
+                {
+                    {"extra", "qp" },
+                    {"key1", "value1%20with%20encoded%20space"},
+                    {"key2", "value2"}
+                };
+            }
+        }
 
         public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
         public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";

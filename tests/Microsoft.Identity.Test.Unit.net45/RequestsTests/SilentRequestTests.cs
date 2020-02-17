@@ -61,17 +61,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public async Task ExpiredTokenRefreshFlowTestAsync()
         {
-            IDictionary<string, string> extraQueryParamsAndClaims =
-               TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
-            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
-
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
                 _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
                     null,
-                    TestConstants.s_extraQueryParams,
+                    TestConstants.ExtraQueryParams,
                     TestConstants.Claims,
                     authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
 
@@ -97,7 +93,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        ExpectedQueryParams = extraQueryParamsAndClaims
+                        ExpectedQueryParams = TestConstants.ExtraQueryParams,
+                        ExpectedPostData = new Dictionary<string, string>() { { OAuth2Parameter.Claims, TestConstants.Claims } }
                     });
 
                 var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
@@ -113,10 +110,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public void BrokerSilentRequestBrokerRequiredTestAsync()
         {
-            IDictionary<string, string> extraQueryParamsAndClaims =
-               TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
-            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
-
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
                 _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
@@ -125,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
                     null,
-                    TestConstants.s_extraQueryParams,
+                    TestConstants.ExtraQueryParams,
                     TestConstants.Claims,
                     authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
                 parameters.IsBrokerConfigured = false;
@@ -142,7 +135,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        ExpectedQueryParams = extraQueryParamsAndClaims
+                        ExpectedQueryParams = TestConstants.ExtraQueryParams,
+                        ExpectedPostData = new Dictionary<string, string>() { { OAuth2Parameter.Claims, TestConstants.Claims } }
                     });
 
                 var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
