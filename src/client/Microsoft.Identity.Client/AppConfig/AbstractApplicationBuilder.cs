@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -254,6 +255,7 @@ namespace Microsoft.Identity.Client
             WithTenantId(applicationOptions.TenantId);
             WithClientName(applicationOptions.ClientName);
             WithClientVersion(applicationOptions.ClientVersion);
+            WithClientCapabilities(applicationOptions.ClientCapabilities);
 
             WithLogging(
                 null,
@@ -308,6 +310,25 @@ namespace Microsoft.Identity.Client
         public T WithExperimentalFeatures(bool enableExperimentalFeatures = true)
         {
             Config.ExperimentalFeaturesEnabled = enableExperimentalFeatures;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction. 
+        /// Allows configuration of one or more client capabilities, e.g. "llt"
+        /// </summary>
+        /// <remarks>
+        /// MSAL will transform these into special claims request. See https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter for
+        /// details on claim requests.
+        /// For more details see https://aka.ms/msal-net-claims-request
+        /// </remarks>
+        public T WithClientCapabilities(IEnumerable<string> clientCapabilities)
+        {
+            if (clientCapabilities!= null && clientCapabilities.Any())
+            {
+                Config.ClientCapabilities = clientCapabilities;
+            }
+
             return (T)this;
         }
 

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -514,5 +515,34 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNotNull(app.AppConfig.TelemetryConfig);
             Assert.AreEqual<string>(telemetryConfig.SessionId, app.AppConfig.TelemetryConfig.SessionId);
         }
+
+        [TestMethod]
+        public void WithClientCapabilities()
+        {
+            var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientCapabilities(new[] {  "cp1", "cp2"})
+                .Build();
+
+            CollectionAssert.AreEquivalent(new[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
+        }
+
+        [TestMethod]
+        public void WithClientCapabilitiesViaOptions()
+        {
+            var options = new PublicClientApplicationOptions
+            {
+                Instance = "https://login.microsoftonline.com",
+                TenantId = "organizations",
+                ClientId = TestConstants.ClientId, 
+                ClientCapabilities = new[] { "cp1", "cp2"}
+            };
+
+            var app = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)                
+                .Build();
+
+            CollectionAssert.AreEquivalent(new string[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
+        }
+
+      
     }
 }
