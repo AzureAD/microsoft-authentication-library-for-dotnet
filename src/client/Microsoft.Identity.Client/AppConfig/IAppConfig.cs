@@ -91,6 +91,17 @@ namespace Microsoft.Identity.Client
         /// </summary>
         bool ExperimentalFeaturesEnabled { get; }
 
+        /// <summary>
+        /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction. 
+        /// Allows configuration of one or more client capabilities, e.g. "llt"
+        /// </summary>
+        /// <remarks>
+        /// MSAL will transform these into a "access_token" claims request. See https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter for
+        /// details on claim requests.
+        /// For more details see https://aka.ms/msal-net-claims-request
+        /// </remarks>
+        IEnumerable<string> ClientCapabilities { get; }
+
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>

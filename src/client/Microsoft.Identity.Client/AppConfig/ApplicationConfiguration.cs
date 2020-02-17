@@ -67,6 +67,8 @@ namespace Microsoft.Identity.Client
 
         public bool ExperimentalFeaturesEnabled { get; set; } = false;
 
+        public IEnumerable<string> ClientCapabilities { get; set; }
+
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
@@ -77,8 +79,6 @@ namespace Microsoft.Identity.Client
         public IDictionary<string, string> ClaimsToSign { get; internal set; }
         public bool MergeWithDefaultClaims { get; internal set; }
         internal int ConfidentialClientCredentialCount;
-
-
 
 #endif
 
