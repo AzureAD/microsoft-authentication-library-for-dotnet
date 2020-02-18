@@ -751,6 +751,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string BrokerApplicationRequired = "broker_application_required";
 
+        /// <summary>
+        /// <para>What happens?</para>You have configured a claims request, but the claims string is not in JSON format
+        /// <para>Mitigation</para>Ensure that the claims parameter is valid JSON. Inspect the inner exception for details about JSON parsing. 
+        /// </summary>
+        public const string ClaimsNotJson = "claims_not_json";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

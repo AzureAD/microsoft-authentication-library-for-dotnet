@@ -51,7 +51,10 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public void AddBodyParameter(string key, string value)
         {
-            _bodyParameters[key] = value;
+            if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
+            {
+                _bodyParameters[key] = value;
+            }
         }
 
         public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endPoint, RequestContext requestContext)

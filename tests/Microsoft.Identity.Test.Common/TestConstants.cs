@@ -80,7 +80,13 @@ namespace Microsoft.Identity.Test.Unit
         public const string UniqueId = "unique_id";
         public const string IdentityProvider = "my-idp";
         public const string Name = "First Last";
-        public const string Claims = "claim1claim2";
+        
+        public const string Claims = @"{""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
+        public static readonly string[] ClientCapabilities = new[] { "cp1", "cp2" };
+        public const string ClientCapabilitiesJson = "{\"access_token\":{\"xms_cc\":[\"cp1\",\"cp2\"]}}";
+        // this a JSON merge from Claims and ClientCapabilitiesJson
+        public const string ClientCapabilitiesAndClaimsJson = "{\"access_token\":{\"xms_cc\":[\"cp1\",\"cp2\"]},\"userinfo\":{\"given_name\":{\"essential\":true},\"nickname\":null,\"email\":{\"essential\":true},\"email_verified\":{\"essential\":true},\"picture\":null,\"http://example.info/claims/groups\":null},\"id_token\":{\"auth_time\":{\"essential\":true},\"acr\":{\"values\":[\"urn:mace:incommon:iap:silver\"]}}}";
+
         public const string DisplayableId = "displayable@id.com";
         public const string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public const string MobileDefaultRedirectUri = "msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842://auth"; // in msidentity-samples-testing tenant -> PublicClientSample
