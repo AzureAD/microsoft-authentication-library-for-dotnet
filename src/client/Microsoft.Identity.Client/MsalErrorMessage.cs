@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Globalization;
 
 namespace Microsoft.Identity.Client
@@ -24,6 +25,7 @@ namespace Microsoft.Identity.Client
 
         public const string CertificateKeySizeTooSmallTemplate =
             "The certificate used must have a key size of at least {0} bits";
+
 
         public const string EmailAddressSuffixMismatch =
             "No identity provider email address suffix matches the provided address";
@@ -320,5 +322,13 @@ namespace Microsoft.Identity.Client
                 requestTokenType, responseTokenType);
         }
 
+
+        public static string ClaimsNotJson(string claims)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "You have configured a claims parameter that is not in JSON format: {0}. Inspect the inner exception for details about the JSON parsing error. To learn more about claim requests, please see https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter",
+                claims);
+        }
     }
 }

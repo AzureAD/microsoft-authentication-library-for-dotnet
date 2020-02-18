@@ -16,6 +16,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthenticationRequestParameters
     {
+        private readonly IServiceBundle _serviceBundle;
         private readonly AcquireTokenCommonParameters _commonParameters;
         private string _loginHint;
 
@@ -25,6 +26,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext)
         {
+            _serviceBundle = serviceBundle;
             _commonParameters = commonParameters;
 
             Authority = Authority.CreateAuthorityForRequest(serviceBundle.Config.AuthorityInfo, commonParameters.AuthorityOverride);
@@ -47,6 +49,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     ExtraQueryParameters[kvp.Key] = kvp.Value;
                 }
             }
+
+            ClaimsAndClientCapabilities = ClaimsHelper.MergeClaimsAndClientCapabilities(
+                _commonParameters.Claims,
+                _serviceBundle.Config.ClientCapabilities);
         }
 
         public ApiTelemetryId ApiTelemId => _commonParameters.ApiTelemId;
@@ -68,7 +74,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string ClientId { get; }
         public Uri RedirectUri { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; }
-        public string Claims => _commonParameters.Claims;
+
+        public string ClaimsAndClientCapabilities { get; private set; }
+
+        /// <summary>
+        /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
+        /// </summary>
+        /// <remarks>If user configured claims, request should bypass cache</remarks>
+        public bool HasClaimRequest
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(_commonParameters.Claims);
+            }
+        }
 
         public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
@@ -117,16 +136,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
+            builder.AppendLine("Claims - " + ClaimsAndClientCapabilities);
 
             string messageWithPii = builder.ToString();
 
             // Create no Pii enabled string builder
             builder = new StringBuilder(
-                Environment.NewLine + "=== Request Data ===" + Environment.NewLine + "Authority Provided? - " +
-                (Authority != null) + Environment.NewLine);
+                Environment.NewLine + "=== Request Data ===" +
+                Environment.NewLine + "Authority Provided? - " + (Authority != null) +
+                Environment.NewLine);
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
             logger.InfoPii(messageWithPii, builder.ToString());
         }
+
     }
 }

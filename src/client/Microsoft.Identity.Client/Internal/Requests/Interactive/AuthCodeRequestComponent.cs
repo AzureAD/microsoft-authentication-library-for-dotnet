@@ -156,9 +156,9 @@ namespace Microsoft.Identity.Client.Internal
                 [OAuth2Parameter.RedirectUri] = redirectUriOverride?.OriginalString ?? _requestParams.RedirectUri.OriginalString
             };
 
-            if (!string.IsNullOrWhiteSpace(_requestParams.Claims))
+            if (!string.IsNullOrWhiteSpace(_requestParams.ClaimsAndClientCapabilities))
             {
-                authorizationRequestParameters[OAuth2Parameter.Claims] = _requestParams.Claims;
+                authorizationRequestParameters[OAuth2Parameter.Claims] = _requestParams.ClaimsAndClientCapabilities;
             }
 
             if (!string.IsNullOrWhiteSpace(_interactiveParameters.LoginHint))

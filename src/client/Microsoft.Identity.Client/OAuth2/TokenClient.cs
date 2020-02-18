@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.OAuth2
 #endif
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
-            _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.Claims);
+            _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.ClaimsAndClientCapabilities);
 
             foreach (var kvp in additionalBodyParameters)
             {
