@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false),
                     null, 
-                    TestConstants.ExtraQueryParams);
+                    TestConstants.ExtraQueryParameters);
 
                 AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false),
                     null,
-                    TestConstants.ExtraQueryParams);
+                    TestConstants.ExtraQueryParameters);
                 AcquireTokenSilentParameters acquireTokenSilentParameters = new AcquireTokenSilentParameters();
 
                 // Act

@@ -13,22 +13,22 @@ namespace Microsoft.Identity.Client.Internal
         private const string AccessTokenClaim = "access_token";
         private const string XmsClientCapability = "xms_cc";
 
-        internal static string MergeClaimsAndClientCapabilities(
+        internal static string GetMergedClaimsAndClientCapabilities(
             string claims, 
             IEnumerable<string> clientCapabilities)
         {
             if (clientCapabilities != null && clientCapabilities.Any())
             {
                 JObject capabilitiesJson = CreateClientCapabilitiesRequestJson(clientCapabilities);
-                MergeClaimsAndCapabilityJson(claims, capabilitiesJson);
+                JObject mergedClaimsAndCapabilities = MergeClaimsIntoCapabilityJson(claims, capabilitiesJson);
 
-                return capabilitiesJson.ToString(Formatting.None);
+                return mergedClaimsAndCapabilities.ToString(Formatting.None);
             }
 
             return claims;
         }
 
-        private static void MergeClaimsAndCapabilityJson(string claims, JObject capabilitiesJson)
+        private static JObject MergeClaimsIntoCapabilityJson(string claims, JObject capabilitiesJson)
         {
             if (!string.IsNullOrEmpty(claims))
             {
@@ -40,8 +40,8 @@ namespace Microsoft.Identity.Client.Internal
                 catch (JsonReaderException ex)
                 {
                     throw new MsalClientException(
-                        MsalError.ClaimsNotJson,
-                        MsalErrorMessage.ClaimsNotJson(claims),
+                        MsalError.InvalidJsonClaimsFormat,
+                        MsalErrorMessage.InvalidJsonClaimsFormat(claims),
                         ex);
                 }
 
@@ -51,8 +51,9 @@ namespace Microsoft.Identity.Client.Internal
                     MergeArrayHandling = MergeArrayHandling.Union
                 });
             }
-        }
 
+            return capabilitiesJson;
+        }
 
         private static JObject CreateClientCapabilitiesRequestJson(IEnumerable<string> clientCapabilities)
         {

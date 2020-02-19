@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false),
                     null,
-                    TestConstants.ExtraQueryParams);
+                    TestConstants.ExtraQueryParameters);
 
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false),
                     null,
-                    TestConstants.ExtraQueryParams);
+                    TestConstants.ExtraQueryParameters);
 
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false),
-                    extraQueryParameters: TestConstants.ExtraQueryParams,
+                    extraQueryParameters: TestConstants.ExtraQueryParameters,
                     claims: TestConstants.Claims);
 
                 parameters.IsBrokerConfigured = true;

@@ -333,7 +333,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 null,
                 cache,
                 null,
-                extraQueryParameters: TestConstants.ExtraQueryParams,
+                extraQueryParameters: TestConstants.ExtraQueryParameters,
                 claims: TestConstants.Claims);
 
             if (isAdfs)
@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         { OAuth2Parameter.Claims, TestConstants.Claims }
                     },
                     ResponseMessage = isAdfs ? CreateAdfsDeviceCodeResponseSuccessMessage() : CreateDeviceCodeResponseSuccessMessage(),
-                    ExpectedQueryParams = TestConstants.ExtraQueryParams,                     
+                    ExpectedQueryParams = TestConstants.ExtraQueryParameters,                     
                 });
 
             for (int i = 0; i < numAuthorizationPendingResults; i++)

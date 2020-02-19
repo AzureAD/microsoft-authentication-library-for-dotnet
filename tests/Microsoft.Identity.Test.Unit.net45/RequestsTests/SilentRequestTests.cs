@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
                     null,
-                    TestConstants.ExtraQueryParams,
+                    TestConstants.ExtraQueryParameters,
                     TestConstants.Claims,
                     authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
 
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        ExpectedQueryParams = TestConstants.ExtraQueryParams,
+                        ExpectedQueryParams = TestConstants.ExtraQueryParameters,
                         ExpectedPostData = new Dictionary<string, string>() { { OAuth2Parameter.Claims, TestConstants.Claims } }
                     });
 
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
                     null,
-                    TestConstants.ExtraQueryParams,
+                    TestConstants.ExtraQueryParameters,
                     TestConstants.Claims,
                     authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
                 parameters.IsBrokerConfigured = false;
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     {
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        ExpectedQueryParams = TestConstants.ExtraQueryParams,
+                        ExpectedQueryParams = TestConstants.ExtraQueryParameters,
                         ExpectedPostData = new Dictionary<string, string>() { { OAuth2Parameter.Claims, TestConstants.Claims } }
                     });
 

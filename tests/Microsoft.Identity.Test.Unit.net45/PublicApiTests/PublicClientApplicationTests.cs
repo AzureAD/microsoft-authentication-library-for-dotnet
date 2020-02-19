@@ -252,7 +252,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None))
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.ClaimsNotJson, ex.ErrorCode);
+            Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
         }
 
         [TestMethod]

@@ -16,9 +16,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
     public class ClaimsTest
     {
         [TestMethod]
-        public void ClaimsMergeTest()
+        public void ClaimsMerge_Test()
         {
-            var mergedJson = ClaimsHelper.MergeClaimsAndClientCapabilities(
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
                 TestConstants.Claims,
                 TestConstants.ClientCapabilities);
 
@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         [TestMethod]
         public void ClaimsMerge_NoCapabilities_Test()
         {
-            var mergedJson = ClaimsHelper.MergeClaimsAndClientCapabilities(
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
                 TestConstants.Claims,
                 new string[0]);
 
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         [TestMethod]
         public void ClaimsMerge_NoClaims_Test()
         {
-            var mergedJson = ClaimsHelper.MergeClaimsAndClientCapabilities(
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
                null,
                TestConstants.ClientCapabilities);
 

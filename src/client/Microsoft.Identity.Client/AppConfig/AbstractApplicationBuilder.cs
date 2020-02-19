@@ -324,7 +324,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public T WithClientCapabilities(IEnumerable<string> clientCapabilities)
         {
-            if (clientCapabilities!= null && clientCapabilities.Any())
+            if (clientCapabilities != null && clientCapabilities.Any())
             {
                 Config.ClientCapabilities = clientCapabilities;
             }
