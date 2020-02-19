@@ -285,6 +285,7 @@ namespace Microsoft.Identity.Client
             "You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details. ";
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
         public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication";
+        public const string NoUPNForSilentAuth = "Unable to query the android account manager because no username is provided in the silent authentication request. Please try using AcquireTokenSilent(IEnumerable<string> scopes, string loginHint). See https://aka.ms/Brokered-Authentication-for-Android for details";
 
         public static string ExperimentalFeature(string methodName)
         {

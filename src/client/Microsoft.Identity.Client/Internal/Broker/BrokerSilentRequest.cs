@@ -58,6 +58,12 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         internal void CreateRequestParametersForBroker()
         {
+            if (string.IsNullOrEmpty(_silentParameters.LoginHint) && string.IsNullOrEmpty(_silentParameters.Account.Username))
+            {
+                _authenticationRequestParameters.RequestContext.Logger.Error(MsalErrorMessage.NoUPNForSilentAuth);
+                throw new MsalClientException(MsalError.NoUsernameProvidedForSilentAndroidBrokerAuthentication, MsalErrorMessage.NoUPNForSilentAuth);
+            }
+
             BrokerPayload.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
             string scopes = EnumerableExtensions.AsSingleString(_authenticationRequestParameters.Scope);
             BrokerPayload.Add(BrokerParameter.Scope, scopes);
@@ -68,10 +74,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
             string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
             BrokerPayload.Add(BrokerParameter.ExtraQp, extraQP);
             BrokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
-            BrokerPayload.Add(BrokerParameter.LoginHint, _silentParameters.LoginHint);
-#pragma warning disable CA1305 // Specify IFormatProvider
-            BrokerPayload.Add(BrokerParameter.ForceRefresh, _silentParameters.ForceRefresh.ToString());
-#pragma warning restore CA1305 // Specify IFormatProvider
+            BrokerPayload.Add(BrokerParameter.LoginHint, string.IsNullOrEmpty(_silentParameters.LoginHint) ? _silentParameters.Account.Username : _silentParameters.LoginHint);
+            BrokerPayload.Add(BrokerParameter.ForceRefresh, _silentParameters.ForceRefresh.ToString(CultureInfo.InvariantCulture));
         }
 
         internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
