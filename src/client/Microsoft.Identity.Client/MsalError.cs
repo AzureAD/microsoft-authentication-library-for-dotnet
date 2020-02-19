@@ -755,7 +755,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para>You have configured a claims request, but the claims string is not in JSON format
         /// <para>Mitigation</para>Ensure that the claims parameter is valid JSON. Inspect the inner exception for details about JSON parsing. 
         /// </summary>
-        public const string ClaimsNotJson = "claims_not_json";
+        public const string InvalidJsonClaimsFormat = "invalid_json_claims_format";
 
 #if iOS
         /// <summary>

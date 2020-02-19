@@ -262,13 +262,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
                 MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
-                mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParams;
+                mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParameters;
                 mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParams)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParameters)
                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 
@@ -298,7 +298,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task AcquireTokenByIntegratedWindowsAuthInvalidClientTestAsync()
         {
             IDictionary<string, string> extraQueryParamsAndClaims =
-                TestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+                TestConstants.ExtraQueryParameters.ToDictionary(e => e.Key, e => e.Value);
             extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
 
             using (var httpManager = new MockHttpManager())
@@ -320,7 +320,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParams)
+                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParameters)
                                                         .WithTelemetry(new TraceTelemetryConfig())
                                                         .BuildConcrete();
 

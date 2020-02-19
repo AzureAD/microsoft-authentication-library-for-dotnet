@@ -542,7 +542,5 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             CollectionAssert.AreEquivalent(new string[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
         }
-
-      
     }
 }

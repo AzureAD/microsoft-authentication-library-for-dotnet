@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            ClaimsAndClientCapabilities = ClaimsHelper.MergeClaimsAndClientCapabilities(
+            ClaimsAndClientCapabilities = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
                 _commonParameters.Claims,
                 _serviceBundle.Config.ClientCapabilities);
         }
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
-            builder.AppendLine("Claims - " + ClaimsAndClientCapabilities);
+            builder.AppendLine("ClaimsAndClientCapabilities - " + ClaimsAndClientCapabilities);
 
             string messageWithPii = builder.ToString();
 
