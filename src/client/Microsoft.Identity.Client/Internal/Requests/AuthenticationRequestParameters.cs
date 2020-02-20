@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>
         /// <remarks>If user configured claims, request should bypass cache</remarks>
-        public bool HasClaimRequest
+        public bool HasClaims
         {
             get
             {
