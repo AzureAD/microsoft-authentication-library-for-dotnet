@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 }
             }
 
-            _logger.Info("Android Broker AddAccount didn't return any results. ");
+            _logger.Info("Android Broker didn't return any results.");
             return null;
         }
 
@@ -170,7 +170,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
             if (string.IsNullOrEmpty(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint)))
             {
                 _logger.Error(MsalErrorMessage.NoUPNOrAccountIDForSilentAuth);
-                throw new MsalClientException(MsalError.NoUsernameOrAccountIDProvidedForSilentAndroidBrokerAuthentication, MsalErrorMessage.NoUPNOrAccountIDForSilentAuth);
             }
 
             loginHint = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
@@ -187,8 +186,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             if (result == null)
             {
-                _logger.Info("Android account manager AddAccount didn't return any accounts. ");
-                throw new MsalException(MsalError.NoAndroidBrokerAccountFound, "Please add the selected account to the broker");
+                _logger.Info("Android account manager didn't return any accounts.");
+                throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.AndroidBrokerAddAccountFailed);
             }
 
             Bundle bundleResult = (Bundle)result?.Result;
