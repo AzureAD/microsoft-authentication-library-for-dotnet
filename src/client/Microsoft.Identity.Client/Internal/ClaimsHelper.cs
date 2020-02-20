@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Internal
         private const string XmsClientCapability = "xms_cc";
 
         internal static string GetMergedClaimsAndClientCapabilities(
-            string claims, 
+            string claims,
             IEnumerable<string> clientCapabilities)
         {
             if (clientCapabilities != null && clientCapabilities.Any())
@@ -58,13 +58,16 @@ namespace Microsoft.Identity.Client.Internal
         private static JObject CreateClientCapabilitiesRequestJson(IEnumerable<string> clientCapabilities)
         {
             // "access_token": {
-            //     "xms_cc": ["cp1", "cp2"]
+            //     "xms_cc": { 
+            //         values: ["cp1", "cp2"]
+            //     }
             //  }
             return new JObject
             {
                 new JProperty(AccessTokenClaim, new JObject(
-                    new JProperty(XmsClientCapability, new JArray(clientCapabilities))))
-            };
+                    new JObject(new JProperty(XmsClientCapability,
+                            new JObject(new JProperty("values",
+                                new JArray(clientCapabilities)))))))            };
         }
     }
 }
