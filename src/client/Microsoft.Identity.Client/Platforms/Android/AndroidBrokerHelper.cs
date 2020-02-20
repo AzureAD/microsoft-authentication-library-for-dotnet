@@ -166,10 +166,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public void GetBrokerAccountInfo(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
-            string loginHint = string.Empty;
-            if (string.IsNullOrEmpty(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint)))
+            string loginHint = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
+            if (string.IsNullOrEmpty(loginHint))
             {
-                _logger.Error(MsalErrorMessage.NoUPNOrAccountIDForSilentAuth);
+                //While it is very unlikely that we end up with both the homeAccountID and the username equal to null
+                //We should still notify the user via log message if this were to occur.
+                _logger.Error(MsalErrorMessage.NoUPNOrAccountIDForSilentBrokerAuth);
             }
 
             loginHint = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);

@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Client
             "You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details. ";
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
         public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication";
-        public const string NoUPNOrAccountIDForSilentAuth = "Unable to query the android account manager because no username or home account id is provided in the silent authentication request.";
+        public const string NoUPNOrAccountIDForSilentBrokerAuth = "Unable to query the Android account manager because no username or home account ID is provided in the silent authentication request.";
         public const string AndroidBrokerAddAccountFailed = "Android account manager could not find an account that matched the provided account information.";
         public static string ExperimentalFeature(string methodName)
         {

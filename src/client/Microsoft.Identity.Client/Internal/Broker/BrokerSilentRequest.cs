@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         {
             if (string.IsNullOrEmpty(_silentParameters.LoginHint) && string.IsNullOrEmpty(_silentParameters.Account?.HomeAccountId?.Identifier))
             {
-                throw new MsalUiRequiredException(MsalError.NoUsernameOrAccountIDProvidedForSilentAndroidBrokerAuthentication, MsalErrorMessage.NoUPNOrAccountIDForSilentAuth);
+                throw new MsalUiRequiredException(MsalError.NoUsernameOrAccountIDProvidedForSilentAndroidBrokerAuthentication, MsalErrorMessage.NoUPNOrAccountIDForSilentBrokerAuth);
             }
 
             BrokerPayload.Add(BrokerParameter.IsSilentBrokerRequest, "true");
