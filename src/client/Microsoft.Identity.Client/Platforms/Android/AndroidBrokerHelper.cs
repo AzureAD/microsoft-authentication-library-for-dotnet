@@ -127,7 +127,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public async Task<string> GetBrokerAuthTokenSilentlyAsync(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
-            GetBrokerAccountInfo(brokerPayload, callerActivity);
+            if (string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId)) ||
+                string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LocalAccountId))
+                )
+            {
+                //Not enough account information is provided for broker silent request. Fetching additional data.
+                GetBrokerAccountInfo(brokerPayload, callerActivity);
+            }
+
             Bundle silentOperationBundle = GetSilentBrokerBundle(brokerPayload);
             silentOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.AcquireTokenSilent);
 
@@ -159,7 +166,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public void GetBrokerAccountInfo(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
-            var loginHint = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
+            string loginHint = string.Empty;
+            if (string.IsNullOrEmpty(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint)))
+            {
+                _logger.Error(MsalErrorMessage.NoUPNOrAccountIDForSilentAuth);
+                throw new MsalClientException(MsalError.NoUsernameOrAccountIDProvidedForSilentAndroidBrokerAuthentication, MsalErrorMessage.NoUPNOrAccountIDForSilentAuth);
+            }
+
+            loginHint = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
             Bundle getAccountsBundle = GetBrokerAccountBundle(brokerPayload);
             getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
 

@@ -91,8 +91,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
 
                 // Don't send silent background request if account information is not provided
-                if (!string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerAccountName)) ||
-                    !string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username)))
+                if (brokerPayload.ContainsKey(BrokerParameter.IsSilentBrokerRequest))
                 {
                     _logger.Verbose("User is specified for silent token request. Starting silent broker request");
                     string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerPayload, _activity).ConfigureAwait(false);
