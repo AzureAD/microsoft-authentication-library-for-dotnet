@@ -88,12 +88,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 }
                 await _brokerHelper.InitiateBrokerHandshakeAsync(_activity).ConfigureAwait(false);
 
-                brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
+                brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username);
 
                 // Don't send silent background request if account information is not provided
                 if (brokerPayload.ContainsKey(BrokerParameter.IsSilentBrokerRequest))
                 {
-                    _logger.Verbose("User is specified for silent token request. Starting silent broker request");
+                    _logger.Verbose("User is specified for silent token request. Starting silent broker request.");
                     string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerPayload, _activity).ConfigureAwait(false);
                     if (!string.IsNullOrEmpty(silentResult))
                     {

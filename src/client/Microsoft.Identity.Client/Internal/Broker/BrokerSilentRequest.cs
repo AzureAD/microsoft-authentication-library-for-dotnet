@@ -58,11 +58,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         internal void CreateRequestParametersForBroker()
         {
-            if (string.IsNullOrEmpty(_silentParameters.LoginHint) && string.IsNullOrEmpty(_silentParameters.Account?.HomeAccountId?.Identifier))
-            {
-                throw new MsalUiRequiredException(MsalError.NoUsernameOrAccountIDProvidedForSilentAndroidBrokerAuthentication, MsalErrorMessage.NoUPNOrAccountIDForSilentBrokerAuth);
-            }
-
             BrokerPayload.Add(BrokerParameter.IsSilentBrokerRequest, "true");
             BrokerPayload.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
             string scopes = EnumerableExtensions.AsSingleString(_authenticationRequestParameters.Scope);
@@ -76,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             BrokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
             BrokerPayload.Add(BrokerParameter.HomeAccountId, _silentParameters.Account?.HomeAccountId?.Identifier);
             BrokerPayload.Add(BrokerParameter.LocalAccountId, _silentParameters.Account?.HomeAccountId?.ObjectId);
-            BrokerPayload.Add(BrokerParameter.LoginHint, _silentParameters.LoginHint);
+            BrokerPayload.Add(BrokerParameter.Username, !string.IsNullOrEmpty(_silentParameters.Account?.Username) ? _silentParameters.Account?.Username : _silentParameters.LoginHint);
 #pragma warning disable CA1305 // Specify IFormatProvider
             BrokerPayload.Add(BrokerParameter.ForceRefresh, _silentParameters.ForceRefresh.ToString());
 #pragma warning restore CA1305 // Specify IFormatProvider
@@ -96,12 +91,12 @@ namespace Microsoft.Identity.Client.Internal.Broker
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
-                throw new MsalUiRequiredException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
+                throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
             }
             else
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
-                throw new MsalUiRequiredException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
+                throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
             }
         }
     }

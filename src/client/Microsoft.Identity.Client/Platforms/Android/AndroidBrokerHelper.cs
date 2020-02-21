@@ -127,14 +127,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public async Task<string> GetBrokerAuthTokenSilentlyAsync(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
-            if (string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId)) ||
-                string.IsNullOrEmpty(AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LocalAccountId))
-                )
-            {
-                //Not enough account information is provided for broker silent request. Fetching additional data.
-                GetBrokerAccountInfo(brokerPayload, callerActivity);
-            }
-
+            GetBrokerAccountInfo(brokerPayload, callerActivity);
             Bundle silentOperationBundle = GetSilentBrokerBundle(brokerPayload);
             silentOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.AcquireTokenSilent);
 
@@ -166,15 +159,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public void GetBrokerAccountInfo(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
-            string loginHint = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
-            if (string.IsNullOrEmpty(loginHint))
-            {
-                //While it is very unlikely that we end up with both the homeAccountID and the username equal to null
-                //We should still notify the user via log message if this were to occur.
-                _logger.Error(MsalErrorMessage.NoUPNOrAccountIDForSilentBrokerAuth);
-            }
-
-            loginHint = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LoginHint);
             Bundle getAccountsBundle = GetBrokerAccountBundle(brokerPayload);
             getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
 
@@ -189,11 +173,15 @@ namespace Microsoft.Identity.Client.Platforms.Android
             if (result == null)
             {
                 _logger.Info("Android account manager didn't return any accounts.");
-                throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.AndroidBrokerAddAccountFailed);
+                throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
             }
 
             Bundle bundleResult = (Bundle)result?.Result;
             var accounts = bundleResult?.GetString(BrokerConstants.BrokerAccounts);
+
+            string username = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username);
+            string homeAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId);
+            string localAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LocalAccountId);
 
             if (!string.IsNullOrEmpty(accounts))
             {
@@ -202,15 +190,26 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 foreach (JObject account in authResult)
                 {
                     var accountData = account[BrokerResponseConst.Account];
-                    if ((accountData[BrokerResponseConst.UserName]).ToString() == loginHint)
+
+                    if ((accountData[BrokerResponseConst.UserName]).ToString() == username)
                     {
-                        brokerPayload.Add(BrokerParameter.HomeAccountId, accountData[BrokerResponseConst.HomeAccountId].ToString());
-                        brokerPayload.Add(BrokerParameter.LocalAccountId, accountData[BrokerResponseConst.LocalAccountId].ToString());
-                        var acc = account;
+                        brokerPayload[BrokerParameter.HomeAccountId] = accountData[BrokerResponseConst.HomeAccountId].ToString();
+                        brokerPayload[BrokerParameter.LocalAccountId] = accountData[BrokerResponseConst.LocalAccountId].ToString();
+                        _logger.Info("Found broker account in Android account manager.");
+                        return;
+                    }
+                    
+                    if ((accountData[BrokerResponseConst.HomeAccountId]).ToString() == homeAccountId &&
+                         (accountData[BrokerResponseConst.LocalAccountId]).ToString() == localAccountId)
+                    {
+                        _logger.Info("Found broker account in Android account manager.");
                         return;
                     }
                 }
             }
+
+            _logger.Info("The requested account does not exist in the Android account manager.");
+            throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
         }
 
         //Inorder for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.

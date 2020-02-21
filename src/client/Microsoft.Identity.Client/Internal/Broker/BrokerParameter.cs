@@ -25,7 +25,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string HomeAccountId = "home_account_id";
         public const string LocalAccountId = "local_account_id";
         public const string Username = "username";
-        public const string LoginHint = "login_hint";
         public const string IntuneEnrollmentIds = "intune_enrollment_ids";
         public const string IntuneMamResource = "intune_mam_resource";
         public const string ClientCapabilities = "client_capabilities";

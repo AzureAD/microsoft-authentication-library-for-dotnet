@@ -179,6 +179,14 @@ namespace Microsoft.Identity.Client
                     null, 
                     UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
+            else if (Parameters.Account.HomeAccountId == null && string.IsNullOrWhiteSpace(Parameters.LoginHint)) // Android broker specific case
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.UserNullError,
+                    MsalErrorMessage.MsalUiRequiredMessage,
+                    null,
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
+            }
         }
     }
 }
