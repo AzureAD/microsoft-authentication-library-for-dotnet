@@ -20,6 +20,22 @@ namespace NetFx
 {
     public class Program
     {
+        private const string Claims = @" {
+   ""userinfo"":
+    {
+     ""given_name"": {""essential"": true},
+     ""nickname"": null,
+     ""email"": {""essential"": true},
+     ""email_verified"": {""essential"": true},
+     ""picture"": null,
+     ""http://example.info/claims/groups"": null
+    },
+   ""id_token"":
+    {
+     ""auth_time"": {""essential"": true},
+     ""acr"": {""values"": [""urn:mace:incommon:iap:silver""] }
+    },  
+  }";
         // This app has http://localhost redirect uri registered
         private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
 
@@ -99,7 +115,7 @@ namespace NetFx
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
-                            //.WithClientCapabilities(new[] { "llt" })
+                            .WithClientCapabilities(new[] { "llt" })
                             .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();
 
@@ -201,6 +217,7 @@ namespace NetFx
                         case '4':
 
                             var interactiveBuilder = pca.AcquireTokenInteractive(s_scopes);
+                            //interactiveBuilder = interactiveBuilder.WithClaims(Claims);
                             interactiveBuilder = ConfigurePoP(interactiveBuilder);
 
                             await FetchTokenAndCallApiAsync(pca, interactiveBuilder.ExecuteAsync()).ConfigureAwait(false);

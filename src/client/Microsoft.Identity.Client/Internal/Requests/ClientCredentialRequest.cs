@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            if (!_clientParameters.ForceRefresh)
+            if (!_clientParameters.ForceRefresh && !AuthenticationRequestParameters.HasClaims)
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
@@ -43,6 +43,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.AuthenticationScheme,
                         AuthenticationRequestParameters.RequestContext.CorrelationId);
                 }
+            }
+            else
+            {
+                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set");
             }
 
             // No AT in the cache or AT needs to be refreshed

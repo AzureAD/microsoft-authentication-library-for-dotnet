@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async override Task PreRunAsync()
         {
 
-            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && AuthenticationRequestParameters.IsBrokerConfigured)
+            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && 
+                AuthenticationRequestParameters.IsBrokerConfigured)
                 return;
 
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
@@ -96,8 +97,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
-            // Look for access token
-            if (!_silentParameters.ForceRefresh)
+
+            if (!_silentParameters.ForceRefresh && !AuthenticationRequestParameters.HasClaims)
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
@@ -107,6 +108,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         + cachedAccessTokenItem.RefreshOn.HasValue);
                     return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
+            }
+            else
+            {
+                logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set");
             }
 
             // No AT or AT.RefreshOn > Now --> refresh the RT
