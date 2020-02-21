@@ -44,6 +44,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
+                Assert.IsNotNull(result, "A result is obtained from the cache, i.e. without HTTP calls");
+
                 Trace.WriteLine("3. Silent Request + WithClaims does not return an AT from the cache");
                 harness.HttpManager.AddInstanceDiscoveryMockHandler(TestConstants.AuthorityUtidTenant);
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
@@ -53,6 +55,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                     .WithClaims(TestConstants.Claims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.IsNotNull(result, "An access token is no longer obtained from the cache. The RT is used to get one from the STS.");
             }
         }
 
@@ -78,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-
+                Assert.IsNotNull(result, "A result is obtained from the cache, i.e. without HTTP calls");
 
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(
@@ -99,6 +103,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                     .WithClaims(TestConstants.Claims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.IsNotNull(result, "An access token is no longer obtained from the cache. The RT is used to get one from the STS.");
             }
         }
 
@@ -123,6 +129,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 var result = await app.AcquireTokenSilent(TestConstants.s_scope, account)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Assert.IsNotNull(result, "A result is obtained from the cache, i.e. without HTTP calls");
             }
         }
 
