@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit
                 brokerSilentRequest.CreateRequestParametersForBroker();
 
                 // Assert
-                Assert.AreEqual(10, brokerSilentRequest.BrokerPayload.Count);
+                Assert.AreEqual(13, brokerSilentRequest.BrokerPayload.Count);
                 Assert.AreEqual(s_canonicalizedAuthority, brokerSilentRequest.BrokerPayload[BrokerParameter.Authority]);
                 Assert.AreEqual(TestConstants.ScopeStr, brokerSilentRequest.BrokerPayload[BrokerParameter.Scope]);
                 Assert.AreEqual(TestConstants.ClientId, brokerSilentRequest.BrokerPayload[BrokerParameter.ClientId]);
