@@ -430,6 +430,11 @@ namespace Microsoft.Identity.Client
         public const string AndroidBrokerOperationFailed = "android_broker_operation_failed";
 
         /// <summary>
+        /// Unable to query the Android account manager because no username or home account ID is provided in the silent authentication request.
+        /// </summary>
+        public const string NoUsernameOrAccountIDProvidedForSilentAndroidBrokerAuthentication = "no_username_or_accountid_provided_for_silent_android_broker_authentication";
+
+        /// <summary>
         /// Error code used when the HTTP response returns HttpStatusCode.NotFound
         /// </summary>
         public const string HttpStatusNotFound = "not_found";

@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.RedirectUri, brokerSilentRequest.BrokerPayload[BrokerParameter.RedirectUri]);
                 Assert.AreEqual(TestConstants.BrokerExtraQueryParameters, brokerSilentRequest.BrokerPayload[BrokerParameter.ExtraQp]);
                 Assert.AreEqual(TestConstants.BrokerOIDCScopes, brokerSilentRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
-                Assert.IsTrue(string.IsNullOrEmpty(brokerSilentRequest.BrokerPayload[BrokerParameter.LoginHint]));
+                Assert.IsTrue(string.IsNullOrEmpty(brokerSilentRequest.BrokerPayload[BrokerParameter.Username]));
                 Assert.AreEqual("False", brokerSilentRequest.BrokerPayload[BrokerParameter.ForceRefresh]);
             }
         }

@@ -361,7 +361,29 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-       
+        [TestMethod]
+        public async Task AcquireTokenSilent_Account_NoHomeAccountIDAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.AuthorityTestTenant), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+                var tokenCacheHelper = new TokenCacheHelper();
+                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+
+                var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app.AcquireTokenSilent(
+                    TestConstants.s_scope.ToArray(),
+                    new Account(null, null, null))
+                    .WithAuthority(app.Authority, false)
+                    .ExecuteAsync()).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.UserNullError, exception.ErrorCode);
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exception.Classification);
+            }
+        }
 
         [TestMethod]
         [TestCategory("Regression")]

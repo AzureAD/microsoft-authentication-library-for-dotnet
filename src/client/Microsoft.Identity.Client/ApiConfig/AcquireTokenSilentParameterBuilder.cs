@@ -179,6 +179,15 @@ namespace Microsoft.Identity.Client
                     null, 
                     UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
+            
+            if (Parameters.Account?.HomeAccountId == null && string.IsNullOrWhiteSpace(Parameters.LoginHint))
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.UserNullError,
+                    MsalErrorMessage.MsalUiRequiredMessage,
+                    null,
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
+            }
         }
     }
 }

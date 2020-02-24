@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         internal void CreateRequestParametersForBroker()
         {
+            BrokerPayload.Add(BrokerParameter.IsSilentBrokerRequest, "true");
             BrokerPayload.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
             string scopes = EnumerableExtensions.AsSingleString(_authenticationRequestParameters.Scope);
             BrokerPayload.Add(BrokerParameter.Scope, scopes);
@@ -68,7 +69,9 @@ namespace Microsoft.Identity.Client.Internal.Broker
             string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
             BrokerPayload.Add(BrokerParameter.ExtraQp, extraQP);
             BrokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
-            BrokerPayload.Add(BrokerParameter.LoginHint, _silentParameters.LoginHint);
+            BrokerPayload.Add(BrokerParameter.HomeAccountId, _silentParameters.Account?.HomeAccountId?.Identifier);
+            BrokerPayload.Add(BrokerParameter.LocalAccountId, _silentParameters.Account?.HomeAccountId?.ObjectId);
+            BrokerPayload.Add(BrokerParameter.Username, !string.IsNullOrEmpty(_silentParameters.Account?.Username) ? _silentParameters.Account?.Username : _silentParameters.LoginHint);
 #pragma warning disable CA1305 // Specify IFormatProvider
             BrokerPayload.Add(BrokerParameter.ForceRefresh, _silentParameters.ForceRefresh.ToString());
 #pragma warning restore CA1305 // Specify IFormatProvider
