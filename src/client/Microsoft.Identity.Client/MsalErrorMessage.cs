@@ -286,6 +286,18 @@ namespace Microsoft.Identity.Client
             "You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details. ";
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
         public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication";
+        public static string AuthorityTypeMismatch(
+            AuthorityType appAuthorityType, 
+            AuthorityType requestAuthorityType)
+            {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "A authority of type {0} was used at the application and of type {1} at the request level. " +
+                "Please use the same authority type between the two.", 
+                appAuthorityType, 
+                requestAuthorityType);
+        }
+
         public const string NoAndroidBrokerAccountFound = "Android account manager could not find an account that matched the provided account information.";
         public static string ExperimentalFeature(string methodName)
         {
