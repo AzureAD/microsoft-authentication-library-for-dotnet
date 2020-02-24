@@ -37,6 +37,11 @@ namespace Microsoft.Identity.Client.Instance
         /// 2. If there is a request authority, try to use it.
         ///     2.1. If the request authority is not "common", then use it
         ///     2.2  If the request authority is "common", ignore it, and use 1.1
+        ///     
+        /// Special cases: 
+        /// 
+        /// - if the authority is not defined at the application level and the request level is not AAD, use the request authority
+        /// - if the authority is defined at app level, and the request level authority of is of different type, throw an exception
         ///
         /// </summary>
         public static Authority CreateAuthorityForRequest(
@@ -48,6 +53,8 @@ namespace Microsoft.Identity.Client.Instance
             {
                 throw new ArgumentNullException(nameof(configAuthorityInfo));
             }
+
+            ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
 
             switch (configAuthorityInfo.AuthorityType)
             {
@@ -73,6 +80,13 @@ namespace Microsoft.Identity.Client.Instance
                         return CreateAuthorityWithTenant(configAuthorityInfo, requestHomeAccountTenantId);
                     }
 
+                    // In case the authority is defined only at the request level
+                    if (configAuthorityInfo.IsDefaultAuthority &&
+                        requestAuthorityInfo.AuthorityType != AuthorityType.Aad)
+                    {
+                        return CreateAuthority(requestAuthorityInfo);
+                    }
+
                     var requestAuthority = new AadAuthority(requestAuthorityInfo);
                     if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant())
                     {
@@ -87,6 +101,21 @@ namespace Microsoft.Identity.Client.Instance
                         "Unsupported authority type");
             }
         }
+
+        private static void ValidateTypeMismatch(AuthorityInfo configAuthorityInfo, AuthorityInfo requestAuthorityInfo)
+        {
+            if (!configAuthorityInfo.IsDefaultAuthority &&
+                            requestAuthorityInfo != null &&
+                            configAuthorityInfo.AuthorityType != requestAuthorityInfo.AuthorityType)
+            {
+                throw new MsalClientException(
+                    MsalError.AuthorityTypeMismatch,
+                    MsalErrorMessage.AuthorityTypeMismatch(
+                        configAuthorityInfo.AuthorityType,
+                        requestAuthorityInfo.AuthorityType));
+            }
+        }
+
 
         public static Authority CreateAuthority(string authority, bool validateAuthority = false)
         {

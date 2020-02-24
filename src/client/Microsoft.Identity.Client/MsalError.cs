@@ -762,6 +762,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidJsonClaimsFormat = "invalid_json_claims_format";
 
+        /// <summary>
+        /// <para>What happens?</para>The authority configured at the application level is different than the authority configured at the request level
+        /// <para>Mitigation</para>Ensure the same authority type is used
+        /// </summary>
+        public const string AuthorityTypeMismatch = "authority_type_mismatch";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

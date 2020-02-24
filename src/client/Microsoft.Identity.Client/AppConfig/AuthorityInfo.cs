@@ -227,6 +227,17 @@ namespace Microsoft.Identity.Client
             return uri.ToLowerInvariant();
         }
 
+        internal bool IsDefaultAuthority
+        {
+            get
+            {
+                return string.Equals(
+                    CanonicalAuthority,
+                    ClientApplicationBase.DefaultAuthority, 
+                    StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
         #endregion
 
         private static void ValidateAuthorityUri(string authority)
