@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public async Task<string> GetBrokerAuthTokenSilentlyAsync(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
-            GetBrokerAccountInfo(brokerPayload, callerActivity);
+            CheckForBrokerAccountInfoInAccountManager(brokerPayload, callerActivity);
             Bundle silentOperationBundle = GetSilentBrokerBundle(brokerPayload);
             silentOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.AcquireTokenSilent);
 
@@ -157,7 +157,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return null;
         }
 
-        public void GetBrokerAccountInfo(IDictionary<string, string> brokerPayload, Activity callerActivity)
+        /// <summary>
+        /// This method is only used for Silent authnetication requests so that we can check to see if an account exists in the account manager before
+        /// sending the silent request to the broker. 
+        /// </summary>
+        public void CheckForBrokerAccountInfoInAccountManager(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
             Bundle getAccountsBundle = GetBrokerAccountBundle(brokerPayload);
             getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
@@ -191,18 +195,18 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 {
                     var accountData = account[BrokerResponseConst.Account];
 
-                    if ((accountData[BrokerResponseConst.UserName]).ToString() == username)
+                    if (string.Equals((accountData[BrokerResponseConst.UserName]).ToString(), username))
                     {
                         brokerPayload[BrokerParameter.HomeAccountId] = accountData[BrokerResponseConst.HomeAccountId].ToString();
                         brokerPayload[BrokerParameter.LocalAccountId] = accountData[BrokerResponseConst.LocalAccountId].ToString();
-                        _logger.Info("Found broker account in Android account manager.");
+                        _logger.Info("Found broker account in Android account manager using the provided login hint.");
                         return;
                     }
                     
-                    if ((accountData[BrokerResponseConst.HomeAccountId]).ToString() == homeAccountId &&
-                         (accountData[BrokerResponseConst.LocalAccountId]).ToString() == localAccountId)
+                    if (string.Equals((accountData[BrokerResponseConst.HomeAccountId]).ToString(), homeAccountId) &&
+                         string.Equals((accountData[BrokerResponseConst.LocalAccountId]).ToString(), localAccountId))
                     {
-                        _logger.Info("Found broker account in Android account manager.");
+                        _logger.Info("Found broker account in Android account manager Using the provided account.");
                         return;
                     }
                 }
