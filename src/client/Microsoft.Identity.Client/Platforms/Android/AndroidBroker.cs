@@ -145,9 +145,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
             catch (Exception ex)
             {
                 _logger.ErrorPiiWithPrefix(ex, "Broker invocation failed.");
-
-
-                s_readyForResponse.Release();
                 throw;
             }
 
