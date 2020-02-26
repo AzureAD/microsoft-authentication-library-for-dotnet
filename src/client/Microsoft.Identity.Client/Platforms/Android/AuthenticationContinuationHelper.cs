@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
             {
                 authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
             }
-            else if (!String.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)))
+            else if (!String.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)) || requestCode == BrokerConstants.BrokerRequestId)
             {
                 AndroidBroker.SetBrokerResult(data, (int)resultCode);
                 return;

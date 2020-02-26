@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client
                     UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
             
-            if (Parameters.Account?.HomeAccountId == null && string.IsNullOrWhiteSpace(Parameters.LoginHint))
+            if (Parameters.Account?.HomeAccountId == null && string.IsNullOrEmpty(Parameters.Account?.Username) && string.IsNullOrWhiteSpace(Parameters.LoginHint))
             {
                 throw new MsalUiRequiredException(
                     MsalError.UserNullError,
