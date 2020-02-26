@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 {
                     var accountData = account[BrokerResponseConst.Account];
 
-                    if (string.Equals((accountData[BrokerResponseConst.UserName]).ToString(), username))
+                    if (string.Equals((accountData[BrokerResponseConst.UserName]).ToString(), username, StringComparison.OrdinalIgnoreCase))
                     {
                         brokerPayload[BrokerParameter.HomeAccountId] = accountData[BrokerResponseConst.HomeAccountId].ToString();
                         brokerPayload[BrokerParameter.LocalAccountId] = accountData[BrokerResponseConst.LocalAccountId].ToString();
