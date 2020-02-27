@@ -160,17 +160,32 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     return;
                 }
 
-                if (resultCode != (int)BrokerResponseCode.ResponseReceived)
+                switch (resultCode)
                 {
-                    s_androidBrokerTokenResponse = new MsalTokenResponse
-                    {
-                        Error = MsalError.BrokerResponseReturnedError,
-                        ErrorDescription = data.GetStringExtra(BrokerConstants.BrokerResultV2),
-                    };
-                }
-                else
-                {
-                    s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                    case (int)BrokerResponseCode.ResponseReceived:
+                        s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                        break;
+                    case (int)BrokerResponseCode.UserCancelled:
+                        s_androidBrokerTokenResponse = new MsalTokenResponse
+                        {
+                            Error = MsalError.AuthenticationCanceledError,
+                            ErrorDescription = MsalErrorMessage.AuthenticationCanceled,
+                        };
+                        break;
+                    case (int)BrokerResponseCode.BrowserCodeError:
+                        s_androidBrokerTokenResponse = new MsalTokenResponse
+                        {
+                            Error = data.GetStringExtra(BrokerConstants.BrokerResultErrorCode),
+                            ErrorDescription = data.GetStringExtra(BrokerConstants.BrokerResultV2),
+                        };
+                        break;
+                    default:
+                        s_androidBrokerTokenResponse = new MsalTokenResponse
+                        {
+                            Error = BrokerConstants.BrokerUnknownErrorCode,
+                            ErrorDescription = "Broker result not returned from android broker.",
+                        };
+                        break;
                 }
             }
             finally
