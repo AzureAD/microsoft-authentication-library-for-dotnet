@@ -204,6 +204,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                         responseDictionary[iOSBrokerConstants.ApplicationToken]);
                 }
 
+                if (responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorCode) &&
+                    responseDictionary[BrokerResponseConst.BrokerErrorCode] == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
+                {
+                    responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
+                }
+
                 brokerTokenResponse = MsalTokenResponse.CreateFromBrokerResponse(responseDictionary);
             }
             else
