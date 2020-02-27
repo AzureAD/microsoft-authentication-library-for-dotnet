@@ -13,5 +13,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         bool CanInvokeBroker();
 
         Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload);
+
+        Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID);
     }
 }

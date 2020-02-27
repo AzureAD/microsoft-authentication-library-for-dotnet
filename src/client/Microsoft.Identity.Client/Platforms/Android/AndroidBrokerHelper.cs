@@ -197,14 +197,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
                     if (string.Equals((accountData[BrokerResponseConst.UserName]).ToString(), username, StringComparison.OrdinalIgnoreCase))
                     {
-                        brokerPayload[BrokerParameter.HomeAccountId] = accountData[BrokerResponseConst.HomeAccountId].ToString();
-                        brokerPayload[BrokerParameter.LocalAccountId] = accountData[BrokerResponseConst.LocalAccountId].ToString();
+                        brokerPayload[BrokerParameter.HomeAccountId] = accountData[BrokerResponseConst.HomeAccountId]?.ToString();
+                        brokerPayload[BrokerParameter.LocalAccountId] = accountData[BrokerResponseConst.LocalAccountId]?.ToString();
                         _logger.Info("Found broker account in Android account manager using the provided login hint.");
                         return;
                     }
                     
-                    if (string.Equals((accountData[BrokerResponseConst.HomeAccountId]).ToString(), homeAccountId) &&
-                         string.Equals((accountData[BrokerResponseConst.LocalAccountId]).ToString(), localAccountId))
+                    if (string.Equals((accountData[BrokerResponseConst.HomeAccountId])?.ToString(), homeAccountId) &&
+                         string.Equals((accountData[BrokerResponseConst.LocalAccountId])?.ToString(), localAccountId))
                     {
                         _logger.Info("Found broker account in Android account manager Using the provided account.");
                         return;
@@ -214,6 +214,52 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             _logger.Info("The requested account does not exist in the Android account manager.");
             throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
+        }
+
+        /// <summary>
+        /// This method will acquire all of the accounts in the account manager that have an access token for the given client ID.
+        /// </summary>
+        public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(IDictionary<string, string> brokerPayload)
+        {
+            Bundle getAccountsBundle = GetBrokerAccountBundle(brokerPayload);
+            getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
+
+            //This operation will acquire all of the accounts in the account manager for the given client ID
+            var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+                BrokerConstants.AuthtokenType,
+                null,
+                getAccountsBundle,
+                null,
+                null,
+                GetPreferredLooper(null));
+
+            if (result == null)
+            {
+                _logger.Info("Android account manager didn't return any accounts.");
+            }
+
+            Bundle bundleResult = (Bundle)result?.Result;
+            var accounts = bundleResult?.GetString(BrokerConstants.BrokerAccounts);
+            List<IAccount> brokerAccounts = new List<IAccount>();
+
+            if (!string.IsNullOrEmpty(accounts))
+            {
+                dynamic authResult = JArray.Parse(accounts);
+
+                foreach (JObject account in authResult)
+                {
+                    var accountData = account[BrokerResponseConst.Account];
+
+                    IAccount iAccount = new Account(accountData[BrokerResponseConst.HomeAccountId]?.ToString(),
+                        accountData[BrokerResponseConst.UserName]?.ToString(),
+                        accountData[BrokerResponseConst.Environment]?.ToString());
+                    brokerAccounts.Add(iAccount);
+                }
+            }
+
+            _logger.Info("Found " + brokerAccounts.Count + " accounts in the account manager.");
+
+            return brokerAccounts;
         }
 
         //Inorder for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.

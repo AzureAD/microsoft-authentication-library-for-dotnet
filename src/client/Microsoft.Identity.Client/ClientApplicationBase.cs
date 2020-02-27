@@ -17,6 +17,8 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
@@ -85,6 +87,15 @@ namespace Microsoft.Identity.Client
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
+
+#if ANDROID
+            if (AppConfig.IsBrokerEnabled)
+            {
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                accounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
+                return accounts;
+            }
+#endif
             if (UserTokenCache == null)
             {
                 requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
