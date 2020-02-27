@@ -37,7 +37,9 @@ namespace Microsoft.Identity.Client
             {
                 authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
             }
-            else if (!String.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)) || requestCode == BrokerConstants.BrokerRequestId)
+            else if (!String.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)) || requestCode == BrokerConstants.BrokerRequestId) 
+                //The BrokerRequestId is an ID that is attached to the activity launch during brokered authentication
+                // that indicates that the response returned to this class is for the broker.
             {
                 AndroidBroker.SetBrokerResult(data, (int)resultCode);
                 return;
