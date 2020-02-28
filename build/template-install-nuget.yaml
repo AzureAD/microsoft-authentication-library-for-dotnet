@@ -6,3 +6,4 @@ steps:
   displayName: 'Use NuGet 4.6.2'
   inputs:
     versionSpec: 4.6.2
+

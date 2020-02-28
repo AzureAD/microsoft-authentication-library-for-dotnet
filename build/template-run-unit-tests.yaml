@@ -4,16 +4,7 @@
 parameters:
   BuildConfiguration: 'debug'
 
-#- task: DotNetCoreCLI@2
-#  displayName: 'Run unit tests'
-#  inputs:
-#    command: test
-#    projects: |
-#     tests/Microsoft.Identity.Test.Unit.*/*.csproj
-#     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
-#    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
 steps:
-
 - task: VisualStudioTestPlatformInstaller@1
   inputs:
     packageFeedSelector: 'nugetOrg'
@@ -24,10 +15,33 @@ steps:
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: |
-        **\tests\**\bin\debug\**\Microsoft.Identity.Test.Unit.net45.dll
+        **\tests\Microsoft.Identity.Test.Unit.net45\bin\debug\**\Microsoft.Identity.Test.Unit.net45.dll
         !**\obj\**
     searchFolder: '$(System.DefaultWorkingDirectory)'
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
-    minimumExpectedTests: 611
+    minimumExpectedTests: 527 # Last checked on 02/28/2020
 
+- task: VSTest@2
+  displayName: 'Run Unit Tests - netcore'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+        **\tests\Microsoft.Identity.Test.Unit.netcore\bin\debug\**\Microsoft.Identity.Test.Unit.netcore.dll
+        !**\obj\**
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: 510 # Last checked on 02/28/2020
+
+- task: VSTest@2
+  displayName: 'Run CacheCompat Tests'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+        **\tests\CacheCompat\CommonCache.Test.Unit\bin\debug\**\CommonCache.Test.Unit.dll
+        !**\obj\**
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: 7 # Last checked on 02/28/2020

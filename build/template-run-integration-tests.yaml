@@ -4,17 +4,6 @@
 parameters:
   BuildConfiguration: 'debug'
 
-#steps:
-#- task: DotNetCoreCLI@2
-#  displayName: 'Run integration Tests'
-#  inputs:
-#    command: test
-#    projects: |
-#     tests/Microsoft.Identity.Test.Integration.net45/Microsoft.Identity.Test.Integration.*.csproj
-#     tests/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.*.csproj
-#     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
-#    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
-
 steps:
 - task: VSTest@2
   displayName: 'Run Integration Tests - net45'
@@ -27,3 +16,15 @@ steps:
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: 44
+
+- task: VSTest@2
+  displayName: 'Run Integration Tests - netcore'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |      
+        !**\obj\**
+        **\tests\**\Microsoft.Identity.Test.Integration.netcore.dll
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    codeCoverageEnabled: false
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: 39
