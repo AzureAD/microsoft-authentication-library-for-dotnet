@@ -28,7 +28,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string iOSBrokerNonce = "broker_nonce"; // included in request and response with iOS Broker v3
         public const string Environment = "environment";
 
-
         public const string iOSBrokerUserCancellationErrorCode = "-50005";
     }
 }
