@@ -4,12 +4,22 @@
 parameters:
   BuildConfiguration: 'debug'
 
+#- task: DotNetCoreCLI@2
+#  displayName: 'Run unit tests'
+#  inputs:
+#    command: test
+#    projects: |
+#     tests/Microsoft.Identity.Test.Unit.*/*.csproj
+#     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
+#    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Run unit tests'
+- task: VSTest@2
+  displayName: 'Run Unit Tests - net45'
   inputs:
-    command: test
-    projects: |
-     tests/Microsoft.Identity.Test.Unit.*/*.csproj
-     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
-    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\tests\**\Microsoft.Identity.Test.Unit.net45.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: 611
+
