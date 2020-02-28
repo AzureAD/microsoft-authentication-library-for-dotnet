@@ -20,7 +20,9 @@ steps:
   displayName: 'Run Integration Tests - net45'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\tests\**\Microsoft.Identity.Test.Integration.net45.dll'
+    testAssemblyVer2: |      
+        !**\obj\**
+        **\tests\**\Microsoft.Identity.Test.Integration.net45.dll
     searchFolder: '$(System.DefaultWorkingDirectory)'
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true

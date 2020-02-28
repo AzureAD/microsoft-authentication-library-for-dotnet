@@ -17,7 +17,9 @@ steps:
   displayName: 'Run Unit Tests - net45'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\tests\**\Microsoft.Identity.Test.Unit.net45.dll'
+    testAssemblyVer2: |
+        **\tests\**\bin\debug\**\Microsoft.Identity.Test.Unit.net45.dll
+        !**\obj\**
     searchFolder: '$(System.DefaultWorkingDirectory)'
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
