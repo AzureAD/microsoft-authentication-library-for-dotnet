@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 else
                 {
                     _logger.Info("Intent created from BundleResult is null. ");
-                    throw new MsalException(MsalError.NullIntentReturnedFromAndroidBroker, MsalErrorMessage.NullIntentReturnedFromBroker);
+                    throw new MsalClientException(MsalError.NullIntentReturnedFromAndroidBroker, MsalErrorMessage.NullIntentReturnedFromBroker);
                 }
 
                 intent = GetInteractiveBrokerIntent(brokerPayload, intent);
@@ -194,8 +194,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
                         return;
                     }
                     
-                    if (string.Equals(accountDataHomeAccountID, homeAccountId) &&
-                         string.Equals(accountDataLocalAccountID, localAccountId))
+                    if (string.Equals(accountDataHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
+                         string.Equals(accountDataLocalAccountID, localAccountId, StringComparison.Ordinal))
                     {
                         _logger.Info("Found broker account in Android account manager Using the provided account.");
                         return;
@@ -245,12 +245,16 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
                 foreach (JObject account in authResult)
                 {
-                    var accountData = account[BrokerResponseConst.Account];
+                    if (account.ContainsKey(BrokerResponseConst.Account))
+                    {
+                        var accountData = account[BrokerResponseConst.Account];
+                        var homeAccountID = account.ContainsKey(BrokerResponseConst.HomeAccountId) ? accountData[BrokerResponseConst.HomeAccountId].ToString() : "";
+                        var userName = account.ContainsKey(BrokerResponseConst.UserName) ? accountData[BrokerResponseConst.UserName].ToString() : "";
+                        var environment = account.ContainsKey(BrokerResponseConst.Environment) ? accountData[BrokerResponseConst.Environment].ToString() : "";
 
-                    IAccount iAccount = new Account(accountData[BrokerResponseConst.HomeAccountId]?.ToString(),
-                        accountData[BrokerResponseConst.UserName]?.ToString(),
-                        accountData[BrokerResponseConst.Environment]?.ToString());
-                    brokerAccounts.Add(iAccount);
+                        IAccount iAccount = new Account(homeAccountID, userName, environment);
+                        brokerAccounts.Add(iAccount);
+                    }
                 }
             }
 
@@ -292,10 +296,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
                         return;
                     }
 
-                    throw new MsalException("Could not negotiate protocol version with broker. ");
+                    throw new MsalClientException("Could not negotiate protocol version with broker. ");
                 }
 
-                throw new MsalException("Could not communicate with broker via account manager");
+                throw new MsalClientException("Could not communicate with broker via account manager");
             }
             catch
             {
@@ -472,7 +476,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             if (!validSignatureFound)
             {
-                throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed, "No matching signature found");
+                throw new MsalClientException(MsalError.AndroidBrokerSignatureVerificationFailed, "No matching signature found");
             }
         }
 
@@ -496,7 +500,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     {
                         if (chainStatus.Status != X509ChainStatusFlags.UntrustedRoot)
                         {
-                            throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed,
+                            throw new MsalClientException(MsalError.AndroidBrokerSignatureVerificationFailed,
                                 string.Format(CultureInfo.InvariantCulture, "app certificate validation failed with {0}", chainStatus.Status));
                         }
                     }
@@ -511,12 +515,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 PackageInfoFlags.Signatures);
             if (packageInfo == null)
             {
-                throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed, "No broker package found");
+                throw new MsalClientException(MsalError.AndroidBrokerSignatureVerificationFailed, "No broker package found");
             }
 
             if (packageInfo.Signatures == null || packageInfo.Signatures.Count == 0)
             {
-                throw new MsalException(MsalError.AndroidBrokerSignatureVerificationFailed, "No signature associated with the broker package.");
+                throw new MsalClientException(MsalError.AndroidBrokerSignatureVerificationFailed, "No signature associated with the broker package.");
             }
 
             List<X509Certificate2> certificates = new List<X509Certificate2>(packageInfo.Signatures.Count);

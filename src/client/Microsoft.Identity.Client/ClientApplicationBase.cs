@@ -88,14 +88,14 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
 
-#if ANDROID
-            if (AppConfig.IsBrokerEnabled)
+
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
                 accounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
                 return accounts;
             }
-#endif
+
             if (UserTokenCache == null)
             {
                 requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");

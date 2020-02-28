@@ -59,12 +59,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             catch (Exception ex)
             {
-                _logger.Error("Broker Operation Failed to complete. In order to perform brokered authentication on android" +
-                    " you need to ensure that you have installed either Intune Company Portal (Version 5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).");
-                if (ex is MsalException)
-                    throw;
-                else
-                    throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
+                _logger.Error("Android broker authentication failed.");
+                HandleBrokerOperationError(ex);
+                throw;
             }
 
             return s_androidBrokerTokenResponse;
@@ -227,13 +224,20 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             catch (Exception ex)
             {
-                _logger.Error("Broker get accounts operation failed to complete. In order to perform brokered authentication on android" +
-                    " you need to ensure that you have installed either Intune Company Portal (Version 5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).");
-                if (ex is MsalException)
-                    throw;
-                else
-                    throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
+                _logger.Error("Failed to get Android broker accounts from the broker.");
+                HandleBrokerOperationError(ex);
+                throw;
             }
+        }
+
+        private void HandleBrokerOperationError(Exception ex)
+        {
+            _logger.Error("In order to perform brokered authentication on android" +
+                          " you need to ensure that you have installed either Intune Company Portal (Version 5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).");
+            if (ex is MsalException)
+                throw ex;
+            else
+                throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
         }
     }
 }
