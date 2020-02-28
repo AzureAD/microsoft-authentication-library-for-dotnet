@@ -153,6 +153,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        [TestMethod]
+        public void BrokerGetAccountsAsyncOnUnsupportedPlatformTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.GetAccountsAsync(TestConstants.ClientId)).ConfigureAwait(false);
+            }
+        }
+
         private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, Action<Exception> validationHandler)
         {
             try

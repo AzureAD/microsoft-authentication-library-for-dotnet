@@ -163,25 +163,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// </summary>
         public void CheckForBrokerAccountInfoInAccountManager(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
-            Bundle getAccountsBundle = GetBrokerAccountBundle(brokerPayload);
-            getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
+            var accounts = GetBrokerAccounts(brokerPayload, callerActivity);
 
-            var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-                BrokerConstants.AuthtokenType,
-                null,
-                getAccountsBundle,
-                null,
-                null,
-                GetPreferredLooper(callerActivity));
-
-            if (result == null)
+            if (string.IsNullOrEmpty(accounts))
             {
                 _logger.Info("Android account manager didn't return any accounts.");
                 throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
             }
-
-            Bundle bundleResult = (Bundle)result?.Result;
-            var accounts = bundleResult?.GetString(BrokerConstants.BrokerAccounts);
 
             string username = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username);
             string homeAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId);
@@ -195,16 +183,19 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 {
                     var accountData = account[BrokerResponseConst.Account];
 
+                    var accountDataHomeAccountID = accountData[BrokerResponseConst.HomeAccountId]?.ToString();
+                    var accountDataLocalAccountID = accountData[BrokerResponseConst.LocalAccountId]?.ToString();
+
                     if (string.Equals((accountData[BrokerResponseConst.UserName]).ToString(), username, StringComparison.OrdinalIgnoreCase))
                     {
-                        brokerPayload[BrokerParameter.HomeAccountId] = accountData[BrokerResponseConst.HomeAccountId]?.ToString();
-                        brokerPayload[BrokerParameter.LocalAccountId] = accountData[BrokerResponseConst.LocalAccountId]?.ToString();
+                        brokerPayload[BrokerParameter.HomeAccountId] = accountDataHomeAccountID;
+                        brokerPayload[BrokerParameter.LocalAccountId] = accountDataLocalAccountID;
                         _logger.Info("Found broker account in Android account manager using the provided login hint.");
                         return;
                     }
                     
-                    if (string.Equals((accountData[BrokerResponseConst.HomeAccountId])?.ToString(), homeAccountId) &&
-                         string.Equals((accountData[BrokerResponseConst.LocalAccountId])?.ToString(), localAccountId))
+                    if (string.Equals(accountDataHomeAccountID, homeAccountId) &&
+                         string.Equals(accountDataLocalAccountID, localAccountId))
                     {
                         _logger.Info("Found broker account in Android account manager Using the provided account.");
                         return;
@@ -216,10 +207,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
         }
 
-        /// <summary>
-        /// This method will acquire all of the accounts in the account manager that have an access token for the given client ID.
-        /// </summary>
-        public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(IDictionary<string, string> brokerPayload)
+        private string GetBrokerAccounts(IDictionary<string, string> brokerPayload, Activity callerActivity)
         {
             Bundle getAccountsBundle = GetBrokerAccountBundle(brokerPayload);
             getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
@@ -231,15 +219,24 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 getAccountsBundle,
                 null,
                 null,
-                GetPreferredLooper(null));
+                GetPreferredLooper(callerActivity));
 
-            if (result == null)
+            Bundle bundleResult = (Bundle)result?.Result;
+            return bundleResult?.GetString(BrokerConstants.BrokerAccounts);
+        }
+
+        /// <summary>
+        /// This method will acquire all of the accounts in the account manager that have an access token for the given client ID.
+        /// </summary>
+        public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(IDictionary<string, string> brokerPayload)
+        {
+            var accounts = GetBrokerAccounts(brokerPayload, null);
+
+            if (string.IsNullOrEmpty(accounts))
             {
                 _logger.Info("Android account manager didn't return any accounts.");
             }
 
-            Bundle bundleResult = (Bundle)result?.Result;
-            var accounts = bundleResult?.GetString(BrokerConstants.BrokerAccounts);
             List<IAccount> brokerAccounts = new List<IAccount>();
 
             if (!string.IsNullOrEmpty(accounts))
@@ -302,7 +299,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             catch
             {
-                _logger.Error("Error when trying to acquire intent for broker authentication.");
+                _logger.Error("Error when trying to initiate communication with the broker.");
                 throw;
             }
         }
