@@ -7,6 +7,7 @@ parameters:
 steps:
 - task: VSTest@2
   displayName: 'Run Integration Tests - net45'
+  continueOnError: true
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: |      
@@ -16,9 +17,12 @@ steps:
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: 44
+    rerunFailedTests: true
+    rerunMaxAttempts: 1
 
 - task: VSTest@2
   displayName: 'Run Integration Tests - netcore'
+  continueOnError: true
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: |      
@@ -28,3 +32,5 @@ steps:
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: 39
+    rerunFailedTests: true
+    rerunMaxAttempts: 1
