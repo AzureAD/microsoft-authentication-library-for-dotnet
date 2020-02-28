@@ -13,6 +13,12 @@ parameters:
 #     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
 #    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
 steps:
+
+- task: VisualStudioTestPlatformInstaller@1
+  inputs:
+    packageFeedSelector: 'nugetOrg'
+    versionSelector: 'latestStable'
+
 - task: VSTest@2
   displayName: 'Run Unit Tests - net45'
   inputs:
