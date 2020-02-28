@@ -21,7 +21,7 @@ steps:
     searchFolder: '$(System.DefaultWorkingDirectory)'
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
-    minimumExpectedTests: 525 # Last checked on 02/28/2020
+    minimumExpectedTests: 500 # Last checked on 02/28/2020
 
 - task: VSTest@2
   displayName: 'Run Unit Tests - netcore'

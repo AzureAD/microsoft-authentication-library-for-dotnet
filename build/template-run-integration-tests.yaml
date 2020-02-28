@@ -31,6 +31,6 @@ steps:
     searchFolder: '$(System.DefaultWorkingDirectory)'
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
-    minimumExpectedTests: 39
+    minimumExpectedTests: 36
     rerunFailedTests: true
     rerunMaxAttempts: 1
