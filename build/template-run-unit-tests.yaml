@@ -5,10 +5,10 @@ parameters:
   BuildConfiguration: 'debug'
 
 steps:
-- task: VisualStudioTestPlatformInstaller@1
-  inputs:
-    packageFeedSelector: 'nugetOrg'
-    versionSelector: 'latestStable'
+#- task: VisualStudioTestPlatformInstaller@1
+#  inputs:
+#    packageFeedSelector: 'nugetOrg'
+#    versionSelector: 'latestStable'
 
 - task: VSTest@2
   displayName: 'Run Unit Tests - net45'
