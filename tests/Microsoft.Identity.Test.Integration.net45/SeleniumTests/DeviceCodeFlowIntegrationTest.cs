@@ -9,7 +9,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
@@ -52,11 +51,29 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
+        public async Task ArlingtonDeviceCodeFlowTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            labResponse.Lab.Authority += labResponse.Lab.TenantId;
+            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", true).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task DeviceCodeFlowAdfsTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
 
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
+            labResponse.Lab.Authority += labResponse.Lab.TenantId;
+            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", true).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -68,10 +85,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user").ConfigureAwait(false);
         }
 
-        private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType)
+        private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType, bool UsGov = false)
         {
             Trace.WriteLine($"Calling AcquireTokenWithDeviceCodeAsync with {0}", userType);
-            var pca = PublicClientApplicationBuilder.Create(labResponse.App.AppId).Build();
+            var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId);
+
+            if (UsGov)
+            {
+                builder.WithAuthority(labResponse.Lab.Authority);
+            }
+
+            var pca = builder.Build();
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
 
             var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>

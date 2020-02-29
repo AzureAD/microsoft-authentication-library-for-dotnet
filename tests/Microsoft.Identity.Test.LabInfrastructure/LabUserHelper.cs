@@ -85,6 +85,18 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserDataAsync(query);
         }
 
+        public static Task<LabResponse> GetArlingtonUserAsync()
+        {
+            return GetLabUserDataAsync(UserQuery.ArlingtonUserQuery);
+        }
+
+        public static Task<LabResponse> GetArlingtonADFSUserAsync()
+        {
+            var query = UserQuery.ArlingtonUserQuery;
+            query.UserType = UserType.Federated;
+            return GetLabUserDataAsync(query);
+        }
+
         public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
         {
             var query = UserQuery.PublicAadUserQuery;

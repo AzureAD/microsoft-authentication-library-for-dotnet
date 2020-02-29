@@ -53,6 +53,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        public async Task ARLINGTON_ROPC_AAD_Async()
+        {
+            var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            labResponse.Lab.Authority += "common";
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ARLINGTON_ROPC_ADFS_Async()
+        {
+            var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
+            labResponse.Lab.Authority += "common";
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
         public async Task ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -160,7 +176,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse)
+        private async Task RunHappyPathTestAsync(LabResponse labResponse, bool USGov = false)
         {
             var user = labResponse.User;
 
@@ -170,7 +186,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithHttpClientFactory(factory)
-                .WithAuthority(_authority)
+                .WithAuthority(USGov ? labResponse.Lab.Authority : _authority)
                 .Build();
 
 

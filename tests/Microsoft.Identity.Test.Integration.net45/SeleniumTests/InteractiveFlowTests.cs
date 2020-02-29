@@ -55,6 +55,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
+        public async Task Arlington_Interactive_AADAsync()
+        {
+            // Arrange
+            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            labResponse.Lab.Authority += "common"; 
+            await RunTestForUserAsync(labResponse, false, true).ConfigureAwait(false);
+        }
+
+        [TestMethod]
         public async Task Interactive_MsaUser_Async()
         {
             // Arrange
@@ -99,6 +108,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Arlington_Interactive_AdfsV2019_FederatedAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
+            labResponse.Lab.Authority += "common";
+            await RunTestForUserAsync(labResponse, false, true).ConfigureAwait(false);
         }
 
 #endif
@@ -157,7 +174,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNull(authResult.IdToken);
         }
 
-        private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
+        private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false, bool UsGov = false)
         {
             IPublicClientApplication pca;
             if (directToAdfs)
@@ -170,10 +187,16 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
             else
             {
-                pca = PublicClientApplicationBuilder
+                var builder = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                    .Build();
+                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri());
+
+                if (UsGov)
+                {
+                    builder.WithAuthority(labResponse.Lab.Authority);
+                }
+
+                pca = builder.Build();
             }
 
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
@@ -214,6 +237,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca
                 .AcquireTokenSilent(s_scopes, account)
+                .WithAuthority(labResponse.Lab.Authority)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
