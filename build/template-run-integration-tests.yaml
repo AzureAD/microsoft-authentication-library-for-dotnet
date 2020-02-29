@@ -19,6 +19,7 @@ steps:
     minimumExpectedTests: 44
     rerunFailedTests: true
     rerunMaxAttempts: 1
+    otherConsoleOptions: '/platform:x64 /Framework:.NETFramework,Version=v4.6 /logger:console;verbosity="normal" '
 
 - task: VSTest@2
   displayName: 'Run Integration Tests - netcore'
@@ -34,3 +35,4 @@ steps:
     minimumExpectedTests: 36
     rerunFailedTests: true
     rerunMaxAttempts: 1
+    otherConsoleOptions: '/platform:x64 /Framework:.NETCoreApp,Version=v2.1 /logger:console;verbosity="normal" '

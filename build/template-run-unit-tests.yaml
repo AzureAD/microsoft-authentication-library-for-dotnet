@@ -22,6 +22,8 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: 500 # Last checked on 02/28/2020
+    otherConsoleOptions: '/platform:x64 /Framework:.NETFramework,Version=v4.6 /logger:console;verbosity="normal" '
+
 
 - task: VSTest@2
   displayName: 'Run Unit Tests - netcore'
@@ -35,6 +37,8 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: 510 # Last checked on 02/28/2020
+    otherConsoleOptions: '/platform:x64 /Framework:.NETCoreApp,Version=v2.1 /logger:console;verbosity="normal" '
+
 
 - task: VSTest@2
   displayName: 'Run CacheCompat Tests'
