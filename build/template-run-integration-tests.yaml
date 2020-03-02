@@ -13,26 +13,27 @@ steps:
     testAssemblyVer2: |      
         !**\obj\**
         **\tests\**\Microsoft.Identity.Test.Integration.net45.dll
+        **\tests\**\Microsoft.Identity.Test.Integration.netcore.dll
     searchFolder: '$(System.DefaultWorkingDirectory)'
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: 44
     rerunFailedTests: true
     rerunMaxAttempts: 1
-    otherConsoleOptions: '/platform:x64 /Framework:.NETFramework,Version=v4.6.2 /logger:console;verbosity="normal" '
+    #otherConsoleOptions: '/platform:x64 /Framework:.NETFramework,Version=v4.6.2 /logger:console;verbosity="normal" '
 
-- task: VSTest@2
-  displayName: 'Run Integration Tests - netcore'
-  continueOnError: true
-  inputs:
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: |      
-        !**\obj\**
-        **\tests\**\Microsoft.Identity.Test.Integration.netcore.dll
-    searchFolder: '$(System.DefaultWorkingDirectory)'
-    codeCoverageEnabled: false
-    failOnMinTestsNotRun: true
-    minimumExpectedTests: 36
-    rerunFailedTests: true
-    rerunMaxAttempts: 1
-    otherConsoleOptions: '/platform:x64 /Framework:.NETCoreApp,Version=v2.1 /logger:console;verbosity="normal" '
+#- task: VSTest@2
+#  displayName: 'Run Integration Tests - netcore'
+#  continueOnError: true
+#  inputs:
+#    testSelector: 'testAssemblies'
+#    testAssemblyVer2: |      
+#        !**\obj\**
+#        **\tests\**\Microsoft.Identity.Test.Integration.netcore.dll
+#    searchFolder: '$(System.DefaultWorkingDirectory)'
+#    codeCoverageEnabled: false
+#    failOnMinTestsNotRun: true
+#    minimumExpectedTests: 36
+#    rerunFailedTests: true
+#    rerunMaxAttempts: 1
+#    otherConsoleOptions: '/platform:x64 /Framework:.NETCoreApp,Version=v2.1 /logger:console;verbosity="normal" '
