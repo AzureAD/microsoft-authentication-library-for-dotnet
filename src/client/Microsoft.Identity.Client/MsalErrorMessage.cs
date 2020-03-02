@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Client
         }
 
         public const string NoAndroidBrokerAccountFound = "Android account manager could not find an account that matched the provided account information.";
-        public const string AndroidBrokerCannotBeInvoked = "In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater)."
+        public const string AndroidBrokerCannotBeInvoked = "In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).";
         public static string ExperimentalFeature(string methodName)
         {
             return string.Format(
