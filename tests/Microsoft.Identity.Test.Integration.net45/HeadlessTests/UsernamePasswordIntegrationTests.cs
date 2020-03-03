@@ -56,16 +56,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ARLINGTON_ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            labResponse.Lab.Authority += "common";
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            labResponse.Lab.Authority += "organizations";
+            await RunHappyPathTestAsync(labResponse, true).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            labResponse.Lab.Authority += "common";
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+            labResponse.Lab.Authority += "organizations";
+            await RunHappyPathTestAsync(labResponse, true).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -197,8 +197,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             // TODO: you can now assert each request and response
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token");
-            var telemetryValue = req.Headers.Where(h => h.Key == "x-client-last-telemetry");
+            if (!USGov)
+            {
+                var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token");
+                var telemetryValue = req.Headers.Where(h => h.Key == "x-client-last-telemetry");
+            }
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);

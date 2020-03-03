@@ -35,10 +35,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string[] s_adfsScopes = { "openid", "profile" };
 
         //TODO: acquire scenario specific client ids from the lab resonse
+        private const string _publicClientIDOBO = "be9b0186-7dfd-448a-a944-f771029105bf";
+        private const string _confidentialClientIDOBO = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
         private const string ConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
-        private const string ArlingtonConfidentialClientID = "c0555d2d-02f2-4838-802e-3463422e571d";
-        private const string ArlingtonPublicClientID = "cb7faed4-b8c0-49ee-b421-f5ed16894c83";
-        private const string ArlingtonAuthority = "https://login.microsoftonline.us/45ff0c17-f8b5-489b-b7fd-2fedebbec0c4";
+        private const string _arlingtonConfidentialClientIDOBO = "c0555d2d-02f2-4838-802e-3463422e571d";
+        private const string _arlingtonPublicClientIDOBO = "cb7faed4-b8c0-49ee-b421-f5ed16894c83";
+        private const string _arlingtonAuthority = "https://login.microsoftonline.us/45ff0c17-f8b5-489b-b7fd-2fedebbec0c4";
+
+        private const string publicCloudHost = "https://login.microsoftonline.com/";
+        private const string arlingtonCloudHost = "https://login.microsoftonline.us/";
 
         private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         private const string TestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
@@ -113,7 +118,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialClientAuthority = TestAuthority;
 
             confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(ArlingtonConfidentialClientID)
+                .Create(_arlingtonConfidentialClientIDOBO)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithCertificate(cert)
                 .Build();
@@ -177,7 +182,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [DataRow(ConfidentialClientID, TestAuthority, "default", DisplayName ="Public Cloud")]
-        [DataRow(ArlingtonConfidentialClientID, ArlingtonAuthority, "arlington", DisplayName ="Arlington Cloud")]
+        [DataRow(_arlingtonConfidentialClientIDOBO, _arlingtonAuthority, "arlington", DisplayName ="Arlington Cloud")]
         public async Task ConfidentialClientWithClientSecretTestAsync(string clientID, string authority, string secretName)
         {
             var confidentialClientAuthority = authority;
@@ -377,7 +382,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ArlingtonWebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
-            await RunOnBehalfOfTestAsync(await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false)).ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            labResponse.Lab.Authority += "organizations";
+            await RunOnBehalfOfTestAsync(labResponse, true).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -408,24 +415,34 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task RunOnBehalfOfTestAsync(LabResponse labResponse, bool usGov = false)
         {
             var user = labResponse.User;
+            var oboHost = usGov ? arlingtonCloudHost : publicCloudHost;
+            var secret = _keyVault.GetSecret(usGov ? TestConstants.MsalArlingtonOBOKeyVaultUri : TestConstants.MsalOBOKeyVaultUri).Value;
+            var authority = usGov ? labResponse.Lab.Authority : TestConstants.AuthorityOrganizationsTenant;
+            var publicClientID = usGov ? _arlingtonPublicClientIDOBO : _publicClientIDOBO;
+            var confidentialClientID = usGov ? _arlingtonConfidentialClientIDOBO : _confidentialClientIDOBO;
+            var oboScope = usGov ? s_arlingtonOBOServiceScope : s_oboServiceScope;
 
-            var secret = _keyVault.GetSecret("https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret").Value;
             //TODO: acquire scenario specific client ids from the lab resonse
-            var publicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
-            var oboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(ArlingtonPublicClientID).WithAuthority(TestConstants.AuthorityOrganizationsTenant).WithRedirectUri(TestConstants.RedirectUri).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
+                                                                 .WithAuthority(authority)
+                                                                 .WithRedirectUri(TestConstants.RedirectUri)
+                                                                 .Build();
 
-            AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenInteractive(s_arlingtonOBOServiceScope)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
+            var builder = msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword);
+
+            if (usGov)
+            {
+                builder.WithAuthority(labResponse.Lab.Authority);
+            }
+
+            var authResult = await builder.ExecuteAsync().ConfigureAwait(false);
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(ArlingtonConfidentialClientID)
-                .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
+                .Create(confidentialClientID)
+                .WithAuthority(new Uri(oboHost + authResult.TenantId), true)
                 .WithClientSecret(secret)
                 .Build();
 
