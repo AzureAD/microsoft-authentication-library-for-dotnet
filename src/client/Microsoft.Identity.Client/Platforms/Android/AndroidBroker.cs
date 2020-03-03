@@ -212,6 +212,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
         {
+            if (!CanInvokeBroker())
+            {
+                _logger.Error("Android broker is not installed so no accounts will be returned.");
+                return new List<IAccount>();
+            }
+
             Dictionary<string, string> brokerPayload = new Dictionary<string, string>();
             brokerPayload.Add(BrokerParameter.ClientId, clientID);
 
