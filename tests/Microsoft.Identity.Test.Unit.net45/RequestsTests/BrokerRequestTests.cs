@@ -17,6 +17,8 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Threading.Tasks;
+using NSubstitute;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -118,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new BrokerInteractiveRequestComponent(
                         parameters,
                         null,
-                        broker, 
+                        broker,
                         "install_url");
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.CanInvokeBroker());
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
@@ -151,6 +153,42 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(false, _brokerSilentRequest.Broker.CanInvokeBroker());
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerSilentRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
             }
+        }
+
+        [TestMethod]
+        public void BrokerGetAccountsAsyncOnUnsupportedPlatformTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.GetAccountsAsync(TestConstants.ClientId)).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetAccountsAsync()
+        {
+            // Arrange
+            var mockBroker = Substitute.For<IBroker>();
+            var expectedAccount = Substitute.For<IAccount>();
+            mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { expectedAccount });
+
+            var platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.CanBrokerSupportSilentAuth().Returns(true);
+            platformProxy.CreateBroker(null).Returns(mockBroker);
+
+
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithBroker(true)
+                .WithPlatformProxy(platformProxy)
+                .Build();
+
+            // Act
+            var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            // Assert
+            Assert.AreSame(expectedAccount, actualAccount.Single());
         }
 
         private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, Action<Exception> validationHandler)
@@ -206,7 +244,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new BrokerInteractiveRequestComponent(
                         parameters,
                         interactiveParameters,
-                        broker, 
+                        broker,
                         "install_url");
 
                 _brokerSilentRequest =

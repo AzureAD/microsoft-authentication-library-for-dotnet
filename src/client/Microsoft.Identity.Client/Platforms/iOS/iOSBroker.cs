@@ -303,5 +303,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             s_brokerResponse = responseUrl;
             s_brokerResponseReady?.Release();
         }
+
+        public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

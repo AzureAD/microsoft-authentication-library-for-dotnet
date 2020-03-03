@@ -39,7 +39,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
-            //TODO: call can invoke broker here
+            if(!Broker.CanInvokeBroker())
+            {
+                throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked);
+            }
+
             _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
             return await SendAndVerifyResponseAsync().ConfigureAwait(false);
