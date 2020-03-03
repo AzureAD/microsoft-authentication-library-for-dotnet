@@ -248,10 +248,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     if (account.ContainsKey(BrokerResponseConst.Account))
                     {
                         var accountData = account[BrokerResponseConst.Account];
-                        var homeAccountID = account.ContainsKey(BrokerResponseConst.HomeAccountId) ? accountData[BrokerResponseConst.HomeAccountId].ToString() : "";
-                        var userName = account.ContainsKey(BrokerResponseConst.UserName) ? accountData[BrokerResponseConst.UserName].ToString() : "";
-                        var environment = account.ContainsKey(BrokerResponseConst.Environment) ? accountData[BrokerResponseConst.Environment].ToString() : "";
-
+                        var homeAccountID = accountData.Value<string>(BrokerResponseConst.HomeAccountId) ?? "";
+                        var userName = accountData.Value<string>(BrokerResponseConst.UserName) ?? "";
+                        var environment = accountData.Value<string>(BrokerResponseConst.Environment) ?? "";
                         IAccount iAccount = new Account(homeAccountID, userName, environment);
                         brokerAccounts.Add(iAccount);
                     }
