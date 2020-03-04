@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="AppiumAutomation.MainPage">
+
+    <StackLayout>
+        <Label Text="Select a UI Test to run: " HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
+        <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+            <Picker x:Name="uiTestPicker" Title="Select a test to run" AutomationId="uiTestPicker">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Acquire Token Interactive</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+            <Button Text="Run" Clicked="RunClickedAsync" AutomationId="runTestButton" />
+        </StackLayout>
+        <StackLayout Padding="5,10">
+            <Label x:Name="resultLabel" Text="Result:" Font="Bold,15" />
+
+            <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
+                <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
+                    <Frame OutlineColor="Black" Padding="5">
+                        <Label x:Name="TestResult" Text="" AutomationId="testResult"/>
+                    </Frame>
+                </StackLayout>
+            </ScrollView>
+        </StackLayout>
+    </StackLayout>
+
+</ContentPage>
