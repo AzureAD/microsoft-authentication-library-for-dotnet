@@ -1,11 +1,11 @@
 4.9.0
 ============
-New Features: ** Added support for Android Broker to MSAL.NET ** MSAL.NET will now be able to take advantage of the brokered authentication scenarios using the microsoft Authenticator and the Intune Company Portal. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1402)
+New Features: ** Added support for Android Broker to MSAL.NET ** MSAL.NET will now be able to take advantage of the brokered authentication scenarios using the Microsoft Authenticator and the Intune Company Portal. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1402)
 
 **Added client capabilities support to MSAL.NET** [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1545)
 
 Bug Fixes:
-**Wrong Authority created in CreateAuthorityForRequest** MSAL.NET now properly creates B2C authorities when using the CreateAuthorityForRequest() api. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1606)
+**Wrong Authority created in CreateAuthorityForRequest** MSAL.NET now properly creates B2C authorities when using the CreateAuthorityForRequest() API. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1606)
 
 4.8.2
 ============
