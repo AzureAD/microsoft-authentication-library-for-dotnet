@@ -9,8 +9,8 @@ namespace Microsoft.Identity.Client
     /// This interface will be available in TokenCacheNOtifiactionArgs callback to enable serialization/deserialization of the cache.
     /// </summary>
     /// <remarks>
-    /// The methods in this class are not thread safe. It is expected that these methods will be called from the token cache callbacks 
-    /// (e.g. via SetBeforeAccess, SetAfterAccess) - these callbacks ensure thread safetly. 
+    /// The methods in this class are not thread safe. It is expected that they will be called from the token cache callbacks 
+    /// (registered via SetBeforeAccess, SetAfterAccess) - these callbacks thread safe because they are triggered sequentially.
     /// </remarks>
     public interface ITokenCacheSerializer
     {
