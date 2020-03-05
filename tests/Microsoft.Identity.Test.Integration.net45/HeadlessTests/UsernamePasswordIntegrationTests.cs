@@ -14,10 +14,12 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,8 +31,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class UsernamePasswordIntegrationTests
     {
-        private const string _authority = "https://login.microsoftonline.com/organizations/";
+        private const string Authority = "https://login.microsoftonline.com/organizations/";
         private static readonly string[] s_scopes = { "User.Read" };
+        public static Guid CorrelationId = new Guid();
+        public string CurrentApiId { get; set; }
+        private const string XClientCurrentTelemetryROPC = "2|1003,0|";
+        private string XClientLastTelemetryROPC = "2|0|||";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -109,18 +115,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(Authority).Build();
 
             try
             {
                 var result = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectSecurePassword)
+                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, incorrectSecurePassword)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -147,7 +152,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(_authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(Authority).Build();
 
             var result = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
                 msalPublicClient
@@ -164,30 +169,43 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user = labResponse.User;
 
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+            SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
 
-            var factory = new TestHttpClientFactory();
+            var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
+                .WithAuthority(Authority)
                 .WithHttpClientFactory(factory)
-                .WithAuthority(_authority)
                 .Build();
 
-
-            //AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
+                .WithCorrelationId(CorrelationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            // TODO: you can now assert each request and response
             var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token");
-            var telemetryValue = req.Headers.Where(h => h.Key == "x-client-last-telemetry");
+
+            var telemetryLastValue = req.Headers.Single(h => h.Key == "x-client-last-telemetry").Value;
+            var telemetryCurrentValue = req.Headers.Single(h => h.Key == "x-client-current-telemetry").Value;
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(user.Upn, authResult.Account.Username, System.StringComparison.InvariantCultureIgnoreCase));
+
+            Assert.AreEqual(XClientCurrentTelemetryROPC, telemetryCurrentValue.FirstOrDefault());
+            Assert.AreEqual(XClientLastTelemetryROPC, telemetryLastValue.FirstOrDefault());
+
+            HttpTelemetryRecorder httpTelemetryRecorder = new HttpTelemetryRecorder();
+            httpTelemetryRecorder.SplitCurrentCsv(telemetryCurrentValue.FirstOrDefault());
+            httpTelemetryRecorder.SplitPreviousCsv(telemetryLastValue.FirstOrDefault());
+
+            Assert.AreEqual(0, httpTelemetryRecorder.CorrelationIdPrevious.Count());
+            Assert.AreEqual("1003", httpTelemetryRecorder.ApiId.FirstOrDefault());
+            Assert.AreEqual(0, httpTelemetryRecorder.ErrorCode.Count());
+            Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.SilentCallSuccessfulCount);
+            Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.ForceRefresh);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.

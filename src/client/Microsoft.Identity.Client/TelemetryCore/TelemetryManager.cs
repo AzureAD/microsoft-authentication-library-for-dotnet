@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private readonly bool _onlySendFailureTelemetry;
         private readonly IPlatformProxy _platformProxy;
         private readonly IApplicationConfiguration _applicationConfiguration;
+        public int SuccessfulSilentCallCount { get; set; } = 0;
 
         public TelemetryManager(
             IApplicationConfiguration applicationConfiguration,
@@ -131,28 +132,20 @@ namespace Microsoft.Identity.Client.TelemetryCore
             Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
         }
 
-        public string FetchAndResetPreviousHttpTelemetryContent()
+        public string FetchAndResetPreviousHttpTelemetryContent(EventBase eventBase)
         {
             lock (_mostRecentStoppedApiEventLockObj)
             {
-                var httpTelemetryContent = new HttpTelemetryContent(_mostRecentStoppedApiEvent);
+                var httpTelemetryContent = new HttpTelemetryContent(_completedEvents, _mostRecentStoppedApiEvent);
                 _mostRecentStoppedApiEvent = null;
-                return httpTelemetryContent.GetCsvAsPrevious();
+                return httpTelemetryContent.GetCsvAsPrevious(SuccessfulSilentCallCount);
             }
         }
 
-        public string FetchCurrentHttpTelemetryContent(string currentRequestCorrelationId)
+        public string FetchCurrentHttpTelemetryContent(EventBase eventBase)
         {
-            foreach (var kvp in _eventsInProgress)
-            {
-                if (string.Compare(kvp.Key.CorrelationId, currentRequestCorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    var httpTelemetryContent = new HttpTelemetryContent(kvp.Value);
-                    return httpTelemetryContent.GetCsvAsCurrent();
-                }
-            }
-
-            return string.Empty;
+            var httpTelemetryContent = new HttpTelemetryContent(_eventsInProgress, eventBase);
+            return httpTelemetryContent.GetCsvAsCurrent();
         }
 
         private IEnumerable<EventBase> CollateOrphanedEvents(string correlationId)

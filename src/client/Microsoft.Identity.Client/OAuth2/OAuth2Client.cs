@@ -83,6 +83,9 @@ namespace Microsoft.Identity.Client.OAuth2
 
             using (_telemetryManager.CreateTelemetryHelper(httpEvent))
             {
+                _headers.Add(TelemetryConstants.XClientLastTelemetry, _telemetryManager.FetchAndResetPreviousHttpTelemetryContent(httpEvent));
+                _headers.Add(TelemetryConstants.XClientCurrentTelemetry, _telemetryManager.FetchCurrentHttpTelemetryContent(httpEvent));
+
                 if (method == HttpMethod.Post)
                 {
                     response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)

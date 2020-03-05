@@ -8,13 +8,14 @@ namespace Microsoft.Identity.Client.TelemetryCore
     internal interface ITelemetryManager
     {
         TelemetryCallback Callback { get; }
+        int SuccessfulSilentCallCount { get; set; }
 
         TelemetryHelper CreateTelemetryHelper(EventBase eventBase);
 
         void StartEvent(EventBase eventToStart);
         void StopEvent(EventBase eventToStop);
         void Flush(string correlationId);
-        string FetchAndResetPreviousHttpTelemetryContent();
-        string FetchCurrentHttpTelemetryContent(string currentRequestCorrelationId);
+        string FetchCurrentHttpTelemetryContent(EventBase currentEvents);
+        string FetchAndResetPreviousHttpTelemetryContent(EventBase stoppedEvents);
     }
 }
