@@ -36,18 +36,21 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
 
         public void SplitPreviousCsv(string telemetryCsv)
         {
-            string[] splitCsv = telemetryCsv.Split('|');
-            SilentCallSuccessfulCount = splitCsv[1];
-
-            if (splitCsv[2] == string.Empty)
+            if (!string.IsNullOrEmpty(telemetryCsv))
             {
-                return;
-            }
+                string[] splitCsv = telemetryCsv.Split('|');
+                SilentCallSuccessfulCount = splitCsv[1];
 
-            string[] splitFailedRequests = splitCsv[2].Split(',');
-            ApiIdPrevious.Add(splitFailedRequests[1]);
-            CorrelationIdPrevious.Add(splitFailedRequests[2]);
-            ErrorCode.Add(splitCsv[2]);
+                if (splitCsv[2] == string.Empty)
+                {
+                    return;
+                }
+
+                string[] splitFailedRequests = splitCsv[2].Split(',');
+                ApiIdPrevious.Add(splitFailedRequests[1]);
+                CorrelationIdPrevious.Add(splitFailedRequests[2]);
+                ErrorCode.Add(splitCsv[2]);
+            }
         }
     }
 }

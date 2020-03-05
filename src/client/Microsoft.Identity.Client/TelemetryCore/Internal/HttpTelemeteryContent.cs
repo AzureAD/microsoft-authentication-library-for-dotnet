@@ -87,13 +87,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
                 return string.Empty;
             }
 
-            var eventsStuff = _eventsInProgress.FirstOrDefault();
+            var apiEvent = _eventsInProgress.FirstOrDefault(e => e.Key.EventName == "msal.api_event");
 
-            if (eventsStuff.Value.ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey))
+            if (apiEvent.Value.ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey))
             {
-                eventsStuff.Value.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
+                apiEvent.Value.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
                 ApiId.Add(apiId);
-                eventsStuff.Value.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
+                apiEvent.Value.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
                 _forceRefresh = forceRefresh;
             }            
 
