@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
@@ -12,55 +13,42 @@ using static Microsoft.Identity.Client.TelemetryCore.TelemetryManager;
 namespace Microsoft.Identity.Client.TelemetryCore.Internal
 {
     internal class HttpTelemetryContent
-    {
-        ConcurrentDictionary<string, List<EventBase>> _stoppedEvents = new ConcurrentDictionary<string, List<EventBase>>();
-        ConcurrentDictionary<EventKey, EventBase> _eventsInProgress = new ConcurrentDictionary<EventKey, EventBase>();
+    { 
         private List<string> ApiId { get; set; } = new List<string>();
         private List<string> ErrorCode { get; set; } = new List<string>();
 
-        EventBase _eventBase;
         private string _forceRefresh;
         
-        public HttpTelemetryContent(ConcurrentDictionary<string, List<EventBase>> stoppedEvents, EventBase eventBase)
+        public string GetCsvAsPrevious(
+            int successfulSilentCallCount,
+            ConcurrentDictionary<string, List<EventBase>> stoppedEvents,
+            EventBase mostRecentStoppedApiEvent)
         {
-            if (eventBase != null)
-            {
-                _stoppedEvents = stoppedEvents;
-                _eventBase = eventBase;
-            }
-        }
-
-        public HttpTelemetryContent(ConcurrentDictionary<EventKey, EventBase> eventsInProgress, EventBase eventBase)
-        {
-            if (eventsInProgress != null)
-            {
-                _eventsInProgress = eventsInProgress;
-                _eventBase = eventBase;
-            }
-        }
-
-        public string GetCsvAsPrevious(int successfulSilentCallCount)
-        {
-            if (_stoppedEvents.Count == 0)
+            if (stoppedEvents.Count == 0)
             {
                 return string.Empty;
             }
 
             string apiIdCorIdData = string.Empty;
+            string correlationId = string.Empty;
 
-            if (_eventBase.TryGetValue(MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey, out string correlationId))
-            {
-                if (!string.IsNullOrEmpty(correlationId))
-                {
-                    _eventBase.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
-                    ApiId.Add(apiId);
-                    apiIdCorIdData = CreateApiIdAndCorrelationIdContent(correlationId);                    
-                }
+            foreach (List<EventBase> cEvents in stoppedEvents.Values)
+            {                
+                cEvents.Find(e => e.TryGetValue("Microsoft.MSAL.correlation_id", out correlationId));
+                string errorCode = string.Empty;
+                cEvents.Find(e => e.TryGetValue(MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey, out errorCode));
+                ErrorCode.Add(errorCode);
             }
 
-            _eventBase.TryGetValue(MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey, out string errorCode);
-            ErrorCode.Add(errorCode);
-            
+            string apiId = string.Empty;
+            if (mostRecentStoppedApiEvent != null)
+            {
+                if (mostRecentStoppedApiEvent.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out apiId))
+                {
+                    ApiId.Add(apiId);                   
+                }
+            }
+            apiIdCorIdData = CreateApiIdAndCorrelationIdContent(correlationId);
             // csv expected format:
             // 2|silent_successful_count|failed_requests|errors|platform_fields
             // failed_request can be further expanded to include:
@@ -80,27 +68,29 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             return data;
         }
 
-        public string GetCsvAsCurrent()
+        public string GetCsvAsCurrent(ConcurrentDictionary<EventKey, EventBase> eventsInProgress)
         {
-            if (_eventsInProgress == null)
+            if (eventsInProgress == null)
             {
                 return string.Empty;
             }
 
-            var apiEvent = _eventsInProgress.FirstOrDefault(e => e.Key.EventName == "msal.api_event");
+            IEnumerable<KeyValuePair<EventKey, EventBase>> apiEvent = eventsInProgress.Where(e => e.Key.EventName == "msal.api_event");
 
-            if (apiEvent.Value.ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey))
+            foreach (KeyValuePair<EventKey, EventBase> events in apiEvent)
             {
-                apiEvent.Value.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
+                events.Value.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
                 ApiId.Add(apiId);
-                apiEvent.Value.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
+                events.Value.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
                 _forceRefresh = forceRefresh;
-            }            
+            }
+
+            string apiEvents = string.Join(",", ApiId);
 
             // csv expected format:
             // 2|api_id,force_refresh|platform_config
             string[] myValues = new string[] {
-                ApiId.FirstOrDefault(),
+                apiEvents,
                 ConvertFromStringToBitwise(_forceRefresh)};
 
             string csvString = string.Join(",", myValues);

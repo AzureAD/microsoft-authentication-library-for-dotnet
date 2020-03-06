@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public static Guid CorrelationId = new Guid();
         public string CurrentApiId { get; set; }
         private const string XClientCurrentTelemetryROPC = "2|1003,0|";
-        private string XClientLastTelemetryROPC = "2|0|||";
+        private string XClientLastTelemetryROPC = "2|0|00000000-0000-0000-0000-000000000000||";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -195,13 +195,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(string.Equals(user.Upn, authResult.Account.Username, System.StringComparison.InvariantCultureIgnoreCase));
 
             Assert.AreEqual(XClientCurrentTelemetryROPC, telemetryCurrentValue.FirstOrDefault());
-            Assert.AreEqual(string.Empty, telemetryLastValue.FirstOrDefault());
+            Assert.AreEqual(XClientLastTelemetryROPC, telemetryLastValue.FirstOrDefault());
 
             HttpTelemetryRecorder httpTelemetryRecorder = new HttpTelemetryRecorder();
             httpTelemetryRecorder.SplitCurrentCsv(telemetryCurrentValue.FirstOrDefault());
             httpTelemetryRecorder.SplitPreviousCsv(telemetryLastValue.FirstOrDefault());
 
-            Assert.AreEqual(0, httpTelemetryRecorder.CorrelationIdPrevious.Count());
+            Assert.AreEqual(1, httpTelemetryRecorder.CorrelationIdPrevious.Count());
             Assert.AreEqual("1003", httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains("1003")));
             Assert.AreEqual(0, httpTelemetryRecorder.ErrorCode.Count());
             //Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.SilentCallSuccessfulCount);

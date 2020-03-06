@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         }
 
         public void StartEvent(EventBase eventToStart)
-        {        
+        {
             _eventsInProgress[new EventKey(eventToStart)] = eventToStart;
         }
 
@@ -132,20 +132,27 @@ namespace Microsoft.Identity.Client.TelemetryCore
             Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
         }
 
-        public string FetchAndResetPreviousHttpTelemetryContent(EventBase eventBase)
+        public string FetchAndResetPreviousHttpTelemetryContent()
         {
             lock (_mostRecentStoppedApiEventLockObj)
             {
-                var httpTelemetryContent = new HttpTelemetryContent(_completedEvents, _mostRecentStoppedApiEvent);
+                var httpTelemetryContent = new HttpTelemetryContent();
+
+                string csv = httpTelemetryContent.GetCsvAsPrevious(
+                         SuccessfulSilentCallCount,
+                         _completedEvents,
+                         _mostRecentStoppedApiEvent);
+
                 _mostRecentStoppedApiEvent = null;
-                return httpTelemetryContent.GetCsvAsPrevious(SuccessfulSilentCallCount);
+
+                return csv;
             }
         }
 
-        public string FetchCurrentHttpTelemetryContent(EventBase eventBase)
+        public string FetchCurrentHttpTelemetryContent()
         {
-            var httpTelemetryContent = new HttpTelemetryContent(_eventsInProgress, eventBase);
-            return httpTelemetryContent.GetCsvAsCurrent();
+            var httpTelemetryContent = new HttpTelemetryContent();
+            return httpTelemetryContent.GetCsvAsCurrent(_eventsInProgress);
         }
 
         private IEnumerable<EventBase> CollateOrphanedEvents(string correlationId)

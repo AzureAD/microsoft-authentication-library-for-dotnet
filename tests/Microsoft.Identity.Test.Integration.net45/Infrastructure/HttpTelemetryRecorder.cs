@@ -47,9 +47,16 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
                 }
 
                 string[] splitFailedRequests = splitCsv[2].Split(',');
-                ApiIdPrevious.Add(splitFailedRequests[1]);
-                CorrelationIdPrevious.Add(splitFailedRequests[2]);
-                ErrorCode.Add(splitCsv[2]);
+                if (splitFailedRequests.Length == 1)
+                {
+                    CorrelationIdPrevious.Add(splitFailedRequests[0]);
+                }
+                else
+                {
+                    ApiIdPrevious.Add(splitFailedRequests[0]);
+                    CorrelationIdPrevious.Add(splitFailedRequests[1]);
+                    ErrorCode.Add(splitCsv[2]);
+                }
             }
         }
     }
