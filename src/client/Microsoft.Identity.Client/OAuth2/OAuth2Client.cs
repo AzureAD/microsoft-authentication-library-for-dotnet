@@ -57,6 +57,11 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
+        internal void AddHttpTelemetryToHeaders(string key, string value)
+        {
+            _headers[key] = value;
+        }
+
         public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endPoint, RequestContext requestContext)
         {
             return await ExecuteRequestAsync<InstanceDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext)
@@ -146,8 +151,8 @@ namespace Microsoft.Identity.Client.OAuth2
                 _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
             }
 
-            _headers.Add(TelemetryConstants.XClientLastTelemetry, _telemetryManager.FetchAndResetPreviousHttpTelemetryContent());
-            _headers.Add(TelemetryConstants.XClientCurrentTelemetry, _telemetryManager.FetchCurrentHttpTelemetryContent());
+            //_headers.Add(TelemetryConstants.XClientLastTelemetry, _telemetryManager.FetchAndResetPreviousHttpTelemetryContent());
+            //_headers.Add(TelemetryConstants.XClientCurrentTelemetry, _telemetryManager.FetchCurrentHttpTelemetryContent());
 
             return addCorrelationId;
         }

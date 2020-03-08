@@ -262,6 +262,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                                                 }";
         public const string InteractiveRequestApiIdPlusCorrelationId = "1005,ad8c894a-557f-48c0-b045-c129590c344e,";
         public const string InteractiveRequestApiId = "1005";
+        public static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
     }
 
     internal static class Adfs2019LabConstants

@@ -2,21 +2,13 @@
 // Licensed under the MIT License.
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -33,10 +25,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private const string Authority = "https://login.microsoftonline.com/organizations/";
         private static readonly string[] s_scopes = { "User.Read" };
-        public static Guid CorrelationId = new Guid();
+        public static Guid CorrelationId = TestConstants.CorrelationId;
         public string CurrentApiId { get; set; }
         private const string XClientCurrentTelemetryROPC = "2|1003,0|";
-        private string XClientLastTelemetryROPC = "2|0|00000000-0000-0000-0000-000000000000||";
+        private const string XClientCurrentTelemetryROPCFailure = "2|1003,1003,1003,0|";
+        private const string XClientLastTelemetryROPC = "";
+        private const string XClientLastTelemetryROPCFailure =
+            "2|0|1003,ad8c894a-557f-48c0-b045-c129590c344e,1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|";
+        private const string ApiIdAndCorrelationIdSection =
+            "1003,ad8c894a-557f-48c0-b045-c129590c344e,1003,ad8c894a-557f-48c0-b045-c129590c344e";
+        private const string InvalidGrantError = "invalid_grant";
+        private const string UPApiId = "1003";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -115,31 +114,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-
-            SecureString incorrectSecurePassword = new SecureString();
-            incorrectSecurePassword.AppendChar('x');
-            incorrectSecurePassword.MakeReadOnly();
-
             var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(Authority).Build();
-
-            try
-            {
-                var result = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, incorrectSecurePassword)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-            }
-            catch (MsalServiceException ex)
-            {
-                Assert.IsTrue(!string.IsNullOrWhiteSpace(ex.CorrelationId));
-                Assert.AreEqual(400, ex.StatusCode);
-                Assert.AreEqual("invalid_grant", ex.ErrorCode);
-                Assert.IsTrue(ex.Message.StartsWith("AADSTS50126"));
-
-                return;
-            }
-
-            Assert.Fail("Bad exception or no exception thrown");
+            await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -164,13 +140,75 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(result.ErrorCode, "invalid_grant");
         }
 
+        [TestMethod]
+        public async Task AcquireToken_ManagedUsernameIncorrectPassword_AcquireTokenSuccessful_CheckTelemetryHeadersAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await CheckTelemetryHeadersAsync(labResponse).ConfigureAwait(false);
+        }
+
+        private async Task CheckTelemetryHeadersAsync(
+            LabResponse labResponse)
+        {
+            var factory = new HttpSnifferClientFactory();
+            
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithAuthority(Authority)
+                .WithHttpClientFactory(factory)
+                .Build();
+
+            await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
+
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token");
+
+            var telemetryLastValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientLastTelemetry).Value;
+            var telemetryCurrentValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientCurrentTelemetry).Value;
+
+            AuthenticationResult authResult = await msalPublicClient
+                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                    .WithCorrelationId(CorrelationId)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+            Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
+            AssertTelemetryHeaders(factory, true);
+        }
+
+        private async Task RunAcquireTokenWithUsernameIncorrectPasswordAsync(
+            IPublicClientApplication msalPublicClient,
+            string userName)
+        {
+            SecureString incorrectSecurePassword = new SecureString();
+            incorrectSecurePassword.AppendChar('x');
+            incorrectSecurePassword.MakeReadOnly();
+
+            try
+            {
+                var result = await msalPublicClient
+                    .AcquireTokenByUsernamePassword(s_scopes, userName, incorrectSecurePassword)
+                    .WithCorrelationId(CorrelationId)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (MsalServiceException ex)
+            {
+                Assert.IsTrue(!string.IsNullOrWhiteSpace(ex.CorrelationId));
+                Assert.AreEqual(400, ex.StatusCode);
+                Assert.AreEqual(InvalidGrantError, ex.ErrorCode);
+                Assert.IsTrue(ex.Message.StartsWith("AADSTS50126"));
+
+                return;
+            }
+
+            Assert.Fail("Bad exception or no exception thrown");
+        }
 
         private async Task RunHappyPathTestAsync(LabResponse labResponse)
         {
-            var user = labResponse.User;
-
-            SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
-
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
@@ -179,33 +217,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
+                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
                 .WithCorrelationId(CorrelationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token");
-
-            var telemetryLastValue = req.Headers.Single(h => h.Key == "x-client-last-telemetry").Value;
-            var telemetryCurrentValue = req.Headers.Single(h => h.Key == "x-client-current-telemetry").Value;
-
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            Assert.IsTrue(string.Equals(user.Upn, authResult.Account.Username, System.StringComparison.InvariantCultureIgnoreCase));
-
-            Assert.AreEqual(XClientCurrentTelemetryROPC, telemetryCurrentValue.FirstOrDefault());
-            Assert.AreEqual(XClientLastTelemetryROPC, telemetryLastValue.FirstOrDefault());
-
-            HttpTelemetryRecorder httpTelemetryRecorder = new HttpTelemetryRecorder();
-            httpTelemetryRecorder.SplitCurrentCsv(telemetryCurrentValue.FirstOrDefault());
-            httpTelemetryRecorder.SplitPreviousCsv(telemetryLastValue.FirstOrDefault());
-
-            Assert.AreEqual(1, httpTelemetryRecorder.CorrelationIdPrevious.Count());
-            Assert.AreEqual("1003", httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains("1003")));
-            Assert.AreEqual(0, httpTelemetryRecorder.ErrorCode.Count());
-            //Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.SilentCallSuccessfulCount);
-            Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.ForceRefresh);
+            Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
+            AssertTelemetryHeaders(factory, false);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
@@ -214,45 +235,47 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
         }
-    }
 
-
-    public class TestHttpClientFactory : IMsalHttpClientFactory
-    {
-        HttpClient _httpClient;
-
-        public IList<(HttpRequestMessage, HttpResponseMessage)> RequestsAndResponses { get; }
-        
-        public TestHttpClientFactory()
+        private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure)
         {
-            RequestsAndResponses = new List<(HttpRequestMessage, HttpResponseMessage)>();
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token" &&
+            x.Item2.StatusCode == HttpStatusCode.OK);
 
-            var recordingHandler = new RecordingHandler((req, res)=> RequestsAndResponses.Add((req, res)));
-            recordingHandler.InnerHandler = new HttpClientHandler();
-            _httpClient = new HttpClient(recordingHandler);
-        }
+            var telemetryLastValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientLastTelemetry).Value;
+            var telemetryCurrentValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientCurrentTelemetry).Value;
+            HttpTelemetryRecorder httpTelemetryRecorder = new HttpTelemetryRecorder();
 
-        public HttpClient GetHttpClient()
-        {
-            return _httpClient;
-        }
+            string csvCurrent = telemetryCurrentValue.FirstOrDefault();
+            string csvPrevious = telemetryLastValue.FirstOrDefault();
 
-    }
+            if (!IsFailure)
+            {
+                Assert.AreEqual(XClientCurrentTelemetryROPC, csvCurrent);
+                Assert.AreEqual(XClientLastTelemetryROPC, csvPrevious);
 
-    public class RecordingHandler : DelegatingHandler
-    {
-        private readonly Action<HttpRequestMessage, HttpResponseMessage> _recordingAction;
+                httpTelemetryRecorder.SplitCurrentCsv(csvCurrent);
+                httpTelemetryRecorder.CheckSchemaVersion(csvCurrent);
 
-        public RecordingHandler(Action<HttpRequestMessage, HttpResponseMessage> recordingAction)
-        {
-            _recordingAction = recordingAction;
-        }
+                Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
+                Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.ForceRefresh);
+                Assert.AreEqual(string.Empty, csvPrevious);
+            }
+            else
+            {
+                Assert.AreEqual(XClientCurrentTelemetryROPCFailure, csvCurrent);
+                Assert.AreEqual(XClientLastTelemetryROPCFailure, csvPrevious);
+                httpTelemetryRecorder.CheckSchemaVersion(csvCurrent);
+                httpTelemetryRecorder.CheckSchemaVersion(csvPrevious);
+                httpTelemetryRecorder.SplitCurrentCsv(csvCurrent);
+                httpTelemetryRecorder.SplitPreviousCsv(csvPrevious);
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            _recordingAction.Invoke(request, response);
-            return response;
+                Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
+                Assert.AreEqual(1, httpTelemetryRecorder.ErrorCode.Count());
+                Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.SilentCallSuccessfulCount);
+                Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.ForceRefresh);
+                Assert.AreEqual(ApiIdAndCorrelationIdSection, httpTelemetryRecorder.ApiIdAndCorrelationIds.FirstOrDefault());
+                Assert.AreEqual(InvalidGrantError, httpTelemetryRecorder.ErrorCode.FirstOrDefault());
+            }
         }
     }
 }

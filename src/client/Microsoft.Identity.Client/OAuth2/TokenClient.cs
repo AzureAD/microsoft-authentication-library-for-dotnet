@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -76,6 +77,9 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
+            _oAuth2Client.AddHttpTelemetryToHeaders(TelemetryConstants.XClientLastTelemetry, _serviceBundle.TelemetryManager.FetchAndResetPreviousHttpTelemetryContent());
+            _oAuth2Client.AddHttpTelemetryToHeaders(TelemetryConstants.XClientCurrentTelemetry, _serviceBundle.TelemetryManager.FetchCurrentHttpTelemetryContent());
+
             MsalTokenResponse response = await SendHttpMessageAsync(tokenEndpoint)
                 .ConfigureAwait(false);
 
@@ -109,6 +113,9 @@ namespace Microsoft.Identity.Client.OAuth2
                 msalTokenResponse.Scope = _requestParams.Scope.AsSingleString();
                 _requestParams.RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
             }
+
+            //Request was successful. Clear telemetry data
+            _serviceBundle.TelemetryManager.ClearHttpTelemetryData();
 
             return msalTokenResponse;
         }

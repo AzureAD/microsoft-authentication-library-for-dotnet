@@ -17,5 +17,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         void Flush(string correlationId);
         string FetchCurrentHttpTelemetryContent();
         string FetchAndResetPreviousHttpTelemetryContent();
+        void ClearHttpTelemetryData();
     }
 }

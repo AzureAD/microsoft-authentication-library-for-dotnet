@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private readonly bool _onlySendFailureTelemetry;
         private readonly IPlatformProxy _platformProxy;
         private readonly IApplicationConfiguration _applicationConfiguration;
+        private HttpTelemetryContent _httpTelemetryContent;
         public int SuccessfulSilentCallCount { get; set; } = 0;
 
         public TelemetryManager(
@@ -40,11 +41,12 @@ namespace Microsoft.Identity.Client.TelemetryCore
             TelemetryCallback telemetryCallback,
             bool onlySendFailureTelemetry = false)
         {
-            _mostRecentStoppedApiEvent = null;
+           // _mostRecentStoppedApiEvent = null;
             _applicationConfiguration = applicationConfiguration;
             _platformProxy = platformProxy;
             Callback = telemetryCallback;
             _onlySendFailureTelemetry = onlySendFailureTelemetry;
+            _httpTelemetryContent = new HttpTelemetryContent();
         }
 
         public TelemetryCallback Callback { get; }
@@ -136,11 +138,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             lock (_mostRecentStoppedApiEventLockObj)
             {
-                var httpTelemetryContent = new HttpTelemetryContent();
-
-                string csv = httpTelemetryContent.GetCsvAsPrevious(
+                string csv = _httpTelemetryContent.GetCsvAsPrevious(
                          SuccessfulSilentCallCount,
-                         _completedEvents,
                          _mostRecentStoppedApiEvent);
 
                 _mostRecentStoppedApiEvent = null;
@@ -151,8 +150,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public string FetchCurrentHttpTelemetryContent()
         {
-            var httpTelemetryContent = new HttpTelemetryContent();
-            return httpTelemetryContent.GetCsvAsCurrent(_eventsInProgress);
+            return _httpTelemetryContent.GetCsvAsCurrent(_eventsInProgress);
         }
 
         private IEnumerable<EventBase> CollateOrphanedEvents(string correlationId)
@@ -195,6 +193,11 @@ namespace Microsoft.Identity.Client.TelemetryCore
             {
                 _eventCount[eventToIncrement.CorrelationId].AddOrUpdate(eventName, 1, (key, count) => count + 1);
             }
+        }
+
+         public void ClearHttpTelemetryData()
+        {
+            _httpTelemetryContent.ClearData();
         }
 
         internal class EventKey : IEquatable<EventKey>

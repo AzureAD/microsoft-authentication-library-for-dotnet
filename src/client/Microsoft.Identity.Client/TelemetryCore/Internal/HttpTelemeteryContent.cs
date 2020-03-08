@@ -13,42 +13,31 @@ using static Microsoft.Identity.Client.TelemetryCore.TelemetryManager;
 namespace Microsoft.Identity.Client.TelemetryCore.Internal
 {
     internal class HttpTelemetryContent
-    { 
+    {
         private List<string> ApiId { get; set; } = new List<string>();
         private List<string> ErrorCode { get; set; } = new List<string>();
+        private List<string> CorrelationId { get; set; } = new List<string>();
 
         private string _forceRefresh;
-        
+
         public string GetCsvAsPrevious(
             int successfulSilentCallCount,
-            ConcurrentDictionary<string, List<EventBase>> stoppedEvents,
             EventBase mostRecentStoppedApiEvent)
         {
-            if (stoppedEvents.Count == 0)
+            if (mostRecentStoppedApiEvent == null || mostRecentStoppedApiEvent.Count == 0)
             {
                 return string.Empty;
             }
 
-            string apiIdCorIdData = string.Empty;
-            string correlationId = string.Empty;
+            CorrelationId.Add(mostRecentStoppedApiEvent[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey]);
+            ApiId.Add(mostRecentStoppedApiEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey]);
 
-            foreach (List<EventBase> cEvents in stoppedEvents.Values)
-            {                
-                cEvents.Find(e => e.TryGetValue("Microsoft.MSAL.correlation_id", out correlationId));
-                string errorCode = string.Empty;
-                cEvents.Find(e => e.TryGetValue(MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey, out errorCode));
-                ErrorCode.Add(errorCode);
-            }
-
-            string apiId = string.Empty;
-            if (mostRecentStoppedApiEvent != null)
+            if (mostRecentStoppedApiEvent.ContainsKey(MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey))
             {
-                if (mostRecentStoppedApiEvent.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out apiId))
-                {
-                    ApiId.Add(apiId);                   
-                }
+                ErrorCode.Add(mostRecentStoppedApiEvent[MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey]);
             }
-            apiIdCorIdData = CreateApiIdAndCorrelationIdContent(correlationId);
+
+            string apiIdCorIdData = CreateApiIdAndCorrelationIdContent();
             // csv expected format:
             // 2|silent_successful_count|failed_requests|errors|platform_fields
             // failed_request can be further expanded to include:
@@ -60,8 +49,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
 
             if (data.Length > 3800)
             {
-                ApiId?.Clear();
-                ErrorCode?.Clear();
+                ClearData();
                 return string.Empty;
             }
 
@@ -97,10 +85,23 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{csvString}{TelemetryConstants.HttpTelemetryPipe}";
         }
 
-        private string CreateApiIdAndCorrelationIdContent(string correlationId)
+        private string CreateApiIdAndCorrelationIdContent()
         {
-            ApiId.Add(correlationId);
-            return string.Join(",", ApiId);
+            List<string> combinedApiIdCorrId = new List<string>();
+            List<string> apiId = new List<string>();
+            apiId = ApiId;
+
+            foreach (var apiIds in ApiId)
+            {
+                combinedApiIdCorrId.Add(apiIds);
+
+                foreach (var corrId in CorrelationId)
+                {
+                    combinedApiIdCorrId.Add(corrId);
+                }
+            }
+           
+            return string.Join(",", combinedApiIdCorrId);
         }
 
         private string CreateFailedRequestsContent(string apiIdAndCorIdCsv)
@@ -118,6 +119,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             }
 
             return TelemetryConstants.One;
+        }
+
+        internal void ClearData()
+        {
+            ApiId?.Clear();
+            CorrelationId?.Clear();
+            ErrorCode?.Clear();
         }
     }
 }
