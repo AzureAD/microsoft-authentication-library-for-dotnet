@@ -766,25 +766,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.AuthorityTestTenant, authority.AuthorityInfo.CanonicalAuthority);
         }
 
+        [TestMethod]
         public async Task AcquireTokenSilentNullAccountErrorTestAsync()
         {
-            PublicClientApplication app = PublicClientApplicationBuilder
+            var app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithTelemetry(new TraceTelemetryConfig())
-                .BuildConcrete();
+                .Build();
 
-            try
-            {
-                AuthenticationResult result = await app
-                    .AcquireTokenSilent(TestConstants.s_scope.ToArray(), string.Empty)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-            }
-            catch (MsalUiRequiredException exc)
-            {
-                Assert.IsNotNull(exc);
-                Assert.AreEqual("user_null", MsalError.UserNullError);
-            }
+
+            await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
+               app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), string.Empty).ExecuteAsync())
+                .ConfigureAwait(false);
         }
 
         /// <summary>
