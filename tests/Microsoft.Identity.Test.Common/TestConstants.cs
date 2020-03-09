@@ -260,9 +260,22 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                                                    ""id_token"": ""idtoken."",
                                                    ""client_info"": ""eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0""
                                                 }";
+
+        // Http Telemetry Constants
         public const string InteractiveRequestApiIdPlusCorrelationId = "1005,ad8c894a-557f-48c0-b045-c129590c344e,";
         public const string InteractiveRequestApiId = "1005";
         public static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
+        public const string XClientCurrentTelemetryROPC = "2|1003,0|";
+        public const string XClientCurrentTelemetryROPCFailure = "2|1003,1003,1003,0|";
+        public const string XClientLastTelemetryROPC = "";
+        public const string XClientLastTelemetryROPCFailure =
+            "2|0|1003,ad8c894a-557f-48c0-b045-c129590c344e,1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|";
+        public const string ApiIdAndCorrelationIdSection =
+            "1003,ad8c894a-557f-48c0-b045-c129590c344e,1003,ad8c894a-557f-48c0-b045-c129590c344e";
+        public const string InvalidGrantError = "invalid_grant";
+        public const string UserCancelError = "user_cancelled_auth";
+        public const string UPApiId = "1003";
+        public const string InteractiveApiId = "1005";
     }
 
     internal static class Adfs2019LabConstants

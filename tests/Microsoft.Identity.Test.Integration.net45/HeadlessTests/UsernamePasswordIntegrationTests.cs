@@ -27,15 +27,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string[] s_scopes = { "User.Read" };
         public static Guid CorrelationId = TestConstants.CorrelationId;
         public string CurrentApiId { get; set; }
-        private const string XClientCurrentTelemetryROPC = "2|1003,0|";
-        private const string XClientCurrentTelemetryROPCFailure = "2|1003,1003,1003,0|";
-        private const string XClientLastTelemetryROPC = "";
-        private const string XClientLastTelemetryROPCFailure =
-            "2|0|1003,ad8c894a-557f-48c0-b045-c129590c344e,1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|";
-        private const string ApiIdAndCorrelationIdSection =
-            "1003,ad8c894a-557f-48c0-b045-c129590c344e,1003,ad8c894a-557f-48c0-b045-c129590c344e";
-        private const string InvalidGrantError = "invalid_grant";
-        private const string UPApiId = "1003";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -160,11 +151,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
 
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token");
-
-            var telemetryLastValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientLastTelemetry).Value;
-            var telemetryCurrentValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientCurrentTelemetry).Value;
-
             AuthenticationResult authResult = await msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
                     .WithCorrelationId(CorrelationId)
@@ -198,7 +184,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 Assert.IsTrue(!string.IsNullOrWhiteSpace(ex.CorrelationId));
                 Assert.AreEqual(400, ex.StatusCode);
-                Assert.AreEqual(InvalidGrantError, ex.ErrorCode);
+                Assert.AreEqual(TestConstants.InvalidGrantError, ex.ErrorCode);
                 Assert.IsTrue(ex.Message.StartsWith("AADSTS50126"));
 
                 return;
@@ -250,31 +236,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             if (!IsFailure)
             {
-                Assert.AreEqual(XClientCurrentTelemetryROPC, csvCurrent);
-                Assert.AreEqual(XClientLastTelemetryROPC, csvPrevious);
+                Assert.AreEqual(TestConstants.XClientCurrentTelemetryROPC, csvCurrent);
+                Assert.AreEqual(TestConstants.XClientLastTelemetryROPC, csvPrevious);
 
                 httpTelemetryRecorder.SplitCurrentCsv(csvCurrent);
                 httpTelemetryRecorder.CheckSchemaVersion(csvCurrent);
 
-                Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
+                Assert.AreEqual(TestConstants.UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(TestConstants.UPApiId)));
                 Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.ForceRefresh);
                 Assert.AreEqual(string.Empty, csvPrevious);
             }
             else
             {
-                Assert.AreEqual(XClientCurrentTelemetryROPCFailure, csvCurrent);
-                Assert.AreEqual(XClientLastTelemetryROPCFailure, csvPrevious);
+                Assert.AreEqual(TestConstants.XClientCurrentTelemetryROPCFailure, csvCurrent);
+                Assert.AreEqual(TestConstants.XClientLastTelemetryROPCFailure, csvPrevious);
                 httpTelemetryRecorder.CheckSchemaVersion(csvCurrent);
                 httpTelemetryRecorder.CheckSchemaVersion(csvPrevious);
                 httpTelemetryRecorder.SplitCurrentCsv(csvCurrent);
                 httpTelemetryRecorder.SplitPreviousCsv(csvPrevious);
 
-                Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
+                Assert.AreEqual(TestConstants.UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(TestConstants.UPApiId)));
                 Assert.AreEqual(1, httpTelemetryRecorder.ErrorCode.Count());
                 Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.SilentCallSuccessfulCount);
                 Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.ForceRefresh);
-                Assert.AreEqual(ApiIdAndCorrelationIdSection, httpTelemetryRecorder.ApiIdAndCorrelationIds.FirstOrDefault());
-                Assert.AreEqual(InvalidGrantError, httpTelemetryRecorder.ErrorCode.FirstOrDefault());
+                Assert.AreEqual(TestConstants.ApiIdAndCorrelationIdSection, httpTelemetryRecorder.ApiIdAndCorrelationIds.FirstOrDefault());
+                Assert.AreEqual(TestConstants.InvalidGrantError, httpTelemetryRecorder.ErrorCode.FirstOrDefault());
             }
         }
     }
