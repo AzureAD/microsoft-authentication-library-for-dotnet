@@ -39,12 +39,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           IHttpManager httpManager,
           ITelemetryManager telemetryManager,
           bool /* for test */ shouldClearCaches,
-          InstanceDiscoveryResponse userProviderInstanceDiscoveryResponse) :
+          InstanceDiscoveryResponse userProviderInstanceDiscoveryResponse = null,
+          Uri userProvidedInstanceDiscoveryUri = null) :
             this(
                 httpManager,
                 telemetryManager,
                 shouldClearCaches,
                 userProviderInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProviderInstanceDiscoveryResponse) : null,
+                userProvidedInstanceDiscoveryUri,
                 null, null, null)
         {
         }
@@ -54,6 +56,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             ITelemetryManager telemetryManager,
             bool shouldClearCaches,
             IUserMetadataProvider userMetadataProvider = null,
+            Uri userProvidedInstanceDiscoveryUri = null,
             IKnownMetadataProvider knownMetadataProvider = null,
             INetworkCacheMetadataProvider networkCacheMetadataProvider = null,
             INetworkMetadataProvider networkMetadataProvider = null)
@@ -65,7 +68,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             _knownMetadataProvider = knownMetadataProvider ?? new KnownMetadataProvider();
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
             _networkMetadataProvider = networkMetadataProvider ?? 
-                new NetworkMetadataProvider(_httpManager, _telemetryManager, _networkCacheMetadataProvider);
+                new NetworkMetadataProvider(
+                    _httpManager, 
+                    _telemetryManager, 
+                    _networkCacheMetadataProvider, 
+                    userProvidedInstanceDiscoveryUri);
 
             if (shouldClearCaches)
             {

@@ -696,7 +696,7 @@ namespace Microsoft.Identity.Client
         public const string InvalidUserInstanceMetadata = "invalid-custom-instance-metadata";
 
         /// <summary>
-        /// <para>What happens?</para>You have configured your own instance metadata, and have also configured custom metadata. These are mutually exclusive. 
+        /// <para>What happens?</para>You have configured your own instance metadata, and have also set validate authority to true. These are mutually exclusive. 
         /// <para>Mitigation</para>Set the validate authority flag to false. See https://aka.ms/msal-net-custom-instance-metadata for more details.
         /// </summary>
         public const string ValidateAuthorityOrCustomMetadata = "validate_authority_or_custom_instance_metadata";
@@ -767,6 +767,13 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Ensure the same authority type is used
         /// </summary>
         public const string AuthorityTypeMismatch = "authority_type_mismatch";
+
+
+        /// <summary>
+        /// <para>What happens?</para>You have configured your own instance metadata using both an Uri and a string. Only one is supported.
+        /// <para>Mitigation</para>Call WithInstanceDicoveryMetadata only once. See https://aka.ms/msal-net-custom-instance-metadata for more details.
+        /// </summary>
+        public const string CustomMetadataInstanceOrUri = "custom_metadata_instance_or_uri";
 
 #if iOS
         /// <summary>
