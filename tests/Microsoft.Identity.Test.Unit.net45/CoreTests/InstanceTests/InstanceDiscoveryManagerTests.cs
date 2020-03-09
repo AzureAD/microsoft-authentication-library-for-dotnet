@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 _harness.ServiceBundle.TelemetryManager,
                 false,
                 null,
+                null,
                 _knownMetadataProvider,
                 _networkCacheMetadataProvider,
                 _networkMetadataProvider);
@@ -84,7 +85,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             // Arrange
             INetworkMetadataProvider networkMetadataProvider = new NetworkMetadataProvider(
-                Substitute.For<IHttpManager>(), Substitute.For<ITelemetryManager>(), _networkCacheMetadataProvider);
+                Substitute.For<IHttpManager>(),
+                Substitute.For<ITelemetryManager>(),
+                _networkCacheMetadataProvider);
 
             _networkCacheMetadataProvider.GetMetadata("some_env.com", Arg.Any<ICoreLogger>()).Returns(_expectedResult);
 
@@ -92,6 +95,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
               _harness.HttpManager,
               _harness.ServiceBundle.TelemetryManager,
               false,
+              null,
               null,
               _knownMetadataProvider,
               _networkCacheMetadataProvider,
@@ -145,14 +149,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public async Task AuthorityValidationFailure_IsRethrown_Async()
         {
             // Arrange
-            var validationException = new MsalServiceException(MsalError.InvalidInstance, "authority validation failed"); 
+            var validationException = new MsalServiceException(MsalError.InvalidInstance, "authority validation failed");
             _networkCacheMetadataProvider = new NetworkCacheMetadataProvider();
 
             // network fails with invalid_instance exception
             _networkMetadataProvider
                 .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
                 .Do(x => throw validationException);
-          
+
 
             // Act
             var actualException = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
@@ -224,6 +228,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 _harness.ServiceBundle.TelemetryManager,
                 false,
                 null,
+                null,
                 _knownMetadataProvider,
                 _networkCacheMetadataProvider,
                 _networkMetadataProvider);
@@ -262,12 +267,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 _harness.ServiceBundle.TelemetryManager,
                 false,
                 _userMetadataProvider,
+                null,
                 _knownMetadataProvider,
                 _networkCacheMetadataProvider,
                 _networkMetadataProvider);
 
             var otherEnvs = new[] { "env1", "env2" };
-            _userMetadataProvider.GetMetadataOrThrow("some_env.com", Arg.Any<ICoreLogger>()).Returns(_expectedResult);
+            var authorityUri = new Uri(Authority);
+
+            // No response from the static and known provider
+            _knownMetadataProvider
+                .GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>())
+                .Returns((InstanceDiscoveryMetadataEntry)null);
+
+            _networkMetadataProvider
+                .GetMetadataAsync(authorityUri, _testRequestContext)
+                .Returns(_expectedResult);
 
             // Act
             InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
@@ -276,19 +291,51 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 _testRequestContext)
                 .ConfigureAwait(false);
 
-            InstanceDiscoveryMetadataEntry actualResult2 = await _discoveryManager.GetMetadataEntryAsync(
-               "https://some_env.com/tid",
-               _testRequestContext)
-               .ConfigureAwait(false);
+            // Assert
+            Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>());
+            await _networkMetadataProvider.Received(1).GetMetadataAsync(authorityUri, _testRequestContext).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task CustomDiscoveryEndpoint_Async()
+        {
+            // Arrange
+            Uri customDiscoveryEndpoint = new Uri("http://some.discovery.endpoint");
+
+            _discoveryManager = new InstanceDiscoveryManager(
+                _harness.HttpManager,
+                _harness.ServiceBundle.TelemetryManager,
+                false,
+                null,
+                customDiscoveryEndpoint,
+                _knownMetadataProvider,
+                _networkCacheMetadataProvider,
+                _networkMetadataProvider);
+
+            var otherEnvs = new[] { "env1", "env2" };
+            var authorityUri = new Uri(Authority);
+
+            // No response from the static and known provider
+            _knownMetadataProvider
+                .GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>())
+                .Returns((InstanceDiscoveryMetadataEntry)null);
+
+            _networkMetadataProvider
+                .GetMetadataAsync(authorityUri, _testRequestContext)
+                .Returns(_expectedResult);
+
+            // Act
+            InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                "https://some_env.com/tid",
+                otherEnvs,
+                _testRequestContext)
+                .ConfigureAwait(false);
 
             // Assert
-            Assert.AreSame(_expectedResult, actualResult, "The user metadata provider should be queried second");
-            Assert.AreSame(_expectedResult, actualResult2, "The user metadata provider should be queried second");
-            _userMetadataProvider.Received(2).GetMetadataOrThrow("some_env.com", Arg.Any<ICoreLogger>());
-            _knownMetadataProvider.DidNotReceiveWithAnyArgs().GetMetadata(null, null, null);
-            await _networkMetadataProvider.DidNotReceiveWithAnyArgs().GetMetadataAsync(
-                Arg.Any<Uri>(),
-                Arg.Any<RequestContext>()).ConfigureAwait(false);
+            Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
+            _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>());
+            await _networkMetadataProvider.Received(1).GetMetadataAsync(authorityUri, _testRequestContext).ConfigureAwait(false);
         }
 
         private async Task ValidateSelfEntryAsync(Uri authority)

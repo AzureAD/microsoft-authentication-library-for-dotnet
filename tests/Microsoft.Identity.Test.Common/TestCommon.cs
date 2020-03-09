@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Common
             new InstanceDiscoveryManager(
                 Substitute.For<IHttpManager>(),
                 Substitute.For<ITelemetryManager>(),
-                true);
+                true, null, null);
             new AuthorityEndpointResolutionManager(null, true);
         }
 

@@ -16,24 +16,34 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal static class MockHttpManagerExtensions
     {
-        public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager)
-        {
-            AddInstanceDiscoveryMockHandler(httpManager, TestConstants.AuthorityCommonTenant);
-        }
-
-        public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager, string authority)
+        public static void AddInstanceDiscoveryMockHandler(
+            this MockHttpManager httpManager, 
+            string authority = TestConstants.AuthorityCommonTenant, 
+            Uri customDiscoveryEndpoint = null, 
+            string instanceMetadataContent = null)
         {
             Uri authorityURI = new Uri(authority);
-            string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authorityURI.Host)
-                                       ? authorityURI.Host
-                                       : AadAuthority.DefaultTrustedHost;
 
-            string discoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort($"https://{discoveryHost}/common/discovery/instance", authorityURI.Port);
+            string discoveryEndpoint;
+
+            if (customDiscoveryEndpoint == null)
+            {
+                string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authorityURI.Host)
+                                           ? authorityURI.Host
+                                           : AadAuthority.DefaultTrustedHost;
+
+                discoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort($"https://{discoveryHost}/common/discovery/instance", authorityURI.Port);
+            }
+            else
+            {
+                discoveryEndpoint = customDiscoveryEndpoint.AbsoluteUri;
+            }
 
             httpManager.AddMockHandler(
-                MockHelpers.CreateInstanceDiscoveryMockHandler(discoveryEndpoint));
+                MockHelpers.CreateInstanceDiscoveryMockHandler(
+                    discoveryEndpoint, 
+                    instanceMetadataContent ?? TestConstants.DiscoveryJsonResponse));
         }
-
 
         public static void AddResponseMockHandlerForPost(
             this MockHttpManager httpManager,
