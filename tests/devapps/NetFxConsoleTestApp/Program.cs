@@ -115,7 +115,7 @@ namespace NetFx
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
-                            .WithClientCapabilities(new[] { "llt" })
+                            //.WithClientCapabilities(new[] { "llt" })
                             .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();
 
