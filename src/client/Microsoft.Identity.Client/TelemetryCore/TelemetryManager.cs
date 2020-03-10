@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
             TelemetryCallback telemetryCallback,
             bool onlySendFailureTelemetry = false)
         {
-           // _mostRecentStoppedApiEvent = null;
             _applicationConfiguration = applicationConfiguration;
             _platformProxy = platformProxy;
             Callback = telemetryCallback;
@@ -197,6 +196,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
          public void ClearHttpTelemetryData()
         {
+            SuccessfulSilentCallCount = 0;
             _httpTelemetryContent.ClearData();
         }
 

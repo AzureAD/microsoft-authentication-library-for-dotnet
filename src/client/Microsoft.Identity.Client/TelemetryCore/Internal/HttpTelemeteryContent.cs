@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
                     combinedApiIdCorrId.Add(corrId);
                 }
             }
-           
+
             return string.Join(",", combinedApiIdCorrId);
         }
 
