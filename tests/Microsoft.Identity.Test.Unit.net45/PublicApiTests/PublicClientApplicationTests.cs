@@ -767,7 +767,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenSilentNullAccountErrorTestAsync()
+        public async Task AcquireTokenSilent_EmptyLoginHint_TestAsync()
         {
             var app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
