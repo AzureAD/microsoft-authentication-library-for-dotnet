@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var ex = Recorder.Exception<Exception>(testCode);
             if (ex != null)
             {
-                throw new AssertFailedException("DoesNotThrow failed.", ex);
+                throw new AssertFailedException("DoesNotThrow failed - - an exception was thrown {ex}", ex);
             }
         }
 
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             var ex = Recorder.Exception<Exception>(testCode);
             if (ex != null)
             {
-                throw new AssertFailedException("DoesNotThrow failed.", ex);
+                throw new AssertFailedException($"DoesNotThrow failed - an exception was thrown {ex}", ex);
             }
         }
 
@@ -124,8 +124,9 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             throw new AssertFailedException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "AssertExtensions.TaskDoesNotThrow failed. Incorrect exception {0} occurred.",
-                    exception.GetType().Name),
+                    "AssertExtensions.TaskDoesNotThrow failed. Incorrect exception {0} occurred. Details {1}",
+                    exception.GetType().Name, 
+                    exception),
                 exception);
         }
 
@@ -154,12 +155,13 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             string message = string.Format(
                 CultureInfo.CurrentCulture,
-                "Checking exception:{0}\tType:{1}{0}\tToString: {2}{0}",
+                "Checking exception:{0}\tType:{1}{0}\tToString: {2}{0}. Details {3}.",
                 Environment.NewLine,
                 actualException.GetType().FullName,
-                actualException.ToString());
+                actualException.ToString(), 
+                actualException);
 
-            Debug.WriteLine(message);
+            Trace.WriteLine(message);
 
             if (allowDerived)
             {
@@ -179,12 +181,14 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         private static void ThrowAssertFailedForExceptionMismatch(Type expectedExceptionType, Exception actualException)
         {
+            Trace.TraceError("Exception match failed. Actual exception is: " + actualException);
             throw new AssertFailedException(
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    "Exception types do not match. Expected: {0}  Actual: {1}",
+                    "Exception types do not match. Expected: {0}  Actual: {1}. Actual exception details: {2}",
                     expectedExceptionType.Name,
-                    actualException.GetType().Name),
+                    actualException.GetType().Name, 
+                    actualException),                
                 actualException);
         }
 
@@ -217,7 +221,9 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 }
                 catch (Exception e)
                 {
-                    throw new AssertFailedException($"Expected to capture a {typeof(TException)} exception but got {e.GetType()}");
+                    throw new AssertFailedException(
+                        $"Expected to capture a {typeof(TException)} exception but got {e.GetType()}. Details {e}", 
+                        e);
                 }
             }
 
@@ -235,7 +241,9 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 }
                 catch (Exception e)
                 {
-                    throw new AssertFailedException($"Expected to capture a {typeof(TException)} exception but got {e.GetType()}");
+                    throw new AssertFailedException(
+                        $"Expected to capture a {typeof(TException)} exception but got {e.GetType()}. Details {e}", 
+                        e);
                 }
             }
         }
