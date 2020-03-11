@@ -84,7 +84,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
             BrokerPayload.Add(BrokerParameter.ClientId, _authenticationRequestParameters.ClientId);
             BrokerPayload.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString());
             BrokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
-            BrokerPayload.Add(BrokerParameter.Force, "NO");
             BrokerPayload.Add(BrokerParameter.RedirectUri, _serviceBundle.Config.RedirectUri);
 
             string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
@@ -93,6 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             BrokerPayload.Add(BrokerParameter.Username, _authenticationRequestParameters.Account?.Username ?? string.Empty);
             BrokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
             BrokerPayload.Add(BrokerParameter.Prompt, _interactiveParameters.Prompt.PromptValue);
+            BrokerPayload.Add(BrokerParameter.Claims, _authenticationRequestParameters.ClaimsAndClientCapabilities);
         }
 
         internal /* internal for test */ void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)

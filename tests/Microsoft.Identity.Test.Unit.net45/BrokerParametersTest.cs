@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsFalse(string.IsNullOrEmpty(brokerInteractiveRequest.BrokerPayload[BrokerParameter.CorrelationId]));
                 Assert.AreNotEqual(Guid.Empty.ToString(), brokerInteractiveRequest.BrokerPayload[BrokerParameter.CorrelationId]);
                 Assert.AreEqual(MsalIdHelper.GetMsalVersion(), brokerInteractiveRequest.BrokerPayload[BrokerParameter.ClientVersion]);
-                Assert.AreEqual("NO", brokerInteractiveRequest.BrokerPayload[BrokerParameter.Force]);
                 Assert.AreEqual(string.Empty, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Username]);
 
                 Assert.AreEqual(TestConstants.RedirectUri, brokerInteractiveRequest.BrokerPayload[BrokerParameter.RedirectUri]);
@@ -62,6 +61,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.BrokerExtraQueryParameters, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraQp]);
 
                 //Assert.AreEqual(TestConstants.BrokerClaims, brokerInteractiveRequest._brokerPayload[BrokerParameter.Claims]); //TODO
+                Assert.AreEqual(BrokerParameter.Claims, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Claims])
                 Assert.AreEqual(BrokerParameter.OidcScopesValue, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
 
 

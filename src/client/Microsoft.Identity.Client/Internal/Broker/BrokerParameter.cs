@@ -36,8 +36,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string BrokerAccountName = "broker_account_name";
         public const string ForceRefresh = "force_refresh";
 
-        public const string Force = "force";
-
         public const string BrokerInstallUrl = "broker_install_url";
         public const string UriSchemeBrokerV2 = "msauthv2://";
         public const string UriSchemeBrokerV3 = "msauthv3://";
