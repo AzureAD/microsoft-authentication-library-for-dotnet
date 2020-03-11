@@ -170,11 +170,18 @@ namespace Microsoft.Identity.Client.Platforms.Android
                         break;
                     case (int)BrokerResponseCode.BrowserCodeError:
                         dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                        string error = string.Empty;
+                        string errorDescription = string.Empty;
 
+                        if (errorResult != null)
+                        {
+                            error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                            errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                        }
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
-                            Error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString(),
-                            ErrorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
+                            Error = error,
+                            ErrorDescription = errorDescription,
                         };
                         break;
                     default:
