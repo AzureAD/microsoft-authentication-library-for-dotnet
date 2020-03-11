@@ -169,10 +169,19 @@ namespace Microsoft.Identity.Client.Platforms.Android
                         };
                         break;
                     case (int)BrokerResponseCode.BrowserCodeError:
+                        dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                        string error = string.Empty;
+                        string errorDescription = string.Empty;
+
+                        if (errorResult != null)
+                        {
+                            error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                            errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                        }
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
-                            Error = data.GetStringExtra(BrokerConstants.BrokerResultErrorCode),
-                            ErrorDescription = data.GetStringExtra(BrokerConstants.BrokerResultV2),
+                            Error = error,
+                            ErrorDescription = errorDescription,
                         };
                         break;
                     default:
@@ -198,14 +207,24 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             Dictionary<string, string> response = new Dictionary<string, string>();
             dynamic authResult = JObject.Parse(brokerResult);
+            var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+            
+            if (!string.IsNullOrEmpty(errorCode))
+            {
+                return new MsalTokenResponse
+                {
+                    Error = errorCode,
+                    ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage].ToString(),
+                };
+            }
 
-            response.Add(BrokerResponseConst.Authority, authResult[BrokerResponseConst.Authority].ToString());
-            response.Add(BrokerResponseConst.AccessToken, authResult[BrokerResponseConst.AccessToken].ToString());
-            response.Add(BrokerResponseConst.IdToken, authResult[BrokerResponseConst.IdToken].ToString());
+            response.Add(BrokerResponseConst.Authority, authResult[BrokerResponseConst.Authority]?.ToString());
+            response.Add(BrokerResponseConst.AccessToken, authResult[BrokerResponseConst.AccessToken]?.ToString());
+            response.Add(BrokerResponseConst.IdToken, authResult[BrokerResponseConst.IdToken]?.ToString());
             response.Add(BrokerResponseConst.CorrelationId, s_correlationId);
-            response.Add(BrokerResponseConst.Scope, authResult[BrokerResponseConst.AndroidScopes].ToString());
-            response.Add(BrokerResponseConst.ExpiresOn, authResult[BrokerResponseConst.ExpiresOn].ToString());
-            response.Add(BrokerResponseConst.ClientInfo, authResult[BrokerResponseConst.ClientInfo].ToString());
+            response.Add(BrokerResponseConst.Scope, authResult[BrokerResponseConst.AndroidScopes]?.ToString());
+            response.Add(BrokerResponseConst.ExpiresOn, authResult[BrokerResponseConst.ExpiresOn]?.ToString());
+            response.Add(BrokerResponseConst.ClientInfo, authResult[BrokerResponseConst.ClientInfo]?.ToString());
 
             return MsalTokenResponse.CreateFromBrokerResponse(response);
         }

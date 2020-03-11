@@ -10,6 +10,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string BrokerErrorCode = "broker_error_code";
         public const string BrokerErrorDescription = "error_description";
 
+        public const string BrokerErrorMessage = "broker_error_message";
+
         public const string Authority = "authority";
         public const string AccessToken = "access_token";
         public const string ClientId = "client_id";
