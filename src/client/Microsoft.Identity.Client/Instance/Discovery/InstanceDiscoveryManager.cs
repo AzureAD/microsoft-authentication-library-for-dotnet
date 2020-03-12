@@ -39,13 +39,13 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           IHttpManager httpManager,
           ITelemetryManager telemetryManager,
           bool /* for test */ shouldClearCaches,
-          InstanceDiscoveryResponse userProviderInstanceDiscoveryResponse = null,
+          InstanceDiscoveryResponse userProvidedInstanceDiscoveryResponse = null,
           Uri userProvidedInstanceDiscoveryUri = null) :
             this(
                 httpManager,
                 telemetryManager,
                 shouldClearCaches,
-                userProviderInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProviderInstanceDiscoveryResponse) : null,
+                userProvidedInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProvidedInstanceDiscoveryResponse) : null,
                 userProvidedInstanceDiscoveryUri,
                 null, null, null)
         {

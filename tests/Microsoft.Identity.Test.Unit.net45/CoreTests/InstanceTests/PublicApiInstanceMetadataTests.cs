@@ -2,26 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -111,8 +96,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var customAuthrority = "https://my.custom.authority/common/";
 
                 harness.HttpManager.AddInstanceDiscoveryMockHandler(
-                    customAuthrority, 
-                    customMetadataUri, 
+                    customAuthrority,
+                    customMetadataUri,
                     TestConstants.DiscoveryJsonResponse.Replace("login.microsoftonline.com", "my.custom.authority"));
 
                 PublicClientApplication app = PublicClientApplicationBuilder

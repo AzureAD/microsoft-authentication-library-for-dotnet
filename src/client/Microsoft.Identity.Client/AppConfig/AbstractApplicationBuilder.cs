@@ -79,8 +79,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Allows developers to configure their own valid authorities. A Uri that returns a response similar to https://aka.ms/aad-instance-discovery 
-        /// should be provided. MSAL uses this information to: 
+        /// Lets an organization setup their own service to handle instance discovery, which enables better caching for microservice/service environments.
+        /// A Uri that returns a response similar to https://aka.ms/aad-instance-discovery should be provided. MSAL uses this information to: 
         /// <list type="bullet">
         /// <item>Call REST APIs on the environment specified in the preferred_network</item>
         /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
