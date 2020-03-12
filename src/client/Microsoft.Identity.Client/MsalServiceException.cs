@@ -202,7 +202,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal bool IsAadUnavailable()
         {
-
             return 
                 StatusCode == 429 || // "Too Many Requests", does not mean AAD is down
                 StatusCode >= 500 || 

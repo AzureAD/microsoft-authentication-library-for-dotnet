@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
+using System.Xml;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using static Microsoft.Identity.Client.TelemetryCore.TelemetryManager;
@@ -15,6 +17,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
     internal class HttpTelemetryContent
     {
         private List<string> ApiId { get; set; } = new List<string>();
+        private List<string> PreviousApiId { get; set; } = new List<string>();
         private List<string> ErrorCode { get; set; } = new List<string>();
         private List<string> CorrelationId { get; set; } = new List<string>();
 
@@ -30,7 +33,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             }
 
             CorrelationId.Add(mostRecentStoppedApiEvent[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey]);
-            ApiId.Add(mostRecentStoppedApiEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey]);
+            PreviousApiId.Add(mostRecentStoppedApiEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey]);
 
             if (mostRecentStoppedApiEvent.ContainsKey(MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey))
             {
@@ -88,19 +91,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
         private string CreateApiIdAndCorrelationIdContent()
         {
             List<string> combinedApiIdCorrId = new List<string>();
-            List<string> apiId = new List<string>();
-            apiId = ApiId;
 
-            foreach (var apiIds in ApiId)
+            for (int i = 0; i < Math.Min(PreviousApiId.Count, CorrelationId.Count); i++)
             {
-                combinedApiIdCorrId.Add(apiIds);
+                combinedApiIdCorrId.Add(PreviousApiId[i]);
+                combinedApiIdCorrId.Add(CorrelationId[i]);
 
-                foreach (var corrId in CorrelationId)
-                {
-                    combinedApiIdCorrId.Add(corrId);
-                }
             }
-
             return string.Join(",", combinedApiIdCorrId);
         }
 

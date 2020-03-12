@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"trace_id\":\"f7ec686c-9196-4220-a754-cd9197de44e9\"," +
                 (subError != null ? ("\"suberror\":" + "\"" + subError + "\",") : "") +
                 "\"correlation_id\":" +
-                "\"" + Guid.NewGuid() + "\"}");
+                "\"" + "f11508ab-067f-40d4-83cb-ccc67bf57e45" + "\"}");
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage(string subError = null)
