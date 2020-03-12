@@ -77,6 +77,14 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
             // Set execution time properties on the event and increment the event count.
             eventToStop.Stop();
+
+            var apiEvent = (eventToStop as ApiEvent);
+            if (apiEvent!= null && !string.IsNullOrEmpty(apiEvent.ApiErrorCode))
+            {
+                _httpTelemetryContent.RecordFailedApiEvent(eventToStop);
+            }
+
+
             IncrementEventCount(eventToStop);
 
             if (_completedEvents.TryGetValue(eventToStop.CorrelationId, out List<EventBase> events))

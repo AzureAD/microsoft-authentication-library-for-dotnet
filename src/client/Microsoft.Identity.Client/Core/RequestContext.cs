@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -12,6 +13,11 @@ namespace Microsoft.Identity.Client.Core
         public Guid CorrelationId { get; }
         public ICoreLogger Logger { get;  }
         public IServiceBundle ServiceBundle { get; }
+
+        /// <summary>
+        /// One and only one ApiEvent is associated with each request.
+        /// </summary>
+        public ApiEvent ApiEvent { get; set; }
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId)
         {

@@ -111,6 +111,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
+            AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
 
             try
             {

@@ -115,6 +115,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public string ApiErrorCode
         {
+            get => this.ContainsKey(ApiErrorCodeKey) ? this[ApiErrorCodeKey] : null;
             set => this[ApiErrorCodeKey] = value;
         }
 

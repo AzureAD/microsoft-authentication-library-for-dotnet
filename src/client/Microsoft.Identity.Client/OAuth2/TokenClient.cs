@@ -77,7 +77,8 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
-            _oAuth2Client.AddHttpTelemetryToHeaders(TelemetryConstants.XClientLastTelemetry, _serviceBundle.TelemetryManager.FetchAndResetPreviousHttpTelemetryContent());
+            
+            _oAuth2Client.AddHttpTelemetryToHeaders(TelemetryConstants.XClientLastTelemetry, _serviceBundle.TelemetryManager.FetchAndResetPreviousHttpTelemetryContent(_requestParams.RequestContext.ApiEvent));
             _oAuth2Client.AddHttpTelemetryToHeaders(TelemetryConstants.XClientCurrentTelemetry, _serviceBundle.TelemetryManager.FetchCurrentHttpTelemetryContent());
 
             MsalTokenResponse response = await SendHttpMessageAsync(tokenEndpoint)
