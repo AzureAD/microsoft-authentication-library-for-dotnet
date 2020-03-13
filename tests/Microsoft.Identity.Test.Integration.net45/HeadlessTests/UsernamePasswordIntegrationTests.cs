@@ -177,7 +177,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task RunHappyPathTestAsync(LabResponse labResponse)
         {
             var user = labResponse.User;
-            string tokenEndpoint;
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
             var factory = new TestHttpClientFactory();
@@ -189,16 +188,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 case AzureEnvironment.azureusgovernment:
                     builder.WithAuthority(labResponse.Lab.Authority + "organizations");
-                    tokenEndpoint = "https://login.microsoftonline.us/organizations/oauth2/v2.0/token";
                     break;
                 default:
-                    tokenEndpoint = "https://login.microsoftonline.com/organizations/oauth2/v2.0/token";
                     break;
             }
 
             var msalPublicClient = builder.Build();
 
-            //AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
                 .ExecuteAsync(CancellationToken.None)
@@ -206,7 +202,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // TODO: you can now assert each request and response
 
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == tokenEndpoint);
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == labResponse.Lab.Authority + "organizations/oauth2/v2.0/token");
             var telemetryValue = req.Headers.Where(h => h.Key == "x-client-last-telemetry");
 
             Assert.IsNotNull(authResult);
