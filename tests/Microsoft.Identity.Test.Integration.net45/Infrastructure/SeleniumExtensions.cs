@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
-            options.AddArguments("headless");
+            //options.AddArguments("headless");
 
             var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
             if (string.IsNullOrEmpty(env))
@@ -172,8 +172,12 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             if (user.Upn.Contains("outlook.com"))
             {
-                Trace.WriteLine("Logging in ... clicking accept prompts for outlook.com MSA user");
-                driver.WaitForElementToBeVisibleAndEnabled(By.Id(CoreUiTestConstants.ConsentAcceptId))?.Click();
+                Trace.WriteLine("Logging in ... clicking accept / yes prompts for outlook.com MSA user");
+                driver.WaitForElementToBeVisibleAndEnabled(
+                    ByIds(
+                        CoreUiTestConstants.ConsentAcceptId, 
+                        fields.AADSignInButtonId))
+                    ?.Click();
             }
 
             if (prompt == Prompt.Consent)
