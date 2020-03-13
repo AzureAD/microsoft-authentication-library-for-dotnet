@@ -54,8 +54,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task ArlingtonDeviceCodeFlowTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            labResponse.Lab.Authority += labResponse.Lab.TenantId;
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user", true).ConfigureAwait(false);
+            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -72,8 +71,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            labResponse.Lab.Authority += labResponse.Lab.TenantId;
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user", true).ConfigureAwait(false);
+            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -85,14 +83,18 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user").ConfigureAwait(false);
         }
 
-        private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType, bool UsGov = false)
+        private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType)
         {
             Trace.WriteLine($"Calling AcquireTokenWithDeviceCodeAsync with {0}", userType);
             var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId);
 
-            if (UsGov)
+            switch (labResponse.User.AzureEnvironment)
             {
-                builder.WithAuthority(labResponse.Lab.Authority);
+                case AzureEnvironment.azureusgovernment:
+                    builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
+                    break;
+                default:
+                    break;
             }
 
             var pca = builder.Build();

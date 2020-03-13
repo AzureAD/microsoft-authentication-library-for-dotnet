@@ -56,16 +56,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ARLINGTON_ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
-            labResponse.Lab.Authority += "organizations";
-            await RunHappyPathTestAsync(labResponse, true).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            labResponse.Lab.Authority += "organizations";
-            await RunHappyPathTestAsync(labResponse, true).ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -176,19 +174,29 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse, bool USGov = false)
+        private async Task RunHappyPathTestAsync(LabResponse labResponse)
         {
             var user = labResponse.User;
-
+            string tokenEndpoint;
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
             var factory = new TestHttpClientFactory();
-            var msalPublicClient = PublicClientApplicationBuilder
+            var builder = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
-                .WithHttpClientFactory(factory)
-                .WithAuthority(USGov ? labResponse.Lab.Authority : _authority)
-                .Build();
+                .WithHttpClientFactory(factory);
 
+            switch (labResponse.User.AzureEnvironment)
+            {
+                case AzureEnvironment.azureusgovernment:
+                    builder.WithAuthority(labResponse.Lab.Authority + "organizations");
+                    tokenEndpoint = "https://login.microsoftonline.us/organizations/oauth2/v2.0/token";
+                    break;
+                default:
+                    tokenEndpoint = "https://login.microsoftonline.com/organizations/oauth2/v2.0/token";
+                    break;
+            }
+
+            var msalPublicClient = builder.Build();
 
             //AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             AuthenticationResult authResult = await msalPublicClient
@@ -197,11 +205,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             // TODO: you can now assert each request and response
-            if (!USGov)
-            {
-                var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/organizations/oauth2/v2.0/token");
-                var telemetryValue = req.Headers.Where(h => h.Key == "x-client-last-telemetry");
-            }
+
+            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == tokenEndpoint);
+            var telemetryValue = req.Headers.Where(h => h.Key == "x-client-last-telemetry");
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
