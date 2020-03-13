@@ -108,24 +108,13 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
-                AssertLastTelemetry(
-                    result.HttpRequest, 
-                    1, 
-                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent }, 
-                    new[] { step2Correlationsid }, 
-                    new[] { string.Empty});
+                AssertLastTelemetryIsNull(result.HttpRequest);
 
-                Guid step3Correlationid = result.Correlationid;
                 Trace.WriteLine("Step 4. Acquire Token Silent with force_refresh = true and failure = invalid_grant");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInvalidGrant, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true); // Current_request = 2 | ATS_ID, 1 |
                 // we've already sent the number of silent calls in step 3, don't send it again
-                AssertLastTelemetry(
-                    result.HttpRequest, 
-                    0, 
-                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent }, 
-                    new[] { step3Correlationid },
-                    new[] { string.Empty }); // Last_request = 2 | 0 | | |
+                AssertLastTelemetryIsNull(result.HttpRequest);
 
                 Guid step4Correlationid = result.Correlationid;
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true and failure = interaction_required");
@@ -134,8 +123,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 AssertLastTelemetry(
                     result.HttpRequest, 
                     expectedeSilentCount: 0, 
-                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent, ApiIds.AcquireTokenSilent }, // from step 4
-                    expectedCorrelationIds: new[] { step3Correlationid, result.Correlationid }, 
+                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent }, // from step 4
+                    expectedCorrelationIds: new[] { step4Correlationid }, 
                     expectedErrors: new[] { "invalid_grant" } );
                 
                 // TODO: not finished
@@ -147,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     result.HttpRequest,
                     expectedeSilentCount: 0,
                     expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent, ApiIds.AcquireTokenSilent , ApiIds.AcquireTokenInteractive}, // from step 4
-                    expectedCorrelationIds: new[] { step3Correlationid, step4Correlationid, result.Correlationid, },
+                    expectedCorrelationIds: new[] { step4Correlationid, result.Correlationid, },
                     expectedErrors: new[] { "authentication_canceled" });
             }
         }
@@ -328,8 +317,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 expectedFailedApiIds.Select(apiId => ((int)apiId).ToString(CultureInfo.InvariantCulture)).ToArray(),
                 actualFailedApiIds); // failed api IDs
 
-            // TOOD
-           // CollectionAssert.AreEqual(expectedCorrelationIds.Select(g => g.ToString()).ToArray(), correlationIds);
+            CollectionAssert.AreEqual(expectedCorrelationIds.Select(g => g.ToString()).ToArray(), correlationIds);
 
             CollectionAssert.AreEqual(expectedErrors, actualErrors); // errors
         }

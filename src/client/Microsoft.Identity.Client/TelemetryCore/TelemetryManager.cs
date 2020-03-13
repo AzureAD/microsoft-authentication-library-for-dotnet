@@ -146,8 +146,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             lock (_mostRecentStoppedApiEventLockObj)
             {
                 string csv = _httpTelemetryContent.GetCsvAsPrevious(
-                         SuccessfulSilentCallCount,
-                         _mostRecentStoppedApiEvent);
+                         SuccessfulSilentCallCount);
 
                 _mostRecentStoppedApiEvent = null;
 
@@ -155,9 +154,9 @@ namespace Microsoft.Identity.Client.TelemetryCore
             }
         }
 
-        public string FetchCurrentHttpTelemetryContent()
+        public string FetchCurrentHttpTelemetryContent(EventBase currentApiEevent)
         {
-            return _httpTelemetryContent.GetCsvAsCurrent(_eventsInProgress);
+            return _httpTelemetryContent.GetCsvAsCurrent(currentApiEevent);
         }
 
         private IEnumerable<EventBase> CollateOrphanedEvents(string correlationId)

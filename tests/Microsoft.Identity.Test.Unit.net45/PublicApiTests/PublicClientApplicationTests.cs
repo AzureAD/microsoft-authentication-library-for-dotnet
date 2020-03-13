@@ -257,15 +257,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddSuccessfulTokenResponseWithHttpTelemetryMockHandlerForPost(
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityCommonTenant,
                     null,
-                    null,
-                    HttpTelemetryTests.CreateHttpTelemetryHeaders(
-                        correlationId,
-                        TestConstants.InteractiveRequestApiId,
-                        null,
-                        TelemetryConstants.Zero));
+                    null);
 
                 result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)

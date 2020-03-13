@@ -24,33 +24,31 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
         private string _forceRefresh;
 
         private ConcurrentQueue<EventBase> _stoppedEvents = new ConcurrentQueue<EventBase>();
-        
 
         public void RecordFailedApiEvent(EventBase stoppedEvent)
         {
-            // TODO: use a collection that supports concurrency
             _stoppedEvents.Enqueue(stoppedEvent);
         }
 
-        public string GetCsvAsPrevious(
-            int successfulSilentCallCount,
-            EventBase mostRecentStoppedApiEvent)
+        public string GetCsvAsPrevious(int successfulSilentCallCount)
         {
             // TODO: make sure to add some locking here to protect against duplicate data
             // i.e. multiple requiests in parallel accessing the queue
 
-            if (mostRecentStoppedApiEvent == null || mostRecentStoppedApiEvent.Count == 0)
+            if (_stoppedEvents.Count == 0)
             {
                 return string.Empty;
             }
 
-            CorrelationId.Add(mostRecentStoppedApiEvent[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey]);
-            PreviousApiId.Add(mostRecentStoppedApiEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey]);
-
-            if (mostRecentStoppedApiEvent.ContainsKey(MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey))
+            foreach (var stopEvent in _stoppedEvents)
             {
-                ErrorCode.Add(mostRecentStoppedApiEvent[MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey]);
-            }
+                if (stopEvent.ContainsKey(MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey)) //only want to record failed events
+                {
+                    ErrorCode.Add(stopEvent[MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey]);
+                    CorrelationId.Add(stopEvent[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey]);
+                    PreviousApiId.Add(stopEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey]);
+                }
+            }           
 
             string apiIdCorIdData = CreateApiIdAndCorrelationIdContent();
             // csv expected format:
@@ -71,34 +69,29 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             return data;
         }
 
-        public string GetCsvAsCurrent(ConcurrentDictionary<EventKey, EventBase> eventsInProgress)
+        public string GetCsvAsCurrent(EventBase eventsInProgress)
         {
+            if (eventsInProgress == null)
+            {
+                return string.Empty;
+            }
 
-            //if (eventsInProgress == null)
-            //{
-            //    return string.Empty;
-            //}
+            eventsInProgress.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
+            ApiId.Add(apiId);
+            eventsInProgress.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
+            _forceRefresh = forceRefresh;
 
-            //IEnumerable<KeyValuePair<EventKey, EventBase>> apiEvent = eventsInProgress.Where(e => e.Key.EventName == "msal.api_event");
+            string apiEvents = string.Join(",", ApiId);
 
-            //foreach (KeyValuePair<EventKey, EventBase> events in apiEvent)
-            //{
-            //    events.Value.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
-            //    ApiId.Add(apiId);
-            //    events.Value.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
-            //    _forceRefresh = forceRefresh;
-            //}
+            // csv expected format:
+            // 2|api_id,force_refresh|platform_config
+            string[] myValues = new string[] {
+                apiEvents,
+                ConvertFromStringToBitwise(_forceRefresh)};
 
-            //string apiEvents = string.Join(",", ApiId);
-
-            //// csv expected format:
-            //// 2|api_id,force_refresh|platform_config
-            //string[] myValues = new string[] {
-            //    apiEvents,
-            //    ConvertFromStringToBitwise(_forceRefresh)};
-
-            //string csvString = string.Join(",", myValues);
-            //return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{csvString}{TelemetryConstants.HttpTelemetryPipe}";
+            string csvString = string.Join(",", myValues);
+            ApiId.Clear();
+            return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{csvString}{TelemetryConstants.HttpTelemetryPipe}";
         }
 
         private string CreateApiIdAndCorrelationIdContent()
