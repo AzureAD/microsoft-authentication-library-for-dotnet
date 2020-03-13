@@ -78,6 +78,29 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        /// <summary>
+        /// Lets an organization setup their own service to handle instance discovery, which enables better caching for microservice/service environments.
+        /// A Uri that returns a response similar to https://aka.ms/aad-instance-discovery should be provided. MSAL uses this information to: 
+        /// <list type="bullet">
+        /// <item>Call REST APIs on the environment specified in the preferred_network</item>
+        /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
+        /// <item>Use the environment aliases to match tokens issued to other authorities</item>
+        /// </list>
+        /// For more details see https://aka.ms/msal-net-custom-instance-metadata
+        /// </summary>
+        /// <remarks>
+        /// Developers take responsibility for authority validation if they use this method. Should not be used when the authority is not know in advance. 
+        /// Has no effect on ADFS or B2C authorities, only for AAD authorities</remarks>
+        /// <param name="instanceDiscoveryUri"></param>
+        /// <returns></returns>
+        public T WithInstanceDicoveryMetadata(Uri instanceDiscoveryUri)
+        {
+            Config.CustomInstanceDiscoveryMetadataUri = instanceDiscoveryUri ??
+                throw new ArgumentNullException(nameof(instanceDiscoveryUri));
+
+            return (T)this;
+        }
+
         internal T WithHttpManager(IHttpManager httpManager)
         {
             Config.HttpManager = httpManager;
@@ -358,7 +381,15 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
-            if (Config.AuthorityInfo.ValidateAuthority && Config.CustomInstanceDiscoveryMetadata != null)
+            if (Config.CustomInstanceDiscoveryMetadata != null && Config.CustomInstanceDiscoveryMetadataUri != null)
+            {
+                throw new MsalClientException(
+                    MsalError.CustomMetadataInstanceOrUri, 
+                    MsalErrorMessage.CustomMetadataInstanceOrUri);
+            }
+
+            if (Config.AuthorityInfo.ValidateAuthority &&
+                (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
             {
                 throw new MsalClientException(MsalError.ValidateAuthorityOrCustomMetadata, MsalErrorMessage.ValidateAuthorityOrCustomMetadata);
             }

@@ -174,7 +174,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public const string NegotiatedBPVersionKey = "common.broker.protocol.version.name";
         public const string BrokerResultV2 = "broker_result_v2";
         public const string BrokerRequestV2Success = "broker_request_v2_success";
-        public const string BrokerResultErrorCode = "mErrorCode";
         public const string BrokerUnknownErrorCode = "unknown_error";
     }
 }

@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
         /// <item> MSAL creates, reads and stores a key securely on behalf of the Windows user. </item>
         /// </list>
         /// </remarks>
-        internal AcquireTokenSilentParameterBuilder WithProofOfPosession(HttpRequestMessage httpRequestMessage)
+        public AcquireTokenSilentParameterBuilder WithProofOfPosession(HttpRequestMessage httpRequestMessage)
         {
             var defaultCryptoProvider = this.ClientApplicationBaseExecutor.ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
             return WithProofOfPosession(httpRequestMessage, defaultCryptoProvider);
