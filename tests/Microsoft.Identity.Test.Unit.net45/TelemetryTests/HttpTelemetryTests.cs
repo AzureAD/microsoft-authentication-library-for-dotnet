@@ -225,12 +225,18 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     break;
                 case AcquireTokenSilentOutcome.FailInvalidGrant:
                     _app.UserTokenCacheInternal.Accessor.ClearAccessTokens();
-                    tokenRequest = _harness.HttpManager.AddFailureTokenEndpointResponse("invalid_grant", TestConstants.AuthorityUtidTenant);
 
-                    var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => request.ExecuteAsync())
+                    correlationId = Guid.NewGuid();
+                    tokenRequest = _harness.HttpManager.AddFailureTokenEndpointResponse(
+                        "invalid_grant", 
+                        TestConstants.AuthorityUtidTenant, 
+                        correlationId.ToString());
+
+                    var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                        () => request.WithCorrelationId(correlationId).ExecuteAsync())
                         .ConfigureAwait(false);
 
-                    correlationId = Guid.Parse(ex.CorrelationId);
+                    Assert.AreEqual(correlationId, Guid.Parse(ex.CorrelationId), "Test error - Exception correlation ID does not match WithCorrelationId value");
 
                     break;
                 case AcquireTokenSilentOutcome.FailInteractionRequired:

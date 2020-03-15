@@ -137,17 +137,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return CreateSuccessResponseMessage(DefaultAdfsTokenResponse);
         }
 
-        public static HttpResponseMessage CreateFailureTokenResponseMessage(string error, string subError = null)
+        public static HttpResponseMessage CreateFailureTokenResponseMessage(
+            string error, 
+            string subError = null, 
+            string correlationId = null)
         {
-            return CreateFailureMessage(HttpStatusCode.BadRequest,
-                "{\"error\":\"" + error + "\",\"error_description\":\"AADSTS00000: Error for test." +                
+            string message = "{\"error\":\"" + error + "\",\"error_description\":\"AADSTS00000: Error for test." +
                 "Trace ID: f7ec686c-9196-4220-a754-cd9197de44e9Correlation ID: " +
                 "04bb0cae-580b-49ac-9a10-b6c3316b1eaaTimestamp: 2015-09-16 07:24:55Z\"," +
                 "\"error_codes\":[70002,70008],\"timestamp\":\"2015-09-16 07:24:55Z\"," +
                 "\"trace_id\":\"f7ec686c-9196-4220-a754-cd9197de44e9\"," +
                 (subError != null ? ("\"suberror\":" + "\"" + subError + "\",") : "") +
                 "\"correlation_id\":" +
-                "\"" + "f11508ab-067f-40d4-83cb-ccc67bf57e45" + "\"}");
+                "\"" + (correlationId ?? "f11508ab-067f-40d4-83cb-ccc67bf57e45") + "\"}";
+
+            return CreateFailureMessage(HttpStatusCode.BadRequest, message);
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage(string subError = null)
