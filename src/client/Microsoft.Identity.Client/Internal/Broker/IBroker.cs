@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         #region Silent Flow Methods
         Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID);
 
-        void RemoveAccountAsync(string clientID, IAccount account);
+        Task RemoveAccountAsync(string clientID, IAccount account);
         #endregion Silent Flow Methods
     }
 }

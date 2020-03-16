@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
         }
 
-        public async void RemoveAccountAsync(string clientID, IAccount account)
+        public async Task RemoveAccountAsync(string clientID, IAccount account)
         {
             if (!CanInvokeBroker())
             {

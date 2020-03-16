@@ -167,7 +167,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task GetAccountsAsync()
+        public void BrokerRemoveAccountAsyncOnUnsupportedPlatformTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.RemoveAccountAsync(TestConstants.ClientId, new Account("test", "test", "test"))).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task BrokerGetAccountsTestAsync()
         {
             // Arrange
             var mockBroker = Substitute.For<IBroker>();
