@@ -79,10 +79,11 @@ namespace Microsoft.Identity.Client.Instance
             string authorizationEndpoint = ReplaceTenantToken(edr.AuthorizationEndpoint, tenantId);
             string tokenEndpoint = ReplaceTenantToken(edr.TokenEndpoint, tenantId);
 
+            //string issuer = edr.Issuer; // not used
             endpoints = new AuthorityEndpoints(
                 authorizationEndpoint,
                 tokenEndpoint,
-                GetSelfSignedJwtAudience(edr.Issuer, tokenEndpoint, tenantId, authorityInfo.AuthorityType));
+                tokenEndpoint);
 
             Add(authorityInfo, userPrincipalName, endpoints);
             return endpoints;

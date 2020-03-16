@@ -99,7 +99,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(
                     "https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/token",
                     endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/v2.0/", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/token", 
+                    endpoints.SelfSignedJwtAudience);
             }
         }
 
