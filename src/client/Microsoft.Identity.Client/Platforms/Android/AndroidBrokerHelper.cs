@@ -274,8 +274,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 null,
                 null,
                 GetPreferredLooper(null));
-
-            Bundle bundleResult = (Bundle)result?.Result;
         }
 
         //Inorder for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.
