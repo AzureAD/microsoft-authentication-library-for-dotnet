@@ -254,6 +254,33 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
         }
 
+        public async void RemoveAccountAsync(string clientID, IAccount account)
+        {
+            if (!CanInvokeBroker())
+            {
+                _logger.Error("Android broker is not installed so no accounts will be removed.");
+                return;
+            }
+
+            Dictionary<string, string> brokerPayload = new Dictionary<string, string>();
+            brokerPayload.Add(BrokerParameter.ClientId, clientID);
+            brokerPayload.Add(BrokerConstants.Environment, account.Environment);
+            brokerPayload.Add(BrokerParameter.HomeAccountId, account.HomeAccountId.Identifier);
+
+            try
+            {
+                await _brokerHelper.InitiateBrokerHandshakeAsync(_activity).ConfigureAwait(false);
+
+                _brokerHelper.RemoveBrokerAccountInAccountManager(brokerPayload);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to remove Android broker account from the broker.");
+                HandleBrokerOperationError(ex);
+                throw;
+            }
+        }
+
         private void HandleBrokerOperationError(Exception ex)
         {
             _logger.Error(MsalErrorMessage.AndroidBrokerCannotBeInvoked);

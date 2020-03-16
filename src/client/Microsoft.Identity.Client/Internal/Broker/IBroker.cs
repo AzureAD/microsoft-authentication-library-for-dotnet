@@ -14,7 +14,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload);
 
-        //This method is only available to brokers that have the BrokerSupportsSilentFlow flag enabled
+        //These methods are only available to brokers that have the BrokerSupportsSilentFlow flag enabled
+        #region Silent Flow Methods
         Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID);
+
+        void RemoveAccountAsync(string clientID, IAccount account);
+        #endregion Silent Flow Methods
     }
 }
