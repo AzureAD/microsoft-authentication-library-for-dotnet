@@ -308,5 +308,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             throw new NotImplementedException();
         }
+
+        public Task RemoveAccountAsync(string clientID, IAccount account)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

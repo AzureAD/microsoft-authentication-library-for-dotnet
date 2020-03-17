@@ -109,7 +109,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public const string ChallangeResponseVersion = "Version";
 
         public const string ResponseErrorCode = "com.microsoft.aad.adal:BrowserErrorCode";
+
         public const string ResponseErrorMessage = "com.microsoft.aad.adal:BrowserErrorMessage";
+
+        public const string HomeAccountIDKey = "account.home.account.id";
+
+        public const string Environment = "environment";
 
 
         /**
@@ -160,6 +165,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public const string BrokerAccounts = "broker_accounts";
 
         public const string CommonProtocolVersion = "common.protocol.version";
+
+        public const string RemoveAccount = "REMOVE_ACCOUNT";
 
         // Claims step-up. Skip cache look up
         public const string SkipCache = "skip.cache";
