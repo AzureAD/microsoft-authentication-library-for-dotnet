@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
-        internal void AddHttpTelemetryToHeaders(string key, string value)
+        internal void AddHeader(string key, string value)
         {
             _headers[key] = value;
         }

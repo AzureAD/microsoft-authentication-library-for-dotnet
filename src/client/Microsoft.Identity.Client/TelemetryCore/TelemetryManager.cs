@@ -82,9 +82,14 @@ namespace Microsoft.Identity.Client.TelemetryCore
             {
                 _httpTelemetryContent.RecordFailedApiEvent(eventToStop);
             }
-            else if (apiEvent != null && apiEvent.WasSuccessful && apiEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey].Contains("1007"))
+            else if (apiEvent != null &&
+                apiEvent.ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey) && 
+                apiEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey].Contains("1007"))
             {
-                _httpTelemetryContent.SuccessfulSilentCallCount++;
+                if (apiEvent.WasSuccessful)
+                {
+                    _httpTelemetryContent.SuccessfulSilentCallCount++;
+                }
             }
 
             IncrementEventCount(eventToStop);
