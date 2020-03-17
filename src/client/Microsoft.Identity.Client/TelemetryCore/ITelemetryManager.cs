@@ -8,7 +8,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
     internal interface ITelemetryManager
     {
         TelemetryCallback Callback { get; }
-        int SuccessfulSilentCallCount { get; set; }
 
         TelemetryHelper CreateTelemetryHelper(EventBase eventBase);
 

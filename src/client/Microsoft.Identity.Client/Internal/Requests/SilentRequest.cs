@@ -160,7 +160,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
             var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
-            AuthenticationRequestParameters.RequestContext.ServiceBundle.TelemetryManager.SuccessfulSilentCallCount++;
             return new AuthenticationResult(
                 cachedAccessTokenItem, 
                 msalIdTokenItem, 

@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private readonly IPlatformProxy _platformProxy;
         private readonly IApplicationConfiguration _applicationConfiguration;
         private HttpTelemetryContent _httpTelemetryContent;
-        public int SuccessfulSilentCallCount { get; set; } = 0;
 
         public TelemetryManager(
             IApplicationConfiguration applicationConfiguration,
@@ -79,11 +78,14 @@ namespace Microsoft.Identity.Client.TelemetryCore
             eventToStop.Stop();
 
             var apiEvent = (eventToStop as ApiEvent);
-            if (apiEvent!= null && !string.IsNullOrEmpty(apiEvent.ApiErrorCode))
+            if (apiEvent != null && !string.IsNullOrEmpty(apiEvent.ApiErrorCode))
             {
                 _httpTelemetryContent.RecordFailedApiEvent(eventToStop);
             }
-
+            else if (apiEvent != null && apiEvent.WasSuccessful && apiEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey].Contains("1007"))
+            {
+                _httpTelemetryContent.SuccessfulSilentCallCount++;
+            }
 
             IncrementEventCount(eventToStop);
 
@@ -145,8 +147,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             lock (_mostRecentStoppedApiEventLockObj)
             {
-                string csv = _httpTelemetryContent.GetCsvAsPrevious(
-                         SuccessfulSilentCallCount);
+                string csv = _httpTelemetryContent.GetCsvAsPrevious();
 
                 _mostRecentStoppedApiEvent = null;
 
@@ -201,9 +202,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
             }
         }
 
-         public void ClearHttpTelemetryData()
+        public void ClearHttpTelemetryData()
         {
-            SuccessfulSilentCallCount = 0;
             _httpTelemetryContent.ClearData();
         }
 

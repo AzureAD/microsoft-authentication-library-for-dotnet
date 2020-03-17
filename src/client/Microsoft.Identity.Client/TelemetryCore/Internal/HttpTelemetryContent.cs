@@ -16,6 +16,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
         private List<string> PreviousApiId { get; set; } = new List<string>();
         private List<string> ErrorCode { get; set; } = new List<string>();
         private List<string> CorrelationId { get; set; } = new List<string>();
+        public int SuccessfulSilentCallCount { get; set; }
         
         private string _forceRefresh;
 
@@ -26,12 +27,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             _stoppedEvents.Enqueue(stoppedEvent);
         }
 
-        public string GetCsvAsPrevious(int successfulSilentCallCount)
+        public string GetCsvAsPrevious()
         {
             if (_stoppedEvents.Count == 0)
             {
                 string data2 = string.Format(CultureInfo.InvariantCulture,
-               $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{successfulSilentCallCount}{TelemetryConstants.HttpTelemetryPipe}{TelemetryConstants.HttpTelemetryPipe}{TelemetryConstants.HttpTelemetryPipe}");
+               $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{SuccessfulSilentCallCount}{TelemetryConstants.HttpTelemetryPipe}{TelemetryConstants.HttpTelemetryPipe}{TelemetryConstants.HttpTelemetryPipe}");
                 return data2;
             }
 
@@ -55,7 +56,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             // failed_request can be further expanded to include:
             // api_id_1,correlation_id_1,api_id_2,correlation_id_2|error_1,error_2
             string data = string.Format(CultureInfo.InvariantCulture,
-                $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{successfulSilentCallCount}{TelemetryConstants.HttpTelemetryPipe}" +
+                $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{SuccessfulSilentCallCount}{TelemetryConstants.HttpTelemetryPipe}" +
                 $"{CreateFailedRequestsContent(apiIdCorIdData)}" +
                 $"{TelemetryConstants.HttpTelemetryPipe}");
 
@@ -125,6 +126,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
 
         internal void ClearData()
         {
+            SuccessfulSilentCallCount = 0;
             while (_stoppedEvents.TryDequeue(out _))
             {
                 // do nothing

@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, forceRefresh: false);
-                AssertLastTelemetryIsNotNull(result.HttpRequest);
+                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 0); // Previous_request = 2|0|||
 
                 Trace.WriteLine("Step 2. Acquire Token Silent successful - AT served from cache");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessFromCache).ConfigureAwait(false);
@@ -105,18 +105,18 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
-                AssertLastTelemetryIsNotNull(result.HttpRequest);
+                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 1); // Previous_request = 2|1|||
 
                 Trace.WriteLine("Step 4. Acquire Token Silent with force_refresh = true and failure = invalid_grant");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInvalidGrant, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true); // Current_request = 2 | ATS_ID, 1 |
-                AssertLastTelemetryIsNotNull(result.HttpRequest);
+                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 1); // Previous_request = 2|1|||
 
                 Guid step4Correlationid = result.Correlationid;
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true and failure = interaction_required");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInteractionRequired, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true);// Current_request = 2 | ATS_ID, 1 |
-                AssertLastTelemetry(
+                AssertPreviousTelemetry(
                     result.HttpRequest,
                     expectedSilentCount: 0,
                     expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent }, // from step 4
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 6. Acquire Token User Cancelled and failure = user_canceled");
                 result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.AuthenticationCancelled).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, forceRefresh: false);// Current_request = 2 | ATS_ID, 0 |
-                AssertLastTelemetry(
+                AssertPreviousTelemetry(
                     result.HttpRequest,
                     expectedSilentCount: 0,
                     expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent, ApiIds.AcquireTokenSilent }, // from step 4
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
 
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, forceRefresh: false);// Current_request = 2 | ATS_ID, 0 |
-                AssertLastTelemetry(
+                AssertPreviousTelemetry(
                     result.HttpRequest,
                     expectedSilentCount: 0,
                     expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent, ApiIds.AcquireTokenSilent, ApiIds.AcquireTokenInteractive }, // from step 4
@@ -150,12 +150,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 8. Acquire Token Silent with force-refresh -> successful");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant, false).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
-                AssertLastTelemetryIsNotNull(result.HttpRequest);
+                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 0);
 
-                Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true and failure = interaction_required");
+                Trace.WriteLine("Step 9. Acquire Token Silent with force_refresh = true and failure = interaction_required");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInteractionRequired, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true);// Current_request = 2 | ATS_ID, 1 |
-                AssertLastTelemetryIsNotNull(result.HttpRequest);
+                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 1);
             }
         }
 
@@ -282,9 +282,18 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             return (tokenRequest?.ActualRequestMessage, correlationId);
         }
 
-        private static void AssertLastTelemetryIsNotNull(HttpRequestMessage requestMessage)
+        private static void AssertStartValuesOfPreviousTelemetryHeader(
+            HttpRequestMessage requestMessage,
+            int silentCountNumber)
         {
-            Assert.AreEqual(5, CheckLastTelemetryStartingValues(requestMessage).Length);
+            string[] actualTelemetryParts = CheckLastTelemetryStartingValues(requestMessage);
+            string actualSchemaVersion = actualTelemetryParts[0];
+            int actualSuccessfullSilentCount = int.Parse(actualTelemetryParts[1], CultureInfo.InvariantCulture);
+
+            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion2, actualSchemaVersion); // version
+            Assert.AreEqual(silentCountNumber, actualSuccessfullSilentCount); // silent count
+
+            Assert.AreEqual(5, actualTelemetryParts.Length); //  2 | 1 | | |
         }
 
         private static void AssertCurrentTelemetry(
@@ -307,7 +316,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.IsTrue(actualTelemetryParts[1].EndsWith(forceRefresh ? "1" : "0")); // force_refresh flag
         }
 
-        private static void AssertLastTelemetry(
+        private static void AssertPreviousTelemetry(
            HttpRequestMessage requestMessage,
            int expectedSilentCount,
            ApiIds[] expectedFailedApiIds,
@@ -320,10 +329,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             var lastTelemetryParts = CheckLastTelemetryStartingValues(requestMessage);
 
-            Assert.AreEqual(5, lastTelemetryParts.Length);
-            string actualSchemaVersion = lastTelemetryParts[0];
-            int actualSuccessfullSilentCount = int.Parse(lastTelemetryParts[1], CultureInfo.InvariantCulture);
-
             string[] actualFailedApiIds = lastTelemetryParts[2]
                 .Split(',')
                 .Where((item, index) => index % 2 == 0)
@@ -332,9 +337,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             string[] actualErrors = lastTelemetryParts[3].Split(',');
 
             CoreAssert.AreEqual(actualFailedApiIds.Length, correlationIds.Length, actualFailedApiIds.Length);
-
-            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion2, actualSchemaVersion); // version
-            Assert.AreEqual(expectedSilentCount, actualSuccessfullSilentCount); // silent count
 
             CollectionAssert.AreEqual(
                 expectedFailedApiIds.Select(apiId => ((int)apiId).ToString(CultureInfo.InvariantCulture)).ToArray(),
