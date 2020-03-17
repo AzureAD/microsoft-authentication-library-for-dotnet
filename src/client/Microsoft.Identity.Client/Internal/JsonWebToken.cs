@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Client.Internal
 #endif
             }
 
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.X5T)]
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificateThumbprint)]
             public string X509CertificateThumbprint { get; set; }
 
             [JsonProperty(

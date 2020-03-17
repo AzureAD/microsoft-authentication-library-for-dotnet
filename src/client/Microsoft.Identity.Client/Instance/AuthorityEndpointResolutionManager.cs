@@ -89,19 +89,6 @@ namespace Microsoft.Identity.Client.Instance
             return endpoints;
         }
 
-        // Used in WithCertificate to create an audience claim in JWT sent by MSAL to EVO
-        // ADAL uses the token endpoint as audience (tenanted or not)
-        // MSAL had been using the issuer, which does not work when tenantnless. But continue to use issuer for ADFS and B2C.
-        private static string GetSelfSignedJwtAudience(string issuer, string tokenEndpoint, string tenantId, AuthorityType authorityType)
-        {
-            if (authorityType == AuthorityType.Aad)
-            {
-                return tokenEndpoint;
-            }
-
-            return ReplaceTenantToken(issuer, tenantId);
-        }
-
         private static string ReplaceTenantToken(string template, string tenantId)
         {
             // some templates use {tenant}, some {tenantid}

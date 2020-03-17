@@ -45,10 +45,7 @@ namespace Microsoft.Identity.Client.Internal
             /// </summary>
             public const string KeyId = "kid";
 
-            /// <summary>
-            /// 
-            /// </summary>
-            public const string X5T = "x5t";
+            public const string X509CertificateThumbprint = "x5t";
 
             public const string X509CertificatePublicCertValue = "x5c";
         }
