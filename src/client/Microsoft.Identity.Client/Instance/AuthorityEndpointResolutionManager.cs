@@ -79,7 +79,6 @@ namespace Microsoft.Identity.Client.Instance
             string authorizationEndpoint = ReplaceTenantToken(edr.AuthorizationEndpoint, tenantId);
             string tokenEndpoint = ReplaceTenantToken(edr.TokenEndpoint, tenantId);
 
-            //string issuer = edr.Issuer; // not used
             endpoints = new AuthorityEndpoints(
                 authorizationEndpoint,
                 tokenEndpoint,
