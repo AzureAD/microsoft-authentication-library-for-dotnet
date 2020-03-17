@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -28,7 +26,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// <summary>
         /// 1.  Acquire Token Interactive successfully
         ///        Current_request = 2 | ATI_ID, 0 |
-        ///        Last_request = NULL
+        ///        Last_request = 2 | 0 | | |
         /// 2. Acquire token silent with AT served from cache ... no calls to /token endpoint
         ///        
         /// 3. Acquire token silent with AT not served from cache (AT expired)
@@ -97,13 +95,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, forceRefresh: false);
-                AssertLastTelemetryIsNotNull(result.HttpRequest); // TODO: this is still debated, it's more likely that we should send a header with silent_count = 0
+                AssertLastTelemetryIsNotNull(result.HttpRequest);
 
                 Trace.WriteLine("Step 2. Acquire Token Silent successful - AT served from cache");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessFromCache).ConfigureAwait(false);
                 Assert.IsNull(result.HttpRequest, "No calls are made to the token endpoint");
 
-                Guid step2Correlationsid = result.Correlationid;
                 Trace.WriteLine("Step 3. Acquire Token Silent successful - via refresh_token flow");
                 _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant).ConfigureAwait(false);
@@ -113,7 +110,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 4. Acquire Token Silent with force_refresh = true and failure = invalid_grant");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInvalidGrant, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true); // Current_request = 2 | ATS_ID, 1 |
-                // we've already sent the number of silent calls in step 3, don't send it again
                 AssertLastTelemetryIsNotNull(result.HttpRequest);
 
                 Guid step4Correlationid = result.Correlationid;
@@ -292,8 +288,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         private static void AssertCurrentTelemetry(
-            HttpRequestMessage requestMessage,
-            ApiIds apiId,
+            HttpRequestMessage requestMessage, 
+            ApiIds apiId, 
             bool forceRefresh)
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(

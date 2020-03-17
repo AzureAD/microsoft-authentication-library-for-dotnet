@@ -24,4 +24,10 @@
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="TelemetryCore\Internal\HttpTelemetryContent.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TelemetryCore\Internal\HttpTelemetryContent.cs" />
+  </ItemGroup>
 </Project>
