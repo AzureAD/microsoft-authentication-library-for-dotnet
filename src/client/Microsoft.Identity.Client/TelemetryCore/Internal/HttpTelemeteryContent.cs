@@ -4,13 +4,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Globalization;
-using System.Linq;
-using System.Xml;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using static Microsoft.Identity.Client.TelemetryCore.TelemetryManager;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal
 {
@@ -20,7 +16,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
         private List<string> PreviousApiId { get; set; } = new List<string>();
         private List<string> ErrorCode { get; set; } = new List<string>();
         private List<string> CorrelationId { get; set; } = new List<string>();
-
+        
         private string _forceRefresh;
 
         private ConcurrentQueue<EventBase> _stoppedEvents = new ConcurrentQueue<EventBase>();
@@ -32,13 +28,16 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
 
         public string GetCsvAsPrevious(int successfulSilentCallCount)
         {
-            // TODO: make sure to add some locking here to protect against duplicate data
-            // i.e. multiple requiests in parallel accessing the queue
-
             if (_stoppedEvents.Count == 0)
             {
-                return string.Empty;
+                string data2 = string.Format(CultureInfo.InvariantCulture,
+               $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{successfulSilentCallCount}{TelemetryConstants.HttpTelemetryPipe}{TelemetryConstants.HttpTelemetryPipe}{TelemetryConstants.HttpTelemetryPipe}");
+                return data2;
             }
+
+            PreviousApiId.Clear();
+            CorrelationId.Clear();
+            ErrorCode.Clear();
 
             foreach (var stopEvent in _stoppedEvents)
             {
@@ -48,7 +47,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
                     CorrelationId.Add(stopEvent[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey]);
                     PreviousApiId.Add(stopEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey]);
                 }
-            }           
+            }
 
             string apiIdCorIdData = CreateApiIdAndCorrelationIdContent();
             // csv expected format:
@@ -126,10 +125,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
 
         internal void ClearData()
         {
-            //ApiId?.Clear();
-            //CorrelationId?.Clear();
-            //ErrorCode?.Clear();
-
             while (_stoppedEvents.TryDequeue(out _))
             {
                 // do nothing
