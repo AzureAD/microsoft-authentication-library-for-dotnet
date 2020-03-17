@@ -191,6 +191,11 @@ namespace Microsoft.Identity.Client.Internal
                 : base(credential)
             {
                 X509CertificateThumbprint = Credential.Thumbprint;
+                if (Credential?.Certificate?.Thumbprint != null)
+                {
+                    X509CertificateKeyId = Credential.Certificate.Thumbprint;
+                }
+
                 X509CertificatePublicCertValue = null;
 
                 if (!sendCertificate)
@@ -205,8 +210,24 @@ namespace Microsoft.Identity.Client.Internal
 #endif
             }
 
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.KeyId)]
+            /// <summary>
+            /// x5t = base64 url encoded cert thumbprint 
+            /// </summary>
+            /// <remarks>
+            /// Mandatory for ADFS 2019
+            /// </remarks>
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificateThumbprint)]
             public string X509CertificateThumbprint { get; set; }
+
+            /// <summary>
+            /// kid (key id) = cert thumbprint
+            /// </summary>
+            /// <remarks>
+            /// Key Id is an optional param, but recommended. Wilson adds both kid and x5t to JWT header
+            /// </remarks>
+            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.KeyId, 
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public string X509CertificateKeyId { get; set; }
 
             [JsonProperty(
                 PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue, 
