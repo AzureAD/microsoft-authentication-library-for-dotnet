@@ -1,16 +1,14 @@
 4.10.0
 ============
-
-Bug fixes:
-
-**Client Credentials flow not working with ADFS 2019** MSAL.NET now uses the token endpoint as audience and adds x5t to the signed assertion it creates from a certificate. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1708)
-**Certain error messages are not returned from the Android Broker** MSAL.NET now throw better exceptions that show the root cause of Android broker failures. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1696)
-**WithProofOfPossesion not exposed on AcquireTokenSilent builder** MSAL.NET now exposes the WithProofOfPossesion call on AcquireTokenSilent [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1715)
-
 New Features:
 
 **MSAL.NET now allows configuration of instance metadata end-point** WithInstanceDicoveryMetadata method now allows developers to pass an Uri with metadata. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1603)
 
+Bug fixes:
+
+**Client Credentials flow not working with ADFS 2019** MSAL.NET now uses the token endpoint as audience and adds x5t to the signed assertion it creates from a certificate. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1708)
+**Certain error messages are not returned from the Android Broker** MSAL.NET now throws better exceptions that show the root cause of Android broker failures. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1696)
+**WithProofOfPossesion not exposed on AcquireTokenSilent builder** MSAL.NET now exposes the WithProofOfPossesion call on AcquireTokenSilent [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1715)
 
 4.9.0
 ============
