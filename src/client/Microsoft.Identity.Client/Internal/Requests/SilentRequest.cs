@@ -120,7 +120,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (MsalServiceException e)
-            {
+            {           
+                //Remove the account from cache in case of bad_token sub error
+                if (MsalError.BadToken.Equals(e.SubError, StringComparison.OrdinalIgnoreCase))
+                {
+                    await CacheManager.TokenCacheInternal.RemoveAccountAsync(AuthenticationRequestParameters.Account, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                    logger.Warning("Removed the account from cache because of bad_token error.");
+                    throw;
+                }
+
                 bool isAadUnavailable = e.IsAadUnavailable();
 
                 logger.Warning($"Refreshing the RT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
