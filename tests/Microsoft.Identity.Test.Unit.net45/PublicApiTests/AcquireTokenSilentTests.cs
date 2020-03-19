@@ -63,11 +63,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false);
 
                 Trace.WriteLine("2. Configure AAD to respond with the typical Invalid Grant error and Bad Token sub error");
-                AddHttpMocks(harness.HttpManager);
+                AddHttpMocks_BadTokenError(harness.HttpManager);
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
 
                 // Act
-                var excepion = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app
+                var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => app
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         account)
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync())
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.BadToken, excepion.SubError);
+                Assert.AreEqual(MsalError.BadToken, exception.SubError);
 
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 Assert.IsFalse(accounts.Any());
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        private static void AddHttpMocks(MockHttpManager httpManager)
+        private static void AddHttpMocks_BadTokenError(MockHttpManager httpManager)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
             httpManager.AddMockHandlerForTenantEndpointDiscovery(
