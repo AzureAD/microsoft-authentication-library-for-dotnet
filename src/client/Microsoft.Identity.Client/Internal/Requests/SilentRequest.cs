@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (MsalError.BadToken.Equals(e.SubError, StringComparison.OrdinalIgnoreCase))
                 {
                     await CacheManager.TokenCacheInternal.RemoveAccountAsync(AuthenticationRequestParameters.Account, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
-                    logger.Warning("Removed the account from cache because of bad_token error.");
+                    logger.Warning("Failed to refresh access token because the refresh token is invalid, removing account from cache.");
                     throw;
                 }
 
