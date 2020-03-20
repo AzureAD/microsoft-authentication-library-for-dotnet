@@ -66,6 +66,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             set => this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
         }
 
+        public string ApiIdString
+        {
+            get => this.ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey) ? 
+                this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] : 
+                null;
+        }
+
         public Uri Authority
         {
             set => this[AuthorityKey] = ScrubTenant(value)?.ToLowerInvariant();

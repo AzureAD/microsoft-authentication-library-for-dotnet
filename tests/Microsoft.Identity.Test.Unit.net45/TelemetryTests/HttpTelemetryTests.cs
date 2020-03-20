@@ -48,11 +48,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// State of client after response is returned - 
         ///         Last_request = 2 | 0 | ATS_ID, corr_step_5 | interaction_required
         ///         
-        /// 6. Acquire Token interactive -> error user_cancelled(i.e.no calls to /token endpoint)
+        /// 6. Acquire Token interactive -> error user_cancelled(i.e. no calls to /token endpoint)
         ///         Current_request = 2 | ATI_ID, 0 |
         ///         Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6 | interaction_required, 
         ///        authentication_canceled|
-        ///               6b. Acquire Token interactive -> HTTP error 503 (Service Unavailable)
+        /// 
+        /// 6b. Acquire Token interactive -> HTTP error 503 (Service Unavailable)
         ///
         ///        Current_request = 2 | ATI_ID, 0 |
         ///        Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, | interaction_required, 
@@ -95,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, forceRefresh: false);
-                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 0); // Previous_request = 2|0|||
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
 
                 Trace.WriteLine("Step 2. Acquire Token Silent successful - AT served from cache");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessFromCache).ConfigureAwait(false);
@@ -105,12 +106,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
-                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 1); // Previous_request = 2|1|||
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 1); // Previous_request = 2|1|||
 
                 Trace.WriteLine("Step 4. Acquire Token Silent with force_refresh = true and failure = invalid_grant");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInvalidGrant, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true); // Current_request = 2 | ATS_ID, 1 |
-                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 1); // Previous_request = 2|1|||
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
 
                 Guid step4Correlationid = result.Correlationid;
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true and failure = interaction_required");
@@ -150,12 +151,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 8. Acquire Token Silent with force-refresh -> successful");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant, false).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
-                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 0);
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
 
                 Trace.WriteLine("Step 9. Acquire Token Silent with force_refresh = true and failure = interaction_required");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInteractionRequired, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true);// Current_request = 2 | ATS_ID, 1 |
-                AssertStartValuesOfPreviousTelemetryHeader(result.HttpRequest, silentCountNumber: 1);
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 1);
             }
         }
 
@@ -173,7 +174,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Success
         }
 
-        private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome outcome)
+        private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenInteractiveAsync(
+            AcquireTokenInteractiveOutcome outcome)
         {
             MockHttpMessageHandler tokenRequest = null;
             Guid correlationId = Guid.Empty;
@@ -282,20 +284,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             return (tokenRequest?.ActualRequestMessage, correlationId);
         }
 
-        private static void AssertStartValuesOfPreviousTelemetryHeader(
-            HttpRequestMessage requestMessage,
-            int silentCountNumber)
-        {
-            string[] actualTelemetryParts = CheckLastTelemetryStartingValues(requestMessage);
-            string actualSchemaVersion = actualTelemetryParts[0];
-            int actualSuccessfullSilentCount = int.Parse(actualTelemetryParts[1], CultureInfo.InvariantCulture);
-
-            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion2, actualSchemaVersion); // version
-            Assert.AreEqual(silentCountNumber, actualSuccessfullSilentCount); // silent count
-
-            Assert.AreEqual(5, actualTelemetryParts.Length); //  2 | 1 | | |
-        }
-
         private static void AssertCurrentTelemetry(
             HttpRequestMessage requestMessage, 
             ApiIds apiId, 
@@ -319,41 +307,62 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         private static void AssertPreviousTelemetry(
            HttpRequestMessage requestMessage,
            int expectedSilentCount,
-           ApiIds[] expectedFailedApiIds,
-           Guid[] expectedCorrelationIds,
-           string[] expectedErrors)
+           ApiIds[] expectedFailedApiIds = null,
+           Guid[] expectedCorrelationIds = null,
+           string[] expectedErrors = null)
         {
             expectedFailedApiIds = expectedFailedApiIds ?? new ApiIds[0];
             expectedCorrelationIds = expectedCorrelationIds ?? new Guid[0];
             expectedErrors = expectedErrors ?? new string[0];
 
-            var lastTelemetryParts = CheckLastTelemetryStartingValues(requestMessage);
-
-            string[] actualFailedApiIds = lastTelemetryParts[2]
-                .Split(',')
-                .Where((item, index) => index % 2 == 0)
-                .ToArray();
-            string[] correlationIds = lastTelemetryParts[2].Split(',').Where((item, index) => index % 2 != 0).ToArray();
-            string[] actualErrors = lastTelemetryParts[3].Split(',');
-
-            CoreAssert.AreEqual(actualFailedApiIds.Length, correlationIds.Length, actualFailedApiIds.Length);
+            var actualHeader = ParseLastRequestHeader(requestMessage);   
+            
+            Assert.AreEqual(expectedSilentCount, actualHeader.SilentCount);
+            CoreAssert.AreEqual(actualHeader.FailedApis.Length, actualHeader.CorrelationIds.Length, actualHeader.Errors.Length);
 
             CollectionAssert.AreEqual(
                 expectedFailedApiIds.Select(apiId => ((int)apiId).ToString(CultureInfo.InvariantCulture)).ToArray(),
-                actualFailedApiIds); // failed api IDs
+                actualHeader.FailedApis);
 
-            CollectionAssert.AreEqual(expectedCorrelationIds.Select(g => g.ToString()).ToArray(), correlationIds);
+            CollectionAssert.AreEqual(
+                expectedCorrelationIds.Select(g => g.ToString()).ToArray(),
+                actualHeader.CorrelationIds);
 
-            CollectionAssert.AreEqual(expectedErrors, actualErrors); // errors
+            CollectionAssert.AreEqual(
+                expectedErrors, 
+                actualHeader.Errors); 
         }
 
-        private static string[] CheckLastTelemetryStartingValues(HttpRequestMessage requestMessage)
+        private static (int SilentCount, string[] FailedApis, string[] CorrelationIds, string[] Errors) ParseLastRequestHeader(HttpRequestMessage requestMessage)
         {
             // schema_version | silent_succesful_count | failed_requests | errors | platform_fields
             // where a failed_request is "api_id, correlation_id"
             string lastTelemetryHeader = requestMessage.Headers.GetValues(
                TelemetryConstants.XClientLastTelemetry).Single();
-            return lastTelemetryHeader.Split('|');
+            var lastRequestParts =  lastTelemetryHeader.Split('|');
+
+            Assert.AreEqual(5, lastRequestParts.Length); //  2 | 1 | | |
+            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion2, lastRequestParts[0]); // version
+
+            int actualSuccessfullSilentCount = int.Parse(lastRequestParts[1], CultureInfo.InvariantCulture);
+
+            string[] actualFailedApiIds = lastRequestParts[2]
+                .Split(',')
+                .Where((item, index) => index % 2 == 0)
+                .Where(it => !string.IsNullOrEmpty(it))
+                .ToArray();
+            string[] correlationIds = lastRequestParts[2]
+                .Split(',')
+                .Where((item, index) => index % 2 != 0)
+                .Where(it => !string.IsNullOrEmpty(it))
+                .ToArray();
+
+            string[] actualErrors = lastRequestParts[3]
+                .Split(',')
+                .Where(it => !string.IsNullOrEmpty(it))
+                .ToArray();
+
+            return (actualSuccessfullSilentCount, actualFailedApiIds, correlationIds, actualErrors);
         }
     }
 }

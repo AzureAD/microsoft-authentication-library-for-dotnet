@@ -77,10 +77,10 @@ namespace Microsoft.Identity.Client.TelemetryCore
             // Set execution time properties on the event and increment the event count.
             eventToStop.Stop();
 
-            var apiEvent = (eventToStop as ApiEvent);
+            var apiEvent = eventToStop as ApiEvent;
             if (apiEvent != null && !string.IsNullOrEmpty(apiEvent.ApiErrorCode))
             {
-                _httpTelemetryContent.RecordFailedApiEvent(eventToStop);
+                _httpTelemetryContent.RecordFailedApiEvent(apiEvent);
             }
             else if (apiEvent != null &&
                 apiEvent.ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey) && 
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             }
         }
 
-        public string FetchCurrentHttpTelemetryContent(EventBase currentApiEevent)
+        public string FetchCurrentHttpTelemetryContent(ApiEvent currentApiEevent)
         {
             return _httpTelemetryContent.GetCsvAsCurrent(currentApiEevent);
         }

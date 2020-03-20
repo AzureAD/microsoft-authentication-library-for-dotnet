@@ -5,61 +5,69 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal
 {
     internal class HttpTelemetryContent
     {
-        private List<string> ApiId { get; set; } = new List<string>();
-        private List<string> PreviousApiId { get; set; } = new List<string>();
-        private List<string> ErrorCode { get; set; } = new List<string>();
-        private List<string> CorrelationId { get; set; } = new List<string>();
         public int SuccessfulSilentCallCount { get; set; }
-        
-        private string _forceRefresh;
 
-        private ConcurrentQueue<EventBase> _stoppedEvents = new ConcurrentQueue<EventBase>();
+        private ConcurrentQueue<ApiEvent> _failedEvents = new ConcurrentQueue<ApiEvent>();
 
-        public void RecordFailedApiEvent(EventBase stoppedEvent)
+        public void RecordFailedApiEvent(ApiEvent stoppedEvent)
         {
-            _stoppedEvents.Enqueue(stoppedEvent);
+            _failedEvents.Enqueue(stoppedEvent);
         }
 
+        /// <summary>
+        /// Csv expected format:
+        ///      2|silent_successful_count|failed_requests|errors|platform_fields
+        ///      failed_request is: api_id_1,correlation_id_1,api_id_2,correlation_id_2|error_1,error_2
+        /// </summary>
         public string GetCsvAsPrevious()
         {
-            if (_stoppedEvents.Count == 0)
+            
+            var failedRequests = new StringBuilder();
+            var errors = new StringBuilder();
+            bool firstFailure = true;
+
+            //TODO: This isn't thread safe - multiple requests could come at the same time...
+            // There are 2 issues here: 
+            // - avoid using locks because this is perf critical
+            // - do no send the same data twice
+            foreach (var ev in _failedEvents)
             {
-                string data2 = string.Format(CultureInfo.InvariantCulture,
-               $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{SuccessfulSilentCallCount}{TelemetryConstants.HttpTelemetryPipe}{TelemetryConstants.HttpTelemetryPipe}{TelemetryConstants.HttpTelemetryPipe}");
-                return data2;
+                string errorCode = ev[MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey];
+                if (!firstFailure)
+                    errors.Append(",");
+
+                errors.Append(ev.ApiErrorCode);
+
+                string correlationId = ev[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey];
+                string apiId = ev[MsalTelemetryBlobEventNames.ApiIdConstStrKey];
+
+                if (!firstFailure)
+                    failedRequests.Append(",");
+
+                failedRequests.Append(ev.ApiIdString);
+                failedRequests.Append(",");
+                failedRequests.Append(ev.CorrelationId);
+
+                firstFailure = false;
             }
 
-            PreviousApiId.Clear();
-            CorrelationId.Clear();
-            ErrorCode.Clear();
+            string data =
+                $"{TelemetryConstants.HttpTelemetrySchemaVersion2}|" +
+                $"{SuccessfulSilentCallCount}|" +
+                $"{failedRequests}|" +
+                $"{errors}|";
 
-            foreach (var stopEvent in _stoppedEvents)
-            {
-                if (stopEvent.ContainsKey(MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey)) //only want to record failed events
-                {
-                    ErrorCode.Add(stopEvent[MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey]);
-                    CorrelationId.Add(stopEvent[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey]);
-                    PreviousApiId.Add(stopEvent[MsalTelemetryBlobEventNames.ApiIdConstStrKey]);
-                }
-            }
-
-            string apiIdCorIdData = CreateApiIdAndCorrelationIdContent();
-            // csv expected format:
-            // 2|silent_successful_count|failed_requests|errors|platform_fields
-            // failed_request can be further expanded to include:
-            // api_id_1,correlation_id_1,api_id_2,correlation_id_2|error_1,error_2
-            string data = string.Format(CultureInfo.InvariantCulture,
-                $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{SuccessfulSilentCallCount}{TelemetryConstants.HttpTelemetryPipe}" +
-                $"{CreateFailedRequestsContent(apiIdCorIdData)}" +
-                $"{TelemetryConstants.HttpTelemetryPipe}");
-
+            // TODO: fix this
             if (data.Length > 3800)
             {
                 ClearData();
@@ -69,51 +77,24 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             return data;
         }
 
-        public string GetCsvAsCurrent(EventBase eventsInProgress)
+        /// <summary>
+        /// Expected format: 2|api_id,force_refresh|platform_config
+        /// </summary>
+        public string GetCsvAsCurrent(ApiEvent eventInProgress)
         {
-            if (eventsInProgress == null)
+            if (eventInProgress == null)
             {
                 return string.Empty;
             }
 
-            eventsInProgress.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
-            ApiId.Add(apiId);
-            eventsInProgress.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
-            _forceRefresh = forceRefresh;
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
 
-            string apiEvents = string.Join(",", ApiId);
-
-            // csv expected format:
-            // 2|api_id,force_refresh|platform_config
-            string[] myValues = new string[] {
-                apiEvents,
-                ConvertFromStringToBitwise(_forceRefresh)};
-
-            string csvString = string.Join(",", myValues);
-            ApiId.Clear();
-            return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}{TelemetryConstants.HttpTelemetryPipe}{csvString}{TelemetryConstants.HttpTelemetryPipe}";
+            return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
+                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}|";
         }
 
-        private string CreateApiIdAndCorrelationIdContent()
-        {
-            List<string> combinedApiIdCorrId = new List<string>();
-
-            for (int i = 0; i < Math.Min(PreviousApiId.Count, CorrelationId.Count); i++)
-            {
-                combinedApiIdCorrId.Add(PreviousApiId[i]);
-                combinedApiIdCorrId.Add(CorrelationId[i]);
-
-            }
-            return string.Join(",", combinedApiIdCorrId);
-        }
-
-        private string CreateFailedRequestsContent(string apiIdAndCorIdCsv)
-        {
-            string errorCodeCsv = string.Join(",", ErrorCode);
-            string csv = $"{apiIdAndCorIdCsv}{TelemetryConstants.HttpTelemetryPipe}{errorCodeCsv}";
-            return csv;
-        }
-
+     
         private string ConvertFromStringToBitwise(string value)
         {
             if (string.IsNullOrEmpty(value) || value == TelemetryConstants.False)
@@ -127,7 +108,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
         internal void ClearData()
         {
             SuccessfulSilentCallCount = 0;
-            while (_stoppedEvents.TryDequeue(out _))
+            while (_failedEvents.TryDequeue(out _))
             {
                 // do nothing
             }
