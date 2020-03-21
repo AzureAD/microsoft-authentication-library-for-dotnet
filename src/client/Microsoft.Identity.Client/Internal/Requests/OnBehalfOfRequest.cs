@@ -39,6 +39,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
             if (msalAccessTokenItem != null)
             {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+
                 return new AuthenticationResult(
                     msalAccessTokenItem, 
                     null,

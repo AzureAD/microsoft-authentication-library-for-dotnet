@@ -106,6 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     logger.Info("Returning access token found in cache. RefreshOn exists ? "
                         + cachedAccessTokenItem.RefreshOn.HasValue);
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
             }
