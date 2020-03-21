@@ -19,16 +19,14 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             SecRecord record = new SecRecord(SecKind.GenericPassword)
             {
                 Generic = NSData.FromString(iOSBrokerConstants.LocalSettingsContainerName),
-                Service = iOSBrokerConstants.BrokerKeyService,
-                Account = iOSBrokerConstants.BrokerKeyAccount,
-                Label = iOSBrokerConstants.BrokerKeyLabel,
-                Comment = iOSBrokerConstants.BrokerKeyComment,
-                Description = iOSBrokerConstants.BrokerKeyStorageDescription
+                Service = iOSBrokerConstants.BrokerKeyService
             };
 
             NSData key = SecKeyChain.QueryAsData(record);
             if (key == null)
             {
+                logger.Info("Attempted to query the keychain returned a null NSData key. ");
+
                 AesManaged algo = new AesManaged();
                 algo.GenerateKey();
                 byte[] rawBytes = algo.Key;
@@ -56,7 +54,15 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 brokerKey = key.ToArray();
             }
-
+            if (brokerKey == null)
+            {
+                logger.Info("broker key is null. ");                
+            }
+            else
+            {
+                logger.Info("broker key is not null. returning. ");
+               
+            }
             return brokerKey;
         }
 
