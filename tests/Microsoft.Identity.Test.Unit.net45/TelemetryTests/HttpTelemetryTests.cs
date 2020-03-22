@@ -6,14 +6,18 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
@@ -48,12 +52,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// State of client after response is returned - 
         ///         Last_request = 2 | 0 | ATS_ID, corr_step_5 | interaction_required
         ///         
-        /// 6. Acquire Token interactive -> error user_cancelled(i.e. no calls to /token endpoint)
-        ///         Current_request = 2 | ATI_ID, 0 |
-        ///         Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6 | interaction_required, 
-        ///        authentication_canceled|
+        /// 6. Acquire Token interactive -> error user_cancelled (i.e. no calls to /token endpoint)
+        ///       No calls to token endpoint
         /// 
-        /// 6b. Acquire Token interactive -> HTTP error 503 (Service Unavailable)
+        /// 7. Acquire Token interactive -> HTTP error 503 (Service Unavailable)
         ///
         ///        Current_request = 2 | ATI_ID, 0 |
         ///        Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, | interaction_required, 
@@ -64,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         ///        Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, ATI-ID, corr_step-6b | interaction_required, 
         ///       authentication_canceled, ServiceUnavailable|
         ///
-        /// 7. Acquire Token interactive -> successful
+        /// 8. Acquire Token interactive -> successful
         ///
         /// Sent to the server - 
         ///        Current_request = 2 | ATI_ID, 0 |
@@ -74,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// State of the client after response is returned - 
         ///        Last_request = NULL
         ///
-        /// 8. Acquire Token Silent with force-refresh -> successful
+        /// 9. Acquire Token Silent with force-refresh -> successful
         /// Sent to the server - 
         ///         Current_request = 2 | ATI_ID, 1 |
         ///         Last_request = NULL
@@ -91,6 +93,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithHttpManager(_harness.HttpManager)
+                            .WithDefaultRedirectUri()
                             .BuildConcrete();
 
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
@@ -123,19 +126,14 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent }, // from step 4
                     expectedCorrelationIds: new[] { step4Correlationid },
                     expectedErrors: new[] { "invalid_grant" });
-
                 Guid step5CorrelationId = result.Correlationid;
-                Trace.WriteLine("Step 6. Acquire Token User Cancelled and failure = user_canceled");
-                result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.AuthenticationCancelled).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, forceRefresh: false);// Current_request = 2 | ATS_ID, 0 |
-                AssertPreviousTelemetry(
-                    result.HttpRequest,
-                    expectedSilentCount: 0,
-                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent, ApiIds.AcquireTokenSilent }, // from step 4
-                    expectedCorrelationIds: new[] { step4Correlationid, step5CorrelationId },
-                    expectedErrors: new[] { "invalid_grant", "interaction_required" });
 
+                Trace.WriteLine("Step 6. Acquire Token Interactive -  user canceled -> token endpoint not hit");
+                result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.AuthenticationCancelled).ConfigureAwait(false);
+                Assert.IsNull(result.HttpRequest, "No calls are made to the token endpoint");
                 Guid step6CorrelationId = result.Correlationid;
+
+                // telemetry is not sent so it accumulates in memory
 
                 Trace.WriteLine("Step 7. Acquire Token Interactive -> successful");
                 result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
@@ -144,9 +142,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 AssertPreviousTelemetry(
                     result.HttpRequest,
                     expectedSilentCount: 0,
-                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent, ApiIds.AcquireTokenSilent, ApiIds.AcquireTokenInteractive }, // from step 4
-                    expectedCorrelationIds: new[] { step4Correlationid, step5CorrelationId, step6CorrelationId },
-                    expectedErrors: new[] { "invalid_grant", "interaction_required", "user_cancelled" });
+                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenSilent, ApiIds.AcquireTokenInteractive },
+                    expectedCorrelationIds: new[] { step5CorrelationId, step6CorrelationId },
+                    expectedErrors: new[] { "interaction_required", "user_cancelled" });
 
                 Trace.WriteLine("Step 8. Acquire Token Silent with force-refresh -> successful");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant, false).ConfigureAwait(false);
@@ -178,36 +176,37 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             AcquireTokenInteractiveOutcome outcome)
         {
             MockHttpMessageHandler tokenRequest = null;
-            Guid correlationId = Guid.Empty;
-
-            var request = _app
-             .AcquireTokenInteractive(TestConstants.s_scope);
+            Guid correlationId = default;
 
             switch (outcome)
             {
                 case AcquireTokenInteractiveOutcome.Success:
                     MsalMockHelpers.ConfigureMockWebUI(
-                    _app.ServiceBundle.PlatformProxy,
+                        _app.ServiceBundle.PlatformProxy,
                          AuthorizationResult.FromUri(_app.AppConfig.RedirectUri + "?code=some-code"));
                     tokenRequest = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
-                    var authResult = await request
+                    var authResult = await _app
+                        .AcquireTokenInteractive(TestConstants.s_scope)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
                     correlationId = authResult.CorrelationId;
                     break;
                 case AcquireTokenInteractiveOutcome.AuthenticationCancelled:
-                    MockWebUI ui = new MockWebUI()
-                    {
-                        MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=user_cancelled")
-                    };
+                    correlationId = Guid.NewGuid();
 
-                    tokenRequest = _harness.HttpManager.AddFailureTokenEndpointResponse(
-                        "user_cancelled",
-                        TestConstants.AuthorityCommonTenant,
-                        correlationId.ToString());
-                    var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
-                    request.WithCorrelationId(correlationId).ExecuteAsync())
+                    var ui = Substitute.For<IWebUI>();
+                    ui.UpdateRedirectUri(Arg.Any<Uri>()).Returns(new Uri("http://localhost:1234"));
+                    ui.AcquireAuthorizationAsync(null, null, null, default).ThrowsForAnyArgs(
+                        new MsalClientException("user_cancelled"));
+                    MsalMockHelpers.ConfigureMockWebUI(_app.ServiceBundle.PlatformProxy, ui);
+                    
+                    var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                        _app
+                        .AcquireTokenInteractive(TestConstants.s_scope)
+                        .WithCorrelationId(correlationId)
+                        .ExecuteAsync())
                         .ConfigureAwait(false);
+
                     break;
                 default:
                     throw new NotImplementedException();
@@ -215,16 +214,18 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.AreEqual(0, _harness.HttpManager.QueueSize);
 
-            return (tokenRequest.ActualRequestMessage, correlationId);
+            return (tokenRequest?.ActualRequestMessage, correlationId);
         }
 
-        private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome outcome, bool forceRefresh = false)
+        private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenSilentAsync(
+            AcquireTokenSilentOutcome outcome, 
+            bool forceRefresh = false)
         {
             MockHttpMessageHandler tokenRequest = null;
             Guid correlationId = Guid.Empty;
 
             var account = (await _app.GetAccountsAsync().ConfigureAwait(false)).Single();
-            var request = _app
+            AcquireTokenSilentParameterBuilder request = _app
                       .AcquireTokenSilent(TestConstants.s_scope, account)
                       .WithForceRefresh(forceRefresh);
 
@@ -248,40 +249,43 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                     break;
                 case AcquireTokenSilentOutcome.FailInvalidGrant:
-                    _app.UserTokenCacheInternal.Accessor.ClearAccessTokens();
-
-                    correlationId = Guid.NewGuid();
-                    tokenRequest = _harness.HttpManager.AddFailureTokenEndpointResponse(
-                        "invalid_grant",
-                        TestConstants.AuthorityUtidTenant,
-                        correlationId.ToString());
-
-                    var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
-                        () => request.WithCorrelationId(correlationId).ExecuteAsync())
+                    (tokenRequest, correlationId) = await RunSilentFlowWithTokenErrorAsync(request, "invalid_grant")
                         .ConfigureAwait(false);
-
-                    Assert.AreEqual(correlationId, Guid.Parse(ex.CorrelationId), "Test error - Exception correlation ID does not match WithCorrelationId value");
 
                     break;
                 case AcquireTokenSilentOutcome.FailInteractionRequired:
-                    _app.UserTokenCacheInternal.Accessor.ClearAccessTokens();
-                    correlationId = Guid.NewGuid();
-                    tokenRequest = _harness.HttpManager.AddFailureTokenEndpointResponse(
-                        "interaction_required",
-                        TestConstants.AuthorityUtidTenant,
-                        correlationId.ToString());
-
-                    var ex2 = await AssertException.TaskThrowsAsync<MsalServiceException>(() => request.WithCorrelationId(correlationId).ExecuteAsync())
+                    (tokenRequest, correlationId) = await RunSilentFlowWithTokenErrorAsync(request, "interaction_required")
                         .ConfigureAwait(false);
-
-                    Assert.AreEqual(correlationId, Guid.Parse(ex2.CorrelationId), "Test error - Exception correlation ID does not match WithCorrelationId value");
                     break;
+
                 default:
                     throw new NotImplementedException();
             }
 
             Assert.AreEqual(0, _harness.HttpManager.QueueSize);
             return (tokenRequest?.ActualRequestMessage, correlationId);
+        }
+
+        private async Task<(MockHttpMessageHandler MockHttpHandler, Guid Correlationid)> RunSilentFlowWithTokenErrorAsync(AcquireTokenSilentParameterBuilder request, string errorCode)
+        {
+            _app.UserTokenCacheInternal.Accessor.ClearAccessTokens();
+
+            var correlationId = Guid.NewGuid();
+            var tokenRequest = _harness.HttpManager.AddFailureTokenEndpointResponse(
+                errorCode,
+                TestConstants.AuthorityUtidTenant,
+                correlationId.ToString());
+
+            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                () => request.WithCorrelationId(correlationId).ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(
+                correlationId, 
+                Guid.Parse(ex.CorrelationId), 
+                "Test error - Exception correlation ID does not match WithCorrelationId value");
+
+            return (tokenRequest, correlationId);
         }
 
         private static void AssertCurrentTelemetry(
