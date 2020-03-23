@@ -9,9 +9,11 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.Instance.Discovery;
+using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
+    [DebuggerDisplay("Name = {this[EventNameKey]} InProgress = {this[ElapsedTimeKey] == \"-1\" }")]
     internal abstract class EventBase : Dictionary<string, string>
     {
         protected const string EventNamePrefix = "msal.";

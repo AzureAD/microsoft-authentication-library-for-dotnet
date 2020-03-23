@@ -37,6 +37,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
                 {
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+
                     return new AuthenticationResult(
                         cachedAccessTokenItem,
                         null,

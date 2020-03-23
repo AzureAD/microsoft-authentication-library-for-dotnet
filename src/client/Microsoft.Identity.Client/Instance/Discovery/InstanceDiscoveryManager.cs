@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class InstanceDiscoveryManager : IInstanceDiscoveryManager
     {
         private readonly IHttpManager _httpManager;
-        private readonly ITelemetryManager _telemetryManager;
+        private readonly IMatsTelemetryManager _telemetryManager;
 
         private readonly IUserMetadataProvider _userMetadataProvider;
         private readonly IKnownMetadataProvider _knownMetadataProvider;
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public InstanceDiscoveryManager(
           IHttpManager httpManager,
-          ITelemetryManager telemetryManager,
+          IMatsTelemetryManager telemetryManager,
           bool /* for test */ shouldClearCaches,
           InstanceDiscoveryResponse userProvidedInstanceDiscoveryResponse = null,
           Uri userProvidedInstanceDiscoveryUri = null) :
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public /* public for test */ InstanceDiscoveryManager(
             IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
+            IMatsTelemetryManager telemetryManager,
             bool shouldClearCaches,
             IUserMetadataProvider userMetadataProvider = null,
             Uri userProvidedInstanceDiscoveryUri = null,
