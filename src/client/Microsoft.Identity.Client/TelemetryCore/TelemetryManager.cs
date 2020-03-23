@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             }
         }
 
-        public void ClearHttpTelemetryData()
+        public void ClearFailedTelemetry()
         {
             _httpTelemetryContent.ClearData();
         }
