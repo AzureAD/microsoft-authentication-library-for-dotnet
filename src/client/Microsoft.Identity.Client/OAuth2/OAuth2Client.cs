@@ -32,9 +32,9 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly Dictionary<string, string> _headers;
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
-        private readonly ITelemetryManager _telemetryManager;
+        private readonly IMatsTelemetryManager _telemetryManager;
 
-        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, ITelemetryManager telemetryManager)
+        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, IMatsTelemetryManager telemetryManager)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 QueryParams = endpointUri.Query
             };
 
-            using (_telemetryManager.CreateTelemetryHelper(httpEvent))
+            using (requestContext.CreateTelemetryHelper(httpEvent))
             {
                 if (method == HttpMethod.Post)
                 {

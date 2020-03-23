@@ -6,6 +6,8 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.Core;
+using System;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
 {
@@ -15,7 +17,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         private const string CorrelationId = "thetelemetrycorrelationid";
         private const string ClientId = "theclientid";
         internal _TestEvent _trackingEvent;
-        private TelemetryManager _telemetryManager;
+        private RequestContext _requestContext;
         private _TestReceiver _testReceiver;
 
         [TestInitialize]
@@ -23,8 +25,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         {
             TestCommon.ResetInternalStaticCaches();
             _testReceiver = new _TestReceiver();
-            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
-            _telemetryManager = new TelemetryManager(serviceBundle.Config, serviceBundle.PlatformProxy, _testReceiver.HandleTelemetryEvents);
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
+                null, 
+                clientId: ClientId, telemetryCallback: _testReceiver.HandleTelemetryEvents);
+            _requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
             _trackingEvent = new _TestEvent("tracking event", CorrelationId);
         }
 
@@ -49,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestMethod]
         public void TestTelemetryHelper()
         {
-            using (_telemetryManager.CreateTelemetryHelper(_trackingEvent))
+            using (_requestContext.CreateTelemetryHelper(_trackingEvent))
             {
             }
 
@@ -59,11 +63,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestMethod]
         public void TestTelemetryHelperWithFlush()
         {
-            using (_telemetryManager.CreateTelemetryHelper(_trackingEvent))
+            using (_requestContext.CreateTelemetryHelper(_trackingEvent))
             {
             }
 
-            _telemetryManager.Flush(CorrelationId);
+            _requestContext.ServiceBundle.MatsTelemetryManager.Flush(CorrelationId);
 
             ValidateResults(ClientId, true);
         }

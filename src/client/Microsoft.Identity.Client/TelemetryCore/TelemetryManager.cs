@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
-    internal class TelemetryManager : ITelemetryManager
+    internal class TelemetryManager : IMatsTelemetryManager
     {
         private const string MsalCacheEventValuePrefix = "msal.token";
         private const string MsalCacheEventName = "msal.cache_event";
@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private readonly bool _onlySendFailureTelemetry;
         private readonly IPlatformProxy _platformProxy;
         private readonly IApplicationConfiguration _applicationConfiguration;
-        private HttpTelemetryContent _httpTelemetryContent;
 
         public TelemetryManager(
             IApplicationConfiguration applicationConfiguration,
@@ -40,19 +39,14 @@ namespace Microsoft.Identity.Client.TelemetryCore
             TelemetryCallback telemetryCallback,
             bool onlySendFailureTelemetry = false)
         {
+
             _applicationConfiguration = applicationConfiguration;
             _platformProxy = platformProxy;
             Callback = telemetryCallback;
             _onlySendFailureTelemetry = onlySendFailureTelemetry;
-            _httpTelemetryContent = new HttpTelemetryContent();
         }
 
         public TelemetryCallback Callback { get; }
-
-        public TelemetryHelper CreateTelemetryHelper(EventBase eventToStart)
-        {
-            return new TelemetryHelper(this, eventToStart);
-        }
 
         public void StartEvent(EventBase eventToStart)
         {
@@ -76,13 +70,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
             // Set execution time properties on the event and increment the event count.
             eventToStop.Stop();
-
-            var apiEvent = eventToStop as ApiEvent;
-            if (apiEvent != null)
-            {
-                _httpTelemetryContent.RecordStoppedEvent(apiEvent);
-            }
-            
 
             IncrementEventCount(eventToStop);
 
@@ -140,23 +127,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
             Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
         }
 
-        public string FetchAndResetPreviousHttpTelemetryContent()
-        {
-            lock (_mostRecentStoppedApiEventLockObj)
-            {
-                string csv = _httpTelemetryContent.GetCsvAsPrevious();
-
-                _mostRecentStoppedApiEvent = null;
-
-                return csv;
-            }
-        }
-
-        public string FetchCurrentHttpTelemetryContent(ApiEvent currentApiEevent)
-        {
-            return _httpTelemetryContent.GetCsvAsCurrent(currentApiEevent);
-        }
-
         private IEnumerable<EventBase> CollateOrphanedEvents(string correlationId)
         {
             var orphanedEvents = new List<EventBase>();
@@ -197,11 +167,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
             {
                 _eventCount[eventToIncrement.CorrelationId].AddOrUpdate(eventName, 1, (key, count) => count + 1);
             }
-        }
-
-        public void ClearFailedTelemetry()
-        {
-            _httpTelemetryContent.ClearData();
         }
 
         internal class EventKey : IEquatable<EventKey>

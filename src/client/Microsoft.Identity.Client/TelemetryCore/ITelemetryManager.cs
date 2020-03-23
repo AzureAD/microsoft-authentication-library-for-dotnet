@@ -5,17 +5,11 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
-    internal interface ITelemetryManager
+    internal interface IMatsTelemetryManager
     {
         TelemetryCallback Callback { get; }
-
-        TelemetryHelper CreateTelemetryHelper(EventBase eventBase);
-
         void StartEvent(EventBase eventToStart);
         void StopEvent(EventBase eventToStop);
         void Flush(string correlationId);
-        string FetchCurrentHttpTelemetryContent(ApiEvent currentApiEvent);
-        string FetchAndResetPreviousHttpTelemetryContent();
-        void ClearFailedTelemetry();
     }
 }

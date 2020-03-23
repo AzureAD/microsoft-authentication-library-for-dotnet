@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
@@ -25,5 +26,15 @@ namespace Microsoft.Identity.Client.Core
             Logger = MsalLogger.Create(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
         }
+
+
+        public TelemetryHelper CreateTelemetryHelper(EventBase eventToStart)
+        {
+            return new TelemetryHelper(
+                ServiceBundle.MatsTelemetryManager,
+                ServiceBundle.HttpTelemetryManager,
+                eventToStart);
+        }
+
     }
 }

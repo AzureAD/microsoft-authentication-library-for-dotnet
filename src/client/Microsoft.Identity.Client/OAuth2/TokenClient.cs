@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client = new OAuth2Client(
                _serviceBundle.DefaultLogger,
                _serviceBundle.HttpManager,
-               _serviceBundle.TelemetryManager);
+               _serviceBundle.MatsTelemetryManager);
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -106,14 +106,14 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
+            _oAuth2Client.AddHeader(
+                TelemetryConstants.XClientCurrentTelemetry,
+                _serviceBundle.HttpTelemetryManager.GetCurrentRequestHeader(
+                    _requestParams.RequestContext.ApiEvent));
 
             _oAuth2Client.AddHeader(
                 TelemetryConstants.XClientLastTelemetry,
-                _serviceBundle.TelemetryManager.FetchAndResetPreviousHttpTelemetryContent());
-            _oAuth2Client.AddHeader(
-                TelemetryConstants.XClientCurrentTelemetry,
-                _serviceBundle.TelemetryManager.FetchCurrentHttpTelemetryContent(
-                    _requestParams.RequestContext.ApiEvent));
+                _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
 
                 // Clear failed telemetry data as we've just sent it
-                _serviceBundle.TelemetryManager.ClearFailedTelemetry();
+                _serviceBundle.HttpTelemetryManager.ResetPreviousUnsentData();
 
                 return msalTokenResponse;
             }
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     // Clear failed telemetry data as we've just sent it ... 
                     // even if we received an error from the server, 
                     // telemetry would have been recorded
-                    _serviceBundle.TelemetryManager.ClearFailedTelemetry();
+                    _serviceBundle.HttpTelemetryManager.ResetPreviousUnsentData();
                 }
                 throw;
             }
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             // OAuth spec states that scopes are case sensitive, but 
             // merge the reserved scopes in a case insensitive way, to 
-            // avoid sending things like "openid OpenId" (note that EVO is tollerant of this)
+            // avoid sending things like "openid OpenId" (note that EVO is tolerant of this)
             SortedSet<string> set = new SortedSet<string>(
                 inputScope.ToArray(),
                 StringComparer.OrdinalIgnoreCase);

@@ -1,23 +1,27 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Json.Utilities;
 
-namespace Microsoft.Identity.Client.TelemetryCore.Internal
+namespace Microsoft.Identity.Client.TelemetryCore.Http
 {
-    internal class HttpTelemetryContent
+    internal class HttpTelemetryManager : IHttpTelemetryManager
     {
         private int _successfulSilentCallCount = 0;
 
         private ConcurrentQueue<ApiEvent> _failedEvents = new ConcurrentQueue<ApiEvent>();
+
+        public void ResetPreviousUnsentData()
+        {
+            _successfulSilentCallCount = 0;
+            while (_failedEvents.TryDequeue(out _))
+            {
+                // do nothing
+            }
+        }
 
         public void RecordStoppedEvent(ApiEvent stoppedEvent)
         {
@@ -38,9 +42,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
         ///      2|silent_successful_count|failed_requests|errors|platform_fields
         ///      failed_request is: api_id_1,correlation_id_1,api_id_2,correlation_id_2|error_1,error_2
         /// </summary>
-        public string GetCsvAsPrevious()
+        public string GetLastRequestHeader()
         {
-            
             var failedRequests = new StringBuilder();
             var errors = new StringBuilder();
             bool firstFailure = true;
@@ -79,7 +82,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             // TODO: fix this
             if (data.Length > 3800)
             {
-                ClearData();
+                ResetPreviousUnsentData();
                 return string.Empty;
             }
 
@@ -89,7 +92,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
         /// <summary>
         /// Expected format: 2|api_id,force_refresh|platform_config
         /// </summary>
-        public string GetCsvAsCurrent(ApiEvent eventInProgress)
+        public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
             if (eventInProgress == null)
             {
@@ -103,7 +106,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}|";
         }
 
-     
+
         private string ConvertFromStringToBitwise(string value)
         {
             if (string.IsNullOrEmpty(value) || value == TelemetryConstants.False)
@@ -114,13 +117,5 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal
             return TelemetryConstants.One;
         }
 
-        internal void ClearData()
-        {
-            _successfulSilentCallCount = 0;
-            while (_failedEvents.TryDequeue(out _))
-            {
-                // do nothing
-            }
-        }
     }
 }

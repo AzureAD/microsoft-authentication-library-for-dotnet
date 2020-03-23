@@ -15,11 +15,15 @@ namespace Microsoft.Identity.Client.Core
         IApplicationConfiguration Config { get; }
         ICoreLogger DefaultLogger { get; }
         IHttpManager HttpManager { get; }
-        ITelemetryManager TelemetryManager { get; }
         IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
-        ITelemetryClient Mats { get; }
+
+        #region Telemetry
+        IHttpTelemetryManager HttpTelemetryManager { get; }
+        ITelemetryClient Mats { get; } // experimental / deprecated? 
+        IMatsTelemetryManager MatsTelemetryManager { get; } // experimental / deprecated?         
+        #endregion
     }
 }

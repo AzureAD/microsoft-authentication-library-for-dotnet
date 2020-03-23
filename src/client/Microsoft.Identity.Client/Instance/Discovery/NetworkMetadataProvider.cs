@@ -16,13 +16,13 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class NetworkMetadataProvider : INetworkMetadataProvider
     {
         private readonly IHttpManager _httpManager;
-        private readonly ITelemetryManager _telemetryManager;
+        private readonly IMatsTelemetryManager _telemetryManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
         private readonly Uri _userProvidedInstanceDiscoveryUri; // can be null
 
         public NetworkMetadataProvider(
             IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
+            IMatsTelemetryManager telemetryManager,
             INetworkCacheMetadataProvider networkCacheMetadataProvider, 
             Uri userProvidedInstanceDiscoveryUri = null)
         {

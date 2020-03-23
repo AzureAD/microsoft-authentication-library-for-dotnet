@@ -96,7 +96,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetrySkipEventsIfApiEventWasSuccessful()
         {
-            _telemetryManager = new TelemetryManager(_serviceBundle.Config, _platformProxy, _myReceiver.HandleTelemetryEvents, true);
+            _telemetryManager = new TelemetryManager(
+                _serviceBundle.Config, 
+                _platformProxy, 
+                _myReceiver.HandleTelemetryEvents, 
+                true);
 
             var correlationId = Guid.NewGuid().AsMatsCorrelationId();
             try

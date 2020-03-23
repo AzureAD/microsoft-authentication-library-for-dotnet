@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(apiEvent))
+                using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
                 {
                     try
                     {
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             finally
             {
-                ServiceBundle.TelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
+                ServiceBundle.MatsTelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
             }
         }
 

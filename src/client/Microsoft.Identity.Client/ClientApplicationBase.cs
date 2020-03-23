@@ -108,8 +108,7 @@ namespace Microsoft.Identity.Client
                         ServiceBundle, 
                         UserTokenCacheInternal, 
                         new AcquireTokenCommonParameters(), 
-                        requestContext), 
-                    ServiceBundle.TelemetryManager);
+                        requestContext));
 
                 accounts = await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
             }
