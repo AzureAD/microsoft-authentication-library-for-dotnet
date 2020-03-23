@@ -23,6 +23,12 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IServiceBundle _serviceBundle;
         private readonly OAuth2Client _oAuth2Client;
 
+        /// <summary>
+        /// Used to avoid sending duplicate "last request" telemetry
+        /// from a multi-threaded environment
+        /// </summary>
+        private volatile bool _requestInProgress = false;
+
         public TokenClient(AuthenticationRequestParameters requestParams)
         {
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
@@ -111,9 +117,13 @@ namespace Microsoft.Identity.Client.OAuth2
                 _serviceBundle.HttpTelemetryManager.GetCurrentRequestHeader(
                     _requestParams.RequestContext.ApiEvent));
 
-            _oAuth2Client.AddHeader(
-                TelemetryConstants.XClientLastTelemetry,
-                _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
+            if (!_requestInProgress)
+            {
+                _oAuth2Client.AddHeader(
+                    TelemetryConstants.XClientLastTelemetry,
+                    _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
+                _requestInProgress = true;
+            }
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
@@ -128,7 +138,6 @@ namespace Microsoft.Identity.Client.OAuth2
                         .GetTokenAsync(builder.Uri,
                             _requestParams.RequestContext)
                         .ConfigureAwait(false);
-
 
                 // Clear failed telemetry data as we've just sent it
                 _serviceBundle.HttpTelemetryManager.ResetPreviousUnsentData();
@@ -145,6 +154,10 @@ namespace Microsoft.Identity.Client.OAuth2
                     _serviceBundle.HttpTelemetryManager.ResetPreviousUnsentData();
                 }
                 throw;
+            }
+            finally
+            {
+                _requestInProgress = false;
             }
         }
 

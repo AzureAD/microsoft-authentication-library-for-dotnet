@@ -8,10 +8,18 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Http
 {
+    /// <summary>
+    /// Responsible for recording API events and formatting CSV 
+    /// with telemetry.
+    /// </summary>
+    /// <remarks>
+    /// Not fully thread safe - it is possible that multiple threads request
+    /// the "previous requests" data at the same time. It is the responsibility of 
+    /// the caller to protect against this.
+    /// </remarks>
     internal class HttpTelemetryManager : IHttpTelemetryManager
     {
         private int _successfulSilentCallCount = 0;
-
         private ConcurrentQueue<ApiEvent> _failedEvents = new ConcurrentQueue<ApiEvent>();
 
         public void ResetPreviousUnsentData()
@@ -48,10 +56,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             var errors = new StringBuilder();
             bool firstFailure = true;
 
-            //TODO: This isn't thread safe - multiple requests could come at the same time...
-            // There are 2 issues here: 
-            // - avoid using locks because this is perf critical
-            // - do no send the same data twice
             foreach (var ev in _failedEvents)
             {
                 string errorCode = ev[MsalTelemetryBlobEventNames.ApiErrorCodeConstStrKey];
