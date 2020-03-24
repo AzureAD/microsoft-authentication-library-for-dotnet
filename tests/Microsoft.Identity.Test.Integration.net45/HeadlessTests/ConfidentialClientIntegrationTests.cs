@@ -359,6 +359,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.ADFS)]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
             await RunOnBehalfOfTestAsync(await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false)).ConfigureAwait(false);
