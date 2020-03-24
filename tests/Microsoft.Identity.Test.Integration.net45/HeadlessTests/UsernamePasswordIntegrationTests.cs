@@ -180,20 +180,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
             var factory = new TestHttpClientFactory();
-            var builder = PublicClientApplicationBuilder
+            var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
-                .WithHttpClientFactory(factory);
-
-            switch (labResponse.User.AzureEnvironment)
-            {
-                case AzureEnvironment.azureusgovernment:
-                    builder.WithAuthority(labResponse.Lab.Authority + "organizations");
-                    break;
-                default:
-                    break;
-            }
-
-            var msalPublicClient = builder.Build();
+                .WithHttpClientFactory(factory)
+                .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .Build();
 
             AuthenticationResult authResult = await msalPublicClient
                 .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)

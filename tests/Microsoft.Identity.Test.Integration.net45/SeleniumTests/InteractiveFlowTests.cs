@@ -185,20 +185,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
             else
             {
-                var builder = PublicClientApplicationBuilder
+                pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
-                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri());
-
-                switch(labResponse.User.AzureEnvironment)
-                {
-                    case AzureEnvironment.azureusgovernment:
-                        builder.WithAuthority(labResponse.Lab.Authority + "common");
-                        break;
-                    default:
-                        break;
-                }
-
-                pca = builder.Build();
+                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithAuthority(labResponse.Lab.Authority + "common")
+                    .Build();
             }
 
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
