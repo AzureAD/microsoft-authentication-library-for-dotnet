@@ -23,8 +23,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public LabServiceApi()
         {
             KeyVaultSecretsProvider _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
-            _labAccessAppId = _keyVaultSecretsProvider.GetMsidLabSecret("LabVaultAppID").Value;
-            _labAccessClientSecret = _keyVaultSecretsProvider.GetMsidLabSecret("LabVaultAppSecret").Value;
+            _labAccessAppId = _keyVaultSecretsProvider.GetSecretByName("LabVaultAppID").Value;
+            _labAccessClientSecret = _keyVaultSecretsProvider.GetSecretByName("LabVaultAppSecret").Value;
         }
 
         /// <summary>

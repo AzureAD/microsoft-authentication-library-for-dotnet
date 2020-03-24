@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return _keyVaultClient.GetSecretAsync(secretUrl).GetAwaiter().GetResult();
         }
 
-        public SecretBundle GetMsidLabSecret(
+        public SecretBundle GetSecretByName(
             string secretName, 
             string keyVaultAddress = KeyVaultInstance.MSIDLab)
         {
