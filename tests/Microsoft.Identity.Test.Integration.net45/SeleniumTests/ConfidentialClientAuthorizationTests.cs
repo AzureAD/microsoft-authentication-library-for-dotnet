@@ -78,7 +78,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, string authority)
         {
-            var cert = s_secretProvider.GetCertificateWithPrivateMaterial(CertificateName);
+            var cert = await s_secretProvider.GetCertificateWithPrivateMaterialAsync(
+                CertificateName, KeyVaultInstance.MsalTeam).ConfigureAwait(false);
 
             IConfidentialClientApplication cca;
             string redirectUri = SeleniumWebUI.FindFreeLocalhostRedirectUri();
