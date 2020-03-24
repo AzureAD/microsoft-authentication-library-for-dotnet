@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         private const string TestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
-
+        private const string AdfsCertName = "IDLABS-APP-Confidential-Client-Cert-OnPrem";
         private KeyVaultSecretsProvider _keyVault;
         private string _ccaSecret;
 
@@ -365,8 +365,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [TestCategory("ClientSecretIntegrationTests")]
-        public async Task AcquireTokenWithClientSecretFromAdfsAsync()
+        [TestCategory(TestCategories.ADFS)]
+        public async Task ClientCreds_WithClientSecret_Adfs_Async()
         {
             SecretBundle secret = _keyVault.GetSecret(Adfs2019LabConstants.ADFS2019ClientSecretURL);
 
@@ -376,8 +376,34 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                             .WithClientSecret(secret.Value)
                                             .BuildConcrete();
 
-            //AuthenticationResult authResult = await msalConfidentialClient.AcquireTokenForClientAsync(AdfsScopes).ConfigureAwait(false);
-            AuthenticationResult authResult = await msalConfidentialClient.AcquireTokenForClient(s_adfsScopes).ExecuteAsync().ConfigureAwait(false);
+            AuthenticationResult authResult = await msalConfidentialClient
+                .AcquireTokenForClient(s_adfsScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNull(authResult.IdToken);
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.ADFS)]
+        public async Task ClientCreds_WithCertificate_Adfs_Async()
+        {
+            var cert = await _keyVault.GetCertificateWithPrivateMaterialAsync(AdfsCertName)
+                .ConfigureAwait(false);
+
+            ConfidentialClientApplication msalConfidentialClient = ConfidentialClientApplicationBuilder.Create(Adfs2019LabConstants.ConfidentialClientId)
+                                            .WithAdfsAuthority(Adfs2019LabConstants.Authority, true)
+                                            .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
+                                            .WithCertificate(cert)
+                                            .BuildConcrete();
+
+            AuthenticationResult authResult = await msalConfidentialClient
+                .AcquireTokenForClient(s_adfsScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNull(authResult.IdToken);

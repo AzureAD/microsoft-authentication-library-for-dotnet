@@ -15,10 +15,22 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
+    public class KeyVaultInstance
+    {
+        /// <summary>
+        /// The KeyVault maintained by the MSID. It is recommended for use. 
+        /// </summary>
+        public const string MSIDLab = "https://msidlabs.vault.azure.net";
+
+        /// <summary>
+        /// The KeyVault maintained by the MSAL.NET team and have full control over. 
+        /// Should be used temporarily - secrets should be stored and managed by MSID Lab.
+        /// </summary>
+        public const string MsalTeam = "https://buildautomation.vault.azure.net/";
+    }
+
     public class KeyVaultSecretsProvider : IDisposable
     {
-        private const string _buildAutomationKeyVaultName = "https://buildautomation.vault.azure.net/";
-        private const string _mSIDLabLabKeyVaultName = "https://msidlabs.vault.azure.net";
         private KeyVaultClient _keyVaultClient;
 
         /// <summary>Initialize the secrets provider with the "keyVault" configuration section.</summary>
@@ -64,14 +76,20 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return _keyVaultClient.GetSecretAsync(secretUrl).GetAwaiter().GetResult();
         }
 
-        public SecretBundle GetMsidLabSecret(string secretName)
+        public SecretBundle GetMsidLabSecret(
+            string secretName, 
+            string keyVaultAddress = KeyVaultInstance.MSIDLab)
         {
-            return _keyVaultClient.GetSecretAsync(_mSIDLabLabKeyVaultName, secretName).GetAwaiter().GetResult();
+            return _keyVaultClient.GetSecretAsync(
+                keyVaultAddress, 
+                secretName).GetAwaiter().GetResult();
         }
 
-        public X509Certificate2 GetCertificateWithPrivateMaterial(string certName)
+        public async Task<X509Certificate2> GetCertificateWithPrivateMaterialAsync(
+            string certName, 
+            string keyVaultAddress = KeyVaultInstance.MSIDLab)
         {
-            SecretBundle secret = _keyVaultClient.GetSecretAsync(_buildAutomationKeyVaultName, certName ).GetAwaiter().GetResult();
+            SecretBundle secret = await _keyVaultClient.GetSecretAsync(keyVaultAddress, certName).ConfigureAwait(false);
             X509Certificate2 certificate = new X509Certificate2(Convert.FromBase64String(secret.Value));
             return certificate;
         }
