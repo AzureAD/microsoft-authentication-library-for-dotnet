@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public const string BrokerKeyLabel = "Broker Key Label";
         public const string BrokerKeyComment = "Broker Key Comment";
         public const string BrokerKeyStorageDescription = "Storage for broker key";
-        public const string LocalSettingsContainerName = "MicrosoftIdentityClient";
+        public const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
         // broker related log messages
         public const string InvokeIosBrokerAppLink = "Invoking the iOS broker app link";
