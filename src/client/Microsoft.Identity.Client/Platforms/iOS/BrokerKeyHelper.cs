@@ -5,7 +5,6 @@ using Foundation;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Security;
-using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -54,15 +53,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 brokerKey = key.ToArray();
             }
-            if (brokerKey == null)
-            {
-                logger.Info("broker key is null. ");                
-            }
-            else
-            {
-                logger.Info("broker key is not null. returning. ");
-               
-            }
+
             return brokerKey;
         }
 
