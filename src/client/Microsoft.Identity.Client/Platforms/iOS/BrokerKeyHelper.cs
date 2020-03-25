@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             byte[] brokerKey = null;
             SecRecord record = new SecRecord(SecKind.GenericPassword)
             {
-                Generic = NSData.FromString(iOSBrokerConstants.LocalSettingsContainerName),
+                Account = iOSBrokerConstants.BrokerKeyAccount,
                 Service = iOSBrokerConstants.BrokerKeyService
             };
 
