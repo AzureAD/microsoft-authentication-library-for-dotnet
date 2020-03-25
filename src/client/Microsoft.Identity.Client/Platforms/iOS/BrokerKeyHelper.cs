@@ -5,7 +5,6 @@ using Foundation;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Security;
-using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -18,17 +17,15 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             byte[] brokerKey = null;
             SecRecord record = new SecRecord(SecKind.GenericPassword)
             {
-                Generic = NSData.FromString(iOSBrokerConstants.LocalSettingsContainerName),
-                Service = iOSBrokerConstants.BrokerKeyService,
                 Account = iOSBrokerConstants.BrokerKeyAccount,
-                Label = iOSBrokerConstants.BrokerKeyLabel,
-                Comment = iOSBrokerConstants.BrokerKeyComment,
-                Description = iOSBrokerConstants.BrokerKeyStorageDescription
+                Service = iOSBrokerConstants.BrokerKeyService
             };
 
             NSData key = SecKeyChain.QueryAsData(record);
             if (key == null)
             {
+                logger.Info("Attempted to query the keychain returned a null NSData key. ");
+
                 AesManaged algo = new AesManaged();
                 algo.GenerateKey();
                 byte[] rawBytes = algo.Key;
