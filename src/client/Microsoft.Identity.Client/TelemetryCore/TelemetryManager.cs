@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
-    internal class TelemetryManager : ITelemetryManager
+    internal class TelemetryManager : IMatsTelemetryManager
     {
         private const string MsalCacheEventValuePrefix = "msal.token";
         private const string MsalCacheEventName = "msal.cache_event";
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             TelemetryCallback telemetryCallback,
             bool onlySendFailureTelemetry = false)
         {
-            _mostRecentStoppedApiEvent = null;
+
             _applicationConfiguration = applicationConfiguration;
             _platformProxy = platformProxy;
             Callback = telemetryCallback;
@@ -48,13 +48,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public TelemetryCallback Callback { get; }
 
-        public TelemetryHelper CreateTelemetryHelper(EventBase eventToStart)
-        {
-            return new TelemetryHelper(this, eventToStart);
-        }
-
         public void StartEvent(EventBase eventToStart)
-        {        
+        {
             _eventsInProgress[new EventKey(eventToStart)] = eventToStart;
         }
 
@@ -75,6 +70,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
             // Set execution time properties on the event and increment the event count.
             eventToStop.Stop();
+
             IncrementEventCount(eventToStop);
 
             if (_completedEvents.TryGetValue(eventToStop.CorrelationId, out List<EventBase> events))
@@ -129,30 +125,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
             eventsToFlush.Insert(0, new DefaultEvent(_platformProxy, correlationId, _applicationConfiguration.ClientId, eventCountToFlush ?? new ConcurrentDictionary<string, int>()));
             Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
-        }
-
-        public string FetchAndResetPreviousHttpTelemetryContent()
-        {
-            lock (_mostRecentStoppedApiEventLockObj)
-            {
-                var httpTelemetryContent = new HttpTelemetryContent(_mostRecentStoppedApiEvent);
-                _mostRecentStoppedApiEvent = null;
-                return httpTelemetryContent.GetCsvAsPrevious();
-            }
-        }
-
-        public string FetchCurrentHttpTelemetryContent(string currentRequestCorrelationId)
-        {
-            foreach (var kvp in _eventsInProgress)
-            {
-                if (string.Compare(kvp.Key.CorrelationId, currentRequestCorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    var httpTelemetryContent = new HttpTelemetryContent(kvp.Value);
-                    return httpTelemetryContent.GetCsvAsCurrent();
-                }
-            }
-
-            return string.Empty;
         }
 
         private IEnumerable<EventBase> CollateOrphanedEvents(string correlationId)

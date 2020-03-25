@@ -85,6 +85,7 @@ namespace Microsoft.Identity.Client
         #region Authority
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }
+        public Uri CustomInstanceDiscoveryMetadataUri { get; set; }
 
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions

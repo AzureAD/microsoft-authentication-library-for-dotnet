@@ -165,6 +165,29 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        public void TestConstructor_InstanceMetadataUri_ValidateAuthority_MutuallyExclusive()
+        {
+            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                  .WithInstanceDicoveryMetadata(new Uri("https://some_uri.com"))
+                                                  .WithAuthority("https://some.authority/bogus/", true)
+                                                  .Build());
+            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
+        public void TestConstructor_WithInstanceDicoveryMetadata_OnlyOneOverload()
+        {
+            string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
+            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                  .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                  .WithInstanceDicoveryMetadata(new Uri("https://some_uri.com"))
+                                                  .WithAuthority("https://some.authority/bogus/", true)
+                                                  .Build());
+            Assert.AreEqual(ex.ErrorCode, MsalError.CustomMetadataInstanceOrUri);
+        }
+
+        [TestMethod]
         public void TestConstructor_BadInstanceMetadata()
         {
             var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)

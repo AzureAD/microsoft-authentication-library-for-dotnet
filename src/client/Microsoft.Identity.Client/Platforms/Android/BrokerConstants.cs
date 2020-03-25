@@ -109,7 +109,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public const string ChallangeResponseVersion = "Version";
 
         public const string ResponseErrorCode = "com.microsoft.aad.adal:BrowserErrorCode";
+
         public const string ResponseErrorMessage = "com.microsoft.aad.adal:BrowserErrorMessage";
+
+        public const string HomeAccountIDKey = "account.home.account.id";
+
+        public const string Environment = "environment";
 
 
         /**
@@ -161,6 +166,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public const string CommonProtocolVersion = "common.protocol.version";
 
+        public const string RemoveAccount = "REMOVE_ACCOUNT";
+
         // Claims step-up. Skip cache look up
         public const string SkipCache = "skip.cache";
         public const string Claims = "account.claims";
@@ -174,7 +181,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public const string NegotiatedBPVersionKey = "common.broker.protocol.version.name";
         public const string BrokerResultV2 = "broker_result_v2";
         public const string BrokerRequestV2Success = "broker_request_v2_success";
-        public const string BrokerResultErrorCode = "mErrorCode";
         public const string BrokerUnknownErrorCode = "unknown_error";
     }
 }

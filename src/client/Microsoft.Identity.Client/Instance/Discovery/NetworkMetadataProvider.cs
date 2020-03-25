@@ -16,17 +16,20 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class NetworkMetadataProvider : INetworkMetadataProvider
     {
         private readonly IHttpManager _httpManager;
-        private readonly ITelemetryManager _telemetryManager;
+        private readonly IMatsTelemetryManager _telemetryManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
+        private readonly Uri _userProvidedInstanceDiscoveryUri; // can be null
 
         public NetworkMetadataProvider(
             IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
-            INetworkCacheMetadataProvider networkCacheMetadataProvider)
+            IMatsTelemetryManager telemetryManager,
+            INetworkCacheMetadataProvider networkCacheMetadataProvider, 
+            Uri userProvidedInstanceDiscoveryUri = null)
         {
-            _httpManager = httpManager;
-            _telemetryManager = telemetryManager;
-            _networkCacheMetadataProvider = networkCacheMetadataProvider;
+            _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
+            _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
+            _networkCacheMetadataProvider = networkCacheMetadataProvider ?? throw new ArgumentNullException(nameof(networkCacheMetadataProvider));
+            _userProvidedInstanceDiscoveryUri = userProvidedInstanceDiscoveryUri; // can be null
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
@@ -78,20 +81,38 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority));
 
+            Uri instanceDiscoveryEndpoint = ComputeHttpEndpoint(authority, requestContext);
+
+            InstanceDiscoveryResponse discoveryResponse = await client
+                .DiscoverAadInstanceAsync(instanceDiscoveryEndpoint, requestContext)
+                .ConfigureAwait(false);
+
+            return discoveryResponse;
+        }
+
+        private Uri ComputeHttpEndpoint(Uri authority, RequestContext requestContext)
+        {
+            if (_userProvidedInstanceDiscoveryUri != null)
+            {
+                return _userProvidedInstanceDiscoveryUri;
+            }
+
             string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authority.Host) ?
                 authority.Host :
                 AadAuthority.DefaultTrustedHost;
-            string instanceDiscoveryEndpoint = BuildInstanceDiscoveryEndpoint(discoveryHost, authority.Port);
+
+            string instanceDiscoveryEndpoint =  UriBuilderExtensions.GetHttpsUriWithOptionalPort(
+                string.Format(
+                    CultureInfo.InvariantCulture, 
+                    "https://{0}/common/discovery/instance", 
+                    discoveryHost), 
+                authority.Port);
 
             requestContext.Logger.InfoPii(
                 $"Fetching instance discovery from the network from host {discoveryHost}. Endpoint {instanceDiscoveryEndpoint}",
                 $"Fetching instance discovery from the network from host {discoveryHost}");
 
-            InstanceDiscoveryResponse discoveryResponse = await client
-                .DiscoverAadInstanceAsync(new Uri(instanceDiscoveryEndpoint), requestContext)
-                .ConfigureAwait(false);
-
-            return discoveryResponse;
+            return new Uri(instanceDiscoveryEndpoint);
         }
 
         private static string BuildAuthorizeEndpoint(Uri authority)
@@ -105,9 +126,5 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return uri.AbsolutePath.Split('/')[1];
         }
 
-        private static string BuildInstanceDiscoveryEndpoint(string host, int port)
-        {
-            return UriBuilderExtensions.GetHttpsUriWithOptionalPort(string.Format(CultureInfo.InvariantCulture, "https://{0}/common/discovery/instance", host), port);
-        }
     }
 }

@@ -65,14 +65,15 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     return context.Request.Url;
                 }
             }
-            catch (ObjectDisposedException)
+            // If cancellation is requested before GetContextAsync is called, then either 
+            // an ObjectDisposedException or an HttpListenerException is thrown.
+            // But this is just cancellation...
+            catch (Exception ex) when (ex is HttpListenerException || ex is ObjectDisposedException)
             {
-                // If cancellation is requested before GetContextAsync is called
-                // then an ObjectDisposedException is fired by GetContextAsync.
-                // This is still just cancellation
-                _logger.Warning("ObjectDisposedException - cancellation requested? " + cancellationToken.IsCancellationRequested);
+                _logger.Info("HttpListenerException - cancellation requested? " + cancellationToken.IsCancellationRequested);
                 cancellationToken.ThrowIfCancellationRequested();
 
+                // if cancellation was not requested, propagate original ex
                 throw;
             }
             finally

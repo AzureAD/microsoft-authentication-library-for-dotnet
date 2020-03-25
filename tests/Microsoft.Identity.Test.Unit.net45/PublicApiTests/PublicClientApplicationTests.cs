@@ -130,8 +130,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-       
-
         [TestMethod]
         public async Task DifferentStateReturnedTestAsync()
         {
@@ -259,15 +257,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddSuccessfulTokenResponseWithHttpTelemetryMockHandlerForPost(
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityCommonTenant,
                     null,
-                    null,
-                    HttpTelemetryTests.CreateHttpTelemetryHeaders(
-                        correlationId,
-                        TestConstants.InteractiveRequestApiId,
-                        null,
-                        TelemetryConstants.Zero));
+                    null);
 
                 result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
@@ -280,76 +273,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 userCacheAccess.AssertAccessCounts(0, 2);
-            }
-        }
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
-        public async Task AcquireTokenInterative_WithValidCustomInstanceMetadata_Async()
-        {
-            string instanceMetadataJson = File.ReadAllText(
-                ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
-
-            using (var harness = CreateTestHarness())
-            {
-                // No instance discovery is made - it is important to not have this mock handler added
-                // harness.HttpManager.AddInstanceDiscoveryMockHandler();
-
-                PublicClientApplication app = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithAuthority(new Uri("https://login.windows.net/common/"), false)
-                    .WithInstanceDicoveryMetadata(instanceMetadataJson)
-                    .WithHttpManager(harness.HttpManager)
-                    .WithTelemetry(new TraceTelemetryConfig())
-                    .BuildConcrete();
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-
-                // the rest of the communcation with AAD happens on the preferred_network alias, not on login.windows.net
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
-
-                AuthenticationResult result = await app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
-                Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
-                Assert.AreEqual(TestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
-                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
-            }
-        }
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
-        public async Task AcquireTokenInterative_WithBadCustomInstanceMetadata_Async()
-        {
-            string instanceMetadataJson = File.ReadAllText(
-                ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
-
-            using (var harness = CreateTestHarness())
-            {
-                // No instance discovery is made - it is important to not have this mock handler added
-                // harness.HttpManager.AddInstanceDiscoveryMockHandler();
-
-                PublicClientApplication app = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithAuthority(new Uri(@"https://sts.windows.net/common/"), false)
-                    .WithInstanceDicoveryMetadata(instanceMetadataJson)
-                    .WithHttpManager(harness.HttpManager)
-                    .WithTelemetry(new TraceTelemetryConfig())
-                    .BuildConcrete();
-
-                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(() => app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None))
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
             }
         }
 
@@ -761,47 +684,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [Description("Test for AcquireToken with user resetting password")]
-        public async Task B2CAcquireTokenWithResetPasswordTestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithB2CAuthority(TestConstants.B2CLoginAuthority)
-                                                                            .WithHttpManager(httpManager)
-                                                                            .WithDebugLoggingCallback(logLevel: LogLevel.Verbose)
-                                                                            .BuildConcrete();
-
-                // Interactive call and user wants to reset password
-                var ui = new MockWebUI()
-                {
-                    MockResult = AuthorizationResult.FromUri(TestConstants.B2CLoginAuthority +
-                    "?error=access_denied&error_description=AADB2C90091%3a+The+user+has+cancelled+entering+self-asserted+information.")
-                };
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
-                MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
-
-                try
-                {
-                    AuthenticationResult result = await app
-                        .AcquireTokenInteractive(TestConstants.s_scope)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
-                }
-                catch (MsalServiceException exc)
-                {
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual("access_denied", exc.ErrorCode);
-                    Assert.AreEqual("AADB2C90091: The user has cancelled entering self-asserted information.", exc.Message);
-                    return;
-                }
-            }
-
-            Assert.Fail("Should not reach here. Exception was not thrown.");
-        }
-
-        [TestMethod]
         [Description("Test for AcquireToken with access denied error. This error will occur if" +
             "user cancels authentication with embedded webview")]
         public async Task AcquireTokenWithAccessDeniedErrorTestAsync()
@@ -879,186 +761,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.AuthorityTestTenant, authority.AuthorityInfo.CanonicalAuthority);
         }
 
-        public async Task AcquireTokenSilentNullAccountErrorTestAsync()
+        [TestMethod]
+        public async Task AcquireTokenSilent_EmptyLoginHint_TestAsync()
         {
-            PublicClientApplication app = PublicClientApplicationBuilder
+            var app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithTelemetry(new TraceTelemetryConfig())
-                .BuildConcrete();
+                .Build();
 
-            try
-            {
-                AuthenticationResult result = await app
-                    .AcquireTokenSilent(TestConstants.s_scope.ToArray(), string.Empty)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-            }
-            catch (MsalUiRequiredException exc)
-            {
-                Assert.IsNotNull(exc);
-                Assert.AreEqual("user_null", MsalError.UserNullError);
-            }
-        }
 
-        [TestMethod]
-        [TestCategory("B2C")]
-        public void B2CLoginAcquireTokenTest()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
-                                                                            .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
-                                                                            .BuildConcrete();
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CLoginAuthority);
-
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("B2C")]
-        public void B2CAcquireTokenTest()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(TestConstants.B2CAuthority), true)
-                                                                            .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
-                                                                            .BuildConcrete();
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CAuthority);
-
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("B2C")]
-        public void B2CAcquireTokenWithValidateAuthorityTrueTest()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
-                                                                            .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
-                                                                            .BuildConcrete();
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CLoginAuthority);
-
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("B2C")]
-        public void B2CAcquireTokenWithValidateAuthorityTrueAndRandomAuthorityTest()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(TestConstants.B2CCustomDomain), true)
-                                                                            .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
-                                                                            .BuildConcrete();
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CCustomDomain);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CCustomDomain);
-
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("B2C")]
-        public void B2CAcquireTokenAuthorityHostMisMatchErrorTest()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
-                                                                            .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
-                                                                            .BuildConcrete();
-                try
-                {
-                    AuthenticationResult result = app
-                        .AcquireTokenInteractive(TestConstants.s_scope)
-                        .WithB2CAuthority(TestConstants.B2CLoginAuthorityWrongHost)
-                        .ExecuteAsync(CancellationToken.None)
-                        .Result;
-                }
-                catch (Exception exc)
-                {
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalErrorMessage.B2CAuthorityHostMisMatch, exc.InnerException.Message);
-                    return;
-                }
-            }
-
-            Assert.Fail("Should not reach here. Exception was not thrown.");
-        }
-
-        [TestMethod]
-        [TestCategory("B2C")]
-        public void B2CAcquireTokenWithB2CLoginAuthorityTest()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                ValidateB2CLoginAuthority(harness, TestConstants.B2CAuthority);
-                ValidateB2CLoginAuthority(harness, TestConstants.B2CLoginAuthority);
-                ValidateB2CLoginAuthority(harness, TestConstants.B2CLoginAuthorityBlackforest);
-                ValidateB2CLoginAuthority(harness, TestConstants.B2CLoginAuthorityMoonCake);
-                ValidateB2CLoginAuthority(harness, TestConstants.B2CLoginAuthorityUsGov);
-                ValidateB2CLoginAuthority(harness, TestConstants.B2CCustomDomain);
-            }
+            await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
+               app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), string.Empty).ExecuteAsync())
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1217,32 +930,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile), true);
             pca.UserTokenCacheInternal.Accessor.AssertItemCount(3, 2, 3, 3, 1);
             return pca;
-        }
-
-        private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority)
-        {
-            var app = PublicClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithB2CAuthority(authority)
-                .WithHttpManager(harness.HttpManager)
-                .BuildConcrete();
-
-            var ui = new MockWebUI()
-            {
-                MockResult = AuthorizationResult.FromUri(authority + "?code=some-code")
-            };
-
-            MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
-            harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(authority);
-            harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority);
-
-            var result = app
-                .AcquireTokenInteractive(TestConstants.s_scope)
-                .ExecuteAsync(CancellationToken.None)
-                .Result;
-
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.Account);
         }
 
         [TestMethod]

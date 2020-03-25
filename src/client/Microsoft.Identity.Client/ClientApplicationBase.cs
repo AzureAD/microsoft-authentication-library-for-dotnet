@@ -17,6 +17,8 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
@@ -85,6 +87,14 @@ namespace Microsoft.Identity.Client
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
+
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            {
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                accounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
+                return accounts;
+            }
+
             if (UserTokenCache == null)
             {
                 requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
@@ -98,8 +108,7 @@ namespace Microsoft.Identity.Client
                         ServiceBundle, 
                         UserTokenCacheInternal, 
                         new AcquireTokenCommonParameters(), 
-                        requestContext), 
-                    ServiceBundle.TelemetryManager);
+                        requestContext));
 
                 accounts = await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
             }
@@ -126,6 +135,13 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public async Task RemoveAsync(IAccount account)
         {
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            {
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                await broker.RemoveAccountAsync(AppConfig.ClientId, account).ConfigureAwait(false);
+                return;
+            }
+
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             if (account != null && UserTokenCacheInternal != null)
             {

@@ -23,8 +23,8 @@ namespace Microsoft.Identity.Test.Common
             // This initializes the classes so that the statics inside them are fully initialized, and clears any cached content in them.
             new InstanceDiscoveryManager(
                 Substitute.For<IHttpManager>(),
-                Substitute.For<ITelemetryManager>(),
-                true);
+                Substitute.For<IMatsTelemetryManager>(),
+                true, null, null);
             new AuthorityEndpointResolutionManager(null, true);
         }
 

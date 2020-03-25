@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class InstanceDiscoveryManager : IInstanceDiscoveryManager
     {
         private readonly IHttpManager _httpManager;
-        private readonly ITelemetryManager _telemetryManager;
+        private readonly IMatsTelemetryManager _telemetryManager;
 
         private readonly IUserMetadataProvider _userMetadataProvider;
         private readonly IKnownMetadataProvider _knownMetadataProvider;
@@ -37,23 +37,26 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public InstanceDiscoveryManager(
           IHttpManager httpManager,
-          ITelemetryManager telemetryManager,
+          IMatsTelemetryManager telemetryManager,
           bool /* for test */ shouldClearCaches,
-          InstanceDiscoveryResponse userProviderInstanceDiscoveryResponse) :
+          InstanceDiscoveryResponse userProvidedInstanceDiscoveryResponse = null,
+          Uri userProvidedInstanceDiscoveryUri = null) :
             this(
                 httpManager,
                 telemetryManager,
                 shouldClearCaches,
-                userProviderInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProviderInstanceDiscoveryResponse) : null,
+                userProvidedInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProvidedInstanceDiscoveryResponse) : null,
+                userProvidedInstanceDiscoveryUri,
                 null, null, null)
         {
         }
 
         public /* public for test */ InstanceDiscoveryManager(
             IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
+            IMatsTelemetryManager telemetryManager,
             bool shouldClearCaches,
             IUserMetadataProvider userMetadataProvider = null,
+            Uri userProvidedInstanceDiscoveryUri = null,
             IKnownMetadataProvider knownMetadataProvider = null,
             INetworkCacheMetadataProvider networkCacheMetadataProvider = null,
             INetworkMetadataProvider networkMetadataProvider = null)
@@ -65,7 +68,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             _knownMetadataProvider = knownMetadataProvider ?? new KnownMetadataProvider();
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
             _networkMetadataProvider = networkMetadataProvider ?? 
-                new NetworkMetadataProvider(_httpManager, _telemetryManager, _networkCacheMetadataProvider);
+                new NetworkMetadataProvider(
+                    _httpManager, 
+                    _telemetryManager, 
+                    _networkCacheMetadataProvider, 
+                    userProvidedInstanceDiscoveryUri);
 
             if (shouldClearCaches)
             {

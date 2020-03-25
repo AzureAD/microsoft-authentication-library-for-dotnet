@@ -13,5 +13,7 @@ namespace Microsoft.Identity.Test.Common
         public const string Selenium = "Selenium";
         public const string LabAccess = "LabAccess";
 
+        public const string ADFS = "ADFS";
+
     }
 }

@@ -10,6 +10,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string BrokerErrorCode = "broker_error_code";
         public const string BrokerErrorDescription = "error_description";
 
+        public const string BrokerErrorMessage = "broker_error_message";
+
         public const string Authority = "authority";
         public const string AccessToken = "access_token";
         public const string ClientId = "client_id";
@@ -26,7 +28,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string LocalAccountId = "local_account_id";
         public const string UserName = "username";
         public const string iOSBrokerNonce = "broker_nonce"; // included in request and response with iOS Broker v3
-        
+        public const string Environment = "environment";
+
         public const string iOSBrokerUserCancellationErrorCode = "-50005";
     }
 }

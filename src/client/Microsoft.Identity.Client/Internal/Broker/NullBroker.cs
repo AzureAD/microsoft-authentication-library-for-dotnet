@@ -23,5 +23,15 @@ namespace Microsoft.Identity.Client.Internal.Broker
         {
             throw new PlatformNotSupportedException(MsalErrorMessage.BrokerNotSupportedOnThisPlatform);
         }
+
+        public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
+        {
+            throw new PlatformNotSupportedException(MsalErrorMessage.BrokerNotSupportedOnThisPlatform);
+        }
+
+        public Task RemoveAccountAsync(string clientID, IAccount account)
+        {
+            throw new NotImplementedException(MsalErrorMessage.BrokerNotSupportedOnThisPlatform);
+        }
     }
 }

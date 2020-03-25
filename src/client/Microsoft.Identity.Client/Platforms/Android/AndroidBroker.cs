@@ -59,12 +59,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             catch (Exception ex)
             {
-                _logger.Error("Broker Operation Failed to complete. In order to perform brokered authentication on android" +
-                    " you need to ensure that you have installed either Intune Company Portal (Version 5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).");
-                if (ex is MsalException)
-                    throw;
-                else
-                    throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
+                _logger.Error("Android broker authentication failed.");
+                HandleBrokerOperationError(ex);
+                throw;
             }
 
             return s_androidBrokerTokenResponse;
@@ -104,8 +101,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
                             Error = MsalError.BrokerResponseReturnedError,
-                            ErrorDescription = "Failed to acquire token silently from the broker. In order to perform brokered authentication on android" +
-                    " you need to ensure that you have installed either Intune Company Portal (Version 5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).",
+                            ErrorDescription = "Failed to acquire token silently from the broker." + MsalErrorMessage.AndroidBrokerCannotBeInvoked,
                         };
                     }
                     return;
@@ -173,10 +169,19 @@ namespace Microsoft.Identity.Client.Platforms.Android
                         };
                         break;
                     case (int)BrokerResponseCode.BrowserCodeError:
+                        dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                        string error = string.Empty;
+                        string errorDescription = string.Empty;
+
+                        if (errorResult != null)
+                        {
+                            error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                            errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                        }
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
-                            Error = data.GetStringExtra(BrokerConstants.BrokerResultErrorCode),
-                            ErrorDescription = data.GetStringExtra(BrokerConstants.BrokerResultV2),
+                            Error = error,
+                            ErrorDescription = errorDescription,
                         };
                         break;
                     default:
@@ -202,16 +207,87 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             Dictionary<string, string> response = new Dictionary<string, string>();
             dynamic authResult = JObject.Parse(brokerResult);
+            var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+            
+            if (!string.IsNullOrEmpty(errorCode))
+            {
+                return new MsalTokenResponse
+                {
+                    Error = errorCode,
+                    ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage].ToString(),
+                };
+            }
 
-            response.Add(BrokerResponseConst.Authority, authResult[BrokerResponseConst.Authority].ToString());
-            response.Add(BrokerResponseConst.AccessToken, authResult[BrokerResponseConst.AccessToken].ToString());
-            response.Add(BrokerResponseConst.IdToken, authResult[BrokerResponseConst.IdToken].ToString());
+            response.Add(BrokerResponseConst.Authority, authResult[BrokerResponseConst.Authority]?.ToString());
+            response.Add(BrokerResponseConst.AccessToken, authResult[BrokerResponseConst.AccessToken]?.ToString());
+            response.Add(BrokerResponseConst.IdToken, authResult[BrokerResponseConst.IdToken]?.ToString());
             response.Add(BrokerResponseConst.CorrelationId, s_correlationId);
-            response.Add(BrokerResponseConst.Scope, authResult[BrokerResponseConst.AndroidScopes].ToString());
-            response.Add(BrokerResponseConst.ExpiresOn, authResult[BrokerResponseConst.ExpiresOn].ToString());
-            response.Add(BrokerResponseConst.ClientInfo, authResult[BrokerResponseConst.ClientInfo].ToString());
+            response.Add(BrokerResponseConst.Scope, authResult[BrokerResponseConst.AndroidScopes]?.ToString());
+            response.Add(BrokerResponseConst.ExpiresOn, authResult[BrokerResponseConst.ExpiresOn]?.ToString());
+            response.Add(BrokerResponseConst.ClientInfo, authResult[BrokerResponseConst.ClientInfo]?.ToString());
 
             return MsalTokenResponse.CreateFromBrokerResponse(response);
+        }
+
+        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
+        {
+            if (!CanInvokeBroker())
+            {
+                _logger.Error("Android broker is not installed so no accounts will be returned.");
+                return new List<IAccount>();
+            }
+
+            Dictionary<string, string> brokerPayload = new Dictionary<string, string>();
+            brokerPayload.Add(BrokerParameter.ClientId, clientID);
+
+            try
+            {
+                await _brokerHelper.InitiateBrokerHandshakeAsync(_activity).ConfigureAwait(false);
+
+                return _brokerHelper.GetBrokerAccountsInAccountManager(brokerPayload);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to get Android broker accounts from the broker.");
+                HandleBrokerOperationError(ex);
+                throw;
+            }
+        }
+
+        public async Task RemoveAccountAsync(string clientID, IAccount account)
+        {
+            if (!CanInvokeBroker())
+            {
+                _logger.Error("Android broker is not installed so no accounts will be removed.");
+                return;
+            }
+
+            Dictionary<string, string> brokerPayload = new Dictionary<string, string>();
+            brokerPayload.Add(BrokerParameter.ClientId, clientID);
+            brokerPayload.Add(BrokerConstants.Environment, account.Environment);
+            brokerPayload.Add(BrokerParameter.HomeAccountId, account.HomeAccountId.Identifier);
+
+            try
+            {
+                await _brokerHelper.InitiateBrokerHandshakeAsync(_activity).ConfigureAwait(false);
+
+                _brokerHelper.RemoveBrokerAccountInAccountManager(brokerPayload);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to remove Android broker account from the broker.");
+                HandleBrokerOperationError(ex);
+                throw;
+            }
+        }
+
+        private void HandleBrokerOperationError(Exception ex)
+        {
+            _logger.Error(MsalErrorMessage.AndroidBrokerCannotBeInvoked);
+            if (ex is MsalException)
+                throw ex;
+            else
+                throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
         }
     }
 }

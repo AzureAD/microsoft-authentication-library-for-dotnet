@@ -111,10 +111,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
+            AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
 
             try
             {
-                using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(apiEvent))
+                using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
                 {
                     try
                     {
@@ -145,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             finally
             {
-                ServiceBundle.TelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
+                ServiceBundle.MatsTelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
             }
         }
 

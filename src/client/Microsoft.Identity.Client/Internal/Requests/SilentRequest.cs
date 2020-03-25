@@ -106,6 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     logger.Info("Returning access token found in cache. RefreshOn exists ? "
                         + cachedAccessTokenItem.RefreshOn.HasValue);
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
             }
@@ -120,7 +121,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (MsalServiceException e)
-            {
+            {           
+                //Remove the account from cache in case of bad_token sub error
+                if (MsalError.BadToken.Equals(e.SubError, StringComparison.OrdinalIgnoreCase))
+                {
+                    await CacheManager.TokenCacheInternal.RemoveAccountAsync(AuthenticationRequestParameters.Account, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                    logger.Warning("Failed to refresh access token because the refresh token is invalid, removing account from cache.");
+                    throw;
+                }
+
                 bool isAadUnavailable = e.IsAadUnavailable();
 
                 logger.Warning($"Refreshing the RT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
