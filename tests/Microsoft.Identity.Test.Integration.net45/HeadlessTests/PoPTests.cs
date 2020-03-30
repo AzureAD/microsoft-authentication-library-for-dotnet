@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("POP", request.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", request.Headers.Authorization.Scheme);
             Assert.AreEqual("pop", result.TokenType);
             await VerifyPoPTokenAsync(clientId, request).ConfigureAwait(false);
 
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("POP", request1.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
             await VerifyPoPTokenAsync(
                  clientId,
                  request1).ConfigureAwait(false);
@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("POP", request1.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
             await VerifyPoPTokenAsync(
                 clientId,
                 request1).ConfigureAwait(false);
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
               .ExecuteAsync()
               .ConfigureAwait(false);
 
-            Assert.AreEqual("POP", request2.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", request2.Headers.Authorization.Scheme);
             await VerifyPoPTokenAsync(
                 clientId,
                 request2).ConfigureAwait(false);

@@ -22,7 +22,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         private readonly HttpRequestMessage _httpRequestMessage;
         private readonly IPoPCryptoProvider _popCryptoProvider;
-        private readonly byte[] _keyThumbprint;
 
         /// <summary>
         /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -36,8 +35,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             _httpRequestMessage = httpRequestMessage ?? throw new ArgumentNullException(nameof(httpRequestMessage));
             _popCryptoProvider = popCryptoProvider ?? throw new ArgumentNullException(nameof(popCryptoProvider));
 
-            _keyThumbprint = ComputeRsaThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
-            KeyId = Base64UrlHelpers.Encode(_keyThumbprint);
+            var keyThumbprint = ComputeRsaThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
+            KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
         public string AuthorizationHeaderPrefix => PoPRequestParameters.PoPAuthHeaderPrefix;
@@ -58,7 +57,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             };
         }
 
-        public string FormatAccessToken(MsalAccessTokenCacheItem atItem)
+        public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             var header = new JObject
             {
@@ -70,7 +69,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             JToken popAssertion = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
 
             var payload = new JObject(
-                new JProperty(PoPClaimTypes.At, atItem.Secret),
+                new JProperty(PoPClaimTypes.At, msalAccessTokenCacheItem.Secret),
                 new JProperty(PoPClaimTypes.Ts, (long)(DateTime.UtcNow - s_jwtBaselineTime).TotalSeconds ),
                 new JProperty(PoPClaimTypes.HttpMethod, _httpRequestMessage.Method.ToString()),
                 new JProperty(PoPClaimTypes.Host, _httpRequestMessage.RequestUri.Host),
