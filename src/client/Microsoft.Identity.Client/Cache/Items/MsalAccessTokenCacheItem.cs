@@ -109,6 +109,9 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         internal string RefreshOnUnixTimestamp { get; set; }
 
+        // BUGBUG: this is wrong - it isn't persisted to the cache and is never recalculated
+        // so when reading a token from the cache, IsAdfs is always false.
+        // (also logically this is a bad place for it)
         internal bool IsAdfs { get; set; }
 
         internal string Authority =>

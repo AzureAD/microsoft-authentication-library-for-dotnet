@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +9,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using System.Linq;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -28,6 +28,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+            if (AuthenticationRequestParameters.Scope == null || !AuthenticationRequestParameters.Scope.Any())
+            {
+                throw new MsalClientException(
+                    MsalError.ScopesRequired,
+                    MsalErrorMessage.ScopesRequired);
+            }
+
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
 
             // look for access token in the cache first.

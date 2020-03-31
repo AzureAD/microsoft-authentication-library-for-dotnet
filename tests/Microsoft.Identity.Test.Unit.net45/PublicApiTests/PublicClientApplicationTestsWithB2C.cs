@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -223,6 +224,71 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        /// <summary>
+        /// If no scopes are passed in, B2C does not return a AT. MSAL must be able to 
+        /// persist the data to the cache and return an AuthenticationResult.
+        /// This behavior has been seen on B2C, as AAD will return an access token for the implicit scopes.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("B2C")]
+        public async Task B2C_NoScopes_NoAccessToken_Async()
+        {
+            
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                // Arrange 1 - interactive call with 0 scopes
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.B2CLoginAuthority,
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.B2CTokenResponseWithoutAT));
+
+                // Act 
+                AuthenticationResult result = await app
+                    .AcquireTokenInteractive(null) // no scopes -> no Access Token!
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                AssertNoAccessToken(result);
+                Assert.AreEqual(0, httpManager.QueueSize);
+
+                // Arrange 2 - silent call
+                IAccount account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
+               
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                   TestConstants.B2CLoginAuthority,
+                   responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.B2CTokenResponseWithoutAT));
+                
+                // Act 
+                result = await app
+                   .AcquireTokenSilent(null, account) // no scopes -> no Access Token!
+                   .ExecuteAsync()
+                   .ConfigureAwait(false);
+
+                // Assert
+                AssertNoAccessToken(result);
+            }
+        }
+
+        private static void AssertNoAccessToken(AuthenticationResult result)
+        {
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Account);
+            Assert.IsNotNull(result.IdToken);
+            Assert.IsNull(result.AccessToken);
+            Assert.IsNull(result.Scopes);
+            Assert.IsTrue(result.ExpiresOn == default);
+            Assert.IsTrue(result.ExtendedExpiresOn == default);
+        }
 
         private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority)
         {

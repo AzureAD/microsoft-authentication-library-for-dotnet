@@ -15,7 +15,6 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -26,22 +25,26 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = null;
+            MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
+            MsalIdTokenCacheItem msalIdTokenCacheItem = null;
+            MsalAccountCacheItem msalAccountCacheItem = null;
+
+            IdToken idToken = IdToken.Parse(response.IdToken);
+
             var tenantId = Authority
                 .CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo.CanonicalAuthority)
                 .GetTenantId();
 
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
-
-            IdToken idToken = IdToken.Parse(response.IdToken);
+            string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
+            string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
 
             string subject = idToken?.Subject;
-
             if (idToken != null && string.IsNullOrEmpty(subject))
             {
                 requestParams.RequestContext.Logger.Warning("Subject not present in Id token");
             }
-
-            string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
 
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
@@ -51,21 +54,37 @@ namespace Microsoft.Identity.Client
                                     requestParams.RequestContext)
                                 .ConfigureAwait(false);
 
-            var msalAccessTokenCacheItem =
-                new MsalAccessTokenCacheItem(
-                    instanceDiscoveryMetadata.PreferredCache,
-                    requestParams.ClientId,
-                    response,
-                    tenantId,
-                    subject,
-                    requestParams.AuthenticationScheme.KeyId)
-                {
-                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
-                    IsAdfs = isAdfsAuthority
-                };
+            #region Create Cache Objects
+            if (!string.IsNullOrEmpty(response.AccessToken))
+            {
+                msalAccessTokenCacheItem =
+                    new MsalAccessTokenCacheItem(
+                        instanceDiscoveryMetadata.PreferredCache,
+                        requestParams.ClientId,
+                        response,
+                        tenantId,
+                        subject,
+                        requestParams.AuthenticationScheme.KeyId)
+                    {
+                        UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
+                        IsAdfs = isAdfsAuthority
+                    };
+            }
 
-            MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
-            MsalIdTokenCacheItem msalIdTokenCacheItem = null;
+            if (!string.IsNullOrEmpty(response.RefreshToken))
+            {
+                msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
+                                    instanceDiscoveryMetadata.PreferredCache,
+                                    requestParams.ClientId,
+                                    response,
+                                    subject);
+
+                if (!_featureFlags.IsFociEnabled)
+                {
+                    msalRefreshTokenCacheItem.FamilyId = null;
+                }
+            }
+
             if (idToken != null)
             {
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(
@@ -77,32 +96,59 @@ namespace Microsoft.Identity.Client
                 {
                     IsAdfs = isAdfsAuthority
                 };
+
+                msalAccountCacheItem = new MsalAccountCacheItem(
+                             instanceDiscoveryMetadata.PreferredCache,
+                             response.ClientInfo,
+                             idToken,
+                             preferredUsername,
+                             tenantId);
+
+
+            }
+
+            #endregion
+
+            string homeAccountId = msalAccessTokenCacheItem?.HomeAccountId ??
+                msalRefreshTokenCacheItem?.HomeAccountId ??
+                msalIdTokenCacheItem?.HomeAccountId;
+
+            Account account = new Account(
+                              homeAccountId,
+                              username,
+                              instanceDiscoveryMetadata.PreferredCache);
+
+            //The ADFS direct scenario does not return client info so the home account id is acquired from the subject
+            if (isAdfsAuthority &&
+                msalAccountCacheItem != null &&
+                string.IsNullOrEmpty(homeAccountId))
+            {
+                msalAccountCacheItem.HomeAccountId = idToken.Subject;
             }
 
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                try
-                {
-                    Account account = null;
-                    string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
-                    if (msalAccessTokenCacheItem.HomeAccountId != null)
-                    {
-                        account = new Account(
-                                          msalAccessTokenCacheItem.HomeAccountId,
-                                          username,
-                                          instanceDiscoveryMetadata.PreferredCache);
-                    }
-                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true, (this as ITokenCacheInternal).IsApplicationCache);
+
+                var args = new TokenCacheNotificationArgs(
+                    this,
+                    ClientId,
+                    account,
+                    hasStateChanged: true,
+                    (this as ITokenCacheInternal).IsApplicationCache);
 
 #pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = true;
+                HasStateChanged = true;
 #pragma warning restore CS0618 // Type or member is obsolete
 
+                try
+                {
                     await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
-                    try
+                    await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
+
+                    if (msalAccessTokenCacheItem != null)
                     {
-                        await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
+                        requestParams.RequestContext.Logger.Info("Saving AT in cache and removing overlapping ATs...");
 
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
@@ -113,75 +159,51 @@ namespace Microsoft.Identity.Client
                             msalAccessTokenCacheItem.TokenType);
 
                         _accessor.SaveAccessToken(msalAccessTokenCacheItem);
-
-                        if (idToken != null)
-                        {
-                            _accessor.SaveIdToken(msalIdTokenCacheItem);
-                            var msalAccountCacheItem = new MsalAccountCacheItem(
-                                instanceDiscoveryMetadata.PreferredCache,
-                                response,
-                                preferredUsername,
-                                tenantId);
-
-                            //The ADFS direct scenario does not return client info so the home account id is acquired from the subject
-                            if (isAdfsAuthority && String.IsNullOrEmpty(msalAccountCacheItem.HomeAccountId))
-                            {
-                                msalAccountCacheItem.HomeAccountId = idToken.Subject;
-                            }
-
-                            _accessor.SaveAccount(msalAccountCacheItem);
-                        }
-
-                        // if server returns the refresh token back, save it in the cache.
-                        if (response.RefreshToken != null)
-                        {
-                            msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
-                                instanceDiscoveryMetadata.PreferredCache,
-                                requestParams.ClientId,
-                                response,
-                                subject);
-
-                            if (!_featureFlags.IsFociEnabled)
-                            {
-                                msalRefreshTokenCacheItem.FamilyId = null;
-                            }
-
-                            requestParams.RequestContext.Logger.Info("Saving RT in cache...");
-                            _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
-                        }
-
-                        UpdateAppMetadata(requestParams.ClientId, instanceDiscoveryMetadata.PreferredCache, response.FamilyId);
-
-                        // save RT in ADAL cache for public clients
-                        // do not save RT in ADAL cache for MSAL B2C scenarios
-                        if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AuthorityType.B2C))
-                        {
-                            var authorityWithPrefferedCache = Authority.CreateAuthorityWithEnvironment(
-                                    requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo,
-                                    instanceDiscoveryMetadata.PreferredCache);
-
-                            CacheFallbackOperations.WriteAdalRefreshToken(
-                                Logger,
-                                LegacyCachePersistence,
-                                msalRefreshTokenCacheItem,
-                                msalIdTokenCacheItem,
-                                authorityWithPrefferedCache.AuthorityInfo.CanonicalAuthority,
-                                msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
-                        }
                     }
-                    finally
+
+                    if (idToken != null)
                     {
-                        await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
+                        requestParams.RequestContext.Logger.Info("Saving Id Token and Account in cache ...");
+                        _accessor.SaveIdToken(msalIdTokenCacheItem);
+                        _accessor.SaveAccount(msalAccountCacheItem);
                     }
 
-                    return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
+                    // if server returns the refresh token back, save it in the cache.
+                    if (msalRefreshTokenCacheItem != null)
+                    {
+                        requestParams.RequestContext.Logger.Info("Saving RT in cache...");
+                        _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                    }
+
+                    UpdateAppMetadata(requestParams.ClientId, instanceDiscoveryMetadata.PreferredCache, response.FamilyId);
+
+                    // Do not save RT in ADAL cache for confidential client or B2C                        
+                    if (!requestParams.IsClientCredentialRequest &&
+                        requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
+                    {
+                        var authorityWithPrefferedCache = Authority.CreateAuthorityWithEnvironment(
+                                requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo,
+                                instanceDiscoveryMetadata.PreferredCache);
+
+                        CacheFallbackOperations.WriteAdalRefreshToken(
+                            Logger,
+                            LegacyCachePersistence,
+                            msalRefreshTokenCacheItem,
+                            msalIdTokenCacheItem,
+                            authorityWithPrefferedCache.AuthorityInfo.CanonicalAuthority,
+                            msalIdTokenCacheItem.IdToken.ObjectId,
+                            response.Scope);
+                    }
                 }
                 finally
                 {
+                    await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
+
+                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
             }
             finally
             {
@@ -217,7 +239,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams)
         {
             // no authority passed
-            if (requestParams?.AuthorityInfo?.CanonicalAuthority == null)
+            if (requestParams.AuthorityInfo?.CanonicalAuthority == null)
             {
                 requestParams.RequestContext.Logger.Warning("No authority provided. Skipping cache lookup ");
                 return null;

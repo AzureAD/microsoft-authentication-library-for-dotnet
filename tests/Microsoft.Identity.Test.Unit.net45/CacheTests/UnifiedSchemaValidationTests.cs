@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -196,7 +197,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithAADAccount()
         {
-            var credential = new MsalAccountCacheItem(MsalEnvironment, CreateAadTestTokenResponse(), "idlab@msidlab4.onmicrosoft.com", AadTenantId);
+            var response = CreateAadTestTokenResponse();
+            var idToken = IdToken.Parse(response.IdToken);
+
+            var credential = new MsalAccountCacheItem(
+                MsalEnvironment,
+                response.ClientInfo,
+                idToken,
+                "idlab@msidlab4.onmicrosoft.com",
+                AadTenantId);
             var expectedJsonObject = new JObject
             {
                 ["local_account_id"] = "9f4880d8-80ba-4c40-97bc-f7a23c703084",
@@ -335,7 +344,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Ignore]
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithMSAAccount()
         {
-            var credential = new MsalAccountCacheItem(MsalEnvironment, CreateMsaTestTokenResponse(), "msalsdktest@outlook.com", MsaTenantId);
+            var response = CreateMsaTestTokenResponse();
+            var credential = new MsalAccountCacheItem(
+                MsalEnvironment,
+                response.ClientInfo,
+                IdToken.Parse(response.IdToken),
+                "msalsdktest@outlook.com",
+                MsaTenantId);
+
             var expectedJsonObject = new JObject
             {
                 ["local_account_id"] = "00000000-0000-0000-40c0-3bac188d01d1",
@@ -471,7 +487,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithB2CAccount()
         {
-            var credential = new MsalAccountCacheItem(MsalEnvironment, CreateB2CTestTokenResponse(), "Missing from the token response", B2CTenantId);
+            var response = CreateB2CTestTokenResponse();
+            var credential = new MsalAccountCacheItem(
+                MsalEnvironment,
+                response.ClientInfo,
+                IdToken.Parse(response.IdToken),
+                "Missing from the token response",
+                B2CTenantId);
+
             var expectedJsonObject = new JObject
             {
                 ["family_name"] = "SDK Test",
@@ -609,7 +632,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithB2CAccountAndTenantId()
         {
-            var credential = new MsalAccountCacheItem(MsalEnvironment, CreateB2CTestTokenResponseWithTenantId(), "Missing from the token response", B2CTenantId);
+            var response = CreateB2CTestTokenResponseWithTenantId();
+            var credential = new MsalAccountCacheItem(
+                MsalEnvironment,
+                response.ClientInfo,
+                IdToken.Parse(response.IdToken),
+                "Missing from the token response",
+                B2CTenantId);
+
             var expectedJsonObject = new JObject
             {
                 ["family_name"] = "SDK Test",
@@ -782,7 +812,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
-            var credential = new MsalAccountCacheItem(MsalEnvironment, CreateAadTestTokenResponseWithFoci(), "idlab@msidlab4.onmicrosoft.com", AadTenantId);
+            var response = CreateAadTestTokenResponseWithFoci();
+
+            var credential = new MsalAccountCacheItem(
+                MsalEnvironment,
+                 response.ClientInfo,
+                IdToken.Parse(response.IdToken),
+                "idlab@msidlab4.onmicrosoft.com", 
+                AadTenantId);
+
             var expectedJsonObject = new JObject
             {
                 ["local_account_id"] = "9f4880d8-80ba-4c40-97bc-f7a23c703084",

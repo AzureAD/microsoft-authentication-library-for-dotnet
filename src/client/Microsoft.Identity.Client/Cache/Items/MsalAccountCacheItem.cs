@@ -18,22 +18,21 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalAccountCacheItem(
             string preferredCacheEnv,
-            MsalTokenResponse response,
+            string clientInfo,
+            IdToken idToken,
             string preferredUsername,
             string tenantId)
             : this()
         {
-            var idToken = IdToken.Parse(response.IdToken);
-
             Init(
                 preferredCacheEnv,
                 idToken?.ObjectId,
-                response.ClientInfo,
-                idToken.Name,
+                clientInfo,
+                idToken?.Name,
                 preferredUsername,
                 tenantId,
-                idToken.GivenName,
-                idToken.FamilyName);
+                idToken?.GivenName,
+                idToken?.FamilyName);
         }
 
         internal /* for test */ MsalAccountCacheItem(

@@ -61,7 +61,8 @@ namespace Microsoft.Identity.Client.OAuth2
                     "ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
             }
 
-            if (!string.Equals(
+            if (!string.IsNullOrEmpty(response.TokenType) &&
+                !string.Equals(
                     response.TokenType,
                     _requestParams.AuthenticationScheme.AccessTokenType,
                     StringComparison.OrdinalIgnoreCase))
