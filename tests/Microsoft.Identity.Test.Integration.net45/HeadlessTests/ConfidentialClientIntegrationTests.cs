@@ -21,6 +21,8 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -277,7 +279,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithClientAssertion(GetSignedClientAssertion(PublicCloudConfidentialClientID, claims))
+                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(ConfidentialClientID, claims))
                 .Build();
 
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
@@ -352,14 +354,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        private static string GetSignedClientAssertion(string clientId, IDictionary<string, string> claims)
+        private static string GetSignedClientAssertionUsingMsalInternal(string clientId, IDictionary<string, string> claims)
         {
 #if NET_CORE
             var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
 #else
             var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
 #endif
-            var jwtToken = new JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
+            var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
             return jwtToken.Sign(clientCredential, false);
         }
@@ -419,6 +421,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNull(authResult.IdToken);
         }
 
+        // Test ignored on net45 due to bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1726
+#if NET_CORE
         [TestMethod]
         [TestCategory(TestCategories.ADFS)]
         public async Task ClientCreds_WithCertificate_Adfs_Async()
@@ -440,6 +444,60 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNull(authResult.IdToken);
+        }
+#endif
+
+        [TestMethod]
+        [TestCategory(TestCategories.ADFS)]
+        public async Task ClientCreds_WithClientAssertion_Adfs_Async()
+        {
+            var cert = await _keyVault.GetCertificateWithPrivateMaterialAsync(AdfsCertName)
+                .ConfigureAwait(false);
+            string clientAssertion = 
+                GetSignedClientAssertionUsingWilson(Adfs2019LabConstants.Authority, cert);
+
+            ConfidentialClientApplication msalConfidentialClient = 
+                ConfidentialClientApplicationBuilder.Create(Adfs2019LabConstants.ConfidentialClientId)
+                                            .WithAdfsAuthority(Adfs2019LabConstants.Authority, true)
+                                            .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
+                                            .WithClientAssertion(clientAssertion)
+                                            .BuildConcrete();
+
+            AuthenticationResult authResult = await msalConfidentialClient
+                .AcquireTokenForClient(s_adfsScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNull(authResult.IdToken);
+        }
+
+        private static string GetSignedClientAssertionUsingWilson(
+            string authority, 
+            X509Certificate2 cert)
+        {
+            string aud = $"{authority}/oauth2/token";
+
+            // no need to add exp, nbf as JsonWebTokenHandler will add them by default.
+            var claims = new Dictionary<string, object>()
+            {
+                { "aud", aud },
+                { "iss", Adfs2019LabConstants.ConfidentialClientId },
+                { "jti", Guid.NewGuid().ToString() },
+                { "sub", Adfs2019LabConstants.ConfidentialClientId }
+            };
+
+            var securityTokenDescriptor = new SecurityTokenDescriptor
+            {
+                Claims = claims,
+                SigningCredentials = new X509SigningCredentials(cert)
+            };
+
+            var handler = new JsonWebTokenHandler();
+            var signedClientAssertion = handler.CreateToken(securityTokenDescriptor);
+
+            return signedClientAssertion;
         }
 
         private async Task RunOnBehalfOfTestAsync(LabResponse labResponse)
