@@ -31,18 +31,28 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class ConfidentialClientIntegrationTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
-        private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
+        private static readonly string[] s_publicCloudOBOServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
+        private static readonly string[] s_arlingtonOBOServiceScope = { "https://arlmsidlab1.us/IDLABS_APP_Confidential_Client/user_impersonation" };
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
         private static readonly string[] s_adfsScopes = { "openid", "profile" };
 
         //TODO: acquire scenario specific client ids from the lab resonse
-        private const string ConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+        private const string PublicCloudPublicClientIDOBO = "be9b0186-7dfd-448a-a944-f771029105bf";
+        private const string PublicCloudConfidentialClientIDOBO = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
+        private const string PublicCloudConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+        private const string ArlingtonConfidentialClientIDOBO = "c0555d2d-02f2-4838-802e-3463422e571d";
+        private const string ArlingtonPublicClientIDOBO = "cb7faed4-b8c0-49ee-b421-f5ed16894c83";
+        private const string ArlingtonAuthority = "https://login.microsoftonline.us/45ff0c17-f8b5-489b-b7fd-2fedebbec0c4";
+
+        private const string PublicCloudHost = "https://login.microsoftonline.com/";
+        private const string ArlingtonCloudHost = "https://login.microsoftonline.us/";
 
         private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
-        private const string TestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+        private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
         private const string AdfsCertName = "IDLABS-APP-Confidential-Client-Cert-OnPrem";
         private KeyVaultSecretsProvider _keyVault;
-        private string _ccaSecret;
+        private static string _publicCloudCcaSecret;
+        private static string _arlingtonCCASecret;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -58,7 +68,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             if (_keyVault == null)
             {
                 _keyVault = new KeyVaultSecretsProvider();
-                _ccaSecret = _keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
+                _publicCloudCcaSecret = _keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
+                _arlingtonCCASecret = _keyVault.GetSecret(TestConstants.MsalArlingtonCCAKeyVaultUri).Value;
             }
         }
 
@@ -67,7 +78,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task GetAuthorizationRequestUrl_ReturnsUri_Async()
         {
             var cca = ConfidentialClientApplicationBuilder
-               .Create(ConfidentialClientID)
+               .Create(PublicCloudConfidentialClientID)
                .WithRedirectUri(RedirectUri)
                .Build();
 
@@ -82,7 +93,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             CoreAssert.AreEqual("offline_access openid profile User.Read", uriParams1["scope"], uriParams2["scope"]);
             CoreAssert.AreEqual("code", uriParams1["response_type"], uriParams2["response_type"]);
-            CoreAssert.AreEqual(ConfidentialClientID, uriParams1["client_id"], uriParams2["client_id"]);
+            CoreAssert.AreEqual(PublicCloudConfidentialClientID, uriParams1["client_id"], uriParams2["client_id"]);
             CoreAssert.AreEqual(RedirectUri, uriParams1["redirect_uri"], uriParams2["redirect_uri"]);
             CoreAssert.AreEqual("select_account", uriParams1["prompt"], uriParams2["prompt"]);
 
@@ -98,10 +109,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
             X509Certificate2 cert = GetCertificate();
-            var confidentialClientAuthority = TestAuthority;
+            var confidentialClientAuthority = PublicCloudTestAuthority;
 
             confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(ConfidentialClientID)
+                .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithCertificate(cert)
                 .Build();
@@ -134,10 +145,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
             X509Certificate2 cert = GetCertificate(true);
-            var confidentialClientAuthority = TestAuthority;
+            var confidentialClientAuthority = PublicCloudTestAuthority;
 
             confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(ConfidentialClientID)
+                .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithCertificate(cert)
                 .Build();
@@ -166,12 +177,27 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ConfidentialClientWithClientSecretTestAsync()
         {
-            var confidentialClientAuthority = TestAuthority;
+            await RunTestWithClientSecretAsync(PublicCloudConfidentialClientID,
+                                                           PublicCloudTestAuthority,
+                                                           _publicCloudCcaSecret).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ArlingtonConfidentialClientWithClientSecretTestAsync()
+        {
+            await RunTestWithClientSecretAsync(ArlingtonConfidentialClientIDOBO,
+                                                           ArlingtonAuthority,
+                                                           _arlingtonCCASecret).ConfigureAwait(false);
+        }
+
+        public async Task RunTestWithClientSecretAsync(string clientID, string authority, string secret)
+        {
+            var confidentialClientAuthority = authority;
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(ConfidentialClientID)
+                .Create(clientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithClientSecret(_ccaSecret)
+                .WithClientSecret(secret)
                 .Build();
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
@@ -196,13 +222,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ConfidentialClientWithNoDefaultClaimsTestAsync()
         {
-            var confidentialClientAuthority = TestAuthority;
+            var confidentialClientAuthority = PublicCloudTestAuthority;
             var claims = GetClaims();
 
             X509Certificate2 cert = GetCertificate();
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(ConfidentialClientID)
+                .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientClaims(cert, claims, false)
                 .Build();
@@ -219,13 +245,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ConfidentialClientWithDefaultClaimsTestAsync()
         {
-            var confidentialClientAuthority = TestAuthority;
+            var confidentialClientAuthority = PublicCloudTestAuthority;
             var claims = GetClaims(false);
 
             X509Certificate2 cert = GetCertificate();
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(ConfidentialClientID)
+                .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientClaims(cert, claims)
                 .Build();
@@ -247,13 +273,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task ConfidentialClientWithSignedAssertionTestAsync()
         {
-            var confidentialClientAuthority = TestAuthority;
+            var confidentialClientAuthority = PublicCloudTestAuthority;
             var claims = GetClaims();
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(ConfidentialClientID)
+                .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(ConfidentialClientID, claims))
+                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, claims))
                 .Build();
 
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
@@ -312,10 +338,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 {
                 { "aud", TestConstants.ClientCredentialAudience },
                 { "exp", exp.ToString(CultureInfo.InvariantCulture) },
-                { "iss", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
+                { "iss", PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
                 { "jti", Guid.NewGuid().ToString() },
                 { "nbf", nbf.ToString(CultureInfo.InvariantCulture) },
-                { "sub", ConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
+                { "sub", PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
                 { "ip", "192.168.2.1" }
                 };
             }
@@ -361,6 +387,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        public async Task ArlingtonWebAPIAccessingGraphOnBehalfOfUserTestAsync()
+        {
+            var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(labResponse).ConfigureAwait(false);
+        }
+
         [TestCategory(TestCategories.ADFS)]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
@@ -470,25 +502,52 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private async Task RunOnBehalfOfTestAsync(LabResponse labResponse)
         {
-            var user = labResponse.User;
+            LabUser user = labResponse.User;
+            string oboHost;
+            string secret;
+            string authority;
+            string publicClientID;
+            string confidentialClientID;
+            string[] oboScope;
 
-            var secret = _keyVault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
+            switch (labResponse.User.AzureEnvironment)
+            {
+                case AzureEnvironment.azureusgovernment:
+                    oboHost = ArlingtonCloudHost;
+                    secret = _keyVault.GetSecret(TestConstants.MsalArlingtonOBOKeyVaultUri).Value;
+                    authority = labResponse.Lab.Authority + "organizations";
+                    publicClientID = ArlingtonPublicClientIDOBO;
+                    confidentialClientID = ArlingtonConfidentialClientIDOBO;
+                    oboScope = s_arlingtonOBOServiceScope;
+                    break;
+                default:
+                    oboHost = PublicCloudHost;
+                    secret = _keyVault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
+                    authority = TestConstants.AuthorityOrganizationsTenant;
+                    publicClientID = PublicCloudPublicClientIDOBO;
+                    confidentialClientID = PublicCloudConfidentialClientIDOBO;
+                    oboScope = s_publicCloudOBOServiceScope;
+                    break;
+            }
+
             //TODO: acquire scenario specific client ids from the lab resonse
-            var publicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
-            var oboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID).WithAuthority(TestConstants.AuthorityOrganizationsTenant).WithRedirectUri(TestConstants.RedirectUri).Build();
+            var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
+                                                                 .WithAuthority(authority)
+                                                                 .WithRedirectUri(TestConstants.RedirectUri)
+                                                                 .Build();
 
-            AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, securePassword)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
+            var builder = msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword);
+
+            builder.WithAuthority(authority);
+
+            var authResult = await builder.ExecuteAsync().ConfigureAwait(false);
 
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(oboConfidentialClientID)
-                .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
+                .Create(confidentialClientID)
+                .WithAuthority(new Uri(oboHost + authResult.TenantId), true)
                 .WithClientSecret(secret)
                 .Build();
 

@@ -11,6 +11,9 @@
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
         <data android:scheme="msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842" android:host="auth" />
+        <data android:scheme="msauth"
+                    android:host="com.companyname.XamarinDev"
+                    android:path="/FHNONvDstzaj3bKe2+WAEGZOwJI="/>
       </intent-filter>
     </activity>
   </application>
