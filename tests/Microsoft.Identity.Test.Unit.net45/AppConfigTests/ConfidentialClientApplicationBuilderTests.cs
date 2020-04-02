@@ -255,6 +255,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 Assert.IsNotNull(e);
                 Assert.AreEqual(MsalError.CertWithoutPrivateKey, e.ErrorCode);
             }
+
+            Assert.Fail();
         }
 
         [TestMethod]

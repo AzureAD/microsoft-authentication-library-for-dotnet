@@ -776,7 +776,7 @@ namespace Microsoft.Identity.Client
         public const string CustomMetadataInstanceOrUri = "custom_metadata_instance_or_uri";
 
         /// <summary>
-        /// <para>What happens?</para>The certificate provided does not have a private key to sign.
+        /// <para>What happens?</para>The certificate provided does not have a private key.
         /// <para>Mitigation</para>Ensure the certificate has a private key.
         /// </summary>
         public const string CertWithoutPrivateKey = "cert_without_private_key";
