@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
-                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(ConfidentialClientID, claims))
+                .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, claims))
                 .Build();
 
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
