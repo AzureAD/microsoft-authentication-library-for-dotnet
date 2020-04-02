@@ -250,7 +250,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             {
                 ConfidentialClientApplicationBuilder
                       .Create(TestConstants.ClientId).WithCertificate(cert).Build();
-            } catch (MsalClientException e)
+            } 
+            catch (MsalClientException e)
             {
                 Assert.IsNotNull(e);
                 Assert.AreEqual(MsalError.CertWithoutPrivateKey, e.ErrorCode);
