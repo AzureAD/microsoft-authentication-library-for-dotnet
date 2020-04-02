@@ -112,9 +112,9 @@ namespace Microsoft.Identity.Client
             #endregion
 
             Account account = new Account(
-                              homeAccountId,
-                              username,
-                              instanceDiscoveryMetadata.PreferredCache);         
+                    homeAccountId,
+                    username,
+                    instanceDiscoveryMetadata.PreferredCache);
 
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
@@ -648,9 +648,9 @@ namespace Microsoft.Identity.Client
                 {
                     var args = new TokenCacheNotificationArgs(this, ClientId, account, true, (this as ITokenCacheInternal).IsApplicationCache);
 
-                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                     try
                     {
+                        await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
 
                         ((ITokenCacheInternal)this).RemoveMsalAccountWithNoLocks(account, requestContext);
@@ -735,9 +735,9 @@ namespace Microsoft.Identity.Client
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true, (this as ITokenCacheInternal).IsApplicationCache);
 
-                await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try
                 {
+                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                     await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
 
                     ((ITokenCacheInternal)this).ClearMsalCache();

@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            return new InMemoryTokenCacheAccessor();
+            return new InMemoryTokenCacheAccessor(Logger);
         }
 
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();

@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            return new InMemoryTokenCacheAccessor();
+            return new InMemoryTokenCacheAccessor(Logger);
         }
 
         /// <inheritdoc />

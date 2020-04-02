@@ -10,11 +10,13 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -118,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             int numIdTokens,
             int numAccounts)
         {
-            var accessor = new InMemoryTokenCacheAccessor();
+            var accessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
 
             for (int i = 1; i <= numAccessTokens; i++)
             {
@@ -443,7 +445,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string json = new UTF8Encoding().GetString(bytes);
 
-            var otherAccessor = new InMemoryTokenCacheAccessor();
+            var otherAccessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
             var s2 = new TokenCacheDictionarySerializer(otherAccessor);
             s2.Deserialize(bytes, false);
 
@@ -502,7 +504,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
 
-            var otherAccessor = new InMemoryTokenCacheAccessor();
+            var otherAccessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
             s2.Deserialize(bytes, false);
 
@@ -611,7 +613,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DeploymentItem(@"Resources\cachecompat_python.bin")]
         public void TestPythonCacheSerializationInterop()
         {
-            var accessor = new InMemoryTokenCacheAccessor();
+            var accessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
             var s = new TokenCacheJsonSerializer(accessor);
             string pythonBinFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_python.bin");
             byte[] bytes = File.ReadAllBytes(pythonBinFilePath);
@@ -627,7 +629,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DeploymentItem(@"Resources\cachecompat_dotnet_dictionary.bin")]
         public void TestMsalNet2XCacheSerializationInterop()
         {
-            var accessor = new InMemoryTokenCacheAccessor();
+            var accessor = new InMemoryTokenCacheAccessor(Substitute.For<ICoreLogger>());
             var s = new TokenCacheDictionarySerializer(accessor);
             string binFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_dotnet_dictionary.bin");
             byte[] bytes = File.ReadAllBytes(binFilePath);

@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            return new InMemoryTokenCacheAccessor();
+            return new InMemoryTokenCacheAccessor(Logger);
         }
 
         protected override IWebUIFactory CreateWebUiFactory() => new NetCoreWebUIFactory();
