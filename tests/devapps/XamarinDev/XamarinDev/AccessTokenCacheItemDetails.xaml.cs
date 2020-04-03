@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -35,8 +36,13 @@ namespace XamarinDev
                 .ToString(CultureInfo.InvariantCulture);
 
             rawClientInfoLabel.Text = msalAccessTokenCacheItem.RawClientInfo;
-            clientInfoUniqueIdentifierLabel.Text = msalAccessTokenCacheItem.ClientInfo.UniqueObjectIdentifier;
-            clientInfoUniqueTenantIdentifierLabel.Text = msalAccessTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
+
+            if (msalAccessTokenCacheItem.RawClientInfo != null)
+            {
+                var clientInfo = ClientInfo.CreateFromJson(msalAccessTokenCacheItem.RawClientInfo);
+                clientInfoUniqueIdentifierLabel.Text = clientInfo.UniqueObjectIdentifier;
+                clientInfoUniqueTenantIdentifierLabel.Text = clientInfo.UniqueTenantIdentifier;
+            }
 
             secretLabel.Text = StringShortenerConverter.GetShortStr(msalAccessTokenCacheItem.Secret, 100);
         }

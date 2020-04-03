@@ -52,42 +52,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-
-        [TestMethod]
-        [TestCategory("B2C")]
-        public async Task B2C_DoesNotAllow_AcquireTokenSilent_With0Scopes_Async()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithB2CAuthority(TestConstants.B2CLoginAuthority)
-                                                                            .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
-                                                                            .BuildConcrete();
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    app.ServiceBundle.PlatformProxy,
-                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CLoginAuthority);
-
-                AuthenticationResult result = app
-                    .AcquireTokenInteractive(null)
-                    .ExecuteAsync(CancellationToken.None)
-                    .Result;
-
-                Assert.IsNotNull(result.Account);
-
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
-                    app.AcquireTokenSilent(null, result.Account).ExecuteAsync()
-                ).ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.ScopesRequired, ex.ErrorCode);
-                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification);
-            }
-        }
-
         [TestMethod]
         [TestCategory("B2C")]
         public void B2CAcquireTokenTest()
@@ -298,21 +262,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AssertNoAccessToken(result);
                 Assert.AreEqual(0, httpManager.QueueSize);
 
-                // Arrange 2 - silent call
-                IAccount account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
-               
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(
-                   TestConstants.B2CLoginAuthority,
-                   responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.B2CTokenResponseWithoutAT));
-                
-                // Act 
-                result = await app
-                   .AcquireTokenSilent(null, account) // no scopes -> no Access Token!
-                   .ExecuteAsync()
-                   .ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+                  app.AcquireTokenSilent(null, result.Account).ExecuteAsync()
+              ).ConfigureAwait(false);
 
-                // Assert
-                AssertNoAccessToken(result);
+                Assert.AreEqual(MsalError.ScopesRequired, ex.ErrorCode);
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification);
             }
         }
 

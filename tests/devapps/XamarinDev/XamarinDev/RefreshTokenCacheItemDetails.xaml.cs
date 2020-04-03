@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -27,8 +28,13 @@ namespace XamarinDev
             userIdentifierLabel.Text = msalRefreshTokenCacheItem.HomeAccountId;
             rawClientInfoLabel.Text = msalRefreshTokenCacheItem.RawClientInfo;
 
-            clientInfoUniqueIdentifierLabel.Text = msalRefreshTokenCacheItem.ClientInfo.UniqueObjectIdentifier;
-            clientInfoUniqueTenantIdentifierLabel.Text = msalRefreshTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
+            if (msalRefreshTokenCacheItem.RawClientInfo != null)
+            {
+                var clientInfo = ClientInfo.CreateFromJson(msalRefreshTokenCacheItem.RawClientInfo);
+
+                clientInfoUniqueIdentifierLabel.Text = clientInfo.UniqueObjectIdentifier;
+                clientInfoUniqueTenantIdentifierLabel.Text = clientInfo.UniqueTenantIdentifier;
+            }
 
             secretLabel.Text = StringShortenerConverter.GetShortStr(msalRefreshTokenCacheItem.Secret, 100);
         }
