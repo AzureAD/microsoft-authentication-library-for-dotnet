@@ -1,3 +1,11 @@
+4.11.0
+============
+Feature Requests: **MSAL.NET will now remove accounts from the cache that have expired refresh tokens** MSAL.NET will remove the refresh token and the associated account if the if suberror is "bad_token" to avoid overloading ESTS. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1720)
+
+Bug Fixes:
+**CryptographicException: Bad PKCS7 padding in iOS brokered authentication** ? [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1628)
+
+
 4.10.0
 ============
 New Features:
