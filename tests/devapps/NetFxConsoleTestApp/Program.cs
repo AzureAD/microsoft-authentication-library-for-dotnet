@@ -52,21 +52,18 @@ namespace NetFx
 
         // Simple confidential client app with access to https://graph.microsoft.com/.default
         private static readonly string s_clientIdForConfidentialApp =
-            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID") ??
-            throw new ArgumentException("Please configure a client id");
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID");
 
         // App secret for app above 
         private static readonly string s_confidentialClientSecret =
-            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET") ??
-            throw new ArgumentException("Please configure a client secret");
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET");
 
         // https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/ADALTesting/providers/Microsoft.KeyVault/vaults/buildautomation/secrets
         private static readonly string s_secretForPoPValidationRequest =
-            Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET") ??
-            throw new ArgumentException("Please configure the pop validation api secret");
+            Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET");
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly IEnumerable<string> s_scopes = new[] { "user.read" }; 
+        private static readonly IEnumerable<string> s_scopes = new[] { "" };
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -74,13 +71,13 @@ namespace NetFx
         public static readonly string AppCacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.app.json";
 
 
-        private static readonly string[] s_tids = new[]  {
-            "common",
-            "organizations",
-            "49f548d0-12b7-4169-a390-bb5304d24462",
-            "72f988bf-86f1-41af-91ab-2d7cd011db47" };
+        private static readonly string[] s_authorities = new[]  {
+            "https://login.microsoftonline.com/common",
+            "https://login.microsoftonline.com/organizations",
+            "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462",
+            "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47" };
 
-        private static int s_currentTid = 0;
+        private static int s_currentAuthority = 0;
 
         public static void Main(string[] args)
         {
@@ -93,8 +90,7 @@ namespace NetFx
 
         private static string GetAuthority()
         {
-            string tenant = s_tids[s_currentTid];
-            return $"https://login.microsoftonline.com/{tenant}";
+            return s_authorities[s_currentAuthority];
         }
 
         private static IConfidentialClientApplication CreateCca()
@@ -318,7 +314,7 @@ namespace NetFx
                             break;
                         case 'r': // rotate tid
 
-                            s_currentTid = (s_currentTid + 1) % s_tids.Length;
+                            s_currentAuthority = (s_currentAuthority + 1) % s_authorities.Length;
                             pca = CreatePca();
                             cca = CreateCca();
                             RunConsoleAppLogicAsync(pca, cca).Wait();

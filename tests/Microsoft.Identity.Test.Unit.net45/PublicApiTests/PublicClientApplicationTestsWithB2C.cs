@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -48,6 +49,42 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
+            }
+        }
+
+
+        [TestMethod]
+        [TestCategory("B2C")]
+        public async Task B2C_DoesNotAllow_AcquireTokenSilent_With0Scopes_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithB2CAuthority(TestConstants.B2CLoginAuthority)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CLoginAuthority);
+
+                AuthenticationResult result = app
+                    .AcquireTokenInteractive(null)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
+                Assert.IsNotNull(result.Account);
+
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+                    app.AcquireTokenSilent(null, result.Account).ExecuteAsync()
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ScopesRequired, ex.ErrorCode);
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification);
             }
         }
 
