@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -121,7 +122,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness(telemetryCallback: myReceiver.HandleTelemetryEvents))
             {
                 TokenCache cache = new TokenCache(harness.ServiceBundle, false);
-
+                string clientInfo = MockHelpers.CreateClientInfo();
+                string homeAccountId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
                 MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
@@ -130,7 +132,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
-                    MockHelpers.CreateClientInfo());
+                    clientInfo, 
+                    homeAccountId);
 
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;

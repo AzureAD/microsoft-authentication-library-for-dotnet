@@ -41,10 +41,13 @@ namespace Microsoft.Identity.Client
             string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
 
             string subject = idToken?.Subject;
-            if (idToken != null && string.IsNullOrEmpty(subject))
+            if (idToken?.Subject != null)
             {
                 requestParams.RequestContext.Logger.Warning("Subject not present in Id token");
             }
+            
+            ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
+            string homeAccountId = clientInfo?.ToAccountIdentifier() ?? subject; // ADFS does not have client info, so we use subject
 
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
@@ -63,7 +66,7 @@ namespace Microsoft.Identity.Client
                         requestParams.ClientId,
                         response,
                         tenantId,
-                        subject,
+                        homeAccountId,
                         requestParams.AuthenticationScheme.KeyId)
                     {
                         UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
@@ -77,7 +80,7 @@ namespace Microsoft.Identity.Client
                                     instanceDiscoveryMetadata.PreferredCache,
                                     requestParams.ClientId,
                                     response,
-                                    subject);
+                                    homeAccountId);
 
                 if (!_featureFlags.IsFociEnabled)
                 {
@@ -92,7 +95,7 @@ namespace Microsoft.Identity.Client
                     requestParams.ClientId,
                     response,
                     tenantId,
-                    subject)
+                    homeAccountId)
                 {
                     IsAdfs = isAdfsAuthority
                 };
@@ -100,31 +103,18 @@ namespace Microsoft.Identity.Client
                 msalAccountCacheItem = new MsalAccountCacheItem(
                              instanceDiscoveryMetadata.PreferredCache,
                              response.ClientInfo,
+                             homeAccountId,
                              idToken,
                              preferredUsername,
                              tenantId);
-
-
             }
 
             #endregion
 
-            string homeAccountId = msalAccessTokenCacheItem?.HomeAccountId ??
-                msalRefreshTokenCacheItem?.HomeAccountId ??
-                msalIdTokenCacheItem?.HomeAccountId;
-
             Account account = new Account(
                               homeAccountId,
                               username,
-                              instanceDiscoveryMetadata.PreferredCache);
-
-            //The ADFS direct scenario does not return client info so the home account id is acquired from the subject
-            if (isAdfsAuthority &&
-                msalAccountCacheItem != null &&
-                string.IsNullOrEmpty(homeAccountId))
-            {
-                msalAccountCacheItem.HomeAccountId = idToken.Subject;
-            }
+                              instanceDiscoveryMetadata.PreferredCache);         
 
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try

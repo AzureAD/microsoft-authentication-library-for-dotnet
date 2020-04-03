@@ -182,7 +182,6 @@ namespace Microsoft.Identity.Client.Cache
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {
-                string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
                 string cachedAccountDisplayableId = kvp.Key.DisplayableId;
                 string cachedClientId = kvp.Key.ClientId;
 
@@ -213,7 +212,6 @@ namespace Microsoft.Identity.Client.Cache
                 if (!string.IsNullOrEmpty(rawClientInfo))
                 {
                     string cachedAccountId = ClientInfo.CreateFromJson(rawClientInfo).ToAccountIdentifier();
-                    string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
                     string cachedClientId = kvp.Key.ClientId;
 
                     if (string.Equals(accountOrUserId, cachedAccountId, StringComparison.OrdinalIgnoreCase) &&
@@ -275,11 +273,18 @@ namespace Microsoft.Identity.Client.Cache
                 List<MsalRefreshTokenCacheItem> list = new List<MsalRefreshTokenCacheItem>();
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
                 {
-                    list.Add(new MsalRefreshTokenCacheItem(
-                        new Uri(pair.Key.Authority).Host,
-                        pair.Key.ClientId,
-                        pair.Value.RefreshToken,
-                        pair.Value.RawClientInfo));
+                    if (!string.IsNullOrEmpty(pair.Value.RawClientInfo))
+                    {
+                        string homeAccountId = ClientInfo.CreateFromJson(pair.Value.RawClientInfo).ToAccountIdentifier();
+
+                        list.Add(new MsalRefreshTokenCacheItem(
+                          new Uri(pair.Key.Authority).Host,
+                          pair.Key.ClientId,
+                          pair.Value.RefreshToken,
+                          pair.Value.RawClientInfo,
+                          familyId: null,
+                          homeAccountId: homeAccountId));
+                    }
                 }
 
                 return list;

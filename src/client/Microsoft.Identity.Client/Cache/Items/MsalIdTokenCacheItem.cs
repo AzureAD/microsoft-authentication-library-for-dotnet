@@ -24,15 +24,14 @@ namespace Microsoft.Identity.Client.Cache.Items
             string clientId,
             MsalTokenResponse response,
             string tenantId,
-            string userId=null
-            )
+            string homeAccountId)
             : this(
                 preferredCacheEnv,
                 clientId,
                 response.IdToken,
                 response.ClientInfo,
-                tenantId,
-                userId)
+                homeAccountId,
+                tenantId)
         {
         }
 
@@ -41,21 +40,16 @@ namespace Microsoft.Identity.Client.Cache.Items
             string clientId,
             string secret,
             string rawClientInfo,
-            string tenantId,
-            string userId=null
-            )
+            string homeAccountId,
+            string tenantId)
             : this()
         {
             Environment = preferredCacheEnv;
             TenantId = tenantId;
             ClientId = clientId;
             Secret = secret;
-
             RawClientInfo = rawClientInfo;
-
-            //Adfs does not send back client info, so HomeAccountId must be explicitly set
-            HomeAccountId = userId;
-            InitUserIdentifier();
+            HomeAccountId = homeAccountId;
         }
 
     

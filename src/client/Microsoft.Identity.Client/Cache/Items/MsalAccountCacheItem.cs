@@ -3,7 +3,6 @@
 
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
@@ -19,6 +18,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal MsalAccountCacheItem(
             string preferredCacheEnv,
             string clientInfo,
+            string homeAccountId,
             IdToken idToken,
             string preferredUsername,
             string tenantId)
@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 preferredCacheEnv,
                 idToken?.ObjectId,
                 clientInfo,
+                homeAccountId,
                 idToken?.Name,
                 preferredUsername,
                 tenantId,
@@ -39,6 +40,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string environment,
             string localAccountId,
             string rawClientInfo,
+            string homeAccountId,
             string name,
             string preferredUsername,
             string tenantId,
@@ -50,6 +52,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 environment,
                 localAccountId,
                 rawClientInfo,
+                homeAccountId,
                 name,
                 preferredUsername,
                 tenantId,
@@ -69,6 +72,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string environment,
             string localAccountId,
             string rawClientInfo,
+            string homeAccountId,
             string name,
             string preferredUsername,
             string tenantId,
@@ -83,8 +87,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = rawClientInfo;
             GivenName = givenName;
             FamilyName = familyName;
-
-            InitUserIdentifier();
+            HomeAccountId = homeAccountId;
         }
 
         internal MsalAccountCacheKey GetKey()

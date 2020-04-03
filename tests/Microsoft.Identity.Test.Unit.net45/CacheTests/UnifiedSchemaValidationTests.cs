@@ -31,37 +31,41 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private const string Scopes = "tasks.read user.read openid profile offline_access";
         private const string RedirectUri = "msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth";
 
+        public const string AadRawClientInfo = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0";
+        public const string MsaRawClientInfo = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ";
+        public const string B2CRawClientInfo = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9";
+
         private MsalTokenResponse CreateAadTestTokenResponse()
         {
-            string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.\",\"client_info\":\"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0\"}";
+            string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.\",\"client_info\":\"" + AadRawClientInfo + "\"}";
             var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
             return msalTokenResponse;
         }
 
         private MsalTokenResponse CreateMsaTestTokenResponse()
         {
-            string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Tasks.Read User.Read openid profile\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vOTE4ODA0MGQtNmM2Ny00YzViLWIxMTItMzZhMzA0YjY2ZGFkL3YyLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwiYXVkIjoiYjZjNjlhMzctZGY5Ni00ZGIwLTkwODgtMmFiOTZlMWQ4MjE1IiwiZXhwIjoxNTM4ODg1MjU0LCJpYXQiOjE1Mzg3OTg1NTQsIm5iZiI6MTUzODc5ODU1NCwibmFtZSI6IlRlc3QgVXNlcm5hbWUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtc2Fsc2RrdGVzdEBvdXRsb29rLmNvbSIsIm9pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInRpZCI6IjkxODgwNDBkLTZjNjctNGM1Yi1iMTEyLTM2YTMwNGI2NmRhZCIsImFpbyI6IkRXZ0tubCFFc2ZWa1NVOGpGVmJ4TTZQaFphUjJFeVhzTUJ5bVJHU1h2UkV1NGkqRm1CVTFSQmw1aEh2TnZvR1NHbHFkQkpGeG5kQXNBNipaM3FaQnIwYzl2YUlSd1VwZUlDVipTWFpqdzghQiIsImFsZyI6IkhTMjU2In0.\",\"client_info\":\"eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ\"}";
+            string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Tasks.Read User.Read openid profile\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vOTE4ODA0MGQtNmM2Ny00YzViLWIxMTItMzZhMzA0YjY2ZGFkL3YyLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwiYXVkIjoiYjZjNjlhMzctZGY5Ni00ZGIwLTkwODgtMmFiOTZlMWQ4MjE1IiwiZXhwIjoxNTM4ODg1MjU0LCJpYXQiOjE1Mzg3OTg1NTQsIm5iZiI6MTUzODc5ODU1NCwibmFtZSI6IlRlc3QgVXNlcm5hbWUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtc2Fsc2RrdGVzdEBvdXRsb29rLmNvbSIsIm9pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInRpZCI6IjkxODgwNDBkLTZjNjctNGM1Yi1iMTEyLTM2YTMwNGI2NmRhZCIsImFpbyI6IkRXZ0tubCFFc2ZWa1NVOGpGVmJ4TTZQaFphUjJFeVhzTUJ5bVJHU1h2UkV1NGkqRm1CVTFSQmw1aEh2TnZvR1NHbHFkQkpGeG5kQXNBNipaM3FaQnIwYzl2YUlSd1VwZUlDVipTWFpqdzghQiIsImFsZyI6IkhTMjU2In0.\",\"client_info\":\"" + MsaRawClientInfo + "\"}";
             var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
             return msalTokenResponse;
         }
 
         private MsalTokenResponse CreateB2CTestTokenResponse()
         {
-            string jsonResponse = "{\"access_token\":\"<removed_at>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIn0.\",\"token_type\":\"Bearer\",\"not_before\":1538801260,\"expires_in\":3600,\"ext_expires_in\":262800,\"expires_on\":1538804860,\"resource\":\"14df2240-96cc-4f42-a133-ef0807492869\",\"client_info\":\"eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9\",\"scope\":\"https://iosmsalb2c.onmicrosoft.com/webapitest/user.read\",\"refresh_token\":\"<removed_rt>\",\"refresh_token_expires_in\":1209600}";
+            string jsonResponse = "{\"access_token\":\"<removed_at>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIn0.\",\"token_type\":\"Bearer\",\"not_before\":1538801260,\"expires_in\":3600,\"ext_expires_in\":262800,\"expires_on\":1538804860,\"resource\":\"14df2240-96cc-4f42-a133-ef0807492869\",\"client_info\":\"" + B2CRawClientInfo + "\",\"scope\":\"https://iosmsalb2c.onmicrosoft.com/webapitest/user.read\",\"refresh_token\":\"<removed_rt>\",\"refresh_token_expires_in\":1209600}";
             var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
             return msalTokenResponse;
         }
 
         private MsalTokenResponse CreateB2CTestTokenResponseWithTenantId()
         {
-            string jsonResponse = "{\"access_token\":\"<removed_at>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIiwidGlkIjoiYmE2YzBkOTQtYThkYS00NWIyLTgzYWUtMzM4NzFmOWMyZGQ4IiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20ifQ.\",\"token_type\":\"Bearer\",\"not_before\":1538801260,\"expires_in\":3600,\"ext_expires_in\":262800,\"expires_on\":1538804860,\"resource\":\"14df2240-96cc-4f42-a133-ef0807492869\",\"client_info\":\"eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9\",\"scope\":\"https://iosmsalb2c.onmicrosoft.com/webapitest/user.read\",\"refresh_token\":\"<removed_rt>\",\"refresh_token_expires_in\":1209600}";
+            string jsonResponse = "{\"access_token\":\"<removed_at>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIiwidGlkIjoiYmE2YzBkOTQtYThkYS00NWIyLTgzYWUtMzM4NzFmOWMyZGQ4IiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20ifQ.\",\"token_type\":\"Bearer\",\"not_before\":1538801260,\"expires_in\":3600,\"ext_expires_in\":262800,\"expires_on\":1538804860,\"resource\":\"14df2240-96cc-4f42-a133-ef0807492869\",\"client_info\":\"" + B2CRawClientInfo + "\",\"scope\":\"https://iosmsalb2c.onmicrosoft.com/webapitest/user.read\",\"refresh_token\":\"<removed_rt>\",\"refresh_token_expires_in\":1209600}";
             var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
             return msalTokenResponse;
         }
 
         private MsalTokenResponse CreateAadTestTokenResponseWithFoci()
         {
-            string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.\",\"client_info\":\"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0\",\"foci\":\"1\"}";
+            string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.\",\"client_info\":\"" + AadRawClientInfo + "\",\"foci\":\"1\"}";
             var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
             return msalTokenResponse;
         }
@@ -93,7 +97,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithAADAccount()
         {
-            var credential = new MsalAccessTokenCacheItem(MsalEnvironment, ClientId, CreateAadTestTokenResponse(), AadTenantId);
+            string homeAccountId = ClientInfo.CreateFromJson(AadRawClientInfo).ToAccountIdentifier();
+            var credential = new MsalAccessTokenCacheItem(
+                MsalEnvironment,
+                ClientId,
+                CreateAadTestTokenResponse(),
+                AadTenantId,
+                homeAccountId);
+
             DateTime currentDate = DateTime.UtcNow;
             string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
             string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
@@ -136,7 +147,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithAADAccount()
         {
-            var credential = new MsalIdTokenCacheItem(MsalEnvironment, ClientId, CreateAadTestTokenResponse(), AadTenantId);
+            string homeAccountId = ClientInfo.CreateFromJson(AadRawClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalIdTokenCacheItem(
+                MsalEnvironment,
+                ClientId,
+                CreateAadTestTokenResponse(),
+                AadTenantId,
+                homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.",
@@ -167,7 +186,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithAADAccount()
         {
-            var credential = new MsalRefreshTokenCacheItem(MsalEnvironment, ClientId, CreateAadTestTokenResponse(), AadTenantId);
+            var response = CreateAadTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalRefreshTokenCacheItem(
+                MsalEnvironment, 
+                ClientId,
+                response,
+                homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "<removed_rt>",
@@ -198,14 +225,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithAADAccount()
         {
             var response = CreateAadTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
             var idToken = IdToken.Parse(response.IdToken);
 
             var credential = new MsalAccountCacheItem(
                 MsalEnvironment,
                 response.ClientInfo,
+                homeAccountId,
                 idToken,
                 "idlab@msidlab4.onmicrosoft.com",
                 AadTenantId);
+
             var expectedJsonObject = new JObject
             {
                 ["local_account_id"] = "9f4880d8-80ba-4c40-97bc-f7a23c703084",
@@ -237,7 +267,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithMSAAccount()
         {
-            var credential = new MsalAccessTokenCacheItem(MsalEnvironment, ClientId, CreateMsaTestTokenResponse(), MsaTenantId);
+            var response = CreateMsaTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalAccessTokenCacheItem(
+                MsalEnvironment,
+                ClientId,
+                response,
+                MsaTenantId,
+                homeAccountId);
+
             DateTime currentDate = DateTime.UtcNow;
             string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
             string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
@@ -280,7 +319,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithMSAAccount()
         {
-            var credential = new MsalIdTokenCacheItem(MsalEnvironment, ClientId, CreateMsaTestTokenResponse(), MsaTenantId);
+            var response = CreateMsaTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalIdTokenCacheItem(
+                MsalEnvironment,
+                ClientId,
+                response,
+                MsaTenantId, 
+                homeAccountId: homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vOTE4ODA0MGQtNmM2Ny00YzViLWIxMTItMzZhMzA0YjY2ZGFkL3YyLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwiYXVkIjoiYjZjNjlhMzctZGY5Ni00ZGIwLTkwODgtMmFiOTZlMWQ4MjE1IiwiZXhwIjoxNTM4ODg1MjU0LCJpYXQiOjE1Mzg3OTg1NTQsIm5iZiI6MTUzODc5ODU1NCwibmFtZSI6IlRlc3QgVXNlcm5hbWUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtc2Fsc2RrdGVzdEBvdXRsb29rLmNvbSIsIm9pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInRpZCI6IjkxODgwNDBkLTZjNjctNGM1Yi1iMTEyLTM2YTMwNGI2NmRhZCIsImFpbyI6IkRXZ0tubCFFc2ZWa1NVOGpGVmJ4TTZQaFphUjJFeVhzTUJ5bVJHU1h2UkV1NGkqRm1CVTFSQmw1aEh2TnZvR1NHbHFkQkpGeG5kQXNBNipaM3FaQnIwYzl2YUlSd1VwZUlDVipTWFpqdzghQiIsImFsZyI6IkhTMjU2In0.",
@@ -311,7 +359,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithMSAAccount()
         {
-            var credential = new MsalRefreshTokenCacheItem(MsalEnvironment, ClientId, CreateMsaTestTokenResponse(), MsaTenantId);
+            var response = CreateMsaTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalRefreshTokenCacheItem(
+                MsalEnvironment, 
+                ClientId,
+                response,
+                homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "<removed_rt>",
@@ -338,52 +394,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(2002, key.iOSType);
         }
 
-        // TODO: the MsaTestTokenResponse in this test contains invalid data for the IDToken so this test will fail.
-        // Working with Olga on why this data is bad so we keep consistent test data in our test and the iOS native tests.
-        [TestMethod]
-        [Ignore]
-        public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithMSAAccount()
-        {
-            var response = CreateMsaTestTokenResponse();
-            var credential = new MsalAccountCacheItem(
-                MsalEnvironment,
-                response.ClientInfo,
-                IdToken.Parse(response.IdToken),
-                "msalsdktest@outlook.com",
-                MsaTenantId);
-
-            var expectedJsonObject = new JObject
-            {
-                ["local_account_id"] = "00000000-0000-0000-40c0-3bac188d01d1",
-                ["home_account_id"] = "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad",
-                ["username"] = "msalsdktest@outlook.com",
-                ["environment"] = "login.microsoftonline.com",
-                ["realm"] = "9188040d-6c67-4c5b-b112-36a304b66dad",
-                ["authority_type"] = "MSSTS",
-                ["name"] = "Test Username",
-                ["client_info"] = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ"
-            };
-
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
-
-            MsalAccountCacheKey key = credential.GetKey();
-
-            string expectedServiceKey = "9188040d-6c67-4c5b-b112-36a304b66dad";
-            Assert.AreEqual(expectedServiceKey, key.iOSService);
-
-            string expectedAccountKey = "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.microsoftonline.com";
-            Assert.AreEqual(expectedAccountKey, key.iOSAccount);
-
-            string expectedGenericKey = "msalsdktest@outlook.com";
-            Assert.AreEqual(expectedGenericKey, key.iOSGeneric);
-
-            Assert.AreEqual(1003, key.iOSType);
-        }
-
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithB2CAccount()
         {
-            var credential = new MsalAccessTokenCacheItem(MsalEnvironment, B2CClientId, CreateB2CTestTokenResponse(), B2CTenantId);
+            var response = CreateB2CTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalAccessTokenCacheItem(
+                MsalEnvironment,
+                B2CClientId,
+                CreateB2CTestTokenResponse(),
+                B2CTenantId,
+                homeAccountId);
+
             DateTime currentDate = DateTime.UtcNow;
             string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
             string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
@@ -426,7 +449,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithB2CAccount()
         {
-            var credential = new MsalIdTokenCacheItem(MsalEnvironment, B2CClientId, CreateB2CTestTokenResponse(), B2CTenantId);
+            var response = CreateB2CTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalIdTokenCacheItem(
+                MsalEnvironment,
+                B2CClientId,
+                response,
+                B2CTenantId,
+                homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIn0.",
@@ -457,7 +489,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithB2CAccount()
         {
-            var credential = new MsalRefreshTokenCacheItem(MsalEnvironment, B2CClientId, CreateB2CTestTokenResponse(), B2CTenantId);
+            var response = CreateB2CTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalRefreshTokenCacheItem(
+                MsalEnvironment, 
+                B2CClientId,
+                response,
+                homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "<removed_rt>",
@@ -487,10 +527,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithB2CAccount()
         {
+
             var response = CreateB2CTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
             var credential = new MsalAccountCacheItem(
                 MsalEnvironment,
                 response.ClientInfo,
+                homeAccountId,
                 IdToken.Parse(response.IdToken),
                 "Missing from the token response",
                 B2CTenantId);
@@ -528,7 +572,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithB2CAccountAndTenantId()
         {
-            var credential = new MsalAccessTokenCacheItem(MsalEnvironment, B2CClientId, CreateB2CTestTokenResponseWithTenantId(), B2CTenantId);
+            var response = CreateB2CTestTokenResponse();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalAccessTokenCacheItem(
+                MsalEnvironment,
+                B2CClientId,
+                response,
+                B2CTenantId,
+                homeAccountId);
             DateTime currentDate = DateTime.UtcNow;
             string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
             string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
@@ -571,7 +623,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithB2CAccountAndTenantId()
         {
-            var credential = new MsalIdTokenCacheItem(MsalEnvironment, B2CClientId, CreateB2CTestTokenResponseWithTenantId(), B2CTenantId);
+            var response = CreateB2CTestTokenResponseWithTenantId();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalIdTokenCacheItem(
+                MsalEnvironment,
+                B2CClientId,
+                response,
+                B2CTenantId,
+                homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIiwidGlkIjoiYmE2YzBkOTQtYThkYS00NWIyLTgzYWUtMzM4NzFmOWMyZGQ4IiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20ifQ.",
@@ -602,7 +663,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithB2CAccountAndTenantId()
         {
-            var credential = new MsalRefreshTokenCacheItem(MsalEnvironment, B2CClientId, CreateB2CTestTokenResponseWithTenantId(), B2CTenantId);
+            var response = CreateB2CTestTokenResponseWithTenantId();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalRefreshTokenCacheItem(
+                MsalEnvironment, 
+                B2CClientId, 
+                CreateB2CTestTokenResponseWithTenantId(),
+                homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "<removed_rt>",
@@ -633,9 +702,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithB2CAccountAndTenantId()
         {
             var response = CreateB2CTestTokenResponseWithTenantId();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
             var credential = new MsalAccountCacheItem(
                 MsalEnvironment,
                 response.ClientInfo,
+                homeAccountId,
                 IdToken.Parse(response.IdToken),
                 "Missing from the token response",
                 B2CTenantId);
@@ -673,7 +745,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForAccessToken_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
-            var credential = new MsalAccessTokenCacheItem(MsalEnvironment, ClientId, CreateAadTestTokenResponseWithFoci(), AadTenantId);
+            var response = CreateAadTestTokenResponseWithFoci();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalAccessTokenCacheItem(
+                MsalEnvironment,
+                ClientId,
+                response,
+                AadTenantId, 
+                homeAccountId);
+
             DateTime currentDate = DateTime.UtcNow;
             string expiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
             string extExpiresOn = CoreHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
@@ -716,7 +797,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForIDToken_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
-            var credential = new MsalIdTokenCacheItem(MsalEnvironment, ClientId, CreateAadTestTokenResponseWithFoci(), AadTenantId);
+            var response = CreateAadTestTokenResponseWithFoci();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalIdTokenCacheItem(
+                MsalEnvironment,
+                ClientId,
+                response,
+                AadTenantId,
+                homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.",
@@ -781,7 +871,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSchemaComplianceForFamilyRefreshToken_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
-            var credential = new MsalRefreshTokenCacheItem(MsalEnvironment, ClientId, CreateAadTestTokenResponseWithFoci(), AadTenantId);
+            var response = CreateAadTestTokenResponseWithFoci();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
+
+            var credential = new MsalRefreshTokenCacheItem(
+                MsalEnvironment, 
+                ClientId,
+                response, 
+                homeAccountId: homeAccountId);
+
             var expectedJsonObject = new JObject
             {
                 ["secret"] = "<removed_rt>",
@@ -813,12 +911,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void TestSchemaComplianceForAccount_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
             var response = CreateAadTestTokenResponseWithFoci();
+            string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalAccountCacheItem(
                 MsalEnvironment,
-                 response.ClientInfo,
+                response.ClientInfo,
+                homeAccountId,
                 IdToken.Parse(response.IdToken),
-                "idlab@msidlab4.onmicrosoft.com", 
+                "idlab@msidlab4.onmicrosoft.com",
                 AadTenantId);
 
             var expectedJsonObject = new JObject
