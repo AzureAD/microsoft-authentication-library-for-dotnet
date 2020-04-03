@@ -1,9 +1,16 @@
 4.11.0
 ============
-Feature Requests: **MSAL.NET will now remove accounts from the cache that have expired refresh tokens** MSAL.NET will remove the refresh token and the associated account if the if suberror is "bad_token" to avoid overloading ESTS. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1720)
+New Features: 
+
+**MSAL.NET will now remove accounts from the cache that have expired refresh tokens**. MSAL.NET will remove both the refresh token and the associated account if the `suberror` is "bad_token" to avaoid unnecessary calls to AzureAD. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1720)
+
+**MSAL.NET uses telemetry schema V2** MSAL.NET has been updated to use Http telemetry schema V2. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1681)
 
 Bug Fixes:
-**CryptographicException: Bad PKCS7 padding in iOS brokered authentication** ? [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1628)
+
+**When migrating a Xamarin application from ADAL.NET to MSAL.NET and preserving the keychain, a CryptographicException can be thrown from the BrokerKeyHelper.** MSAL.NET now does the broker key keychain look up by Service and Account only. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1628)
+
+**WithProofOfPosession produces a token of type POP when it is expected to be PoP** MSAl.NET will now produce a token of type PoP when WithProofOfPosession() is used. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1711)
 
 
 4.10.0
