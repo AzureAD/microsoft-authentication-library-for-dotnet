@@ -85,6 +85,29 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return GetLabUserDataAsync(query);
         }
 
+        public static Task<LabResponse> GetArlingtonUserAsync()
+        {
+            var response = GetLabUserDataAsync(UserQuery.ArlingtonUserQuery);
+            if (response.Result.User.AzureEnvironment != AzureEnvironment.azureusgovernment)
+            {
+                response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
+            }
+            return response;
+        }
+
+        public static Task<LabResponse> GetArlingtonADFSUserAsync()
+        {
+            var query = UserQuery.ArlingtonUserQuery;
+            query.UserType = UserType.Federated;
+            var response =  GetLabUserDataAsync(query);
+
+            if (response.Result.User.AzureEnvironment != AzureEnvironment.azureusgovernment)
+            {
+                response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
+            }
+            return response;
+        }
+
         public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
         {
             var query = UserQuery.PublicAadUserQuery;

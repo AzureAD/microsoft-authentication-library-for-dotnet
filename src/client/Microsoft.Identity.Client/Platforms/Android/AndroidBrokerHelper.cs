@@ -510,7 +510,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
             X509Chain chain = new X509Chain();
             chain.ChainPolicy = new X509ChainPolicy()
             {
+#pragma warning disable IA5352 //Certificates are not published to a CRL when revoked for broker so this check cannot be made
                 RevocationMode = X509RevocationMode.NoCheck
+#pragma warning restore IA5352
             };
 
             chain.ChainPolicy.ExtraStore.AddRange(collection);

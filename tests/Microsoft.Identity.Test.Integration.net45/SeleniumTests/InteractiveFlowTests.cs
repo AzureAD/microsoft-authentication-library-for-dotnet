@@ -55,6 +55,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
+        public async Task Arlington_Interactive_AADAsync()
+        {
+            // Arrange
+            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
+        }
+
+        [TestMethod]
         public async Task Interactive_MsaUser_Async()
         {
             // Arrange
@@ -99,6 +107,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Arlington_Interactive_AdfsV2019_FederatedAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
         }
 
 #endif
@@ -174,6 +189,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithAuthority(labResponse.Lab.Authority + "common")
                     .Build();
             }
 

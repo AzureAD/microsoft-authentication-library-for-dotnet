@@ -50,6 +50,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("appid")]
         public string AppId { get; set; }
 
+        [JsonProperty("azureenvironment")]
+        public AzureEnvironment AzureEnvironment { get; set; }
+
         public string GetOrFetchPassword()
         {
             if (_password == null)
