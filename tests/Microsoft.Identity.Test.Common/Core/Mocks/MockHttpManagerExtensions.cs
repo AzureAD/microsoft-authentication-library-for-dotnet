@@ -84,7 +84,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string authority = TestConstants.AuthorityCommonTenant,
             IDictionary<string, string> bodyParameters = null,
             IDictionary<string, string> queryParameters = null,
-            bool foci = false)
+            bool foci = false, 
+            HttpResponseMessage responseMessage = null)
         {
             var handler = new MockHttpMessageHandler()
             {
@@ -92,7 +93,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = bodyParameters,
                 ExpectedQueryParams = queryParameters,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(foci)
+                ResponseMessage = responseMessage ?? MockHelpers.CreateSuccessTokenResponseMessage(foci)
             };
             httpManager.AddMockHandler(handler);
             return handler;
@@ -162,7 +163,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 });
         }
 
-        public static MockHttpMessageHandler AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(this MockHttpManager httpManager)
+        public static MockHttpMessageHandler AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+            this MockHttpManager httpManager)
         {
             var handler = new MockHttpMessageHandler()
             {

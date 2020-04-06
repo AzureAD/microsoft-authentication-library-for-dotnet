@@ -98,6 +98,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
 
+            ThrowIfNoScopesOnB2C();
+
             if (!_silentParameters.ForceRefresh && !AuthenticationRequestParameters.HasClaims)
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
@@ -121,7 +123,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (MsalServiceException e)
-            {           
+            {
                 //Remove the account from cache in case of bad_token sub error
                 if (MsalError.BadToken.Equals(e.SubError, StringComparison.OrdinalIgnoreCase))
                 {
@@ -142,6 +144,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 logger.Warning("Failed to refresh the RT and cannot use existing AT (expired or missing).");
                 throw;
+            }
+        }
+
+
+        private void ThrowIfNoScopesOnB2C()
+        {
+            // B2C will not issue an access token if no scopes are requested
+            // And we don't want to refresh the RT on every ATS call
+            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/715 for details
+
+            if (!AuthenticationRequestParameters.HasScopes &&
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C )
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.ScopesRequired,
+                    MsalErrorMessage.ScopesRequired,
+                    null,
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
         }
 
@@ -200,7 +220,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // after the first RT exchanged.
             bool? isFamilyMember = await CacheManager.IsAppFociMemberAsync(TheOnlyFamilyId).ConfigureAwait(false);
 
-            if (isFamilyMember.HasValue && isFamilyMember.Value == false)
+            if (isFamilyMember.HasValue && !isFamilyMember.Value)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(
                     "[FOCI] App is not part of the family, skipping FOCI.");

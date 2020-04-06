@@ -69,26 +69,42 @@ namespace Microsoft.Identity.Client
             Guid correlationID)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
+            string homeAccountId =
+                msalAccessTokenCacheItem?.HomeAccountId ??
+                msalIdTokenCacheItem?.HomeAccountId;
+            string environment = msalAccessTokenCacheItem?.Environment ??
+                msalIdTokenCacheItem?.Environment;
 
-            if (msalAccessTokenCacheItem.HomeAccountId != null)
+            if (homeAccountId != null)
             {
-                string username = msalAccessTokenCacheItem.IsAdfs ? msalIdTokenCacheItem?.IdToken.Upn : msalIdTokenCacheItem?.IdToken?.PreferredUsername;
+                string username = null;
+                if (msalIdTokenCacheItem != null)
+                {
+                    username = msalIdTokenCacheItem.IsAdfs ? 
+                        msalIdTokenCacheItem?.IdToken.Upn : 
+                        msalIdTokenCacheItem?.IdToken?.PreferredUsername;
+                }
+
                 Account = new Account(
-                    msalAccessTokenCacheItem.HomeAccountId,
+                    homeAccountId,
                     username,
-                    msalAccessTokenCacheItem.Environment);
+                    environment);
             }
 
-            AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
+            if (msalAccessTokenCacheItem!= null)
+            {
+                AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
+                ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
+                ExtendedExpiresOn = msalAccessTokenCacheItem.ExtendedExpiresOn;
+                Scopes = msalAccessTokenCacheItem.ScopeSet;
+                IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
+                TokenType = msalAccessTokenCacheItem.TokenType;
+            }
+
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
-            ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
-            ExtendedExpiresOn = msalAccessTokenCacheItem.ExtendedExpiresOn;
             TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
-            Scopes = msalAccessTokenCacheItem.ScopeSet;
-            IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
             CorrelationId = correlationID;
-            TokenType = msalAccessTokenCacheItem.TokenType;
         }
 
         /// <summary>

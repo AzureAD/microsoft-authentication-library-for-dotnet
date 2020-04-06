@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
@@ -72,6 +73,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public Authority TenantUpdatedCanonicalAuthority { get; set; }
         public ICacheSessionManager CacheSessionManager { get; }
         public SortedSet<string> Scope { get; }
+
+        public bool HasScopes => Scope != null && Scope.Any();
+
         public string ClientId { get; }
         public Uri RedirectUri { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; }

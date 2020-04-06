@@ -546,7 +546,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 await AssertException.TaskThrowsAsync<InvalidOperationException>(
                     () => app
-                        .AcquireTokenInteractive(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+                        .AcquireTokenInteractive(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None))
+                    .ConfigureAwait(false);
             }
         }
 

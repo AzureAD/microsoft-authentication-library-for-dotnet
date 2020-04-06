@@ -1,5 +1,6 @@
 ﻿using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -28,13 +29,14 @@ namespace XamarinDev
             idTokenLabel.Text = JsonHelper.SerializeToJson(msalIdTokenCacheItem.IdToken);
 
             rawClientInfoLabel.Text = msalIdTokenCacheItem.RawClientInfo;
-            clientInfoUniqueIdentifierLabel.Text = msalIdTokenCacheItem.ClientInfo.UniqueObjectIdentifier;
-            clientInfoUniqueTenantIdentifierLabel.Text = msalIdTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
 
+            if (msalIdTokenCacheItem.RawClientInfo != null)
+            {
+                var clientInfo = ClientInfo.CreateFromJson(msalIdTokenCacheItem.RawClientInfo);
 
-            //userDisplayableIdLabel.Text = MsalAccountCacheItem.PreferredUsername;
-            //userNameLabel.Text = MsalAccountCacheItem.Name;
-            //userIdentityProviderLabel.Text = MsalAccountCacheItem.IdentityProvider;
+                clientInfoUniqueIdentifierLabel.Text = clientInfo.UniqueObjectIdentifier;
+                clientInfoUniqueTenantIdentifierLabel.Text = clientInfo.UniqueTenantIdentifier;
+            }
         }
     }
 }

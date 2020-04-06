@@ -182,7 +182,6 @@ namespace Microsoft.Identity.Client.Cache
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {
-                string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
                 string cachedAccountDisplayableId = kvp.Key.DisplayableId;
                 string cachedClientId = kvp.Key.ClientId;
 
@@ -213,7 +212,6 @@ namespace Microsoft.Identity.Client.Cache
                 if (!string.IsNullOrEmpty(rawClientInfo))
                 {
                     string cachedAccountId = ClientInfo.CreateFromJson(rawClientInfo).ToAccountIdentifier();
-                    string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
                     string cachedClientId = kvp.Key.ClientId;
 
                     if (string.Equals(accountOrUserId, cachedAccountId, StringComparison.OrdinalIgnoreCase) &&
@@ -275,11 +273,19 @@ namespace Microsoft.Identity.Client.Cache
                 List<MsalRefreshTokenCacheItem> list = new List<MsalRefreshTokenCacheItem>();
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
                 {
+                    string homeAccountId = null;
+                    if (!string.IsNullOrEmpty(pair.Value.RawClientInfo))
+                    {
+                        homeAccountId = ClientInfo.CreateFromJson(pair.Value.RawClientInfo).ToAccountIdentifier();
+                    }
+
                     list.Add(new MsalRefreshTokenCacheItem(
-                        new Uri(pair.Key.Authority).Host,
-                        pair.Key.ClientId,
-                        pair.Value.RefreshToken,
-                        pair.Value.RawClientInfo));
+                      new Uri(pair.Key.Authority).Host,
+                      pair.Key.ClientId,
+                      pair.Value.RefreshToken,
+                      pair.Value.RawClientInfo,
+                      familyId: null,
+                      homeAccountId: homeAccountId));
                 }
 
                 return list;
@@ -303,11 +309,11 @@ namespace Microsoft.Identity.Client.Cache
             string uniqueId)
         {
             List<MsalRefreshTokenCacheItem> adalRts = GetAllAdalEntriesForMsal(
-                logger, 
-                legacyCachePersistence, 
-                environmentAliases, 
-                clientId, 
-                upn, 
+                logger,
+                legacyCachePersistence,
+                environmentAliases,
+                clientId,
+                upn,
                 uniqueId);
 
             List<MsalRefreshTokenCacheItem> filteredByPrefEnv = adalRts.Where

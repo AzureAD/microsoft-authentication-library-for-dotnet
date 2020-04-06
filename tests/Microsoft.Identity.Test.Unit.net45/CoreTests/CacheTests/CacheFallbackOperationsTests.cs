@@ -290,19 +290,24 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         {
             // Arrange
             _legacyCachePersistence.ThrowOnWrite = true;
+            string clientInfo = MockHelpers.CreateClientInfo("u1", "ut1");
+            string homeAccountId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
 
             var rtItem = new MsalRefreshTokenCacheItem(
                 TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
-                "someRT",
-                MockHelpers.CreateClientInfo("u1", "ut1"));
+                "someRT", 
+                clientInfo, 
+                null, 
+                homeAccountId);
 
             var idTokenCacheItem = new MsalIdTokenCacheItem(
                 TestConstants.ProductionPrefCacheEnvironment, // different env
                 TestConstants.ClientId,
                 MockHelpers.CreateIdToken("u1", "username"),
-                MockHelpers.CreateClientInfo("u1", "ut1"),
-                "ut1");
+                clientInfo, 
+                tenantId: "ut1", 
+                homeAccountId: homeAccountId);
 
             // Act
             CacheFallbackOperations.WriteAdalRefreshToken(
@@ -326,20 +331,24 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         {
             // Arrange
             _legacyCachePersistence.ThrowOnWrite = true;
+            string clientInfo = MockHelpers.CreateClientInfo("u1", "ut1");
+            string homeAccountId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
 
             var rtItem = new MsalRefreshTokenCacheItem(
                 TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "someRT",
-                MockHelpers.CreateClientInfo("u1", "ut1"),
-                "familyId");
+                clientInfo, 
+                "familyId", 
+                homeAccountId);
 
             var idTokenCacheItem = new MsalIdTokenCacheItem(
                 TestConstants.ProductionPrefNetworkEnvironment, // different env
                 TestConstants.ClientId,
                 MockHelpers.CreateIdToken("u1", "username"),
-                MockHelpers.CreateClientInfo("u1", "ut1"),
-                "ut1");
+                clientInfo, 
+                tenantId: "ut1", 
+                homeAccountId: homeAccountId);
 
             // Act
             CacheFallbackOperations.WriteAdalRefreshToken(
@@ -436,23 +445,27 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             string scope)
         {
             string clientInfoString;
+            string homeAccountId;
             if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(uniqueTenantId))
             {
                 clientInfoString = null;
+                homeAccountId = null;
             }
             else
             {
                 clientInfoString = MockHelpers.CreateClientInfo(uid, uniqueTenantId);
+                homeAccountId = ClientInfo.CreateFromJson(clientInfoString).ToAccountIdentifier();
             }
 
-            var rtItem = new MsalRefreshTokenCacheItem(env, clientId, "someRT", clientInfoString);
+            var rtItem = new MsalRefreshTokenCacheItem(env, clientId, "someRT", clientInfoString, null, homeAccountId);
 
             var idTokenCacheItem = new MsalIdTokenCacheItem(
                 env,
                 clientId,
                 MockHelpers.CreateIdToken(uid, username),
                 clientInfoString,
-                uniqueTenantId);
+                homeAccountId,
+                tenantId: uniqueTenantId);
 
             CacheFallbackOperations.WriteAdalRefreshToken(
                 _logger,

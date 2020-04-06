@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Client
         public const string MultipleTokensMatched =
             "The cache contains multiple tokens satisfying the requirements. Try to clear token cache";
 
-        public const string NoDataFromSTS = "No data received from security token service";
         public const string NullParameterTemplate = "Parameter '{0}' cannot be null";
         public const string ParsingMetadataDocumentFailed = "Parsing WS metadata exchange failed";
         public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
@@ -302,6 +301,8 @@ namespace Microsoft.Identity.Client
         public const string AndroidBrokerCannotBeInvoked = "In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).";
         public const string CustomMetadataInstanceOrUri = "You have configured your own instance metadata using both an Uri and a string. Only one is supported. " +
             "See https://aka.ms/msal-net-custom-instance-metadata for more details.";
+
+        public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow.";
 
         public static string ExperimentalFeature(string methodName)
         {

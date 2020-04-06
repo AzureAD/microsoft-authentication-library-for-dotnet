@@ -31,7 +31,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public static long ValidExtendedExpiresIn = 7200;
 
         private readonly TokenCacheHelper _tokenCacheHelper = new TokenCacheHelper();
+        private string _clientInfo;
+        private string _homeAccountId;
 
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            _clientInfo = MockHelpers.CreateClientInfo();
+            _homeAccountId = ClientInfo.CreateFromJson(_clientInfo).ToAccountIdentifier();
+
+            base.TestInitialize();
+        }
 
         [TestMethod]
         public void GetExactScopesMatchedAccessTokenTest()
@@ -47,7 +57,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     "",
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo, 
+                    _homeAccountId);
 
                 // create key out of access token cache item and then
                 // set it as the value of the access token.
@@ -82,7 +93,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    _homeAccountId);
 
                 // create key out of access token cache item and then
                 // set it as the value of the access token.
@@ -146,7 +158,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    _homeAccountId);
 
                 cache.Accessor.SaveAccessToken(atItem);
 
@@ -186,7 +199,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    _homeAccountId);
 
                 // create key out of access token cache item and then
                 // set it as the value of the access token.
@@ -218,15 +232,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             json = JsonTestUtils.AddKeyValue(json, "refresh_in", "1800");
 
             var tokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+            var homeAccountId = ClientInfo.CreateFromJson(tokenResponse.ClientInfo).ToAccountIdentifier();
 
             // Act
-            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(TestConstants.ProductionPrefNetworkEnvironment,
+            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(
+                TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
                     tokenResponse,
-                    TestConstants.TenantId);
+                    TestConstants.TenantId,
+                    homeAccountId);
 
             // Assert
-            Assert.AreEqual(tokenResponse.RefreshIn, 1800);
+            Assert.AreEqual(1800, tokenResponse.RefreshIn);
             Assert.AreEqual(tokenResponse.TokenType, at.TokenType);
             Assert.IsNull(at.KeyId);
             Assert.IsTrue(at.RefreshOn.HasValue);
@@ -245,13 +262,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             json = JsonTestUtils.AddKeyValue(json, StorageJsonKeys.TokenType, "pop");
 
             var tokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+            var homeAccountId = ClientInfo.CreateFromJson(tokenResponse.ClientInfo).ToAccountIdentifier();
 
             // Act
-            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(TestConstants.ProductionPrefNetworkEnvironment,
-                    TestConstants.ClientId,
-                    tokenResponse,
-                    TestConstants.TenantId,
-                    keyId: "kid1");
+            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(
+                TestConstants.ProductionPrefNetworkEnvironment,
+                TestConstants.ClientId,
+                tokenResponse,
+                TestConstants.TenantId,
+                homeAccountId,
+                keyId: "kid1");
 
             // Assert
             Assert.AreEqual("kid1", at.KeyId);
@@ -264,15 +284,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Arrange
             string json = TestConstants.TokenResponseJson;
             var tokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(json);
+            var homeAccountId = ClientInfo.CreateFromJson(tokenResponse.ClientInfo).ToAccountIdentifier();
 
             // Act
-            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(TestConstants.ProductionPrefNetworkEnvironment,
-                    TestConstants.ClientId,
-                    tokenResponse,
-                    TestConstants.TenantId);
+            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(
+                TestConstants.ProductionPrefNetworkEnvironment,
+                TestConstants.ClientId,
+                tokenResponse,
+                homeAccountId,
+                TestConstants.TenantId);
 
             // Assert
-            Assert.AreEqual(tokenResponse.RefreshIn, 0);
+            Assert.AreEqual(0, tokenResponse.RefreshIn);
             Assert.IsFalse(at.RefreshOn.HasValue);
         }
 
@@ -291,7 +314,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo, 
+                    _homeAccountId);
 
                 atItem.Secret = atItem.GetKey().ToString();
                 cache.Accessor.SaveAccessToken(atItem);
@@ -321,7 +345,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    _homeAccountId);
 
                 atItem.Secret = atItem.GetKey().ToString();
                 cache.Accessor.SaveAccessToken(atItem);
@@ -356,7 +381,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     "",
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromMinutes(4)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    _homeAccountId);
 
                 atItem.Secret = atItem.GetKey().ToString();
                 cache.Accessor.SaveAccessToken(atItem);
@@ -383,7 +409,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
                     "someRT",
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    null,
+                    _homeAccountId);
 
                 string rtKey = rtItem.GetKey().ToString();
                 cache.Accessor.SaveRefreshToken(rtItem);
@@ -418,7 +446,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     TestConstants.SovereignNetworkEnvironment,
                     TestConstants.ClientId,
                     "someRT",
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    null,
+                    _homeAccountId);
 
                 string rtKey = rtItem.GetKey().ToString();
                 cache.Accessor.SaveRefreshToken(rtItem);
@@ -451,7 +481,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    _homeAccountId);
 
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;
@@ -525,7 +556,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    _homeAccountId);
 
                 // create key out of access token cache item and then
                 // set it as the value of the access token.
@@ -566,7 +598,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    _homeAccountId);
 
                 // create key out of access token cache item and then
                 // set it as the value of the access token.
@@ -607,7 +640,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
-                    MockHelpers.CreateClientInfo());
+                    _clientInfo,
+                    _homeAccountId);
 
                 // create key out of access token cache item and then
                 // set it as the value of the access token.
@@ -732,20 +766,21 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.IsTrue(cache.Accessor.GetAllRefreshTokens().Any(rt => string.IsNullOrEmpty(rt.FamilyId)));
         }
 
-
         [TestMethod]
         public void CreateFrtFromTokenResponse()
         {
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
             response.FamilyId = "1";
+            var homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
-            var frt = new MsalRefreshTokenCacheItem("env", TestConstants.ClientId, response);
+            var frt = new MsalRefreshTokenCacheItem(
+                "env", 
+                TestConstants.ClientId, 
+                response,
+                homeAccountId);
 
             Assert.AreEqual("1", frt.FamilyId);
         }
-
-
-
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]

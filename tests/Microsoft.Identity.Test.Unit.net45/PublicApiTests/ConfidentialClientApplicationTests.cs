@@ -514,6 +514,33 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task ClientCreds_And_Obo_DoNotAllow_EmptyScopes_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientSecret("secret")
+                    .Build();
+
+                // OBO
+                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => cca.AcquireTokenOnBehalfOf(null, new UserAssertion("assertion", "assertiontype")).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ScopesRequired, ex.ErrorCode);
+
+                // Client Creds
+                ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => cca.AcquireTokenForClient(null).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ScopesRequired, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
         public async Task ConfidentialClientUsingClientAssertionClaimsTestAsync()
         {
             using (var httpManager = new MockHttpManager())
