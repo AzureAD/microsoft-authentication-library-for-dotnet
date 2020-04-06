@@ -14,6 +14,8 @@ using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using System.ComponentModel;
+using System.Text;
 
 namespace Microsoft.Identity.Client.Platforms.netcore
 {
@@ -32,7 +34,32 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// </summary>
         public override Task<string> GetUserPrincipalNameAsync()
         {
-            return Task.FromResult(string.Empty);
+            const int NameUserPrincipal = 8;
+            return Task.FromResult(GetUserPrincipalName(NameUserPrincipal));
+        }
+
+        private string GetUserPrincipalName(int nameFormat)
+        {
+            uint userNameSize = 0;
+            WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
+            if (userNameSize == 0)
+            {
+                throw new MsalClientException(
+                    MsalError.GetUserNameFailed,
+                    MsalErrorMessage.GetUserNameFailed,
+                    new Win32Exception(Marshal.GetLastWin32Error()));
+            }
+
+            var sb = new StringBuilder((int)userNameSize);
+            if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
+            {
+                throw new MsalClientException(
+                    MsalError.GetUserNameFailed,
+                    MsalErrorMessage.GetUserNameFailed,
+                    new Win32Exception(Marshal.GetLastWin32Error()));
+            }
+
+            return sb.ToString();
         }
 
         public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
