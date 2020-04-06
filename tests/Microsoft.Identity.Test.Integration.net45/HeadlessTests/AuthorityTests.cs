@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
-                .WithLogging((lvl, msg, pii) => TestContext.WriteLine($"{lvl} - {msg}"), LogLevel.Verbose, true)
+                .WithTestLogging()
                 .Build();
 
             Trace.WriteLine("Acquire a token using a not so common authority alias");
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithAuthority("https://bogus.microsoft.com/common")
-                .WithLogging((lvl, msg, pii) => TestContext.WriteLine($"{lvl} - {msg}"), LogLevel.Verbose, true)
+                .WithTestLogging()
                 .Build();
 
             Trace.WriteLine("Acquire a token using a not so common authority alias");

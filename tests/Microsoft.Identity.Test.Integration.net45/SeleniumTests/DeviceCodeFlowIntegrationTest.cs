@@ -8,6 +8,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -45,7 +46,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task DeviceCodeFlowTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType)
         {
             Trace.WriteLine($"Calling AcquireTokenWithDeviceCodeAsync with {0}", userType);
-            var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId);
+            var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithTestLogging();
 
             switch (labResponse.User.AzureEnvironment)
             {

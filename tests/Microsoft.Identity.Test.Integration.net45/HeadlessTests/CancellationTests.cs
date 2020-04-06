@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.netcore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -91,6 +92,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .Create("1d18b3b0-251b-4714-a02a-9956cec86c2d") // Any app that accepts http://localhost redirect
                     .WithRedirectUri(redirectUri)
                     .WithPlatformProxy(platformProxy)
+                    .WithTestLogging()
                     .Build();
             return pca;
         }

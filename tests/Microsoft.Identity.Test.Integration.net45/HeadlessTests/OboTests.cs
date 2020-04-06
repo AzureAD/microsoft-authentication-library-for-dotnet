@@ -12,6 +12,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -74,6 +75,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithTestLogging()
                 .Build();
             s_inMemoryTokenCache.Bind(pca.UserTokenCache);
 
@@ -99,6 +101,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = ConfidentialClientApplicationBuilder
                 .Create(OboConfidentialClientID)
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
+                .WithTestLogging()
                 .WithClientSecret(_confidentialClientSecret)
                 .Build();
             s_inMemoryTokenCache.Bind(cca.UserTokenCache);
