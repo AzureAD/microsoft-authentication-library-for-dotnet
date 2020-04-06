@@ -242,8 +242,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
-                .WithHttpClientFactory(factory)
                 .WithTestLogging()
+                .WithHttpClientFactory(factory)
                 .WithAuthority(labResponse.Lab.Authority, "organizations")
                 .Build();
 
