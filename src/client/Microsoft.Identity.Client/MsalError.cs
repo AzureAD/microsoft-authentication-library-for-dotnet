@@ -766,6 +766,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ScopesRequired = "scopes_required_client_credentials";
 
+        /// <summary>
         /// <para>What happens?</para>The certificate provided does not have a private key.
         /// <para>Mitigation</para>Ensure the certificate has a private key.
         /// </summary>
