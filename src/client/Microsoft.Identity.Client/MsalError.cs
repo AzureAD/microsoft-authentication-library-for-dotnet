@@ -775,6 +775,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string CustomMetadataInstanceOrUri = "custom_metadata_instance_or_uri";
 
+        /// <summary>
+        /// <para>What happens?</para>The certificate provided does not have a private key.
+        /// <para>Mitigation</para>Ensure the certificate has a private key.
+        /// </summary>
+        public const string CertWithoutPrivateKey = "cert_without_private_key";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

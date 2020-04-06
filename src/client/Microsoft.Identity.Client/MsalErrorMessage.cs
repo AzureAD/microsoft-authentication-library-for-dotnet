@@ -344,5 +344,13 @@ namespace Microsoft.Identity.Client
                 "You have configured a claims parameter that is not in JSON format: {0}. Inspect the inner exception for details about the JSON parsing error. To learn more about claim requests, please see https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter",
                 claims);
         }
+
+        public static string CertMustHavePrivateKey(string certificateName)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "The certificate {0} does not have a private key.",
+                certificateName);
+        }
     }
 }
