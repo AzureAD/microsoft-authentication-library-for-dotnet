@@ -128,7 +128,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithAuthority(Authority)
-                .WithTestLogging()
                 .Build();
 
             await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
