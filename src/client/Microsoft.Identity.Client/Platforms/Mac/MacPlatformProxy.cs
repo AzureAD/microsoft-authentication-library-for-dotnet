@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         /// </remarks>
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            return new InMemoryTokenCacheAccessor();
+            return new InMemoryTokenCacheAccessor(Logger);
         }
 
         protected override IWebUIFactory CreateWebUiFactory() => new MacUIFactory();
