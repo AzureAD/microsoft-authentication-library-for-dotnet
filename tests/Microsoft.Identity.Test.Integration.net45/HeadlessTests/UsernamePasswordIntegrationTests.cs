@@ -97,8 +97,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(Adfs2019LabConstants.PublicClientId).WithAdfsAuthority(Adfs2019LabConstants.Authority).Build();
-            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword).ExecuteAsync().ConfigureAwait(false);
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(Adfs2019LabConstants.PublicClientId)
+                .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                .WithTestLogging()
+                .Build();
+            AuthenticationResult authResult = await msalPublicClient
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
@@ -117,9 +125,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(Authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithAuthority(Authority)
+                .Build();
 
-            var result = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+            await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
                 msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
                     .ExecuteAsync(CancellationToken.None))
@@ -130,7 +141,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(Authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithTestLogging()
+                .WithAuthority(Authority)
+                .Build();
             await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
         }
 
@@ -144,7 +159,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            var msalPublicClient = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithAuthority(Authority).Build();
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithTestLogging()
+                .WithAuthority(Authority).Build();
 
             var result = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
                 msalPublicClient
@@ -223,6 +241,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var factory = new HttpSnifferClientFactory();
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
+                .WithTestLogging()
                 .WithHttpClientFactory(factory)
                 .WithAuthority(labResponse.Lab.Authority, "organizations")
                 .Build();

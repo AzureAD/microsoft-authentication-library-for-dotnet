@@ -19,6 +19,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -80,6 +81,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = ConfidentialClientApplicationBuilder
                .Create(PublicCloudConfidentialClientID)
                .WithRedirectUri(RedirectUri)
+               .WithTestLogging()
                .Build();
 
             var uri1 = await cca.GetAuthorizationRequestUrl(s_scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -115,6 +117,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithCertificate(cert)
+                .WithTestLogging()
                 .Build();
 
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
@@ -198,6 +201,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(clientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientSecret(secret)
+                .WithTestLogging()
                 .Build();
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
 
@@ -231,6 +235,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientClaims(cert, claims, false)
+                .WithTestLogging()
                 .Build();
 
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
@@ -254,6 +259,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientClaims(cert, claims)
+                .WithTestLogging()
                 .Build();
 
             var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
@@ -280,6 +286,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(PublicCloudConfidentialClientID)
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, claims))
+                .WithTestLogging()
                 .Build();
 
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
@@ -409,6 +416,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                             .WithAdfsAuthority(Adfs2019LabConstants.Authority, true)
                                             .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
                                             .WithClientSecret(secret.Value)
+                                            .WithTestLogging()
                                             .BuildConcrete();
 
             AuthenticationResult authResult = await msalConfidentialClient
@@ -433,6 +441,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ConfidentialClientApplication msalConfidentialClient = ConfidentialClientApplicationBuilder.Create(Adfs2019LabConstants.ConfidentialClientId)
                                             .WithAdfsAuthority(Adfs2019LabConstants.Authority, true)
                                             .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
+                                            .WithTestLogging()
                                             .WithCertificate(cert)
                                             .BuildConcrete();
 
@@ -453,12 +462,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var cert = await _keyVault.GetCertificateWithPrivateMaterialAsync(AdfsCertName)
                 .ConfigureAwait(false);
-            string clientAssertion = 
+            string clientAssertion =
                 GetSignedClientAssertionUsingWilson(Adfs2019LabConstants.Authority, cert);
 
-            ConfidentialClientApplication msalConfidentialClient = 
+            ConfidentialClientApplication msalConfidentialClient =
                 ConfidentialClientApplicationBuilder.Create(Adfs2019LabConstants.ConfidentialClientId)
                                             .WithAdfsAuthority(Adfs2019LabConstants.Authority, true)
+                                            .WithTestLogging()
                                             .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
                                             .WithClientAssertion(clientAssertion)
                                             .BuildConcrete();
@@ -474,7 +484,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         private static string GetSignedClientAssertionUsingWilson(
-            string authority, 
+            string authority,
             X509Certificate2 cert)
         {
             string aud = $"{authority}/oauth2/token";
@@ -537,6 +547,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
                                                                  .WithAuthority(authority)
                                                                  .WithRedirectUri(TestConstants.RedirectUri)
+                                                                 .WithTestLogging()
                                                                  .Build();
 
             var builder = msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword);
@@ -549,6 +560,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(confidentialClientID)
                 .WithAuthority(new Uri(oboHost + authResult.TenantId), true)
                 .WithClientSecret(secret)
+                .WithTestLogging()
                 .Build();
 
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(authResult.AccessToken))
