@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security;
@@ -14,7 +13,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -29,16 +27,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
     public class PublicClientApplicationTests : TestBase
-    {
-        private TokenCacheHelper _tokenCacheHelper;
-
-        [TestInitialize]
-        public override void TestInitialize()
-        {
-            base.TestInitialize();
-            _tokenCacheHelper = new TokenCacheHelper();
-        }
-
+    {      
         [TestMethod]
         public void ConstructorsTest()
         {
