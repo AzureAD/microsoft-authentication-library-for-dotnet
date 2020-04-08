@@ -40,26 +40,34 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         private string GetUserPrincipalName(int nameFormat)
         {
-            uint userNameSize = 0;
-            WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
-            if (userNameSize == 0)
+            if (PlatformProxyShared.IsWindowsPlatform())
             {
-                throw new MsalClientException(
-                    MsalError.GetUserNameFailed,
-                    MsalErrorMessage.GetUserNameFailed,
-                    new Win32Exception(Marshal.GetLastWin32Error()));
+                uint userNameSize = 0;
+                WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
+                if (userNameSize == 0)
+                {
+                    throw new MsalClientException(
+                        MsalError.GetUserNameFailed,
+                        MsalErrorMessage.GetUserNameFailed,
+                        new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
+                var sb = new StringBuilder((int)userNameSize);
+                if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
+                {
+                    throw new MsalClientException(
+                        MsalError.GetUserNameFailed,
+                        MsalErrorMessage.GetUserNameFailed,
+                        new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
+                return sb.ToString();
             }
 
-            var sb = new StringBuilder((int)userNameSize);
-            if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
-            {
-                throw new MsalClientException(
-                    MsalError.GetUserNameFailed,
-                    MsalErrorMessage.GetUserNameFailed,
-                    new Win32Exception(Marshal.GetLastWin32Error()));
-            }
-
-            return sb.ToString();
+            throw new PlatformNotSupportedException(
+                "MSAL cannot determine the username (UPN) of the currently logged in user." +
+                "For Integrated Windows Authentication and Username/Password flows, please use .WithUsername() before calling ExecuteAsync(). " +
+                "For more details see https://aka.ms/msal-net-iwa");
         }
 
         public override Task<bool> IsUserLocalAsync(RequestContext requestContext)

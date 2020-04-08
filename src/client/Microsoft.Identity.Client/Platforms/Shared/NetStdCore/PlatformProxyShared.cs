@@ -2,16 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
 {
-    internal class PlatformProxyShared
+    internal static class PlatformProxyShared
     {
         public static void StartDefaultOsBrowser(string url)
         {
@@ -56,6 +52,33 @@ namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
                     throw new PlatformNotSupportedException(RuntimeInformation.OSDescription);
                 }
             }
+        }
+
+        /// <summary>
+        ///  Is this a windows platform
+        /// </summary>
+        /// <returns>A  value indicating if we are running on windows or not</returns>
+        public static bool IsWindowsPlatform()
+        {
+            return Environment.OSVersion.Platform == PlatformID.Win32NT;
+        }
+
+        /// <summary>
+        /// Is this a MAC platform
+        /// </summary>
+        /// <returns>A value indicating if we are running on mac or not</returns>
+        public static bool IsMacPlatform()
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        }
+
+        /// <summary>
+        /// Is this a linux platform
+        /// </summary>
+        /// <returns>A  value indicating if we are running on linux or not</returns>
+        public static bool IsLinuxPlatform()
+        {
+            return Environment.OSVersion.Platform == PlatformID.Unix;
         }
     }
 }
