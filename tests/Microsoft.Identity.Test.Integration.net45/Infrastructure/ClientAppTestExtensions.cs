@@ -13,8 +13,8 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
             var httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
-                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
-                .WithHttpClientFactory(httpClientFactory);
+                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true);
+                //.WithHttpClientFactory(httpClientFactory);
 
         }
 
@@ -23,8 +23,8 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
             var httpClientFactory = new HttpSnifferClientFactory();
 
             return builder
-                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true)
-                .WithHttpClientFactory(httpClientFactory);            
+                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"), LogLevel.Verbose, enablePiiLogging: true);
+                //.WithHttpClientFactory(httpClientFactory);            
         }
     }
 }
