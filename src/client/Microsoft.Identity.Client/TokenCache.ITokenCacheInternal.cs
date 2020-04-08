@@ -316,6 +316,13 @@ namespace Microsoft.Identity.Client
 
             if (!requestParams.IsClientCredentialRequest)
             {
+                requestParams.RequestContext.Logger.Info("Request home acc id: " + requestParams.Account?.HomeAccountId?.Identifier);
+                if (tokenCacheItems.Any())
+                {
+                    requestParams.RequestContext.Logger.Info("access token count: " + tokenCacheItems.Count());
+                    requestParams.RequestContext.Logger.Info("Item home acc id: " + tokenCacheItems.First().HomeAccountId);
+                }
+
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
                                 requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
