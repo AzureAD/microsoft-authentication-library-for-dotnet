@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -909,6 +910,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var pcaBuilder = PublicClientApplicationBuilder
                 .Create(clientIdInFile)
                 .WithTelemetry(new TraceTelemetryConfig())
+                .WithLogging((lvl, msg, _) => Trace.WriteLine($"[MSAL][{lvl}] {msg}"))
                 .WithHttpManager(httpManager);
 
             if (authority != null)
