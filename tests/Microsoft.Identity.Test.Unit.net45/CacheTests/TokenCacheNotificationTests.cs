@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 tokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor, addSecondAt: false);
                 var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).First();
 
-                // All these actions result in a reloading the cache
+                // All these actions trigger a reloading of the cache
                 await RunAfterAccessFailureAsync(pca, () => pca.GetAccountsAsync()).ConfigureAwait(false);
                 await RunAfterAccessFailureAsync(pca,
                     () => pca.AcquireTokenSilent(new[] { "User.Read" }, account).ExecuteAsync())
