@@ -200,5 +200,32 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         }
 
         public override bool UseEmbeddedWebViewDefault => false;
+
+        /// <summary>
+        ///  Is this a windows platform
+        /// </summary>
+        /// <returns>A  value indicating if we are running on windows or not</returns>
+        public static bool IsWindowsPlatform()
+        {
+            return Environment.OSVersion.Platform == PlatformID.Win32NT;
+        }
+
+        /// <summary>
+        /// Is this a MAC platform
+        /// </summary>
+        /// <returns>A value indicating if we are running on mac or not</returns>
+        public static bool IsMacPlatform()
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        }
+
+        /// <summary>
+        /// Is this a linux platform
+        /// </summary>
+        /// <returns>A  value indicating if we are running on linux or not</returns>
+        public static bool IsLinuxPlatform()
+        {
+            return Environment.OSVersion.Platform == PlatformID.Unix;
+        }
     }
 }
