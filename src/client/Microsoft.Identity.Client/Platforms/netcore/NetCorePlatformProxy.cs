@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -14,6 +13,8 @@ using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using System.ComponentModel;
+using System.Text;
 
 namespace Microsoft.Identity.Client.Platforms.netcore
 {
@@ -32,7 +33,40 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// </summary>
         public override Task<string> GetUserPrincipalNameAsync()
         {
-            return Task.FromResult(string.Empty);
+            const int NameUserPrincipal = 8;
+            return Task.FromResult(GetUserPrincipalName(NameUserPrincipal));
+        }
+
+        private string GetUserPrincipalName(int nameFormat)
+        {
+            if (IsWindowsPlatform())
+            {
+                uint userNameSize = 0;
+                WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
+                if (userNameSize == 0)
+                {
+                    throw new MsalClientException(
+                        MsalError.GetUserNameFailed,
+                        MsalErrorMessage.GetUserNameFailed,
+                        new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
+                var sb = new StringBuilder((int)userNameSize);
+                if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
+                {
+                    throw new MsalClientException(
+                        MsalError.GetUserNameFailed,
+                        MsalErrorMessage.GetUserNameFailed,
+                        new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
+                return sb.ToString();
+            }
+
+            throw new PlatformNotSupportedException(
+                "MSAL cannot determine the username (UPN) of the currently logged in user." +
+                "For Integrated Windows Authentication and Username/Password flows, please use .WithUsername() before calling ExecuteAsync(). " +
+                "For more details see https://aka.ms/msal-net-iwa");
         }
 
         public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
@@ -165,5 +199,32 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         }
 
         public override bool UseEmbeddedWebViewDefault => false;
+
+        /// <summary>
+        ///  Is this a windows platform
+        /// </summary>
+        /// <returns>A  value indicating if we are running on windows or not</returns>
+        public static bool IsWindowsPlatform()
+        {
+            return Environment.OSVersion.Platform == PlatformID.Win32NT;
+        }
+
+        /// <summary>
+        /// Is this a MAC platform
+        /// </summary>
+        /// <returns>A value indicating if we are running on mac or not</returns>
+        public static bool IsMacPlatform()
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        }
+
+        /// <summary>
+        /// Is this a linux platform
+        /// </summary>
+        /// <returns>A  value indicating if we are running on linux or not</returns>
+        public static bool IsLinuxPlatform()
+        {
+            return Environment.OSVersion.Platform == PlatformID.Unix;
+        }
     }
 }
