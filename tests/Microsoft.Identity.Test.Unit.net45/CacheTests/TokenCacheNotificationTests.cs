@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,6 +18,62 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     [TestClass]
     public class TokenCacheNotificationTests : TestBase
     {
+        [TestMethod]
+        public async Task AfterAccess_Is_Called_When_BeforeAceess_Throws_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var pca = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                var tokenCacheHelper = new TokenCacheHelper();
+                tokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor, addSecondAt: false);
+                var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).First();
+
+                // All these actions result in a reloading the cache
+                await RunAfterAccessFailureAsync(pca, () => pca.GetAccountsAsync()).ConfigureAwait(false);
+                await RunAfterAccessFailureAsync(pca,
+                    () => pca.AcquireTokenSilent(new[] { "User.Read" }, account).ExecuteAsync())
+                    .ConfigureAwait(false);
+                await RunAfterAccessFailureAsync(pca, () => pca.RemoveAsync(account)).ConfigureAwait(false);
+
+                // AcquireTokenInteractive will save a token to the cache, but needs more setup
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                MsalMockHelpers.ConfigureMockWebUI(pca);
+                await RunAfterAccessFailureAsync(pca, () => 
+                    pca.AcquireTokenInteractive(new[] { "User.Read" }).ExecuteAsync())
+                        .ConfigureAwait(false);
+
+            }
+        }
+
+        private static async Task RunAfterAccessFailureAsync(
+            IPublicClientApplication pca,
+            Func<Task> operationThatTouchesCache)
+        {
+            bool beforeAccessCalled = false;
+            bool afterAccessCalled = false;
+
+            pca.UserTokenCache.SetBeforeAccess(args =>
+            {
+                beforeAccessCalled = true;
+                throw new InvalidOperationException();
+            });
+
+            pca.UserTokenCache.SetAfterAccess(args => { afterAccessCalled = true; });
+
+            await AssertException.TaskThrowsAsync<InvalidOperationException>(
+                operationThatTouchesCache).ConfigureAwait(false);
+
+            Assert.IsTrue(beforeAccessCalled);
+            Assert.IsTrue(afterAccessCalled);
+        }
+
         [TestMethod]
         public async Task TestSubscribeNonAsync()
         {
@@ -131,7 +189,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 pca.UserTokenCache.SetBeforeWriteAsync(async args =>
                 {
                     sb.Append("beforewrite-");
-                    numBeforeWriteCalls++;                    
+                    numBeforeWriteCalls++;
                     await Task.Delay(10).ConfigureAwait(false);
                 });
 
