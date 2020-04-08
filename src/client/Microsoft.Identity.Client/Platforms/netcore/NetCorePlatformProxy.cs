@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -40,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         private string GetUserPrincipalName(int nameFormat)
         {
-            if (PlatformProxyShared.IsWindowsPlatform())
+            if (IsWindowsPlatform())
             {
                 uint userNameSize = 0;
                 WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
