@@ -9,7 +9,9 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Windows.Security.Cryptography;
@@ -26,8 +28,15 @@ namespace Microsoft.Identity.Client.Platforms.uap
             get { return true; }
         }
 
-        public async Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
+        public async Task<string> CreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri)
         {
+            if (!DeviceAuthHelper.IsDeviceAuthChallenge(response))
+            {
+                return null;
+            }
+
+            IDictionary<string, string> challengeData = DeviceAuthHelper.ParseChallengeData(response);
+
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
 
             Certificate certificate = null;
@@ -43,9 +52,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 }
             }
 
-            DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
+            DeviceAuthJWTResponse responseJWT = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetCertificateBlob().ToArray()));
-            IBuffer input = CryptographicBuffer.ConvertStringToBinary(response.GetResponseToSign(),
+            IBuffer input = CryptographicBuffer.ConvertStringToBinary(responseJWT.GetResponseToSign(),
                 BinaryStringEncoding.Utf8);
             CryptographicKey keyPair = await
                 PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256,
@@ -53,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
             IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input).AsTask().ConfigureAwait(false);
 
-            string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", response.GetResponseToSign(),
+            string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", responseJWT.GetResponseToSign(),
                 Base64UrlHelpers.Encode(signed.ToArray()));
             string authToken = string.Format(CultureInfo.InvariantCulture, " AuthToken=\"{0}\"", signedJwt);
             return string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);

@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.Utils;
 
@@ -165,7 +166,7 @@ namespace Microsoft.Identity.Client.Instance
              string openIdConfigurationEndpoint,
              RequestContext requestContext)
         {
-            var client = new OAuth2Client(requestContext.Logger, _serviceBundle.HttpManager, _serviceBundle.TelemetryManager, _serviceBundle.PlatformProxy.CreateDeviceAuthManager());
+            var client = new OAuth2Client(requestContext.Logger, _serviceBundle.HttpManager, _serviceBundle.TelemetryManager, _serviceBundle.DeviceAuthManager);
             return await client.ExecuteRequestAsync<TenantDiscoveryResponse>(
                        new Uri(openIdConfigurationEndpoint),
                        HttpMethod.Get,

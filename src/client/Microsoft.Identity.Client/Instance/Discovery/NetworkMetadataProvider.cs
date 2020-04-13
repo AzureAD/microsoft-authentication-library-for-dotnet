@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
@@ -74,7 +75,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           Uri authority,
           RequestContext requestContext)
         {
-            var client = new OAuth2Client(requestContext.Logger, _httpManager, _telemetryManager, null);
+            var client = new OAuth2Client(requestContext.Logger, _httpManager, _telemetryManager, new NullDeviceAuthManager());
 
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority));

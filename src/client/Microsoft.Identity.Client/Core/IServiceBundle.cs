@@ -21,5 +21,6 @@ namespace Microsoft.Identity.Client.Core
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
         ITelemetryClient Mats { get; }
+        IDeviceAuthManager DeviceAuthManager { get; }
     }
 }

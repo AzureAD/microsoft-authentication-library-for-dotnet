@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -37,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 OAuth2Client client = new OAuth2Client(harness.ServiceBundle.DefaultLogger, harness.HttpManager, new TelemetryManager(
                     harness.ServiceBundle.Config,
                     harness.ServiceBundle.PlatformProxy,
-                    null), harness.ServiceBundle.PlatformProxy.CreateDeviceAuthManager());
+                    null), harness.ServiceBundle.DeviceAuthManager);
 
                 Task<MsalTokenResponse> task = client.GetTokenAsync(
                     new Uri(TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token"),

@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Net;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.net45.Native;
+using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Win32.SafeHandles;
 
@@ -21,11 +26,24 @@ namespace Microsoft.Identity.Client.Platforms.net45
             get { return true; }
         }
 
-        public async Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
+        public async Task<string> CreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri)
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
 
             X509Certificate2 certificate = null;
+
+            if (!DeviceAuthHelper.IsDeviceAuthChallenge(response))
+            {
+                return null;
+            }
+
+            IDictionary<string, string> challengeData = DeviceAuthHelper.ParseChallengeData(response);
+
+            if (!challengeData.ContainsKey("SubmitUrl"))
+            {
+                challengeData["SubmitUrl"] = endpointUri.AbsoluteUri;
+            }
+
             try
             {
                 certificate = FindCertificate(challengeData);
@@ -38,17 +56,17 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 }
             }
 
-            DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
+            DeviceAuthJWTResponse responseJWT = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
             CngKey key = NetDesktopCryptographyManager.GetCngPrivateKey(certificate);
             byte[] sig = null;
             using (RSACng rsa = new RSACng(key))
             {
                 rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
-                sig = rsa.SignData(response.GetResponseToSign().ToByteArray());
+                sig = rsa.SignData(responseJWT.GetResponseToSign().ToByteArray());
             }
 
-            string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", response.GetResponseToSign(),
+            string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", responseJWT.GetResponseToSign(),
                 Base64UrlHelpers.Encode(sig));
             string authToken = string.Format(CultureInfo.InvariantCulture, " AuthToken=\"{0}\"", signedJwt);
 

@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual IDeviceAuthManager CreateDeviceAuthManager()
         {
-            throw new NotImplementedException();
+            return new NullDeviceAuthManager();
         }
     }
 }
