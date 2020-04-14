@@ -168,10 +168,5 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             return new iOSBroker(Logger, CryptographyManager);
         }
-
-        public override IDeviceAuthManager CreateDeviceAuthManager()
-        {
-            return new iOSDeviceAuthManager();
-        }
     }
 }

@@ -175,10 +175,5 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             Process.Start("open", url);
             return Task.FromResult(0);
         }
-
-        public override IDeviceAuthManager CreateDeviceAuthManager()
-        {
-            return new MacDeviceAuthManager();
-        }
     }
 }

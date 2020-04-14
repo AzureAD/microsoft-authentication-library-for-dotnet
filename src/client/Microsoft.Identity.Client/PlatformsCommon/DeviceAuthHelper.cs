@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon
         public static IDictionary<string, string> ParseChallengeData(HttpResponse response)
         {
             IDictionary<string, string> data = new Dictionary<string, string>();
-            string wwwAuthenticate = response.Headers.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).FirstOrDefault();
+            string wwwAuthenticate = response.Headers.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).Single();
             wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthConstants.PKeyAuthName.Length + 1);
             List<string> headerPairs = CoreHelpers.SplitWithQuotes(wwwAuthenticate, ',');
             foreach (string pair in headerPairs)
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon
                    && response.Headers != null
                    && response.StatusCode == HttpStatusCode.Unauthorized
                    && response.Headers.Contains(PKeyAuthConstants.WwwAuthenticateHeader)
-                   && response.Headers.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).FirstOrDefault()
+                   && response.Headers.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).First()
                        .StartsWith(PKeyAuthConstants.PKeyAuthName, StringComparison.OrdinalIgnoreCase);
         }
 

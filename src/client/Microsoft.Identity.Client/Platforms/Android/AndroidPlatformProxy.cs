@@ -218,10 +218,5 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         public override bool UseEmbeddedWebViewDefault => false;
-
-        public override IDeviceAuthManager CreateDeviceAuthManager()
-        {
-            return new AndroidDeviceAuthManager();
-        }
     }
 }

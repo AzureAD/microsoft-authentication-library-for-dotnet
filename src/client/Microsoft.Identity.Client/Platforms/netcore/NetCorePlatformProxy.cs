@@ -164,11 +164,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return Task.FromResult(0);
         }
 
-        public override IDeviceAuthManager CreateDeviceAuthManager()
-        {
-            return new NetCoreDeviceAuthManager();
-        }
-
         public override bool UseEmbeddedWebViewDefault => false;
     }
 }
