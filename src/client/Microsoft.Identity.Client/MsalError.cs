@@ -756,7 +756,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>You have configured your own instance metadata using both an Uri and a string. Only one is supported.
-        /// <para>Mitigation</para>Call WithInstanceDicoveryMetadata only once. See https://aka.ms/msal-net-custom-instance-metadata for more details.
+        /// <para>Mitigation</para>Call WithInstanceDiscoveryMetadata only once. See https://aka.ms/msal-net-custom-instance-metadata for more details.
         /// </summary>
         public const string CustomMetadataInstanceOrUri = "custom_metadata_instance_or_uri";
 

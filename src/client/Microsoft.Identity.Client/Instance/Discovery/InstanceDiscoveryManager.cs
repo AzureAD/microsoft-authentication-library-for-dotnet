@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     /// <summary>
     /// Priority order of metadata providers: 
     /// 
-    /// If user provided metadata via <see cref="AbstractApplicationBuilder{T}.WithInstanceDicoveryMetadata(string)"/> use it exclusively. Otherwise:
+    /// If user provided metadata via <see cref="AbstractApplicationBuilder{T}.WithInstanceDiscoveryMetadata(string)"/> use it exclusively. Otherwise:
     /// 
     /// 1. Static cache (this is populated from the network)
     /// 2. Well-known cache if all environments present in the token cache are known (this is hardcoded into msal)
