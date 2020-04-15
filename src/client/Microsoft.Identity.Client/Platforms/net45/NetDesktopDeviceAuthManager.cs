@@ -10,7 +10,6 @@ using System.Security.Permissions;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Platforms.net45.Native;
 using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -58,13 +57,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             DeviceAuthJWTResponse responseJWT = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
-            CngKey key = NetDesktopCryptographyManager.GetCngPrivateKey(certificate);
-            byte[] sig = null;
-            using (RSACng rsa = new RSACng(key))
-            {
-                rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
-                sig = rsa.SignData(responseJWT.GetResponseToSign().ToByteArray());
-            }
+            
+            //TODO: pass netDesktopCryptographyManager in as a parameter in the constructor
+            var sig = new NetDesktopCryptographyManager().SignWithCertificate(responseJWT.GetResponseToSign(), certificate);
 
             string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", responseJWT.GetResponseToSign(),
                 Base64UrlHelpers.Encode(sig));
@@ -75,31 +70,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 challengeData["Version"]);
 
             return Task.FromResult(resultString).Result;
-        }
-
-        private static CngKey GetCngPrivateKey(X509Certificate2 certificate)
-        {
-            using (var certContext = GetCertificateContext(certificate))
-            using (SafeNCryptKeyHandle privateKeyHandle = X509Native.AcquireCngPrivateKey(certContext))
-            {
-                // We need to assert for full trust when opening the CNG key because
-                // CngKey.Open(SafeNCryptKeyHandle) does a full demand for full trust, and we want to allow
-                // access to a certificate's private key by anyone who has access to the certificate itself.
-                new PermissionSet(PermissionState.Unrestricted).Assert();
-                return CngKey.Open(privateKeyHandle, CngKeyHandleOpenOptions.None);
-            }
-        }
-
-        public static SafeCertContextHandle GetCertificateContext(X509Certificate certificate)
-        {
-            SafeCertContextHandle certContext = X509Native.DuplicateCertContext(certificate.Handle);
-
-            // Make sure to keep the X509Certificate object alive until after its certificate context is
-            // duplicated, otherwise it could end up being closed out from underneath us before we get a
-            // chance to duplicate the handle.
-            GC.KeepAlive(certificate);
-
-            return certContext;
         }
 
         private static X509Certificate2 FindCertificate(IDictionary<string, string> challengeData)
