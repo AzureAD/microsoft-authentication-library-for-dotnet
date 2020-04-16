@@ -131,6 +131,7 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
+        #region Public Properties
         /// <summary>
         /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c> in the inner
         /// <see cref="System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
@@ -163,11 +164,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string ResponseBody { get; internal set; }
 
-        /// <remarks>
-        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
-        /// first.
-        /// </remarks>
-        internal string SubError { get; set; }
 
         /// <summary>
         /// Contains the http headers from the server response that indicated an error.
@@ -183,19 +179,22 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string CorrelationId { get; internal set; }
 
+        #endregion
+
         /// <summary>
-        /// Creates and returns a string representation of the current exception.
+        /// Flag that indicates that the exception occured as a result of client throttling.
         /// </summary>
-        /// <returns>A string representation of the current exception.</returns>
-        public override string ToString()
-        {
-            return base.ToString() + string.Format(
-                CultureInfo.InvariantCulture,
-                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}",
-                StatusCode,
-                ResponseBody,
-                Headers);
-        }
+        /// <remarks>
+        /// Client Throttling spec https://identitydivision.visualstudio.com/DevEx/_git/AuthLibrariesApiReview?path=%2FService%20protection%2FIntial%20set%20of%20protection%20measures.md&version=GBdev&_a=preview
+        /// </remarks>
+        internal bool IsThrottlingException { get; set; }
+
+
+        /// <remarks>
+        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
+        /// first.
+        /// </remarks>
+        internal string SubError { get; set; }
 
         /// <summary>
         /// As per discussion with Evo, AAD 
@@ -226,6 +225,20 @@ namespace Microsoft.Identity.Client
             ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
             CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
             SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
+        }
+
+        /// <summary>
+        /// Creates and returns a string representation of the current exception.
+        /// </summary>
+        /// <returns>A string representation of the current exception.</returns>
+        public override string ToString()
+        {
+            return base.ToString() + string.Format(
+                CultureInfo.InvariantCulture,
+                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}",
+                StatusCode,
+                ResponseBody,
+                Headers);
         }
     }
 }

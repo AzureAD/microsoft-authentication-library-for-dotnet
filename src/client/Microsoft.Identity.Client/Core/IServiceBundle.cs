@@ -4,6 +4,7 @@
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.WsTrust;
@@ -19,6 +20,7 @@ namespace Microsoft.Identity.Client.Core
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
+        IThrottlingManager ThrottlingManager { get;  }
 
         #region Telemetry
         IHttpTelemetryManager HttpTelemetryManager { get; }

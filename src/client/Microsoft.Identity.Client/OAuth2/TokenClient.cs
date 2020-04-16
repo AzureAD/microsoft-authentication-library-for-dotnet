@@ -120,20 +120,21 @@ namespace Microsoft.Identity.Client.OAuth2
 
             if (!_requestInProgress)
             {
+                _requestInProgress = true;
+
                 _oAuth2Client.AddHeader(
                     TelemetryConstants.XClientLastTelemetry,
                     _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
-                _requestInProgress = true;
             }
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
         {
-            UriBuilder builder = new UriBuilder(tokenEndpoint);            
-            builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
-
             try
             {
+                UriBuilder builder = new UriBuilder(tokenEndpoint);
+                builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
+
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
                         .GetTokenAsync(builder.Uri,
@@ -147,6 +148,8 @@ namespace Microsoft.Identity.Client.OAuth2
             }
             catch (MsalServiceException ex)
             {
+                _serviceBundle.ThrottlingManager.RecordException(_oAuth2Client.BodyParameters, ex);
+
                 if (!ex.IsAadUnavailable())
                 {
                     // Clear failed telemetry data as we've just sent it ... 
