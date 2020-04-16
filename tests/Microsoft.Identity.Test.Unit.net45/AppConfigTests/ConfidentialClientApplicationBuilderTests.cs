@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                   .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                   .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                    .Build();
 
             var instanceDiscoveryMetadata = (cca.AppConfig as ApplicationConfiguration).CustomInstanceDiscoveryMetadata;
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
             var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                  .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                  .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
             Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_BadInstanceMetadata()
         {
             var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                  .WithInstanceDicoveryMetadata("{bad_json_metadata")
+                                                  .WithInstanceDiscoveryMetadata("{bad_json_metadata")
                                                   .Build());
 
             Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
