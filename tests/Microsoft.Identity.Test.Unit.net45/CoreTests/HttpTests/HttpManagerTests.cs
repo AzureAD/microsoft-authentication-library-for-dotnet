@@ -13,18 +13,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
 using NSubstitute;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
     public class HttpManagerTests
     {
-        readonly Dictionary<string, string> _httpTelemetryHeaders = new Dictionary<string, string>
-        {
-            {TelemetryConstants.XClientLastTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion2},
-            {TelemetryConstants.XClientCurrentTelemetry, TelemetryConstants.HttpTelemetrySchemaVersion2}
-        };
-
         [TestInitialize]
         public void TestInitialize()
         {
@@ -116,7 +111,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 {
                     var msalHttpResponse = await httpManager.SendGetAsync(
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                                _httpTelemetryHeaders,
+                                                                null,
                                                                 Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
@@ -130,16 +125,39 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task NoResiliencyIfRetryAfterHeaderPresentAsync(bool useTimeSpanRetryAfter)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var response = httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.ServiceUnavailable);
+
+                response.Headers.RetryAfter = useTimeSpanRetryAfter ?
+                    new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromSeconds(1)) :
+                    new System.Net.Http.Headers.RetryConditionHeaderValue(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(2));
+
+                var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => httpManager.SendGetAsync(
+                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"), null, Substitute.For<ICoreLogger>()))
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(0, httpManager.QueueSize, "HttpManager must not retry because a RetryAfter header is present");
+                Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
+            }
+        }
+
+        [TestMethod]
         public async Task TestSendGetWithHttp500TypeFailure2Async()
         {
             using (var httpManager = new MockHttpManager())
-            {                
+            {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.BadGateway);
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.BadGateway);
 
                 var msalHttpResponse = await httpManager.SendPostForceResponseAsync(
                                                             new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                            _httpTelemetryHeaders,
+                                                            null,
                                                             new StringContent("body"),
                                                             Substitute.For<ICoreLogger>())
                                                         .ConfigureAwait(false);
@@ -160,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 {
                     var msalHttpResponse = await httpManager.SendPostAsync(
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                                _httpTelemetryHeaders,
+                                                                null,
                                                                 (IDictionary<string, string>)null,
                                                                Substitute.For<ICoreLogger>())
                                                             .ConfigureAwait(false);
