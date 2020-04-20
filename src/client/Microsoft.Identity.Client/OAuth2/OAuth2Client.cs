@@ -3,7 +3,6 @@
 
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
@@ -12,26 +11,34 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using System.Linq;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
+    /// <summary>
+    /// Responsible for talking to all the Identity provider endpoints:
+    /// - instance discovery
+    /// - endpoint metadata
+    /// - mex
+    /// - /token endpoint via TokenClient
+    /// - device code endpoint
+    /// </summary>
     internal class OAuth2Client
     {
         private readonly Dictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _headers;
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
-        private readonly ITelemetryManager _telemetryManager;
+        private readonly IMatsTelemetryManager _telemetryManager;
         private readonly IDeviceAuthManager _deviceAuthManager;
 
-        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, ITelemetryManager telemetryManager, IDeviceAuthManager deviceAuthManager)
+        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, IMatsTelemetryManager telemetryManager, IDeviceAuthManager deviceAuthManager)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
@@ -49,7 +56,15 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public void AddBodyParameter(string key, string value)
         {
-            _bodyParameters[key] = value;
+            if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
+            {
+                _bodyParameters[key] = value;
+            }
+        }
+
+        internal void AddHeader(string key, string value)
+        {
+            _headers[key] = value;
         }
 
         public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endPoint, RequestContext requestContext)
@@ -80,7 +95,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 QueryParams = endpointUri.Query
             };
 
-            using (_telemetryManager.CreateTelemetryHelper(httpEvent))
+            using (requestContext.CreateTelemetryHelper(httpEvent))
             {
                 if (method == HttpMethod.Post)
                 {
@@ -130,7 +145,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             }
                         }
                     }
-                    catch (SerializationException) // in the rare case we get an error response we cannot deserialize
+                    catch (JsonException) // in the rare case we get an error response we cannot deserialize
                     {
                         // CreateErrorResponse does the same validation. Will be logging the error there.
                     }
@@ -158,11 +173,9 @@ namespace Microsoft.Identity.Client.OAuth2
                 _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
             }
 
-            _headers.Add(TelemetryConstants.XClientLastTelemetry, _telemetryManager.FetchAndResetPreviousHttpTelemetryContent());
-            _headers.Add(TelemetryConstants.XClientCurrentTelemetry, _telemetryManager.FetchCurrentHttpTelemetryContent(requestContext.CorrelationId.AsMatsCorrelationId()));
-
             //add pkeyauth header
             _headers.Add(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
+
             return addCorrelationId;
         }
 
@@ -223,7 +236,7 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError);
             }
-            catch (SerializationException) // in the rare case we get an error response we cannot deserialize
+            catch (JsonException) // in the rare case we get an error response we cannot deserialize
             {
                 exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.NonParsableOAuthError,

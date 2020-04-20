@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -61,29 +62,32 @@ namespace Microsoft.Identity.Client.Cache
                 [AccountKey] = accountsAsString
             };
 
-            return JsonHelper.SerializeToJson(cacheDict)
+            // Serializes as an array of Key Value pairs
+            return JsonHelper.SerializeToJson(cacheDict.ToList())
                              .ToByteArray();
         }
 
         public IDictionary<string, JToken> Deserialize(byte[] bytes, bool clearExistingCacheData)
         {
-            Dictionary<string, IEnumerable<string>> cacheDict;
+            List<KeyValuePair<string, IEnumerable<string>>> cacheKvpList;
 
             try
             {
-                cacheDict = JsonHelper.DeserializeFromJson<Dictionary<string, IEnumerable<string>>>(bytes);
+                cacheKvpList = JsonHelper.DeserializeFromJson< List<KeyValuePair<string, IEnumerable<string>>>>(bytes);
             }
             catch (Exception ex)
             {
                 throw new MsalClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheDictionarySerializerFailedParse, ex);
             }
 
+            var cacheDict = cacheKvpList.ToDictionary(x => x.Key, x => x.Value);
+
             if (clearExistingCacheData)
             {
                 _accessor.Clear();
             }
 
-            if (cacheDict == null || cacheDict.Count == 0)
+            if (cacheKvpList == null || cacheKvpList.Count == 0)
             {
                 return null;
             }

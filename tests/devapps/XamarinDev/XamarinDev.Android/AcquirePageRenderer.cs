@@ -16,6 +16,8 @@ using Xamarin.Forms.Platform.Android;
 using XamarinDev;
 using Xamarin.Forms;
 using XamarinDev.Droid;
+using Android;
+using Android.Support.V4.App;
 
 [assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
 
@@ -27,7 +29,8 @@ namespace XamarinDev.Droid
 
 		public AcquirePageRenderer(Context context) : base(context)
 		{
-		}
+
+        }
 
 		protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
         {

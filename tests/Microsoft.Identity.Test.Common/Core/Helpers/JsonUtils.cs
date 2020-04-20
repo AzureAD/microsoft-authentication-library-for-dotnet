@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Json.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -13,6 +14,17 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             jobj[key] = value;
 
             return jobj.ToString();
+        }
+
+        public static void AssertJsonDeepEquals(string expectedJson, string actualJson)
+        {
+            JToken expected = JToken.Parse(expectedJson);
+            JToken actual = JToken.Parse(actualJson);
+
+            if (!JToken.DeepEquals(expected, actual))
+            {
+                Assert.Fail($"The 2 JSON strings are not the same. Expected {expectedJson} Actual {actualJson}");
+            }
         }
     }
 }

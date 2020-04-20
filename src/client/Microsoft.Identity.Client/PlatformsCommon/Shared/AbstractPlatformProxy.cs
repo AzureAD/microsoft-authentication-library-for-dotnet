@@ -190,11 +190,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new NotImplementedException();
         }
 
-        public virtual IBroker CreateBroker()
+        public virtual IBroker CreateBroker(CoreUIParent uIParent)
         {
             return OverloadBrokerForTest ?? new NullBroker();
         }
 
+        public virtual bool CanBrokerSupportSilentAuth()
+        {
+            return false;
+        }
+        
         public virtual IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
             throw new NotImplementedException();

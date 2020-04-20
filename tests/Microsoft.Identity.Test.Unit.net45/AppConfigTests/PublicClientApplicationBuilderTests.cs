@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -144,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                   .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                   .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                    .Build();
 
             var instanceDiscoveryMetadata = (pca.AppConfig as ApplicationConfiguration).CustomInstanceDiscoveryMetadata;
@@ -157,17 +158,40 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
             var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                  .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                  .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
             Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
         }
 
         [TestMethod]
+        public void TestConstructor_InstanceMetadataUri_ValidateAuthority_MutuallyExclusive()
+        {
+            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                  .WithInstanceDiscoveryMetadata(new Uri("https://some_uri.com"))
+                                                  .WithAuthority("https://some.authority/bogus/", true)
+                                                  .Build());
+            Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
+        public void TestConstructor_WithInstanceDiscoveryMetadata_OnlyOneOverload()
+        {
+            string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
+            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                  .WithInstanceDiscoveryMetadata(instanceMetadataJson)
+                                                  .WithInstanceDiscoveryMetadata(new Uri("https://some_uri.com"))
+                                                  .WithAuthority("https://some.authority/bogus/", true)
+                                                  .Build());
+            Assert.AreEqual(ex.ErrorCode, MsalError.CustomMetadataInstanceOrUri);
+        }
+
+        [TestMethod]
         public void TestConstructor_BadInstanceMetadata()
         {
             var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                  .WithInstanceDicoveryMetadata("{bad_json_metadata")
+                                                  .WithInstanceDiscoveryMetadata("{bad_json_metadata")
                                                   .Build());
 
             Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);
@@ -513,6 +537,33 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.IsNotNull(app.AppConfig.TelemetryConfig);
             Assert.AreEqual<string>(telemetryConfig.SessionId, app.AppConfig.TelemetryConfig.SessionId);
+        }
+
+        [TestMethod]
+        public void WithClientCapabilities()
+        {
+            var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientCapabilities(new[] {  "cp1", "cp2"})
+                .Build();
+
+            CollectionAssert.AreEquivalent(new[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
+        }
+
+        [TestMethod]
+        public void WithClientCapabilitiesViaOptions()
+        {
+            var options = new PublicClientApplicationOptions
+            {
+                Instance = "https://login.microsoftonline.com",
+                TenantId = "organizations",
+                ClientId = TestConstants.ClientId, 
+                ClientCapabilities = new[] { "cp1", "cp2"}
+            };
+
+            var app = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)                
+                .Build();
+
+            CollectionAssert.AreEquivalent(new string[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
         }
     }
 }

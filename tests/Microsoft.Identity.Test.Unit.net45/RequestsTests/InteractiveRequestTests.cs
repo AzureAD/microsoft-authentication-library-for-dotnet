@@ -10,9 +10,12 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -21,8 +24,6 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Test.Unit.PublicApiTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Microsoft.Identity.Client.Internal.Broker;
-using NSubstitute.Core;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -47,14 +48,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                 };
 
-                var webUi = NSubstitute.Substitute.For<IWebUI>();
-
                 AssertException.Throws<ArgumentNullException>(() =>
-                    new InteractiveRequest(null, requestParams, interactiveParameters, webUi));
+                    new InteractiveRequest(null, interactiveParameters));
                 AssertException.Throws<ArgumentNullException>(() =>
-                    new InteractiveRequest(bundle, null, interactiveParameters, webUi));
-                AssertException.Throws<ArgumentNullException>(() =>
-                    new InteractiveRequest(bundle, requestParams, null, webUi));
+                    new InteractiveRequest(requestParams, null));
             }
         }
 
@@ -62,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task WithExtraQueryParamsAndClaimsAsync()
         {
             IDictionary<string, string> extraQueryParamsAndClaims =
-                TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+                TestConstants.ExtraQueryParameters.ToDictionary(e => e.Key, e => e.Value);
             extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
 
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
@@ -72,15 +69,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var ui = new MockWebUI()
                 {
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code"),
-                    QueryParamsToValidate = TestConstants.s_extraQueryParams
+                    QueryParamsToValidate = TestConstants.ExtraQueryParameters
                 };
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, ui);
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
                 var tokenResponseHandler = new MockHttpMessageHandler
                 {
                     ExpectedMethod = HttpMethod.Post,
-                    ExpectedQueryParams = extraQueryParamsAndClaims,
+                    ExpectedQueryParams = TestConstants.ExtraQueryParameters,
+                    ExpectedPostData = new Dictionary<string, string>()
+                        { {OAuth2Parameter.Claims,  TestConstants.Claims } },
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 };
                 harness.HttpManager.AddMockHandler(tokenResponseHandler);
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
                     cache,
-                    extraQueryParameters: TestConstants.s_extraQueryParams,
+                    extraQueryParameters: TestConstants.ExtraQueryParameters,
                     claims: TestConstants.Claims);
 
                 parameters.RedirectUri = new Uri("some://uri");
@@ -101,13 +101,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                 };
 
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
+                var request = new InteractiveRequest(
                     parameters,
-                    interactiveParameters,
-                    ui);
+                    interactiveParameters);
 
-                AuthenticationResult result = await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
+                AuthenticationResult result = await request.RunAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
@@ -117,14 +115,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void NoCacheLookup()
+        public async Task NoCacheLookupAsync()
         {
             MyReceiver myReceiver = new MyReceiver();
 
             using (MockHttpAndServiceBundle harness = CreateTestHarness(telemetryCallback: myReceiver.HandleTelemetryEvents))
             {
                 TokenCache cache = new TokenCache(harness.ServiceBundle, false);
-
+                string clientInfo = MockHelpers.CreateClientInfo();
+                string homeAccountId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
                 MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
@@ -133,7 +132,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
-                    MockHelpers.CreateClientInfo());
+                    clientInfo, 
+                    homeAccountId);
 
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;
@@ -143,6 +143,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code")
                 };
+
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, ui);
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
@@ -165,15 +167,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 };
 
                 InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
                     parameters,
-                    interactiveParameters,
-                    ui);
+                    interactiveParameters);
 
-                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                task.Wait();
-                AuthenticationResult result = task.Result;
-                Assert.IsNotNull(result);
+                AuthenticationResult result = await request.RunAsync().ConfigureAwait(false);
+
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
                 Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(result.AccessToken, "some-access-token");
@@ -197,79 +195,41 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task BrokerInteractiveRequestBrokerRequiredTestAsync()
+        public async Task RedirectUriContainsFragmentErrorTestAsync()
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
-                MockWebUI ui = new MockWebUI()
-                {
-                    // When the auth code is returned from the authorization server prefixed with msauth:// 
-                    // this means the user who logged requires cert based auth and broker
-                    MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=msauth://some-code")
-                };
-
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
-
-                harness.ServiceBundle.PlatformProxy.SetBrokerForTest(CreateMockBroker());
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle, false));
-                parameters.IsBrokerEnabled = false;
-
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
-                    parameters,
-                    new AcquireTokenInteractiveParameters(),
-                    ui);
-
-                AuthenticationResult result = await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
-                Assert.IsNotNull(result);
-                Assert.AreEqual("access-token", result.AccessToken);
-            }
-        }
-
-        [TestMethod]
-        public void RedirectUriContainsFragmentErrorTest()
-        {
-            try
-            {
-                using (MockHttpAndServiceBundle harness = CreateTestHarness())
-                {
-                    AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                        TestConstants.AuthorityHomeTenant,
-                        TestConstants.s_scope,
-                        new TokenCache(harness.ServiceBundle, false),
-                        extraQueryParameters: new Dictionary<string, string>
-                        {
-                            {"extra", "qp"}
-                        });
-                    parameters.RedirectUri = new Uri("some://uri#fragment=not-so-good");
-                    parameters.LoginHint = TestConstants.DisplayableId;
-                    AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                    new TokenCache(harness.ServiceBundle, false),
+                    extraQueryParameters: new Dictionary<string, string>
                     {
-                        Prompt = Prompt.ForceLogin,
-                        ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
-                    };
+                            {"extra", "qp"}
+                    });
+                parameters.RedirectUri = new Uri("some://uri#fragment=not-so-good");
+                parameters.LoginHint = TestConstants.DisplayableId;
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                {
+                    Prompt = Prompt.ForceLogin,
+                    ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
+                };
 
-                    new InteractiveRequest(
-                        harness.ServiceBundle,
-                        parameters,
-                        interactiveParameters,
-                        new MockWebUI());
+                var request = new InteractiveRequest(
+                    parameters,
+                    interactiveParameters);
+                var ex = await AssertException.TaskThrowsAsync<ArgumentException>
+                    (() => request.RunAsync()).ConfigureAwait(false);
 
-                    Assert.Fail("ArgumentException should be thrown here");
-                }
-            }
-            catch (ArgumentException ae)
-            {
-                Assert.IsTrue(ae.Message.Contains(MsalErrorMessage.RedirectUriContainsFragment));
+                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.RedirectUriContainsFragment));
             }
         }
 
+
         [TestMethod]
-        public void VerifyAuthorizationResultTest()
+        public async Task VerifyAuthorizationResultTestAsync()
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
@@ -279,6 +239,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 {
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired),
                 };
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, webUi);
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
@@ -294,51 +255,39 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 };
 
                 InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
                     parameters,
-                    interactiveParameters,
-                    webUi);
+                    interactiveParameters);
 
-                try
-                {
-                    request.ExecuteAsync(CancellationToken.None).Wait();
-                    Assert.Fail("MsalException should have been thrown here");
-                }
-                catch (Exception exc)
-                {
-                    Assert.IsTrue(exc.InnerException is MsalUiRequiredException);
-                    Assert.AreEqual(
-                        MsalError.NoPromptFailedError,
-                        ((MsalUiRequiredException)exc.InnerException).ErrorCode);
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                    () => request.RunAsync())
+                    .ConfigureAwait(false);
 
-                    Assert.AreEqual(
-                       UiRequiredExceptionClassification.PromptNeverFailed,
-                       ((MsalUiRequiredException)exc.InnerException).Classification);
-                }
+                Assert.AreEqual(
+                    MsalError.NoPromptFailedError,
+                    ex.ErrorCode);
+
+                Assert.AreEqual(
+                   UiRequiredExceptionClassification.PromptNeverFailed,
+                   ex.Classification);
+
 
                 webUi = new MockWebUI
                 {
                     MockResult = AuthorizationResult.FromUri(
                         TestConstants.AuthorityHomeTenant + "?error=invalid_request&error_description=some error description")
                 };
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, webUi);
 
                 request = new InteractiveRequest(
-                    harness.ServiceBundle,
                     parameters,
-                    interactiveParameters,
-                    webUi);
+                    interactiveParameters);
 
-                try
-                {
-                    request.ExecuteAsync(CancellationToken.None).Wait(CancellationToken.None);
-                    Assert.Fail("MsalException should have been thrown here");
-                }
-                catch (Exception exc)
-                {
-                    Assert.IsTrue(exc.InnerException is MsalException);
-                    Assert.AreEqual("invalid_request", ((MsalException)exc.InnerException).ErrorCode);
-                    Assert.AreEqual("some error description", ((MsalException)exc.InnerException).Message);
-                }
+                var ex2 = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                     () => request.RunAsync())
+                     .ConfigureAwait(false);
+
+                Assert.AreEqual("invalid_request", ex2.ErrorCode);
+                Assert.AreEqual("some error description", ex2.Message);
             }
         }
 
@@ -355,24 +304,23 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     // error code and error description is empty string (not null)
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=some_error&error_description= "),
                 };
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, webUi);
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false));
 
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
+                var request = new InteractiveRequest(
                     parameters,
-                    new AcquireTokenInteractiveParameters(),
-                    webUi);
+                    new AcquireTokenInteractiveParameters());
 
                 var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                    () => request.ExecuteAsync(CancellationToken.None))
+                    () => request.RunAsync(CancellationToken.None))
                     .ConfigureAwait(false);
 
                 Assert.AreEqual("some_error", ex.ErrorCode);
-                Assert.AreEqual(InteractiveRequest.UnknownError, ex.Message);
+                Assert.AreEqual("Unknown error", ex.Message);
             }
         }
 
@@ -397,15 +345,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                 };
 
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
+                var request = new InteractiveRequest(
                     parameters,
-                    interactiveParameters,
-                    new MockWebUI());
+                    interactiveParameters);
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, new MockWebUI());
 
                 try
                 {
-                    request.ExecuteAsync(CancellationToken.None).Wait();
+                    request.RunAsync().Wait();
                     Assert.Fail("MsalException should be thrown here");
                 }
                 catch (Exception exc)
@@ -427,7 +374,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private IBroker CreateMockBroker()
         {
             IBroker mockBroker = Substitute.For<IBroker>();
-            mockBroker.CanInvokeBroker(null).ReturnsForAnyArgs(true);
+            mockBroker.CanInvokeBroker().ReturnsForAnyArgs(true);
             mockBroker.AcquireTokenUsingBrokerAsync(null).ReturnsForAnyArgs(TestConstants.CreateMsalTokenResponse());
             return mockBroker;
         }

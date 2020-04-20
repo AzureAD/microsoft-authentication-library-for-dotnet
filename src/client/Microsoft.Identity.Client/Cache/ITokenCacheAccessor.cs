@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Cache
         MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey);
 
         MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey);
-
+        
         MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey);
 
         MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey);

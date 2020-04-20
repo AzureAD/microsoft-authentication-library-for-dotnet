@@ -20,6 +20,22 @@ namespace NetFx
 {
     public class Program
     {
+        private const string Claims = @" {
+   ""userinfo"":
+    {
+     ""given_name"": {""essential"": true},
+     ""nickname"": null,
+     ""email"": {""essential"": true},
+     ""email_verified"": {""essential"": true},
+     ""picture"": null,
+     ""http://example.info/claims/groups"": null
+    },
+   ""id_token"":
+    {
+     ""auth_time"": {""essential"": true},
+     ""acr"": {""values"": [""urn:mace:incommon:iap:silver""] }
+    },  
+  }";
         // This app has http://localhost redirect uri registered
         private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
 
@@ -28,7 +44,7 @@ namespace NetFx
 
         private static readonly HttpMethod s_popMethod = HttpMethod.Get;
 
-        private static bool _usePoP = true;
+        private static bool s_usePoP = false;
 
         // These are not really secret as they do not protect anything, but validaton tools will complain
         // if we have secrets in the code. 
@@ -36,21 +52,18 @@ namespace NetFx
 
         // Simple confidential client app with access to https://graph.microsoft.com/.default
         private static readonly string s_clientIdForConfidentialApp =
-            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID") ??
-            throw new ArgumentException("Please configure a client id");
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID");
 
         // App secret for app above 
         private static readonly string s_confidentialClientSecret =
-            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET") ??
-            throw new ArgumentException("Please configure a client secret");
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET");
 
         // https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/ADALTesting/providers/Microsoft.KeyVault/vaults/buildautomation/secrets
         private static readonly string s_secretForPoPValidationRequest =
-            Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET") ??
-            throw new ArgumentException("Please configure the pop validation api secret");
+            Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET");
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly IEnumerable<string> s_scopes = new[] { "user.read", "Openid", "profile" }; // used for WIA and U/P, can be empty
+        private static readonly IEnumerable<string> s_scopes = new[] { "" };
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -58,13 +71,13 @@ namespace NetFx
         public static readonly string AppCacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.app.json";
 
 
-        private static readonly string[] s_tids = new[]  {
-            "common",
-            "organizations",
-            "49f548d0-12b7-4169-a390-bb5304d24462",
-            "72f988bf-86f1-41af-91ab-2d7cd011db47" };
+        private static readonly string[] s_authorities = new[]  {
+            "https://login.microsoftonline.com/common",
+            "https://login.microsoftonline.com/organizations",
+            "https://login.microsoftonline.com/49f548d0-12b7-4169-a390-bb5304d24462",
+            "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47" };
 
-        private static int s_currentTid = 0;
+        private static int s_currentAuthority = 0;
 
         public static void Main(string[] args)
         {
@@ -77,8 +90,7 @@ namespace NetFx
 
         private static string GetAuthority()
         {
-            string tenant = s_tids[s_currentTid];
-            return $"https://login.microsoftonline.com/{tenant}";
+            return s_authorities[s_currentAuthority];
         }
 
         private static IConfidentialClientApplication CreateCca()
@@ -99,6 +111,7 @@ namespace NetFx
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
+                            //.WithClientCapabilities(new[] { "llt" })
                             .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();
 
@@ -148,7 +161,7 @@ namespace NetFx
                         6. Acquire Token Silently - multiple requests in parallel
                         7. Acquire SSH Cert Interactive
                         8. Client Credentials 
-                        p. Toggle POP (currently {(_usePoP ? "ON" : "OFF")}) 
+                        p. Toggle POP (currently {(s_usePoP ? "ON" : "OFF")}) 
                         c. Clear cache
                         r. Rotate Tenant ID
                         e. Expire all ATs
@@ -200,9 +213,10 @@ namespace NetFx
                         case '4':
 
                             var interactiveBuilder = pca.AcquireTokenInteractive(s_scopes);
+                            //interactiveBuilder = interactiveBuilder.WithClaims(Claims);
                             interactiveBuilder = ConfigurePoP(interactiveBuilder);
 
-                            await FetchTokenAndCallPoPApiAsync(interactiveBuilder.ExecuteAsync()).ConfigureAwait(false);
+                            await FetchTokenAndCallApiAsync(pca, interactiveBuilder.ExecuteAsync()).ConfigureAwait(false);
 
                             break;
 
@@ -214,7 +228,7 @@ namespace NetFx
                             }
 
                             AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(s_scopes, account);
-                            if (_usePoP)
+                            if (s_usePoP)
                             {
                                 silentBuilder = silentBuilder
                                     .WithExtraQueryParameters(GetTestSliceParams())
@@ -231,7 +245,7 @@ namespace NetFx
                                 .Select(acc =>
                                 {
                                     var silentBuilder = pca.AcquireTokenSilent(s_scopes, acc);
-                                    if (_usePoP)
+                                    if (s_usePoP)
                                     {
                                         silentBuilder = silentBuilder
                                             .WithExtraQueryParameters(GetTestSliceParams())
@@ -287,7 +301,7 @@ namespace NetFx
                             await FetchTokenAndCallApiAsync(pca, authTask).ConfigureAwait(false);
                             break;
                         case 'p': // toggle pop
-                            _usePoP = !_usePoP;
+                            s_usePoP = !s_usePoP;
                             break;
 
                         case 'c':
@@ -300,7 +314,7 @@ namespace NetFx
                             break;
                         case 'r': // rotate tid
 
-                            s_currentTid = (s_currentTid + 1) % s_tids.Length;
+                            s_currentAuthority = (s_currentAuthority + 1) % s_authorities.Length;
                             pca = CreatePca();
                             cca = CreateCca();
                             RunConsoleAppLogicAsync(pca, cca).Wait();
@@ -349,7 +363,7 @@ namespace NetFx
         private static T ConfigurePoP<T>(AbstractPublicClientAcquireTokenParameterBuilder<T> builder)
             where T : AbstractPublicClientAcquireTokenParameterBuilder<T>
         {
-            if (_usePoP)
+            if (s_usePoP)
             {
                 builder = builder
                     .WithExtraQueryParameters(GetTestSliceParams())
@@ -357,16 +371,6 @@ namespace NetFx
             }
 
             return builder as T;
-        }
-
-        private static async Task FetchTokenAndCallPoPApiAsync(Task<AuthenticationResult> authTask)
-        {
-            var result = await authTask.ConfigureAwait(false);
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("Token type: {0} Token: {1}", result.TokenType, result.AccessToken);
-            Console.ResetColor();
-
-            await CallPoPVerificationAPIAsync(result.CreateAuthorizationHeader()).ConfigureAwait(false);
         }
 
         private static async Task FetchTokenAndCallApiAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
@@ -379,7 +383,7 @@ namespace NetFx
 
             string authHeader = authTask.Result.CreateAuthorizationHeader();
 
-            if (_usePoP)
+            if (s_usePoP)
             {
                 await CallPoPVerificationAPIAsync(authHeader).ConfigureAwait(false);
             }

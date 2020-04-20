@@ -19,19 +19,24 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredCacheEnv,
             string clientId,
             MsalTokenResponse response,
-            string userId=null)
-            : this(preferredCacheEnv, clientId, response.RefreshToken, response.ClientInfo, response.FamilyId, userId)
+            string homeAccountId)
+            : this(
+                  preferredCacheEnv, 
+                  clientId, 
+                  response.RefreshToken, 
+                  response.ClientInfo, 
+                  response.FamilyId, 
+                  homeAccountId)
         {
         }
-
 
         internal MsalRefreshTokenCacheItem(
             string preferredCacheEnv,
             string clientId,
             string secret,
             string rawClientInfo,
-            string familyId = null,
-            string userId = null)
+            string familyId,
+            string homeAccountId)
             : this()
         {
             ClientId = clientId;
@@ -39,10 +44,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             Secret = secret;
             RawClientInfo = rawClientInfo;
             FamilyId = familyId;
-
-            //Adfs does not send back client info, so HomeAccountId must be explicitly set
-            HomeAccountId = userId;
-            InitUserIdentifier();
+            HomeAccountId = homeAccountId;
         }
 
         /// <summary>

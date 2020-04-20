@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -52,6 +53,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Arlington_Interactive_AADAsync()
+        {
+            // Arrange
+            LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -101,9 +110,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
+        [TestMethod]
+        public async Task Arlington_Interactive_AdfsV2019_FederatedAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
+        }
+
 #endif
 
         [TestMethod]
+        [TestCategory(TestCategories.ADFS)]
         public async Task Interactive_AdfsV2019_DirectAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
@@ -166,6 +183,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     .Create(Adfs2019LabConstants.PublicClientId)
                     .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
                     .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                    .WithTestLogging()
                     .Build();
             }
             else
@@ -173,6 +191,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithAuthority(labResponse.Lab.Authority + "common")
+                    .WithTestLogging()
                     .Build();
             }
 
@@ -228,6 +248,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+               .WithTestLogging()
                .Build();
 
             AcquireTokenInteractiveParameterBuilder builder = pca

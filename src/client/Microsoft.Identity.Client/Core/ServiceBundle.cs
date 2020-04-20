@@ -9,6 +9,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.Http;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Core
@@ -33,18 +35,26 @@ namespace Microsoft.Identity.Client.Core
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
 
+            HttpTelemetryManager = new HttpTelemetryManager();
             if (config.TelemetryConfig != null)
             {
                 // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
                 Mats = TelemetryClient.CreateMats(config, PlatformProxy, config.TelemetryConfig);
-                TelemetryManager = Mats?.TelemetryManager ?? new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
+                MatsTelemetryManager = Mats?.TelemetryManager ?? 
+                    new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
             }
             else
             {
-                TelemetryManager = new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
+                MatsTelemetryManager = new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
             }
 
-            InstanceDiscoveryManager = new InstanceDiscoveryManager(HttpManager, TelemetryManager, shouldClearCaches, config.CustomInstanceDiscoveryMetadata);
+            InstanceDiscoveryManager = new InstanceDiscoveryManager(
+                HttpManager, 
+                MatsTelemetryManager, 
+                shouldClearCaches, 
+                config.CustomInstanceDiscoveryMetadata, 
+                config.CustomInstanceDiscoveryMetadataUri);
+
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
             DeviceAuthManager = PlatformProxy.CreateDeviceAuthManager();
@@ -56,7 +66,7 @@ namespace Microsoft.Identity.Client.Core
         public IHttpManager HttpManager { get; }
 
         /// <inheritdoc />
-        public ITelemetryManager TelemetryManager { get; }
+        public IMatsTelemetryManager MatsTelemetryManager { get; }
 
         public IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
 
@@ -76,6 +86,8 @@ namespace Microsoft.Identity.Client.Core
         public ITelemetryClient Mats { get; }
 
         public IDeviceAuthManager DeviceAuthManager { get; }
+
+        public IHttpTelemetryManager HttpTelemetryManager { get; }
 
         public static ServiceBundle Create(ApplicationConfiguration config)
         {

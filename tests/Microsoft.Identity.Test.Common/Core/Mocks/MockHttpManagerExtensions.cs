@@ -16,24 +16,34 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal static class MockHttpManagerExtensions
     {
-        public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager)
-        {
-            AddInstanceDiscoveryMockHandler(httpManager, TestConstants.AuthorityCommonTenant);
-        }
-
-        public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager, string authority)
+        public static void AddInstanceDiscoveryMockHandler(
+            this MockHttpManager httpManager, 
+            string authority = TestConstants.AuthorityCommonTenant, 
+            Uri customDiscoveryEndpoint = null, 
+            string instanceMetadataContent = null)
         {
             Uri authorityURI = new Uri(authority);
-            string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authorityURI.Host)
-                                       ? authorityURI.Host
-                                       : AadAuthority.DefaultTrustedHost;
 
-            string discoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort($"https://{discoveryHost}/common/discovery/instance", authorityURI.Port);
+            string discoveryEndpoint;
+
+            if (customDiscoveryEndpoint == null)
+            {
+                string discoveryHost = KnownMetadataProvider.IsKnownEnvironment(authorityURI.Host)
+                                           ? authorityURI.Host
+                                           : AadAuthority.DefaultTrustedHost;
+
+                discoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort($"https://{discoveryHost}/common/discovery/instance", authorityURI.Port);
+            }
+            else
+            {
+                discoveryEndpoint = customDiscoveryEndpoint.AbsoluteUri;
+            }
 
             httpManager.AddMockHandler(
-                MockHelpers.CreateInstanceDiscoveryMockHandler(discoveryEndpoint));
+                MockHelpers.CreateInstanceDiscoveryMockHandler(
+                    discoveryEndpoint, 
+                    instanceMetadataContent ?? TestConstants.DiscoveryJsonResponse));
         }
-
 
         public static void AddResponseMockHandlerForPost(
             this MockHttpManager httpManager,
@@ -51,42 +61,42 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 });
         }
 
-        public static void AddSuccessTokenResponseMockHandlerForPost(
-            this MockHttpManager httpManager,
-            string authority,
-            IDictionary<string, string> bodyParameters = null,
-            IDictionary<string, string> queryParameters = null,
-            bool foci = false)
+        public static MockHttpMessageHandler AddFailureTokenEndpointResponse(
+           this MockHttpManager httpManager,
+           string error,
+           string authority = TestConstants.AuthorityCommonTenant, 
+           string correlationId = null)
         {
-            httpManager.AddMockHandler(
-                new MockHttpMessageHandler()
-                {
-                    ExpectedUrl = authority + "oauth2/v2.0/token",
-                    ExpectedMethod = HttpMethod.Post,
-                    ExpectedPostData = bodyParameters,
-                    ExpectedQueryParams = queryParameters,
-                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(foci)
-                });
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = authority + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateFailureTokenResponseMessage(
+                    error, 
+                    correlationId: correlationId)
+            };
+            httpManager.AddMockHandler(handler);
+            return handler;
         }
 
-        public static void AddSuccessfulTokenResponseWithHttpTelemetryMockHandlerForPost(
-           this MockHttpManager httpManager,
-           string authority,
-           IDictionary<string, string> bodyParameters = null,
-           IDictionary<string, string> queryParameters = null,
-           IDictionary<string, string> httpTelemetryHeaders = null,
-           bool foci = false)
+        public static MockHttpMessageHandler AddSuccessTokenResponseMockHandlerForPost(
+            this MockHttpManager httpManager,
+            string authority = TestConstants.AuthorityCommonTenant,
+            IDictionary<string, string> bodyParameters = null,
+            IDictionary<string, string> queryParameters = null,
+            bool foci = false, 
+            HttpResponseMessage responseMessage = null)
         {
-            httpManager.AddMockHandler(
-                new MockHttpMessageHandler()
-                {
-                    ExpectedUrl = authority + "oauth2/v2.0/token",
-                    ExpectedMethod = HttpMethod.Post,
-                    ExpectedPostData = bodyParameters,
-                    ExpectedQueryParams = queryParameters,
-                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(foci),
-                    HttpTelemetryHeaders = httpTelemetryHeaders
-                });
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = authority + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = bodyParameters,
+                ExpectedQueryParams = queryParameters,
+                ResponseMessage = responseMessage ?? MockHelpers.CreateSuccessTokenResponseMessage(foci)
+            };
+            httpManager.AddMockHandler(handler);
+            return handler;
         }
 
         public static void AddSuccessTokenResponseMockHandlerForGet(
@@ -153,7 +163,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 });
         }
 
-        public static MockHttpMessageHandler AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(this MockHttpManager httpManager)
+        public static MockHttpMessageHandler AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+            this MockHttpManager httpManager)
         {
             var handler = new MockHttpMessageHandler()
             {

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Globalization;
 
 namespace Microsoft.Identity.Client
@@ -48,7 +49,6 @@ namespace Microsoft.Identity.Client
         public const string MultipleTokensMatched =
             "The cache contains multiple tokens satisfying the requirements. Try to clear token cache";
 
-        public const string NoDataFromSTS = "No data received from security token service";
         public const string NullParameterTemplate = "Parameter '{0}' cannot be null";
         public const string ParsingMetadataDocumentFailed = "Parsing WS metadata exchange failed";
         public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
@@ -117,6 +117,7 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseError = "Broker response returned error: ";
         public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
+        public const string NullIntentReturnedFromBroker = "Broker returned a null intent. Check the Xamarin Android app settings and logs for more information.";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint.";
         public const string MultipleAccountsForLoginHint = "You are trying to acquire a token silently using a login hint. Multiple accounts were found in the token cache having this login hint. Please choose an account manually an pass it in to AcquireTokenSilently.";
 
@@ -283,6 +284,25 @@ namespace Microsoft.Identity.Client
         public const string InvalidClient = "A configuration issue is preventing authentication - check the error message from the server for details." +
             "You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details. ";
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
+        public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication";
+        public static string AuthorityTypeMismatch(
+            AuthorityType appAuthorityType, 
+            AuthorityType requestAuthorityType)
+            {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "A authority of type {0} was used at the application and of type {1} at the request level. " +
+                "Please use the same authority type between the two.", 
+                appAuthorityType, 
+                requestAuthorityType);
+        }
+
+        public const string NoAndroidBrokerAccountFound = "Android account manager could not find an account that matched the provided account information.";
+        public const string AndroidBrokerCannotBeInvoked = "In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).";
+        public const string CustomMetadataInstanceOrUri = "You have configured your own instance metadata using both an Uri and a string. Only one is supported. " +
+            "See https://aka.ms/msal-net-custom-instance-metadata for more details.";
+
+        public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow.";
 
         public static string ExperimentalFeature(string methodName)
         {
@@ -318,5 +338,20 @@ namespace Microsoft.Identity.Client
                 requestTokenType, responseTokenType);
         }
 
+        public static string InvalidJsonClaimsFormat(string claims)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "You have configured a claims parameter that is not in JSON format: {0}. Inspect the inner exception for details about the JSON parsing error. To learn more about claim requests, please see https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter",
+                claims);
+        }
+
+        public static string CertMustHavePrivateKey(string certificateName)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "The certificate {0} does not have a private key.",
+                certificateName);
+        }
     }
 }

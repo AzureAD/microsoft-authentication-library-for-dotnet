@@ -20,6 +20,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string IsConfidentialClientKey = EventNamePrefix + "is_confidential_client";
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
         public const string LoginHintKey = EventNamePrefix + "login_hint";
+        public const string IsAccessTokenCacheHitKey = EventNamePrefix + "at_cache_hit";
 
         public enum ApiIds
         {
@@ -63,7 +64,15 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public ApiIds ApiId
         {
+            get => (ApiIds)Enum.Parse(typeof(ApiIds), this[MsalTelemetryBlobEventNames.ApiIdConstStrKey]);
             set => this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
+        }
+
+        public string ApiIdString
+        {
+            get => this.ContainsKey(MsalTelemetryBlobEventNames.ApiIdConstStrKey) ? 
+                this[MsalTelemetryBlobEventNames.ApiIdConstStrKey] : 
+                null;
         }
 
         public Uri Authority
@@ -113,8 +122,20 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
+        public bool IsAccessTokenCacheHit
+        {
+#pragma warning disable CA1305 // Specify IFormatProvider
+            get
+            {  return this.ContainsKey(IsAccessTokenCacheHitKey) ?
+                    (this[IsAccessTokenCacheHitKey] == true.ToString().ToLowerInvariant()) : 
+                    false; }
+            set { this[IsAccessTokenCacheHitKey] = value.ToString().ToLowerInvariant(); }
+#pragma warning restore CA1305 // Specify IFormatProvider
+        }
+
         public string ApiErrorCode
         {
+            get => this.ContainsKey(ApiErrorCodeKey) ? this[ApiErrorCodeKey] : null;
             set => this[ApiErrorCodeKey] = value;
         }
 

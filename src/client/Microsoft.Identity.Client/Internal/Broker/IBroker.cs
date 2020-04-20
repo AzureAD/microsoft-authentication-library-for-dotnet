@@ -10,8 +10,15 @@ namespace Microsoft.Identity.Client.Internal.Broker
 {
     internal interface IBroker
     {
-        bool CanInvokeBroker(CoreUIParent uiParent);
+        bool CanInvokeBroker();
 
         Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload);
+
+        //These methods are only available to brokers that have the BrokerSupportsSilentFlow flag enabled
+        #region Silent Flow Methods
+        Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID);
+
+        Task RemoveAccountAsync(string clientID, IAccount account);
+        #endregion Silent Flow Methods
     }
 }

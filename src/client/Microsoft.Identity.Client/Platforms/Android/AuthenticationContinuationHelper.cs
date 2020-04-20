@@ -37,6 +37,13 @@ namespace Microsoft.Identity.Client
             {
                 authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
             }
+            else if (!String.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)) || requestCode == BrokerConstants.BrokerRequestId) 
+                //The BrokerRequestId is an ID that is attached to the activity launch during brokered authentication
+                // that indicates that the response returned to this class is for the broker.
+            {
+                AndroidBroker.SetBrokerResult(data, (int)resultCode);
+                return;
+            }
             else
             {
                 authorizationResult = ProcessFromSystemWebview(requestCode, resultCode, data);
@@ -49,14 +56,14 @@ namespace Microsoft.Identity.Client
         {
             switch ((int)resultCode)
             {
-            case (int)Result.Ok:
-                return AuthorizationResult.FromUri(data.GetStringExtra("ReturnedUrl"));
+                case (int)Result.Ok:
+                    return AuthorizationResult.FromUri(data.GetStringExtra("ReturnedUrl"));
 
-            case (int)Result.Canceled:
-                return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
+                case (int)Result.Canceled:
+                    return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
 
-            default:
-                return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
+                default:
+                    return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
             }
         }
 
@@ -64,14 +71,14 @@ namespace Microsoft.Identity.Client
         {
             switch ((int)resultCode)
             {
-            case AndroidConstants.AuthCodeReceived:
-                return AuthorizationResult.FromUri(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
+                case AndroidConstants.AuthCodeReceived:
+                    return AuthorizationResult.FromUri(data.GetStringExtra("com.microsoft.identity.client.finalUrl"));
 
-            case AndroidConstants.Cancel:
-                return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
+                case AndroidConstants.Cancel:
+                    return AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
 
-            default:
-                return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
+                default:
+                    return AuthorizationResult.FromStatus(AuthorizationStatus.UnknownError);
             }
         }
     }

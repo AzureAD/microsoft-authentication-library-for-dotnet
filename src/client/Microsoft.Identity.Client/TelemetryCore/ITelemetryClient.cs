@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
     // This interface defines the root infrastructure for MATS.
     internal interface ITelemetryClient : IDisposable
     {
-        ITelemetryManager TelemetryManager { get; }
+        IMatsTelemetryManager TelemetryManager { get; }
 
         MatsScenario CreateScenario();
 

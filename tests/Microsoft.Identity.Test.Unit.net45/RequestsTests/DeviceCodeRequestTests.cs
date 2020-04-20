@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void TestDeviceCodeAuthSuccess()
+        public async Task TestDeviceCodeAuthSuccessAsync()
         {
             const int NumberOfAuthorizationPendingRequestsToInject = 1;
 
@@ -101,10 +101,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
 
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
+                var authenticationResult = await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
 
-                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                task.Wait();
-                var authenticationResult = task.Result;
                 Assert.IsNotNull(authenticationResult);
                 Assert.IsNotNull(actualDeviceCodeResult);
 
@@ -160,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
                 var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                    () => request.ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+                    () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
             }
         }
 
@@ -335,7 +333,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 null,
                 cache,
                 null,
-                extraQueryParameters: TestConstants.s_extraQueryParams,
+                extraQueryParameters: TestConstants.ExtraQueryParameters,
                 claims: TestConstants.Claims);
 
             if (isAdfs)
@@ -357,10 +355,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             expectedScopes.Add(OAuth2Value.ScopeProfile);
             expectedScopes.Add(OAuth2Value.ScopeOpenId);
 
-            IDictionary<string, string> extraQueryParamsAndClaims =
-                TestConstants.s_extraQueryParams.ToDictionary(e => e.Key, e => e.Value);
-            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
-
             // Mock Handler for device code request
             harness.HttpManager.AddMockHandler(
                 new MockHttpMessageHandler
@@ -369,10 +363,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExpectedPostData = new Dictionary<string, string>()
                     {
                         { OAuth2Parameter.ClientId, TestConstants.ClientId },
-                        { OAuth2Parameter.Scope, expectedScopes.AsSingleString() }
+                        { OAuth2Parameter.Scope, expectedScopes.AsSingleString() },
+                        { OAuth2Parameter.Claims, TestConstants.Claims }
                     },
                     ResponseMessage = isAdfs ? CreateAdfsDeviceCodeResponseSuccessMessage() : CreateDeviceCodeResponseSuccessMessage(),
-                    ExpectedQueryParams = extraQueryParamsAndClaims
+                    ExpectedQueryParams = TestConstants.ExtraQueryParameters,                     
                 });
 
             for (int i = 0; i < numAuthorizationPendingResults; i++)

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -26,23 +27,36 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _clientParameters = clientParameters;
         }
 
-        internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+            if (AuthenticationRequestParameters.Scope == null || !AuthenticationRequestParameters.Scope.Any())
+            {
+                throw new MsalClientException(
+                    MsalError.ScopesRequired,
+                    MsalErrorMessage.ScopesRequired);
+            }
+
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            if (!_clientParameters.ForceRefresh)
+            if (!_clientParameters.ForceRefresh && !AuthenticationRequestParameters.HasClaims)
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
                 if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
                 {
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+
                     return new AuthenticationResult(
                         cachedAccessTokenItem,
                         null,
                         AuthenticationRequestParameters.AuthenticationScheme,
                         AuthenticationRequestParameters.RequestContext.CorrelationId);
                 }
+            }
+            else
+            {
+                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set");
             }
 
             // No AT in the cache or AT needs to be refreshed
@@ -82,12 +96,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.IsConfidentialClient = true;
         }
 
-        protected override SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
-        {
+        protected override SortedSet<string> GetOverridenScopes(ISet<string> inputScopes)
+        {           
             // Client credentials should not add the reserved scopes
             // "openid", "profile" and "offline_access" 
             // because AT is on behalf of an app (no profile, no IDToken, no RT)
-            return new SortedSet<string>(inputScope);
+            return new SortedSet<string>(inputScopes);
         }
 
         private Dictionary<string, string> GetBodyParameters()

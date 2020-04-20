@@ -1,3 +1,71 @@
+4.11.0
+============
+New Features: 
+
+**MSAL.NET will now remove accounts from the cache that have expired refresh tokens**. MSAL.NET will remove both the refresh token and the associated account if the `suberror` is "bad_token" to avaoid unnecessary calls to AzureAD. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1720)
+
+**MSAL.NET uses telemetry schema V2** MSAL.NET has been updated to use Http telemetry schema V2. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1681)
+
+Bug Fixes:
+
+**When migrating a Xamarin application from ADAL.NET to MSAL.NET and preserving the keychain, a CryptographicException can be thrown from the BrokerKeyHelper.** MSAL.NET now does the broker key keychain look up by Service and Account only. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1628)
+
+**WithProofOfPosession produces a token of type POP when it is expected to be PoP** MSAl.NET will now produce a token of type PoP when WithProofOfPosession() is used. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1711)
+
+
+4.10.0
+============
+New Features:
+
+**MSAL.NET now allows configuration of instance metadata end-point** WithInstanceDicoveryMetadata method now allows developers to pass an Uri with metadata. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1603)
+
+Bug fixes:
+
+**Client Credentials flow not working with ADFS 2019** MSAL.NET now uses the token endpoint as audience and adds x5t to the signed assertion it creates from a certificate. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1708)
+**Certain error messages are not returned from the Android Broker** MSAL.NET now throws better exceptions that show the root cause of Android broker failures. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1696)
+**WithProofOfPossesion not exposed on AcquireTokenSilent builder** MSAL.NET now exposes the WithProofOfPossesion call on AcquireTokenSilent [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1715)
+
+4.9.0
+============
+New Features: ** Added support for Android Broker to MSAL.NET ** MSAL.NET will now be able to take advantage of the brokered authentication scenarios using the Microsoft Authenticator and the Intune Company Portal. Learn how to levereage the broker [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Leveraging-the-broker-on-iOS-and-Android#brokered-authentication-for-android) [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1402)
+
+**Added client capabilities support to MSAL.NET** [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1545)
+
+Bug Fixes:
+**Wrong Authority created in CreateAuthorityForRequest** MSAL.NET now properly configures the authority when set from acquire Token apis and is not set on the application. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1606)
+
+4.8.2
+============
+
+Bug Fixes:
+**When using `.WithBroker(true)`, but no broker is installed on the device, MSAL.NET would throw a null ref**. MSAL.NET now checks if the user is required to have their device managed, and if not, the user will be guided through the regular authentication process with no broker. If device mangagement is required, the user will be guided to the App Store to install the Authenticator App. [See more details in the issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1598).
+**Starting with version 4.8.1, MSAL.NET would throw a MonoTouchException on iOS 10 and 11 devices**. Starting with iOS 13 , all WKWebViews report their full page user agent as desktop, previously this was reported as mobile to the server. A check was added in 4.8.1 to switch to use macOS user-agent for all browsers by default. Now, for devices lower than iOS 13, this check will not occur. [See issue for more details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1621).
+
+4.8.1
+============
+
+**Fix a Null Reference bug in the main AcquireTokenInteractive scenario on Android.** This is the reason why release 4.8.0 was unlisted from NuGet -[Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1585)
+
+**Change the internal serialization library logic to prevent Mono errors with DataContract serializers** -[Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1586)
+
+4.8.0
+============
+Bug fix:
+**Cannot acquire token in UWP app on HoloLens via a unity plugin as json serialization fails** Serialization now works properly in MSAL.NET. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1468)
+
+**AAD Security question registration page unresponsive in Android embedded webview** MSAL.NET now properly handles the andoid activity when using the embedded webview. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1532)
+
+**"offline_access" scope causes token cache misses** MSAL.NET now properly filters the cache during silent authentication. [Issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1548)
+
+**Improved invalid client error message** MSAL.NET now has a better error message when an invalid client error is sent back from AAD. [Issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1576)
+
+New Features:
+**MSAL.NET now supports Proof of Possession** The PublicClientApplication on every target has support for this. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1488)
+
+**Token cache serialization for Mac** MSAL.NET is now able to serialize and deserialize the token cache during authentication on MAC OS. [Issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1487)
+
+**MSAL.NET now uses "mobile" configuration for iOS Xamarin embedded webview** MSAL.NET now properly uses the WKWebview on iPad when using the embedded webview. [Issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1552)
+
 4.7.1.
 ============
 Bug fix:

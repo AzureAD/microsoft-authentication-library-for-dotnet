@@ -17,13 +17,16 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Threading.Tasks;
+using NSubstitute;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
     public class BrokerRequestTests : TestBase
     {
-        private BrokerInteractiveRequest _brokerInteractiveRequest;
+        private BrokerInteractiveRequestComponent _brokerInteractiveRequest;
+        private BrokerSilentRequest _brokerSilentRequest;
 
         [TestMethod]
         public void BrokerResponseTest()
@@ -109,32 +112,118 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false),
                     null,
-                    TestConstants.s_extraQueryParams);
+                    TestConstants.ExtraQueryParameters);
 
                 // Act
-                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
                 _brokerInteractiveRequest =
-                    new BrokerInteractiveRequest(
+                    new BrokerInteractiveRequestComponent(
+                        parameters,
+                        null,
+                        broker,
+                        "install_url");
+                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.CanInvokeBroker());
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public void BrokerSilentRequestTest()
+        {
+            string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(TestConstants.AuthorityTestTenant));
+
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                var parameters = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityTestTenant,
+                    TestConstants.s_scope,
+                    new TokenCache(harness.ServiceBundle, false),
+                    null,
+                    TestConstants.ExtraQueryParameters);
+
+                // Act
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+                _brokerSilentRequest =
+                    new BrokerSilentRequest(
                         parameters,
                         null,
                         harness.ServiceBundle,
-                        null,
                         broker);
-                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.CanInvokeBroker(null));
-                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
+                Assert.AreEqual(false, _brokerSilentRequest.Broker.CanInvokeBroker());
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerSilentRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
             }
+        }
+
+        [TestMethod]
+        public void BrokerGetAccountsAsyncOnUnsupportedPlatformTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.GetAccountsAsync(TestConstants.ClientId)).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public void BrokerRemoveAccountAsyncOnUnsupportedPlatformTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.RemoveAccountAsync(TestConstants.ClientId, new Account("test", "test", "test"))).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task BrokerGetAccountsTestAsync()
+        {
+            // Arrange
+            var mockBroker = Substitute.For<IBroker>();
+            var expectedAccount = Substitute.For<IAccount>();
+            mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { expectedAccount });
+
+            var platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.CanBrokerSupportSilentAuth().Returns(true);
+            platformProxy.CreateBroker(null).Returns(mockBroker);
+
+
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithBroker(true)
+                .WithPlatformProxy(platformProxy)
+                .Build();
+
+            // Act
+            var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            // Assert
+            Assert.AreSame(expectedAccount, actualAccount.Single());
         }
 
         private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, Action<Exception> validationHandler)
         {
             try
             {
+                //Testing interactive response
                 _brokerInteractiveRequest.ValidateResponseFromBroker(msalTokenResponse);
 
                 Assert.Fail("MsalServiceException should have been thrown here");
             }
             catch (MsalServiceException exc)
             {
+                try
+                {
+                    //Testing silent response
+                    _brokerSilentRequest.ValidateResponseFromBroker(msalTokenResponse);
+
+                    Assert.Fail("MsalServiceException should have been thrown here");
+                }
+                catch (MsalServiceException exc2)
+                {
+                    validationHandler(exc2);
+                }
                 validationHandler(exc);
             }
 
@@ -148,26 +237,32 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false),
-                    extraQueryParameters: TestConstants.s_extraQueryParams,
+                    extraQueryParameters: TestConstants.ExtraQueryParameters,
                     claims: TestConstants.Claims);
 
-                parameters.IsBrokerEnabled = true;
+                parameters.IsBrokerConfigured = true;
 
                 AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
+                AcquireTokenSilentParameters acquireTokenSilentParameters = new AcquireTokenSilentParameters();
 
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
-                    parameters,
-                    interactiveParameters,
-                    new MockWebUI());
+                //PublicAuthCodeRequest request = new PublicAuthCodeRequest(
+                //    parameters,
+                //    interactiveParameters,
+                //    new MockWebUI());
 
-                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
                 _brokerInteractiveRequest =
-                    new BrokerInteractiveRequest(
+                    new BrokerInteractiveRequestComponent(
                         parameters,
                         interactiveParameters,
+                        broker,
+                        "install_url");
+
+                _brokerSilentRequest =
+                    new BrokerSilentRequest(
+                        parameters,
+                        acquireTokenSilentParameters,
                         harness.ServiceBundle,
-                        null,
                         broker);
             }
         }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.companyname.XamarinDev">
   <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="27" />
   <uses-permission android:name="android.permission.INTERNET" />
@@ -11,6 +11,9 @@
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
         <data android:scheme="msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842" android:host="auth" />
+        <data android:scheme="msauth"
+                    android:host="com.companyname.XamarinDev"
+                    android:path="/FHNONvDstzaj3bKe2+WAEGZOwJI="/>
       </intent-filter>
     </activity>
   </application>

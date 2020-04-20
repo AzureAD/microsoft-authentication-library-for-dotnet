@@ -3,12 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client
 {
@@ -54,6 +57,8 @@ namespace Microsoft.Identity.Client
         /// Has no effect on ADFS or B2C authorities, only for AAD authorities</remarks>
         /// <param name="instanceDiscoveryJson"></param>
         /// <returns></returns>
+        [Obsolete("This method name has a typo, please use WithInstanceDiscoveryMetadata instead", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithInstanceDicoveryMetadata(string instanceDiscoveryJson)
         {
             if (string.IsNullOrEmpty(instanceDiscoveryJson))
@@ -67,13 +72,98 @@ namespace Microsoft.Identity.Client
                 Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
                 return (T)this;
             }
-            catch (System.Runtime.Serialization.SerializationException ex)
+            catch (JsonException ex)
             {
                 throw new MsalClientException(
                     MsalError.InvalidUserInstanceMetadata,
                     MsalErrorMessage.InvalidUserInstanceMetadata,
                     ex);
             }
+        }
+
+        /// <summary>
+        /// Allows developers to configure their own valid authorities. A json string similar to https://aka.ms/aad-instance-discovery should be provided.
+        /// MSAL uses this information to: 
+        /// <list type="bullet">
+        /// <item>Call REST APIs on the environment specified in the preferred_network</item>
+        /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
+        /// <item>Use the environment aliases to match tokens issued to other authorities</item>
+        /// </list>
+        /// For more details see https://aka.ms/msal-net-custom-instance-metadata
+        /// </summary>
+        /// <remarks>
+        /// Developers take responsibility for authority validation if they use this method. Should not be used when the authority is not known in advance. 
+        /// Has no effect on ADFS or B2C authorities, only for AAD authorities</remarks>
+        /// <param name="instanceDiscoveryJson"></param>
+        /// <returns></returns>
+        public T WithInstanceDiscoveryMetadata(string instanceDiscoveryJson)
+        {
+            if (string.IsNullOrEmpty(instanceDiscoveryJson))
+            {
+                throw new ArgumentNullException(instanceDiscoveryJson);
+            }
+
+            try
+            {
+                InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceDiscoveryJson);
+                Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
+                return (T)this;
+            }
+            catch (JsonException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidUserInstanceMetadata,
+                    MsalErrorMessage.InvalidUserInstanceMetadata,
+                    ex);
+            }
+        }
+
+        /// <summary>
+        /// Lets an organization setup their own service to handle instance discovery, which enables better caching for microservice/service environments.
+        /// A Uri that returns a response similar to https://aka.ms/aad-instance-discovery should be provided. MSAL uses this information to: 
+        /// <list type="bullet">
+        /// <item>Call REST APIs on the environment specified in the preferred_network</item>
+        /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
+        /// <item>Use the environment aliases to match tokens issued to other authorities</item>
+        /// </list>
+        /// For more details see https://aka.ms/msal-net-custom-instance-metadata
+        /// </summary>
+        /// <remarks>
+        /// Developers take responsibility for authority validation if they use this method. Should not be used when the authority is not know in advance. 
+        /// Has no effect on ADFS or B2C authorities, only for AAD authorities</remarks>
+        /// <param name="instanceDiscoveryUri"></param>
+        /// <returns></returns>
+        [Obsolete("This method name has a typo, please use WithInstanceDiscoveryMetadata instead", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public T WithInstanceDicoveryMetadata(Uri instanceDiscoveryUri)
+        {
+            Config.CustomInstanceDiscoveryMetadataUri = instanceDiscoveryUri ??
+                throw new ArgumentNullException(nameof(instanceDiscoveryUri));
+
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Lets an organization setup their own service to handle instance discovery, which enables better caching for microservice/service environments.
+        /// A Uri that returns a response similar to https://aka.ms/aad-instance-discovery should be provided. MSAL uses this information to: 
+        /// <list type="bullet">
+        /// <item>Call REST APIs on the environment specified in the preferred_network</item>
+        /// <item>Identify an environment under which to save tokens and accounts in the cache</item>
+        /// <item>Use the environment aliases to match tokens issued to other authorities</item>
+        /// </list>
+        /// For more details see https://aka.ms/msal-net-custom-instance-metadata
+        /// </summary>
+        /// <remarks>
+        /// Developers take responsibility for authority validation if they use this method. Should not be used when the authority is not known in advance. 
+        /// Has no effect on ADFS or B2C authorities, only for AAD authorities</remarks>
+        /// <param name="instanceDiscoveryUri"></param>
+        /// <returns></returns>
+        public T WithInstanceDiscoveryMetadata(Uri instanceDiscoveryUri)
+        {
+            Config.CustomInstanceDiscoveryMetadataUri = instanceDiscoveryUri ??
+                throw new ArgumentNullException(nameof(instanceDiscoveryUri));
+
+            return (T)this;
         }
 
         internal T WithHttpManager(IHttpManager httpManager)
@@ -253,6 +343,7 @@ namespace Microsoft.Identity.Client
             WithTenantId(applicationOptions.TenantId);
             WithClientName(applicationOptions.ClientName);
             WithClientVersion(applicationOptions.ClientVersion);
+            WithClientCapabilities(applicationOptions.ClientCapabilities);
 
             WithLogging(
                 null,
@@ -311,6 +402,25 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction. 
+        /// Allows configuration of one or more client capabilities, e.g. "llt"
+        /// </summary>
+        /// <remarks>
+        /// MSAL will transform these into special claims request. See https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter for
+        /// details on claim requests.
+        /// For more details see https://aka.ms/msal-net-claims-request
+        /// </remarks>
+        public T WithClientCapabilities(IEnumerable<string> clientCapabilities)
+        {
+            if (clientCapabilities != null && clientCapabilities.Any())
+            {
+                Config.ClientCapabilities = clientCapabilities;
+            }
+
+            return (T)this;
+        }
+
+        /// <summary>
         /// Generate telemetry aggregation events.
         /// </summary>
         /// <param name="telemetryConfig"></param>
@@ -336,7 +446,15 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
-            if (Config.AuthorityInfo.ValidateAuthority && Config.CustomInstanceDiscoveryMetadata != null)
+            if (Config.CustomInstanceDiscoveryMetadata != null && Config.CustomInstanceDiscoveryMetadataUri != null)
+            {
+                throw new MsalClientException(
+                    MsalError.CustomMetadataInstanceOrUri, 
+                    MsalErrorMessage.CustomMetadataInstanceOrUri);
+            }
+
+            if (Config.AuthorityInfo.ValidateAuthority &&
+                (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
             {
                 throw new MsalClientException(MsalError.ValidateAuthorityOrCustomMetadata, MsalErrorMessage.ValidateAuthorityOrCustomMetadata);
             }

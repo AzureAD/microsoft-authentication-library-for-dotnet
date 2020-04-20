@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
     /// </summary>
     internal class NullBroker : IBroker
     {
-        public bool CanInvokeBroker(CoreUIParent uiParent)
+        public bool CanInvokeBroker()
         {
             return false;
         }
@@ -22,6 +22,16 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
         {
             throw new PlatformNotSupportedException(MsalErrorMessage.BrokerNotSupportedOnThisPlatform);
+        }
+
+        public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
+        {
+            throw new PlatformNotSupportedException(MsalErrorMessage.BrokerNotSupportedOnThisPlatform);
+        }
+
+        public Task RemoveAccountAsync(string clientID, IAccount account)
+        {
+            throw new NotImplementedException(MsalErrorMessage.BrokerNotSupportedOnThisPlatform);
         }
     }
 }

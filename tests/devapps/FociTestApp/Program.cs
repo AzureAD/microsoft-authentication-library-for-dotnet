@@ -18,6 +18,7 @@ namespace FociTestApp
         private const string FAMILY_MEMBER_1 = "7660e4d6-d3f3-4385-9851-bc9027ef4a03";
         private const string FAMILY_MEMBER_2 = "9668f2bd-6103-4292-9024-84fa2d1b6fb2";
         private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        private static bool s_useIWA = false;
 
 
         private static readonly string[] s_scopes = new[] { "user.read" };
@@ -34,18 +35,21 @@ namespace FociTestApp
             s_pcaFam1 = PublicClientApplicationBuilder
                 .Create(FAMILY_MEMBER_1)
                 .WithRedirectUri("http://localhost")
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .WithLogging(Log, LogLevel.Verbose, true)
                 .Build();
 
             s_pcaFam2 = PublicClientApplicationBuilder
                .Create(FAMILY_MEMBER_2)
                .WithRedirectUri("http://localhost")
+               .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                .WithLogging(Log, LogLevel.Verbose, true)
                .Build();
 
             s_pcaNonFam = PublicClientApplicationBuilder
              .Create(NON_FAMILY_MEMBER)
              .WithRedirectUri("http://localhost")
+             .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
              .WithLogging(Log, LogLevel.Verbose, true)
              .Build();
 
@@ -85,7 +89,7 @@ namespace FociTestApp
                 await DisplayAccountsAsync(s_pcaFam1).ConfigureAwait(false);
 
                 // display menu
-                Console.WriteLine(@"
+                Console.WriteLine($@"
                         1. Acquire Token App1 (family member)
                         2. Acquire Token App2 (family member)
                         3. Acquire Token App3 (non-family member)
@@ -96,42 +100,42 @@ namespace FociTestApp
 
                         7. Clear cache via App1
                         8. Clear cache via App2
+                        t. Toggle IWA (currently {(s_useIWA ? "ON" : "OFF")})
                         0. Exit App
                     Enter your Selection: ");
-                int.TryParse(Console.ReadLine(), out var selection);
-
-                Task<AuthenticationResult> authTask = null;
+                char.TryParse(Console.ReadLine(), out var selection);
+                Task<AuthenticationResult> authTask;
 
                 try
                 {
                     switch (selection)
                     {
-                        case 1:
-                            authTask = StartInteractiveAuthAsync(s_pcaFam1);
+                        case '1':
+                            authTask = StartAcquireTokenAsync(s_pcaFam1);
                             FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                             break;
-                        case 2:
-                            authTask = StartInteractiveAuthAsync(s_pcaFam2);
+                        case '2':
+                            authTask = StartAcquireTokenAsync(s_pcaFam2);
                             FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                             break;
-                        case 3:
-                            authTask = StartInteractiveAuthAsync(s_pcaNonFam);
+                        case '3':
+                            authTask = StartAcquireTokenAsync(s_pcaNonFam);
                             FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                             break;
-                        case 4:
+                        case '4':
                             authTask = StartSilentAuthAsync(s_pcaFam1);
                             FetchTokenAsync(s_pcaFam1, authTask).GetAwaiter().GetResult();
                             break;
-                        case 5:
+                        case '5':
                             authTask = StartSilentAuthAsync(s_pcaFam2);
                             FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                             break;
-                        case 6:
+                        case '6':
                             authTask = StartSilentAuthAsync(s_pcaNonFam);
                             FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
                             break;
 
-                        case 7:
+                        case '7':
                             var accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
                             var accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
                             var accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
@@ -143,7 +147,7 @@ namespace FociTestApp
                             }
 
                             break;
-                        case 8:
+                        case '8':
                             accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
                             accounts2 = await s_pcaFam2.GetAccountsAsync().ConfigureAwait(false);
                             accounts3 = await s_pcaNonFam.GetAccountsAsync().ConfigureAwait(false);
@@ -155,8 +159,11 @@ namespace FociTestApp
                             }
 
                             break;
-                        case 0:
+                        case '0':
                             return;
+                        case 't':
+                            s_useIWA = true;
+                            break;
                         default:
                             break;
                     }
@@ -173,8 +180,12 @@ namespace FociTestApp
             }
         }
 
-        private static Task<AuthenticationResult> StartInteractiveAuthAsync(IPublicClientApplication pca)
+        private static Task<AuthenticationResult> StartAcquireTokenAsync(IPublicClientApplication pca)
         {
+            if (s_useIWA)
+            {
+                return pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).ExecuteAsync();
+            }
             return pca.AcquireTokenInteractive(s_scopes).WithUseEmbeddedWebView(false).ExecuteAsync();
         }
 

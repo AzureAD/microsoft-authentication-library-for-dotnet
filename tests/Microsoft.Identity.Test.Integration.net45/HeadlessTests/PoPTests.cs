@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -80,6 +81,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var pca = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithExperimentalFeatures()
+                .WithTestLogging()
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
             ConfigureInMemoryCache(pca);
 
@@ -92,7 +94,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("POP", request.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", request.Headers.Authorization.Scheme);
             Assert.AreEqual("pop", result.TokenType);
             await VerifyPoPTokenAsync(clientId, request).ConfigureAwait(false);
 
@@ -110,6 +112,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             pca = PublicClientApplicationBuilder
                            .Create(clientId)
                            .WithExperimentalFeatures()
+                           .WithTestLogging()
                            .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                            .Build();
             ConfigureInMemoryCache(pca);
@@ -136,6 +139,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var pca = PublicClientApplicationBuilder.Create(clientId)
                 .WithExperimentalFeatures()
+                .WithTestLogging()
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
             ConfigureInMemoryCache(pca);
 
@@ -146,7 +150,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("POP", request1.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
             await VerifyPoPTokenAsync(
                  clientId,
                  request1).ConfigureAwait(false);
@@ -166,7 +170,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("POP", request1.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
             await VerifyPoPTokenAsync(
                 clientId,
                 request1).ConfigureAwait(false);
@@ -178,7 +182,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
               .ExecuteAsync()
               .ConfigureAwait(false);
 
-            Assert.AreEqual("POP", request2.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", request2.Headers.Authorization.Scheme);
             await VerifyPoPTokenAsync(
                 clientId,
                 request2).ConfigureAwait(false);

@@ -16,13 +16,15 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string MsgProtocolVersion = "msg_protocol_ver";
         public const string MsgProtocolVersion3 = "3";
         public const string SkipCache = "YES";
+        public const string AppLink = "app_link";
+        public const string IsSilentBrokerRequest = "is_silent_broker_request";
 
         // not required
         public const string CorrelationId = "correlation_id";
         public const string ExtraQp = "extra_query_param";
         public const string HomeAccountId = "home_account_id";
+        public const string LocalAccountId = "local_account_id";
         public const string Username = "username";
-        public const string LoginHint = "login_hint";
         public const string IntuneEnrollmentIds = "intune_enrollment_ids";
         public const string IntuneMamResource = "intune_mam_resource";
         public const string ClientCapabilities = "client_capabilities";
@@ -31,6 +33,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Claims = "claims";
         public const string ExtraConsentScopes = "extra_consent_scopes";
         public const string Prompt = "prompt";
+        public const string BrokerAccountName = "broker_account_name";
+        public const string ForceRefresh = "force_refresh";
 
         public const string Force = "force";
 

@@ -5,8 +5,8 @@ using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -28,32 +28,33 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string RefreshIn = "refresh_in";
     }
 
-    [DataContract]
+    [JsonObject]
+    [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase
     {
         private long _expiresIn;
         private long _extendedExpiresIn;
         private long _refreshIn;
 
-        [DataMember(Name = TokenResponseClaim.TokenType, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.AccessToken, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.AccessToken)]
         public string AccessToken { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.RefreshToken, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.RefreshToken)]
         public string RefreshToken { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.Scope, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.Scope)]
         public string Scope { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.ClientInfo, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.ClientInfo)]
         public string ClientInfo { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.IdToken, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.IdToken)]
         public string IdToken { get; set; }
 
-        [DataMember(Name = TokenResponseClaim.ExpiresIn, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.ExpiresIn)]
         public long ExpiresIn
         {
             get => _expiresIn;
@@ -64,7 +65,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
-        [DataMember(Name = TokenResponseClaim.ExtendedExpiresIn, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.ExtendedExpiresIn)]
         public long ExtendedExpiresIn
         {
             get => _extendedExpiresIn;
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
-        [DataMember(Name = TokenResponseClaim.RefreshIn, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.RefreshIn)]
         public long RefreshIn
         {
             get => _refreshIn;
@@ -89,7 +90,7 @@ namespace Microsoft.Identity.Client.OAuth2
         /// <summary>
         /// Optional field, FOCI support.
         /// </summary>
-        [DataMember(Name = TokenResponseClaim.FamilyId, IsRequired = false)]
+        [JsonProperty(PropertyName = TokenResponseClaim.FamilyId)]
         public string FamilyId { get; set; }
 
         public DateTimeOffset AccessTokenExpiresOn { get; private set; }

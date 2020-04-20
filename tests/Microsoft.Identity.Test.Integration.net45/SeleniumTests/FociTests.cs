@@ -10,6 +10,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -126,14 +127,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             pca_fam1 = PublicClientApplicationBuilder
                .Create(clientId1)
+               .WithTestLogging()
                .Build();
 
             pca_fam2 = PublicClientApplicationBuilder
                .Create(clientId2)
+               .WithTestLogging()
               .Build();
 
             pca_nonFam = PublicClientApplicationBuilder
               .Create(labResponse.App.AppId)
+               .WithTestLogging()
               .Build();
 
             SetCacheSerializationToFile(pca_fam1, cacheFilePath);

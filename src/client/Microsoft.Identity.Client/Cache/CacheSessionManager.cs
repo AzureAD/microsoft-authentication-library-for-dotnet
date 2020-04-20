@@ -23,17 +23,14 @@ namespace Microsoft.Identity.Client.Cache
     internal class CacheSessionManager : ICacheSessionManager
     {
         private readonly AuthenticationRequestParameters _requestParams;
-        private readonly ITelemetryManager _telemetryManager;
         private bool _cacheRefreshedForRead = false;
 
         public CacheSessionManager(
             ITokenCacheInternal tokenCacheInternal, 
-            AuthenticationRequestParameters requestParams, 
-            ITelemetryManager telemetryManager)
+            AuthenticationRequestParameters requestParams)
         {
             TokenCacheInternal = tokenCacheInternal ?? throw new ArgumentNullException(nameof(tokenCacheInternal));
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
-            _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
         }
 
         #region ICacheSessionManager implementation
@@ -104,7 +101,8 @@ namespace Microsoft.Identity.Client.Cache
                 {
                     if (!_cacheRefreshedForRead) // double check locking
                     {
-                        using (_telemetryManager.CreateTelemetryHelper(cacheEvent))
+                        
+                        using (_requestParams.RequestContext.CreateTelemetryHelper(cacheEvent))
                         {
                             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
                                TokenCacheInternal,
@@ -113,8 +111,14 @@ namespace Microsoft.Identity.Client.Cache
                                hasStateChanged: false, 
                                TokenCacheInternal.IsApplicationCache);
 
-                            await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
-                            await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                            try
+                            {
+                                await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
+                            }
+                            finally
+                            {
+                                await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                            }
 
                             _cacheRefreshedForRead = true;
                         }

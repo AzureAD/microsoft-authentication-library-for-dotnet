@@ -26,20 +26,20 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             if (s_userCache.ContainsKey(query))
             {
-                Debug.WriteLine("User cache hit");
+                Trace.WriteLine("Lab user cache hit. Selected user: " + s_userCache[query].User.Upn);
                 return s_userCache[query];
             }
 
-            var user = await s_labService.GetLabResponseAsync(query).ConfigureAwait(false);
-            if (user == null)
+            var response = await s_labService.GetLabResponseAsync(query).ConfigureAwait(false);
+            if (response == null)
             {
                 throw new LabUserNotFoundException(query, "Found no users for the given query.");
             }
 
-            Debug.WriteLine("User cache miss");
-            s_userCache.Add(query, user);
+            s_userCache.Add(query, response);
+            Debug.WriteLine("User cache miss. Returning user from lab: " + response.User.Upn);
 
-            return user;
+            return response;
         }
 
         public static Task<LabResponse> GetDefaultUserAsync()
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static async Task<LabResponse> GetB2CMSAAccountAsync()
         {
             var response = await GetLabUserDataAsync(UserQuery.B2CMSAUserQuery).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(response.User.HomeUPN) || 
+            if (string.IsNullOrEmpty(response.User.HomeUPN) ||
                 string.Equals("None", response.User.HomeUPN, StringComparison.OrdinalIgnoreCase))
             {
                 response.User.HomeUPN = response.User.Upn;
@@ -81,8 +81,24 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static Task<LabResponse> GetSpecificUserAsync(string upn)
         {
             var query = new UserQuery();
-            //query.Upn = upn;
             return GetLabUserDataAsync(query);
+        }
+
+        public static Task<LabResponse> GetArlingtonUserAsync()
+        {
+            var response = GetLabUserDataAsync(UserQuery.ArlingtonUserQuery);
+            response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
+            return response;
+        }
+
+        public static Task<LabResponse> GetArlingtonADFSUserAsync()
+        {
+            var query = UserQuery.ArlingtonUserQuery;
+            query.UserType = UserType.Federated;
+            var response = GetLabUserDataAsync(query);
+
+            response.Result.User.AzureEnvironment = AzureEnvironment.azureusgovernment;
+            return response;
         }
 
         public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
@@ -92,7 +108,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             query.UserType = federated ? UserType.Federated : UserType.Cloud;
 
             if (!federated &&
-                federationProvider != FederationProvider.ADFSv2019 )
+                federationProvider != FederationProvider.ADFSv2019)
             {
                 throw new InvalidOperationException("Test Setup Error: MSAL only supports ADFS2019 direct (non-federated) access. " +
                     "Support for older versions of ADFS is exclusively via federation");

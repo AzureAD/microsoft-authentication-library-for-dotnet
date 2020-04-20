@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
-            var requestParams = _publicClientApplication.CreateRequestParameters(
+            AuthenticationRequestParameters requestParams = _publicClientApplication.CreateRequestParameters(
                 commonParameters,
                 requestContext,
                 _publicClientApplication.UserTokenCacheInternal);
@@ -36,14 +36,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             requestParams.LoginHint = interactiveParameters.LoginHint;
             requestParams.Account = interactiveParameters.Account;
 
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParams,
-                interactiveParameters,
-                CreateWebAuthenticationDialog(interactiveParameters, requestParams.RequestContext));
+            InteractiveRequest interactiveRequest = 
+                new InteractiveRequest(requestParams, interactiveParameters);
 
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-
+            return await interactiveRequest.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<AuthenticationResult> ExecuteAsync(
@@ -71,14 +67,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
-#if NET_CORE
-            if (string.IsNullOrWhiteSpace(integratedWindowsAuthParameters.Username))
-            {
-                throw new PlatformNotSupportedException("AcquireTokenByIntegratedWindowsAuth is not supported on .net core without adding .WithUsername() because " +
-                    "MSAL cannot determine the username (UPN) of the currently logged in user. Please use .WithUsername() before calling ExecuteAsync(). " +
-                    "For more details see https://aka.ms/msal-net-iwa");
-            }
-#endif
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
             var requestParams = _publicClientApplication.CreateRequestParameters(
@@ -112,48 +100,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 usernamePasswordParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        private IWebUI CreateWebAuthenticationDialog(
-            AcquireTokenInteractiveParameters interactiveParameters,
-            RequestContext requestContext)
-        {
-            if (interactiveParameters.CustomWebUi != null)
-            {
-                return new CustomWebUiHandler(interactiveParameters.CustomWebUi);
-            }
-
-            CoreUIParent coreUiParent = interactiveParameters.UiParent;
-
-            coreUiParent.UseEmbeddedWebview = GetUseEmbeddedWebview(
-                interactiveParameters.UseEmbeddedWebView,
-                requestContext.ServiceBundle.PlatformProxy.UseEmbeddedWebViewDefault);
-
-#if WINDOWS_APP || DESKTOP
-            // hidden web view can be used in both WinRT and desktop applications.
-            coreUiParent.UseHiddenBrowser = interactiveParameters.Prompt.Equals(Prompt.Never);
-#if WINDOWS_APP
-            coreUiParent.UseCorporateNetwork = _publicClientApplication.AppConfig.UseCorporateNetwork;
-#endif
-#endif
-            return ServiceBundle.PlatformProxy.GetWebUiFactory().CreateAuthenticationDialog(
-                coreUiParent,
-                requestContext);
-        }
-
-        private static bool GetUseEmbeddedWebview(WebViewPreference userPreference, bool defaultValue)
-        {
-            switch (userPreference)
-            {
-            case WebViewPreference.NotSpecified:
-                return defaultValue;
-            case WebViewPreference.Embedded:
-                return true;
-            case WebViewPreference.System:
-                return false;
-            default:
-                throw new NotImplementedException("Unknown option");
-            }
         }
     }
 }

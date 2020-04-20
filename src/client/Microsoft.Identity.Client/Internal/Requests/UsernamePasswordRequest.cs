@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 serviceBundle);
         }
 
-        internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);

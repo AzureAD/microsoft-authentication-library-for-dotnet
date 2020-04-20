@@ -28,27 +28,39 @@ namespace Microsoft.Identity.Client.Platforms.uap
             get { return true; }
         }
 
-        public async Task<string> CreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri)
+        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri, out string responseHeader)
         {
+            responseHeader = string.Empty;
+            Certificate certificate = null;
+            string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
+
             if (!DeviceAuthHelper.IsDeviceAuthChallenge(response))
             {
-                return null;
+                return false;
+            }
+            if (!DeviceAuthHelper.CanOSPerformPKeyAuth())
+            {
+                responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
+                return false;
             }
 
             IDictionary<string, string> challengeData = DeviceAuthHelper.ParseChallengeData(response);
 
-            string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
+            if (!challengeData.ContainsKey("SubmitUrl"))
+            {
+                challengeData["SubmitUrl"] = endpointUri.AbsoluteUri;
+            }
 
-            Certificate certificate = null;
             try
             {
-                certificate = await FindCertificateAsync(challengeData).ConfigureAwait(false);
+                //certificate = Task.FromResult(FindCertificateAsync(challengeData)).Result.GetResults();
             }
             catch (MsalException ex)
             {
                 if (ex.ErrorCode == MsalError.DeviceCertificateNotFound)
                 {
-                    return await Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData["Context"], challengeData["Version"])).ConfigureAwait(false);
+                    responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
+                    return true;
                 }
             }
 
@@ -56,19 +68,19 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetCertificateBlob().ToArray()));
             IBuffer input = CryptographicBuffer.ConvertStringToBinary(responseJWT.GetResponseToSign(),
                 BinaryStringEncoding.Utf8);
-            CryptographicKey keyPair = await
-                PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256,
-                    CryptographicPadding.RsaPkcs1V15).AsTask().ConfigureAwait(false);
+            CryptographicKey keyPair =
+                Task.FromResult(PersistedKeyProvider.OpenKeyPairFromCertificateAsync(certificate, HashAlgorithmNames.Sha256, CryptographicPadding.RsaPkcs1V15)).Result.GetResults();
 
-            IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input).AsTask().ConfigureAwait(false);
+            IBuffer signed = Task.FromResult(CryptographicEngine.SignAsync(keyPair, input)).Result.GetResults();
 
             string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", responseJWT.GetResponseToSign(),
                 Base64UrlHelpers.Encode(signed.ToArray()));
             string authToken = string.Format(CultureInfo.InvariantCulture, " AuthToken=\"{0}\"", signedJwt);
-            return string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
+            responseHeader = string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
+            return true;
         }
 
-        private static async Task<Certificate> FindCertificateAsync(IDictionary<string, string> challengeData)
+        private async Task<Certificate> FindCertificateAsync(IDictionary<string, string> challengeData)
         {
             CertificateQuery query = new CertificateQuery();
             IReadOnlyList<Certificate> certificates = null;

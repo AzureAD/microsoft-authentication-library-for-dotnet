@@ -85,13 +85,6 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         #region Equals and GetHashCode
 
-        public override bool Equals(object obj)
-        {
-            return obj is MsalAppMetadataCacheItem item &&
-                Equals(item);
-
-        }
-
         public override int GetHashCode()
         {
             var hashCode = -1793347351;
@@ -103,14 +96,19 @@ namespace Microsoft.Identity.Client.Cache.Items
             return hashCode;
         }
 
-        public bool Equals(MsalAppMetadataCacheItem item)
+        public bool Equals(MsalAppMetadataCacheItem other)
         {
-            return ClientId == item.ClientId &&
-                   Environment == item.Environment &&
-                   FamilyId == item.FamilyId &&
-                   base.AdditionalFieldsJson == item.AdditionalFieldsJson;
+            return ClientId == other.ClientId &&
+                   Environment == other.Environment &&
+                   FamilyId == other.FamilyId &&
+                   base.AdditionalFieldsJson == other.AdditionalFieldsJson;
         }
+        public override bool Equals(object obj)
+        {
+            return obj is MsalAppMetadataCacheItem item &&
+                Equals(item);
 
+        }
         #endregion
     }
 }

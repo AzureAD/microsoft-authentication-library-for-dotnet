@@ -16,6 +16,8 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
+using Microsoft.Identity.Client.Internal.Broker;
+
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -218,5 +220,20 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         public override bool UseEmbeddedWebViewDefault => false;
+
+        public override IBroker CreateBroker(CoreUIParent uIParent)
+        {
+            if (OverloadBrokerForTest != null)
+            {
+                return OverloadBrokerForTest;
+            }
+
+            return new AndroidBroker(uIParent, Logger);
+        }
+
+        public override bool CanBrokerSupportSilentAuth()
+        {
+            return true;
+        }
     }
 }

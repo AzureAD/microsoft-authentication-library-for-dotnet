@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
@@ -94,7 +93,10 @@ namespace Microsoft.Identity.Client.TelemetryCore
             ContextStore contextStore,
             bool isScenarioUploadDisabled)
         {
-            TelemetryManager = new TelemetryManager(applicationConfiguration, platformProxy, ProcessTelemetryCallback);
+            TelemetryManager = new TelemetryManager(
+                applicationConfiguration, 
+                platformProxy, 
+                ProcessTelemetryCallback);
 
             _errorStore = errorStore;
             _uploader = uploader;
@@ -104,7 +106,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             _isScenarioUploadDisabled = isScenarioUploadDisabled;
         }
 
-        public ITelemetryManager TelemetryManager { get; }
+        public IMatsTelemetryManager TelemetryManager { get; }
 
         private static bool IsDeviceEnabled(TelemetryAudienceType audienceType, string dpti)
         {

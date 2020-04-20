@@ -9,9 +9,7 @@ Quick links:
 
 ## Nuget package
 
-Released     | Nightly
------------------------------|-------------------------
- [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/) | TBD
+ [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/) 
 
 ## Build Status
  

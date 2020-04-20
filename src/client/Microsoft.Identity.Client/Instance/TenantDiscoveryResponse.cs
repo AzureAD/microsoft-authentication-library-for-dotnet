@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -13,16 +13,17 @@ namespace Microsoft.Identity.Client.Instance
         public const string Issuer = "issuer";
     }
 
-    [DataContract]
+    [JsonObject]
+    [Preserve(AllMembers = true)]
     internal class TenantDiscoveryResponse : OAuth2ResponseBase
     {
-        [DataMember(Name = TenantDiscoveryResponseClaim.AuthorizationEndpoint, IsRequired = false)]
+        [JsonProperty(PropertyName = TenantDiscoveryResponseClaim.AuthorizationEndpoint)]
         public string AuthorizationEndpoint { get; set; }
 
-        [DataMember(Name = TenantDiscoveryResponseClaim.TokenEndpoint, IsRequired = false)]
+        [JsonProperty(PropertyName = TenantDiscoveryResponseClaim.TokenEndpoint)]
         public string TokenEndpoint { get; set; }
 
-        [DataMember(Name = TenantDiscoveryResponseClaim.Issuer, IsRequired = false)]
+        [JsonProperty(PropertyName = TenantDiscoveryResponseClaim.Issuer)]
         public string Issuer { get; set; }
     }
 }

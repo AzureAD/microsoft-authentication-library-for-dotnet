@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using System.Linq;
 using System;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -73,6 +74,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async override Task PreRunAsync()
         {
+
+            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && 
+                AuthenticationRequestParameters.IsBrokerConfigured)
+                return;
+
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
 
@@ -82,14 +88,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 account?.HomeAccountId?.TenantId);
         }
 
-        internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-           
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && AuthenticationRequestParameters.IsBrokerConfigured)
+            {
+                var msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
+                return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            }
 
-            // Look for access token
-            if (!_silentParameters.ForceRefresh)
+            ThrowIfNoScopesOnB2C();
+
+            if (!_silentParameters.ForceRefresh && !AuthenticationRequestParameters.HasClaims)
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
@@ -97,8 +108,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     logger.Info("Returning access token found in cache. RefreshOn exists ? "
                         + cachedAccessTokenItem.RefreshOn.HasValue);
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                     return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
+            }
+            else
+            {
+                logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set");
             }
 
             // No AT or AT.RefreshOn > Now --> refresh the RT
@@ -108,6 +124,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (MsalServiceException e)
             {
+                //Remove the account from cache in case of bad_token sub error
+                if (MsalError.BadToken.Equals(e.SubError, StringComparison.OrdinalIgnoreCase))
+                {
+                    await CacheManager.TokenCacheInternal.RemoveAccountAsync(AuthenticationRequestParameters.Account, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                    logger.Warning("Failed to refresh access token because the refresh token is invalid, removing account from cache.");
+                    throw;
+                }
+
                 bool isAadUnavailable = e.IsAadUnavailable();
 
                 logger.Warning($"Refreshing the RT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
@@ -121,6 +145,37 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Warning("Failed to refresh the RT and cannot use existing AT (expired or missing).");
                 throw;
             }
+        }
+
+
+        private void ThrowIfNoScopesOnB2C()
+        {
+            // B2C will not issue an access token if no scopes are requested
+            // And we don't want to refresh the RT on every ATS call
+            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/715 for details
+
+            if (!AuthenticationRequestParameters.HasScopes &&
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C )
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.ScopesRequired,
+                    MsalErrorMessage.ScopesRequired,
+                    null,
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
+            }
+        }
+
+        private async Task<MsalTokenResponse> ExecuteBrokerAsync(CancellationToken cancellationToken)
+        {
+            IBroker broker = base.ServiceBundle.PlatformProxy.CreateBroker(null);
+
+            var brokerSilentRequest = new BrokerSilentRequest(
+                AuthenticationRequestParameters,
+                _silentParameters,
+                ServiceBundle,
+                broker);
+
+            return await brokerSilentRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
@@ -165,7 +220,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // after the first RT exchanged.
             bool? isFamilyMember = await CacheManager.IsAppFociMemberAsync(TheOnlyFamilyId).ConfigureAwait(false);
 
-            if (isFamilyMember.HasValue && isFamilyMember.Value == false)
+            if (isFamilyMember.HasValue && !isFamilyMember.Value)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(
                     "[FOCI] App is not part of the family, skipping FOCI.");

@@ -18,8 +18,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     public static class SeleniumExtensions
     {
-        private const int ImplicitTimeoutSeconds = 10;
-        private const int ExplicitTimeoutSeconds = 20;
+        private static readonly TimeSpan ImplicitTimespan = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan ExplicitTimespan = TimeSpan.FromSeconds(20);
+        private static readonly TimeSpan ShortExplicitTimespan = TimeSpan.FromSeconds(5);
 
         public static IWebDriver CreateDefaultWebDriver()
         {
@@ -40,7 +41,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 driver = new ChromeDriver(env, options);
             }
 
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(ImplicitTimeoutSeconds);
+            driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
             driver.Manage().Window.Maximize();
 
             return driver;
@@ -94,10 +95,16 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         #endregion
 
-        public static IWebElement WaitForElementToBeVisibleAndEnabled(this IWebDriver driver, By by)
+        public static IWebElement WaitForElementToBeVisibleAndEnabled(
+            this IWebDriver driver, 
+            By by, 
+            TimeSpan waitTime = default, 
+            bool ignoreFailures = false)
         {
             Trace.WriteLine($"[Selenium UI] Waiting for {by.ToString()} to be visible and enabled");
-            var webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(ExplicitTimeoutSeconds));
+            var webDriverWait = new WebDriverWait(
+                driver, 
+                waitTime != default ? waitTime : ExplicitTimespan);
 
             try
             {
@@ -137,6 +144,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             catch (WebDriverTimeoutException)
             {
                 Trace.WriteLine($"[Selenium UI] Element {by.ToString()} has not been found");
+                if (ignoreFailures)
+                {
+                    return null;
+                }
+
                 driver.LogAllUiElements();
                 throw;
             }
@@ -170,10 +182,27 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             EnterUsername(driver, user, withLoginHint, adfsOnly, fields);
             EnterPassword(driver, user, fields);
 
+            HandleConsent(driver, user, fields, prompt);
+        }
+
+        private static void HandleConsent(IWebDriver driver, LabUser user, UserInformationFieldIds fields, Prompt prompt)
+        {
+            // For MSA, a special consent screen seems to come up every now and then
             if (user.Upn.Contains("outlook.com"))
             {
-                Trace.WriteLine("Logging in ... clicking accept prompts for outlook.com MSA user");
-                driver.WaitForElementToBeVisibleAndEnabled(By.Id(CoreUiTestConstants.ConsentAcceptId))?.Click();
+                try
+                {
+                    Trace.WriteLine("Finding accept prompt");
+                    var acceptBtn = driver.WaitForElementToBeVisibleAndEnabled(
+                        ByIds(CoreUiTestConstants.ConsentAcceptId, fields.AADSignInButtonId), 
+                        waitTime: ShortExplicitTimespan,
+                        ignoreFailures: true);
+                    acceptBtn?.Click();
+                }
+                catch
+                {
+                    Trace.WriteLine("No accept prompt found accept prompt");
+                }
             }
 
             if (prompt == Prompt.Consent)

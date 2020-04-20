@@ -6,64 +6,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
-using static Microsoft.Identity.Test.Unit.RequestsTests.InteractiveRequestTests;
 
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     public class OAuthClientTests : TestBase
     {
-        [TestMethod]
-        public void RedirectUriContainsFragmentErrorTest()
-        {
-            try
-            {
-                using (var harness = CreateTestHarness())
-                {
-                    AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                        TestConstants.AuthorityHomeTenant,
-                        TestConstants.s_scope,
-                        new TokenCache(harness.ServiceBundle, false),
-                        extraQueryParameters: new Dictionary<string, string>
-                        {
-                            {"extra", "qp"}
-                        });
-                    parameters.RedirectUri = new Uri("some://uri#fragment=not-so-good");
-                    parameters.LoginHint = TestConstants.DisplayableId;
-                    var interactiveParameters = new AcquireTokenInteractiveParameters
-                    {
-                        Prompt = Prompt.ForceLogin,
-                        ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
-                    };
-
-                    new InteractiveRequest(
-                        harness.ServiceBundle,
-                        parameters,
-                        interactiveParameters,
-                        new MockWebUI());
-
-                    Assert.Fail("ArgumentException should be thrown here");
-                }
-            }
-            catch (ArgumentException ae)
-            {
-                Assert.IsTrue(ae.Message.Contains(MsalErrorMessage.RedirectUriContainsFragment));
-            }
-        }
-
         [TestMethod]
         public void OAuthClient_FailsWithServiceExceptionWhenItCannotParseJsonResponse()
         {
@@ -240,16 +197,15 @@ namespace Microsoft.Identity.Test.Unit
                     Prompt = Prompt.SelectAccount,
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                 };
+                MsalMockHelpers.ConfigureMockWebUI(harness.ServiceBundle.PlatformProxy, new MockWebUI());
 
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
+                var request = new InteractiveRequest(
                     parameters,
-                    interactiveParameters,
-                    new MockWebUI());
+                    interactiveParameters);
 
                 try
                 {
-                    request.ExecuteAsync(CancellationToken.None).Wait();
+                    request.RunAsync().Wait();
                     Assert.Fail("MsalException should have been thrown here");
                 }
                 catch (Exception exc)

@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
         /// <item> MSAL creates, reads and stores a key securely on behalf of the Windows user. </item>
         /// </list>
         /// </remarks>
-        internal AcquireTokenSilentParameterBuilder WithProofOfPosession(HttpRequestMessage httpRequestMessage)
+        public AcquireTokenSilentParameterBuilder WithProofOfPosession(HttpRequestMessage httpRequestMessage)
         {
             var defaultCryptoProvider = this.ClientApplicationBaseExecutor.ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
             return WithProofOfPosession(httpRequestMessage, defaultCryptoProvider);
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client
         /// this method will send the public certificate to Azure AD along with the token request,
         /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
-        /// (either via portal or powershell/CLI operation)
+        /// (either via portal or powershell/CLI operation). For details see https://aka.ms/msal-net-sni
         /// </summary>
         /// <param name="withSendX5C"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>.
         /// The default is <c>false</c></param>
@@ -177,6 +177,15 @@ namespace Microsoft.Identity.Client
                     MsalError.UserNullError, 
                     MsalErrorMessage.MsalUiRequiredMessage, 
                     null, 
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
+            }
+            
+            if (Parameters.Account?.HomeAccountId == null && string.IsNullOrEmpty(Parameters.Account?.Username) && string.IsNullOrWhiteSpace(Parameters.LoginHint))
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.UserNullError,
+                    MsalErrorMessage.MsalUiRequiredMessage,
+                    null,
                     UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
         }

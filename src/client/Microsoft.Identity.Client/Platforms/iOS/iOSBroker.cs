@@ -29,18 +29,20 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private readonly ICoreLogger _logger;
         private readonly ICryptographyManager _cryptoManager;
+        private readonly CoreUIParent _uIParent;
         private string _brokerRequestNonce;
         private bool _brokerV3Installed = false;
 
-        public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager)
+        public iOSBroker(ICoreLogger logger, ICryptographyManager cryptoManager, CoreUIParent uIParent)
         {
             _logger = logger;
             _cryptoManager = cryptoManager;
+            _uIParent = uIParent;
         }
 
-        public bool CanInvokeBroker(CoreUIParent uiParent)
+        public bool CanInvokeBroker()
         {
-            if (uiParent?.CallerViewController == null)
+            if (_uIParent?.CallerViewController == null)
             {
                 _logger.Error(iOSBrokerConstants.CallerViewControllerIsNullCannotInvokeBroker);
                 throw new MsalClientException(MsalError.UIViewControllerRequiredForiOSBroker, MsalErrorMessage.UIViewControllerIsRequiredToInvokeiOSBroker);
@@ -48,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             bool canStartBroker = false;
 
-            uiParent.CallerViewController.InvokeOnMainThread(() =>
+            _uIParent.CallerViewController.InvokeOnMainThread(() =>
             {
                 if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV3))
                 {
@@ -60,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (!canStartBroker)
             {
-                uiParent.CallerViewController.InvokeOnMainThread(() =>
+                _uIParent.CallerViewController.InvokeOnMainThread(() =>
                 {
                     if (IsBrokerInstalled(BrokerParameter.UriSchemeBrokerV2))
                     {
@@ -122,35 +124,23 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 _logger.Info(iOSBrokerConstants.BrokerPayloadContainsInstallUrl);
 
-                string url = brokerPayload[BrokerParameter.BrokerInstallUrl];
-                Uri uri = new Uri(url);
-                string query = uri.Query;
+                string appLink = brokerPayload[BrokerParameter.BrokerInstallUrl];
 
-                if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Substring(1);
-                }
+                DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(appLink)));
 
-                _logger.Info(iOSBrokerConstants.InvokeIosBrokerAppLink);
-
-                Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-
-                _logger.Info(iOSBrokerConstants.StartingActionViewActivity + iOSBrokerConstants.AppLink);
-
-                DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(keyPair[iOSBrokerConstants.AppLink])));
-
-                throw new MsalClientException(MsalErrorIOSEx.BrokerApplicationRequired, MsalErrorMessageIOSEx.BrokerApplicationRequired);
+                throw new MsalClientException(
+                    MsalError.BrokerApplicationRequired, 
+                    MsalErrorMessage.BrokerApplicationRequired);
             }
-
             else
             {
                 _logger.Info(iOSBrokerConstants.InvokeTheIosBroker);
 
-                NSUrl url = new NSUrl(iOSBrokerConstants.InvokeBroker + brokerPayload.ToQueryParameter());
+                NSUrl url = new NSUrl(iOSBrokerConstants.InvokeV2Broker + brokerPayload.ToQueryParameter());
 
-                _logger.VerbosePii(iOSBrokerConstants.BrokerPayloadPii + brokerPayload.ToQueryParameter(),
-
-                iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
+                _logger.VerbosePii(
+                    iOSBrokerConstants.BrokerPayloadPii + brokerPayload.ToQueryParameter(),
+                    iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
 
                 DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
             }
@@ -212,6 +202,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     TryWriteBrokerApplicationTokenToKeychain(
                         responseDictionary[BrokerResponseConst.ClientId], 
                         responseDictionary[iOSBrokerConstants.ApplicationToken]);
+                }
+
+                if (responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorCode) &&
+                    responseDictionary[BrokerResponseConst.BrokerErrorCode] == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
+                {
+                    responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
                 }
 
                 brokerTokenResponse = MsalTokenResponse.CreateFromBrokerResponse(responseDictionary);
@@ -306,6 +302,16 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             s_brokerResponse = responseUrl;
             s_brokerResponseReady?.Release();
+        }
+
+        public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveAccountAsync(string clientID, IAccount account)
+        {
+            throw new NotImplementedException();
         }
     }
 }

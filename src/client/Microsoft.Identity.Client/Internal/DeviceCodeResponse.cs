@@ -3,35 +3,36 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    [DataContract]
+    [JsonObject]
+    [Preserve(AllMembers = true)]
     internal class DeviceCodeResponse : OAuth2ResponseBase
     {
-        [DataMember(Name = "user_code", IsRequired = false)]
+        [JsonProperty(PropertyName = "user_code")]
         public string UserCode { get; internal set; }
 
-        [DataMember(Name = "device_code", IsRequired = false)]
+        [JsonProperty(PropertyName = "device_code")]
         public string DeviceCode { get; internal set; }
 
-        [DataMember(Name = "verification_url", IsRequired = false)]
+        [JsonProperty(PropertyName = "verification_url")]
         public string VerificationUrl { get; internal set; }
 
         // This is the OAuth2 standards compliant value.
         // It should be used if it's present, if it's not then fallback to VerificiationUrl
-        [DataMember(Name = "verification_uri", IsRequired = false)]
+        [JsonProperty(PropertyName = "verification_uri")]
         public string VerificationUri { get; internal set; }
 
-        [DataMember(Name = "expires_in", IsRequired = false)]
+        [JsonProperty(PropertyName = "expires_in")]
         public long ExpiresIn { get; internal set; }
 
-        [DataMember(Name = "interval", IsRequired = false)]
+        [JsonProperty(PropertyName = "interval")]
         public long Interval { get; internal set; }
 
-        [DataMember(Name = "message", IsRequired = false)]
+        [JsonProperty(PropertyName = "message")]
         public string Message { get; internal set; }
 
         public DeviceCodeResult GetResult(string clientId, ISet<string> scopes)

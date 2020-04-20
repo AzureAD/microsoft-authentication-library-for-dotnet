@@ -6,6 +6,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -42,6 +43,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithB2CAuthority(_b2CROPCAuthority)
+                .WithTestLogging()
                 .Build();
 
             AuthenticationResult authResult = await msalPublicClient

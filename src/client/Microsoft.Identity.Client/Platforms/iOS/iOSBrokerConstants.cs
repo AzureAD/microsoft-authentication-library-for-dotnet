@@ -20,8 +20,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public const string MsgProtocolVer = "msg_protocol_ver";
         public const string Claims = "claims";
         public const string SkipCache = "skip_cache";
-        public const string AppLink = "app_link";
-        public const string InvokeBroker = "msauthv2://broker?";
+        public const string InvokeV3Broker = "msauthv3://broker?";
+        public const string InvokeV2Broker = "msauthv2://broker?";
         public const string Code = "code";
         public const string BrokerError = "broker_error";
         public const string Error = "error";

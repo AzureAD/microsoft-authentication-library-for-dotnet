@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Cache
                 uniqueId, idItem.IdToken.PreferredUsername);
                 AdalResultWrapper wrapper = new AdalResultWrapper()
                 {
-                    Result = new AdalResult(null, null, DateTimeOffset.MinValue)
+                    Result = new AdalResult()
                     {
                         UserInfo = new AdalUserInfo()
                         {
@@ -182,7 +182,6 @@ namespace Microsoft.Identity.Client.Cache
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {
-                string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
                 string cachedAccountDisplayableId = kvp.Key.DisplayableId;
                 string cachedClientId = kvp.Key.ClientId;
 
@@ -213,7 +212,6 @@ namespace Microsoft.Identity.Client.Cache
                 if (!string.IsNullOrEmpty(rawClientInfo))
                 {
                     string cachedAccountId = ClientInfo.CreateFromJson(rawClientInfo).ToAccountIdentifier();
-                    string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
                     string cachedClientId = kvp.Key.ClientId;
 
                     if (string.Equals(accountOrUserId, cachedAccountId, StringComparison.OrdinalIgnoreCase) &&
@@ -256,30 +254,34 @@ namespace Microsoft.Identity.Client.Cache
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> upnEntries =
                         listToProcess.Where(p => upn.Equals(p.Key.DisplayableId, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                    if (upnEntries.Any())
-                    {
-                        listToProcess = upnEntries;
-                    }
+                    listToProcess = upnEntries;
                 }
 
-                // if userId is provided then use it to filter
+                // if uniqueId is provided then use it to filter
                 if (!string.IsNullOrEmpty(uniqueId))
                 {
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> uniqueIdEntries =
                         listToProcess.Where(p => uniqueId.Equals(p.Key.UniqueId, StringComparison.OrdinalIgnoreCase)).ToList();
-                    if (uniqueIdEntries.Any())
-                    {
-                        listToProcess = uniqueIdEntries;
-                    }
+
+                    listToProcess = uniqueIdEntries;
                 }
+
                 List<MsalRefreshTokenCacheItem> list = new List<MsalRefreshTokenCacheItem>();
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
                 {
+                    string homeAccountId = null;
+                    if (!string.IsNullOrEmpty(pair.Value.RawClientInfo))
+                    {
+                        homeAccountId = ClientInfo.CreateFromJson(pair.Value.RawClientInfo).ToAccountIdentifier();
+                    }
+
                     list.Add(new MsalRefreshTokenCacheItem(
-                        new Uri(pair.Key.Authority).Host,
-                        pair.Key.ClientId,
-                        pair.Value.RefreshToken,
-                        pair.Value.RawClientInfo));
+                      new Uri(pair.Key.Authority).Host,
+                      pair.Key.ClientId,
+                      pair.Value.RefreshToken,
+                      pair.Value.RawClientInfo,
+                      familyId: null,
+                      homeAccountId: homeAccountId));
                 }
 
                 return list;
@@ -303,11 +305,11 @@ namespace Microsoft.Identity.Client.Cache
             string uniqueId)
         {
             List<MsalRefreshTokenCacheItem> adalRts = GetAllAdalEntriesForMsal(
-                logger, 
-                legacyCachePersistence, 
-                environmentAliases, 
-                clientId, 
-                upn, 
+                logger,
+                legacyCachePersistence,
+                environmentAliases,
+                clientId,
+                upn,
                 uniqueId);
 
             List<MsalRefreshTokenCacheItem> filteredByPrefEnv = adalRts.Where

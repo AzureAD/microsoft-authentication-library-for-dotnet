@@ -172,13 +172,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidOwnerWindowType = "invalid_owner_window_type";
 
-        // TODO: InvalidServiceUrl does not seem to be used anywhere?
-
-        /// <summary>
-        /// Invalid service URL.
-        /// </summary>
-        public const string InvalidServiceUrl = "invalid_service_url";
-
         /// <summary>
         /// Encoded token too long.
         /// <para>What happens</para>
@@ -186,13 +179,6 @@ namespace Microsoft.Identity.Client
         /// the max possible length for a JWT token.
         /// </summary>
         public const string EncodedTokenTooLong = "encoded_token_too_long";
-
-        // TODO: does not seem to be used in MSAL.NET
-
-        /// <summary>
-        /// No data from STS.
-        /// </summary>
-        public const string NoDataFromSts = "no_data_from_sts";
 
         /// <summary>
         /// User Mismatch.
@@ -377,7 +363,6 @@ namespace Microsoft.Identity.Client
         public const string IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user";
 
         /// <summary>
-        /// TODO: UPDATE DOCUMENTATION!
         /// On Android, you need to call <c>AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)</c> passing
         /// the activity. See https://aka.ms/msal-interactive-android
         /// </summary>
@@ -403,6 +388,36 @@ namespace Microsoft.Identity.Client
         /// or there were issues with the UiParent or CallerViewController being null. See https://aka.ms/msal-brokers
         /// </summary>
         public const string CannotInvokeBroker = "cannot_invoke_broker";
+
+        /// <summary>
+        /// MSAL is not able to find a suitable account to use with broker
+        /// </summary>
+        public const string NoAndroidBrokerAccountFound = "no_broker_account_found";
+
+        /// <summary>
+        /// MSAL cannot find the broker application to authenticate accounts.
+        /// </summary>
+        public const string NoAndroidBrokerInstalledOnDevice = "No_Broker_Installed_On_Device";
+
+        /// <summary>
+        /// Null intent was returned so broker activity cannot be launched
+        /// </summary>
+        public const string NullIntentReturnedFromAndroidBroker = "null_intent_returned_from_broker";
+
+        /// <summary>
+        /// Failed to validate android broker signature
+        /// </summary>
+        public const string AndroidBrokerSignatureVerificationFailed = "broker_signature_verification_failed";
+
+        /// <summary>
+        /// Failed To Complete Android Broker Operation
+        /// </summary>
+        public const string AndroidBrokerOperationFailed = "android_broker_operation_failed";
+
+        /// <summary>
+        /// Unable to query the Android account manager because no username or home account ID is provided in the silent authentication request.
+        /// </summary>
+        public const string NoUsernameOrAccountIDProvidedForSilentAndroidBrokerAuthentication = "no_username_or_accountid_provided_for_silent_android_broker_authentication";
 
         /// <summary>
         /// Error code used when the HTTP response returns HttpStatusCode.NotFound
@@ -666,7 +681,7 @@ namespace Microsoft.Identity.Client
         public const string InvalidUserInstanceMetadata = "invalid-custom-instance-metadata";
 
         /// <summary>
-        /// <para>What happens?</para>You have configured your own instance metadata, and have also configured custom metadata. These are mutually exclusive. 
+        /// <para>What happens?</para>You have configured your own instance metadata, and have also set validate authority to true. These are mutually exclusive. 
         /// <para>Mitigation</para>Set the validate authority flag to false. See https://aka.ms/msal-net-custom-instance-metadata for more details.
         /// </summary>
         public const string ValidateAuthorityOrCustomMetadata = "validate_authority_or_custom_instance_metadata";
@@ -721,9 +736,47 @@ namespace Microsoft.Identity.Client
         public const string ExperimentalFeature = "experimental_feature";
 
         /// <summary>
+        /// <para>What happens?</para>A broker application is required, but one could not be found.
+        /// <para>Mitigation</para>Install a broker application, such as Authenticator, from the application store
+        /// </summary>
+        public const string BrokerApplicationRequired = "broker_application_required";
+
+        /// <summary>
+        /// <para>What happens?</para>You have configured a claims request, but the claims string is not in JSON format
+        /// <para>Mitigation</para>Ensure that the claims parameter is valid JSON. Inspect the inner exception for details about JSON parsing. 
+        /// </summary>
+        public const string InvalidJsonClaimsFormat = "invalid_json_claims_format";
+
+        /// <summary>
+        /// <para>What happens?</para>The authority configured at the application level is different than the authority configured at the request level
+        /// <para>Mitigation</para>Ensure the same authority type is used
+        /// </summary>
+        public const string AuthorityTypeMismatch = "authority_type_mismatch";
+
+
+        /// <summary>
+        /// <para>What happens?</para>You have configured your own instance metadata using both an Uri and a string. Only one is supported.
+        /// <para>Mitigation</para>Call WithInstanceDiscoveryMetadata only once. See https://aka.ms/msal-net-custom-instance-metadata for more details.
+        /// </summary>
+        public const string CustomMetadataInstanceOrUri = "custom_metadata_instance_or_uri";
+
+        /// <summary>
+        /// <para>What happens?</para>No scopes have been requested
+        /// <para>Mitigation</para>At least one scope must be specified for this authentication flow
+        /// </summary>
+        public const string ScopesRequired = "scopes_required_client_credentials";
+
+        /// <summary>
+        /// <para>What happens?</para>The certificate provided does not have a private key.
+        /// <para>Mitigation</para>Ensure the certificate has a private key.
+        /// </summary>
+        public const string CertWithoutPrivateKey = "cert_without_private_key";
+
+        /// <summary>
         /// Device certificate not found.
         /// </summary>
         public const string DeviceCertificateNotFound = "device_certificate_not_found";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

@@ -67,20 +67,30 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/987654321/";
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
         public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
-        public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
-        public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";
-        public const string B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/sometenantid/policy/";
-        public const string B2CCustomDomain = "https://catsareamazing.com/tfp/catsareamazing/policy/";
-        public const string B2CLoginAuthorityUsGov = "https://sometenantid.b2clogin.us/tfp/sometenantid/policy/";
-        public const string B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/policy/";
-        public const string B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/policy/";
+
+        public const string B2CPolicy = "policy";
+        public static readonly string B2CAuthority = $"https://login.microsoftonline.in/tfp/tenant/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthority = $"https://sometenantid.b2clogin.com/tfp/sometenantid/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthorityWrongHost = $"https://anothertenantid.b2clogin.com/tfp/sometenantid/{B2CPolicy}/";
+        public static readonly string B2CCustomDomain = $"https://catsareamazing.com/tfp/catsareamazing/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthorityUsGov = $"https://sometenantid.b2clogin.us/tfp/sometenantid/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthorityMoonCake = $"https://sometenantid.b2clogin.cn/tfp/sometenantid/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthorityBlackforest = $"https://sometenantid.b2clogin.de/tfp/sometenantid/{B2CPolicy}/";
+
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
         public const string FamilyId = "1";
         public const string UniqueId = "unique_id";
         public const string IdentityProvider = "my-idp";
         public const string Name = "First Last";
-        public const string Claims = "claim1claim2";
+        
+        public const string Claims = @"{""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
+        public static readonly string[] ClientCapabilities = new[] { "cp1", "cp2" };
+        public const string ClientCapabilitiesJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}}}";
+        // this a JSON merge from Claims and ClientCapabilitiesJson
+        public const string ClientCapabilitiesAndClaimsJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}},""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
+            
+
         public const string DisplayableId = "displayable@id.com";
         public const string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public const string MobileDefaultRedirectUri = "msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842://auth"; // in msidentity-samples-testing tenant -> PublicClientSample
@@ -96,6 +106,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string XClientVer = "x-client-Ver";
         public const TokenSubjectType TokenSubjectTypeUser = 0;
         public const string TestMessage = "test message";
+        public const string LoginHint = "loginHint";
 
         public const string LocalAccountId = "test_local_account_id";
         public const string GivenName = "Joe";
@@ -123,18 +134,25 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
 
         public const string Bearer = "bearer";
 
-        public static readonly IDictionary<string, string> s_extraQueryParams
-            = new Dictionary<string, string>()
+        public static IDictionary<string, string> ExtraQueryParameters
+        {
+            get
             {
-                {"extra", "qp" },
-                {"key1", "value1%20with%20encoded%20space"},
-                {"key2", "value2"}
-            };
+                return new Dictionary<string, string>()
+                {
+                    {"extra", "qp" },
+                    {"key1", "value1%20with%20encoded%20space"},
+                    {"key2", "value2"}
+                };
+            }
+        }
 
         public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
         public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
+        public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/";
         public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/";
+        public const string MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
 
         public enum AuthorityType { B2C };
         public static string[] s_prodEnvAliases = new string[] {
@@ -191,6 +209,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
             string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
 
         public const string BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2";
+        public const string BrokerOIDCScopes = "openid offline_access profile";
         public const string BrokerClaims = "testClaims";
 
         public static readonly ClientCredentialWrapper s_onPremiseCredentialWithSecret = ClientCredentialWrapper.CreateWithSecret(ClientSecret);
@@ -233,21 +252,19 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                         ]
                 }";
 
-        public const string TokenResponseJson =
-            "{\"token_type\":\"Bearer\"," +
-            "\"scope\":\"user_impersonation\"," +
-            "\"expires_in\":\"3600\"," +
-            "\"ext_expires_in\":\"3600\"," +
-            "\"expires_on\":\"1566165638\"," +
-            "\"not_before\":\"1566161738\"," +
-            "\"resource\":\"user.read\"," +
-            "\"access_token\":\"at_secret\"," +
-            "\"refresh_token\":\"rt_secret\"," +
-            "\"id_token\":\"idtoken.\"," +
-            "\"client_info\":\"eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0\"}";
-
-        public const string InteractiveRequestApiIdPlusCorrelationId = "1005,ad8c894a-557f-48c0-b045-c129590c344e,";
-        public const string InteractiveRequestApiId = "1005";
+        public const string TokenResponseJson = @"{
+                                                   ""token_type"": ""Bearer"",
+                                                   ""scope"": ""user_impersonation"",
+                                                   ""expires_in"": ""3600"",
+                                                   ""ext_expires_in"": ""3600"",
+                                                   ""expires_on"": ""1566165638"",
+                                                   ""not_before"": ""1566161738"",
+                                                   ""resource"": ""user.read"",
+                                                   ""access_token"": ""at_secret"",
+                                                   ""refresh_token"": ""rt_secret"",
+                                                   ""id_token"": ""idtoken."",
+                                                   ""client_info"": ""eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0""
+                                                }";
     }
 
     internal static class Adfs2019LabConstants

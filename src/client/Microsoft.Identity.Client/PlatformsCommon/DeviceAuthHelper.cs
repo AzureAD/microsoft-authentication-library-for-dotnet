@@ -1,10 +1,11 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
@@ -52,10 +53,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon
                                    challengeData[PKeyAuthConstants.ChallengeResponseVersion]);
         }
 
-        //PKeyAuth can only be performed on operating systems with a major OS version of 6. 
-        //This corresponds to windows 7, 8, 8.1 and their server equivilents.
         public static bool CanOSPerformPKeyAuth()
         {
+            //PKeyAuth can only be performed on operating systems with a major OS version of 6. 
+            //This corresponds to windows 7, 8, 8.1 and their server equivilents.
 #if DESKTOP
             if (Environment.OSVersion.Version.Major == 6)
             {

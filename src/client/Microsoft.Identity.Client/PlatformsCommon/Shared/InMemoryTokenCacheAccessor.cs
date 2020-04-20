@@ -8,114 +8,148 @@ using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     /// <summary>
-    /// Keeps the 4 token cache dictionaries in memory. Token Cache extensions
+    /// Keeps the token cache dictionaries in memory. Token Cache extensions
     /// are responsible for persistance.
     /// </summary>
+    /// <remarks>See this post for efficient use of Concurrent Dictionary http://geekswithblogs.net/simonc/archive/2012/02/22/inside-the-concurrent-collections-concurrentdictionary.aspx</remarks>
     internal class InMemoryTokenCacheAccessor : ITokenCacheAccessor
     {
-        private readonly IDictionary<string, MsalAccessTokenCacheItem> _accessTokenCacheDictionary =
-            new Dictionary<string, MsalAccessTokenCacheItem>();
+        private readonly ConcurrentDictionary<string, MsalAccessTokenCacheItem> _accessTokenCacheDictionary =
+            new ConcurrentDictionary<string, MsalAccessTokenCacheItem>();
 
-        private readonly IDictionary<string, MsalRefreshTokenCacheItem> _refreshTokenCacheDictionary =
-            new Dictionary<string, MsalRefreshTokenCacheItem>();
+        private readonly ConcurrentDictionary<string, MsalRefreshTokenCacheItem> _refreshTokenCacheDictionary =
+            new ConcurrentDictionary<string, MsalRefreshTokenCacheItem>();
 
-        private readonly IDictionary<string, MsalIdTokenCacheItem> _idTokenCacheDictionary =
-            new Dictionary<string, MsalIdTokenCacheItem>();
+        private readonly ConcurrentDictionary<string, MsalIdTokenCacheItem> _idTokenCacheDictionary =
+            new ConcurrentDictionary<string, MsalIdTokenCacheItem>();
 
-        private readonly IDictionary<string, MsalAccountCacheItem> _accountCacheDictionary =
-            new Dictionary<string, MsalAccountCacheItem>();
+        private readonly ConcurrentDictionary<string, MsalAccountCacheItem> _accountCacheDictionary =
+            new ConcurrentDictionary<string, MsalAccountCacheItem>();
 
-        private readonly IDictionary<string, MsalAppMetadataCacheItem> _appMetadataDictionary =
-           new Dictionary<string, MsalAppMetadataCacheItem>();
+        private readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> _appMetadataDictionary =
+           new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
+        private readonly ICoreLogger _logger;
 
+        public InMemoryTokenCacheAccessor(ICoreLogger logger)
+        {
+            _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
+        }
+
+        #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            _accessTokenCacheDictionary[item.GetKey().ToString()] = item;
+            string key = item.GetKey().ToString();
+
+            // if a conflict occurs, pick the latest value
+            _accessTokenCacheDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            _refreshTokenCacheDictionary[item.GetKey().ToString()] = item;
+            string key = item.GetKey().ToString();
+            _refreshTokenCacheDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            _idTokenCacheDictionary[item.GetKey().ToString()] = item;
+            string key = item.GetKey().ToString();
+            _idTokenCacheDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            _accountCacheDictionary[item.GetKey().ToString()] = item;
+            string key = item.GetKey().ToString();
+            _accountCacheDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
         }
 
         public void SaveAppMetadata(MsalAppMetadataCacheItem item)
         {
-            _appMetadataDictionary[item.GetKey().ToString()] = item;
+            string key = item.GetKey().ToString();
+            _appMetadataDictionary.AddOrUpdate(key, item, (k, oldValue) => item);
         }
+        #endregion
 
+        #region Get
         public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
-            if (_accessTokenCacheDictionary.TryGetValue(accessTokenKey.ToString(), out var cacheItem))
-            {
-                return cacheItem;
-            }
-
-            return null;
+            _accessTokenCacheDictionary.TryGetValue(accessTokenKey.ToString(), out MsalAccessTokenCacheItem cacheItem);
+            return cacheItem;
         }
 
         public MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
         {
-            if (_refreshTokenCacheDictionary.TryGetValue(refreshTokenKey.ToString(), out var cacheItem))
-            {
-                return cacheItem;
-            }
-
-            return null;
+            _refreshTokenCacheDictionary.TryGetValue(refreshTokenKey.ToString(), out var cacheItem);
+            return cacheItem;
         }
 
         public MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey)
         {
-            if (_idTokenCacheDictionary.TryGetValue(idTokenKey.ToString(), out var cacheItem))
-            {
-                return cacheItem;
-            }
-            return null;
+            _idTokenCacheDictionary.TryGetValue(idTokenKey.ToString(), out var cacheItem);
+            return cacheItem;
         }
 
         public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
         {
-            if (_accountCacheDictionary.TryGetValue(accountKey.ToString(), out var cacheItem))
-            {
-                return cacheItem;
-            }
-
-            return null;
+            _accountCacheDictionary.TryGetValue(accountKey.ToString(), out var cacheItem);
+            return cacheItem;
         }
 
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        {
+            _appMetadataDictionary.TryGetValue(appMetadataKey.ToString(), out var cacheItem);
+            return cacheItem;
+        }
+        #endregion
+
+        #region Delete
         public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
         {
-            _accessTokenCacheDictionary.Remove(cacheKey.ToString());
+            if (!_accessTokenCacheDictionary.TryRemove(cacheKey.ToString(), out _))
+            {
+                _logger.InfoPii(
+                    $"Cannot delete an access token because it was already deleted. Key {cacheKey}",
+                    "Cannot delete an access token because it was already deleted");
+            }
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey)
         {
-            _refreshTokenCacheDictionary.Remove(cacheKey.ToString());
+            if (!_refreshTokenCacheDictionary.TryRemove(cacheKey.ToString(), out _))
+            {
+                _logger.InfoPii(
+                    $"Cannot delete an refresh token because it was already deleted. Key {cacheKey}",
+                    "Cannot delete an refresh token because it was already deleted");
+            }
         }
 
         public void DeleteIdToken(MsalIdTokenCacheKey cacheKey)
         {
-            _idTokenCacheDictionary.Remove(cacheKey.ToString());
+            if (!_idTokenCacheDictionary.TryRemove(cacheKey.ToString(), out _))
+            {
+                _logger.InfoPii(
+                    $"Cannot delete an id token because it was already deleted. Key {cacheKey}",
+                    "Cannot delete an id token because it was already deleted");
+            }
         }
 
         public void DeleteAccount(MsalAccountCacheKey cacheKey)
         {
-            _accountCacheDictionary.Remove(cacheKey.ToString());
+            if (!_accountCacheDictionary.TryRemove(cacheKey.ToString(), out _))
+            {
+                _logger.InfoPii(
+                    $"Cannot delete an account because it was already deleted. Key {cacheKey}",
+                    "Cannot delete an account because it was already deleted");
+            }
         }
 
+        #endregion
+
+        #region Get All Values
         public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
             return new ReadOnlyCollection<MsalAccessTokenCacheItem>(
@@ -126,7 +160,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return new ReadOnlyCollection<MsalRefreshTokenCacheItem>(
                 _refreshTokenCacheDictionary.Values.ToList());
-
         }
 
         public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
@@ -146,6 +179,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return new ReadOnlyCollection<MsalAppMetadataCacheItem>(
                _appMetadataDictionary.Values.ToList());
         }
+        #endregion
 
         public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
         {
@@ -161,13 +195,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             // app metadata isn't removable
         }
 
-        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
-        {
-            if (_appMetadataDictionary.TryGetValue(appMetadataKey.ToString(), out var cacheItem))
-            {
-                return cacheItem;
-            }
-            return null;
-        }
+
     }
 }
