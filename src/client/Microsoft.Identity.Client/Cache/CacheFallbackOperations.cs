@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
@@ -25,6 +26,8 @@ namespace Microsoft.Identity.Client.Cache
             string uniqueId,
             string scope)
         {
+            //Debugger.Launch();
+            //Debugger.Break();
             try
             {
                 if (rtItem == null)
@@ -239,6 +242,9 @@ namespace Microsoft.Identity.Client.Cache
         {
             try
             {
+                //Debugger.Launch();
+                //Debugger.Break();
+
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                     AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
                 // filter by client id and environment first

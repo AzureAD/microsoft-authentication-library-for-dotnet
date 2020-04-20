@@ -480,7 +480,7 @@ namespace Microsoft.Identity.Client
                     aliases,
                     requestParams.ClientId,
                     upn,
-                    requestParams.Account.HomeAccountId?.Identifier);
+                    requestParams.Account.HomeAccountId?.ObjectId);
             }
 
             return null;
