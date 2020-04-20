@@ -30,6 +30,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon
 
         public static bool IsDeviceAuthChallenge(HttpResponse response)
         {
+            //For PKeyAuth, challenge headers returned from the STS will be case sensitive so a case sensitive check is used to determine
+            //if the response is a PKeyAuth challenge.
             return response != null
                    && response.Headers != null
                    && response.StatusCode == HttpStatusCode.Unauthorized
@@ -38,6 +40,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon
                        .StartsWith(PKeyAuthConstants.PKeyAuthName, StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Constructs a bypass response to the PKeyAuth challenge on platforms where the challenge cannot be completed.
+        /// </summary>
         public static string GetBypassChallengeResponse(HttpResponse response)
         {
             var challengeData = DeviceAuthHelper.ParseChallengeData(response);
@@ -45,6 +50,19 @@ namespace Microsoft.Identity.Client.PlatformsCommon
                                    @"PKeyAuth Context=""{0}"",Version=""{1}""",
                                    challengeData[PKeyAuthConstants.ChallengeResponseContext],
                                    challengeData[PKeyAuthConstants.ChallengeResponseVersion]);
+        }
+
+        //PKeyAuth can only be performed on operating systems with a major OS version of 6. 
+        //This corresponds to windows 7, 8, 8.1 and their server equivilents.
+        public static bool CanOSPerformPKeyAuth()
+        {
+#if DESKTOP
+            if (Environment.OSVersion.Version.Major == 6)
+            {
+                return true;
+            }
+#endif
+            return false;
         }
     }
 }

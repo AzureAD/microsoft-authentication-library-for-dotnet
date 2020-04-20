@@ -11,7 +11,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 {
     internal interface IDeviceAuthManager
     {
-        bool CanHandleDeviceAuthChallenge { get; }
-        Task<string> CreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri);
+        bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri, out string responseHeader);
     }
 }

@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
-            _deviceAuthManager = deviceAuthManager;
+            _deviceAuthManager = deviceAuthManager ?? new NullDeviceAuthManager();
         }
 
         public void AddQueryParameter(string key, string value)
@@ -99,8 +99,9 @@ namespace Microsoft.Identity.Client.OAuth2
                     //Check if we can perform device auth
                     if (sendDeviceAuthParams)
                     {
-                        string responseHeader = await _deviceAuthManager.CreateDeviceAuthChallengeResponseAsync(response, endpointUri).ConfigureAwait(false);
-                        if (!string.IsNullOrEmpty(responseHeader))
+                        string responseHeader = string.Empty;
+                        var isChallenge = _deviceAuthManager.TryCreateDeviceAuthChallengeResponseAsync(response, endpointUri, out responseHeader);
+                        if (isChallenge)
                         {
                             //Injecting PKeyAuth response here and replaying request to attempt device auth
                             _headers["Authorization"] = responseHeader;

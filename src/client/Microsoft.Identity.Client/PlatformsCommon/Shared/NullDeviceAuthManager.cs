@@ -9,13 +9,22 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
+    /// <summary>
+    /// Used for platforms that do not implement PKeyAuth.
+    /// </summary>
     internal class NullDeviceAuthManager : IDeviceAuthManager
     {
-        public bool CanHandleDeviceAuthChallenge => false;
-
-        public Task<string> CreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri)
+        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri, out string responseHeader)
         {
-            return Task.FromResult(DeviceAuthHelper.GetBypassChallengeResponse(response));
+            if (!DeviceAuthHelper.IsDeviceAuthChallenge(response))
+            {
+                responseHeader = string.Empty;
+                return false;
+            }
+
+            //Bypassing challenge
+            responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
+            return true;
         }
     }
 }

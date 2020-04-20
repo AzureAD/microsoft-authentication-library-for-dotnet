@@ -116,8 +116,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XamarinDev", "tests\devapps
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Integration.net47", "tests\Microsoft.Identity.Test.Integration.net47\Microsoft.Identity.Test.Integration.net47.csproj", "{8C209A34-0F6E-488D-B1A9-D52B1354AC78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Integration.net48", "tests\Microsoft.Identity.Test.Integration.net48\Microsoft.Identity.Test.Integration.net48.csproj", "{BBEDF4EC-FB63-4D05-BE98-492BA2E96DFC}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Extensions.Web", "src\extensions.web\Microsoft.Identity.Client.Extensions.Web\Microsoft.Identity.Client.Extensions.Web.csproj", "{00665BF8-F364-4390-A835-D533FFC9ADDD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A1BDB0D8-A1F8-4203-A95F-31D0ABC4DF7B} = {A1BDB0D8-A1F8-4203-A95F-31D0ABC4DF7B}

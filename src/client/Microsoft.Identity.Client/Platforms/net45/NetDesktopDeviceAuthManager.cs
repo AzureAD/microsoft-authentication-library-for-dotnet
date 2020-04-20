@@ -20,20 +20,20 @@ namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class NetDesktopDeviceAuthManager : IDeviceAuthManager
     {
-        public bool CanHandleDeviceAuthChallenge
+        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri, out string responseHeader)
         {
-            get { return true; }
-        }
-
-        public async Task<string> CreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri)
-        {
+            responseHeader = string.Empty;
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
-
             X509Certificate2 certificate = null;
 
             if (!DeviceAuthHelper.IsDeviceAuthChallenge(response))
             {
-                return null;
+                return false;
+            }
+            if (!DeviceAuthHelper.CanOSPerformPKeyAuth())
+            {
+                responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
+                return false;
             }
 
             IDictionary<string, string> challengeData = DeviceAuthHelper.ParseChallengeData(response);
@@ -51,7 +51,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
             {
                 if (ex.ErrorCode == MsalError.DeviceCertificateNotFound)
                 {
-                    return await Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData["Context"], challengeData["Version"])).ConfigureAwait(false);
+                    responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
+                    return true;
                 }
             }
 
@@ -65,11 +66,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 Base64UrlHelpers.Encode(sig));
             string authToken = string.Format(CultureInfo.InvariantCulture, " AuthToken=\"{0}\"", signedJwt);
 
-            var resultString = string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken,
+            responseHeader = string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken,
                 challengeData["Context"],
                 challengeData["Version"]);
 
-            return Task.FromResult(resultString).Result;
+            return true;
         }
 
         private static X509Certificate2 FindCertificate(IDictionary<string, string> challengeData)

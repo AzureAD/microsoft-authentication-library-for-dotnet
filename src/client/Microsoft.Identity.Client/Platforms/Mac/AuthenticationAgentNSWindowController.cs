@@ -204,26 +204,6 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 return;
             }
 
-            if (requestUrlString.StartsWith(BrokerConstants.DeviceAuthChallengeRedirect, StringComparison.CurrentCultureIgnoreCase))
-            {
-                var uri = new Uri(requestUrlString);
-                string query = uri.Query;
-                if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Substring(1);
-                }
-
-                Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-                string responseHeader = _deviceAuthManager.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
-
-                var newRequest = (NSMutableUrlRequest)request.MutableCopy();
-                newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);
-                newRequest[BrokerConstants.ChallengeResponseHeader] = responseHeader;
-                webView.MainFrame.LoadRequest(newRequest);
-                WebView.DecideIgnore(decisionToken);
-                return;
-            }
-
             if (!request.Url.AbsoluteString.Equals("about:blank", StringComparison.CurrentCultureIgnoreCase) &&
                 !request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {

@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Core
             InstanceDiscoveryManager = new InstanceDiscoveryManager(HttpManager, TelemetryManager, shouldClearCaches, config.CustomInstanceDiscoveryMetadata);
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
-            DeviceAuthManager = PlatformProxy != null ? PlatformProxy.CreateDeviceAuthManager() : null;
+            DeviceAuthManager = PlatformProxy.CreateDeviceAuthManager();
         }
 
         public ICoreLogger DefaultLogger { get; }
