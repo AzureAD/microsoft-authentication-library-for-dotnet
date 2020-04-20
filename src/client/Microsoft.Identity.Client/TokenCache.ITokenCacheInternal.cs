@@ -476,7 +476,6 @@ namespace Microsoft.Identity.Client
                 return CacheFallbackOperations.GetAdalEntryForMsal(
                     Logger,
                     LegacyCachePersistence,
-                    metadata.PreferredCache,
                     aliases,
                     requestParams.ClientId,
                     upn,
