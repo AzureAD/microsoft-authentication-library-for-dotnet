@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,6 +13,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -151,20 +154,37 @@ namespace Microsoft.Identity.Test.Unit
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreatePKeyAuthChallengeResponse()
                     });
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithPKeyAuthValidation());
 
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
-                Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
-                Assert.AreEqual(TestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
-                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
-                Assert.AreEqual(TestConstants.Utid, result.TenantId);
             }
+        }
+
+        private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithPKeyAuthValidation()
+        {
+            return new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                AdditionalRequestValidation = request =>
+                {
+                    var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
+
+                    // Check presence of client_assertion in request
+                    var encodedJwt = formsData.First().Value;
+
+                    // Check presence and value of pkeyAuth value.
+                    var handler = new JwtSecurityTokenHandler();
+                    var jsonToken = handler.ReadJwtToken(encodedJwt);
+                    var pKeyAuth = jsonToken.Header.Where(header => header.Key == "x-ms-PKeyAuth").FirstOrDefault();
+                    Assert.AreEqual("x-ms-PKeyAuth", pKeyAuth.Key, "PKey Auth Header: x-ms-PKeyAuth should be present");
+                    Assert.AreEqual(pKeyAuth.Value.ToString(), TestConstants.PKeyAuthResponse);
+                }
+            };
         }
 #endif
 
