@@ -254,22 +254,18 @@ namespace Microsoft.Identity.Client.Cache
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> upnEntries =
                         listToProcess.Where(p => upn.Equals(p.Key.DisplayableId, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                    if (upnEntries.Any())
-                    {
-                        listToProcess = upnEntries;
-                    }
+                    listToProcess = upnEntries;
                 }
 
-                // if userId is provided then use it to filter
+                // if uniqueId is provided then use it to filter
                 if (!string.IsNullOrEmpty(uniqueId))
                 {
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> uniqueIdEntries =
                         listToProcess.Where(p => uniqueId.Equals(p.Key.UniqueId, StringComparison.OrdinalIgnoreCase)).ToList();
-                    if (uniqueIdEntries.Any())
-                    {
-                        listToProcess = uniqueIdEntries;
-                    }
+
+                    listToProcess = uniqueIdEntries;
                 }
+
                 List<MsalRefreshTokenCacheItem> list = new List<MsalRefreshTokenCacheItem>();
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
                 {
