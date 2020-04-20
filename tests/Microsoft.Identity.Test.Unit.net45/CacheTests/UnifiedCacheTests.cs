@@ -40,9 +40,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     app.ServiceBundle.PlatformProxy,
                 AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
+                HttpResponseMessage response = MockHelpers.CreateSuccessTokenResponseMessageWithUid(
+                    TestConstants.Uid, 
+                    TestConstants.Utid, 
+                    "testuser@contoso.com");
 
-                AuthenticationResult result = app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync(CancellationToken.None).Result;
+                httpManager.AddResponseMockHandlerForPost(response);
+
+               AuthenticationResult result = app.AcquireTokenInteractive(TestConstants.s_scope).ExecuteAsync(CancellationToken.None).Result;
                 Assert.IsNotNull(result);
 
                 // make sure Msal stored RT in Adal cache

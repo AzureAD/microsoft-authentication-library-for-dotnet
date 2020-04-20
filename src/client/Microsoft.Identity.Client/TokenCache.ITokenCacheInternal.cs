@@ -476,11 +476,10 @@ namespace Microsoft.Identity.Client
                 return CacheFallbackOperations.GetAdalEntryForMsal(
                     Logger,
                     LegacyCachePersistence,
-                    metadata.PreferredCache,
                     aliases,
                     requestParams.ClientId,
                     upn,
-                    requestParams.Account.HomeAccountId?.Identifier);
+                    requestParams.Account.HomeAccountId?.ObjectId);
             }
 
             return null;
