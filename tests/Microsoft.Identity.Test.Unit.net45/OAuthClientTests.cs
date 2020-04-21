@@ -174,15 +174,11 @@ namespace Microsoft.Identity.Test.Unit
                     var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                     var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
 
-                    // Check presence of client_assertion in request
-                    var encodedJwt = formsData.First().Value;
+                    // Check presence of pkeyAuth in request
+                    Assert.IsTrue(formsData.TryGetValue("Authorization", out string pKeyAuthHeader), "Missing PKeyAuth header from request");
 
-                    // Check presence and value of pkeyAuth value.
-                    var handler = new JwtSecurityTokenHandler();
-                    var jsonToken = handler.ReadJwtToken(encodedJwt);
-                    var pKeyAuth = jsonToken.Header.Where(header => header.Key == "x-ms-PKeyAuth").FirstOrDefault();
-                    Assert.AreEqual("x-ms-PKeyAuth", pKeyAuth.Key, "PKey Auth Header: x-ms-PKeyAuth should be present");
-                    Assert.AreEqual(pKeyAuth.Value.ToString(), TestConstants.PKeyAuthResponse);
+                    // Check value of pkeyAuth header.
+                    Assert.AreEqual(pKeyAuthHeader, TestConstants.PKeyAuthResponse);
                 }
             };
         }

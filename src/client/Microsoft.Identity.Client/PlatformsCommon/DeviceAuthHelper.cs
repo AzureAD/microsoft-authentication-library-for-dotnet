@@ -48,9 +48,20 @@ namespace Microsoft.Identity.Client.PlatformsCommon
         {
             var challengeData = DeviceAuthHelper.ParseChallengeData(response);
             return string.Format(CultureInfo.InvariantCulture,
-                                   @"PKeyAuth Context=""{0}"",Version=""{1}""",
+                                   PKeyAuthConstants.PKeyAuthBypassReponseFormat,
                                    challengeData[PKeyAuthConstants.ChallengeResponseContext],
                                    challengeData[PKeyAuthConstants.ChallengeResponseVersion]);
+        }
+
+        /// <summary>
+        /// Constructs a bypass response to the PKeyAuth challenge on platforms where the challenge cannot be completed.
+        /// </summary>
+        public static string GetBypassChallengeResponse(Dictionary<string, string> response)
+        {
+            return string.Format(CultureInfo.InvariantCulture,
+                                   PKeyAuthConstants.PKeyAuthBypassReponseFormat,
+                                   response[PKeyAuthConstants.ChallengeResponseContext],
+                                   response[PKeyAuthConstants.ChallengeResponseVersion]);
         }
 
         public static bool CanOSPerformPKeyAuth()

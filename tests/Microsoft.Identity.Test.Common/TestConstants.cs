@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string GivenName = "Joe";
         public const string FamilyName = "Doe";
         public const string Username = "joe@localhost.com";
-        public const string PKeyAuthResponse = "PKeyAuth, Context=context, Version=1.0";
+        public const string PKeyAuthResponse = "PKeyAuth Context=context, Version=1.0";
 
         //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
         public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj

@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Platforms.Shared.Apple;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
@@ -201,6 +202,26 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 _callbackMethod(AuthorizationResult.FromUri(request.Url.ToString()));
                 WebView.DecideIgnore(decisionToken);
                 Close();
+                return;
+            }
+
+            if (requestUrlString.StartsWith(BrokerConstants.DeviceAuthChallengeRedirect, StringComparison.CurrentCultureIgnoreCase))
+            {
+                var uri = new Uri(requestUrlString);
+                string query = uri.Query;
+                if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Substring(1);
+                }
+
+                Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
+                string responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(keyPair);
+
+                var newRequest = (NSMutableUrlRequest)request.MutableCopy();
+                newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);
+                newRequest[BrokerConstants.ChallengeResponseHeader] = responseHeader;
+                webView.MainFrame.LoadRequest(newRequest);
+                WebView.DecideIgnore(decisionToken);
                 return;
             }
 

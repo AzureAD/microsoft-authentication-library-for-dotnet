@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using CoreFoundation;
 using Foundation;
 using Microsoft.Identity.Client.Platforms.Shared.Apple;
+using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using UIKit;
@@ -51,6 +52,26 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             {
                 _authenticationAgentUIViewController.DismissViewController(true, () =>
                     _authenticationAgentUIViewController.CallbackMethod(AuthorizationResult.FromUri(requestUrlString)));
+                decisionHandler(WKNavigationActionPolicy.Cancel);
+                return;
+            }
+
+            if (requestUrlString.StartsWith(iOSBrokerConstants.DeviceAuthChallengeRedirect, StringComparison.OrdinalIgnoreCase))
+            {
+                Uri uri = new Uri(requestUrlString);
+                string query = uri.Query;
+                if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Substring(1);
+                }
+
+                Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
+                string responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(keyPair);
+
+                NSMutableUrlRequest newRequest = (NSMutableUrlRequest)navigationAction.Request.MutableCopy();
+                newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);
+                newRequest[iOSBrokerConstants.ChallengeResponseHeader] = responseHeader;
+                webView.LoadRequest(newRequest);
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }

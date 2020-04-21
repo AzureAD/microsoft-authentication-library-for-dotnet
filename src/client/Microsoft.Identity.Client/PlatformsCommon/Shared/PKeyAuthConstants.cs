@@ -14,5 +14,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public const string PKeyAuthName = "PKeyAuth";
         public const string ChallengeResponseContext = "Context";
         public const string ChallengeResponseVersion = "Version";
+        public const string PKeyAuthBypassReponseFormat = @"PKeyAuth Context=""{0}"",Version=""{1}""";
     }
 }
