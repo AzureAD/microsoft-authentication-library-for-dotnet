@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -21,13 +22,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class RefreshInTests : TestBase
     {
-        private enum TokenResponseType
-        {
-            Valid,
-            Invalid_AADUnavailable,
-            Invalid_AADAvailable
-        }
-
         #region AcquireTokenSilent tests
 
         [TestMethod]
@@ -45,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                AddHttpMocks(TokenResponseType.Valid, harness.HttpManager);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -105,9 +99,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor, DateTime.UtcNow - TimeSpan.FromMinutes(1));
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
-
                 Trace.WriteLine("3. Configure AAD to respond with a 500 error");
-                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
+
 
                 // Act
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
@@ -123,8 +118,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
                 cacheAccess.AssertAccessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
+                // reset throttling, otherwise MSAL would block similar requests for 2 minutes 
+                // and we would still get a cached response
+                SingletonThrottlingManager.GetInstance().ResetCache();
+
                 // Now let AAD respond with tokens
-                AddTokenResponse(TokenResponseType.Valid, harness.HttpManager);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid);
 
                 result = await app
                   .AcquireTokenSilent(
@@ -153,7 +152,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 
                 Trace.WriteLine("3. Configure AAD to respond with the typical Invalid Grant error");
-                AddHttpMocks(TokenResponseType.Invalid_AADAvailable, harness.HttpManager);
+                harness.HttpManager.AddAllMocks(TokenResponseType.InvalidGrant);
+
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
 
                 // Act
@@ -181,7 +181,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.UserTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to be unavaiable");
-                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
+
                 var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
 
                 // Act
@@ -215,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                AddHttpMocks(TokenResponseType.Valid, harness.HttpManager);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
@@ -259,7 +261,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with an error");
-                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
 
                 // Act
                 AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -272,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 cacheAccess.AssertAccessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
                 // Now let AAD respond with tokens
-                AddTokenResponse(TokenResponseType.Valid, harness.HttpManager);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid);
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
@@ -296,7 +299,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with the typical Invalid Grant error");
-                AddHttpMocks(TokenResponseType.Invalid_AADAvailable, harness.HttpManager);
+                harness.HttpManager.AddAllMocks(TokenResponseType.InvalidGrant);
 
                 // Act
                 await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => 
@@ -322,7 +325,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheAccessRecorder cacheAccess = app.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to be unavaiable");
-                AddHttpMocks(TokenResponseType.Invalid_AADUnavailable, harness.HttpManager);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
 
                 // Act
                 MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => app
@@ -338,61 +342,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         #endregion
 
-        private static void AddHttpMocks(TokenResponseType aadResponse, MockHttpManager httpManager)
-        {
-            httpManager.AddInstanceDiscoveryMockHandler();
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(
-                TestConstants.AuthorityUtidTenant);
-
-            AddTokenResponse(aadResponse, httpManager);
-        }
-
-        private static void AddTokenResponse(TokenResponseType aadResponse, MockHttpManager httpManager)
-        {
-            switch (aadResponse)
-            {
-                case TokenResponseType.Valid:
-                    var refreshHandler = new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                       TestConstants.UniqueId,
-                       TestConstants.DisplayableId,
-                       TestConstants.s_scope.ToArray())
-                    };
-                    httpManager.AddMockHandler(refreshHandler);
-                    break;
-                case TokenResponseType.Invalid_AADUnavailable:
-                    var refreshHandler1 = new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateFailureMessage(
-                            System.Net.HttpStatusCode.GatewayTimeout, "gateway timeout")
-                    };
-                    var refreshHandler2 = new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateFailureMessage(
-                           System.Net.HttpStatusCode.GatewayTimeout, "gateway timeout")
-                    };
-
-                    // MSAL retries once for errors in the 500 - 600 range
-                    httpManager.AddMockHandler(refreshHandler1);
-                    httpManager.AddMockHandler(refreshHandler2);
-                    break;
-                case TokenResponseType.Invalid_AADAvailable:
-                    var handler = new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
-                    };
-
-                    httpManager.AddMockHandler(handler);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
 
         private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
             ITokenCacheAccessor accessor,

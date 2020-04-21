@@ -4,8 +4,6 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
@@ -181,14 +179,10 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
-        /// <summary>
-        /// Flag that indicates that the exception occured as a result of client throttling.
-        /// </summary>
-        /// <remarks>
-        /// Client Throttling spec https://identitydivision.visualstudio.com/DevEx/_git/AuthLibrariesApiReview?path=%2FService%20protection%2FIntial%20set%20of%20protection%20measures.md&version=GBdev&_a=preview
-        /// </remarks>
+        ///// <summary>
+        ///// Flag that indicates that the exception occured as a result of client throttling.
+        ///// </summary>
         internal bool IsThrottlingException { get; set; }
-
 
         /// <remarks>
         /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
@@ -235,10 +229,11 @@ namespace Microsoft.Identity.Client
         {
             return base.ToString() + string.Format(
                 CultureInfo.InvariantCulture,
-                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}",
+                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2} \n\t Throttled: {3}",
                 StatusCode,
                 ResponseBody,
-                Headers);
+                Headers,
+                IsThrottlingException);
         }
     }
 }

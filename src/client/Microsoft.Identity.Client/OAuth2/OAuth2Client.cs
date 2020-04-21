@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Json;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -30,6 +31,7 @@ namespace Microsoft.Identity.Client.OAuth2
     {
         private readonly Dictionary<string, string> _headers;
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
+        private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
 
         public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, IMatsTelemetryManager telemetryManager)
@@ -37,9 +39,6 @@ namespace Microsoft.Identity.Client.OAuth2
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
         }
-
-        public IDictionary<string, string> BodyParameters { get; } = 
-            new Dictionary<string, string>();
 
         public void AddQueryParameter(string key, string value)
         {
@@ -53,13 +52,18 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
             {
-                BodyParameters[key] = value;
+                _bodyParameters[key] = value;
             }
         }        
 
         internal void AddHeader(string key, string value)
         {
             _headers[key] = value;
+        }
+
+        internal IReadOnlyDictionary<string, string> GetBodyParameters()
+        {
+            return new ReadOnlyDictionary<string, string>(_bodyParameters);
         }
 
         public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endPoint, RequestContext requestContext)
@@ -75,15 +79,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false)
         {
-            if (endPoint is null)
-            {
-                throw new ArgumentNullException(nameof(endPoint));
-            }
-
-            if (requestContext is null)
-            {
-                throw new ArgumentNullException(nameof(requestContext));
-            }
+            CheckParamsNotNull(endPoint, requestContext);
 
             bool addCorrelationId = !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
             AddCommonHeaders(requestContext, addCorrelationId);
@@ -100,7 +96,7 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 if (method == HttpMethod.Post)
                 {
-                    response = await _httpManager.SendPostAsync(endpointUri, _headers, BodyParameters, requestContext.Logger)
+                    response = await _httpManager.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext.Logger)
                                                 .ConfigureAwait(false);
                 }
                 else
@@ -141,6 +137,19 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             return CreateResponse<T>(response, requestContext, addCorrelationId);
+        }
+
+        private static void CheckParamsNotNull(Uri endPoint, RequestContext requestContext)
+        {
+            if (endPoint is null)
+            {
+                throw new ArgumentNullException(nameof(endPoint));
+            }
+
+            if (requestContext is null)
+            {
+                throw new ArgumentNullException(nameof(requestContext));
+            }
         }
 
         private bool AddCommonHeaders(RequestContext requestContext, bool addCorrelationId)

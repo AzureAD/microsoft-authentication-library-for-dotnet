@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Core
                 config.CustomInstanceDiscoveryMetadataUri);
 
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
-            ThrottlingManager = SingletonThrottlingManager.Instance;
+            ThrottlingManager = SingletonThrottlingManager.GetInstance();
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
         }
 
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Core
 
         public IHttpTelemetryManager HttpTelemetryManager { get; }
 
-        public IThrottlingManager ThrottlingManager { get; }
+        public IThrottlingProvider ThrottlingManager { get; }
 
         public static ServiceBundle Create(ApplicationConfiguration config)
         {

@@ -103,9 +103,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         public ClientCredentialWrapper ClientCredential { get; set; }
-#endif
 
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
@@ -125,14 +123,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
         public IAccount Account { get; set; }
 
-        public bool IsClientCredentialRequest { get; set; }
-        public bool IsRefreshTokenRequest { get; set; }
+        public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
+        public bool IsConfidentialClient => ClientCredential != null;
+        public bool IsRefreshTokenRequest => ApiId == ApiEvent.ApiIds.AcquireTokenByRefreshToken;
         public UserAssertion UserAssertion { get; set; }
 
         #endregion
 
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters()
         {
+            var logger = this.RequestContext.Logger;
+
             // Create Pii enabled string builder
             var builder = new StringBuilder(
                 Environment.NewLine + "=== Request Data ===" + Environment.NewLine + "Authority Provided? - " +

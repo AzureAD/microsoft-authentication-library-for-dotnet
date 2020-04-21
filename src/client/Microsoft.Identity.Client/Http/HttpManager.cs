@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Http
                     retry: false).ConfigureAwait(false);
             }
 
-            logger.Error("Request retry failed.");
+            logger.Warning("Request retry failed.");
             if (timeoutException != null)
             {
                 throw new MsalServiceException(

@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -26,6 +27,7 @@ namespace Microsoft.Identity.Test.Common
                 Substitute.For<IMatsTelemetryManager>(),
                 true, null, null);
             new AuthorityEndpointResolutionManager(null, true);
+            SingletonThrottlingManager.GetInstance().ResetCache();
         }
 
         public static object GetPropValue(object src, string propName)

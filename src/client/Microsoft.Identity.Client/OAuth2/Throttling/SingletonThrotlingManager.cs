@@ -1,49 +1,105 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
+
     /// <summary>
-    /// Throttling occurs 
+    /// Throttling occurs
     /// <list type="bullet">
     /// <item>Afetr receving an RetryAfter header</item>
     /// <item>After receiving 429, 5xx HTTP status.</item>
     /// <item>After receiving a UI Interaction required signal</item>
     /// </list>
+    /// 
+    /// This class manages the throttling providers and is itself a provider
     /// </summary>
     /// <remarks>
     /// Client Throttling spec https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1624
     /// </remarks>
-    internal class SingletonThrottlingManager : IThrottlingManager
+    internal class SingletonThrottlingManager : IThrottlingProvider
     {
+        #region For Test
+
+        public IEnumerable<IThrottlingProvider> ThrottlingProvidersForTest => _throttlingProviders;
+        #endregion
+
         #region Singleton
-        private SingletonThrottlingManager() { }
+        private SingletonThrottlingManager()
+        {
+            _throttlingProviders = new List<IThrottlingProvider>()
+            {
+                // the order is important
+                new UiRequiredProvider(),
+                new RetryAfterProvider(),
+                new HttpStatusProvider(),
+            }; 
+        }      
 
         private static readonly Lazy<SingletonThrottlingManager> lazyPrivateCtor =
             new Lazy<SingletonThrottlingManager>(() => new SingletonThrottlingManager());
 
-        public static SingletonThrottlingManager Instance { get { return lazyPrivateCtor.Value; } }
+        public static SingletonThrottlingManager GetInstance()
+        {            
+            return lazyPrivateCtor.Value; 
+        }
+
         #endregion
 
-        private readonly ConcurrentDictionary<string, MsalServiceException>
+        private readonly IEnumerable<IThrottlingProvider> _throttlingProviders;        
 
-        public void RecordException(IEnumerable<KeyValuePair<string, string>> bodyParams, MsalServiceException ex)
+        private readonly ISet<ApiEvent.ApiIds> s_supportedRequests = new HashSet<ApiEvent.ApiIds>()
         {
-            ex.
+            ApiEvent.ApiIds.AcquireTokenSilent,
+            ApiEvent.ApiIds.AcquireTokenByUsernamePassword,
+            ApiEvent.ApiIds.AcquireTokenByIntegratedWindowsAuth,
+            ApiEvent.ApiIds.AcquireTokenByDeviceCode
+        };
+
+        public void RecordException(
+            AuthenticationRequestParameters requestParams,
+            IReadOnlyDictionary<string, string> bodyParams,
+            MsalServiceException ex)
+        {
+            if (!ex.IsThrottlingException && IsSupportedRequest(requestParams))
+            {
+                foreach (var provider in _throttlingProviders)
+                {
+                    provider.RecordException(requestParams, bodyParams, ex);
+                }
+            }
         }
 
-        public void ThrottleIfNeeded(IEnumerable<KeyValuePair<string, string>> bodyParams)
+        public void TryThrottle(
+           AuthenticationRequestParameters requestParams,
+           IReadOnlyDictionary<string, string> bodyParams)
         {
+            if (IsSupportedRequest(requestParams))
+            {
+                foreach (var provider in _throttlingProviders)
+                {
+                    provider.TryThrottle(requestParams, bodyParams);
+                }
+            }
         }
 
-        public void Reset()
+        private bool IsSupportedRequest(AuthenticationRequestParameters requestParameters)
         {
-            throw new NotImplementedException();
+            return s_supportedRequests.Contains(requestParameters.ApiId) &&
+                !requestParameters.IsConfidentialClient;
         }
 
+        public void ResetCache()
+        {
+            foreach (var provider in _throttlingProviders)
+            {
+                provider.ResetCache();
+            }
+        }
     }
 }

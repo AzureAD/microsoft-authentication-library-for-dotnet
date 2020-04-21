@@ -46,13 +46,25 @@ namespace Microsoft.Identity.Client.OAuth2
             string tokenEndpointOverride = null,
             CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Endpoints.TokenEndpoint;
             string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
             AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
 
-            MsalTokenResponse response = await SendHttpAndClearTelemetryAsync(tokenEndpoint)
-                .ConfigureAwait(false);
+            _serviceBundle.ThrottlingManager.TryThrottle(_requestParams, _oAuth2Client.GetBodyParameters());
 
+            MsalTokenResponse response;
+            try
+            {
+                response = await SendHttpAndClearTelemetryAsync(tokenEndpoint)
+                    .ConfigureAwait(false);
+            }
+            catch (MsalServiceException e)
+            {
+                _serviceBundle.ThrottlingManager.RecordException(_requestParams, _oAuth2Client.GetBodyParameters(), e);
+                throw;
+            }
 
             if (string.IsNullOrEmpty(response.Scope))
             {
@@ -148,8 +160,6 @@ namespace Microsoft.Identity.Client.OAuth2
             }
             catch (MsalServiceException ex)
             {
-                _serviceBundle.ThrottlingManager.RecordException(_oAuth2Client.BodyParameters, ex);
-
                 if (!ex.IsAadUnavailable())
                 {
                     // Clear failed telemetry data as we've just sent it ... 

@@ -58,7 +58,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _confidentialClientApplication.AppTokenCacheInternal);
 
             requestParams.SendX5C = clientParameters.SendX5C;
-            requestParams.IsClientCredentialRequest = true;
 
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
