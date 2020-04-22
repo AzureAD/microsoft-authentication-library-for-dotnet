@@ -23,6 +23,10 @@ namespace Microsoft.Identity.Test.Unit.Throttling
     public class ThrottlingAcceptanceTests : TestBase
     {
         private const int RetryAfterDurationSeconds = 15;
+        private static readonly IDictionary<string, string> s_throttlingHeader = new Dictionary<string, string>()
+        {
+            { ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue}
+        };
 
         /// <summary>
         /// 400 with Retry After with N seconds, the entry should stay in cache for N seconds
@@ -53,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1); 
 
                 Trace.WriteLine("5. Third call - no more throttling");
-                httpManager.AddTokenResponse(TokenResponseType.Valid);
+                httpManager.AddTokenResponse(TokenResponseType.Valid, s_throttlingHeader);
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync()
                        .ConfigureAwait(false);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 0);
@@ -91,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("5. Third call - no more throttling");
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid, s_throttlingHeader);
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync()
                        .ConfigureAwait(false);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 0);
@@ -123,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("A different request, e.g. with other scopes, will not be throttled");
-                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid, s_throttlingHeader);
                 await app.AcquireTokenSilent(new[] { "Other.Scopes" }, account).ExecuteAsync()
                        .ConfigureAwait(false);
             }
@@ -235,12 +239,13 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             new TokenCacheHelper().PopulateCache(app.UserTokenCacheInternal.Accessor, expiredAccessTokens: true);
 
             var tokenResponse = httpManager.AddAllMocks(TokenResponseType.InvalidClient);
-            UpdateStatusCodeAndHeaders(tokenResponse, httpStatusCode, retryAfterInSeconds);
+            UpdateStatusCodeAndHeaders(tokenResponse.ResponseMessage, httpStatusCode, retryAfterInSeconds);
 
             if (httpStatusCode >= 500 && httpStatusCode < 600 && !retryAfterInSeconds.HasValue)
             {
-                var response2 = httpManager.AddTokenResponse(TokenResponseType.InvalidClient);
-                UpdateStatusCodeAndHeaders(response2, httpStatusCode, retryAfterInSeconds);
+                var response2 = httpManager.AddTokenResponse(
+                    TokenResponseType.InvalidClient, s_throttlingHeader);
+                UpdateStatusCodeAndHeaders(response2.ResponseMessage, httpStatusCode, retryAfterInSeconds);
             }
 
             var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
@@ -249,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
                 () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                     .ConfigureAwait(false);
-
+            
             Assert.AreEqual(0, httpManager.QueueSize, "No more requests expected");
             Assert.AreEqual(httpStatusCode, ex.StatusCode);
 

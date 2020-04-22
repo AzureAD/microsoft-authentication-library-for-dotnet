@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -51,6 +52,7 @@ namespace Microsoft.Identity.Client.OAuth2
             string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Endpoints.TokenEndpoint;
             string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
             AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
+            AddThrottlingHeader();
 
             _serviceBundle.ThrottlingManager.TryThrottle(_requestParams, _oAuth2Client.GetBodyParameters());
 
@@ -87,6 +89,24 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// A client side library needs to communicate to the server side that 
+        /// it has implemented enforcement of HTTP 429 and Retry-After header.
+        /// Because if the server-side detects loops, then it can break the loop by sending 
+        /// either HTTP 429 or Retry-After header with a different HTTP status.
+        /// Right now, the server side breaks the loops by invalid_grant response, 
+        /// which breaks protocol under some condition and also causes unexplained prompt.
+        /// </summary>
+        private void AddThrottlingHeader()
+        {
+            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(_requestParams))
+            {
+                _oAuth2Client.AddHeader(
+                    ThrottleCommon.ThrottleRetryAfterHeaderName, 
+                    ThrottleCommon.ThrottleRetryAfterHeaderValue);
+            }
         }
 
         private void AddBodyParamsAndHeaders(IDictionary<string, string> additionalBodyParameters, string scopes)

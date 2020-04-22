@@ -30,8 +30,9 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         {
             var logger = requestParams.RequestContext.Logger;
 
-            if ((ex.StatusCode == 429 || (ex.StatusCode >= 500 && ex.StatusCode < 600)) &&
-                // if a retry-after header is present, another provide will take care of this
+            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams) &&
+                (ex.StatusCode == 429 || (ex.StatusCode >= 500 && ex.StatusCode < 600)) &&
+                // if a retry-after header is present, another provider will take care of this
                 !RetryAfterProvider.TryGetRetryAfterValue(ex.Headers, out _)) 
             {
                 logger.Info($"[Throttling] Http status code {ex.StatusCode} encountered - " +
@@ -52,14 +53,17 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public void TryThrottle(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams)
         {
-            var logger = requestParams.RequestContext.Logger;
-          
-            string strictThumbprint = ThrottleCommon.GetRequestStrictThumbprint(
-                bodyParams,
-                requestParams.AuthorityInfo.CanonicalAuthority,
-                requestParams.Account?.HomeAccountId?.Identifier);
+            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
+            {
+                var logger = requestParams.RequestContext.Logger;
 
-            ThrottleCommon.TryThrow(strictThumbprint, Cache, logger, nameof(HttpStatusProvider));
+                string strictThumbprint = ThrottleCommon.GetRequestStrictThumbprint(
+                    bodyParams,
+                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.Account?.HomeAccountId?.Identifier);
+
+                ThrottleCommon.TryThrow(strictThumbprint, Cache, logger, nameof(HttpStatusProvider));
+            }
         }
     }
 }

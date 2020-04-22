@@ -1,17 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
     internal static class ThrottleCommon
     {
+        public const string ThrottleRetryAfterHeaderName = "x-ms-lib-capability";
+        public const string ThrottleRetryAfterHeaderValue = "retry-after, h429";
+
         private const string KeyDelimiter = ".";
 
-      
         /// <summary>
         /// The strict thumbprint is based on: 
         /// ClientId
@@ -53,6 +55,11 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 ex.IsThrottlingException = true;
                 throw ex;
             }
+        }
+
+        public static bool IsRetryAfterAndHttpStatusThrottlingSupported(AuthenticationRequestParameters requestParameters)
+        {
+            return !requestParameters.IsConfidentialClient;
         }
     }
 }

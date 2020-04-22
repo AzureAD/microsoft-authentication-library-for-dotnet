@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             });
         }
 
-        public static HttpResponseMessage AddAllMocks(this MockHttpManager httpManager, TokenResponseType aadResponse)
+        public static MockHttpMessageHandler AddAllMocks(this MockHttpManager httpManager, TokenResponseType aadResponse)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
             httpManager.AddMockHandlerForTenantEndpointDiscovery(
@@ -232,9 +232,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return AddTokenResponse(httpManager, aadResponse);
         }
 
-        public static HttpResponseMessage AddTokenResponse(
+        public static MockHttpMessageHandler AddTokenResponse(
             this MockHttpManager httpManager, 
-            TokenResponseType responseType)
+            TokenResponseType responseType, 
+            IDictionary<string, string> expectedRequestHeaders = null)
         {
             HttpResponseMessage responseMessage;
 
@@ -245,52 +246,33 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                        TestConstants.UniqueId,
                        TestConstants.DisplayableId,
                        TestConstants.s_scope.ToArray());
-                    var refreshHandler = new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage =responseMessage
-                    };
-                    httpManager.AddMockHandler(refreshHandler);
+                   
                     break;
                 case TokenResponseType.Invalid_AADUnavailable503:
                     responseMessage = MockHelpers.CreateFailureMessage(
-                            System.Net.HttpStatusCode.ServiceUnavailable, "service down");                   
-                    var refreshHandler1 = new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = responseMessage
-                    };
-
-                    // MSAL retries once for errors in the 500 - 600 range
-                    httpManager.AddMockHandler(refreshHandler1);
+                            System.Net.HttpStatusCode.ServiceUnavailable, "service down");
+                   
                     break;
                 case TokenResponseType.InvalidGrant:
-
-                    responseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage();
-                    var handler = new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = responseMessage
-                    };
-
-                    httpManager.AddMockHandler(handler);
+                    responseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage();                   
                     break;
                 case TokenResponseType.InvalidClient:                    
 
                     responseMessage = MockHelpers.CreateInvalidClientResponseMessage();
-                    handler = new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = responseMessage
-                    };
-
-                    httpManager.AddMockHandler(handler);
                     break;
                 default:
                     throw new NotImplementedException();
             }
 
-            return responseMessage;
+            var responseHandler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                ResponseMessage = responseMessage, 
+            };
+            httpManager.AddMockHandler(responseHandler);
+
+            return responseHandler;
         }
 
         public static HttpResponseMessage AddTokenErrorResponse(

@@ -38,35 +38,27 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 new UiRequiredProvider(),
                 new RetryAfterProvider(),
                 new HttpStatusProvider(),
-            }; 
-        }      
+            };
+        }
 
         private static readonly Lazy<SingletonThrottlingManager> lazyPrivateCtor =
             new Lazy<SingletonThrottlingManager>(() => new SingletonThrottlingManager());
 
         public static SingletonThrottlingManager GetInstance()
-        {            
-            return lazyPrivateCtor.Value; 
+        {
+            return lazyPrivateCtor.Value;
         }
 
         #endregion
 
-        private readonly IEnumerable<IThrottlingProvider> _throttlingProviders;        
-
-        private readonly ISet<ApiEvent.ApiIds> s_supportedRequests = new HashSet<ApiEvent.ApiIds>()
-        {
-            ApiEvent.ApiIds.AcquireTokenSilent,
-            ApiEvent.ApiIds.AcquireTokenByUsernamePassword,
-            ApiEvent.ApiIds.AcquireTokenByIntegratedWindowsAuth,
-            ApiEvent.ApiIds.AcquireTokenByDeviceCode
-        };
+        private readonly IEnumerable<IThrottlingProvider> _throttlingProviders;
 
         public void RecordException(
             AuthenticationRequestParameters requestParams,
             IReadOnlyDictionary<string, string> bodyParams,
             MsalServiceException ex)
         {
-            if (!ex.IsThrottlingException && IsSupportedRequest(requestParams))
+            if (!ex.IsThrottlingException)
             {
                 foreach (var provider in _throttlingProviders)
                 {
@@ -79,20 +71,12 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
            AuthenticationRequestParameters requestParams,
            IReadOnlyDictionary<string, string> bodyParams)
         {
-            if (IsSupportedRequest(requestParams))
+            foreach (var provider in _throttlingProviders)
             {
-                foreach (var provider in _throttlingProviders)
-                {
-                    provider.TryThrottle(requestParams, bodyParams);
-                }
+                provider.TryThrottle(requestParams, bodyParams);
             }
         }
 
-        private bool IsSupportedRequest(AuthenticationRequestParameters requestParameters)
-        {
-            return s_supportedRequests.Contains(requestParameters.ApiId) &&
-                !requestParameters.IsConfidentialClient;
-        }
 
         public void ResetCache()
         {

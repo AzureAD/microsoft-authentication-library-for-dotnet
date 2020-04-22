@@ -4,11 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
     internal class RetryAfterProvider : IThrottlingProvider
     {
+
         internal ThrottlingCache Cache { get; } // internal for test only
 
         internal static readonly TimeSpan MaxRetryAfter = TimeSpan.FromSeconds(3600); // internal for test only
@@ -18,9 +20,13 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             Cache = new ThrottlingCache();
         }
 
-        public void RecordException(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams, MsalServiceException ex)
+        public void RecordException(
+            AuthenticationRequestParameters requestParams, 
+            IReadOnlyDictionary<string, string> bodyParams, 
+            MsalServiceException ex)
         {
-            if (TryGetRetryAfterValue(ex.Headers, out TimeSpan retryAfterTimespan))
+            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams) &&
+                TryGetRetryAfterValue(ex.Headers, out TimeSpan retryAfterTimespan))
             {
                 retryAfterTimespan = GetSafeValue(retryAfterTimespan);
 
@@ -43,16 +49,21 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             Cache.Clear();
         }
 
-        public void TryThrottle(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams)
+        public void TryThrottle(
+            AuthenticationRequestParameters requestParams, 
+            IReadOnlyDictionary<string, string> bodyParams)
         {
-            var logger = requestParams.RequestContext.Logger;
+            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
+            {
+                var logger = requestParams.RequestContext.Logger;
 
-            string strictThumbprint = ThrottleCommon.GetRequestStrictThumbprint(
-                bodyParams,
-                requestParams.AuthorityInfo.CanonicalAuthority,
-                requestParams.Account?.HomeAccountId?.Identifier);
+                string strictThumbprint = ThrottleCommon.GetRequestStrictThumbprint(
+                    bodyParams,
+                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.Account?.HomeAccountId?.Identifier);
 
-            ThrottleCommon.TryThrow(strictThumbprint, Cache, logger, nameof(RetryAfterProvider));
+                ThrottleCommon.TryThrow(strictThumbprint, Cache, logger, nameof(RetryAfterProvider));
+            }
         }
 
         public static bool TryGetRetryAfterValue(HttpResponseHeaders headers, out TimeSpan retryAfterTimespan)
