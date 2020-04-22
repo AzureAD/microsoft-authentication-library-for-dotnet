@@ -45,11 +45,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentNullException(nameof(acquireTokenParameters));
             }
 
-            if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
-            {
-                throw new ArgumentNullException(nameof(authenticationRequestParameters.Scope));
-            }
-
             ValidateScopeInput(authenticationRequestParameters.Scope);
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
@@ -86,14 +81,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// input scopes with reserved scopes (openid, profile etc.)
         /// Leave as is / return null otherwise
         /// </summary>
-        /// <param name="inputScope"></param>
-        /// <returns></returns>
-        protected virtual SortedSet<string> GetOverridenScopes(ISet<string> inputScope)
+        protected virtual SortedSet<string> GetOverridenScopes(ISet<string> inputScopes)
         {
             return null;
         }
 
-        protected void ValidateScopeInput(SortedSet<string> scopesToValidate)
+        private void ValidateScopeInput(SortedSet<string> scopesToValidate)
         {
             if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientId))
             {
@@ -111,10 +104,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
+            AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
 
             try
             {
-                using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(apiEvent))
+                using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
                 {
                     try
                     {
@@ -145,7 +139,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             finally
             {
-                ServiceBundle.TelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
+                ServiceBundle.MatsTelemetryManager.Flush(AuthenticationRequestParameters.RequestContext.CorrelationId.AsMatsCorrelationId());
             }
         }
 
@@ -300,7 +294,5 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         result.ExpiresOn));
             }
         }
-
-       
     }
 }

@@ -68,6 +68,11 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(certificate));
             }
 
+            if (!certificate.HasPrivateKey)
+            {
+                throw new MsalClientException(MsalError.CertWithoutPrivateKey, MsalErrorMessage.CertMustHavePrivateKey(nameof(certificate)));
+            }
+
             Config.ClientCredentialCertificate = certificate;
             Config.ConfidentialClientCredentialCount++;
             return this;

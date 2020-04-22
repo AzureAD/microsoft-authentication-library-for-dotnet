@@ -67,13 +67,16 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/987654321/";
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
         public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
-        public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
-        public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";
-        public const string B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/sometenantid/policy/";
-        public const string B2CCustomDomain = "https://catsareamazing.com/tfp/catsareamazing/policy/";
-        public const string B2CLoginAuthorityUsGov = "https://sometenantid.b2clogin.us/tfp/sometenantid/policy/";
-        public const string B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/policy/";
-        public const string B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/policy/";
+
+        public const string B2CPolicy = "policy";
+        public static readonly string B2CAuthority = $"https://login.microsoftonline.in/tfp/tenant/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthority = $"https://sometenantid.b2clogin.com/tfp/sometenantid/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthorityWrongHost = $"https://anothertenantid.b2clogin.com/tfp/sometenantid/{B2CPolicy}/";
+        public static readonly string B2CCustomDomain = $"https://catsareamazing.com/tfp/catsareamazing/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthorityUsGov = $"https://sometenantid.b2clogin.us/tfp/sometenantid/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthorityMoonCake = $"https://sometenantid.b2clogin.cn/tfp/sometenantid/{B2CPolicy}/";
+        public static readonly string B2CLoginAuthorityBlackforest = $"https://sometenantid.b2clogin.de/tfp/sometenantid/{B2CPolicy}/";
+
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
         public const string FamilyId = "1";
@@ -146,8 +149,10 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
 
         public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
         public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
+        public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/";
         public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/";
+        public const string MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
 
         public enum AuthorityType { B2C };
         public static string[] s_prodEnvAliases = new string[] {
@@ -260,8 +265,6 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                                                    ""id_token"": ""idtoken."",
                                                    ""client_info"": ""eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0""
                                                 }";
-        public const string InteractiveRequestApiIdPlusCorrelationId = "1005,ad8c894a-557f-48c0-b045-c129590c344e,";
-        public const string InteractiveRequestApiId = "1005";
     }
 
     internal static class Adfs2019LabConstants

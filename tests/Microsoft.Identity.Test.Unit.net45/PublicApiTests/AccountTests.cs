@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
@@ -82,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             cacheAccessRecorder.AssertAccessCounts(1, 0);
         }
 
-      
+
 
         // Bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1030
         [TestMethod]
@@ -218,7 +219,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 accounts = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(accounts);
                 Assert.AreEqual(1, accounts.Count());
-
+                string clientInfo = MockHelpers.CreateClientInfo();
+                string homeAccountId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
                 var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefCacheEnvironment,
                     TestConstants.ClientId,
@@ -226,19 +228,25 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TestConstants.Utid,
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3600)),
-                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
-                    MockHelpers.CreateClientInfo());
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)), 
+                    clientInfo, 
+                    homeAccountId);
 
                 atItem.Secret = atItem.GetKey().ToString();
                 app.UserTokenCacheInternal.Accessor.SaveAccessToken(atItem);
 
                 // another cache entry for different uid. user count should be 2.
 
+                string clientInfo2 = MockHelpers.CreateClientInfo("uId1", "uTId1");
+                string homeAccountId2 = ClientInfo.CreateFromJson(clientInfo2).ToAccountIdentifier();
+
                 MsalRefreshTokenCacheItem rtItem = new MsalRefreshTokenCacheItem(
                     TestConstants.ProductionPrefCacheEnvironment,
                     TestConstants.ClientId,
-                    "someRT",
-                    MockHelpers.CreateClientInfo("uId1", "uTId1"));
+                    "someRT", 
+                    clientInfo2, 
+                    null, 
+                    homeAccountId2);
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
 
@@ -246,15 +254,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TestConstants.ProductionPrefCacheEnvironment,
                     TestConstants.ClientId,
                     MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                    MockHelpers.CreateClientInfo("uId1", "uTId1"),
-                    "uTId1");
+                    clientInfo2, 
+                    homeAccountId: homeAccountId2,
+                    tenantId: "uTId1");
 
                 app.UserTokenCacheInternal.Accessor.SaveIdToken(idTokenCacheItem);
 
                 MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem(
                     TestConstants.ProductionPrefCacheEnvironment,
                     null,
-                    MockHelpers.CreateClientInfo("uId1", "uTId1"),
+                    clientInfo2, 
+                    homeAccountId2,
                     null,
                     null,
                     "uTId1",
@@ -269,11 +279,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(2, accounts.Count()); // scoped by env
 
                 // another cache entry for different environment. user count should still be 2. Sovereign cloud user must not be returned
+                string clientInfo3 = MockHelpers.CreateClientInfo(TestConstants.Uid + "more1", TestConstants.Utid);
+                string homeAccountId3 = ClientInfo.CreateFromJson(clientInfo3).ToAccountIdentifier();
+
                 rtItem = new MsalRefreshTokenCacheItem(
                     TestConstants.SovereignNetworkEnvironment,
                     TestConstants.ClientId,
                     "someRT",
-                    MockHelpers.CreateClientInfo(TestConstants.Uid + "more1", TestConstants.Utid));
+                    clientInfo3, 
+                    null, 
+                    homeAccountId3);
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
                 Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
@@ -382,7 +397,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         private PublicClientApplication InitPcaFromCacheFile(
-            AzureCloudInstance cloud, 
+            AzureCloudInstance cloud,
             HttpManager httpManager,
             string tokenCacheFile)
         {

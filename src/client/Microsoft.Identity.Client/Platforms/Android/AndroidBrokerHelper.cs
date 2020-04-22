@@ -262,6 +262,20 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return brokerAccounts;
         }
 
+        public void RemoveBrokerAccountInAccountManager(IDictionary<string, string> brokerPayload)
+        {
+            Bundle removeAccountBundle = GetRemoveBrokerAccountBundle(brokerPayload);
+            removeAccountBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.RemoveAccount);
+
+            var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+                BrokerConstants.AuthtokenType,
+                null,
+                removeAccountBundle,
+                null,
+                null,
+                GetPreferredLooper(null));
+        }
+
         //Inorder for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.
         public async Task InitiateBrokerHandshakeAsync(Activity callerActivity)
         {
@@ -444,6 +458,17 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return bundle;
         }
 
+        private Bundle GetRemoveBrokerAccountBundle(IDictionary<string, string> brokerPayload)
+        {
+            Bundle bundle = new Bundle();
+
+            bundle.PutString(BrokerConstants.AccountClientIdKey, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientId));
+            bundle.PutString(BrokerConstants.Environment, GetValueFromBrokerPayload(brokerPayload, BrokerConstants.Environment));
+            bundle.PutString(BrokerConstants.HomeAccountIDKey, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId));
+
+            return bundle;
+        }
+
         private bool VerifySignature(string brokerPackageName)
         {
             List<X509Certificate2> certs = ReadCertDataForBrokerApp(brokerPackageName);
@@ -488,7 +513,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
             X509Chain chain = new X509Chain();
             chain.ChainPolicy = new X509ChainPolicy()
             {
+#pragma warning disable IA5352 //Certificates are not published to a CRL when revoked for broker so this check cannot be made
                 RevocationMode = X509RevocationMode.NoCheck
+#pragma warning restore IA5352
             };
 
             chain.ChainPolicy.ExtraStore.AddRange(collection);

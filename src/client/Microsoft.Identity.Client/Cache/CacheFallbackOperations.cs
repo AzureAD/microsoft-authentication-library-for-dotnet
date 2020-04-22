@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
@@ -182,7 +183,6 @@ namespace Microsoft.Identity.Client.Cache
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {
-                string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
                 string cachedAccountDisplayableId = kvp.Key.DisplayableId;
                 string cachedClientId = kvp.Key.ClientId;
 
@@ -213,7 +213,6 @@ namespace Microsoft.Identity.Client.Cache
                 if (!string.IsNullOrEmpty(rawClientInfo))
                 {
                     string cachedAccountId = ClientInfo.CreateFromJson(rawClientInfo).ToAccountIdentifier();
-                    string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
                     string cachedClientId = kvp.Key.ClientId;
 
                     if (string.Equals(accountOrUserId, cachedAccountId, StringComparison.OrdinalIgnoreCase) &&
@@ -231,7 +230,7 @@ namespace Microsoft.Identity.Client.Cache
             }
         }
 
-        public static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(
+        private static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
             IEnumerable<string> environmentAliases,
@@ -256,30 +255,34 @@ namespace Microsoft.Identity.Client.Cache
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> upnEntries =
                         listToProcess.Where(p => upn.Equals(p.Key.DisplayableId, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                    if (upnEntries.Any())
-                    {
-                        listToProcess = upnEntries;
-                    }
+                    listToProcess = upnEntries;
                 }
 
-                // if userId is provided then use it to filter
+                // if uniqueId is provided then use it to filter
                 if (!string.IsNullOrEmpty(uniqueId))
                 {
                     List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> uniqueIdEntries =
                         listToProcess.Where(p => uniqueId.Equals(p.Key.UniqueId, StringComparison.OrdinalIgnoreCase)).ToList();
-                    if (uniqueIdEntries.Any())
-                    {
-                        listToProcess = uniqueIdEntries;
-                    }
+
+                    listToProcess = uniqueIdEntries;
                 }
+
                 List<MsalRefreshTokenCacheItem> list = new List<MsalRefreshTokenCacheItem>();
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
                 {
+                    string homeAccountId = null;
+                    if (!string.IsNullOrEmpty(pair.Value.RawClientInfo))
+                    {
+                        homeAccountId = ClientInfo.CreateFromJson(pair.Value.RawClientInfo).ToAccountIdentifier();
+                    }
+
                     list.Add(new MsalRefreshTokenCacheItem(
-                        new Uri(pair.Key.Authority).Host,
-                        pair.Key.ClientId,
-                        pair.Value.RefreshToken,
-                        pair.Value.RawClientInfo));
+                      new Uri(pair.Key.Authority).Host,
+                      pair.Key.ClientId,
+                      pair.Value.RefreshToken,
+                      pair.Value.RawClientInfo,
+                      familyId: null,
+                      homeAccountId: homeAccountId));
                 }
 
                 return list;
@@ -296,31 +299,30 @@ namespace Microsoft.Identity.Client.Cache
         public static MsalRefreshTokenCacheItem GetAdalEntryForMsal(
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
-            string preferredEnvironment,
             IEnumerable<string> environmentAliases,
             string clientId,
             string upn,
             string uniqueId)
         {
-            List<MsalRefreshTokenCacheItem> adalRts = GetAllAdalEntriesForMsal(
-                logger, 
-                legacyCachePersistence, 
-                environmentAliases, 
-                clientId, 
-                upn, 
+            IEnumerable<MsalRefreshTokenCacheItem> adalRts = GetAllAdalEntriesForMsal(
+                logger,
+                legacyCachePersistence,
+                environmentAliases,
+                clientId,
+                upn,
                 uniqueId);
 
-            List<MsalRefreshTokenCacheItem> filteredByPrefEnv = adalRts.Where
-                (rt => rt.Environment.Equals(preferredEnvironment, StringComparison.OrdinalIgnoreCase)).ToList();
+            IEnumerable<IGrouping<string, MsalRefreshTokenCacheItem>> rtGroupsByEnv = adalRts.GroupBy(rt => rt.Environment.ToLowerInvariant());
 
-            if (filteredByPrefEnv.Any())
+            // if we have more than 1 RT per env, there is smth wrong with the ADAL cache
+            if (rtGroupsByEnv.Any(g => g.Count() > 1))
             {
-                return filteredByPrefEnv.First();
+                throw new MsalClientException(
+                    MsalError.InvalidAdalCacheMultipleRTs, 
+                    MsalErrorMessage.InvalidAdalCacheMultipleRTs);
             }
-            else
-            {
-                return adalRts.FirstOrDefault();
-            }
+
+            return adalRts.FirstOrDefault();
         }
     }
 }

@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal
             string codeVerifier = authorizationTuple.Item3;
 
             var uiEvent = new UiEvent(_requestParams.RequestContext.CorrelationId.AsMatsCorrelationId());
-            using (_serviceBundle.TelemetryManager.CreateTelemetryHelper(uiEvent))
+            using (_requestParams.RequestContext.CreateTelemetryHelper(uiEvent))
             {
                 var authorizationResult = await webUi.AcquireAuthorizationAsync(
                                            authorizationUri,

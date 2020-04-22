@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -22,8 +23,13 @@ namespace XamarinDev
             localAccountIdLabel.Text = msalAccountCacheItem.LocalAccountId;
 
             rawClientInfoLabel.Text = msalAccountCacheItem.RawClientInfo;
-            clientInfoUniqueIdentifierLabel.Text = msalAccountCacheItem.ClientInfo.UniqueObjectIdentifier;
-            clientInfoUniqueTenantIdentifierLabel.Text = msalAccountCacheItem.ClientInfo.UniqueTenantIdentifier;
+            if (msalAccountCacheItem.RawClientInfo != null)
+            {
+                var clientInfo = ClientInfo.CreateFromJson(msalAccountCacheItem.RawClientInfo);
+
+                clientInfoUniqueIdentifierLabel.Text = clientInfo.UniqueObjectIdentifier;
+                clientInfoUniqueTenantIdentifierLabel.Text = clientInfo.UniqueTenantIdentifier;
+            }
         }
 	}
 }

@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             var rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
             if (rsaProvider == null)
             {
-                throw new MsalException("The provided certificate has a key that is not accessable.");
+                throw new MsalClientException("The provided certificate has a key that is not accessable.");
             }
 
             const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures

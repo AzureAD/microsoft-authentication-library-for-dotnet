@@ -2,16 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
 {
-    internal class PlatformProxyShared
+    internal static class PlatformProxyShared
     {
         public static void StartDefaultOsBrowser(string url)
         {
@@ -56,6 +52,6 @@ namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
                     throw new PlatformNotSupportedException(RuntimeInformation.OSDescription);
                 }
             }
-        }
+        }        
     }
 }

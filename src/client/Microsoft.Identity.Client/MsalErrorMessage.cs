@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Client
         public const string MultipleTokensMatched =
             "The cache contains multiple tokens satisfying the requirements. Try to clear token cache";
 
-        public const string NoDataFromSTS = "No data received from security token service";
         public const string NullParameterTemplate = "Parameter '{0}' cannot be null";
         public const string ParsingMetadataDocumentFailed = "Parsing WS metadata exchange failed";
         public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
@@ -303,6 +302,9 @@ namespace Microsoft.Identity.Client
         public const string CustomMetadataInstanceOrUri = "You have configured your own instance metadata using both an Uri and a string. Only one is supported. " +
             "See https://aka.ms/msal-net-custom-instance-metadata for more details.";
 
+        public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow.";
+        public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Mitigation: Delete the ADAL cache. If you do not maintain an ADAL cache, this may be a bug in MSAL.";
+
         public static string ExperimentalFeature(string methodName)
         {
             return string.Format(
@@ -343,6 +345,14 @@ namespace Microsoft.Identity.Client
                 CultureInfo.InvariantCulture,
                 "You have configured a claims parameter that is not in JSON format: {0}. Inspect the inner exception for details about the JSON parsing error. To learn more about claim requests, please see https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter",
                 claims);
+        }
+
+        public static string CertMustHavePrivateKey(string certificateName)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "The certificate {0} does not have a private key.",
+                certificateName);
         }
     }
 }

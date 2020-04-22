@@ -2,14 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 
@@ -28,6 +25,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
 
+        public static readonly string B2CTokenResponseWithoutAT =
+            "{\"id_token\":\""+ CreateIdTokenForB2C(TestConstants.Uid, TestConstants.Utid, TestConstants.B2CPolicy) +"  \"," +
+            "\"token_type\":\"Bearer\",\"not_before\":1585658742," +
+            "\"client_info\":\"" + CreateClientInfo(TestConstants.Uid + "-" + TestConstants.B2CPolicy, TestConstants.Utid) + "\"," +
+            "\"scope\":\"\"," +
+            "\"refresh_token\":\"eyJraWQiOiJjcGltY29yZV8wOTI1MjAxNSIsInZlciI6IjEuMCIsInppcCI6IkRlZmxhdGUiLCJzZXIiOiIxLjAifQ..58S7QKY4AVcJS620.mMAGPkA5-v2QL4-kfB7sThyLQec7ZLyd2b-3-GBly5fLNVkbO9GVo9ZzqbaXbuzkNpj4iSITIRjfK4mBEcNU7s7EieHBbsRP8oee3feUuOzzAc61ZQBmTAkYsjEVa4iTSCxM-eU5n1fyZ1lIK6s33lOzylEs5pVT75HMvr_iLEd_2_QN0Y3ql2NVx1kPJsqk4TR0vfG2vum60sr5IBd2TcIamSAfByzfS6LUfVTicbVuWW7GHbJaQtFiE2tOhoJD_bePKGwWX-UwakMe3A4CfKbpT20OIs_o1UPcQUCGmn7XUjBrEPiaPcRHjVCes7ptGR4uTE7emHl9zHq4btl8poHg7iWG4gEmmp0FFvi6XhFOZosotSTTn72SdEkf-o93SmMrlxMRMMFdzEjqbyaiZSwirYfhbNMPcy_jeQ3BL0cr5UreIhxLkSj_xc9A3vDHVK8a3d6IcBa_x1Wwrt_mzEynI1ldgmQwxyda_Xti1JS3OdBQ0ZIkSiw6Z6l8Vmw-kGgkmWOfYjaFWI-vsV5TGYRUA7UnnbzXfbR1x1KwmVs28ssvl_6lsjqWrbBWMUduPGWA1THZzXEnf-MqA1cJfQRq.vRqgMxW_pIJoPUzNOxKUpQ\"," +
+            "\"refresh_token_expires_in\":1209600}";
+
         public static readonly string DefaultAdfsTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
@@ -43,12 +48,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
            "\",\"id_token_expires_in\":\"3600\"}";
 
-        public static string CreateClientInfo()
-        {
-            return CreateClientInfo(TestConstants.Uid, TestConstants.Utid);
-        }
-
-        public static string CreateClientInfo(string uid, string utid)
+        public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)
         {
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
         }
@@ -65,12 +65,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateResiliencyMessage(HttpStatusCode statusCode)
         {
-            HttpResponseMessage responseMessage = null;
-            HttpContent content = null;
-
-            responseMessage = new HttpResponseMessage(statusCode);
-            content = new StringContent("Server Error 500-599");
-
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            HttpContent content = new StringContent("Server Error 500-599");
             if (responseMessage != null)
             {
                 responseMessage.Content = content;
@@ -119,7 +115,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             return CreateSuccessResponseMessage(
                 foci ? FociTokenResponse : DefaultTokenResponse);
-        }
+        }        
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessageWithUid(
             string uid, string utid, string displayableName)
@@ -139,6 +135,23 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static HttpResponseMessage CreateAdfsSuccessTokenResponseMessage()
         {
             return CreateSuccessResponseMessage(DefaultAdfsTokenResponse);
+        }
+
+        public static HttpResponseMessage CreateFailureTokenResponseMessage(
+            string error, 
+            string subError = null, 
+            string correlationId = null)
+        {
+            string message = "{\"error\":\"" + error + "\",\"error_description\":\"AADSTS00000: Error for test." +
+                "Trace ID: f7ec686c-9196-4220-a754-cd9197de44e9Correlation ID: " +
+                "04bb0cae-580b-49ac-9a10-b6c3316b1eaaTimestamp: 2015-09-16 07:24:55Z\"," +
+                "\"error_codes\":[70002,70008],\"timestamp\":\"2015-09-16 07:24:55Z\"," +
+                "\"trace_id\":\"f7ec686c-9196-4220-a754-cd9197de44e9\"," +
+                (subError != null ? ("\"suberror\":" + "\"" + subError + "\",") : "") +
+                "\"correlation_id\":" +
+                "\"" + (correlationId ?? "f11508ab-067f-40d4-83cb-ccc67bf57e45") + "\"}";
+
+            return CreateFailureMessage(HttpStatusCode.BadRequest, message);
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage(string subError = null)
@@ -262,6 +275,29 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         "\"tid\": \"" + tenantId + "\"," +
                         "\"ver\": \"2.0\"}";
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
+        }
+
+        private static string CreateIdTokenForB2C(string uniqueId, string tenantId, string policy)
+        {
+            string id = "{" + 
+                        "  \"exp\": 1585662342," + 
+                        "  \"nbf\": 1585658742," + 
+                        "  \"ver\": \"1.0\"," + 
+                        $"  \"iss\": \"https://fabrikamb2c.b2clogin.com/{tenantId}/v2.0/\"," + 
+                        "  \"sub\": \"52f6cad9-b822-4492-b742-e60cd2d55ee2\"," + 
+                        "  \"aud\": \"841e1190-d73a-450c-9d68-f5cf16b78e81\"," + 
+                        $"  \"acr\": \"{policy}\"," + 
+                        "  \"iat\": 1585658742," + 
+                        "  \"auth_time\": 1585658742," + 
+                        "  \"idp\": \"live.com\"," + 
+                        "  \"name\": \"John Bob\"," + 
+                        "  \"oid\": \""+ uniqueId + "\"," + 
+                        "  \"emails\": [" + 
+                        "    \"john.bob@outlook.com\"" + 
+                        "  ]}";
+
+            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
+
         }
 
         public static string CreateAdfsIdToken(string upn)

@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(new Uri("https://login.windows.net/common/"), false)
-                    .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                    .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                     .WithHttpManager(harness.HttpManager)
                     .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(new Uri(@"https://sts.windows.net/common/"), false)
-                    .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                    .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                     .WithHttpManager(harness.HttpManager)
                     .WithTelemetry(new TraceTelemetryConfig())
                     .BuildConcrete();
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 PublicClientApplication app = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(customAuthrority, false)
-                    .WithInstanceDicoveryMetadata(customMetadataUri)
+                    .WithInstanceDiscoveryMetadata(customMetadataUri)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 

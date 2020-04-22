@@ -88,7 +88,6 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
 
-
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
@@ -109,8 +108,7 @@ namespace Microsoft.Identity.Client
                         ServiceBundle, 
                         UserTokenCacheInternal, 
                         new AcquireTokenCommonParameters(), 
-                        requestContext), 
-                    ServiceBundle.TelemetryManager);
+                        requestContext));
 
                 accounts = await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
             }
@@ -137,6 +135,13 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public async Task RemoveAsync(IAccount account)
         {
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            {
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                await broker.RemoveAccountAsync(AppConfig.ClientId, account).ConfigureAwait(false);
+                return;
+            }
+
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             if (account != null && UserTokenCacheInternal != null)
             {

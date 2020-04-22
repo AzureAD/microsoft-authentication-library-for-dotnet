@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
@@ -15,6 +16,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal MsalIdTokenCacheItem()
         {
             CredentialType = StorageJsonValues.CredentialTypeIdToken;
+            idTokenLazy = new Lazy<IdToken>(() => IdToken.Parse(Secret));
         }
 
         internal MsalIdTokenCacheItem(
@@ -22,15 +24,14 @@ namespace Microsoft.Identity.Client.Cache.Items
             string clientId,
             MsalTokenResponse response,
             string tenantId,
-            string userId=null
-            )
+            string homeAccountId)
             : this(
                 preferredCacheEnv,
                 clientId,
                 response.IdToken,
                 response.ClientInfo,
-                tenantId,
-                userId)
+                homeAccountId,
+                tenantId)
         {
         }
 
@@ -39,9 +40,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string clientId,
             string secret,
             string rawClientInfo,
-            string tenantId,
-            string userId=null
-            )
+            string homeAccountId,
+            string tenantId)
             : this()
         {
             Environment = preferredCacheEnv;
@@ -49,10 +49,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             ClientId = clientId;
             Secret = secret;
             RawClientInfo = rawClientInfo;
-
-            //Adfs does not send back client info, so HomeAccountId must be explicitly set
-            HomeAccountId = userId;
-            InitUserIdentifier();
+            HomeAccountId = homeAccountId;
         }
 
     
@@ -63,7 +60,12 @@ namespace Microsoft.Identity.Client.Cache.Items
                                     IsAdfs ? string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, "adfs") :
                                     string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
 
-        internal IdToken IdToken => IdToken.Parse(Secret);
+        private readonly Lazy<IdToken> idTokenLazy;
+
+        internal IdToken IdToken
+        {
+            get => idTokenLazy.Value;
+        }
 
         internal MsalIdTokenCacheKey GetKey()
         {

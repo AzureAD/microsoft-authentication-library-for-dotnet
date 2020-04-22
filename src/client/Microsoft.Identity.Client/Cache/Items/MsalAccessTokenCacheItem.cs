@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string clientId,
             MsalTokenResponse response,
             string tenantId,
-            string userId = null,
+            string homeAccountId,
             string keyId = null)
             : this(
                 preferredCacheEnv,
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 response.AccessTokenExpiresOn,
                 response.AccessTokenExtendedExpiresOn,
                 response.ClientInfo,
-                userId,
+                homeAccountId,
                 keyId,
                 response.AccessTokenRefreshOn,
                 response.TokenType)
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             DateTimeOffset accessTokenExpiresOn,
             DateTimeOffset accessTokenExtendedExpiresOn,
             string rawClientInfo,
-            string userId = null,
+            string homeAccountId,
             string keyId = null,
             DateTimeOffset? accessTokenRefreshOn = null,
             string tokenType = StorageJsonValues.TokenTypeBearer) : this()
@@ -72,9 +72,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 RefreshOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(accessTokenRefreshOn.Value);
             }
 
-            //Adfs does not send back client info, so HomeAccountId must be explicitly set
-            HomeAccountId = userId;
-            InitUserIdentifier();
+            HomeAccountId = homeAccountId;
         }
 
         private string _tenantId;
@@ -109,6 +107,9 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         internal string RefreshOnUnixTimestamp { get; set; }
 
+        // BUGBUG: this is wrong - it isn't persisted to the cache and is never recalculated
+        // so when reading a token from the cache, IsAdfs is always false.
+        // (also logically this is a bad place for it)
         internal bool IsAdfs { get; set; }
 
         internal string Authority =>

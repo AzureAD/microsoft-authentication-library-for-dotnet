@@ -1,3 +1,30 @@
+4.11.0
+============
+New Features: 
+
+**MSAL.NET will now remove accounts from the cache that have expired refresh tokens**. MSAL.NET will remove both the refresh token and the associated account if the `suberror` is "bad_token" to avaoid unnecessary calls to AzureAD. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1720)
+
+**MSAL.NET uses telemetry schema V2** MSAL.NET has been updated to use Http telemetry schema V2. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1681)
+
+Bug Fixes:
+
+**When migrating a Xamarin application from ADAL.NET to MSAL.NET and preserving the keychain, a CryptographicException can be thrown from the BrokerKeyHelper.** MSAL.NET now does the broker key keychain look up by Service and Account only. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1628)
+
+**WithProofOfPosession produces a token of type POP when it is expected to be PoP** MSAl.NET will now produce a token of type PoP when WithProofOfPosession() is used. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1711)
+
+
+4.10.0
+============
+New Features:
+
+**MSAL.NET now allows configuration of instance metadata end-point** WithInstanceDicoveryMetadata method now allows developers to pass an Uri with metadata. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1603)
+
+Bug fixes:
+
+**Client Credentials flow not working with ADFS 2019** MSAL.NET now uses the token endpoint as audience and adds x5t to the signed assertion it creates from a certificate. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1708)
+**Certain error messages are not returned from the Android Broker** MSAL.NET now throws better exceptions that show the root cause of Android broker failures. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1696)
+**WithProofOfPossesion not exposed on AcquireTokenSilent builder** MSAL.NET now exposes the WithProofOfPossesion call on AcquireTokenSilent [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1715)
+
 4.9.0
 ============
 New Features: ** Added support for Android Broker to MSAL.NET ** MSAL.NET will now be able to take advantage of the brokered authentication scenarios using the Microsoft Authenticator and the Intune Company Portal. Learn how to levereage the broker [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Leveraging-the-broker-on-iOS-and-Android#brokered-authentication-for-android) [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1402)

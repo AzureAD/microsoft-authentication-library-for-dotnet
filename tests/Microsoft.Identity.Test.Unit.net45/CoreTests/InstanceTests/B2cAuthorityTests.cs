@@ -99,7 +99,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(
                     "https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/token",
                     endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/v2.0/", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/token", 
+                    endpoints.SelfSignedJwtAudience);
             }
         }
 
@@ -146,14 +147,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
-            const string UriNoPort = TestConstants.B2CAuthority;
-            const string UriNoPortTailSlash = TestConstants.B2CAuthority;
+            string UriNoPort = TestConstants.B2CAuthority;
+            string UriNoPortTailSlash = TestConstants.B2CAuthority;
 
             const string UriDefaultPort = "https://login.microsoftonline.in:443/tfp/tenant/policy";
 
             const string UriCustomPort = "https://login.microsoftonline.in:444/tfp/tenant/policy";
             const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/policy/";
-            const string UriVanityPort = TestConstants.B2CLoginAuthority;
+            string UriVanityPort = TestConstants.B2CLoginAuthority;
 
             var authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));
             Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);

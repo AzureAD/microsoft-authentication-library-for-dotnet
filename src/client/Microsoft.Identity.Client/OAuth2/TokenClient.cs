@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -22,6 +23,12 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IServiceBundle _serviceBundle;
         private readonly OAuth2Client _oAuth2Client;
 
+        /// <summary>
+        /// Used to avoid sending duplicate "last request" telemetry
+        /// from a multi-threaded environment
+        /// </summary>
+        private volatile bool _requestInProgress = false;
+
         public TokenClient(AuthenticationRequestParameters requestParams)
         {
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
@@ -30,7 +37,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client = new OAuth2Client(
                _serviceBundle.DefaultLogger,
                _serviceBundle.HttpManager,
-               _serviceBundle.TelemetryManager);
+               _serviceBundle.MatsTelemetryManager);
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -40,7 +47,38 @@ namespace Microsoft.Identity.Client.OAuth2
             CancellationToken cancellationToken = default)
         {
             string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Endpoints.TokenEndpoint;
-            string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride: GetDefaultScopes(_requestParams.Scope);
+            string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
+            AddBodyParamsAndHeaders(additionalBodyParameters, scopes);
+
+            MsalTokenResponse response = await SendHttpAndClearTelemetryAsync(tokenEndpoint)
+                .ConfigureAwait(false);
+
+
+            if (string.IsNullOrEmpty(response.Scope))
+            {
+                response.Scope = _requestParams.Scope.AsSingleString();
+                _requestParams.RequestContext.Logger.Info(
+                    "ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
+            }
+
+            if (!string.IsNullOrEmpty(response.TokenType) &&
+                !string.Equals(
+                    response.TokenType,
+                    _requestParams.AuthenticationScheme.AccessTokenType,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new MsalClientException(
+                    MsalError.TokenTypeMismatch,
+                    MsalErrorMessage.TokenTypeMismatch(
+                        _requestParams.AuthenticationScheme.AccessTokenType,
+                        response.TokenType));
+            }
+
+            return response;
+        }
+
+        private void AddBodyParamsAndHeaders(IDictionary<string, string> additionalBodyParameters, string scopes)
+        {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.ClientId);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
 
@@ -62,7 +100,6 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
             }
 #endif
-
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.ClaimsAndClientCapabilities);
 
@@ -76,48 +113,60 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
-            MsalTokenResponse response = await SendHttpMessageAsync(tokenEndpoint)
-                .ConfigureAwait(false);
+            _oAuth2Client.AddHeader(
+                TelemetryConstants.XClientCurrentTelemetry,
+                _serviceBundle.HttpTelemetryManager.GetCurrentRequestHeader(
+                    _requestParams.RequestContext.ApiEvent));
 
-            if (!string.Equals(
-                    response.TokenType,
-                    _requestParams.AuthenticationScheme.AccessTokenType,
-                    StringComparison.OrdinalIgnoreCase))
+            if (!_requestInProgress)
             {
-                throw new MsalClientException(
-                    MsalError.TokenTypeMismatch,
-                    MsalErrorMessage.TokenTypeMismatch(
-                        _requestParams.AuthenticationScheme.AccessTokenType,
-                        response.TokenType));
+                _oAuth2Client.AddHeader(
+                    TelemetryConstants.XClientLastTelemetry,
+                    _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
+                _requestInProgress = true;
             }
-
-            return response;
         }
 
-        private async Task<MsalTokenResponse> SendHttpMessageAsync(string tokenEndpoint)
+        private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
         {
-            UriBuilder builder = new UriBuilder(tokenEndpoint);
+            UriBuilder builder = new UriBuilder(tokenEndpoint);            
             builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
-            MsalTokenResponse msalTokenResponse =
-                await _oAuth2Client
-                    .GetTokenAsync(builder.Uri,
-                        _requestParams.RequestContext)
-                    .ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(msalTokenResponse.Scope))
+            try
             {
-                msalTokenResponse.Scope = _requestParams.Scope.AsSingleString();
-                _requestParams.RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result. ");
-            }
+                MsalTokenResponse msalTokenResponse =
+                    await _oAuth2Client
+                        .GetTokenAsync(builder.Uri,
+                            _requestParams.RequestContext)
+                        .ConfigureAwait(false);
 
-            return msalTokenResponse;
+                // Clear failed telemetry data as we've just sent it
+                _serviceBundle.HttpTelemetryManager.ResetPreviousUnsentData();
+
+                return msalTokenResponse;
+            }
+            catch (MsalServiceException ex)
+            {
+                if (!ex.IsAadUnavailable())
+                {
+                    // Clear failed telemetry data as we've just sent it ... 
+                    // even if we received an error from the server, 
+                    // telemetry would have been recorded
+                    _serviceBundle.HttpTelemetryManager.ResetPreviousUnsentData();
+                }
+                throw;
+            }
+            finally
+            {
+                _requestInProgress = false;
+            }
         }
 
         private static string GetDefaultScopes(ISet<string> inputScope)
         {
             // OAuth spec states that scopes are case sensitive, but 
             // merge the reserved scopes in a case insensitive way, to 
-            // avoid sending things like "openid OpenId" (note that EVO is tollerant of this)
+            // avoid sending things like "openid OpenId" (note that EVO is tolerant of this)
             SortedSet<string> set = new SortedSet<string>(
                 inputScope.ToArray(),
                 StringComparer.OrdinalIgnoreCase);

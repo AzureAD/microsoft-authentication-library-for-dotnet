@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -32,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Authority = Authority.CreateAuthorityForRequest(serviceBundle.Config.AuthorityInfo, commonParameters.AuthorityOverride);
 
             ClientId = serviceBundle.Config.ClientId;
-            CacheSessionManager = new CacheSessionManager(tokenCache, this, serviceBundle.TelemetryManager);
+            CacheSessionManager = new CacheSessionManager(tokenCache, this);
             Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
@@ -71,6 +73,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public Authority TenantUpdatedCanonicalAuthority { get; set; }
         public ICacheSessionManager CacheSessionManager { get; }
         public SortedSet<string> Scope { get; }
+
+        public bool HasScopes => Scope != null && Scope.Any();
+
         public string ClientId { get; }
         public Uri RedirectUri { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; }

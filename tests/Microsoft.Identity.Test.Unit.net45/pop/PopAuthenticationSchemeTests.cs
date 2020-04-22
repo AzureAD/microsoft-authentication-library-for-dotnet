@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
             JwtSecurityToken decodedPopToken = new JwtSecurityToken(popTokenString);
 
             // Assert
-            Assert.AreEqual("POP", authenticationScheme.AuthorizationHeaderPrefix);
+            Assert.AreEqual("PoP", authenticationScheme.AuthorizationHeaderPrefix);
             Assert.AreEqual(JWT, authenticationScheme.KeyId);
             Assert.AreEqual(2, tokenParams.Count);
             Assert.AreEqual("pop", tokenParams["token_type"]);

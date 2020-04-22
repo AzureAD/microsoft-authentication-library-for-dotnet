@@ -53,6 +53,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             B2CIdentityProvider = LabInfrastructure.B2CIdentityProvider.MSA
         };
 
+        public static UserQuery ArlingtonUserQuery => new UserQuery
+        {
+            UserType = LabInfrastructure.UserType.Cloud,
+            AzureEnvironment = LabInfrastructure.AzureEnvironment.azureusgovernment
+        };
+
         // generated code, re-generate or update manually if you change the members of this class !
         #region Equals and GetHashCode
         public override bool Equals(object obj)

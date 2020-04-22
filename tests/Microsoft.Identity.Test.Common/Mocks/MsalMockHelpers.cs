@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.UI;
 using NSubstitute;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Test.Common.Mocks
 {
@@ -45,11 +46,25 @@ namespace Microsoft.Identity.Test.Common.Mocks
             return webUi;
         }
 
-        public static void ConfigureMockWebUI(IPlatformProxy platformProxy, IWebUI webUi)
+        public static void ConfigureMockWebUI(IPlatformProxy platformProxy, IWebUI webUi = null)
         {
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<CoreUIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
             platformProxy.SetWebUiFactory(mockFactory);
+        }
+
+        /// <summary>
+        /// Configures a web ui that returns a succesfull result
+        /// </summary>
+        public static void ConfigureMockWebUI(IPublicClientApplication pca)
+        {
+            var app = pca as PublicClientApplication;
+            MockWebUI webUi = new MockWebUI
+            {
+                MockResult = AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code")
+            };
+
+            ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, webUi);
         }
     }
 }

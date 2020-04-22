@@ -172,13 +172,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidOwnerWindowType = "invalid_owner_window_type";
 
-        // TODO: InvalidServiceUrl does not seem to be used anywhere?
-
-        /// <summary>
-        /// Invalid service URL.
-        /// </summary>
-        public const string InvalidServiceUrl = "invalid_service_url";
-
         /// <summary>
         /// Encoded token too long.
         /// <para>What happens</para>
@@ -186,13 +179,6 @@ namespace Microsoft.Identity.Client
         /// the max possible length for a JWT token.
         /// </summary>
         public const string EncodedTokenTooLong = "encoded_token_too_long";
-
-        // TODO: does not seem to be used in MSAL.NET
-
-        /// <summary>
-        /// No data from STS.
-        /// </summary>
-        public const string NoDataFromSts = "no_data_from_sts";
 
         /// <summary>
         /// User Mismatch.
@@ -377,7 +363,6 @@ namespace Microsoft.Identity.Client
         public const string IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user";
 
         /// <summary>
-        /// TODO: UPDATE DOCUMENTATION!
         /// On Android, you need to call <c>AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)</c> passing
         /// the activity. See https://aka.ms/msal-interactive-android
         /// </summary>
@@ -771,9 +756,27 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>You have configured your own instance metadata using both an Uri and a string. Only one is supported.
-        /// <para>Mitigation</para>Call WithInstanceDicoveryMetadata only once. See https://aka.ms/msal-net-custom-instance-metadata for more details.
+        /// <para>Mitigation</para>Call WithInstanceDiscoveryMetadata only once. See https://aka.ms/msal-net-custom-instance-metadata for more details.
         /// </summary>
         public const string CustomMetadataInstanceOrUri = "custom_metadata_instance_or_uri";
+
+        /// <summary>
+        /// <para>What happens?</para>No scopes have been requested
+        /// <para>Mitigation</para>At least one scope must be specified for this authentication flow
+        /// </summary>
+        public const string ScopesRequired = "scopes_required_client_credentials";
+
+        /// <summary>
+        /// <para>What happens?</para>The certificate provided does not have a private key.
+        /// <para>Mitigation</para>Ensure the certificate has a private key.
+        /// </summary>
+        public const string CertWithoutPrivateKey = "cert_without_private_key";
+
+        /// <summary>
+        /// <para>What happens?</para>The ADAL cache is invalid as it contains multiple refresh token entries for one user.
+        /// <para>Mitigation</para>Delete the ADAL cache. If you do not maintain an ADAL cache, this may be a bug in MSAL.
+        /// </summary>
+        public const string InvalidAdalCacheMultipleRTs = "invalid_adal_cache";
 
 #if iOS
         /// <summary>
