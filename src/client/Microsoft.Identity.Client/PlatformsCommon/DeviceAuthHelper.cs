@@ -17,13 +17,21 @@ namespace Microsoft.Identity.Client.PlatformsCommon
         public static IDictionary<string, string> ParseChallengeData(HttpResponse response)
         {
             IDictionary<string, string> data = new Dictionary<string, string>();
-            string wwwAuthenticate = response.Headers.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).Single();
+            string wwwAuthenticate = response.Headers.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).SingleOrDefault();
             wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthConstants.PKeyAuthName.Length + 1);
+            if (string.IsNullOrEmpty(wwwAuthenticate))
+            {
+                return data;
+            }
+
             List<string> headerPairs = CoreHelpers.SplitWithQuotes(wwwAuthenticate, ',');
             foreach (string pair in headerPairs)
             {
                 List<string> keyValue = CoreHelpers.SplitWithQuotes(pair, '=');
-                data.Add(keyValue[0].Trim(), keyValue[1].Trim().Replace("\"", ""));
+                if (keyValue.Count == 2)
+                {
+                    data.Add(keyValue[0].Trim(), keyValue[1].Trim().Replace("\"", ""));
+                }
             }
 
             return data;
