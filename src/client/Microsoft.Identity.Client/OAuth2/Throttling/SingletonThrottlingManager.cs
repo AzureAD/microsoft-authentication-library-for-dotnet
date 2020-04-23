@@ -23,7 +23,6 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
     internal class SingletonThrottlingManager : IThrottlingProvider
     {
         #region For Test
-
         public IEnumerable<IThrottlingProvider> ThrottlingProvidersForTest => _throttlingProviders;
         #endregion
 
@@ -33,7 +32,6 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             _throttlingProviders = new List<IThrottlingProvider>()
             {
                 // the order is important
-                new UiRequiredProvider(),
                 new RetryAfterProvider(),
                 new HttpStatusProvider(),
             };
@@ -74,7 +72,6 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 provider.TryThrottle(requestParams, bodyParams);
             }
         }
-
 
         public void ResetCache()
         {

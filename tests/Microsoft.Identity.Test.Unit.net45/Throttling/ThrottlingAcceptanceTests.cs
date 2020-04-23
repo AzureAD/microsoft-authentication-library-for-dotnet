@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
-                var (retryAfterProvider, _, _) = GetTypedThrottlingProviders(throttlingManager);
+                var (retryAfterProvider, _) = GetTypedThrottlingProviders(throttlingManager);
                 var singleEntry = retryAfterProvider.Cache.CacheForTest.Single().Value;
                 TimeSpan actualExpiration = singleEntry.ExpirationTime - singleEntry.CreationTime;
                 Assert.AreEqual(actualExpiration, RetryAfterProvider.MaxRetryAfter);
@@ -282,10 +282,9 @@ namespace Microsoft.Identity.Test.Unit.Throttling
 
         private static void SimulateTimePassing(SingletonThrottlingManager throttlingManager, TimeSpan delay)
         {
-            var (retryAfterProvider, httpStatusProvider, uiRequiredProvider) = GetTypedThrottlingProviders(throttlingManager);
+            var (retryAfterProvider, httpStatusProvider) = GetTypedThrottlingProviders(throttlingManager);
             MoveToPast(delay, retryAfterProvider.Cache.CacheForTest);
             MoveToPast(delay, httpStatusProvider.Cache.CacheForTest);
-            MoveToPast(delay, uiRequiredProvider.Cache.CacheForTest);
         }
 
         private static void MoveToPast(TimeSpan delay, ConcurrentDictionary<string, ThrottlingCacheEntry> cacheDictionary)
@@ -306,20 +305,18 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             int httpStatusEntryCount = 0, 
             int uiExceptionEntryCount = 0)
         {
-            var (retryAfterProvider, httpStatusProvider, uiRequiredProvider) = GetTypedThrottlingProviders(throttlingManager);
+            var (retryAfterProvider, httpStatusProvider) = GetTypedThrottlingProviders(throttlingManager);
 
             Assert.AreEqual(retryAfterEntryCount, retryAfterProvider.Cache.CacheForTest.Count);
             Assert.AreEqual(httpStatusEntryCount, httpStatusProvider.Cache.CacheForTest.Count);
-            Assert.AreEqual(uiExceptionEntryCount, uiRequiredProvider.Cache.CacheForTest.Count);
         }
 
-        private static (RetryAfterProvider, HttpStatusProvider, UiRequiredProvider) GetTypedThrottlingProviders(
+        private static (RetryAfterProvider, HttpStatusProvider) GetTypedThrottlingProviders(
             SingletonThrottlingManager throttlingManager)
         {
             return (
                 throttlingManager.ThrottlingProvidersForTest.Single(p => p is RetryAfterProvider) as RetryAfterProvider,
-                throttlingManager.ThrottlingProvidersForTest.Single(p => p is HttpStatusProvider) as HttpStatusProvider,
-                throttlingManager.ThrottlingProvidersForTest.Single(p => p is UiRequiredProvider) as UiRequiredProvider);
+                throttlingManager.ThrottlingProvidersForTest.Single(p => p is HttpStatusProvider) as HttpStatusProvider);
         }
 
         private static void AssertInvalidClientEx(MsalServiceException ex)
