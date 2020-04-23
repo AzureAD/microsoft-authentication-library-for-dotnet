@@ -10,7 +10,6 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -126,11 +125,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IAccount Account { get; set; }
 
         public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
-        public bool IsConfidentialClient => ClientCredential != null;
+        public bool IsConfidentialClient
+        {
+            get
+            {
+#if ANDROID || iOS || WINDOWS_APP || MAC
+                return false;
+#else
+                return ClientCredential != null;
+#endif
+            }
+        }
         public bool IsRefreshTokenRequest => ApiId == ApiEvent.ApiIds.AcquireTokenByRefreshToken;
         public UserAssertion UserAssertion { get; set; }
 
-        #endregion
+#endregion
 
         public void LogParameters()
         {
