@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         /// <summary>
         /// Default timespan that blocks an application, if HTTP 429 and HTTP 5xx was recieved and Retry-After HTTP header was not sent.
         /// </summary>
-        internal static readonly TimeSpan s_throttleDuration = TimeSpan.FromSeconds(120); // internal for test
+        internal static readonly TimeSpan s_throttleDuration = TimeSpan.FromSeconds(60); // internal for test
 
         /// <summary>
         /// Exposed only for testing purposes
@@ -53,7 +53,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public void TryThrottle(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams)
         {
-            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
+            if (!Cache.IsEmpty() && 
+                ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
             {
                 var logger = requestParams.RequestContext.Logger;
 

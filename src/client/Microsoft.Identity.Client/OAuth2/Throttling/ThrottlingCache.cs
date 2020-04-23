@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
@@ -65,6 +66,11 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         public void Clear()
         {
             _cache.Clear();
+        }
+
+        public bool IsEmpty()
+        {
+            return !_cache.Any();
         }
 
         internal ConcurrentDictionary<string, ThrottlingCacheEntry> CacheForTest => _cache; 

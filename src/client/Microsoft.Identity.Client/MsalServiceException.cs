@@ -4,11 +4,10 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client
 {
+
     /// <summary>
     /// Exception type thrown when service returns an error response or other networking errors occur.
     /// For more details, see https://aka.ms/msal-net-exceptions
@@ -179,11 +178,6 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
-        ///// <summary>
-        ///// Flag that indicates that the exception occured as a result of client throttling.
-        ///// </summary>
-        internal bool IsThrottlingException { get; set; }
-
         /// <remarks>
         /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
         /// first.
@@ -201,26 +195,6 @@ namespace Microsoft.Identity.Client
                 string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
         }
 
-        internal override void PopulateJson(JObject jobj)
-        {
-            base.PopulateJson(jobj);
-
-            jobj[ClaimsKey] = Claims;
-            jobj[ResponseBodyKey] = ResponseBody;
-            jobj[CorrelationIdKey] = CorrelationId;
-            jobj[SubErrorKey] = SubError;
-        }
-
-        internal override void PopulateObjectFromJson(JObject jobj)
-        {
-            base.PopulateObjectFromJson(jobj);
-
-            Claims = JsonUtils.GetExistingOrEmptyString(jobj, ClaimsKey);
-            ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
-            CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
-            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
-        }
-
         /// <summary>
         /// Creates and returns a string representation of the current exception.
         /// </summary>
@@ -229,11 +203,10 @@ namespace Microsoft.Identity.Client
         {
             return base.ToString() + string.Format(
                 CultureInfo.InvariantCulture,
-                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2} \n\t Throttled: {3}",
+                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}",
                 StatusCode,
                 ResponseBody,
-                Headers,
-                IsThrottlingException);
+                Headers);
         }
     }
 }

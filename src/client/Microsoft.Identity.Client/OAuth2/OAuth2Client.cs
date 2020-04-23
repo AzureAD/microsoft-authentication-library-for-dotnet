@@ -78,9 +78,7 @@ namespace Microsoft.Identity.Client.OAuth2
         }
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false)
-        {
-            CheckParamsNotNull(endPoint, requestContext);
-
+        {            
             bool addCorrelationId = !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
             AddCommonHeaders(requestContext, addCorrelationId);
 
@@ -137,20 +135,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             return CreateResponse<T>(response, requestContext, addCorrelationId);
-        }
-
-        private static void CheckParamsNotNull(Uri endPoint, RequestContext requestContext)
-        {
-            if (endPoint is null)
-            {
-                throw new ArgumentNullException(nameof(endPoint));
-            }
-
-            if (requestContext is null)
-            {
-                throw new ArgumentNullException(nameof(requestContext));
-            }
-        }
+        }   
 
         private bool AddCommonHeaders(RequestContext requestContext, bool addCorrelationId)
         {

@@ -44,11 +44,11 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("3. Second call - request is throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                        .ConfigureAwait(false);
                 AssertInvalidClientEx(ex);
-                Assert.IsTrue(ex.IsThrottlingException);
+                
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("4. Time passes, the throttling cache will have expired");
@@ -83,11 +83,10 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("3. Second call - request is throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                        .ConfigureAwait(false);
                 Assert.AreEqual(httpStatusCode, ex.StatusCode);
-                Assert.IsTrue(ex.IsThrottlingException);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("4. Simulate Time passes, the throttling cache will have expired");
@@ -117,13 +116,12 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("A similar request, e.g. with a claims challenge, will be throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account)
                         .WithClaims(TestConstants.Claims) // claims are not part of the strict thumbprint
                         .ExecuteAsync())                    
                        .ConfigureAwait(false);
                 Assert.AreEqual(400, ex.StatusCode);
-                Assert.IsTrue(ex.IsThrottlingException);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("A different request, e.g. with other scopes, will not be throttled");
@@ -173,11 +171,10 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);                
 
                 Trace.WriteLine("3. Second call - request is throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                        .ConfigureAwait(false);
                 Assert.AreEqual(httpStatusCode, ex.StatusCode);
-                Assert.IsTrue(ex.IsThrottlingException);
                 AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
 
                 Trace.WriteLine("4. Simulate Time passes, the throttling cache will have expired");
@@ -207,19 +204,31 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
 
                 Trace.WriteLine("A similar request, e.g. with a claims challenge, will be throttled");
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account)
                         .WithClaims(TestConstants.Claims) // claims are not part of the strict thumbprint
                         .ExecuteAsync())
                        .ConfigureAwait(false);
                 Assert.AreEqual(429, ex.StatusCode);
-                Assert.IsTrue(ex.IsThrottlingException);
                 AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
 
                 Trace.WriteLine("A different request, e.g. with other scopes, will not be throttled");
                 httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
                 await app.AcquireTokenSilent(new[] { "Other.Scopes" }, account).ExecuteAsync()
                        .ConfigureAwait(false);
+
+                Trace.WriteLine("Create a new PCA and try a different flow");
+                var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManagerAndBundle.HttpManager)
+                    .BuildConcrete();
+                new TokenCacheHelper().PopulateCache(
+                    pca2.UserTokenCacheInternal.Accessor, 
+                    expiredAccessTokens: true);
+
+                await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                 () => pca2.AcquireTokenSilent(TestConstants.s_scope, account)
+                      .ExecuteAsync())
+                     .ConfigureAwait(false);
             }
         }
 

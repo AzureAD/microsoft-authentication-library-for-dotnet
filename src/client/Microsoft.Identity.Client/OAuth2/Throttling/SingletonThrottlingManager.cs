@@ -3,8 +3,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
@@ -58,7 +56,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             IReadOnlyDictionary<string, string> bodyParams,
             MsalServiceException ex)
         {
-            if (!ex.IsThrottlingException)
+            if (!(ex is MsalThrottledServiceException))
             {
                 foreach (var provider in _throttlingProviders)
                 {

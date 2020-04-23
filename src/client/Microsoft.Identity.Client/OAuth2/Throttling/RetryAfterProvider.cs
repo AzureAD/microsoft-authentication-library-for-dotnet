@@ -53,7 +53,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             AuthenticationRequestParameters requestParams, 
             IReadOnlyDictionary<string, string> bodyParams)
         {
-            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
+            if (!Cache.IsEmpty() && 
+                ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
             {
                 var logger = requestParams.RequestContext.Logger;
 

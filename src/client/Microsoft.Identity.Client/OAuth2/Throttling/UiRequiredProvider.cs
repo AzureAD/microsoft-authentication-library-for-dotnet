@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
@@ -12,7 +14,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         /// <summary>
         /// Default number of seconds that application returns the cached response, in case of UI required requests.
         /// </summary>
-        private readonly TimeSpan s_uiRequiredExpiration = TimeSpan.FromSeconds(120);
+        internal static readonly TimeSpan s_uiRequiredExpiration = TimeSpan.FromSeconds(120);
 
         /// <summary>
         /// Exposed only for testing purposes
@@ -24,9 +26,9 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             Cache = new ThrottlingCache();
         }
 
-        private readonly ISet<string> s_excludedParams = new HashSet<string>()
+        private static readonly ISet<string> s_excludedParams = new HashSet<string>()
         {
-            //TODO
+            
         };
 
         public void RecordException(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams, MsalServiceException ex)
@@ -53,23 +55,29 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public void TryThrottle(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams)
         {
-            var logger = requestParams.RequestContext.Logger;
+            if (!Cache.IsEmpty())
+            {
+                var logger = requestParams.RequestContext.Logger;
 
-            string fullThumbprint = GetRequestFullThumbprint(
-                bodyParams,
-                requestParams.AuthorityInfo.CanonicalAuthority,
-                requestParams.Account?.HomeAccountId?.Identifier);
+                string fullThumbprint = GetRequestFullThumbprint(
+                    bodyParams,
+                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.Account?.HomeAccountId?.Identifier);
 
-            ThrottleCommon.TryThrow(fullThumbprint, Cache, logger, nameof(UiRequiredProvider));
+                ThrottleCommon.TryThrow(fullThumbprint, Cache, logger, nameof(UiRequiredProvider));
+            }
         }
 
-        public static string GetRequestFullThumbprint(
-         IReadOnlyDictionary<string, string> bodyParams,
-         string authority,
-         string homeAccountId)
+        private static string GetRequestFullThumbprint(
+             IReadOnlyDictionary<string, string> bodyParams,
+             string authority,
+             string homeAccountId)
         {
-            // order is not guaranteed in a dictionary, so we need to 
-            return Guid.NewGuid().ToString(); //TODO: fill this in once Sasha confirms the list of things not to set in here.
+            string strictThumbprint = ThrottleCommon.GetRequestStrictThumbprint(bodyParams, authority, homeAccountId);
+            string additionalParams = string.Concat(
+                bodyParams.Values.Except(s_excludedParams).OrderBy(val => val, StringComparer.OrdinalIgnoreCase));
+
+            return $"{strictThumbprint}.{additionalParams}";
         }
 
     }

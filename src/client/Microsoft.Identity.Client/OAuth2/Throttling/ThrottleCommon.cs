@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         public const string ThrottleRetryAfterHeaderName = "x-ms-lib-capability";
         public const string ThrottleRetryAfterHeaderValue = "retry-after, h429";
 
-        private const string KeyDelimiter = ".";
+        internal const string KeyDelimiter = ".";
 
         /// <summary>
         /// The strict thumbprint is based on: 
@@ -51,9 +51,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                     $"Exception thrown because of throttling rule {providerName} - thumbprint: {thumbprint}",
                     $"Exception thrown because of throttling rule {providerName}");
 
-                // mark the exception for logging purposes
-                ex.IsThrottlingException = true;
-                throw ex;
+                // mark the exception for logging purposes                
+                throw new MsalThrottledServiceException(ex);
             }
         }
 
