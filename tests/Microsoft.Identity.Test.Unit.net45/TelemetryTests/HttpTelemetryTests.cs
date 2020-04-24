@@ -95,6 +95,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithHttpManager(_harness.HttpManager)
                             .WithDefaultRedirectUri()
+                            .WithLogging((lvl,msg,pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
                             .BuildConcrete();
 
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");

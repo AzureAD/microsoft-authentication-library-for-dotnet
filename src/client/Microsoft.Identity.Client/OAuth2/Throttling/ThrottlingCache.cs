@@ -40,22 +40,23 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 entry,
                 (_, oldEntry) => entry.CreationTime > oldEntry.CreationTime ? entry : oldEntry);
 
-            logger.Verbose($"Cache size before cleaning up {_cache.Count}");
-            CleanCache();
-            logger.Verbose($"Cache size after cleaning up {_cache.Count}");
+            CleanCache(logger);
         }
 
-        public bool TryGetOrRemoveExpired(string key, out MsalServiceException ex)
+        public bool TryGetOrRemoveExpired(string key, ICoreLogger logger, out MsalServiceException ex)
         {
             ex = null;
             if (_cache.TryGetValue(key, out var entry))
             {
+                logger.Info($"[Throttling] Entry found. Creation: {entry.CreationTime} Expiration: {entry.ExpirationTime} ");
                 if (entry.IsExpired)
                 {
+                    logger.Info($"[Throttling] Removing entry");
                     _cache.TryRemove(key, out _);
                     return false;
                 }
-                
+
+                logger.InfoPii($"[Throttling] Returning valid entry for key {key}", "[Throttling] Returning valid entry.");
                 ex = entry.Exception;
                 return true;
             }
@@ -76,9 +77,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         internal ConcurrentDictionary<string, ThrottlingCacheEntry> CacheForTest => _cache; 
 
 
-        private void CleanCache()
+        private void CleanCache(ICoreLogger logger)
         {
-
             if (_lastCleanupTime + s_cleanupCacheInterval < DateTimeOffset.UtcNow &&
                 !_cleanupInProgress)
             {
@@ -86,10 +86,14 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 {
                     if (!_cleanupInProgress)
                     {
+                        logger.Verbose($"[Throttling] Cache size before cleaning up {_cache.Count}");
+
                         _cleanupInProgress = true;
                         CleanupCacheNoLocks();
                         _lastCleanupTime = DateTimeOffset.UtcNow;
                         _cleanupInProgress = false;
+
+                        logger.Verbose($"[Throttling] Cache size after cleaning up {_cache.Count}");
                     }
                 }
             }
