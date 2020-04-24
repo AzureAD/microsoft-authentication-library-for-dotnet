@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsFalse(ex is MsalUiRequiredException, "5xx exceptions do not translate to MsalUIRequired");
-                Assert.AreEqual(504, ex.StatusCode);
+                Assert.AreEqual(503, ex.StatusCode);
             }
         }
         #endregion
@@ -311,7 +311,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [Description("AT expiredh. AAD fails but is available when refreshing.")]
+        [Description("AT expired. AAD fails but is available when refreshing.")]
         public async Task ClientCreds_Expired_NeedsRefresh_AADInvalidResponse_Async()
         {
             // Arrange
@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsFalse(ex is MsalUiRequiredException, "5xx exceptions do not translate to MsalUIRequired");
-                Assert.AreEqual(504, ex.StatusCode);
+                Assert.AreEqual(503, ex.StatusCode);
                 cacheAccess.AssertAccessCounts(1, 0);
             }
         }
