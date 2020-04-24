@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("4. Simulate Time passes, the throttling cache will have expired");
-                SimulateTimePassing(throttlingManager, retryAfterDuration);
+                throttlingManager.SimulateTimePassing(retryAfterDuration);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("5. Third call - no more throttling");
@@ -144,13 +144,12 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
-                var (retryAfterProvider, _) = GetTypedThrottlingProviders(throttlingManager);
+                var (retryAfterProvider, _) = throttlingManager.GetTypedThrottlingProviders();
                 var singleEntry = retryAfterProvider.Cache.CacheForTest.Single().Value;
                 TimeSpan actualExpiration = singleEntry.ExpirationTime - singleEntry.CreationTime;
                 Assert.AreEqual(actualExpiration, RetryAfterProvider.MaxRetryAfter);
             }
         }
-
         #endregion
 
         #region HTTP 5xx acceptance test
@@ -178,7 +177,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
 
                 Trace.WriteLine("4. Simulate Time passes, the throttling cache will have expired");
-                SimulateTimePassing(throttlingManager, HttpStatusProvider.s_throttleDuration);
+                throttlingManager.SimulateTimePassing(HttpStatusProvider.s_throttleDuration);
                 AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
 
                 Trace.WriteLine("5. Third call - no more throttling");
@@ -280,42 +279,17 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             }
         }
 
-        private static void SimulateTimePassing(SingletonThrottlingManager throttlingManager, TimeSpan delay)
-        {
-            var (retryAfterProvider, httpStatusProvider) = GetTypedThrottlingProviders(throttlingManager);
-            MoveToPast(delay, retryAfterProvider.Cache.CacheForTest);
-            MoveToPast(delay, httpStatusProvider.ThrottlingCache.CacheForTest);
-        }
-
-        private static void MoveToPast(TimeSpan delay, ConcurrentDictionary<string, ThrottlingCacheEntry> cacheDictionary)
-        {
-            foreach (var kvp in cacheDictionary)
-            {
-                // move time forward by moving creation and expiration time back
-                cacheDictionary[kvp.Key] = new ThrottlingCacheEntry(
-                    kvp.Value.Exception,
-                    kvp.Value.CreationTime - delay,
-                    kvp.Value.ExpirationTime - delay);
-            }
-        }
 
         private static void AssertThrottlingCacheEntryCount(
             SingletonThrottlingManager throttlingManager, 
             int retryAfterEntryCount = 0, 
             int httpStatusEntryCount = 0)
         {
-            var (retryAfterProvider, httpStatusProvider) = GetTypedThrottlingProviders(throttlingManager);
+            var (retryAfterProvider, httpStatusProvider) = 
+                throttlingManager.GetTypedThrottlingProviders();
 
             Assert.AreEqual(retryAfterEntryCount, retryAfterProvider.Cache.CacheForTest.Count);
             Assert.AreEqual(httpStatusEntryCount, httpStatusProvider.ThrottlingCache.CacheForTest.Count);
-        }
-
-        private static (RetryAfterProvider, HttpStatusProvider) GetTypedThrottlingProviders(
-            SingletonThrottlingManager throttlingManager)
-        {
-            return (
-                throttlingManager.ThrottlingProvidersForTest.Single(p => p is RetryAfterProvider) as RetryAfterProvider,
-                throttlingManager.ThrottlingProvidersForTest.Single(p => p is HttpStatusProvider) as HttpStatusProvider);
         }
 
         private static void AssertInvalidClientEx(MsalServiceException ex)

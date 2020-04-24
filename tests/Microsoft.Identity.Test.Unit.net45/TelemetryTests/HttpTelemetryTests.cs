@@ -6,10 +6,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
+using Microsoft.Identity.Test.Unit.Throttling;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -146,6 +147,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     expectedCorrelationIds: new[] { step5CorrelationId, step6CorrelationId },
                     expectedErrors: new[] { "interaction_required", "user_cancelled" });
 
+                // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
+                _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
+                    HttpStatusProvider.s_throttleDuration);
 
                 Trace.WriteLine("Step 8. Acquire Token Interactive -> Success");
                 result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
