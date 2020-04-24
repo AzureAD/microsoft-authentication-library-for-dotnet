@@ -1,3 +1,22 @@
+4.12.0
+============
+New Features: 
+
+**Integrated Windows Auth available on .NET Core on Window**. On .NET Core, for the Windows platforms, AcquireTokenByIntegratedWindowsAuthAsync(scopes) works without passing the username.
+
+**The scope parameter is now less strict in some of the AcquireTokenXXX methods**. MSAL now allows developers to call AcquireToken* methods without scopes. MSAL continues to ask for "offline_access", "profile" and "openid" scopes, which makes token providers (AAD B2B, AAD B2C, ADFS) return Id Tokens, which contain user metadata. Some token providers continue to issue access tokens, which can be used to access the UserInfo metadata endpoint. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/715)
+
+Bug fixes:
+
+**Fix potential cache consistency issues in multi-threaded environment**. Synchronize token cache to avoid cache inconsistency where token cache is shared with many environments. 
+
+**Fix null reference exception thrown by AcquireTokenForClient when using a cert in .cer format / without a private key**. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1719)
+
+**Fix the spelling in API WithInstanceDicoveryMetadata**. Marked the WithInstanceDicovery as deprecated and added WithInstanceDiscoveryMetadata to fix the spelling.
+
+**Fix MsalClientException UserMismatchSaveToken sometimes thrown in web apps**. Fix the scenario where in web app / web api scenarios where a token cache was shared across multiple users, MSAL would sometimes throw an MsalClientException.
+
+
 4.11.0
 ============
 New Features: 
