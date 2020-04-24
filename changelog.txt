@@ -2,7 +2,7 @@
 ============
 New Features: 
 
-**Integrated Windows Auth available on .NET Core on Window**. On .NET Core, for the Windows platforms, AcquireTokenByIntegratedWindowsAuthAsync(scopes) works without passing the username.
+**Integrated Windows Auth available on .NET Core on Windows without username**. On .NET Core, for the Windows platforms, AcquireTokenByIntegratedWindowsAuthAsync(scopes) works without passing the username.
 
 **The scope parameter is now less strict in some of the AcquireTokenXXX methods**. MSAL now allows developers to call AcquireToken* methods without scopes. MSAL continues to ask for "offline_access", "profile" and "openid" scopes, which makes token providers (AAD B2B, AAD B2C, ADFS) return Id Tokens, which contain user metadata. Some token providers continue to issue access tokens, which can be used to access the UserInfo metadata endpoint. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/715)
 
