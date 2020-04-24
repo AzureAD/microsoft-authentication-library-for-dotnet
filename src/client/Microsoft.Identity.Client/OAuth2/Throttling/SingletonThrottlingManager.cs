@@ -8,17 +8,21 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
 
     /// <summary>
-    /// Throttling occurs
+    /// Throttling is the action through which MSAL blocks applications from making repeated 
+    /// bad requests to the server. This works by MSAL detecting certain conditions when the server
+    /// returns an error. If a similar request is then issued under the same condition, the same
+    /// server error is returned by MSAL, without contacting the server.
+    /// 
+    /// Throttling occurs in the following conditions:
     /// <list type="bullet">
     /// <item>Afetr receving an RetryAfter header</item>
-    /// <item>After receiving 429, 5xx HTTP status.</item>
-    /// <item>After receiving a UI Interaction required signal</item>
+    /// <item>After receiving 429, 5xx HTTP status.</item>    
     /// </list>
-    /// 
     /// This class manages the throttling providers and is itself a provider
     /// </summary>
     /// <remarks>
     /// Client Throttling spec https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1624
+    /// 
     /// </remarks>
     internal class SingletonThrottlingManager : IThrottlingProvider
     {

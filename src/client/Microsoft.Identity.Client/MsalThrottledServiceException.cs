@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client
     /// 
     /// The properties of this exception are identical to the original exceptin
     /// 
-    /// For more details see https://aka.ms/msal-throttling
+    /// For more details see https://aka.ms/msal-net-throttling
     /// </summary>
     public class MsalThrottledServiceException : MsalServiceException
     {

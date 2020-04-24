@@ -9,18 +9,18 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
     internal class HttpStatusProvider : IThrottlingProvider
     {
         /// <summary>
-        /// Default timespan that blocks an application, if HTTP 429 and HTTP 5xx was recieved and Retry-After HTTP header was not sent.
+        /// Default timespan that blocks an application, if HTTP 429 and HTTP 5xx was recieved and Retry-After HTTP header was NOT returned by AAD.
         /// </summary>
         internal static readonly TimeSpan s_throttleDuration = TimeSpan.FromSeconds(60); // internal for test
 
         /// <summary>
         /// Exposed only for testing purposes
         /// </summary>
-        internal ThrottlingCache Cache { get; }
+        internal ThrottlingCache ThrottlingCache { get; }
 
         public HttpStatusProvider()
         {
-            Cache = new ThrottlingCache();
+            ThrottlingCache = new ThrottlingCache();
         }
 
         public void RecordException(
@@ -42,18 +42,18 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                     requestParams.AuthorityInfo.CanonicalAuthority,
                     requestParams.Account?.HomeAccountId?.Identifier);
                 var entry = new ThrottlingCacheEntry(ex, s_throttleDuration);
-                Cache.AddAndCleanup(thumbprint, entry, logger);
+                ThrottlingCache.AddAndCleanup(thumbprint, entry, logger);
             }
         }
 
         public void ResetCache()
         {
-            Cache.Clear();
+            ThrottlingCache.Clear();
         }
 
         public void TryThrottle(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams)
         {
-            if (!Cache.IsEmpty() && 
+            if (!ThrottlingCache.IsEmpty() && 
                 ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
             {
                 var logger = requestParams.RequestContext.Logger;
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                     requestParams.AuthorityInfo.CanonicalAuthority,
                     requestParams.Account?.HomeAccountId?.Identifier);
 
-                ThrottleCommon.TryThrow(strictThumbprint, Cache, logger, nameof(HttpStatusProvider));
+                ThrottleCommon.TryThrow(strictThumbprint, ThrottlingCache, logger, nameof(HttpStatusProvider));
             }
         }
     }

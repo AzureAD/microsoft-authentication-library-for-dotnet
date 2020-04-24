@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         {
             var (retryAfterProvider, httpStatusProvider) = GetTypedThrottlingProviders(throttlingManager);
             MoveToPast(delay, retryAfterProvider.Cache.CacheForTest);
-            MoveToPast(delay, httpStatusProvider.Cache.CacheForTest);
+            MoveToPast(delay, httpStatusProvider.ThrottlingCache.CacheForTest);
         }
 
         private static void MoveToPast(TimeSpan delay, ConcurrentDictionary<string, ThrottlingCacheEntry> cacheDictionary)
@@ -302,13 +302,12 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         private static void AssertThrottlingCacheEntryCount(
             SingletonThrottlingManager throttlingManager, 
             int retryAfterEntryCount = 0, 
-            int httpStatusEntryCount = 0, 
-            int uiExceptionEntryCount = 0)
+            int httpStatusEntryCount = 0)
         {
             var (retryAfterProvider, httpStatusProvider) = GetTypedThrottlingProviders(throttlingManager);
 
             Assert.AreEqual(retryAfterEntryCount, retryAfterProvider.Cache.CacheForTest.Count);
-            Assert.AreEqual(httpStatusEntryCount, httpStatusProvider.Cache.CacheForTest.Count);
+            Assert.AreEqual(httpStatusEntryCount, httpStatusProvider.ThrottlingCache.CacheForTest.Count);
         }
 
         private static (RetryAfterProvider, HttpStatusProvider) GetTypedThrottlingProviders(
