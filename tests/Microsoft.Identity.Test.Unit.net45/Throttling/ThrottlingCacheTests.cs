@@ -54,8 +54,8 @@ namespace Microsoft.Identity.Test.Unit.Throttling
 
             // Assert
             MsalServiceException foundEx1, foundEx2;
-            bool isFound1 = cache.TryGetOrRemoveExpired("k1", out foundEx1);
-            bool isFound2 = cache.TryGetOrRemoveExpired("k2", out foundEx2);
+            bool isFound1 = cache.TryGetOrRemoveExpired("k1", _logger, out foundEx1);
+            bool isFound2 = cache.TryGetOrRemoveExpired("k2", _logger, out foundEx2);
 
             Assert.IsFalse(isFound1, "Should have been removed by cleanup");
             Assert.IsTrue(isFound2, "Should have been found as it is not expired");
