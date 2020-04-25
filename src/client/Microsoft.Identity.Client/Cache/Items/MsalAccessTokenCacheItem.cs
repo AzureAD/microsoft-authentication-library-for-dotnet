@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             };
 
 #if DESKTOP || NET_CORE
-            Trace.WriteLine("AT FromJObject ... " + j);
+            System.Diagnostics.Trace.WriteLine("AT FromJObject ... " + j);
 #endif
             item.PopulateFieldsFromJObject(j);
 
