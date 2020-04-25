@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
@@ -17,6 +18,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.HomeAccountId);
             Environment = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
             RawClientInfo = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientInfo);
+
+            Trace.WriteLine($"HomeAccountId {HomeAccountId} Environment {Environment} RawClientInfo {RawClientInfo}");
 
             // Important: order matters.  This MUST be the last one called since it will extract the
             // remaining fields out.

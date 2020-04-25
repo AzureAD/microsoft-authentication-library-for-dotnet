@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
@@ -18,9 +19,11 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal virtual void PopulateFieldsFromJObject(JObject j)
         {
             AdditionalFieldsJson = j.ToString();
+            Trace.WriteLine($"AdditionalFieldsJson {AdditionalFieldsJson}");
+
         }
 
-        
+
         internal virtual JObject ToJObject()
         {
             var json = string.IsNullOrWhiteSpace(AdditionalFieldsJson) ? new JObject() : JObject.Parse(AdditionalFieldsJson);

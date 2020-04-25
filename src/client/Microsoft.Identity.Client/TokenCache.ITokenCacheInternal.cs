@@ -314,6 +314,12 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger,
                 "Filtering by tenant id");
 
+
+            requestParams.RequestContext.Logger.Warning(
+                "!! Item home account id:" + tokenCacheItems.First().HomeAccountId);
+            requestParams.RequestContext.Logger.Warning("!! request home acc id: " + 
+                requestParams.Account?.HomeAccountId?.Identifier);
+
             if (!requestParams.IsClientCredentialRequest)
             {
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(

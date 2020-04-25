@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.OAuth2;
@@ -170,6 +171,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TokenType = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer
             };
 
+            Trace.WriteLine("AT FromJObject ... " + j);
             item.PopulateFieldsFromJObject(j);
 
             return item;
