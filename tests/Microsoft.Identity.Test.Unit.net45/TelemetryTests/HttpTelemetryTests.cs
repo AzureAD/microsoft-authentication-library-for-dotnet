@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
                 _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
-                    HttpStatusProvider.s_throttleDuration);
+                    HttpStatusProvider.s_throttleDuration.Add(TimeSpan.FromSeconds(1)));
 
                 Trace.WriteLine("Step 8. Acquire Token Interactive -> Success");
                 result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
