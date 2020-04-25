@@ -18,7 +18,10 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal virtual void PopulateFieldsFromJObject(JObject j)
         {
             AdditionalFieldsJson = j.ToString();
+#if !NETSTANDARD
+
             Trace.WriteLine($"AdditionalFieldsJson {AdditionalFieldsJson}");
+#endif
         }
 
         internal virtual JObject ToJObject()
