@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TokenType = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer
             };
 
-#if !NETSTANDARD
+#if DESKTOP || NET_CORE
             Trace.WriteLine("AT FromJObject ... " + j);
 #endif
             item.PopulateFieldsFromJObject(j);

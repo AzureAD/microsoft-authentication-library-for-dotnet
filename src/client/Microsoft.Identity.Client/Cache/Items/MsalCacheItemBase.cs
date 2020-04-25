@@ -18,7 +18,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.HomeAccountId);
             Environment = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
             RawClientInfo = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientInfo);
-#if !NETSTANDARD
+#if DESKTOP || NET_CORE
+
             Trace.WriteLine($"HomeAccountId {HomeAccountId} Environment {Environment} RawClientInfo {RawClientInfo}");
 #endif
             // Important: order matters.  This MUST be the last one called since it will extract the
