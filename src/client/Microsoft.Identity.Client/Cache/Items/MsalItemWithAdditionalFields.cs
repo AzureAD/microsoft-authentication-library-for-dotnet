@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
@@ -20,9 +19,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             AdditionalFieldsJson = j.ToString();
             Trace.WriteLine($"AdditionalFieldsJson {AdditionalFieldsJson}");
-
         }
-
 
         internal virtual JObject ToJObject()
         {
