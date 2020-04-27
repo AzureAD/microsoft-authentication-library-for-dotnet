@@ -19,6 +19,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidGrantError = "invalid_grant";
 
+        /// <summary>
+        /// Standard OAuth2 protocol error code. It indicates that the application needs to expose the UI to the user
+        /// so that the user does an interactive action in order to get a new token.
+        /// <para>Mitigation:</para> If your application is a <see cref="T:IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
+        /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
+        /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation
+        /// </summary>
+        public const string InteractionRequired = "interaction_required";
+
 #if !DESKTOP && !NET_CORE
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif

@@ -24,19 +24,17 @@ namespace Microsoft.Identity.Client
             MsalServiceException ex = null;
             var oAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
 
-            if (string.Equals(oAuth2Response?.Error, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase))
+            if (IsInvalidGrant(oAuth2Response) || IsInteractionRequired(oAuth2Response))
             {
-                if (IsUiInteractionRequired(oAuth2Response?.SubError))
-                {
-                    ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
-                }
+                ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
             }
+
 
             if (string.Equals(oAuth2Response?.Error, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
             {
                 ex = new MsalServiceException(
                     MsalError.InvalidClient,
-                    MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription, 
+                    MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription,
                     innerException);
             }
 
@@ -57,7 +55,19 @@ namespace Microsoft.Identity.Client
             return ex;
         }
 
-        internal static bool IsUiInteractionRequired(string subError)
+        private static bool IsInteractionRequired(OAuth2ResponseBase oAuth2Response)
+        {
+            return string.Equals(oAuth2Response?.Error, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase);
+
+        }
+
+        private static bool IsInvalidGrant(OAuth2ResponseBase oAuth2Response)
+        {
+            return string.Equals(oAuth2Response?.Error, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase)
+                             && IsInvalidGrantSubError(oAuth2Response?.SubError);
+        }
+
+        private static bool IsInvalidGrantSubError(string subError)
         {
             if (string.IsNullOrEmpty(subError))
             {
