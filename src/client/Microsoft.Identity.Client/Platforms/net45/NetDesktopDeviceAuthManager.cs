@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -23,23 +24,23 @@ namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class NetDesktopDeviceAuthManager : IDeviceAuthManager
     {
-        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri, out string responseHeader)
+        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponseHeaders responseHeaders, Uri endpointUri, out string responseHeader)
         {
             responseHeader = string.Empty;
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
             X509Certificate2 certificate = null;
 
-            if (!DeviceAuthHelper.IsDeviceAuthChallenge(response))
+            if (!DeviceAuthHelper.IsDeviceAuthChallenge(responseHeaders))
             {
                 return false;
             }
             if (!DeviceAuthHelper.CanOSPerformPKeyAuth())
             {
-                responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
-                return false;
+                responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(responseHeaders);
+                return true;
             }
 
-            IDictionary<string, string> challengeData = DeviceAuthHelper.ParseChallengeData(response);
+            IDictionary<string, string> challengeData = DeviceAuthHelper.ParseChallengeData(responseHeaders);
 
             if (!challengeData.ContainsKey("SubmitUrl"))
             {
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             {
                 if (ex.ErrorCode == MsalError.DeviceCertificateNotFound)
                 {
-                    responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
+                    responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(responseHeaders);
                     return true;
                 }
             }

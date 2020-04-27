@@ -18,13 +18,13 @@ namespace Microsoft.Identity.Test.Unit
         static HttpResponse s_httpResponse;
 
         [TestInitialize]
-        private static void Initialize()
+        public void Initialize()
         {
             //Arrange
             if (s_httpResponse == null)
             {
-                HttpResponse response = new HttpResponse();
-                response.Headers = MockHelpers.CreatePKeyAuthChallengeResponse().Headers;
+                s_httpResponse = new HttpResponse();
+                s_httpResponse.Headers = MockHelpers.CreatePKeyAuthChallengeResponse().Headers;
             }
         }
 
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit
         public void ParsePKeyAuthChallengeData()
         {
             //Act
-            var result = DeviceAuthHelper.ParseChallengeData(s_httpResponse);
+            var result = DeviceAuthHelper.ParseChallengeData(s_httpResponse.Headers);
 
             //Assert
             Assert.AreEqual(result["Version"], "1.0");
@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Test.Unit
         public void CheckIfResponseIsDeviceAuthChallenge()
         {
             //Act
-            bool successResponse = DeviceAuthHelper.IsDeviceAuthChallenge(s_httpResponse);
-            bool failedResponse = DeviceAuthHelper.IsDeviceAuthChallenge(new HttpResponse());
+            bool successResponse = DeviceAuthHelper.IsDeviceAuthChallenge(s_httpResponse.Headers);
+            bool failedResponse = DeviceAuthHelper.IsDeviceAuthChallenge((new HttpResponse()).Headers);
 
             //Assert
             Assert.IsTrue(successResponse);
@@ -58,11 +58,11 @@ namespace Microsoft.Identity.Test.Unit
         {
             //Arrange
             Dictionary<string, string> pKeyAuthHeaders = new Dictionary<string, string>();
-            pKeyAuthHeaders.Add("Context", "some context");
-            pKeyAuthHeaders.Add("Version", "some version");
+            pKeyAuthHeaders.Add("Context", "context");
+            pKeyAuthHeaders.Add("Version", "1.0");
 
             //Act
-            var result1 = DeviceAuthHelper.GetBypassChallengeResponse(s_httpResponse);
+            var result1 = DeviceAuthHelper.GetBypassChallengeResponse(s_httpResponse.Headers);
             var result2 = DeviceAuthHelper.GetBypassChallengeResponse(pKeyAuthHeaders);
 
             //Assert

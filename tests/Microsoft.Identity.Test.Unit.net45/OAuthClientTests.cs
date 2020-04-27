@@ -171,14 +171,10 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
                 AdditionalRequestValidation = request =>
                 {
-                    var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                    var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
-
-                    // Check presence of pkeyAuth in request
-                    Assert.IsTrue(formsData.TryGetValue("Authorization", out string pKeyAuthHeader), "Missing PKeyAuth header from request");
+                    var authHeader = request.Headers.Authorization?.ToString();
 
                     // Check value of pkeyAuth header.
-                    Assert.AreEqual(pKeyAuthHeader, TestConstants.PKeyAuthResponse);
+                    Assert.AreEqual(authHeader, TestConstants.PKeyAuthResponse);
                 }
             };
         }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,23 +29,23 @@ namespace Microsoft.Identity.Client.Platforms.uap
             get { return true; }
         }
 
-        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri, out string responseHeader)
+        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponseHeaders headers, Uri endpointUri, out string responseHeader)
         {
             responseHeader = string.Empty;
             Certificate certificate = null;
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
 
-            if (!DeviceAuthHelper.IsDeviceAuthChallenge(response))
+            if (!DeviceAuthHelper.IsDeviceAuthChallenge(headers))
             {
                 return false;
             }
             if (!DeviceAuthHelper.CanOSPerformPKeyAuth())
             {
-                responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
+                responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(headers);
                 return false;
             }
 
-            IDictionary<string, string> challengeData = DeviceAuthHelper.ParseChallengeData(response);
+            IDictionary<string, string> challengeData = DeviceAuthHelper.ParseChallengeData(headers);
 
             if (!challengeData.ContainsKey("SubmitUrl"))
             {
@@ -53,13 +54,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
             try
             {
-                //certificate = Task.FromResult(FindCertificateAsync(challengeData)).Result.GetResults();
+                certificate = Task.FromResult(FindCertificateAsync(challengeData)).Result.Result;
             }
             catch (MsalException ex)
             {
                 if (ex.ErrorCode == MsalError.DeviceCertificateNotFound)
                 {
-                    responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
+                    responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(headers);
                     return true;
                 }
             }

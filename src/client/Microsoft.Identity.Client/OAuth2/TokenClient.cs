@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore;
+using System.Net;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -37,8 +38,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client = new OAuth2Client(
                _serviceBundle.DefaultLogger,
                _serviceBundle.HttpManager,
-               _serviceBundle.MatsTelemetryManager,
-               _serviceBundle.DeviceAuthManager);
+               _serviceBundle.MatsTelemetryManager);
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -155,6 +155,20 @@ namespace Microsoft.Identity.Client.OAuth2
                     // telemetry would have been recorded
                     _serviceBundle.HttpTelemetryManager.ResetPreviousUnsentData();
                 }
+
+                if (ex.StatusCode == (int)HttpStatusCode.Unauthorized)
+                {
+                    string responseHeader = string.Empty;
+                    var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponseAsync(ex.Headers, builder.Uri, out responseHeader);
+                    if (isChallenge)
+                    {
+                        //Injecting PKeyAuth response here and replaying request to attempt device auth
+                        _oAuth2Client.AddHeader("Authorization", responseHeader);
+
+                        return await _oAuth2Client.GetTokenAsync(builder.Uri, _requestParams.RequestContext, false).ConfigureAwait(false);
+                    }
+                }
+
                 throw;
             }
             finally

@@ -14,9 +14,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
-using System.Linq;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.OAuth2
@@ -36,14 +33,12 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
         private readonly IMatsTelemetryManager _telemetryManager;
-        private readonly IDeviceAuthManager _deviceAuthManager;
 
-        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, IMatsTelemetryManager telemetryManager, IDeviceAuthManager deviceAuthManager)
+        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, IMatsTelemetryManager telemetryManager)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
-            _deviceAuthManager = deviceAuthManager ?? new NullDeviceAuthManager();
         }
 
         public void AddQueryParameter(string key, string value)
@@ -73,16 +68,17 @@ namespace Microsoft.Identity.Client.OAuth2
                        .ConfigureAwait(false);
         }
 
-        public async Task<MsalTokenResponse> GetTokenAsync(Uri endPoint, RequestContext requestContext)
+        public async Task<MsalTokenResponse> GetTokenAsync(Uri endPoint, RequestContext requestContext, bool addCommonHeaders = true)
         {
-            return await ExecuteRequestAsync<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext).ConfigureAwait(false);
+            return await ExecuteRequestAsync<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext, false, addCommonHeaders).ConfigureAwait(false);
         }
 
-        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool sendDeviceAuthParams = true)
+        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool addCommonHeaders = true)
         {
             bool addCorrelationId = requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
-            //No need to re-add headers for the replayed PKeyAuth request
-            if (sendDeviceAuthParams)
+            
+            //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
+            if (addCommonHeaders)
             {
                 AddCommonHeaders(requestContext, addCorrelationId);
             }
@@ -111,19 +107,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
                 {
-                    //Check if we can perform device auth
-                    if (sendDeviceAuthParams)
-                    {
-                        string responseHeader = string.Empty;
-                        var isChallenge = _deviceAuthManager.TryCreateDeviceAuthChallengeResponseAsync(response, endpointUri, out responseHeader);
-                        if (isChallenge)
-                        {
-                            //Injecting PKeyAuth response here and replaying request to attempt device auth
-                            _headers["Authorization"] = responseHeader;
-                            return await ExecuteRequestAsync<T>(endPoint, method, requestContext, expectErrorsOn200OK, false).ConfigureAwait(false);
-                        }
-                    }
-
                     try
                     {
                         httpEvent.OauthErrorCode = MsalError.UnknownError;
@@ -172,9 +155,6 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
             }
-
-            //add pkeyauth header
-            _headers.Add(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
 
             return addCorrelationId;
         }

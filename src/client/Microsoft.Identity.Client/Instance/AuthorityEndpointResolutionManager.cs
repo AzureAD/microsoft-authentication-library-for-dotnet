@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.Instance
              string openIdConfigurationEndpoint,
              RequestContext requestContext)
         {
-            var client = new OAuth2Client(requestContext.Logger, _serviceBundle.HttpManager, _serviceBundle.MatsTelemetryManager, _serviceBundle.DeviceAuthManager);
+            var client = new OAuth2Client(requestContext.Logger, _serviceBundle.HttpManager, _serviceBundle.MatsTelemetryManager);
             return await client.ExecuteRequestAsync<TenantDiscoveryResponse>(
                        new Uri(openIdConfigurationEndpoint),
                        HttpMethod.Get,

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
@@ -17,16 +18,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// </summary>
     internal class NullDeviceAuthManager : IDeviceAuthManager
     {
-        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponse response, Uri endpointUri, out string responseHeader)
+        public bool TryCreateDeviceAuthChallengeResponseAsync(HttpResponseHeaders headers, Uri endpointUri, out string responseHeader)
         {
-            if (!DeviceAuthHelper.IsDeviceAuthChallenge(response))
+            if (!DeviceAuthHelper.IsDeviceAuthChallenge(headers))
             {
                 responseHeader = string.Empty;
                 return false;
             }
 
             //Bypassing challenge
-            responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(response);
+            responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(headers);
             return true;
         }
     }

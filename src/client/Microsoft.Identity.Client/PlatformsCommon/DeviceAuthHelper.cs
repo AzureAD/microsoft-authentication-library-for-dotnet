@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
@@ -14,10 +15,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon
 {
     internal class DeviceAuthHelper
     {
-        public static IDictionary<string, string> ParseChallengeData(HttpResponse response)
+        public static IDictionary<string, string> ParseChallengeData(HttpResponseHeaders responseHeaders)
         {
             IDictionary<string, string> data = new Dictionary<string, string>();
-            string wwwAuthenticate = response.Headers.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).SingleOrDefault();
+            string wwwAuthenticate = responseHeaders.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).SingleOrDefault();
             wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthConstants.PKeyAuthName.Length + 1);
             if (string.IsNullOrEmpty(wwwAuthenticate))
             {
@@ -37,24 +38,23 @@ namespace Microsoft.Identity.Client.PlatformsCommon
             return data;
         }
 
-        public static bool IsDeviceAuthChallenge(HttpResponse response)
+        public static bool IsDeviceAuthChallenge(HttpResponseHeaders responseHeaders)
         {
             //For PKeyAuth, challenge headers returned from the STS will be case sensitive so a case sensitive check is used to determine
             //if the response is a PKeyAuth challenge.
-            return response != null
-                   && response.Headers != null
-                   && response.StatusCode == HttpStatusCode.Unauthorized
-                   && response.Headers.Contains(PKeyAuthConstants.WwwAuthenticateHeader)
-                   && response.Headers.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).First()
+            return responseHeaders != null
+                   && responseHeaders != null
+                   && responseHeaders.Contains(PKeyAuthConstants.WwwAuthenticateHeader)
+                   && responseHeaders.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).First()
                        .StartsWith(PKeyAuthConstants.PKeyAuthName, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
         /// Constructs a bypass response to the PKeyAuth challenge on platforms where the challenge cannot be completed.
         /// </summary>
-        public static string GetBypassChallengeResponse(HttpResponse response)
+        public static string GetBypassChallengeResponse(HttpResponseHeaders responseHeaders)
         {
-            var challengeData = DeviceAuthHelper.ParseChallengeData(response);
+            var challengeData = DeviceAuthHelper.ParseChallengeData(responseHeaders);
             return string.Format(CultureInfo.InvariantCulture,
                                    PKeyAuthConstants.PKeyAuthBypassReponseFormat,
                                    challengeData[PKeyAuthConstants.ChallengeResponseContext],
