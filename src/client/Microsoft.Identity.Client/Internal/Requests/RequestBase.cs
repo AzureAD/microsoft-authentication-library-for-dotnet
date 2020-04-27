@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     try
                     {
                         await PreRunAsync().ConfigureAwait(false);
-                        AuthenticationRequestParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
+                        AuthenticationRequestParameters.LogParameters();
                         LogRequestStarted(AuthenticationRequestParameters);
 
                         AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);

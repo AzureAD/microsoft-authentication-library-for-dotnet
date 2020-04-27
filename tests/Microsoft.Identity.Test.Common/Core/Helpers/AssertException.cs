@@ -153,16 +153,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         {
             Type expectedType = typeof(TException);
 
-            string message = string.Format(
-                CultureInfo.CurrentCulture,
-                "Checking exception:{0}\tType:{1}{0}\tToString: {2}{0}. Details {3}.",
-                Environment.NewLine,
-                actualException.GetType().FullName,
-                actualException.ToString(), 
-                actualException);
-
-            Trace.WriteLine(message);
-
             if (allowDerived)
             {
                 if (!(actualException is TException))

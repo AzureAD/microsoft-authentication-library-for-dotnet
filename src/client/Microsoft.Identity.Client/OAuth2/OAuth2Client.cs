@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Json;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -28,17 +29,15 @@ namespace Microsoft.Identity.Client.OAuth2
     /// </summary>
     internal class OAuth2Client
     {
-        private readonly Dictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _headers;
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
+        private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
-        private readonly IMatsTelemetryManager _telemetryManager;
 
         public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, IMatsTelemetryManager telemetryManager)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
-            _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
         }
 
         public void AddQueryParameter(string key, string value)
@@ -55,11 +54,16 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 _bodyParameters[key] = value;
             }
-        }
+        }        
 
         internal void AddHeader(string key, string value)
         {
             _headers[key] = value;
+        }
+
+        internal IReadOnlyDictionary<string, string> GetBodyParameters()
+        {
+            return new ReadOnlyDictionary<string, string>(_bodyParameters);
         }
 
         public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endPoint, RequestContext requestContext)
@@ -68,18 +72,18 @@ namespace Microsoft.Identity.Client.OAuth2
                        .ConfigureAwait(false);
         }
 
-        public async Task<MsalTokenResponse> GetTokenAsync(Uri endPoint, RequestContext requestContext)
+        internal async Task<MsalTokenResponse> GetTokenAsync(Uri endPoint, RequestContext requestContext)
         {
             return await ExecuteRequestAsync<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext).ConfigureAwait(false);
         }
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false)
-        {
-            bool addCorrelationId = requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
+        {            
+            bool addCorrelationId = !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
             AddCommonHeaders(requestContext, addCorrelationId);
 
             HttpResponse response = null;
-            Uri endpointUri = CreateFullEndpointUri(endPoint);
+            Uri endpointUri = AddExtraQueryParams(endPoint);
             var httpEvent = new HttpEvent(requestContext.CorrelationId.AsMatsCorrelationId())
             {
                 HttpPath = endpointUri,
@@ -117,7 +121,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
                             if (response.StatusCode == HttpStatusCode.OK &&
                                 expectErrorsOn200OK &&
-                                !string.IsNullOrEmpty(msalTokenResponse.Error))
+                                !string.IsNullOrEmpty(msalTokenResponse?.Error))
                             {
                                 ThrowServerException(response, requestContext);
                             }
@@ -131,7 +135,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             return CreateResponse<T>(response, requestContext, addCorrelationId);
-        }
+        }   
 
         private bool AddCommonHeaders(RequestContext requestContext, bool addCorrelationId)
         {
@@ -206,7 +210,7 @@ namespace Microsoft.Identity.Client.OAuth2
             var httpErrorCodeMessage = string.Format(CultureInfo.InvariantCulture, "HttpStatusCode: {0}: {1}", (int)response.StatusCode, response.StatusCode.ToString());
             requestContext.Logger.Info(httpErrorCodeMessage);
 
-            Exception exceptionToThrow;
+            MsalServiceException exceptionToThrow;
             try
             {
                 exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError);
@@ -250,10 +254,8 @@ namespace Microsoft.Identity.Client.OAuth2
             throw exceptionToThrow;
         }
 
-        private static Exception ExtractErrorsFromTheResponse(HttpResponse response, ref bool shouldLogAsError)
+        private static MsalServiceException ExtractErrorsFromTheResponse(HttpResponse response, ref bool shouldLogAsError)
         {
-            Exception exceptionToThrow = null;
-
             // In cases where the end-point is not found (404) response.body will be empty.
             if (string.IsNullOrWhiteSpace(response.Body))
             {
@@ -267,11 +269,6 @@ namespace Microsoft.Identity.Client.OAuth2
                 return null;
             }
 
-            exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
-                msalTokenResponse.Error,
-                msalTokenResponse.ErrorDescription,
-                response);
-
             // For device code flow, AuthorizationPending can occur a lot while waiting
             // for the user to auth via browser and this causes a lot of error noise in the logs.
             // So suppress this particular case to an Info so we still see the data but don't
@@ -282,10 +279,13 @@ namespace Microsoft.Identity.Client.OAuth2
                 shouldLogAsError = false;
             }
 
-            return exceptionToThrow;
+            return MsalServiceExceptionFactory.FromHttpResponse(
+                msalTokenResponse.Error,
+                msalTokenResponse.ErrorDescription,
+                response);
         }
 
-        private Uri CreateFullEndpointUri(Uri endPoint)
+        private Uri AddExtraQueryParams(Uri endPoint)
         {
             var endpointUri = new UriBuilder(endPoint);
             string extraQp = _queryParameters.ToQueryParameter();
