@@ -1,8 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
-using System.Text;
-using Microsoft.Identity.Client.Core;
+﻿using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
@@ -16,12 +12,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)
         {
-            var builder = new StringBuilder();
-            builder.AppendLine("=== OnBehalfOfParameters ===");
-            builder.AppendLine("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
-            builder.AppendLine("User provided: " + (Account != null));
-            builder.AppendLine("ForceRefresh: " + ForceRefresh);
-            logger.Info(builder.ToString());
+            logger.Info("=== AcquireTokenSilent Parameters ===");
+            logger.Info("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
+            logger.InfoPii(
+                "Account provided: " + ((Account != null) ? Account.ToString() : "false"),
+                "Account provided: " + (Account != null));
+            logger.Info("ForceRefresh: " + ForceRefresh);
         }
     }
 }
