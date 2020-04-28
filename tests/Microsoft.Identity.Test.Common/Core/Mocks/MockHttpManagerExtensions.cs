@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -114,17 +115,19 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 });
         }
 
-        public static void AddResiliencyMessageMockHandler(
+        public static HttpResponseMessage AddResiliencyMessageMockHandler(
             this MockHttpManager httpManager,
             HttpMethod httpMethod,
             HttpStatusCode httpStatusCode)
         {
+            var response = MockHelpers.CreateResiliencyMessage(httpStatusCode);
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
                 {
                     ExpectedMethod = httpMethod,
-                    ResponseMessage = MockHelpers.CreateResiliencyMessage(httpStatusCode)
+                    ResponseMessage = response
                 });
+            return response;
         }
 
         public static void AddRequestTimeoutResponseMessageMockHandler(this MockHttpManager httpManager, HttpMethod httpMethod)
@@ -219,5 +222,87 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ResponseMessage = MockHelpers.CreateAdfsSuccessTokenResponseMessage()
             });
         }
+
+        public static MockHttpMessageHandler AddAllMocks(this MockHttpManager httpManager, TokenResponseType aadResponse)
+        {
+            httpManager.AddInstanceDiscoveryMockHandler();
+            httpManager.AddMockHandlerForTenantEndpointDiscovery(
+                TestConstants.AuthorityUtidTenant);
+
+            return AddTokenResponse(httpManager, aadResponse);
+        }
+
+        public static MockHttpMessageHandler AddTokenResponse(
+            this MockHttpManager httpManager, 
+            TokenResponseType responseType, 
+            IDictionary<string, string> expectedRequestHeaders = null)
+        {
+            HttpResponseMessage responseMessage;
+
+            switch (responseType)
+            {
+                case TokenResponseType.Valid:
+                    responseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                       TestConstants.UniqueId,
+                       TestConstants.DisplayableId,
+                       TestConstants.s_scope.ToArray());
+                   
+                    break;
+                case TokenResponseType.Invalid_AADUnavailable503:
+                    responseMessage = MockHelpers.CreateFailureMessage(
+                            System.Net.HttpStatusCode.ServiceUnavailable, "service down");
+                   
+                    break;
+                case TokenResponseType.InvalidGrant:
+                    responseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage();                   
+                    break;
+                case TokenResponseType.InvalidClient:                    
+
+                    responseMessage = MockHelpers.CreateInvalidClientResponseMessage();
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            var responseHandler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedRequestHeaders = expectedRequestHeaders,
+                ResponseMessage = responseMessage, 
+            };
+            httpManager.AddMockHandler(responseHandler);
+
+            return responseHandler;
+        }
+
+        public static HttpResponseMessage AddTokenErrorResponse(
+            this MockHttpManager httpManager, 
+            string error, 
+            HttpStatusCode? customStatusCode)
+        {
+            var responseMessage = MockHelpers.CreateFailureTokenResponseMessage(error, customStatusCode: customStatusCode);
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = responseMessage
+            };
+            httpManager.AddMockHandler(handler);
+            return responseMessage;
+        }
+    }
+
+    public enum TokenResponseType
+    {
+        Valid,
+        Invalid_AADUnavailable503,
+        /// <summary>
+        /// Results in a UI Required Exception
+        /// </summary>
+        InvalidGrant, 
+
+        /// <summary>
+        /// Normal server exception
+        /// </summary>
+        InvalidClient
     }
 }

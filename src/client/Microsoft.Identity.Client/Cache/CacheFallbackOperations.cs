@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
@@ -229,7 +230,7 @@ namespace Microsoft.Identity.Client.Cache
             }
         }
 
-        public static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(
+        private static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
             IEnumerable<string> environmentAliases,
@@ -298,13 +299,12 @@ namespace Microsoft.Identity.Client.Cache
         public static MsalRefreshTokenCacheItem GetAdalEntryForMsal(
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence,
-            string preferredEnvironment,
             IEnumerable<string> environmentAliases,
             string clientId,
             string upn,
             string uniqueId)
         {
-            List<MsalRefreshTokenCacheItem> adalRts = GetAllAdalEntriesForMsal(
+            IEnumerable<MsalRefreshTokenCacheItem> adalRts = GetAllAdalEntriesForMsal(
                 logger,
                 legacyCachePersistence,
                 environmentAliases,
@@ -312,17 +312,17 @@ namespace Microsoft.Identity.Client.Cache
                 upn,
                 uniqueId);
 
-            List<MsalRefreshTokenCacheItem> filteredByPrefEnv = adalRts.Where
-                (rt => rt.Environment.Equals(preferredEnvironment, StringComparison.OrdinalIgnoreCase)).ToList();
+            IEnumerable<IGrouping<string, MsalRefreshTokenCacheItem>> rtGroupsByEnv = adalRts.GroupBy(rt => rt.Environment.ToLowerInvariant());
 
-            if (filteredByPrefEnv.Any())
+            // if we have more than 1 RT per env, there is smth wrong with the ADAL cache
+            if (rtGroupsByEnv.Any(g => g.Count() > 1))
             {
-                return filteredByPrefEnv.First();
+                throw new MsalClientException(
+                    MsalError.InvalidAdalCacheMultipleRTs, 
+                    MsalErrorMessage.InvalidAdalCacheMultipleRTs);
             }
-            else
-            {
-                return adalRts.FirstOrDefault();
-            }
+
+            return adalRts.FirstOrDefault();
         }
     }
 }

@@ -4,13 +4,10 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client
 {
+
     /// <summary>
     /// Exception type thrown when service returns an error response or other networking errors occur.
     /// For more details, see https://aka.ms/msal-net-exceptions
@@ -131,6 +128,7 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
+        #region Public Properties
         /// <summary>
         /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c> in the inner
         /// <see cref="System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
@@ -163,11 +161,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string ResponseBody { get; internal set; }
 
-        /// <remarks>
-        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
-        /// first.
-        /// </remarks>
-        internal string SubError { get; set; }
 
         /// <summary>
         /// Contains the http headers from the server response that indicated an error.
@@ -183,19 +176,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string CorrelationId { get; internal set; }
 
-        /// <summary>
-        /// Creates and returns a string representation of the current exception.
-        /// </summary>
-        /// <returns>A string representation of the current exception.</returns>
-        public override string ToString()
-        {
-            return base.ToString() + string.Format(
-                CultureInfo.InvariantCulture,
-                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}",
-                StatusCode,
-                ResponseBody,
-                Headers);
-        }
+        #endregion
+
+        /// <remarks>
+        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
+        /// first.
+        /// </remarks>
+        internal string SubError { get; set; }
 
         /// <summary>
         /// As per discussion with Evo, AAD 
@@ -208,24 +195,18 @@ namespace Microsoft.Identity.Client
                 string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
         }
 
-        internal override void PopulateJson(JObject jobj)
+        /// <summary>
+        /// Creates and returns a string representation of the current exception.
+        /// </summary>
+        /// <returns>A string representation of the current exception.</returns>
+        public override string ToString()
         {
-            base.PopulateJson(jobj);
-
-            jobj[ClaimsKey] = Claims;
-            jobj[ResponseBodyKey] = ResponseBody;
-            jobj[CorrelationIdKey] = CorrelationId;
-            jobj[SubErrorKey] = SubError;
-        }
-
-        internal override void PopulateObjectFromJson(JObject jobj)
-        {
-            base.PopulateObjectFromJson(jobj);
-
-            Claims = JsonUtils.GetExistingOrEmptyString(jobj, ClaimsKey);
-            ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
-            CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
-            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
+            return base.ToString() + string.Format(
+                CultureInfo.InvariantCulture,
+                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}",
+                StatusCode,
+                ResponseBody,
+                Headers);
         }
     }
 }

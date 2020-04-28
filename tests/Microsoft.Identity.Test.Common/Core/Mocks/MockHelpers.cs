@@ -148,9 +148,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static HttpResponseMessage CreateFailureTokenResponseMessage(
-            string error, 
-            string subError = null, 
-            string correlationId = null)
+            string error,
+            string subError = null,
+            string correlationId = null,
+            HttpStatusCode? customStatusCode = null)
         {
             string message = "{\"error\":\"" + error + "\",\"error_description\":\"AADSTS00000: Error for test." +
                 "Trace ID: f7ec686c-9196-4220-a754-cd9197de44e9Correlation ID: " +
@@ -161,7 +162,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"correlation_id\":" +
                 "\"" + (correlationId ?? "f11508ab-067f-40d4-83cb-ccc67bf57e45") + "\"}";
 
-            return CreateFailureMessage(HttpStatusCode.BadRequest, message);
+            var statusCode = customStatusCode.HasValue ? customStatusCode.Value : HttpStatusCode.BadRequest;
+            return CreateFailureMessage(statusCode, message);
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage(string subError = null)
@@ -204,6 +206,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"trace_id\":\"21c3e4db-d2fd-44f7-a3e0-5939f84e6000\",\"correlation_id\":" +
                 "\"3d483b09-1198-4acb-929f-c648674e32bd\"}");
         }
+
+
 
         public static HttpResponseMessage CreateNoErrorFieldResponseMessage()
         {

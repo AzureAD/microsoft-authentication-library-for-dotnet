@@ -32,6 +32,7 @@ namespace NetCoreTestApp
 
         private static readonly string[] s_tids = new[]  {
             "common",
+            "organizations",
             "49f548d0-12b7-4169-a390-bb5304d24462",
             "72f988bf-86f1-41af-91ab-2d7cd011db47" };
 

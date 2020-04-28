@@ -101,6 +101,7 @@ namespace Microsoft.Identity.Client.Http
         {
             Exception timeoutException = null;
             bool isRetryable = false;
+            bool is5xxError = false;
             HttpResponse response = null;
 
             try
@@ -124,10 +125,9 @@ namespace Microsoft.Identity.Client.Http
                     MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)response.StatusCode, response.StatusCode));
 
-                if ((int)response.StatusCode >= 500 && (int)response.StatusCode < 600)
-                {
-                    isRetryable = true;
-                }
+
+                is5xxError = (int)response.StatusCode >= 500 && (int)response.StatusCode < 600;
+                isRetryable = is5xxError && !HasRetryAfterHeader(response);
             }
             catch (TaskCanceledException exception)
             {
@@ -136,36 +136,37 @@ namespace Microsoft.Identity.Client.Http
                 timeoutException = exception;
             }
 
-            if (isRetryable)
+            if (isRetryable && retry)
             {
-                if (retry)
-                {
-                    logger.Info("Retrying one more time..");
-                    await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-                    return await ExecuteWithRetryAsync(
-                        endpoint,
-                        headers,
-                        body,
-                        method,
-                        logger,
-                        doNotThrow,
-                        retry: false).ConfigureAwait(false);
-                }
 
-                logger.Error("Request retry failed.");
-                if (timeoutException != null)
-                {
-                    throw new MsalServiceException(
-                        MsalError.RequestTimeout,
-                        "Request to the endpoint timed out.",
-                        timeoutException);
-                }
+                logger.Info("Retrying one more time..");
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+                return await ExecuteWithRetryAsync(
+                    endpoint,
+                    headers,
+                    body,
+                    method,
+                    logger,
+                    doNotThrow,
+                    retry: false).ConfigureAwait(false);
+            }
 
-                if (doNotThrow)
-                {
-                    return response;
-                }
+            logger.Warning("Request retry failed.");
+            if (timeoutException != null)
+            {
+                throw new MsalServiceException(
+                    MsalError.RequestTimeout,
+                    "Request to the endpoint timed out.",
+                    timeoutException);
+            }
 
+            if (doNotThrow)
+            {
+                return response;
+            }
+
+            if (is5xxError)
+            {
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.ServiceNotAvailable,
                     "Service is unavailable to process the request",
@@ -173,6 +174,13 @@ namespace Microsoft.Identity.Client.Http
             }
 
             return response;
+        }
+
+        private static bool HasRetryAfterHeader(HttpResponse response)
+        {
+            var retryAfter = response?.Headers?.RetryAfter;
+            return retryAfter != null &&
+                (retryAfter.Delta.HasValue || retryAfter.Date.HasValue);
         }
 
         private async Task<HttpResponse> ExecuteAsync(
