@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Net;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -126,6 +127,9 @@ namespace Microsoft.Identity.Client.OAuth2
                     _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
                 _requestInProgress = true;
             }
+
+            //Signaling that the client can perform PKey Auth
+            _oAuth2Client.AddHeader(PKeyAuthConstants.DeviceAuthHeaderName, PKeyAuthConstants.DeviceAuthHeaderValue);
         }
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)

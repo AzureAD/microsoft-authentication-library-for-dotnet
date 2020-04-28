@@ -19,6 +19,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Win32.SafeHandles;
+using Microsoft.Identity.Client.Platforms.net45.Native;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -62,9 +63,14 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             DeviceAuthJWTResponse responseJWT = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
-            
-            //TODO: pass netDesktopCryptographyManager in as a parameter in the constructor
-            var sig = new NetDesktopCryptographyManager().SignWithCertificate(responseJWT.GetResponseToSign(), certificate);
+
+            CngKey key = NetDesktopCryptographyManager.GetCngPrivateKey(certificate);
+            byte[] sig = null;
+            using (RSACng rsa = new RSACng(key))
+            {
+                rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
+                sig = rsa.SignData(responseJWT.GetResponseToSign().ToByteArray());
+            }
 
             string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", responseJWT.GetResponseToSign(),
                 Base64UrlHelpers.Encode(sig));
