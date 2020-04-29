@@ -1,0 +1,21 @@
+# template-run-device-auth-tests.yaml
+# Performs pkeyAuth device authenticaiton on a enrolled Windows 8 machine
+
+  - job: 'run-device-auth-Integration-tests'
+    pool:
+        name: DevEx Win8 Automation
+        demands: name = MSIDWIN802
+    steps:
+
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Build Artifacts'
+      inputs:
+        artifactName: DeviceAuth
+        itemPattern: '**/*'
+        enabled: false
+
+    - task: VSTest@2
+      displayName: 'DeviceAuthTests'
+      inputs:
+        testAssemblyVer2: '(System.ArtifactsDirectory)/DeviceAuth/*/*'
+        diagnosticsEnabled: True

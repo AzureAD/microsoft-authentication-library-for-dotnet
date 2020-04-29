@@ -22,3 +22,5 @@ steps:
 - template: template-run-integration-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
+
+- template: template-run-device-auth-tests.yaml
