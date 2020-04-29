@@ -104,9 +104,6 @@
   <PropertyGroup Condition="'$(APPCENTER_BUILD)' != ''">
     <DefineConstants>$(DefineConstants);IS_APPCENTER_BUILD</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(WIN8_TEST)' != ''">
-    <DefineConstants>$(DefineConstants);IS_WIN8_TESTRUN</DefineConstants>
-  </PropertyGroup>
 
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
