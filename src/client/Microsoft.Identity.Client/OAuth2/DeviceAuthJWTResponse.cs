@@ -33,12 +33,13 @@ namespace Microsoft.Identity.Client.OAuth2
     [JsonObject]
     internal class DeviceAuthPayload
     {
+        private Lazy<long> _defaultDeviceAuthJWTTimeSpan = new Lazy<long>(() => (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
+        
         public DeviceAuthPayload(string audience, string nonce)
         {
             this.Nonce = nonce;
             this.Audience = audience;
-            var timeSpan = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
-            this.Iat = (long)timeSpan.TotalSeconds;
+            this.Iat = _defaultDeviceAuthJWTTimeSpan.Value;
         }
 
         [JsonProperty("iat")]

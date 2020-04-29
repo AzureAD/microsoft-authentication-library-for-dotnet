@@ -167,9 +167,10 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint)
         {
+            UriBuilder builder = new UriBuilder(tokenEndpoint);
+
             try
             {
-                UriBuilder builder = new UriBuilder(tokenEndpoint);
                 builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
 
                 MsalTokenResponse msalTokenResponse =
