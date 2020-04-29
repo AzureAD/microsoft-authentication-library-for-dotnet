@@ -10,6 +10,7 @@ using Microsoft.Identity.Json;
 namespace Microsoft.Identity.Client.OAuth2
 {
     [JsonObject]
+    [Preserve(AllMembers = true)]
     internal class DeviceAuthHeader
     {
         public DeviceAuthHeader(string base64EncodedCertificate)
@@ -31,6 +32,7 @@ namespace Microsoft.Identity.Client.OAuth2
     }
 
     [JsonObject]
+    [Preserve(AllMembers = true)]
     internal class DeviceAuthPayload
     {
         private Lazy<long> _defaultDeviceAuthJWTTimeSpan = new Lazy<long>(() => (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
