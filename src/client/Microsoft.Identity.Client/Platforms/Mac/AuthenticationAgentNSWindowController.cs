@@ -11,6 +11,8 @@ using WebKit;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Platforms.Shared.Apple;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
@@ -28,15 +30,17 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         private readonly string _url;
         private readonly string _callback;
         private readonly ReturnCodeCallback _callbackMethod;
+        private readonly IDeviceAuthManager _deviceAuthManager;
 
         public delegate void ReturnCodeCallback(AuthorizationResult result);
 
-        public AuthenticationAgentNSWindowController(string url, string callback, ReturnCodeCallback callbackMethod)
+        public AuthenticationAgentNSWindowController(string url, string callback, ReturnCodeCallback callbackMethod, IDeviceAuthManager deviceAuthManager)
             : base("PlaceholderNibNameToForceWindowLoad")
         {
             _url = url;
             _callback = callback;
             _callbackMethod = callbackMethod;
+            _deviceAuthManager = deviceAuthManager;
             NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(CoreCustomUrlProtocol)));
         }
 
@@ -211,7 +215,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 }
 
                 Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-                string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
+                string responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(keyPair);
 
                 var newRequest = (NSMutableUrlRequest)request.MutableCopy();
                 newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);

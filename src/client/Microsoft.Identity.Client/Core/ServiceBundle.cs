@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client.Core
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
+            DeviceAuthManager = PlatformProxy.CreateDeviceAuthManager();
         }
 
         public ICoreLogger DefaultLogger { get; }
@@ -84,6 +85,8 @@ namespace Microsoft.Identity.Client.Core
 
         /// <inheritdoc />
         public ITelemetryClient Mats { get; }
+
+        public IDeviceAuthManager DeviceAuthManager { get; }
 
         public IHttpTelemetryManager HttpTelemetryManager { get; }
 

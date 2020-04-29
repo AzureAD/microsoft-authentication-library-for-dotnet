@@ -20,8 +20,9 @@ namespace Microsoft.Identity.Client.Core
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
+        IDeviceAuthManager DeviceAuthManager { get; }
         IThrottlingProvider ThrottlingManager { get;  }
-
+        
         #region Telemetry
         IHttpTelemetryManager HttpTelemetryManager { get; }
         ITelemetryClient Mats { get; } // experimental / deprecated? 

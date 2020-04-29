@@ -72,15 +72,20 @@ namespace Microsoft.Identity.Client.OAuth2
                        .ConfigureAwait(false);
         }
 
-        internal async Task<MsalTokenResponse> GetTokenAsync(Uri endPoint, RequestContext requestContext)
+        internal async Task<MsalTokenResponse> GetTokenAsync(Uri endPoint, RequestContext requestContext, bool addCommonHeaders = true)
         {
-            return await ExecuteRequestAsync<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext).ConfigureAwait(false);
+            return await ExecuteRequestAsync<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext, false, addCommonHeaders).ConfigureAwait(false);
         }
 
-        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false)
-        {            
-            bool addCorrelationId = !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
-            AddCommonHeaders(requestContext, addCorrelationId);
+        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool addCommonHeaders = true)
+        {
+            bool addCorrelationId = requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
+            
+            //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
+            if (addCommonHeaders)
+            {
+                AddCommonHeaders(requestContext, addCorrelationId);
+            }
 
             HttpResponse response = null;
             Uri endpointUri = AddExtraQueryParams(endPoint);
