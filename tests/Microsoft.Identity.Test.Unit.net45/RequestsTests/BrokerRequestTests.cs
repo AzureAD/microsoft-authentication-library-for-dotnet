@@ -184,6 +184,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = Substitute.For<IAccount>();
             mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { expectedAccount });
+            mockBroker.CanInvokeBroker().Returns(true);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
