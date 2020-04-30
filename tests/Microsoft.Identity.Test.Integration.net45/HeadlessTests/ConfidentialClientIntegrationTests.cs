@@ -80,6 +80,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var cca = ConfidentialClientApplicationBuilder
                .Create(PublicCloudConfidentialClientID)
+               .WithClientSecret(_publicCloudCcaSecret)
                .WithRedirectUri(RedirectUri)
                .WithTestLogging()
                .Build();
