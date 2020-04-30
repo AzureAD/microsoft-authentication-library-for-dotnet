@@ -616,7 +616,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>You configured MSAL confidential client authentication without an authentication type (Certificate, Secret, Client Assertion)
-        /// <para>Mitigation</para>Either call <see cref="ConfidentialClientApplicationBuilder.WithClientSecret"/>, <see cref="ConfidentialClientApplicationBuilder.WithCertificate"/> or <see cref="ConfidentialClientApplicationBuilder.WithClientAssertion"/>.
+        /// <para>Mitigation</para>Either call ConfidentialClientApplicationBuilder.WithClientSecret, ConfidentialClientApplicationBuilder.WithCertificate, ConfidentialClientApplicationBuilder.WithClientAssertion
         /// </summary>
         public const string ClientCredentialAuthenticationTypeMustBeDefined = "Client_Credentials_Required_In_Confidential_Client_Application";
 
