@@ -1018,6 +1018,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void EnsurePublicApiSurfaceExistsOnInterface()
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                                     .WithClientSecret("cats")
                                                                                      .Build();
 
             // This test is to ensure that the methods we want/need on the IConfidentialClientApplication exist and compile.  This isn't testing functionality, that's done elsewhere.

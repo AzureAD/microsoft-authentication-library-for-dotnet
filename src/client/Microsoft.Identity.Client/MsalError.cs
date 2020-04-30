@@ -614,6 +614,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "Client_Credential_Authentication_Types_Are_Mutually_Exclusive";
 
+        /// <summary>
+        /// <para>What happens?</para>You configured MSAL confidential client authentication without an authentication type (Certificate, Secret, Client Assertion)
+        /// <para>Mitigation</para>Either call ConfidentialClientApplicationBuilder.WithClientSecret, ConfidentialClientApplicationBuilder.WithCertificate, ConfidentialClientApplicationBuilder.WithClientAssertion
+        /// </summary>
+        public const string ClientCredentialAuthenticationTypeMustBeDefined = "Client_Credentials_Required_In_Confidential_Client_Application";
+
         #region InvalidGrant suberrors
         /// <summary>
         /// Issue can be resolved by user interaction during the interactive authentication flow.
