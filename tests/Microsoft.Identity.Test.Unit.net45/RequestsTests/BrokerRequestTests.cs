@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task BrokerGetAccountsTestAsync()
+        public async Task BrokerGetAccountsWithBrokerInstalledTestAsync()
         {
             // Arrange
             var mockBroker = Substitute.For<IBroker>();
@@ -199,8 +199,34 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Act
             var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
 
-            // Assert
+            // Assert that MSAL acquires an account from the broker cache
             Assert.AreSame(expectedAccount, actualAccount.Single());
+        }
+
+        [TestMethod]
+        public async Task BrokerGetAccountsWithBrokerNotInstalledTestAsync()
+        {
+            // Arrange
+            var mockBroker = Substitute.For<IBroker>();
+            var expectedAccount = Substitute.For<IAccount>();
+            mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { expectedAccount });
+            mockBroker.CanInvokeBroker().Returns(false);
+
+            var platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.CanBrokerSupportSilentAuth().Returns(true);
+            platformProxy.CreateBroker(null).Returns(mockBroker);
+
+
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithBroker(true)
+                .WithPlatformProxy(platformProxy)
+                .Build();
+
+            // Act
+            var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            // Assert that MSAL does not attempt to acquire an account when broker is not available
+            Assert.IsTrue(actualAccount.Count() == 0);
         }
 
         private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, Action<Exception> validationHandler)
