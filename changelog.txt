@@ -2,7 +2,7 @@
 ============
 New Features: 
 
-**Client throttling is supported in Public Client Applications** MSAL will now implement client side throttling to reduce excessive authentication requests sent to the service. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1624)
+**Client throttling is supported in Public Client Applications** MSAL will now implement client side throttling to reduce excessive authentication requests sent to the service: In the case where the Azure AD service replies with an HTTP error implying throttling, MSAL.NET now respects itself the delay imposed by the service by throwing an exception telling the application after which delay/when it will be able to acquire a token again without even attempting to call the service. For details see [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1624)
 
 **MSAL now can perform device authentication on Desktop** On Operating systems prior to Windows 10 (Windows 7, 8, 8.1 and their server conterparts) MSAL.NET is able to perform device authentication using PKey Authentication. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1543)
 
