@@ -10,7 +10,7 @@ Bug Fixes:
 
 **MSAL .NET would throw a null ref when no authentication type was specified when creating a confidential client application** MSAL .NET now verifies the developer has specified one client credential (client secret, certificate, or client assertion) when using a confidential client application. See [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1795)
 
-**GetAccountsAsync() used to returns 0 accounts when the broker was not installed** (on Xamarin.Android). MSAL will now return accounts from the local MSAL cache when the broker is not installed and WithBroker(trus) is used. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1775)
+**GetAccountsAsync() used to return 0 accounts when the broker was not installed** (on Xamarin.Android). MSAL will now return accounts from the local MSAL cache when the broker is not installed and WithBroker(trus) is used. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1775)
 
 4.12.0
 ============
