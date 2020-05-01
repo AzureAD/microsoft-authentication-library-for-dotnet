@@ -1,3 +1,17 @@
+4.13.0
+============
+New Features: 
+
+**Client throttling is supported in Public Client Applications** MSAL will now implement client side throttling to reduce excessive authentication requests sent to the service: In the case where the Azure AD service replies with an HTTP error implying throttling, MSAL.NET now respects itself the delay imposed by the service by throwing an exception telling the application after which delay/when it will be able to acquire a token again without even attempting to call the service. For details see [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1624)
+
+**MSAL now can perform device authentication on Desktop** On Operating systems prior to Windows 10 (Windows 7, 8, 8.1 and their server conterparts) MSAL.NET is able to perform device authentication using PKey Authentication. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1543)
+
+Bug Fixes:
+
+**MSAL .NET would throw a null ref when no authentication type was specified when creating a confidential client application** MSAL .NET now verifies the developer has specified one client credential (client secret, certificate, or client assertion) when using a confidential client application. See [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1795)
+
+**GetAccountsAsync() used to return 0 accounts when the broker was not installed** (on Xamarin.Android). MSAL will now return accounts from the local MSAL cache when the broker is not installed and WithBroker(trus) is used. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1775)
+
 4.12.0
 ============
 New Features: 
