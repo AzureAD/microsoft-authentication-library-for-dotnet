@@ -4,6 +4,8 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -208,5 +210,31 @@ namespace Microsoft.Identity.Client
                 ResponseBody,
                 Headers);
         }
+
+        #region Serialization
+
+
+        // DEPRECATE / OBSOLETE - this functionality is not used and should be removed in a next major version
+
+        internal override void PopulateJson(JObject jobj)
+        {
+            base.PopulateJson(jobj);
+
+            jobj[ClaimsKey] = Claims;
+            jobj[ResponseBodyKey] = ResponseBody;
+            jobj[CorrelationIdKey] = CorrelationId;
+            jobj[SubErrorKey] = SubError;
+        }
+
+        internal override void PopulateObjectFromJson(JObject jobj)
+        {
+            base.PopulateObjectFromJson(jobj);
+
+            Claims = JsonUtils.GetExistingOrEmptyString(jobj, ClaimsKey);
+            ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
+            CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
+            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
+        }
+        #endregion
     }
 }

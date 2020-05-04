@@ -10,16 +10,12 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.Platforms.net45.Native
 {
-   //
-    // Public facing enumerations
-    //
-
     /// <summary>
     ///     Padding modes 
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1027:MarkEnumsWithFlags", Justification = "Public use of the enum is not as flags")]
     [SuppressMessage("Microsoft.Design", "CA1008:EnumsShouldHaveZeroValue", Justification = "The native BCRYPT_PAD_NONE value is 1, not 0, and this is for interop.")]
-    public enum AsymmetricPaddingMode
+    internal enum AsymmetricPaddingMode
     {
         /// <summary>
         ///     No padding
