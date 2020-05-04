@@ -20,6 +20,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
         private const string TheOnlyFamilyId = "1";
+        private Lazy<IBroker> _broker;
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -28,6 +29,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, silentParameters)
         {
             _silentParameters = silentParameters;
+            _broker = new Lazy<IBroker>(() => ServiceBundle.PlatformProxy.CreateBroker(null));
         }
 
         private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint)
@@ -75,9 +77,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async override Task PreRunAsync()
         {
 
-            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && 
-                AuthenticationRequestParameters.IsBrokerConfigured)
+            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() &&
+                AuthenticationRequestParameters.IsBrokerConfigured &&
+                _broker.Value.CanInvokeBroker())
+            {
                 return;
+            }
 
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
@@ -92,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && AuthenticationRequestParameters.IsBrokerConfigured)
+            if (ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth() && AuthenticationRequestParameters.IsBrokerConfigured && _broker.Value.CanInvokeBroker())
             {
                 var msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
