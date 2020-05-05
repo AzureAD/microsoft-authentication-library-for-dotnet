@@ -27,11 +27,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
         private const string ChromePackage = "com.android.chrome";
-#if __ANDROID_29__
-        private const string CustomTabService = "androidx.browser.customtabs.action.CustomTabsService";
-#else
+        // this is used to check if anything can open custom tabs.
+        // Must use the classic support. Leaving the reference androidx intent
+//#if __ANDROID_29__
+//        private const string CustomTabService = "androidx.browser.customtabs.action.CustomTabsService";
+//#else
         private const string CustomTabService = "android.support.customtabs.action.CustomTabsService";
-#endif
+//#endif
         public AndroidPlatformProxy(ICoreLogger logger) : base(logger)
         {
         }
