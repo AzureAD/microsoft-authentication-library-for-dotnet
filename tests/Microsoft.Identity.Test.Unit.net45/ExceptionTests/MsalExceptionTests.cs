@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.ExceptionTests
 {
+
     [TestClass]
     public class MsalExceptionTests
     {

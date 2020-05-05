@@ -136,7 +136,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #endif
             }
         }
-        public bool IsRefreshTokenRequest => ApiId == ApiEvent.ApiIds.AcquireTokenByRefreshToken;
         public UserAssertion UserAssertion { get; set; }
 
 #endregion

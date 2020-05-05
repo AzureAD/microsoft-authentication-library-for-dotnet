@@ -13,18 +13,20 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             this IThrottlingProvider throttlingManager, 
             TimeSpan delay)
         {
-            var (retryAfterProvider, httpStatusProvider) = GetTypedThrottlingProviders(throttlingManager);
-            MoveToPast(delay, retryAfterProvider.Cache.CacheForTest);
+            var (retryAfterProvider, httpStatusProvider, uiRequiredProvider) = GetTypedThrottlingProviders(throttlingManager);
+            MoveToPast(delay, retryAfterProvider.ThrottlingCache.CacheForTest);
             MoveToPast(delay, httpStatusProvider.ThrottlingCache.CacheForTest);
+            MoveToPast(delay, uiRequiredProvider.ThrottlingCache.CacheForTest);
         }
 
-        public static (RetryAfterProvider, HttpStatusProvider) GetTypedThrottlingProviders(
+        public static (RetryAfterProvider, HttpStatusProvider, UiRequiredProvider) GetTypedThrottlingProviders(
           this IThrottlingProvider throttlingManager)
         {
             var manager = throttlingManager as SingletonThrottlingManager;
             return (
-                manager.ThrottlingProvidersForTest.Single(p => p is RetryAfterProvider) as RetryAfterProvider,
-                manager.ThrottlingProvidersForTest.Single(p => p is HttpStatusProvider) as HttpStatusProvider);
+                manager.ThrottlingProviders.Single(p => p is RetryAfterProvider) as RetryAfterProvider,
+                manager.ThrottlingProviders.Single(p => p is HttpStatusProvider) as HttpStatusProvider,
+                manager.ThrottlingProviders.Single(p => p is UiRequiredProvider) as UiRequiredProvider);
         }
 
 
