@@ -20,6 +20,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
         private const string TheOnlyFamilyId = "1";
+        private bool? _canExecuteBrokerValue;
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -28,6 +29,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, silentParameters)
         {
             _silentParameters = silentParameters;
+        }
+
+        private bool _canExecuteBroker
+        {
+            get
+            {
+                if (_canExecuteBrokerValue == null)
+                {
+                    _canExecuteBrokerValue = AuthenticationRequestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
+                }
+
+                return (bool)_canExecuteBrokerValue;
+            }
         }
 
         private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint)
@@ -75,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async override Task PreRunAsync()
         {
 
-            if (AuthenticationRequestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            if (_canExecuteBroker)
             {
                 return;
             }
@@ -93,7 +107,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-            if (AuthenticationRequestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            if (_canExecuteBroker)
             {
                 var msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
