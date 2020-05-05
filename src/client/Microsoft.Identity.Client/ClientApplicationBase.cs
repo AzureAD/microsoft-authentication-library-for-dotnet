@@ -91,11 +91,8 @@ namespace Microsoft.Identity.Client
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                if (broker.CanInvokeBroker())
-                {
-                    accounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
-                    return accounts;
-                }
+                accounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
+                return accounts;
             }
 
             if (UserTokenCache == null)
