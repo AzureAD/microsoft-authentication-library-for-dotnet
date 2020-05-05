@@ -35,13 +35,15 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
         public AuthenticationActivity()
         { }
 
-#if __ANDROID_29__
-        private readonly string _customTabsServiceAction =
-            "androidx.browser.customtabs.action.CustomTabsService";
-#else
+        // this is used to check if anything can open custom tabs.
+        // Must use the classic support. Leaving the reference androidx intent
+//#if __ANDROID_29__
+//        private readonly string _customTabsServiceAction =
+//            "androidx.browser.customtabs.action.CustomTabsService";
+//#else
         private readonly string _customTabsServiceAction =
             "android.support.customtabs.action.CustomTabsService";
-#endif
+//#endif
 
         private string _requestUrl;
         private int _requestId;
