@@ -6,7 +6,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Exception type thrown when MSAL detects that an application is trying to acquire a token even 
     /// though an <see cref="MsalUiRequiredException"/> was recently thrown. 
-    /// To mitigate this, when an <see cref="MsalUiRequiredException"/> is encountered,
+    /// To mitigate this, when a <see cref="MsalUiRequiredException"/> is encountered,
     /// the application should switch to acquiring a token interactively. To better understand
     /// why the <see cref="MsalUiRequiredException" /> was thrown, inspect the <see cref="MsalUiRequiredException.Classification"/>
     /// property.
