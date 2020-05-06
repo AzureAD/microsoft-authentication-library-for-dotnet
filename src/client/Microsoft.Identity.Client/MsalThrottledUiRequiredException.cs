@@ -4,24 +4,28 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Exception type thrown when MSAL detects that an application is trying to acquire a token too often, as a result of: 
-    /// - A previous request resulted in an HTTP response containing a Retry-After header which was not followed.
-    /// - A previous request resulted in an HTTP 429 or 5xx, which indicates a problem with the server.
-    ///     
+    /// Exception type thrown when MSAL detects that an application is trying to acquire a token even 
+    /// though an <see cref="MsalUiRequiredException"/> was recently thrown. 
+    /// To mitigate this, when a <see cref="MsalUiRequiredException"/> is encountered,
+    /// the application should switch to acquiring a token interactively. To better understand
+    /// why the <see cref="MsalUiRequiredException" /> was thrown, inspect the <see cref="MsalUiRequiredException.Classification"/>
+    /// property.
+    /// 
     /// The properties of this exception are identical to the original exception
     /// 
     /// For more details see https://aka.ms/msal-net-throttling
     /// </summary>
-    public class MsalThrottledServiceException : MsalServiceException
+    public class MsalThrottledUiRequiredException : MsalUiRequiredException
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public MsalThrottledServiceException(MsalServiceException originalException) : 
+        public MsalThrottledUiRequiredException(MsalUiRequiredException originalException) : 
             base(
                 originalException.ErrorCode, 
                 originalException.Message, 
-                originalException.InnerException)
+                originalException.InnerException, 
+                originalException.Classification)
         {
             SubError = originalException.SubError;
             StatusCode = originalException.StatusCode;
@@ -34,8 +38,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// The original service exception that triggered the throttling.
+        /// The original exception that triggered the throttling.
         /// </summary>
-        public MsalServiceException OriginalServiceException { get; }
+        public MsalUiRequiredException OriginalServiceException { get; }
     }
 }

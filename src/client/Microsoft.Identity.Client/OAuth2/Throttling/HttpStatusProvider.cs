@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                     requestParams.AuthorityInfo.CanonicalAuthority,
                     requestParams.Account?.HomeAccountId?.Identifier);
 
-                ThrottleCommon.TryThrow(strictThumbprint, ThrottlingCache, logger, nameof(HttpStatusProvider));
+                ThrottleCommon.TryThrowServiceException(strictThumbprint, ThrottlingCache, logger, nameof(HttpStatusProvider));
             }
         }
     }

@@ -26,18 +26,17 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
     /// </remarks>
     internal class SingletonThrottlingManager : IThrottlingProvider
     {
-        #region For Test
-        public IEnumerable<IThrottlingProvider> ThrottlingProvidersForTest => _throttlingProviders;
-        #endregion
+        public /* internal for test only */ IEnumerable<IThrottlingProvider> ThrottlingProviders { get; }
 
         #region Singleton
         private SingletonThrottlingManager()
         {
-            _throttlingProviders = new List<IThrottlingProvider>()
+            ThrottlingProviders = new List<IThrottlingProvider>()
             {
                 // the order is important
                 new RetryAfterProvider(),
                 new HttpStatusProvider(),
+                new UiRequiredProvider()
             };
         }
 
@@ -51,8 +50,6 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         #endregion
 
-        private readonly IEnumerable<IThrottlingProvider> _throttlingProviders;
-
         public void RecordException(
             AuthenticationRequestParameters requestParams,
             IReadOnlyDictionary<string, string> bodyParams,
@@ -60,7 +57,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         {
             if (!(ex is MsalThrottledServiceException))
             {
-                foreach (var provider in _throttlingProviders)
+                foreach (var provider in ThrottlingProviders)
                 {
                     provider.RecordException(requestParams, bodyParams, ex);
                 }
@@ -71,7 +68,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
            AuthenticationRequestParameters requestParams,
            IReadOnlyDictionary<string, string> bodyParams)
         {
-            foreach (var provider in _throttlingProviders)
+            foreach (var provider in ThrottlingProviders)
             {
                 provider.TryThrottle(requestParams, bodyParams);
             }
@@ -79,7 +76,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public void ResetCache()
         {
-            foreach (var provider in _throttlingProviders)
+            foreach (var provider in ThrottlingProviders)
             {
                 provider.ResetCache();
             }

@@ -118,6 +118,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true); // Current_request = 2 | ATS_ID, 1 |
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
 
+                // invalid grant error puts MSAL in a throttled state - simulate some time passing for this
+                _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
+                    UiRequiredProvider.s_uiRequiredExpiration.Add(TimeSpan.FromSeconds(1)));
+
                 Guid step4Correlationid = result.Correlationid;
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true and failure = interaction_required");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInteractionRequired, forceRefresh: true).ConfigureAwait(false);

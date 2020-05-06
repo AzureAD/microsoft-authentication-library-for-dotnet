@@ -20,7 +20,6 @@ namespace Microsoft.Identity.Client
     /// <item><description>Contrary to <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, public clients are unable to hold configuration time secrets,
     /// and as a result have no client secret</description></item>
     /// <item><description>The redirect URL is pre-proposed by the library. It does not need to be passed in the constructor</description></item>
-    /// <item><description>.NET Core does not support UI, and therefore this platform does not provide the interactive token acquisition methods</description></item>
     /// </list>
     /// </remarks>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
