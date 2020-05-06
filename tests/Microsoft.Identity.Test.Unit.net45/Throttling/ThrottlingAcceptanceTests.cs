@@ -33,12 +33,12 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         /// 400 with Retry After with N seconds, the entry should stay in cache for N seconds
         /// </summary>
         /// <remarks>This test will actually sleep for N seconds to simulate the real world scenario</remarks>
-        [TestMethod] 
+        [TestMethod]
         public async Task Http400_RetryAfter_ThrottleForDuration_AcceptanceTest_Async()
         {
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
-            {                
-                var app = await SetupAndAquireOnceAsync(httpManagerAndBundle, 400, 2, TokenResponseType.InvalidClient).ConfigureAwait(false);
+            {
+                var app = await SetupAndAcquireOnceAsync(httpManagerAndBundle, 400, 2, TokenResponseType.InvalidClient).ConfigureAwait(false);
                 var httpManager = httpManagerAndBundle.HttpManager;
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
                 var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
@@ -49,13 +49,13 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                        .ConfigureAwait(false);
                 AssertInvalidClientEx(ex);
-                
+
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("4. Time passes, the throttling cache will have expired");
                 await Task.Delay(2 * 1000).ConfigureAwait(false);
                 // cache isn't clear just by time passing
-                AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1); 
+                AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("5. Third call - no more throttling");
                 httpManager.AddTokenResponse(TokenResponseType.Valid, s_throttlingHeader);
@@ -76,9 +76,9 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         {
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
-                var app = await SetupAndAquireOnceAsync(
-                    httpManagerAndBundle, 
-                    httpStatusCode, 
+                var app = await SetupAndAcquireOnceAsync(
+                    httpManagerAndBundle,
+                    httpStatusCode,
                     RetryAfterDurationSeconds,
                     TokenResponseType.InvalidClient).ConfigureAwait(false);
 
@@ -115,9 +115,9 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         {
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
-                var app = await SetupAndAquireOnceAsync(
-                    httpManagerAndBundle, 
-                    400, 
+                var app = await SetupAndAcquireOnceAsync(
+                    httpManagerAndBundle,
+                    400,
                     RetryAfterDurationSeconds,
                     TokenResponseType.InvalidClient).ConfigureAwait(false);
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
                    () => app.AcquireTokenSilent(TestConstants.s_scope, account)
                         .WithClaims(TestConstants.Claims) // claims are not part of the strict thumbprint
-                        .ExecuteAsync())                    
+                        .ExecuteAsync())
                        .ConfigureAwait(false);
                 Assert.AreEqual(400, ex.StatusCode);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 await app.AcquireTokenSilent(new[] { "Other.Scopes" }, account).ExecuteAsync()
                        .ConfigureAwait(false);
             }
-        }         
+        }
 
         /// <summary>
         /// 400 with Retry After with 2 hours, should be throttled on DefaultThrottlig timeout
@@ -148,9 +148,9 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         {
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
-                var app = await SetupAndAquireOnceAsync(
-                    httpManagerAndBundle, 
-                    400, 
+                var app = await SetupAndAcquireOnceAsync(
+                    httpManagerAndBundle,
+                    400,
                     7200,
                     TokenResponseType.InvalidClient).ConfigureAwait(false);
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
@@ -177,10 +177,10 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         {
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
-                var app = await SetupAndAquireOnceAsync(httpManagerAndBundle, httpStatusCode, null, TokenResponseType.InvalidClient).ConfigureAwait(false);
+                var app = await SetupAndAcquireOnceAsync(httpManagerAndBundle, httpStatusCode, null, TokenResponseType.InvalidClient).ConfigureAwait(false);
 
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
-                var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);                
+                var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
 
                 Trace.WriteLine("3. Second call - request is throttled");
                 var ex = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
@@ -210,10 +210,10 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         {
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
-                var app = await SetupAndAquireOnceAsync(
-                    httpManagerAndBundle, 
-                    429, 
-                    null, 
+                var app = await SetupAndAcquireOnceAsync(
+                    httpManagerAndBundle,
+                    429,
+                    null,
                     TokenResponseType.InvalidClient).ConfigureAwait(false);
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
                 var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                     .WithHttpManager(httpManagerAndBundle.HttpManager)
                     .BuildConcrete();
                 new TokenCacheHelper().PopulateCache(
-                    pca2.UserTokenCacheInternal.Accessor, 
+                    pca2.UserTokenCacheInternal.Accessor,
                     expiredAccessTokens: true);
 
                 await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
@@ -266,10 +266,10 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         {
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
-                var app = await SetupAndAquireOnceAsync(
-                    httpManagerAndBundle, 
-                    400, 
-                    null, 
+                var app = await SetupAndAcquireOnceAsync(
+                    httpManagerAndBundle,
+                    400,
+                    null,
                     TokenResponseType.InvalidGrant).ConfigureAwait(false);
 
                 var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
@@ -295,7 +295,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
 
                 Trace.WriteLine("Time passes, the same request should now pass");
                 throttlingManager.SimulateTimePassing(
-                    UiRequiredProvider.s_uiRequiredExpiration + 
+                    UiRequiredProvider.s_uiRequiredExpiration +
                     TimeSpan.FromSeconds(1));
 
                 httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
@@ -319,7 +319,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         {
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
-                var app = await SetupAndAquireOnceAsync(
+                var app = await SetupAndAcquireOnceAsync(
                     httpManagerAndBundle,
                     400,
                     null,
@@ -346,14 +346,62 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync()
                        .ConfigureAwait(false);
                 AssertThrottlingCacheEntryCount(throttlingManager, uiRequiredEntryCount: 1);
-
             }
         }
 
+        [TestMethod]
+        public async Task UiRequired_MultipleEntries_Async()
+        {
+            Assert.AreEqual(2, TestConstants.s_scope.Count, "test error - expecting at least 2 scopes");
+
+            using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
+            {
+                var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
+
+                var app = await SetupAndAcquireOnceAsync(
+                    httpManagerAndBundle,
+                    400,
+                    null,
+                    TokenResponseType.InvalidGrant).ConfigureAwait(false);
+
+                Assert.AreEqual(0, httpManagerAndBundle.HttpManager.QueueSize);
+                AssertThrottlingCacheEntryCount(throttlingManager, uiRequiredEntryCount: 1);
+
+                httpManagerAndBundle.HttpManager.AddTokenResponse(
+                    TokenResponseType.InvalidGrant, s_throttlingHeader);
+
+                Trace.WriteLine("Make another failing request, but with fewer scopes - should not be throttled.");
+                var singleScope = TestConstants.s_scope.Take(1);
+                var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                  () => app.AcquireTokenSilent(singleScope, account).ExecuteAsync())
+                      .ConfigureAwait(false);
+
+                Assert.AreEqual(0, httpManagerAndBundle.HttpManager.QueueSize);
+                AssertThrottlingCacheEntryCount(throttlingManager, uiRequiredEntryCount: 2);
+
+                Trace.WriteLine("Time passes, the same requests should now pass");
+                throttlingManager.SimulateTimePassing(
+                    UiRequiredProvider.s_uiRequiredExpiration +
+                    TimeSpan.FromSeconds(1));
+
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+                await app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync()
+                       .ConfigureAwait(false);
+                httpManagerAndBundle.HttpManager.AddTokenResponse(TokenResponseType.Valid);
+
+                await app.AcquireTokenSilent(singleScope, account).WithForceRefresh(true).ExecuteAsync()
+                      .ConfigureAwait(false);
+
+                // there will still be an entry here because the refresh token written by the first succesful ATS
+                // is different from the initial RT
+                AssertThrottlingCacheEntryCount(throttlingManager, uiRequiredEntryCount: 1);
+            }
+        }
         #endregion
 
-        private async Task<PublicClientApplication> SetupAndAquireOnceAsync(
-             MockHttpAndServiceBundle httpManagerAndBundle,
+        private async Task<PublicClientApplication> SetupAndAcquireOnceAsync(
+            MockHttpAndServiceBundle httpManagerAndBundle,
             int httpStatusCode,
             int? retryAfterInSeconds,
             TokenResponseType tokenResponseType)
@@ -380,10 +428,10 @@ namespace Microsoft.Identity.Test.Unit.Throttling
 
             Trace.WriteLine("2. First failing call ");
             var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync(), 
+                () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync(),
                      allowDerived: true)
                     .ConfigureAwait(false);
-            
+
             Assert.AreEqual(0, httpManager.QueueSize, "No more requests expected");
             Assert.AreEqual(httpStatusCode, ex.StatusCode);
             Assert.AreEqual(tokenResponseType == TokenResponseType.InvalidGrant, ex is MsalUiRequiredException);
@@ -392,8 +440,8 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         }
 
         private static void UpdateStatusCodeAndHeaders(
-            HttpResponseMessage tokenResponse, 
-            int httpStatusCode, 
+            HttpResponseMessage tokenResponse,
+            int httpStatusCode,
             int? retryAfterInSeconds)
         {
             tokenResponse.StatusCode = (HttpStatusCode)httpStatusCode;
@@ -405,12 +453,12 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         }
 
         private static void AssertThrottlingCacheEntryCount(
-            SingletonThrottlingManager throttlingManager, 
-            int retryAfterEntryCount = 0, 
-            int httpStatusEntryCount = 0, 
+            SingletonThrottlingManager throttlingManager,
+            int retryAfterEntryCount = 0,
+            int httpStatusEntryCount = 0,
             int uiRequiredEntryCount = 0)
         {
-            var (retryAfterProvider, httpStatusProvider, uiRequiredProvider) = 
+            var (retryAfterProvider, httpStatusProvider, uiRequiredProvider) =
                 throttlingManager.GetTypedThrottlingProviders();
 
             Assert.AreEqual(retryAfterEntryCount, retryAfterProvider.ThrottlingCache.CacheForTest.Count);

@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public void RecordException(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams, MsalServiceException ex)
         {
-            if (ex is MsalUiRequiredException && IsSupported(requestParams))
+            if (ex is MsalUiRequiredException && IsRequestSupported(requestParams))
             {
                 var logger = requestParams.RequestContext.Logger;
 
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public void TryThrottle(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams)
         {
-            if (!ThrottlingCache.IsEmpty() && IsSupported(requestParams))
+            if (!ThrottlingCache.IsEmpty() && IsRequestSupported(requestParams))
             {
                 var logger = requestParams.RequestContext.Logger;
 
@@ -77,7 +77,12 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             }
         }
 
-        private static bool IsSupported(AuthenticationRequestParameters requestParams)
+        /// <summary>
+        /// MsalUiRequiredException is thrown from AcquireTokenSilent, based on certain error codes from the server 
+        /// when contacting the token endpoint.
+        /// Currently, throttling will only apply to public client applications at first. 
+        /// </summary>
+        private static bool IsRequestSupported(AuthenticationRequestParameters requestParams)
         {            
             return !requestParams.IsConfidentialClient &&
                 requestParams.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent;
