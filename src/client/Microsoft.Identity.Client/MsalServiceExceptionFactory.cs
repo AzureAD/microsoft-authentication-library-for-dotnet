@@ -57,8 +57,7 @@ namespace Microsoft.Identity.Client
 
         private static bool IsInteractionRequired(OAuth2ResponseBase oAuth2Response)
         {
-            return string.Equals(oAuth2Response?.Error, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase);
-
+            return string.Equals(oAuth2Response?.Error, MsalError.InteractionRequired, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsInvalidGrant(OAuth2ResponseBase oAuth2Response)
