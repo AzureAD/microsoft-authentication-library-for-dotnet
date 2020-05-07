@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
                 var tokenResponse = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                tokenResponse.ResponseMessage.StatusCode = HttpStatusCode.TooManyRequests;
+                tokenResponse.ResponseMessage.StatusCode = (HttpStatusCode)429;
                 const int RetryAfterInSeconds = 10;
                 UpdateStatusCodeAndHeaders(tokenResponse.ResponseMessage, 429, RetryAfterInSeconds);
 
