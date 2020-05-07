@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                     400,
                     7200,
                     TokenResponseType.InvalidClient).ConfigureAwait(false);
-                var account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
+                
                 var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
@@ -163,6 +163,48 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 Assert.AreEqual(actualExpiration, RetryAfterProvider.MaxRetryAfter);
             }
         }
+
+        [TestMethod]
+        public async Task ConfidentialClientUsingSecretNoCacheProvidedTestAsync()
+        {
+            using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
+            {
+                var httpManager = httpManagerAndBundle.HttpManager;
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
+                var (retryAfterProvider, _, _) = throttlingManager.GetTypedThrottlingProviders();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
+                var tokenResponse = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                tokenResponse.ResponseMessage.StatusCode = HttpStatusCode.TooManyRequests;
+                const int RetryAfterInSeconds = 10;
+                UpdateStatusCodeAndHeaders(tokenResponse.ResponseMessage, 429, RetryAfterInSeconds);
+
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>( 
+                    () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(429, ex.StatusCode);
+                AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
+
+                var ex2 = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                   () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
+                   .ConfigureAwait(false);
+                Assert.AreEqual(429, ex2.StatusCode);
+                Assert.AreSame(ex, ex2.OriginalServiceException);
+
+                throttlingManager.SimulateTimePassing(TimeSpan.FromSeconds(RetryAfterInSeconds + 1));
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+            }
+        }
+
+
         #endregion
 
         #region HTTP 5xx acceptance test
