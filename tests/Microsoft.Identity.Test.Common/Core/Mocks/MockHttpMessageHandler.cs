@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,8 +21,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public string ExpectedUrl { get; set; }
         public IDictionary<string, string> ExpectedQueryParams { get; set; }
         public IDictionary<string, string> ExpectedPostData { get; set; }
-        public IDictionary<string, string> HttpTelemetryHeaders { get; set; }
+        public IDictionary<string, string> ExpectedRequestHeaders { get; set; }
+
         public HttpMethod ExpectedMethod { get; set; }
+        
         public Exception ExceptionToThrow { get; set; }
         public Action<HttpRequestMessage> AdditionalRequestValidation { get; set; }
 
@@ -96,14 +97,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         Assert.AreEqual(ExpectedPostData[key], requestPostDataPairs[key]);
                     }
                 }
-            }
-
-            if (HttpTelemetryHeaders != null)
+            }       
+            
+            if (ExpectedRequestHeaders != null )
             {
-                if (ActualRequestMessage.Headers.Contains(TelemetryConstants.XClientLastTelemetry))
+                foreach (var kvp in ExpectedRequestHeaders)
                 {
-                    Assert.AreEqual(HttpTelemetryHeaders[TelemetryConstants.XClientLastTelemetry], ReturnValueFromRequestHeader(TelemetryConstants.XClientLastTelemetry));
-                    Assert.AreEqual(HttpTelemetryHeaders[TelemetryConstants.XClientCurrentTelemetry], ReturnValueFromRequestHeader(TelemetryConstants.XClientCurrentTelemetry));
+                    Assert.IsTrue(
+                        request.Headers.Any(h =>
+                            string.Equals(h.Key, kvp.Key, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(h.Value.AsSingleString(), kvp.Value, StringComparison.OrdinalIgnoreCase))
+                        , $"Expecting a request header {kvp.Key}: {kvp.Value} but did not find in the actual request: {request}");
                 }
             }
 

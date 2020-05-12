@@ -53,7 +53,8 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                     var windowController = new AuthenticationAgentNSWindowController(
                         authorizationUri.AbsoluteUri,
                         redirectUri.OriginalString,
-                        SetAuthorizationResult);
+                        SetAuthorizationResult,
+                        RequestContext.ServiceBundle.PlatformProxy.CreateDeviceAuthManager());
                     windowController.Run(CoreUIParent.CallerWindow);
                 });
             }

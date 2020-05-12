@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -89,6 +90,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .WithAuthority(authority)
                 .WithCertificate(cert)
                 .WithRedirectUri(redirectUri)
+                .WithTestLogging()
                 .Build();
 
             Trace.WriteLine("Part 1 - Call GetAuthorizationRequestUrl to figure out where to go ");

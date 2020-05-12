@@ -17,13 +17,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public const string TooManyRequestsContent = "Too many requests error";
         public static readonly TimeSpan TestRetryAfterDuration = TimeSpan.FromSeconds(120);
 
-        public static readonly string DefaultTokenResponse =
-            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
-            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
-            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
-            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
-            "\",\"id_token_expires_in\":\"3600\"}";
+      
 
         public static readonly string B2CTokenResponseWithoutAT =
             "{\"id_token\":\""+ CreateIdTokenForB2C(TestConstants.Uid, TestConstants.Utid, TestConstants.B2CPolicy) +"  \"," +
@@ -39,14 +33,38 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\"" +
             ":\"" + CreateAdfsIdToken(TestConstants.OnPremiseDisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
-        public static readonly string FociTokenResponse =
-           "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
-           "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
-           ",\"foci\":\"1\"" +
-           ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
-           ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-           ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
-           "\",\"id_token_expires_in\":\"3600\"}";
+
+        public static string GetFociTokenResponse()
+        {
+            return 
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+            "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
+            ",\"foci\":\"1\"" +
+            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
+            "\",\"id_token_expires_in\":\"3600\"}";
+        }
+
+        public static readonly string DefaultEmtpyFailureErrorMessage =
+            "{\"the-error-is-not-here\":\"erorwithouterrorfield\",\"error_description\":\"AADSTS991: " +
+                                        "This is an error message which doesn't contain the error field. " +
+                                        "Trace ID: dd25f4fb-3e8d-458e-90e7-179524ce0000Correlation ID: " +
+                                        "f11508ab-067f-40d4-83cb-ccc67bf57e45Timestamp: 2018-09-22 00:50:11Z\"," +
+                                        "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
+                                        "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
+                                        "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}";
+
+        public static string GetDefaultTokenResponse()
+        {
+              return 
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
+            ",\"refresh_token\":\"" + Guid.NewGuid() +"\",\"client_info\"" +
+            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
+            "\",\"id_token_expires_in\":\"3600\"}";
+        }
 
         public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)
         {
@@ -114,7 +132,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false)
         {
             return CreateSuccessResponseMessage(
-                foci ? FociTokenResponse : DefaultTokenResponse);
+                foci ? GetFociTokenResponse() : GetDefaultTokenResponse());
         }        
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessageWithUid(
@@ -138,9 +156,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static HttpResponseMessage CreateFailureTokenResponseMessage(
-            string error, 
-            string subError = null, 
-            string correlationId = null)
+            string error,
+            string subError = null,
+            string correlationId = null,
+            HttpStatusCode? customStatusCode = null)
         {
             string message = "{\"error\":\"" + error + "\",\"error_description\":\"AADSTS00000: Error for test." +
                 "Trace ID: f7ec686c-9196-4220-a754-cd9197de44e9Correlation ID: " +
@@ -151,7 +170,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"correlation_id\":" +
                 "\"" + (correlationId ?? "f11508ab-067f-40d4-83cb-ccc67bf57e45") + "\"}";
 
-            return CreateFailureMessage(HttpStatusCode.BadRequest, message);
+            var statusCode = customStatusCode.HasValue ? customStatusCode.Value : HttpStatusCode.BadRequest;
+            return CreateFailureMessage(statusCode, message);
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage(string subError = null)
@@ -195,16 +215,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"3d483b09-1198-4acb-929f-c648674e32bd\"}");
         }
 
+
+
         public static HttpResponseMessage CreateNoErrorFieldResponseMessage()
         {
-            return CreateFailureMessage(HttpStatusCode.BadRequest,
-                                        "{\"the-error-is-not-here\":\"erorwithouterrorfield\",\"error_description\":\"AADSTS991: " +
-                                        "This is an error message which doesn't contain the error field. " +
-                                        "Trace ID: dd25f4fb-3e8d-458e-90e7-179524ce0000Correlation ID: " +
-                                        "f11508ab-067f-40d4-83cb-ccc67bf57e45Timestamp: 2018-09-22 00:50:11Z\"," +
-                                        "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
-                                        "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
-                                        "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
+            return CreateFailureMessage(HttpStatusCode.BadRequest, DefaultEmtpyFailureErrorMessage);
         }
 
         public static HttpResponseMessage CreateHttpStatusNotFoundResponseMessage()
@@ -346,6 +361,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Content = new StringContent(TooManyRequestsContent)
             };
             httpResponse.Headers.RetryAfter = new RetryConditionHeaderValue(TestRetryAfterDuration);
+
+            return httpResponse;
+        }
+
+
+        public static HttpResponseMessage CreatePKeyAuthChallengeResponse()
+        {
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Content = new StringContent(DefaultEmtpyFailureErrorMessage)
+            };
+            httpResponse.Headers.Add("WWW-Authenticate", @"PKeyAuth  Nonce=""nonce"",  Version=""1.0"", CertThumbprint=""thumbprint"",  Context=""context""");
 
             return httpResponse;
         }

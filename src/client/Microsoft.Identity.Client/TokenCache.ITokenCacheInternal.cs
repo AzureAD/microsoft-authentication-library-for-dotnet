@@ -39,15 +39,7 @@ namespace Microsoft.Identity.Client
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
             string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
             string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
-
-            string subject = idToken?.Subject;
-            if (idToken?.Subject != null)
-            {
-                requestParams.RequestContext.Logger.Warning("Subject not present in Id token");
-            }
-            
-            ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
-            string homeAccountId = clientInfo?.ToAccountIdentifier() ?? subject; // ADFS does not have client info, so we use subject
+            string homeAccountId = GetHomeAccountId(requestParams, response, idToken);
 
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
@@ -112,9 +104,9 @@ namespace Microsoft.Identity.Client
             #endregion
 
             Account account = new Account(
-                              homeAccountId,
-                              username,
-                              instanceDiscoveryMetadata.PreferredCache);         
+                    homeAccountId,
+                    username,
+                    instanceDiscoveryMetadata.PreferredCache);
 
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
@@ -199,6 +191,19 @@ namespace Microsoft.Identity.Client
             {
                 _semaphoreSlim.Release();
             }
+        }
+
+        private static string GetHomeAccountId(AuthenticationRequestParameters requestParams, MsalTokenResponse response, IdToken idToken)
+        {
+            string subject = idToken?.Subject;
+            if (idToken?.Subject != null)
+            {
+                requestParams.RequestContext.Logger.Info("Subject not present in Id token");
+            }
+
+            ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
+            string homeAccountId = clientInfo?.ToAccountIdentifier() ?? subject; // ADFS does not have client info, so we use subject
+            return homeAccountId;
         }
 
         private static string GetPreferredUsernameFromIdToken(bool isAdfsAuthority, IdToken idToken)
@@ -476,11 +481,10 @@ namespace Microsoft.Identity.Client
                 return CacheFallbackOperations.GetAdalEntryForMsal(
                     Logger,
                     LegacyCachePersistence,
-                    metadata.PreferredCache,
                     aliases,
                     requestParams.ClientId,
                     upn,
-                    requestParams.Account.HomeAccountId?.Identifier);
+                    requestParams.Account.HomeAccountId?.ObjectId);
             }
 
             return null;
@@ -648,9 +652,9 @@ namespace Microsoft.Identity.Client
                 {
                     var args = new TokenCacheNotificationArgs(this, ClientId, account, true, (this as ITokenCacheInternal).IsApplicationCache);
 
-                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                     try
                     {
+                        await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
 
                         ((ITokenCacheInternal)this).RemoveMsalAccountWithNoLocks(account, requestContext);
@@ -735,9 +739,9 @@ namespace Microsoft.Identity.Client
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true, (this as ITokenCacheInternal).IsApplicationCache);
 
-                await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                 try
                 {
+                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                     await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
 
                     ((ITokenCacheInternal)this).ClearMsalCache();

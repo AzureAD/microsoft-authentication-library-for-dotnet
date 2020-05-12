@@ -13,13 +13,10 @@ using Windows.Storage;
 using Windows.System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Windows.ApplicationModel.Core;
-using Windows.UI.Core;
 using Windows.Security.Authentication.Web;
 
 namespace Microsoft.Identity.Client.Platforms.uap
@@ -184,7 +181,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override ILegacyCachePersistence CreateLegacyCachePersistence() => new UapLegacyCachePersistence(Logger, CryptographyManager);
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor();
+        public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor(Logger);
 
         public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage() => new UapTokenCacheBlobStorage(CryptographyManager, Logger);
 
@@ -216,5 +213,10 @@ namespace Microsoft.Identity.Client.Platforms.uap
         protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
 
         public override bool IsSystemWebViewAvailable => false;
+
+        public override IDeviceAuthManager CreateDeviceAuthManager()
+        {
+            return new UapDeviceAuthManager();
+        }
     }
 }

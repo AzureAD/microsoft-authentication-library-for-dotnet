@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void VerifyAuthorizationPendingErrorDoesNotLogError()
+        public async Task VerifyAuthorizationPendingErrorDoesNotLogError_Async()
         {
             // When calling DeviceCodeFlow, we poll for the authorization and if the user hasn't entered the code in yet
             // then we receive an error for authorization_pending.  This is thrown as an exception and logged as
@@ -290,8 +290,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
-                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                task.Wait();
+                await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
+                
 
                 // Ensure we got logs so the log callback is working.
                 Assert.IsTrue(logCallbacks.Count > 0, "There should be data in logCallbacks");

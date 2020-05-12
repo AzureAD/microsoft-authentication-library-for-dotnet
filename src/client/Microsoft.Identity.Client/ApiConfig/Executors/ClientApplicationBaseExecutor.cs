@@ -60,8 +60,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _clientApplicationBase.UserTokenCacheInternal);
 
-            requestParameters.IsRefreshTokenRequest = true;
-
             requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 
             requestParameters.SendX5C = refreshTokenParameters.SendX5C;

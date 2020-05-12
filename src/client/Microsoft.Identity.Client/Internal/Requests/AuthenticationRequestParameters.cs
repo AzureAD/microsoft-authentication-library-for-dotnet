@@ -10,7 +10,6 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -104,9 +103,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+
         public ClientCredentialWrapper ClientCredential { get; set; }
 #endif
-
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
         public string LoginHint
@@ -125,14 +124,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
         public IAccount Account { get; set; }
 
-        public bool IsClientCredentialRequest { get; set; }
-        public bool IsRefreshTokenRequest { get; set; }
+        public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
+        public bool IsConfidentialClient
+        {
+            get
+            {
+#if ANDROID || iOS || WINDOWS_APP || MAC
+                return false;
+#else
+                return ClientCredential != null;
+#endif
+            }
+        }
         public UserAssertion UserAssertion { get; set; }
 
-        #endregion
+#endregion
 
-        public void LogParameters(ICoreLogger logger)
+        public void LogParameters()
         {
+            var logger = this.RequestContext.Logger;
+
             // Create Pii enabled string builder
             var builder = new StringBuilder(
                 Environment.NewLine + "=== Request Data ===" + Environment.NewLine + "Authority Provided? - " +

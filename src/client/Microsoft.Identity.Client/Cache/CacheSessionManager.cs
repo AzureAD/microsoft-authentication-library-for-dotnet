@@ -111,8 +111,14 @@ namespace Microsoft.Identity.Client.Cache
                                hasStateChanged: false, 
                                TokenCacheInternal.IsApplicationCache);
 
-                            await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
-                            await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                            try
+                            {
+                                await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
+                            }
+                            finally
+                            {
+                                await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                            }
 
                             _cacheRefreshedForRead = true;
                         }

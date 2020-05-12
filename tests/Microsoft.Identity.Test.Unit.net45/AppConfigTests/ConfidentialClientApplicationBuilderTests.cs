@@ -27,7 +27,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor()
         {
-            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId).Build();
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                          .WithClientSecret("cats")
+                                                          .Build();
+
             Assert.AreEqual(TestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNotNull(cca.UserTokenCache);
 
@@ -56,22 +59,29 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
         private void TestBuildConfidentialClientFromOptions(ConfidentialClientApplicationOptions options)
         {
+            options.ClientSecret = "cats";
             var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
             var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.AuthorityInfo;
             Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
         public void TestBuildWithNoClientSecretButUsingCert()
         {
             var options = new ConfidentialClientApplicationOptions()
             {
                 ClientId = TestConstants.ClientId,
                 TenantId = "the_tenant_id",
-                Instance = "https://login.microsoftonline.com"
+                Instance = "https://login.microsoftonline.com",
             };
 
-            var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
+            var cert = new X509Certificate2(
+               ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+
+            var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options)
+                                                          .WithCertificate(cert)
+                                                          .Build();
             var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.AuthorityInfo;
             Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authorityInfo.CanonicalAuthority);
         }
@@ -112,7 +122,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestWithDifferentClientId()
         {
             const string ClientId = "9340c42a-f5de-4a80-aea0-874adc2ca325";
-            var cca = ConfidentialClientApplicationBuilder.Create(ClientId).Build();
+            var cca = ConfidentialClientApplicationBuilder.Create(ClientId).WithClientSecret("cats").Build();
             Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
         }
 
@@ -120,7 +130,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_ClientIdOverride()
         {
             const string ClientId = "73cc145e-798f-430c-8d6d-618f1a5802e9";
-            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId).WithClientId(ClientId).Build();
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                .WithClientId(ClientId)
+                                                                .WithClientSecret("cats")
+                                                                .Build();
             Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
         }
 
@@ -130,7 +143,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             const string ClientName = "my client name";
             const string ClientVersion = "1.2.3.4-prerelease";
             var cca =
-                ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId).WithClientName(ClientName).WithClientVersion(ClientVersion).Build();
+                ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                            .WithClientName(ClientName)
+                                                            .WithClientVersion(ClientVersion)
+                                                            .WithClientSecret("cats")
+                                                            .Build();
             Assert.AreEqual(ClientName, cca.AppConfig.ClientName);
             Assert.AreEqual(ClientVersion, cca.AppConfig.ClientVersion);
         }
@@ -138,7 +155,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithDebugLoggingCallback()
         {
-            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId).WithDebugLoggingCallback().Build();
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                .WithClientSecret("cats")
+                                                                .WithDebugLoggingCallback()
+                                                                .Build();
             Assert.IsNotNull(cca.AppConfig.LoggingCallback);
         }
 
@@ -146,7 +166,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithHttpClientFactory()
         {
             var httpClientFactory = NSubstitute.Substitute.For<IMsalHttpClientFactory>();
-            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId).WithHttpClientFactory(httpClientFactory).Build();
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                .WithHttpClientFactory(httpClientFactory)
+                                                                .WithClientSecret("cats")
+                                                                .Build();
             Assert.AreEqual(httpClientFactory, cca.AppConfig.HttpClientFactory);
         }
 
@@ -154,7 +177,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithLogging()
         {
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(TestConstants.ClientId).WithLogging((level, message, pii) => { }).Build();
+                      .Create(TestConstants.ClientId)
+                            .WithClientSecret("cats")
+                            .WithLogging((level, message, pii) => { }).Build();
 
             Assert.IsNotNull(cca.AppConfig.LoggingCallback);
         }
@@ -164,7 +189,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string RedirectUri = "http://some_redirect_uri/";
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(TestConstants.ClientId).WithRedirectUri(RedirectUri).Build();
+                      .Create(TestConstants.ClientId)
+                      .WithClientSecret("cats")
+                      .WithRedirectUri(RedirectUri).Build();
 
             Assert.AreEqual(RedirectUri, cca.AppConfig.RedirectUri);
         }
@@ -173,7 +200,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithNullRedirectUri()
         {
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(TestConstants.ClientId).WithRedirectUri(null).Build();
+                      .Create(TestConstants.ClientId)
+                      .WithClientSecret("cats")
+                      .WithRedirectUri(null).Build();
 
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
         }
@@ -182,7 +211,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithEmptyRedirectUri()
         {
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(TestConstants.ClientId).WithRedirectUri(string.Empty).Build();
+                      .Create(TestConstants.ClientId)
+                      .WithClientSecret("cats")
+                      .WithRedirectUri(string.Empty).Build();
 
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
         }
@@ -191,7 +222,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithWhitespaceRedirectUri()
         {
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(TestConstants.ClientId).WithRedirectUri("      ").Build();
+                      .Create(TestConstants.ClientId)
+                      .WithClientSecret("cats")
+                      .WithRedirectUri("      ")
+                      .Build();
 
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, cca.AppConfig.RedirectUri);
         }
@@ -201,6 +235,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             Assert.ThrowsException<InvalidOperationException>(() =>
                 ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                    .WithClientSecret("cats")
                                                     .WithRedirectUri("this is not a valid uri")
                                                     .Build());
         }
@@ -210,7 +245,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string TenantId = "a_tenant id";
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(TestConstants.ClientId).WithTenantId(TenantId).Build();
+                      .Create(TestConstants.ClientId)
+                      .WithClientSecret("cats")
+                      .WithTenantId(TenantId)
+                      .Build();
 
             Assert.AreEqual(TenantId, cca.AppConfig.TenantId);
         }
@@ -220,7 +258,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string ClientSecret = "secret value here";
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(TestConstants.ClientId).WithClientSecret(ClientSecret).Build();
+                      .Create(TestConstants.ClientId)
+                      .WithClientSecret(ClientSecret)
+                      .Build();
 
             Assert.IsNotNull(cca.AppConfig.ClientSecret);
             Assert.AreEqual(ClientSecret, cca.AppConfig.ClientSecret);
@@ -234,7 +274,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
 
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(TestConstants.ClientId).WithCertificate(cert).Build();
+                      .Create(TestConstants.ClientId)
+                      .WithCertificate(cert).Build();
 
             Assert.IsNotNull(cca.AppConfig.ClientCredentialCertificate);
         }
@@ -266,7 +307,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                   .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                   .WithClientSecret("cats")
+                                                   .WithInstanceDiscoveryMetadata(instanceMetadataJson)
                                                    .Build();
 
             var instanceDiscoveryMetadata = (cca.AppConfig as ApplicationConfiguration).CustomInstanceDiscoveryMetadata;
@@ -279,7 +321,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
             var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                  .WithInstanceDicoveryMetadata(instanceMetadataJson)
+                                                  .WithInstanceDiscoveryMetadata(instanceMetadataJson)
+                                                  .WithClientSecret("cats")
                                                   .WithAuthority("https://some.authority/bogus/", true)
                                                   .Build());
             Assert.AreEqual(ex.ErrorCode, MsalError.ValidateAuthorityOrCustomMetadata);
@@ -289,7 +332,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_BadInstanceMetadata()
         {
             var ex = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                  .WithInstanceDicoveryMetadata("{bad_json_metadata")
+                                                  .WithInstanceDiscoveryMetadata("{bad_json_metadata")
+                                                  .WithClientSecret("cats")
                                                   .Build());
 
             Assert.AreEqual(ex.ErrorCode, MsalError.InvalidUserInstanceMetadata);

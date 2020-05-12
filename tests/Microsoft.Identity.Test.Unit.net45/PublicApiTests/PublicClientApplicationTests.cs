@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -800,8 +801,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Act
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                var account = accounts.Single(a => a.HomeAccountId.TenantId == tenant1);
                 AuthenticationResult response = await
-                    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    pca.AcquireTokenSilent(new[] { "User.Read" }, account)
                     .WithAuthority(tenantedAuthority1)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -811,8 +813,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Act
                 accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                account = accounts.Single(a => a.HomeAccountId.TenantId == tenant2);
                 response = await
-                    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    pca.AcquireTokenSilent(new[] { "User.Read" }, account)
                     .WithAuthority(tenantedAuthority2)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -847,8 +850,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Act
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                var account = accounts.Single(a => a.HomeAccountId.TenantId == tenant1);
                 AuthenticationResult response = await
-                    pca.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    pca.AcquireTokenSilent(new[] { "User.Read" }, account)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -860,8 +864,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Act
                 accounts = await pca2.GetAccountsAsync().ConfigureAwait(false);
+                account = accounts.Single(a => a.HomeAccountId.TenantId == tenant2);
                 response = await
-                    pca2.AcquireTokenSilent(new[] { "User.Read" }, accounts.First())
+                    pca2.AcquireTokenSilent(new[] { "User.Read" }, account)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -919,7 +924,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var pcaBuilder = PublicClientApplicationBuilder
                 .Create(clientIdInFile)
-                .WithTelemetry(new TraceTelemetryConfig())
+                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[{lvl}] {msg}"))
                 .WithHttpManager(httpManager);
 
             if (authority != null)

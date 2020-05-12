@@ -143,6 +143,13 @@ namespace Microsoft.Identity.Client.Internal
             {
                 AuthenticationType = ConfidentialClientAuthenticationType.SignedClientAssertion;
             }
+
+            if (AuthenticationType == ConfidentialClientAuthenticationType.None)
+            {
+                throw new MsalClientException(
+                    MsalError.ClientCredentialAuthenticationTypeMustBeDefined,
+                    MsalErrorMessage.ClientCredentialAuthenticationTypeMustBeDefined);
+            }
         }
 
         internal byte[] Sign(ICryptographyManager cryptographyManager, string message)
@@ -168,6 +175,7 @@ namespace Microsoft.Identity.Client.Internal
 
     internal enum ConfidentialClientAuthenticationType
     {
+        None,
         ClientCertificate,
         ClientCertificateWithClaims,
         ClientSecret,

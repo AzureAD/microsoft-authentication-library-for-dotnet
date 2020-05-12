@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
@@ -14,7 +15,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     /// <summary>
     /// Priority order of metadata providers: 
     /// 
-    /// If user provided metadata via <see cref="AbstractApplicationBuilder{T}.WithInstanceDicoveryMetadata(string)"/> use it exclusively. Otherwise:
+    /// If user provided metadata via <see cref="AbstractApplicationBuilder{T}.WithInstanceDiscoveryMetadata(string)"/> use it exclusively. Otherwise:
     /// 
     /// 1. Static cache (this is populated from the network)
     /// 2. Well-known cache if all environments present in the token cache are known (this is hardcoded into msal)
@@ -67,6 +68,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             _userMetadataProvider = userMetadataProvider;
             _knownMetadataProvider = knownMetadataProvider ?? new KnownMetadataProvider();
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
+            
             _networkMetadataProvider = networkMetadataProvider ?? 
                 new NetworkMetadataProvider(
                     _httpManager, 

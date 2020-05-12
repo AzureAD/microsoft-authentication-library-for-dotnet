@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 
@@ -47,6 +48,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var pca = PublicClientApplicationBuilder
                     .Create("1d18b3b0-251b-4714-a02a-9956cec86c2d")
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithTestLogging()
                     .Build();
 
             // This should fail after a few seconds
@@ -71,6 +73,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var pca = PublicClientApplicationBuilder
                     .Create("1d18b3b0-251b-4714-a02a-9956cec86c2d")
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                    .WithTestLogging()
                     .Build();
 
             // The timeout is greater than the timeout of the TCP listener

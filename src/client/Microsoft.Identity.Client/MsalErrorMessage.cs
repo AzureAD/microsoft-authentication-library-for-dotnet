@@ -221,6 +221,7 @@ namespace Microsoft.Identity.Client
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
 
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "ClientSecret, Certificate and ClientAssertion are mutually exclusive properties. Only specify one. See https://aka.ms/msal-net-client-credentials";
+        public const string ClientCredentialAuthenticationTypeMustBeDefined = "One client credential type required either: ClientSecret, Certificate OR ClientAssertion must be defined when creating a Confidential Client. Only specify one. See https://aka.ms/msal-net-client-credentials";
         public const string ClientIdMustBeAGuid = "Error: ClientId is not a Guid.";
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
@@ -303,6 +304,7 @@ namespace Microsoft.Identity.Client
             "See https://aka.ms/msal-net-custom-instance-metadata for more details.";
 
         public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow.";
+        public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Mitigation: Delete the ADAL cache. If you do not maintain an ADAL cache, this may be a bug in MSAL.";
 
         public static string ExperimentalFeature(string methodName)
         {

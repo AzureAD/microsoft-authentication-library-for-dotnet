@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using Microsoft.Identity.Client;
 
@@ -9,7 +10,7 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
 {
     public class HttpSnifferClientFactory : IMsalHttpClientFactory
     {
-        HttpClient _httpClient;
+        readonly HttpClient _httpClient;
 
         public IList<(HttpRequestMessage, HttpResponseMessage)> RequestsAndResponses { get; }
 
@@ -17,7 +18,11 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
         {
             RequestsAndResponses = new List<(HttpRequestMessage, HttpResponseMessage)>();
 
-            var recordingHandler = new RecordingHandler((req, res) => RequestsAndResponses.Add((req, res)));
+            var recordingHandler = new RecordingHandler((req, res) => { 
+                RequestsAndResponses.Add((req, res));
+                Trace.WriteLine($"[MSAL][HTTP Request]: {req}");
+                Trace.WriteLine($"[MSAL][HTTP Response]: {res}");
+            });
             recordingHandler.InnerHandler = new HttpClientHandler();
             _httpClient = new HttpClient(recordingHandler);
         }

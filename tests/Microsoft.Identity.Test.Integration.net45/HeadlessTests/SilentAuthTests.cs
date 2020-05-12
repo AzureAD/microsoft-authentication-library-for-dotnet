@@ -3,6 +3,7 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
@@ -33,6 +34,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             pca = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithAuthority("https://login.microsoftonline.com/organizations")
+                .WithTestLogging()
                 .Build();
 
             Trace.WriteLine("Part 1 - Acquire a token with U/P");
@@ -51,6 +53,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             pca = PublicClientApplicationBuilder
                 .Create(LabApiConstants.MSAOutlookAccountClientID)
+                .WithTestLogging()
                 .WithAuthority(AadAuthorityAudience.PersonalMicrosoftAccount)
                 .Build();
 
@@ -83,6 +86,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 var pca1 = PublicClientApplicationBuilder
                    .Create(labResponse.App.AppId)
+                   .WithTestLogging()
                    .WithAuthority("https://login.microsoftonline.com/organizations")
                    .Build();
 
@@ -98,6 +102,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 // simulate a restart by creating a new client
                 var pca2 = PublicClientApplicationBuilder
                  .Create(labResponse.App.AppId)
+                 .WithTestLogging()
                  .Build();
 
                 SetCacheSerializationToFile(pca2, cacheFilePath);

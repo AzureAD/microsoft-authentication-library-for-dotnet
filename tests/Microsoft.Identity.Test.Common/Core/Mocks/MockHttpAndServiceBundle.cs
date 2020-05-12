@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -46,7 +47,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ITokenCacheInternal tokenCache,
             IAccount account = null,
             IDictionary<string, string> extraQueryParameters = null,
-            string claims = null)
+            string claims = null,
+            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.None)
         {
             if (tokenCache == null)
             {
@@ -57,7 +59,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 Scopes = scopes ?? TestConstants.s_scope,
                 ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>(),
-                Claims = claims
+                Claims = claims, 
+                ApiId = apiId
             };
 
             return new AuthenticationRequestParameters(

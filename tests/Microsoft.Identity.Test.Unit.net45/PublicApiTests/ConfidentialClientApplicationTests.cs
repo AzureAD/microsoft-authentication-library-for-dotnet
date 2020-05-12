@@ -47,42 +47,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [Description("Tests the public interfaces can be mocked")]
-        [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
-        public void MockConfidentialClientApplication_AcquireToken()
-        {
-            // Setup up a confidential client application that returns a dummy result
-            var mockResult = new AuthenticationResult(
-                "",
-                false,
-                "",
-                DateTimeOffset.Now,
-                DateTimeOffset.Now,
-                "",
-                null,
-                "id token",
-                new[]
-                {
-                    "scope1",
-                    "scope2"
-                },
-                Guid.NewGuid());
-
-            var mockApp = Substitute.For<IConfidentialClientApplication>();
-            mockApp.AcquireTokenByAuthorizationCode(null, "123").ExecuteAsync(CancellationToken.None).Returns(mockResult);
-
-            // Now call the substitute with the args to get the substitute result
-            var actualResult = mockApp.AcquireTokenByAuthorizationCode(null, "123").ExecuteAsync(CancellationToken.None).Result;
-            Assert.IsNotNull(actualResult);
-            Assert.AreEqual("id token", mockResult.IdToken, "Mock result failed to return the expected id token");
-            // Check the scope property
-            IEnumerable<string> scopes = actualResult.Scopes;
-            Assert.IsNotNull(scopes);
-            Assert.AreEqual("scope1", scopes.First());
-            Assert.AreEqual("scope2", scopes.Last());
-        }
-
-        [TestMethod]
-        [Description("Tests the public interfaces can be mocked")]
         public void MockConfidentialClientApplication_Users()
         {
             // Setup up a confidential client application with mocked users
@@ -108,26 +72,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.AreEqual("DisplayableId_1", users.First().Username);
             Assert.AreEqual("DisplayableId_2", users.Last().Username);
-        }
-
-        [TestMethod]
-        [Description("Tests the public application interfaces can be mocked to throw MSAL exceptions")]
-        [Ignore("Bug 1001, as we deprecate public API, new methods aren't mockable.  Working on prototype.")]
-        public void MockConfidentialClientApplication_Exception()
-        {
-            // Setup up a confidential client application that returns throws
-            var mockApp = Substitute.For<IConfidentialClientApplication>();
-            mockApp
-                .WhenForAnyArgs(x => x.AcquireTokenForClient(Arg.Any<string[]>()).ExecuteAsync(CancellationToken.None))
-                .Do(x => throw new MsalServiceException("my error code", "my message", new HttpRequestException()));
-
-            // Now call the substitute and check the exception is thrown
-            var ex = AssertException.Throws<MsalServiceException>(
-                () => mockApp
-                    .AcquireTokenForClient(new string[] { "scope1" })
-                    .ExecuteAsync(CancellationToken.None));
-            Assert.AreEqual("my error code", ex.ErrorCode);
-            Assert.AreEqual("my message", ex.Message);
         }
 
         [TestMethod]
@@ -216,7 +160,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 userCacheAccess.AssertAccessCounts(0, 0);
             }
         }
-
 
         [TestMethod]
         [TestCategory("Regression")]
@@ -1018,6 +961,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void EnsurePublicApiSurfaceExistsOnInterface()
         {
             IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                                     .WithClientSecret("cats")
                                                                                      .Build();
 
             // This test is to ensure that the methods we want/need on the IConfidentialClientApplication exist and compile.  This isn't testing functionality, that's done elsewhere.

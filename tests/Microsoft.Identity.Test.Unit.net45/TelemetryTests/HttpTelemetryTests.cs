@@ -6,10 +6,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
+using Microsoft.Identity.Test.Unit.Throttling;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -94,6 +95,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithHttpManager(_harness.HttpManager)
                             .WithDefaultRedirectUri()
+                            .WithLogging((lvl,msg,pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
                             .BuildConcrete();
 
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
@@ -115,6 +117,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInvalidGrant, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true); // Current_request = 2 | ATS_ID, 1 |
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
+
+                // invalid grant error puts MSAL in a throttled state - simulate some time passing for this
+                _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
+                    UiRequiredProvider.s_uiRequiredExpiration.Add(TimeSpan.FromSeconds(1)));
 
                 Guid step4Correlationid = result.Correlationid;
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true and failure = interaction_required");
@@ -146,6 +152,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     expectedCorrelationIds: new[] { step5CorrelationId, step6CorrelationId },
                     expectedErrors: new[] { "interaction_required", "user_cancelled" });
 
+                // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
+                _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
+                    HttpStatusProvider.s_throttleDuration.Add(TimeSpan.FromSeconds(1)));
 
                 Trace.WriteLine("Step 8. Acquire Token Interactive -> Success");
                 result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);

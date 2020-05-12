@@ -28,7 +28,10 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         /// </summary>
         public override Task<string> GetUserPrincipalNameAsync()
         {
-            return Task.FromResult(string.Empty);
+            throw new PlatformNotSupportedException(
+                "MSAL cannot determine the username (UPN) of the currently logged in user." +
+                "For Integrated Windows Authentication and Username/Password flows, please use .WithUsername() before calling ExecuteAsync(). " +
+                "For more details see https://aka.ms/msal-net-iwa");
         }
 
         public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
@@ -123,7 +126,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            return new InMemoryTokenCacheAccessor();
+            return new InMemoryTokenCacheAccessor(Logger);
         }
 
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
