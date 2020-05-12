@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         }
 
         [TestMethod]
-        public async Task ConfidentialClientUsingSecretNoCacheProvidedTestAsync()
+        public async Task RetryAfter_ConfidentialClient_Async()
         {
             using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
             {
