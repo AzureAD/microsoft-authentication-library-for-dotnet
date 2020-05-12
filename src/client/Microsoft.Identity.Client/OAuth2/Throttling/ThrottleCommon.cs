@@ -54,11 +54,6 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 // mark the exception for logging purposes                
                 throw new MsalThrottledServiceException(ex);
             }
-        }        
-
-        public static bool IsRetryAfterAndHttpStatusThrottlingSupported(AuthenticationRequestParameters requestParameters)
-        {
-            return !requestParameters.IsConfidentialClient;
-        }
+        }               
     }
 }

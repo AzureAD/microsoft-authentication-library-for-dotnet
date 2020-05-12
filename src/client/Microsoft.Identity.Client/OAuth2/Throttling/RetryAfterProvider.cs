@@ -7,6 +7,10 @@ using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
+    /// <summary>
+    /// The Retry-After provider observes all service exceptions from all flows and looks for a header like: RetryAfter X seconds.
+    /// It then enforces this header, by throttling for X seconds.
+    /// </summary>
     internal class RetryAfterProvider : IThrottlingProvider
     {
 
@@ -24,8 +28,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             IReadOnlyDictionary<string, string> bodyParams, 
             MsalServiceException ex)
         {
-            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams) &&
-                TryGetRetryAfterValue(ex.Headers, out TimeSpan retryAfterTimespan))
+            if (TryGetRetryAfterValue(ex.Headers, out TimeSpan retryAfterTimespan))
             {
                 retryAfterTimespan = GetSafeValue(retryAfterTimespan);
 
@@ -52,8 +55,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             AuthenticationRequestParameters requestParams, 
             IReadOnlyDictionary<string, string> bodyParams)
         {
-            if (!ThrottlingCache.IsEmpty() && 
-                ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
+            if (!ThrottlingCache.IsEmpty())
             {
                 var logger = requestParams.RequestContext.Logger;
 

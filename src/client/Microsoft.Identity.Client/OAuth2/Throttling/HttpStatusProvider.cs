@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         {
             var logger = requestParams.RequestContext.Logger;
 
-            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams) &&
+            if (IsRequestSupported(requestParams) &&
                 (ex.StatusCode == 429 || (ex.StatusCode >= 500 && ex.StatusCode < 600)) &&
                 // if a retry-after header is present, another provider will take care of this
                 !RetryAfterProvider.TryGetRetryAfterValue(ex.Headers, out _)) 
@@ -53,8 +53,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public void TryThrottle(AuthenticationRequestParameters requestParams, IReadOnlyDictionary<string, string> bodyParams)
         {
-            if (!ThrottlingCache.IsEmpty() && 
-                ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
+            if (!ThrottlingCache.IsEmpty() &&
+                IsRequestSupported(requestParams))
             {
                 var logger = requestParams.RequestContext.Logger;
 
@@ -65,6 +65,11 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
                 ThrottleCommon.TryThrowServiceException(strictThumbprint, ThrottlingCache, logger, nameof(HttpStatusProvider));
             }
+        }
+
+        private static bool IsRequestSupported(AuthenticationRequestParameters requestParameters)
+        {
+            return !requestParameters.IsConfidentialClient;
         }
     }
 }
