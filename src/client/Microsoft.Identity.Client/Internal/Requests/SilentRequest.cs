@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (_canExecuteBrokerValue == null)
                 {
-                    _canExecuteBrokerValue = AuthenticationRequestParameters.IsBrokerConfiguredByUser && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
+                    _canExecuteBrokerValue = AuthenticationRequestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
                 }
 
                 return (bool)_canExecuteBrokerValue;
