@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var interactiveParameters = new AcquireTokenInteractiveParameters();
 
                 // Arrange - important for test
-                requestParams.IsBrokerConfiguredByUser = false;
+                requestParams.IsBrokerConfigured = false;
                 var authCodeResult = new Tuple<string, string>("some_auth_code", "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var interactiveParameters = new AcquireTokenInteractiveParameters();
 
                 // Arrange - important for test
-                requestParams.IsBrokerConfiguredByUser = true;
+                requestParams.IsBrokerConfigured = true;
                 _brokerExchangeComponentOverride
                     .FetchTokensAsync(default)
                     .Returns(Task.FromResult(_msalTokenResponse));
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var interactiveParameters = new AcquireTokenInteractiveParameters();
 
                 // Arrange - important for test
-                requestParams.IsBrokerConfiguredByUser = true;
+                requestParams.IsBrokerConfigured = true;
 
                 // broker returns null 
                 _brokerExchangeComponentOverride
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var interactiveParameters = new AcquireTokenInteractiveParameters();
 
                 // Arrange - important for test
-                requestParams.IsBrokerConfiguredByUser = false;
+                requestParams.IsBrokerConfigured = false;
 
                 // web UI starts the flow, but the auth code shows Evo needs the broker
                 var authCodeResult = new Tuple<string, string>(AuthCodeWithAppLink, "pkce_verifier");
