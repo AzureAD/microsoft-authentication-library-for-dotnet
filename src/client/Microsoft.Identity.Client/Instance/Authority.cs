@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Instance
         }
 
 
-        public static Authority CreateAuthority(string authority, bool validateAuthority = true)
+        public static Authority CreateAuthority(string authority, bool validateAuthority = false)
         {
             return CreateAuthority(AuthorityInfo.FromAuthorityUri(authority, validateAuthority));
         }
