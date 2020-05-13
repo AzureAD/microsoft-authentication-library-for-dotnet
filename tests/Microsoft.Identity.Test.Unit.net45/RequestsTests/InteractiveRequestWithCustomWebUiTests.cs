@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
         }
 
         private async Task ExecuteTestAsync(

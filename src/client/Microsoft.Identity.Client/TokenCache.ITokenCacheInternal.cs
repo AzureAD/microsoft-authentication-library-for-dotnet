@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
 
             var tenantId = Authority
                 .CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo.CanonicalAuthority)
-                .GetTenantId();
+                .TenantId;
 
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
             string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Client
                                 "Filtering by user assertion id");
             }
 
-            string requestTenantId = requestParams.Authority.GetTenantId();
+            string requestTenantId = requestParams.Authority.TenantId;
 
             tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                 string.Equals(item.TenantId ?? string.Empty, requestTenantId ?? string.Empty, StringComparison.OrdinalIgnoreCase),

@@ -247,18 +247,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Body = TestConstants.DiscoveryJsonResponse,
                     StatusCode = System.Net.HttpStatusCode.OK
                 };
-            }
+            }           
 
-            if (endpoint.AbsoluteUri.Equals("https://login.microsoftonline.com/my-utid/v2.0/.well-known/openid-configuration"))
-            {
-                return new HttpResponse()
-                {
-                    Body = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityUtidTenant).Content.ReadAsStringAsync().Result,
-                    StatusCode = System.Net.HttpStatusCode.OK
-                };
-            }
-
-            Assert.Fail("Only instance discovery and openid are supported");
+            Assert.Fail("Only instance discovery is supported");
             return null;
         }
 

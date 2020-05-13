@@ -6,21 +6,24 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 
-namespace Microsoft.Identity.Client.Instance
+namespace Microsoft.Identity.Client.Instance.Validation
 {
-    internal class AadOpenIdConfigurationEndpointManager : IOpenIdConfigurationEndpointManager
+    internal class AadAuthorityValidator : IAuthorityValidator
     {
         private readonly IServiceBundle _serviceBundle;
 
-        public AadOpenIdConfigurationEndpointManager(IServiceBundle serviceBundle)
+        public AadAuthorityValidator(IServiceBundle serviceBundle)
         {
             _serviceBundle = serviceBundle;
         }
 
-        /// <inheritdoc />
-        public async Task<string> ValidateAuthorityAndGetOpenIdDiscoveryEndpointAsync(
+        /// <summary>
+        /// AAD performs authority validation by calling the instance metadata endpoint. This is a bit unfortunate, 
+        /// because instance metadata is used for aliasing, and authority validation is orthogonal to that. 
+        /// MSAL must figure out aliasing even if ValidateAuthority is set to false.
+        /// </summary>
+        public async Task ValidateAuthorityAsync(
             AuthorityInfo authorityInfo,
-            string userPrincipalName,
             RequestContext requestContext)
         {
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
@@ -31,8 +34,6 @@ namespace Microsoft.Identity.Client.Instance
                                              authorityInfo.CanonicalAuthority,
                                              requestContext).ConfigureAwait(false);
             }
-
-            return authorityInfo.CanonicalAuthority + Constants.OpenIdConfigurationEndpoint;
         }
     }
 }

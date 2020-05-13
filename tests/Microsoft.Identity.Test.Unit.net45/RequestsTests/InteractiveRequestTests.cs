@@ -330,7 +330,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
@@ -368,7 +367,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
         }
 
         private IBroker CreateMockBroker()

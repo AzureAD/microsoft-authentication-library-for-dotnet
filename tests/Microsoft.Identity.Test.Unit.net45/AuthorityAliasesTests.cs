@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit
 
             using (var httpManager = new MockHttpManager())
             {
-
                 var authorityUri = new Uri(
                     string.Format(
                         CultureInfo.InvariantCulture,
@@ -57,15 +56,6 @@ namespace Microsoft.Identity.Test.Unit
                           .WithDebugLoggingCallback()
                           .BuildConcrete();
 
-                // mock for openId config request
-                httpManager.AddMockHandler(new MockHttpMessageHandler
-                {
-                    ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/v2.0/.well-known/openid-configuration",
-                        TestConstants.ProductionPrefNetworkEnvironment),
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
-                });
-
                 // mock webUi authorization
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
@@ -74,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit
                 // mock token request
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {
-                    ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/home/oauth2/v2.0/token",
+                    ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/oauth2/v2.0/token",
                         TestConstants.ProductionPrefNetworkEnvironment),
                     ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
@@ -100,15 +90,6 @@ namespace Microsoft.Identity.Test.Unit
 
                     Assert.IsNotNull(result);
                 }
-
-                // mock for openId config request for tenant specific authority
-                httpManager.AddMockHandler(new MockHttpMessageHandler
-                {
-                    ExpectedUrl = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/v2.0/.well-known/openid-configuration",
-                        TestConstants.ProductionPrefNetworkEnvironment, TestConstants.Utid),
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityUtidTenant)
-                });
 
                 // silent request targeting rt should find rt in cache for authority with any environment alias
                 foreach (var envAlias in TestConstants.s_prodEnvAliases)

@@ -80,13 +80,11 @@ namespace Microsoft.Identity.Test.Unit
         private void SetupMocks(MockHttpManager httpManager)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
         }
 
         private void SetupMocks(MockHttpManager httpManager, string authority)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(authority);
         }
 
         [TestMethod]

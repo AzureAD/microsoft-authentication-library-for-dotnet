@@ -11,7 +11,6 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
 using NSubstitute;
 
@@ -80,12 +79,6 @@ namespace Microsoft.Identity.Test.Common
         public static IServiceBundle CreateDefaultAdfsServiceBundle()
         {
             return CreateServiceBundleWithCustomHttpManager(null, authority: TestConstants.OnPremiseAuthority);
-        }
-
-        internal static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
-        {
-            mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
         }
     }
 }

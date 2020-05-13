@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
                 Trace.WriteLine("4. Time passes, the throttling cache will have expired");
-                await Task.Delay(2 * 1000).ConfigureAwait(false);
+                await Task.Delay(2100).ConfigureAwait(false);
                 // cache isn't clear just by time passing
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
@@ -179,7 +179,6 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var (retryAfterProvider, _, _) = throttlingManager.GetTypedThrottlingProviders();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
                 var tokenResponse = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
                 tokenResponse.ResponseMessage.StatusCode = (HttpStatusCode)429;
                 const int RetryAfterInSeconds = 10;

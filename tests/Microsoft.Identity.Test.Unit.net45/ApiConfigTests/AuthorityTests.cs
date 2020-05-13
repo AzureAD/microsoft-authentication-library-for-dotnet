@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             string resultTid)
         {
             var resultAuthority = Authority.CreateAuthorityForRequest(config, request, accountTid);
-            Assert.AreEqual(resultTid, resultAuthority.GetTenantId());
+            Assert.AreEqual(resultTid, resultAuthority.TenantId);
         }
     }
 }

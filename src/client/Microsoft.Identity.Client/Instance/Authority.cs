@@ -5,9 +5,9 @@ using System;
 
 namespace Microsoft.Identity.Client.Instance
 {
-    /// <summary>
-    ///
-    /// </summary>
+    /// <remarks>
+    /// Must be kept immutable
+    /// </remarks>
     internal abstract class Authority
     {
         protected Authority(AuthorityInfo authorityInfo)
@@ -196,13 +196,18 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
-        internal abstract string GetTenantId();
+        internal abstract string TenantId { get; }
 
         /// <summary>
         /// Gets a tenanted authority if the current authority is tenantless.
         /// Returns the original authority on B2C and ADFS
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId);
+
+        /// <summary>
+        /// Gets the authority endpoints based on the host and tenant id. Does not rely on OIDC discovery.
+        /// </summary>
+        internal abstract AuthorityEndpoints GetHardcodedEndpoints();
 
         private static void CheckB2CAuthorityHost(AuthorityInfo requestAuthorityInfo, AuthorityInfo configAuthorityInfo)
         {

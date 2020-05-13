@@ -90,7 +90,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             using (_harness = CreateTestHarness())
             {
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithHttpManager(_harness.HttpManager)
@@ -108,7 +107,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Assert.IsNull(result.HttpRequest, "No calls are made to the token endpoint");
 
                 Trace.WriteLine("Step 3. Acquire Token Silent successful - via refresh_token flow");
-                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 1); // Previous_request = 2|1|||

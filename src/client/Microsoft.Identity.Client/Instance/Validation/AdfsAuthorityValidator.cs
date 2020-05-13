@@ -9,20 +9,19 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Client.Instance
+namespace Microsoft.Identity.Client.Instance.Validation
 {
-    internal class AdfsOpenIdConfigurationEndpointManager : IOpenIdConfigurationEndpointManager
+    internal class AdfsAuthorityValidator : IAuthorityValidator
     {
         private readonly IServiceBundle _serviceBundle;
 
-        public AdfsOpenIdConfigurationEndpointManager(IServiceBundle serviceBundle)
+        public AdfsAuthorityValidator(IServiceBundle serviceBundle)
         {
             _serviceBundle = serviceBundle;
         }
 
-        public async Task<string> ValidateAuthorityAndGetOpenIdDiscoveryEndpointAsync(
+        public async Task ValidateAuthorityAsync(
             AuthorityInfo authorityInfo,
-            string userPrincipalName,
             RequestContext requestContext)
         {
             if (authorityInfo.ValidateAuthority)
@@ -52,8 +51,6 @@ namespace Microsoft.Identity.Client.Instance
                         MsalErrorMessage.InvalidAuthorityOpenId);
                 }
             }
-
-            return authorityInfo.CanonicalAuthority + Constants.WellKnownOpenIdConfigurationPath;
         }
     }
 }
