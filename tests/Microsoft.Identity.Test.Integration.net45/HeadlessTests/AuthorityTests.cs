@@ -88,6 +88,33 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("invalid_instance", exception.ErrorCode);
         }
 
+        [TestMethod]
+        public async Task AuthorityValidationTestWithFalseValidateAuthorityAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabUser user = labResponse.User;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithAuthority("https://bogus.microsoft.com/common", false)
+                .WithTestLogging()
+                .Build();
+
+            Trace.WriteLine("Acquire a token using a not so common authority alias");
+
+            HttpRequestException exception = await AssertException.TaskThrowsAsync<HttpRequestException>(() =>
+                 pca.AcquireTokenByUsernamePassword(
+                    s_scopes,
+                     user.Upn,
+                     new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
+                     .ExecuteAsync())
+                .ConfigureAwait(false);
+
+
+            Assert.IsTrue(((System.Net.WebException) exception.InnerException).Status == System.Net.WebExceptionStatus.NameResolutionFailure);
+
+        }
+
 
         /// <summary>
         /// If this test fails, please update the <see cref="KnownMetadataProvider"/> to 
