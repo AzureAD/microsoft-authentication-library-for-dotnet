@@ -4,20 +4,23 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
+    /// <summary>
+    /// The Retry-After provider observes all service exceptions from all flows and looks for a header like: RetryAfter X seconds.
+    /// It then enforces this header, by throttling for X seconds.
+    /// </summary>
     internal class RetryAfterProvider : IThrottlingProvider
     {
 
-        internal ThrottlingCache Cache { get; } // internal for test only
+        internal ThrottlingCache ThrottlingCache { get; } // internal for test only
 
         internal static readonly TimeSpan MaxRetryAfter = TimeSpan.FromSeconds(3600); // internal for test only
 
         public RetryAfterProvider()
         {
-            Cache = new ThrottlingCache();
+            ThrottlingCache = new ThrottlingCache();
         }
 
         public void RecordException(
@@ -25,8 +28,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             IReadOnlyDictionary<string, string> bodyParams, 
             MsalServiceException ex)
         {
-            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams) &&
-                TryGetRetryAfterValue(ex.Headers, out TimeSpan retryAfterTimespan))
+            if (TryGetRetryAfterValue(ex.Headers, out TimeSpan retryAfterTimespan))
             {
                 retryAfterTimespan = GetSafeValue(retryAfterTimespan);
 
@@ -40,21 +42,20 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                     requestParams.Account?.HomeAccountId?.Identifier);
                 var entry = new ThrottlingCacheEntry(ex, retryAfterTimespan);
 
-                Cache.AddAndCleanup(thumbprint, entry, logger);
+                ThrottlingCache.AddAndCleanup(thumbprint, entry, logger);
             }
         }
 
         public void ResetCache()
         {
-            Cache.Clear();
+            ThrottlingCache.Clear();
         }
 
         public void TryThrottle(
             AuthenticationRequestParameters requestParams, 
             IReadOnlyDictionary<string, string> bodyParams)
         {
-            if (!Cache.IsEmpty() && 
-                ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(requestParams))
+            if (!ThrottlingCache.IsEmpty())
             {
                 var logger = requestParams.RequestContext.Logger;
 
@@ -63,7 +64,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                     requestParams.AuthorityInfo.CanonicalAuthority,
                     requestParams.Account?.HomeAccountId?.Identifier);
 
-                ThrottleCommon.TryThrow(strictThumbprint, Cache, logger, nameof(RetryAfterProvider));
+                ThrottleCommon.TryThrowServiceException(strictThumbprint, ThrottlingCache, logger, nameof(RetryAfterProvider));
             }
         }
 

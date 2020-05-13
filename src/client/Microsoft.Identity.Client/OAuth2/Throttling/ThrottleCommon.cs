@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             return sb.ToString();
         }
 
-        public static void TryThrow(string thumbprint, ThrottlingCache cache, ICoreLogger logger, string providerName)
+        public static void TryThrowServiceException(string thumbprint, ThrottlingCache cache, ICoreLogger logger, string providerName)
         {
             if (cache.TryGetOrRemoveExpired(thumbprint, logger, out var ex))
             {
@@ -54,11 +54,6 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 // mark the exception for logging purposes                
                 throw new MsalThrottledServiceException(ex);
             }
-        }
-
-        public static bool IsRetryAfterAndHttpStatusThrottlingSupported(AuthenticationRequestParameters requestParameters)
-        {
-            return !requestParameters.IsConfidentialClient;
-        }
+        }               
     }
 }

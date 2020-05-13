@@ -103,12 +103,9 @@ namespace Microsoft.Identity.Client.OAuth2
         /// </summary>
         private void AddThrottlingHeader()
         {
-            if (ThrottleCommon.IsRetryAfterAndHttpStatusThrottlingSupported(_requestParams))
-            {
-                _oAuth2Client.AddHeader(
-                    ThrottleCommon.ThrottleRetryAfterHeaderName, 
-                    ThrottleCommon.ThrottleRetryAfterHeaderValue);
-            }
+            _oAuth2Client.AddHeader(
+                ThrottleCommon.ThrottleRetryAfterHeaderName,
+                ThrottleCommon.ThrottleRetryAfterHeaderValue);
         }
 
         private void AddBodyParamsAndHeaders(IDictionary<string, string> additionalBodyParameters, string scopes)
