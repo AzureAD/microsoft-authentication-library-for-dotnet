@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
-            if(!Broker.BrokerIsInstalledAndInvokable())
+            if(!Broker.IsBrokerInstalledAndInvokable())
             {
                 throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked);
             }

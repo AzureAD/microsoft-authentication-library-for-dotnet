@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private IBroker CreateMockBroker(bool isInvokable = true)
         {
             IBroker mockBroker = Substitute.For<IBroker>();
-            mockBroker.BrokerIsInstalledAndInvokable().ReturnsForAnyArgs(isInvokable);
+            mockBroker.IsBrokerInstalledAndInvokable().ReturnsForAnyArgs(isInvokable);
             mockBroker.AcquireTokenUsingBrokerAsync(null).ReturnsForAnyArgs(TestConstants.CreateMsalTokenResponse());
             return mockBroker;
         }
