@@ -31,13 +31,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _silentParameters = silentParameters;
         }
 
-        private bool _canExecuteBroker
+        private bool BrokerIsInstalledAndSupportsSilentAuth
         {
             get
             {
                 if (_canExecuteBrokerValue == null)
                 {
-                    _canExecuteBrokerValue = AuthenticationRequestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
+                    _canExecuteBrokerValue = AuthenticationRequestParameters.IsBrokerConfiguredByUser && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
                 }
 
                 return (bool)_canExecuteBrokerValue;
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async override Task PreRunAsync()
         {
 
-            if (_canExecuteBroker)
+            if (BrokerIsInstalledAndSupportsSilentAuth)
             {
                 return;
             }
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-            if (_canExecuteBroker)
+            if (BrokerIsInstalledAndSupportsSilentAuth)
             {
                 var msalTokenResponse = await ExecuteBrokerAsync(cancellationToken).ConfigureAwait(false);
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);

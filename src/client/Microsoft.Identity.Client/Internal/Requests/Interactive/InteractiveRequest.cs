@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (_requestParams.IsBrokerConfigured)
+            if (_requestParams.IsBrokerConfiguredByUser)
             {
                 _logger.Info("Broker is configured. Starting broker flow without knowing the broker installation app link.");
 

@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             IBroker broker = CreateBroker(null);
 
-            if (broker.CanInvokeBroker())
+            if (broker.BrokerIsInstalledAndInvokable())
             {
                 return true;
             }

@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public async Task<MsalTokenResponse> FetchTokensAsync(CancellationToken cancellationToken)
         {
-            if (Broker.CanInvokeBroker())
+            if (Broker.BrokerIsInstalledAndInvokable())
             {
                 _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
             }

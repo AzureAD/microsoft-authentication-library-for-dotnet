@@ -110,42 +110,57 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         public void BrokerSilentRequestBrokerRequiredTestAsync()
         {
+            //Broker is not configured by user but is installed
+            BrokerSilentRequestTestExecutor(false, true);
+        }
+
+        [TestMethod]
+        public void BrokerSilentRequestBrokerConfiguredButNotInstalledTestAsync()
+        {
+            //Broker is configured by user but is not installed
+            BrokerSilentRequestTestExecutor(false, true);
+        }
+
+        [TestMethod]
+        public void BrokerSilentRequestBrokerNotConfiguredAndNotInstalledTestAsync()
+        {
+            //Broker is not configured by user and is not installed
+            BrokerSilentRequestTestExecutor(false, false);
+        }
+
+        public void BrokerSilentRequestTestExecutor(bool brokerConfiguredByUser, bool brokerIsInstalledAndInvokable)
+        {
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
-                _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
-                harness.ServiceBundle.PlatformProxy.SetBrokerForTest(CreateMockBroker());
+                _tokenCacheHelper.PopulateCache(harness.Cache.Accessor,
+                    TestConstants.Uid,
+                    TestConstants.Utid,
+                    TestConstants.ClientId,
+                    TestConstants.ProductionPrefCacheEnvironment,
+                    "Broker@broker.com");
+                harness.ServiceBundle.PlatformProxy.SetBrokerForTest(CreateMockBroker(brokerIsInstalledAndInvokable));
 
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
                     null,
                     TestConstants.ExtraQueryParameters,
-                    TestConstants.Claims,
-                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false));
-                parameters.IsBrokerConfigured = false;
+                    null,
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, false));
+                parameters.IsBrokerConfiguredByUser = brokerConfiguredByUser;
 
                 var silentParameters = new AcquireTokenSilentParameters()
                 {
                     Account = new Account(TestConstants.HomeAccountId, TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment),
                 };
 
-                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
-
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        ExpectedQueryParams = TestConstants.ExtraQueryParameters,
-                        ExpectedPostData = new Dictionary<string, string>() { { OAuth2Parameter.Claims, TestConstants.Claims } }
-                    });
-
                 var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
 
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                 var result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual("some-access-token", result.AccessToken);
+                Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual("Broker@broker.com", result.Account.Username);
             }
         }
 
@@ -197,10 +212,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        private IBroker CreateMockBroker()
+        private IBroker CreateMockBroker(bool isInvokable = true)
         {
             IBroker mockBroker = Substitute.For<IBroker>();
-            mockBroker.CanInvokeBroker().ReturnsForAnyArgs(true);
+            mockBroker.BrokerIsInstalledAndInvokable().ReturnsForAnyArgs(isInvokable);
             mockBroker.AcquireTokenUsingBrokerAsync(null).ReturnsForAnyArgs(TestConstants.CreateMsalTokenResponse());
             return mockBroker;
         }

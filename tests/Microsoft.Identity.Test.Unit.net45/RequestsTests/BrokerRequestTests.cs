@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         null,
                         broker,
                         "install_url");
-                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.CanInvokeBroker());
+                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.BrokerIsInstalledAndInvokable());
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
             }
         }
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         null,
                         harness.ServiceBundle,
                         broker);
-                Assert.AreEqual(false, _brokerSilentRequest.Broker.CanInvokeBroker());
+                Assert.AreEqual(false, _brokerSilentRequest.Broker.BrokerIsInstalledAndInvokable());
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerSilentRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
             }
         }
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = Substitute.For<IAccount>();
             mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { expectedAccount });
-            mockBroker.CanInvokeBroker().Returns(true);
+            mockBroker.BrokerIsInstalledAndInvokable().Returns(true);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = Substitute.For<IAccount>();
             mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { expectedAccount });
-            mockBroker.CanInvokeBroker().Returns(false);
+            mockBroker.BrokerIsInstalledAndInvokable().Returns(false);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
@@ -267,7 +267,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     extraQueryParameters: TestConstants.ExtraQueryParameters,
                     claims: TestConstants.Claims);
 
-                parameters.IsBrokerConfigured = true;
+                parameters.IsBrokerConfiguredByUser = true;
 
                 AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
                 AcquireTokenSilentParameters acquireTokenSilentParameters = new AcquireTokenSilentParameters();

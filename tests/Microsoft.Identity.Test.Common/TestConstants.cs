@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string DisplayableId = "displayable@id.com";
         public const string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
-        public const string MobileDefaultRedirectUri = "msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842://auth"; // in msidentity-samples-testing tenant -> PublicClientSample
+        public const string MobileDefaultRedirectUri = "msal4a1aa1d5-c567-99d0-ad0b-cd957a470042://auth"; // in msidentity-samples-testing tenant -> PublicClientSample
         public const string ClientSecret = "client_secret";
         public const string DefaultPassword = "password";
         public const string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
