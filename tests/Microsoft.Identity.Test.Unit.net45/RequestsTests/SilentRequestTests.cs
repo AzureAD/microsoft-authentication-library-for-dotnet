@@ -130,6 +130,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         public void BrokerSilentRequestTestExecutor(bool brokerConfiguredByUser, bool brokerIsInstalledAndInvokable)
         {
+            string brokerID = "Broker@broker.com";
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
                 _tokenCacheHelper.PopulateCache(harness.Cache.Accessor,
@@ -137,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.Utid,
                     TestConstants.ClientId,
                     TestConstants.ProductionPrefCacheEnvironment,
-                    "Broker@broker.com");
+                    brokerID);
                 harness.ServiceBundle.PlatformProxy.SetBrokerForTest(CreateMockBroker(brokerIsInstalledAndInvokable));
 
                 var parameters = harness.CreateRequestParams(
@@ -160,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
-                Assert.AreEqual("Broker@broker.com", result.Account.Username);
+                Assert.AreEqual(brokerID, result.Account.Username);
             }
         }
 
