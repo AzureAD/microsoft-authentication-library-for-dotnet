@@ -123,7 +123,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             switch (type)
             {
                 case AuthorityType.Aad:
-                    // Only perform Instance Discovery when validateAuthority is true.
                     InstanceDiscoveryMetadataEntry entry =
                     _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
                     await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
