@@ -53,7 +53,8 @@ namespace Microsoft.Identity.Test.Common
             bool isExtendedTokenLifetimeEnabled = false,
             bool enablePiiLogging = false,
             string clientId = TestConstants.ClientId,
-            bool clearCaches = true)
+            bool clearCaches = true,
+            bool validateAuthority = true)
         {
             var appConfig = new ApplicationConfiguration()
             {
@@ -65,7 +66,7 @@ namespace Microsoft.Identity.Test.Common
                 LogLevel = LogLevel.Verbose,
                 EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
-                AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, false)
+                AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, validateAuthority)
             };
 
             return new ServiceBundle(appConfig, clearCaches);

@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -47,6 +48,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             };
 
             _harness = base.CreateTestHarness();
+            TestCommon.CreateServiceBundleWithCustomHttpManager(_harness.HttpManager, validateAuthority: true);
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
