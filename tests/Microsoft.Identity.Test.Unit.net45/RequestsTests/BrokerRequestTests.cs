@@ -225,8 +225,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Act
             var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
 
-            // Assert that MSAL does not attempt to acquire an account when broker is not available
-            Assert.IsTrue(actualAccount.Count() == 0);
+            // Assert that MSAL attempts to acquire an account locally when broker is not available
+            Assert.IsTrue(actualAccount.Count() == 1);
         }
 
         private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, Action<Exception> validationHandler)
