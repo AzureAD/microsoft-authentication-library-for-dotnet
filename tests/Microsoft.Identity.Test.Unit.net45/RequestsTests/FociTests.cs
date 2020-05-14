@@ -84,7 +84,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B cannot acquire a token interactivelty, but will try to use FRT
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                    () => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
 
                 // B can resume acquiring tokens silently via the normal RT
@@ -114,12 +115,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
                 // B cannot acquire a token interactivelty, but will try to use FRT
-                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() => SilentAsync(_appB, ServerTokenResponse.OtherError)).ConfigureAwait(false);
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                    () => SilentAsync(_appB, ServerTokenResponse.OtherError)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.InvalidGrantError, ex.ErrorCode);
                 Assert.IsTrue(!String.IsNullOrEmpty(ex.CorrelationId));
 
                 // B performs interactive auth and everything goes back to normal - both A and B can silently sing in
-                await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
+                await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);                                
+
                 await SilentAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
                 await SilentAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 

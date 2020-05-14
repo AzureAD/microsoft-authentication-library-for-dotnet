@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -492,9 +493,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
-                    cache);
-                authParams.ClientCredential = TestConstants.s_credentialWithSecret;
-                authParams.IsClientCredentialRequest = true;
+                    cache, 
+                    apiId: ApiEvent.ApiIds.AcquireTokenForClient);
 
                 var cacheItem = cache.FindAccessTokenAsync(authParams).Result;
 

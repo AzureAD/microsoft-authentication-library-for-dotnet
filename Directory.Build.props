@@ -4,7 +4,9 @@
 
     <LangVersion>7.2</LangVersion>
     <SignAssembly>true</SignAssembly>
+    <!-- The MSAL.snk has both private and public keys -->
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/build/MSAL.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

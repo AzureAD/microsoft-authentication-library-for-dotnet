@@ -4,13 +4,12 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client
 {
+
     /// <summary>
     /// Exception type thrown when service returns an error response or other networking errors occur.
     /// For more details, see https://aka.ms/msal-net-exceptions
@@ -131,6 +130,7 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
+        #region Public Properties
         /// <summary>
         /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c> in the inner
         /// <see cref="System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
@@ -163,11 +163,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string ResponseBody { get; internal set; }
 
-        /// <remarks>
-        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
-        /// first.
-        /// </remarks>
-        internal string SubError { get; set; }
 
         /// <summary>
         /// Contains the http headers from the server response that indicated an error.
@@ -183,6 +178,25 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string CorrelationId { get; internal set; }
 
+        #endregion
+
+        /// <remarks>
+        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
+        /// first.
+        /// </remarks>
+        internal string SubError { get; set; }
+
+        /// <summary>
+        /// As per discussion with Evo, AAD 
+        /// </summary>
+        internal bool IsAadUnavailable()
+        {
+            return 
+                StatusCode == 429 || // "Too Many Requests", does not mean AAD is down
+                StatusCode >= 500 || 
+                string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
+        }
+
         /// <summary>
         /// Creates and returns a string representation of the current exception.
         /// </summary>
@@ -197,16 +211,10 @@ namespace Microsoft.Identity.Client
                 Headers);
         }
 
-        /// <summary>
-        /// As per discussion with Evo, AAD 
-        /// </summary>
-        internal bool IsAadUnavailable()
-        {
-            return 
-                StatusCode == 429 || // "Too Many Requests", does not mean AAD is down
-                StatusCode >= 500 || 
-                string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
-        }
+        #region Serialization
+
+
+        // DEPRECATE / OBSOLETE - this functionality is not used and should be removed in a next major version
 
         internal override void PopulateJson(JObject jobj)
         {
@@ -227,5 +235,6 @@ namespace Microsoft.Identity.Client
             CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
             SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
         }
+        #endregion
     }
 }

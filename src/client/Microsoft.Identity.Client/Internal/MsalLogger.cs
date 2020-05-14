@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal
             ClientVersion = clientVersion ?? string.Empty;
 
             ClientInformation = string.Empty;
-            if (!string.IsNullOrEmpty(clientName))
+            if (!string.IsNullOrEmpty(clientName) && !ApplicationConfiguration.DefaultClientName.Equals(clientName))
             {
                 // space is intentional for formatting of the message
                 if (string.IsNullOrEmpty(clientVersion))
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal
                 config?.LogLevel ?? LogLevel.Verbose,
                 config?.EnablePiiLogging ?? false,
                 config?.IsDefaultPlatformLoggingEnabled ?? isDefaultPlatformLoggingEnabled,
-                config?.LoggingCallback ?? null);
+                config?.LoggingCallback);
         }
 
         public static ICoreLogger NullLogger => s_nullLogger.Value;

@@ -19,6 +19,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidGrantError = "invalid_grant";
 
+        /// <summary>
+        /// Standard OAuth2 protocol error code. It indicates that the application needs to expose the UI to the user
+        /// so the user can do an interactive log-in to get a token with updated claims.
+        /// <para>Mitigation:</para> If your application is a <see cref="T:IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
+        /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
+        /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation
+        /// </summary>
+        public const string InteractionRequired = "interaction_required";
+
 #if !DESKTOP && !NET_CORE
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
@@ -614,6 +623,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "Client_Credential_Authentication_Types_Are_Mutually_Exclusive";
 
+        /// <summary>
+        /// <para>What happens?</para>You configured MSAL confidential client authentication without an authentication type (Certificate, Secret, Client Assertion)
+        /// <para>Mitigation</para>Either call ConfidentialClientApplicationBuilder.WithClientSecret, ConfidentialClientApplicationBuilder.WithCertificate, ConfidentialClientApplicationBuilder.WithClientAssertion
+        /// </summary>
+        public const string ClientCredentialAuthenticationTypeMustBeDefined = "Client_Credentials_Required_In_Confidential_Client_Application";
+
         #region InvalidGrant suberrors
         /// <summary>
         /// Issue can be resolved by user interaction during the interactive authentication flow.
@@ -771,6 +786,11 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Ensure the certificate has a private key.
         /// </summary>
         public const string CertWithoutPrivateKey = "cert_without_private_key";
+
+        /// <summary>
+        /// Device certificate not found.
+        /// </summary>
+        public const string DeviceCertificateNotFound = "device_certificate_not_found";
 
         /// <summary>
         /// <para>What happens?</para>The ADAL cache is invalid as it contains multiple refresh token entries for one user.

@@ -50,8 +50,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
-
-
         /// <summary>
         ///     Get the user logged in to Windows or throws
         /// </summary>
@@ -304,6 +302,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
             return NetDesktopPoPCryptoProvider.Instance;
+        }
+
+        public override IDeviceAuthManager CreateDeviceAuthManager()
+        {
+            return new NetDesktopDeviceAuthManager();
         }
     }
 }

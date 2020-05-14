@@ -130,6 +130,8 @@ namespace Microsoft.Identity.Client
 
         #region SERIALIZATION
 
+        // DEPRECATE / OBSOLETE - this functionality is not used and should be removed in a next major version
+
         private const string ExceptionTypeKey = "type";
         private const string ErrorCodeKey = "error_code";
         private const string ErrorDescriptionKey = "error_description";
@@ -187,7 +189,7 @@ namespace Microsoft.Identity.Client
                 return ex;
             }
 
-            throw new MsalClientException(MsalError.JsonParseError,  MsalErrorMessage.MsalExceptionFailedToParse);
+            throw new MsalClientException(MsalError.JsonParseError, MsalErrorMessage.MsalExceptionFailedToParse);
         }
 
         #endregion // SERIALIZATION
