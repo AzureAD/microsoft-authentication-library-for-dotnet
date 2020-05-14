@@ -233,7 +233,16 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public override bool CanBrokerSupportSilentAuth()
         {
-            return true;
+            IBroker broker = CreateBroker(null);
+
+            if (broker.IsBrokerInstalledAndInvokable())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

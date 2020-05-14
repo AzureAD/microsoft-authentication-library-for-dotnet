@@ -88,14 +88,11 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
 
-            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            if (AppConfig.IsBrokerConfigured && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                if (broker.CanInvokeBroker())
-                {
-                    accounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
-                    return accounts;
-                }
+                accounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
+                return accounts;
             }
 
             if (UserTokenCache == null)
@@ -138,7 +135,7 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public async Task RemoveAsync(IAccount account)
         {
-            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            if (AppConfig.IsBrokerConfigured && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
                 await broker.RemoveAccountAsync(AppConfig.ClientId, account).ConfigureAwait(false);
