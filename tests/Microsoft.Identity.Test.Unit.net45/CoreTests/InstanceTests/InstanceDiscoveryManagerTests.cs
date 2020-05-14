@@ -366,7 +366,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryAsync(Authority, requestContext).ConfigureAwait(false);
 
             // Since the validateAuthority is set to false, proceed without alias. 
-            ValidateSingleEntryMetadata(new Uri("https://some_env.com/tid"), actualResult);
+            ValidateSingleEntryMetadata(new Uri(Authority), actualResult);
         }
 
         private async Task ValidateSelfEntryAsync(Uri authority)

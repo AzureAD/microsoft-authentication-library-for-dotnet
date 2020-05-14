@@ -109,10 +109,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                      new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
                      .ExecuteAsync())
                 .ConfigureAwait(false);
-
-
+#if NET_CORE
+            Assert.IsTrue(((System.Net.Sockets.SocketException)exception.InnerException).SocketErrorCode == System.Net.Sockets.SocketError.HostNotFound);
+#else
             Assert.IsTrue(((System.Net.WebException) exception.InnerException).Status == System.Net.WebExceptionStatus.NameResolutionFailure);
-
+#endif
         }
 
 
