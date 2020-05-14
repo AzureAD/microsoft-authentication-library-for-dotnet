@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
         }
 
-        public bool BrokerIsInstalledAndInvokable()
+        public bool IsBrokerInstalledAndInvokable()
         {
             bool canInvoke = _brokerHelper.CanSwitchToBroker();
             _logger.Verbose("Can invoke broker? " + canInvoke);
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
         {
-            if (!BrokerIsInstalledAndInvokable())
+            if (!IsBrokerInstalledAndInvokable())
             {
                 _logger.Error("Android broker is not installed so no accounts will be returned.");
                 return new List<IAccount>();
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public async Task RemoveAccountAsync(string clientID, IAccount account)
         {
-            if (!BrokerIsInstalledAndInvokable())
+            if (!IsBrokerInstalledAndInvokable())
             {
                 _logger.Error("Android broker is not installed so no accounts will be removed.");
                 return;

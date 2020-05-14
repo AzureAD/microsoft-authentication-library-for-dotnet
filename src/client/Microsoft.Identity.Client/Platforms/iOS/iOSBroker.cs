@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             _uIParent = uIParent;
         }
 
-        public bool BrokerIsInstalledAndInvokable()
+        public bool IsBrokerInstalledAndInvokable()
         {
             if (_uIParent?.CallerViewController == null)
             {
