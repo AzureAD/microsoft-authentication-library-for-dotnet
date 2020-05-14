@@ -340,6 +340,35 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             await _networkMetadataProvider.Received(1).GetMetadataAsync(authorityUri, _testRequestContext).ConfigureAwait(false);
         }
 
+        [TestMethod]
+        public async Task ValidateAuthorityFalse_SkipsNetworkCall_Async()
+        {
+            // Arrange
+            var validationException = new MsalServiceException(MsalError.InvalidInstance, "authority validation failed");
+
+            // Inject authority in service bundle
+            var httpManager = new MockHttpManager();
+            var appConfig = new ApplicationConfiguration()
+            {
+                HttpManager = httpManager,
+                AuthorityInfo = AuthorityInfo.FromAuthorityUri(Authority, false)
+            };
+
+            var serviceBundle = ServiceBundle.Create(appConfig);
+
+            RequestContext requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+
+            // network fails with invalid_instance exception
+            _networkMetadataProvider
+                .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), requestContext))
+                .Do(x => throw validationException);
+
+            InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryAsync(Authority, requestContext).ConfigureAwait(false);
+
+            // Since the validateAuthority is set to false, proceed without alias. 
+            ValidateSingleEntryMetadata(new Uri("https://some_env.com/tid"), actualResult);
+        }
+
         private async Task ValidateSelfEntryAsync(Uri authority)
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
