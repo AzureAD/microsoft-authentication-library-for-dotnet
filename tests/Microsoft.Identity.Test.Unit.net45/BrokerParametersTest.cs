@@ -50,21 +50,14 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(s_canonicalizedAuthority, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Authority]);
                 Assert.AreEqual(TestConstants.ScopeStr, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Scope]);
                 Assert.AreEqual(TestConstants.ClientId, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ClientId]);
-
                 Assert.IsFalse(string.IsNullOrEmpty(brokerInteractiveRequest.BrokerPayload[BrokerParameter.CorrelationId]));
                 Assert.AreNotEqual(Guid.Empty.ToString(), brokerInteractiveRequest.BrokerPayload[BrokerParameter.CorrelationId]);
                 Assert.AreEqual(MsalIdHelper.GetMsalVersion(), brokerInteractiveRequest.BrokerPayload[BrokerParameter.ClientVersion]);
                 Assert.AreEqual(string.Empty, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Username]);
-
                 Assert.AreEqual(TestConstants.RedirectUri, brokerInteractiveRequest.BrokerPayload[BrokerParameter.RedirectUri]);
-
                 Assert.AreEqual(TestConstants.BrokerExtraQueryParameters, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraQp]);
-
-                //Assert.AreEqual(TestConstants.BrokerClaims, brokerInteractiveRequest._brokerPayload[BrokerParameter.Claims]); //TODO
-                Assert.AreEqual(BrokerParameter.Claims, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Claims])
+                Assert.AreEqual(BrokerParameter.Claims, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Claims]);
                 Assert.AreEqual(BrokerParameter.OidcScopesValue, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
-
-
             }
         }
 
@@ -75,11 +68,13 @@ namespace Microsoft.Identity.Test.Unit
             using (var harness = CreateTestHarness())
             {
                 // Arrange
+                var account = new Account(TestConstants.HomeAccountId, TestConstants.Username, TestConstants.ProductionPrefNetworkEnvironment);
+
                 var parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false),
-                    null,
+                    account,
                     TestConstants.ExtraQueryParameters);
                 AcquireTokenSilentParameters acquireTokenSilentParameters = new AcquireTokenSilentParameters();
 
@@ -105,8 +100,10 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.RedirectUri, brokerSilentRequest.BrokerPayload[BrokerParameter.RedirectUri]);
                 Assert.AreEqual(TestConstants.BrokerExtraQueryParameters, brokerSilentRequest.BrokerPayload[BrokerParameter.ExtraQp]);
                 Assert.AreEqual(TestConstants.BrokerOIDCScopes, brokerSilentRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
-                Assert.IsTrue(string.IsNullOrEmpty(brokerSilentRequest.BrokerPayload[BrokerParameter.Username]));
+                Assert.AreEqual(TestConstants.Username, brokerSilentRequest.BrokerPayload[BrokerParameter.Username]);
                 Assert.AreEqual("False", brokerSilentRequest.BrokerPayload[BrokerParameter.ForceRefresh]);
+                Assert.AreEqual(TestConstants.HomeAccountId, brokerSilentRequest.BrokerPayload[BrokerParameter.HomeAccountId]);
+                Assert.AreEqual(TestConstants.LocalAccountId, brokerSilentRequest.BrokerPayload[BrokerParameter.LocalAccountId]);
             }
         }
     }

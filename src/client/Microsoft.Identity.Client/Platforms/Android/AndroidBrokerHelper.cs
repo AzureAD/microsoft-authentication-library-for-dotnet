@@ -406,7 +406,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 ClientVersion = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientVersion),
                 CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
                 Prompt = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Prompt).ToUpperInvariant(),
-                Claims = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Claims)
+                Claims = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Claims),
             };
 
             brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(request));
@@ -431,6 +431,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
                 HomeAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId),
                 LocalAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LocalAccountId),
+                ForceRefresh = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ForceRefresh),
                 Claims = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Claims)
             };
 
