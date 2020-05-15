@@ -2,10 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -17,12 +13,10 @@ namespace Microsoft.Identity.Client.Instance
         internal B2CAuthority(AuthorityInfo authorityInfo)
             : base(authorityInfo)
         {
+            TenantId = new Uri(AuthorityInfo.CanonicalAuthority).Segments[2].TrimEnd('/');
         }
 
-        internal override string GetTenantId()
-        {
-            return new Uri(AuthorityInfo.CanonicalAuthority).Segments[2].TrimEnd('/');
-        }
+        internal override string TenantId { get; }
 
         internal override string GetTenantedAuthority(string tenantId)
         {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Json;
 
-namespace Microsoft.Identity.Client.Instance
+namespace Microsoft.Identity.Client.Instance.Validation
 {
     internal class AdfsWebFingerResponseClaim : OAuth2ResponseBaseClaim
     {

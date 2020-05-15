@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 // the rest of the communication with AAD happens on the preferred_network alias, not on login.windows.net
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = await app
@@ -112,7 +111,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 // the rest of the communication with AAD happens on the preferred_network alias, not on login.windows.net
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(customAuthrority);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customAuthrority);
 
                 AuthenticationResult result = await app

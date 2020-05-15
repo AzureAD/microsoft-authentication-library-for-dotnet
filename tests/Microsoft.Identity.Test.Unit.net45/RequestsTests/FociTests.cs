@@ -283,7 +283,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _instanceAndEndpointRequestPerformed = true;
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
             }
 
             _harness.HttpManager.AddMockHandler(
@@ -342,7 +341,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _instanceAndEndpointRequestPerformed = true;
 
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
             }
 
             MsalMockHelpers.ConfigureMockWebUI(

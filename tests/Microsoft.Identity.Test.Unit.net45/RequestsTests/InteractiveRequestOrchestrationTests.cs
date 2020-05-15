@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange - common stuff
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
-                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+                MockInstanceDiscovery(harness.HttpManager);
 
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange - common stuff
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
-                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+                MockInstanceDiscovery(harness.HttpManager);
 
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange - common stuff
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
-                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+                MockInstanceDiscovery(harness.HttpManager);
 
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange - common stuff
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
-                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+                MockInstanceDiscovery(harness.HttpManager);
 
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
 
@@ -292,10 +292,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
+        private static void MockInstanceDiscovery(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
         }
 
    

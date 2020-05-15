@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                 AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 HttpResponseMessage response = MockHelpers.CreateSuccessTokenResponseMessageWithUid(
                     TestConstants.Uid, 
                     TestConstants.Utid, 
@@ -65,7 +64,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 }
 
                 Assert.AreEqual(0, httpManager.QueueSize);
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -123,7 +121,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 AuthenticationResult result = app

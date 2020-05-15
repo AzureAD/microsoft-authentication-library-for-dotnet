@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // AcquireTokenInteractive will save a token to the cache, but needs more setup
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 MsalMockHelpers.ConfigureMockWebUI(pca);
@@ -197,7 +196,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     pca.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = await pca

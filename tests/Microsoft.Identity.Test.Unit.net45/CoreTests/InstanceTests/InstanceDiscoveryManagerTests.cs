@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             };
 
             _harness = base.CreateTestHarness();
-            TestCommon.CreateServiceBundleWithCustomHttpManager(_harness.HttpManager, validateAuthority: true);
+
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,

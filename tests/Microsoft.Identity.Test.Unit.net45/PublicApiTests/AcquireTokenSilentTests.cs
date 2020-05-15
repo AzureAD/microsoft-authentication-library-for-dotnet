@@ -88,8 +88,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private static void AddHttpMocks_BadTokenError(MockHttpManager httpManager)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(
-                TestConstants.AuthorityUtidTenant);
 
             var handler = new MockHttpMessageHandler()
             {
@@ -234,7 +232,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         TestConstants.Bearer));
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuestTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -457,7 +454,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -502,7 +498,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -531,7 +526,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant2);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -560,8 +554,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -655,7 +647,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant2);
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
@@ -683,8 +674,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityGuidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -727,8 +716,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
-
                 //populate cache
                 var tokenCacheHelper = new TokenCacheHelper();
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);

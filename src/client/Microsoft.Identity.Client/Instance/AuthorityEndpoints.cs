@@ -9,16 +9,18 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class AuthorityEndpoints
     {
-        public AuthorityEndpoints(string authorizationEndpoint, string tokenEndpoint, string selfSignedJwtAudience)
+        public AuthorityEndpoints(string authorizationEndpoint, string tokenEndpoint, string deviceCodeEndpoint)
         {
             AuthorizationEndpoint = authorizationEndpoint;
             TokenEndpoint = tokenEndpoint;
-            SelfSignedJwtAudience = selfSignedJwtAudience;
+            SelfSignedJwtAudience = tokenEndpoint;
+            DeviceCodeEndpoint = deviceCodeEndpoint;
         }
 
         public string AuthorizationEndpoint { get; }
         public string TokenEndpoint { get; }
         public string SelfSignedJwtAudience { get; }
+        public string DeviceCodeEndpoint { get; }
 
         public static async Task UpdateAuthorityEndpointsAsync(
             AuthenticationRequestParameters requestParameters)

@@ -51,7 +51,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 // Act
@@ -73,7 +72,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Act again - silent call with a different scheme - the existing AT will not be returned
                 authScheme.KeyId.Returns("other_keyid");
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityTestTenant);
 
                 silentResult = await RunSilentCallAsync(
                    httpManager,
@@ -114,7 +112,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 // Act

@@ -60,30 +60,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        public void B2CLoginAuthorityCreateAuthority()
+        public void B2CLoginAuthorityEndpoints()
         {
             using (var httpManager = new MockHttpManager())
             {
                 var appConfig = new ApplicationConfiguration()
                 {
                     HttpManager = httpManager,
-                    AuthorityInfo = AuthorityInfo.FromAuthorityUri(TestConstants.B2CLoginAuthority, false)
+                    AuthorityInfo = AuthorityInfo.FromAuthorityUri(
+                        "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/", true)
                 };
 
                 var serviceBundle = ServiceBundle.Create(appConfig);
 
-                // add mock response for tenant endpoint discovery
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/v2.0/.well-known/openid-configuration",
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-B2CLogin.json")))
-                    });
-
                 Authority instance = Authority.CreateAuthority(
-                    TestConstants.B2CLoginAuthority);
+                    "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/");
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
                 var resolver = new AuthorityEndpointResolutionManager(serviceBundle);
@@ -94,12 +85,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .GetAwaiter().GetResult();
 
                 Assert.AreEqual(
-                    "https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/authorize",
+                    "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/authorize",
                     endpoints.AuthorizationEndpoint);
                 Assert.AreEqual(
-                    "https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/token",
+                    "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token",
                     endpoints.TokenEndpoint);
-                Assert.AreEqual("https://sometenantid.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/policy/oauth2/v2.0/token", 
+                Assert.AreEqual("https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token", 
                     endpoints.SelfSignedJwtAudience);
             }
         }

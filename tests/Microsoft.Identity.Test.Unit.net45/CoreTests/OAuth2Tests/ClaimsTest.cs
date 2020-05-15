@@ -48,7 +48,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 
                 Trace.WriteLine("3. Silent Request + WithClaims does not return an AT from the cache");
                 harness.HttpManager.AddInstanceDiscoveryMockHandler(TestConstants.AuthorityUtidTenant);
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityUtidTenant);
 
                 result = await app.AcquireTokenSilent(TestConstants.s_scope, account)
@@ -85,8 +84,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 Assert.IsNotNull(result, "A result is obtained from the cache, i.e. without HTTP calls");
 
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(
-                    TestConstants.AuthorityUtidTenant);
                 var refreshHandler = new MockHttpMessageHandler()
                 {
                     ExpectedMethod = HttpMethod.Post,
@@ -155,7 +152,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 
                 mockUi.QueryParamsToValidate = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityCommonTenant,
                     bodyParameters: mockUi.QueryParamsToValidate);
@@ -192,7 +188,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                         OAuth2Parameter.Claims,
                         TestConstants.ClientCapabilitiesJson } };
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityCommonTenant,
                     bodyParameters: mockUi.QueryParamsToValidate);
@@ -228,7 +223,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                     { OAuth2Parameter.Claims,
                         TestConstants.ClientCapabilitiesAndClaimsJson } };
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityCommonTenant,
                     bodyParameters: mockUi.QueryParamsToValidate);
