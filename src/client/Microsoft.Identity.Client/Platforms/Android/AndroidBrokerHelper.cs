@@ -405,7 +405,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MatchAll).VersionName,
                 ClientVersion = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientVersion),
                 CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
-                Prompt = "NONE"
+                Prompt = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Prompt).ToUpperInvariant()
             };
 
             brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(request));
