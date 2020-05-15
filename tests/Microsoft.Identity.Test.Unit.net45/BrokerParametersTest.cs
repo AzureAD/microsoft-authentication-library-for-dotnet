@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(string.Empty, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Username]);
                 Assert.AreEqual(TestConstants.RedirectUri, brokerInteractiveRequest.BrokerPayload[BrokerParameter.RedirectUri]);
                 Assert.AreEqual(TestConstants.BrokerExtraQueryParameters, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraQp]);
-                Assert.AreEqual(BrokerParameter.Claims, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Claims]);
+                Assert.AreEqual(TestConstants.Claims, brokerInteractiveRequest.BrokerPayload[BrokerParameter.Claims]);
                 Assert.AreEqual(BrokerParameter.OidcScopesValue, brokerInteractiveRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
             }
         }
@@ -77,6 +77,8 @@ namespace Microsoft.Identity.Test.Unit
                     account,
                     TestConstants.ExtraQueryParameters);
                 AcquireTokenSilentParameters acquireTokenSilentParameters = new AcquireTokenSilentParameters();
+                acquireTokenSilentParameters.Account = account;
+                acquireTokenSilentParameters.ForceRefresh = true;
 
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
@@ -101,9 +103,9 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.BrokerExtraQueryParameters, brokerSilentRequest.BrokerPayload[BrokerParameter.ExtraQp]);
                 Assert.AreEqual(TestConstants.BrokerOIDCScopes, brokerSilentRequest.BrokerPayload[BrokerParameter.ExtraOidcScopes]);
                 Assert.AreEqual(TestConstants.Username, brokerSilentRequest.BrokerPayload[BrokerParameter.Username]);
-                Assert.AreEqual("False", brokerSilentRequest.BrokerPayload[BrokerParameter.ForceRefresh]);
+                Assert.AreEqual("True", brokerSilentRequest.BrokerPayload[BrokerParameter.ForceRefresh]);
                 Assert.AreEqual(TestConstants.HomeAccountId, brokerSilentRequest.BrokerPayload[BrokerParameter.HomeAccountId]);
-                Assert.AreEqual(TestConstants.LocalAccountId, brokerSilentRequest.BrokerPayload[BrokerParameter.LocalAccountId]);
+                Assert.AreEqual(TestConstants.Uid, brokerSilentRequest.BrokerPayload[BrokerParameter.LocalAccountId]);
             }
         }
     }
