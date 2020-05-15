@@ -194,6 +194,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+                TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority, validateAuthority: true);
                 try
                 {
                     var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
