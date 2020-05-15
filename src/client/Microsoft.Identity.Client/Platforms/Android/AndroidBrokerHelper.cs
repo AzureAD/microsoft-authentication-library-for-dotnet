@@ -23,6 +23,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -405,9 +406,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MatchAll).VersionName,
                 ClientVersion = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientVersion),
                 CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
-                Prompt = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Prompt),
-                Claims = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Claims)
+                Prompt = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Prompt).ToUpperInvariant(),
+                Claims = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Claims),
+                UserName = "idlabca@msidlab8.onmicrosoft.com"
             };
+
+            var test = JsonHelper.SerializeToJson(request);
+            var test2 = test;
 
             brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(request));
 
