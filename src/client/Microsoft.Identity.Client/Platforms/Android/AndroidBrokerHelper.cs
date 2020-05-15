@@ -431,7 +431,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
                 HomeAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId),
                 LocalAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LocalAccountId),
-                ForceRefresh = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ForceRefresh),
                 Claims = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Claims)
             };
 
