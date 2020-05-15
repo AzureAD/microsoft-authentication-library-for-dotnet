@@ -24,6 +24,7 @@ using System.Text;
 using NSubstitute.Routing.Handlers;
 using Microsoft.Identity.Client.Internal.Broker;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -108,38 +109,48 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void BrokerSilentRequestBrokerRequiredTestAsync()
+        public async Task BrokerSilentRequestBrokerRequiredTestAsync()
         {
             //Broker is not configured by user but is installed
-            BrokerSilentRequestTestExecutor(false, true);
+            await BrokerSilentRequestTestExecutorAsync(false, true).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void BrokerSilentRequestBrokerConfiguredButNotInstalledTestAsync()
+        public async Task BrokerSilentRequestBrokerConfiguredButNotInstalledTestAsync()
         {
             //Broker is configured by user but is not installed
-            BrokerSilentRequestTestExecutor(false, true);
+            await BrokerSilentRequestTestExecutorAsync(false, true).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public void BrokerSilentRequestBrokerNotConfiguredAndNotInstalledTestAsync()
+        public async Task BrokerSilentRequestBrokerNotConfiguredAndNotInstalledTestAsync()
         {
             //Broker is not configured by user and is not installed
-            BrokerSilentRequestTestExecutor(false, false);
+            await BrokerSilentRequestTestExecutorAsync(false, false).ConfigureAwait(false);
         }
 
-        public void BrokerSilentRequestTestExecutor(bool brokerConfiguredByUser, bool brokerIsInstalledAndInvokable)
+        public async Task BrokerSilentRequestTestExecutorAsync(bool brokerConfiguredByUser, bool brokerIsInstalledAndInvokable)
         {
+            if (brokerConfiguredByUser && brokerIsInstalledAndInvokable)
+            {
+                Assert.Fail("Test error - not implemented");
+            }
+
             string brokerID = "Broker@broker.com";
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
+                // resul will be from the cache
                 _tokenCacheHelper.PopulateCache(harness.Cache.Accessor,
                     TestConstants.Uid,
                     TestConstants.Utid,
                     TestConstants.ClientId,
                     TestConstants.ProductionPrefCacheEnvironment,
                     brokerID);
-                harness.ServiceBundle.PlatformProxy.SetBrokerForTest(CreateMockBroker(brokerIsInstalledAndInvokable));
+
+                IBroker mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable().ReturnsForAnyArgs(brokerIsInstalledAndInvokable);
+
+                harness.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
 
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
@@ -154,23 +165,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Account = new Account(TestConstants.HomeAccountId, TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment),
                 };
 
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler()
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        ExpectedQueryParams = TestConstants.ExtraQueryParameters,
-                        ExpectedPostData = new Dictionary<string, string>() { { OAuth2Parameter.Claims, TestConstants.Claims } }
-                    });
-
                 var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
 
-                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                var result = task.Result;
+                var result = await request.RunAsync(default).ConfigureAwait(false);
+
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
                 Assert.AreEqual(brokerID, result.Account.Username);
+                await mockBroker.DidNotReceive().AcquireTokenUsingBrokerAsync(Arg.Any<Dictionary<string, string>>()).ConfigureAwait(false);
             }
         }
 
@@ -179,10 +182,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
-                AssertException.Throws<ArgumentNullException>( () => harness.CreateRequestParams(
-                    null,
-                    TestConstants.s_scope,
-                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false)));
+                AssertException.Throws<ArgumentNullException>(() => harness.CreateRequestParams(
+                   null,
+                   TestConstants.s_scope,
+                   authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityHomeTenant, false)));
             }
         }
 
@@ -220,14 +223,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual(MsalError.NoTokensFoundError, exc.ErrorCode);
                 }
             }
-        }
-
-        private IBroker CreateMockBroker(bool isInvokable = true)
-        {
-            IBroker mockBroker = Substitute.For<IBroker>();
-            mockBroker.IsBrokerInstalledAndInvokable().ReturnsForAnyArgs(isInvokable);
-            mockBroker.AcquireTokenUsingBrokerAsync(null).ReturnsForAnyArgs(TestConstants.CreateMsalTokenResponse());
-            return mockBroker;
         }
 
         private class MockHttpTestHarness : IDisposable
