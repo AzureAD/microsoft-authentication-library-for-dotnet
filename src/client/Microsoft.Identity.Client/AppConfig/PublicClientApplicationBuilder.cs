@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-            Config.IsBrokerConfigured = enableBroker;
+            Config.IsBrokerEnabled = enableBroker;
 
             return this;
         }

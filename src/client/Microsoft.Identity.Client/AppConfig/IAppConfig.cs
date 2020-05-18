@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Indicates whether or not the current application object is configured to use brokered authentication.
         /// </summary>
-        bool IsBrokerConfigured { get; }
+        bool IsBrokerEnabled { get; }
 
         /// <summary>
         /// The name of the calling application for telemetry purposes.
