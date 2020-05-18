@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
-            IsBrokerConfigured = serviceBundle.Config.IsBrokerConfigured;
+            IsBrokerConfigured = serviceBundle.Config.IsBrokerEnabled;
 
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? new Dictionary<string, string>();

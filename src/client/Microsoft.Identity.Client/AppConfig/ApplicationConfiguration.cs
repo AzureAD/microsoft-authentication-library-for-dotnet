@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
         public bool UseCorporateNetwork { get; internal set; }
         public string IosKeychainSecurityGroup { get; internal set; }
 
-        public bool IsBrokerConfigured { get; internal set; }
+        public bool IsBrokerEnabled { get; internal set; }
 
         public ITelemetryConfig TelemetryConfig { get; internal set; }
 
