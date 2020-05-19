@@ -59,6 +59,10 @@
       <Project>{18559d36-c735-4933-aa86-398c8222d4f6}</Project>
       <Name>Microsoft.Identity.Test.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Identity.Test.Integration.net45\Microsoft.Identity.Test.Integration.net45.csproj">
+      <Project>{6A93C76A-5DEB-4A4D-A004-1F611C67B4E6}</Project>
+      <Name>Microsoft.Identity.Test.Integration.net45</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
       <Project>{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}</Project>
       <Name>Microsoft.Identity.Test.LabInfrastructure</Name>
