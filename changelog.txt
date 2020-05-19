@@ -10,7 +10,7 @@ Bug Fixes:
 
 **MSAL .NET now respects the ValidateAuthority=false flag. See [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1791)
 
-**When the Andrid borker is configured but it is not installed, MSAL should revert to using its own cache to try to perform the AcquireTokenSilent call. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1809)
+**When the Android borker is configured but it is not installed, MSAL should revert to using its own cache to try to perform the AcquireTokenSilent call. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1809)
 
 4.13.0
 ============
