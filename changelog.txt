@@ -2,7 +2,7 @@
 ============
 New Features: 
 
-**MSAL no longer calls the OIDC endpoint, as it can infer the authorization and token endpoints based on the authority URL. This will speed up token acquisition, especially for multi-tenant applications, as fewer network calls will be made. For details see [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1750)
+**MSAL no longer calls the OIDC metadata endpoint, as it can infer the authorization and token URLs based on the authority URL. This will speed up token acquisition, especially for multi-tenant applications, as fewer network calls will be made. For details see [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1750)
 
 **Client throttling extended support** MSAL will throttle all /token calls during an event in which the server sends a Retry-After header, thus ensuring the Retry-After instruction is observed. MSAL will also throttle server requests that result in `MsalUiRequiredException` being thrown, for example when the user is required to perform MFA but the app keeps trying to acquire a token silently. For details see [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1624)
 
@@ -10,7 +10,7 @@ Bug Fixes:
 
 **MSAL .NET now respects the ValidateAuthority=false flag. See [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1791)
 
-**When the Android borker is configured but it is not installed, MSAL should revert to using its own cache to try to perform the AcquireTokenSilent call. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1809)
+**When the Android broker (Authenticator / Company Portal) is configured but it is not installed, MSAL should revert to using its own cache to try to perform the AcquireTokenSilent call. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1809)
 
 4.13.0
 ============
