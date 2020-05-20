@@ -31,7 +31,7 @@ stages:
         - visualstudio
     
     # Bootstrap the build
-    - template: template-build-and-prep-automation.yaml
+  - template: template-build-and-prep-automation.yaml
 
 # BUILD IOS APPCENTER APP PHASE
 
@@ -40,7 +40,7 @@ stages:
         name: Hosted Mac Internal
         demands: Xamarin.iOS
     
-    - template: template-build-ios-automation.yaml
+  - template: template-build-ios-automation.yaml
 
 # APP CENTER ANDROID MSAL TESTS PHASE
 
@@ -49,7 +49,7 @@ stages:
     pool:
       vmImage: 'windows-latest'
 
-    - template: template-android-appcenter-tests.yaml
+  - template: template-android-appcenter-tests.yaml
 
 # APP CENTER IOS MSAL TESTS PHASE
 
@@ -60,4 +60,4 @@ stages:
     pool:
       vmImage: 'windows-latest'
 
-    - template: template-ios-appcenter-tests.yaml
+  - template: template-ios-appcenter-tests.yaml
