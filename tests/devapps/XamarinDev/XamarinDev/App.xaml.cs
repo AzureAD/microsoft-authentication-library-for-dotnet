@@ -27,7 +27,7 @@ namespace XamarinDev
                     case Device.iOS:
                         return "msauth.com.companyname.XamarinDev://auth";
                     case Device.Android:
-                        return "msauth://com.companyname.xamarindev/FHNONvDstzaj3bKe2+WAEGZOwJI=";
+                        return "msauth://com.companyname.xamarindev/Fy2zjTiLYs5sXM3sGy+PGcv8MaQ=";
                     default:
                         throw new InvalidOperationException("Broker only supported on ios and android");
                 }
@@ -81,7 +81,6 @@ namespace XamarinDev
                 builder.WithBroker();
                 builder = builder.WithRedirectUri(BrokerRedirectUri);
             }
-
             else
             {
                 builder.WithRedirectUri(DefaultMobileRedirectUri);
