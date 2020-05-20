@@ -29,8 +29,10 @@ stages:
         - msbuild
         - visualstudio
     
+    steps:
+
     # Bootstrap the build
-  - template: template-build-and-prep-automation.yaml
+    - template: template-build-and-prep-automation.yaml
 
 # BUILD IOS APPCENTER APP PHASE
 
