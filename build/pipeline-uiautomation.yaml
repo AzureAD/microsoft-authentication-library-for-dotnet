@@ -4,7 +4,6 @@ trigger: none
 pr:
 - master
 
-
 # Create a daily midnight build for UI automation builds on master.
 schedules:
 - cron: "0 0 * * *"
