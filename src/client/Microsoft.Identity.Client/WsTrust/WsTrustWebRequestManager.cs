@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.WsTrust
             {
                 string message = string.Format(
                         CultureInfo.CurrentCulture,
-                        MsalErrorMessage.FederatedServiceParseErrorTemplate,
+                        MsalErrorMessage.ParsingWsTrustResponseFailedErrorTemplate,
                         wsTrustEndpoint.Uri,
                         resp.Body);
 

@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client
         public const string PlatformNotSupported = "Platform Not Supported";
 
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1}";
-        public const string FederatedServiceParseErrorTemplate = "Federated service at {0} parse error: Body {1}";
+        public const string ParsingWsTrustResponseFailedErrorTemplate = "Federated service at {0} parse error: Body {1}";
         public const string UnknownUserType = "Unknown User Type";
 
         public const string InternalErrorCacheEmptyUsername =
