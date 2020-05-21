@@ -101,8 +101,14 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (System.Xml.XmlException ex)
             {
+                string message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        MsalErrorMessage.FederatedServiceParseErrorTemplate,
+                        wsTrustEndpoint.Uri,
+                        resp.Body);
+
                 throw new MsalClientException(
-                    MsalError.ParsingWsTrustResponseFailed, MsalError.ParsingWsTrustResponseFailed, ex);
+                    MsalError.ParsingWsTrustResponseFailed, message, ex);
             }
         }
 
