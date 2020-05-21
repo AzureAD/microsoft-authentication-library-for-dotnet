@@ -33,6 +33,7 @@ steps:
 
 - task: MSBuild@1
   displayName: 'Build and Sign MSAL Android broker apk'
+  enabled: false
   inputs:
     solution: tests/devapps/XForms/XamarinDev/XamarinDev.csproj
     configuration: Release
