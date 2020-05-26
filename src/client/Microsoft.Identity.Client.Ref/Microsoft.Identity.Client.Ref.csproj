@@ -12,7 +12,10 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <DefineConstants>$(DefineConstants);WINDOWS_APP_BUILDTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid9)'">
+    <DefineConstants>$(DefineConstants);ANDROID_BUILDTIME</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid10)'">
     <DefineConstants>$(DefineConstants);ANDROID_BUILDTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
