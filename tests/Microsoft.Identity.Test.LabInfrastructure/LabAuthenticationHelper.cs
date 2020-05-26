@@ -34,8 +34,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 {
                     s_defaultAuthType = LabAccessAuthenticationType.ClientSecret;
                     s_secret = data;
-
-                    throw new MsalClientException("TestErrorCode", "->" + data + "<-");
                 }
             }
         }

@@ -70,10 +70,5 @@
   <ItemGroup>
     <Compile Include="AndroidTests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="data.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
