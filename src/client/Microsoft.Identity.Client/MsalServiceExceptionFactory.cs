@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -32,9 +33,20 @@ namespace Microsoft.Identity.Client
 
             if (string.Equals(oAuth2Response?.Error, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
             {
+                string testValue = "value";
+                if (File.Exists("data.txt"))
+                {
+                    var data = File.ReadAllText("data.txt");
+
+                    if (!string.IsNullOrWhiteSpace(data))
+                    {
+                        testValue = data;
+                    }
+
+                }
                 ex = new MsalServiceException(
                     MsalError.InvalidClient,
-                    MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription,
+                    MsalErrorMessage.InvalidClient + "TEST Value = " + testValue + " Original exception: " + oAuth2Response?.ErrorDescription,
                     innerException);
             }
 
