@@ -47,6 +47,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [Ignore]
         public async Task SilentAuth_MsaUser_ForceRefresh_Async()
         {
             var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
