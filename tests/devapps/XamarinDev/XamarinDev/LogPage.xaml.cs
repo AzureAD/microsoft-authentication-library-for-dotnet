@@ -61,14 +61,14 @@ namespace XamarinDev
             {
                 lock (BufferLockPii)
                 {
-                    SbPii.AppendLine(str + "\n\n");
+                    SbPii.AppendLine(str + Environment.NewLine);
                 }
             }
             else
             {
                 lock (BufferLock)
                 {
-                    Sb.AppendLine(str + "\n\n");
+                    Sb.AppendLine(str + Environment.NewLine);
                 }
             }
         }
