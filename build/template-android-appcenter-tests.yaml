@@ -9,6 +9,12 @@ steps:
   errorActionPreference: silentlyContinue
   displayName: 'Install Appcenter Cli'
 
+- task: DownloadBuildArtifacts@0
+  displayName: 'Download Build Artifacts'
+  inputs:
+    artifactName: drop
+    itemPattern: '**/*'
+
 - task: AzureKeyVault@1
   displayName: 'Azure Key Vault: AzureADIdentityDivisionTestAgentSecret'
   inputs:
