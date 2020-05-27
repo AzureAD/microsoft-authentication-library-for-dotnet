@@ -1,5 +1,11 @@
 steps:
 
+- task: DownloadBuildArtifacts@0
+  displayName: 'Download Drop'
+  inputs:
+    artifactName: drop
+    itemPattern: '**/*'
+
 - powershell: '$Import = $(FastRun)'
   errorActionPreference: silentlyContinue
   displayName: 'Import Variables'
@@ -9,18 +15,18 @@ steps:
   errorActionPreference: silentlyContinue
   displayName: 'Install Appcenter Cli'
 
-- task: DownloadBuildArtifacts@0
-  displayName: 'Download Build Artifacts'
-  inputs:
-    artifactName: drop
-    itemPattern: '**/*'
-
 - task: AzureKeyVault@1
   displayName: 'Azure Key Vault: AzureADIdentityDivisionTestAgentSecret'
   inputs:
     azureSubscription: '.NET Keyvault'
     KeyVaultName: buildautomation
-    SecretsFilter: AzureADIdentityDivisionTestAgent
+    SecretsFilter: AzureADIdentityDivisionTestAgentSecret
+
+- powershell: |
+    $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
+    $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\iOS\bin\Debug\data.txt
+  displayName: 'Get Credentials'
+
 
 - powershell: |
     $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
