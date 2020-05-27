@@ -24,12 +24,6 @@ steps:
 
 - powershell: |
     $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
-    $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\iOS\bin\Debug\data.txt
-  displayName: 'Get Credentials'
-
-
-- powershell: |
-    $secret = '$(AzureADIdentityDivisionTestAgentSecret)'
     $secret | Out-File $(System.ArtifactsDirectory)\drop\AppCenter\MSAL\Android\bin\Debug\data.txt
   displayName: 'Get Credentials'
   
