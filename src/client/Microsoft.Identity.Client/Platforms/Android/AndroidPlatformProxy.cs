@@ -68,7 +68,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             if (global::Android.OS.Build.VERSION.SdkInt < global::Android.OS.BuildVersionCodes.Lollipop)
             {
+#pragma warning disable CS0618 // Type or member is obsolete https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854
                 return global::Android.OS.Build.CpuAbi;
+#pragma warning restore CS0618 // Type or member is obsolete
             }
 
             IList<string> supportedABIs = global::Android.OS.Build.SupportedAbis;
@@ -82,7 +84,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         protected override string InternalGetOperatingSystem()
         {
+#pragma warning disable CS0618 // Type or member is obsolete https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854
             return global::Android.OS.Build.VERSION.Sdk;
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         protected override string InternalGetDeviceModel()
