@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Json.Linq;
 
-namespace Microsoft.Identity.Client.Platforms.Android
+namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
     internal class AndroidBroker : IBroker
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             s_androidBrokerTokenResponse = null;
             s_correlationId = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId);
-            
+
             try
             {
                 // This task will kick off the broker and will block on the _readyForResponse semaphore
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerPayload, _activity).ConfigureAwait(false);
                     if (!string.IsNullOrEmpty(silentResult))
                     {
-                        s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(silentResult);
+                        s_androidBrokerTokenResponse = MsalTokenResponse.CreateFromAndroidBrokerResponse(silentResult, s_correlationId);
                     }
                     else
                     {
@@ -159,7 +159,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 switch (resultCode)
                 {
                     case (int)BrokerResponseCode.ResponseReceived:
-                        s_androidBrokerTokenResponse = CreateMsalTokenResponseFromResult(data.GetStringExtra(BrokerConstants.BrokerResultV2));
+                        s_androidBrokerTokenResponse = 
+                            MsalTokenResponse.CreateFromAndroidBrokerResponse(
+                                data.GetStringExtra(BrokerConstants.BrokerResultV2),
+                                s_correlationId);
                         break;
                     case (int)BrokerResponseCode.UserCancelled:
                         s_androidBrokerTokenResponse = new MsalTokenResponse
@@ -197,36 +200,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
             {
                 s_readyForResponse.Release();
             }
-        }
-
-        private static MsalTokenResponse CreateMsalTokenResponseFromResult(string brokerResult)
-        {
-            if (string.IsNullOrEmpty(brokerResult))
-            {
-                return null;
-            }
-            Dictionary<string, string> response = new Dictionary<string, string>();
-            dynamic authResult = JObject.Parse(brokerResult);
-            var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-            
-            if (!string.IsNullOrEmpty(errorCode))
-            {
-                return new MsalTokenResponse
-                {
-                    Error = errorCode,
-                    ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage].ToString(),
-                };
-            }
-
-            response.Add(BrokerResponseConst.Authority, authResult[BrokerResponseConst.Authority]?.ToString());
-            response.Add(BrokerResponseConst.AccessToken, authResult[BrokerResponseConst.AccessToken]?.ToString());
-            response.Add(BrokerResponseConst.IdToken, authResult[BrokerResponseConst.IdToken]?.ToString());
-            response.Add(BrokerResponseConst.CorrelationId, s_correlationId);
-            response.Add(BrokerResponseConst.Scope, authResult[BrokerResponseConst.AndroidScopes]?.ToString());
-            response.Add(BrokerResponseConst.ExpiresOn, authResult[BrokerResponseConst.ExpiresOn]?.ToString());
-            response.Add(BrokerResponseConst.ClientInfo, authResult[BrokerResponseConst.ClientInfo]?.ToString());
-
-            return MsalTokenResponse.CreateFromBrokerResponse(response);
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)

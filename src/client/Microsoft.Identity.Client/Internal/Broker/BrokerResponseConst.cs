@@ -3,7 +3,10 @@
 
 namespace Microsoft.Identity.Client.Internal.Broker
 {
-    internal class BrokerResponseConst
+    /// <summary>
+    /// For Android there are from: https://github.com/AzureAD/microsoft-authentication-library-common-for-android/blob/dev/common/src/main/java/com/microsoft/identity/common/internal/broker/BrokerResult.java
+    /// </summary>
+    internal static class BrokerResponseConst
     {
         public const string ErrorMetadata = "error_metadata";
         public const string BrokerErrorDomain = "broker_error_domain";
@@ -31,5 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Environment = "environment";
 
         public const string iOSBrokerUserCancellationErrorCode = "-50005";
+
+        public const string TokenType = "token_type";
     }
 }

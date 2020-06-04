@@ -24,7 +24,7 @@ using Microsoft.Identity.Json.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Platforms.Android
+namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
     [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class AndroidBrokerHelper
@@ -94,10 +94,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     _logger.Info("Android account manager didn't return any results for interactive broker request.");
                 }
 
-                Bundle bundleResult = (Bundle)(await result.GetResultAsync(
+                Bundle bundleResult = (Bundle)await result.GetResultAsync(
                      AccountManagerTimeoutSeconds,
                      TimeUnit.Seconds)
-                     .ConfigureAwait(false));
+                     .ConfigureAwait(false);
 
                 intent = (Intent)bundleResult?.GetParcelable(AccountManager.KeyIntent);
 
@@ -141,10 +141,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             if (result != null)
             {
-                Bundle bundleResult = (Bundle)(await result.GetResultAsync(
+                Bundle bundleResult = (Bundle)await result.GetResultAsync(
                      AccountManagerTimeoutSeconds,
                      TimeUnit.Seconds)
-                     .ConfigureAwait(false));
+                     .ConfigureAwait(false);
 
                 if (bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success))
                 {
@@ -186,14 +186,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     var accountDataHomeAccountID = accountData[BrokerResponseConst.HomeAccountId]?.ToString();
                     var accountDataLocalAccountID = accountData[BrokerResponseConst.LocalAccountId]?.ToString();
 
-                    if (string.Equals((accountData[BrokerResponseConst.UserName]).ToString(), username, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(accountData[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
                     {
                         brokerPayload[BrokerParameter.HomeAccountId] = accountDataHomeAccountID;
                         brokerPayload[BrokerParameter.LocalAccountId] = accountDataLocalAccountID;
                         _logger.Info("Found broker account in Android account manager using the provided login hint.");
                         return;
                     }
-                    
+
                     if (string.Equals(accountDataHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
                          string.Equals(accountDataLocalAccountID, localAccountId, StringComparison.Ordinal))
                     {
@@ -296,10 +296,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
                 if (result != null)
                 {
-                    Bundle bundleResult = (Bundle)(await result.GetResultAsync(
+                    Bundle bundleResult = (Bundle)await result.GetResultAsync(
                         AccountManagerTimeoutSeconds,
                         TimeUnit.Seconds)
-                        .ConfigureAwait(false));
+                        .ConfigureAwait(false);
 
                     var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
 

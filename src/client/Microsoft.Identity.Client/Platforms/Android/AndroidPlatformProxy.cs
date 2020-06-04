@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
 using Microsoft.Identity.Client.Internal.Broker;
-
+using Microsoft.Identity.Client.Platforms.Android.Broker;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
