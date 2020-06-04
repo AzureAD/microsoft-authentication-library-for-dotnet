@@ -171,6 +171,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 CorrelationId = correlationId, // Android response does not expose Correlation ID
                 Scope = authResult[BrokerResponseConst.AndroidScopes], // sadly for iOS this is "scope" and for Android "scope"
                 ExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExpiresOn].ToString()),
+                ExtendedExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo],
                 TokenType = authResult[BrokerResponseConst.TokenType] ?? "Bearer"
             };
@@ -180,6 +181,11 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private static long GetExpiresIn(string expiresOn)
         {
+            if (string.IsNullOrEmpty(expiresOn))
+            {
+                return 0;
+            }
+
             long expiresOnUnixTimestamp = long.Parse(expiresOn, CultureInfo.InvariantCulture);
             return expiresOnUnixTimestamp - CoreHelpers.CurrDateTimeInUnixTimestamp();
         }

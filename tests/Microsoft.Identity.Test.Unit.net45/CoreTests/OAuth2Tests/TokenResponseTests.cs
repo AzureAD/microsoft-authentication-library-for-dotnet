@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
       ""token_type"":""Bearer"",
       ""username"":""some_user@contoso.com""
    }";
-            androidBrokerResponse.Replace("1591196764", unixTimestamp); 
+            androidBrokerResponse = androidBrokerResponse.Replace("1591196764", unixTimestamp); 
             string correlationId = Guid.NewGuid().ToString();
             // Act
             var msalTokenResponse = MsalTokenResponse.CreateFromAndroidBrokerResponse(androidBrokerResponse, correlationId);
@@ -94,6 +94,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.AreEqual("User.Read openid offline_access profile", msalTokenResponse.Scope);
             Assert.AreEqual("Bearer", msalTokenResponse.TokenType);
             Assert.IsTrue(msalTokenResponse.AccessTokenExpiresOn <= DateTimeOffset.Now + TimeSpan.FromMinutes(40));
+            Assert.IsTrue(msalTokenResponse.AccessTokenExtendedExpiresOn <= DateTimeOffset.Now + TimeSpan.FromMinutes(40));
+
+            Assert.IsTrue(msalTokenResponse.AccessTokenExpiresOn > DateTimeOffset.Now );
+            Assert.IsTrue(msalTokenResponse.AccessTokenExtendedExpiresOn > DateTimeOffset.Now );
 
             Assert.IsNull(msalTokenResponse.RefreshToken);
 

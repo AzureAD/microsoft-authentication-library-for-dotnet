@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string Scope = "scope";
         public const string AndroidScopes = "scopes";
         public const string ExpiresOn = "expires_on";
+        public const string ExtendedExpiresOn = "ext_expires_on";
         public const string ClientInfo = "client_info";
         public const string Account = "mAccount";
         public const string HomeAccountId = "home_account_id";
