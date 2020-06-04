@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Client
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         private const int DefaultExpirationBufferInMinutes = 5;
+        internal const int ExpirationTooLargeInDays = 10 * 365;
 
         private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
         private readonly IFeatureFlags _featureFlags;
