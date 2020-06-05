@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.OAuth2
         /// </remarks>
         internal static MsalTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
         {
-            dynamic authResult = JObject.Parse(jsonResponse);
+            JObject authResult = JObject.Parse(jsonResponse);
             var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
 
             if (!string.IsNullOrEmpty(errorCode))
@@ -165,15 +165,15 @@ namespace Microsoft.Identity.Client.OAuth2
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
-                Authority = authResult[BrokerResponseConst.Authority],
-                AccessToken = authResult[BrokerResponseConst.AccessToken],
-                IdToken = authResult[BrokerResponseConst.IdToken],
+                Authority = authResult[BrokerResponseConst.Authority].ToString(),
+                AccessToken = authResult[BrokerResponseConst.AccessToken].ToString(),
+                IdToken = authResult[BrokerResponseConst.IdToken].ToString(),
                 CorrelationId = correlationId, // Android response does not expose Correlation ID
-                Scope = authResult[BrokerResponseConst.AndroidScopes], // sadly for iOS this is "scope" and for Android "scopes"
+                Scope = authResult[BrokerResponseConst.AndroidScopes].ToString(), // sadly for iOS this is "scope" and for Android "scopes"
                 ExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExpiresOn].ToString()),
                 ExtendedExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
-                ClientInfo = authResult[BrokerResponseConst.ClientInfo],
-                TokenType = authResult[BrokerResponseConst.TokenType] ?? "Bearer"
+                ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
+                TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer"
             };
 
             return msalTokenResponse;
