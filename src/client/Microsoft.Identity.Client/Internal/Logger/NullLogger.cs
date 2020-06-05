@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class NullLogger : ICoreLogger
     {
@@ -68,6 +69,20 @@ namespace Microsoft.Identity.Client.Internal
 
         public void VerbosePii(string messageWithPii, string messageScrubbed)
         {
+        }
+
+        public void Log(LogLevel msalLogLevel, string messageWithPii, string messageScrubbed)
+        {
+        }
+
+        public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
+        {
+            return new DurationLogHelper(this, measuredBlockName, logLevel);
+        }
+
+        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null)
+        {
+            return LogBlockDuration(methodName, logLevel);
         }
     }
 }

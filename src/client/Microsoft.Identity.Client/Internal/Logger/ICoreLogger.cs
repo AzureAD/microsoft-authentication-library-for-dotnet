@@ -2,6 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -25,5 +28,8 @@ namespace Microsoft.Identity.Client.Core
         void InfoPiiWithPrefix(Exception exWithPii, string prefix);
         void Verbose(string messageScrubbed);
         void VerbosePii(string messageWithPii, string messageScrubbed);
+        void Log(LogLevel msalLogLevel, string messageWithPii, string messageScrubbed);
+        DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose);
+        DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null);
     }
 }

@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             string packageName = _androidContext.PackageName;
 
-            // ADAL switches broker for following conditions:
+            // Rules are:
             // 1- broker app is installed
             // 2- signature of the broker is valid
             // 3- account exists
@@ -279,45 +279,48 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         //Inorder for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.
         public async Task InitiateBrokerHandshakeAsync(Activity callerActivity)
         {
-            try
+            using (_logger.LogMethodDuration())
             {
-                Bundle helloRequestBundle = new Bundle();
-                helloRequestBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
-                helloRequestBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
-                helloRequestBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
-
-                IAccountManagerFuture result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
-                    BrokerConstants.AuthtokenType,
-                    null,
-                    helloRequestBundle,
-                    null,
-                    null,
-                    GetPreferredLooper(callerActivity));
-
-                if (result != null)
+                try
                 {
-                    Bundle bundleResult = (Bundle)await result.GetResultAsync(
-                        AccountManagerTimeoutSeconds,
-                        TimeUnit.Seconds)
-                        .ConfigureAwait(false);
+                    Bundle helloRequestBundle = new Bundle();
+                    helloRequestBundle.PutString(BrokerConstants.ClientAdvertisedMaximumBPVersionKey, BrokerConstants.BrokerProtocalVersionCode);
+                    helloRequestBundle.PutString(BrokerConstants.ClientConfiguredMinimumBPVersionKey, "2.0");
+                    helloRequestBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, "HELLO");
 
-                    var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
+                    IAccountManagerFuture result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+                        BrokerConstants.AuthtokenType,
+                        null,
+                        helloRequestBundle,
+                        null,
+                        null,
+                        GetPreferredLooper(callerActivity));
 
-                    if (!string.IsNullOrEmpty(bpKey))
+                    if (result != null)
                     {
-                        _logger.Info("Using broker protocol version: " + bpKey);
-                        return;
+                        Bundle bundleResult = (Bundle)await result.GetResultAsync(
+                            AccountManagerTimeoutSeconds,
+                            TimeUnit.Seconds)
+                            .ConfigureAwait(false);
+
+                        var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
+
+                        if (!string.IsNullOrEmpty(bpKey))
+                        {
+                            _logger.Info("Using broker protocol version: " + bpKey);
+                            return;
+                        }
+
+                        throw new MsalClientException("Could not negotiate protocol version with broker. ");
                     }
 
-                    throw new MsalClientException("Could not negotiate protocol version with broker. ");
+                    throw new MsalClientException("Could not communicate with broker via account manager");
                 }
-
-                throw new MsalClientException("Could not communicate with broker via account manager");
-            }
-            catch
-            {
-                _logger.Error("Error when trying to initiate communication with the broker.");
-                throw;
+                catch
+                {
+                    _logger.Error("Error when trying to initiate communication with the broker.");
+                    throw;
+                }
             }
         }
 
@@ -338,13 +341,16 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private void ValidateBrokerRedirectURI(IDictionary<string, string> brokerPayload)
         {
-            string computedRedirectUri = GetRedirectUriForBroker();
-
-            if (!string.Equals(computedRedirectUri, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri), StringComparison.OrdinalIgnoreCase))
+            using (_logger.LogMethodDuration())
             {
-                string msg = string.Format(CultureInfo.CurrentCulture, "The broker redirect URI is incorrect, it should be {0}. Please visit https://aka.ms/Brokered-Authentication-for-Android for more details.", computedRedirectUri);
-                _logger.Info(msg);
-                throw new MsalClientException(MsalError.CannotInvokeBroker, msg);
+                string computedRedirectUri = GetRedirectUriForBroker();
+
+                if (!string.Equals(computedRedirectUri, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri), StringComparison.OrdinalIgnoreCase))
+                {
+                    string msg = string.Format(CultureInfo.CurrentCulture, "The broker redirect URI is incorrect, it should be {0}. Please visit https://aka.ms/Brokered-Authentication-for-Android for more details.", computedRedirectUri);
+                    _logger.Info(msg);
+                    throw new MsalClientException(MsalError.CannotInvokeBroker, msg);
+                }
             }
         }
 
@@ -568,24 +574,27 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private bool VerifyAuthenticator()
         {
-            // there may be multiple authenticators from same package
-            // , but there is only one entry for an authenticator type in
-            // AccountManager.
-            // If another app tries to install same authenticator type, it will
-            // queue up and will be active after first one is uninstalled.
-            AuthenticatorDescription[] authenticators = _androidAccountManager.GetAuthenticatorTypes();
-            foreach (AuthenticatorDescription authenticator in authenticators)
+            using (_logger.LogMethodDuration())
             {
-                if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType, StringComparison.OrdinalIgnoreCase)
-                    && VerifySignature(authenticator.PackageName))
+                // there may be multiple authenticators from same package
+                // , but there is only one entry for an authenticator type in
+                // AccountManager.
+                // If another app tries to install same authenticator type, it will
+                // queue up and will be active after first one is uninstalled.
+                AuthenticatorDescription[] authenticators = _androidAccountManager.GetAuthenticatorTypes();
+                foreach (AuthenticatorDescription authenticator in authenticators)
                 {
-                    _logger.Verbose("Found the Authenticator on the device");
-                    return true;
+                    if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType, StringComparison.OrdinalIgnoreCase)
+                        && VerifySignature(authenticator.PackageName))
+                    {
+                        _logger.Verbose("Found the Authenticator on the device");
+                        return true;
+                    }
                 }
-            }
 
-            _logger.Warning("No Authenticator found on the device.");
-            return false;
+                _logger.Warning("No Authenticator found on the device.");
+                return false;
+            }
         }
 
         public static string GetValueFromBrokerPayload(IDictionary<string, string> brokerPayload, string key)

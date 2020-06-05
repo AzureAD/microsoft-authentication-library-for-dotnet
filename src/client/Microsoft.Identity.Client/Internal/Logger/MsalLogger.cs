@@ -3,18 +3,19 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class MsalLogger : ICoreLogger
     {
         private readonly IPlatformLogger _platformLogger;
         private readonly LogCallback _loggingCallback;
-        private readonly LogLevel _logLevel;
+        private readonly LogLevel _minLogLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
         private static readonly Lazy<ICoreLogger> s_nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
 
@@ -30,7 +31,7 @@ namespace Microsoft.Identity.Client.Internal
             CorrelationId = correlationId;
             PiiLoggingEnabled = enablePiiLogging;
             _loggingCallback = loggingCallback;
-            _logLevel = logLevel;
+            _minLogLevel = logLevel;
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
             _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
@@ -148,14 +149,14 @@ namespace Microsoft.Identity.Client.Internal
             Log(LogLevel.Error, messageWithPii, messageScrubbed);
         }
 
-        private void Log(LogLevel msalLogLevel, string messageWithPii, string messageScrubbed)
+        public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            if (_loggingCallback == null || msalLogLevel > _logLevel)
+            if (_loggingCallback == null || logLevel > _minLogLevel)
             {
                 return;
             }
 
-            //format log message;
+            // format log message;
             string correlationId = CorrelationId.Equals(Guid.Empty)
                 ? string.Empty
                 : " - " + CorrelationId;
@@ -180,7 +181,7 @@ namespace Microsoft.Identity.Client.Internal
 
             if (_isDefaultPlatformLoggingEnabled)
             {
-                switch (msalLogLevel)
+                switch (logLevel)
                 {
                     case LogLevel.Error:
                         _platformLogger.Error(log);
@@ -197,7 +198,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
             }
 
-            _loggingCallback.Invoke(msalLogLevel, log, isLoggingPii);
+            _loggingCallback.Invoke(logLevel, log, isLoggingPii);
         }
 
         internal static string GetPiiScrubbedExceptionDetails(Exception ex)
@@ -232,6 +233,16 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             return sb.ToString();
+        }
+
+        public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
+        {
+            return new DurationLogHelper(this, measuredBlockName, logLevel);
+        }
+
+        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null)
+        {
+            return LogBlockDuration(methodName, logLevel);
         }
     }
 }
