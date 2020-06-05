@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -100,19 +101,18 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public string Authority { get; private set; }
 
-        internal static MsalTokenResponse CreateFromBrokerResponse(Dictionary<string, string> responseDictionary)
+        internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {
-            if (responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorCode) ||
-                responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorDescription))
+            if  (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
                 return new MsalTokenResponse
                 {
-                    Error = responseDictionary[BrokerResponseConst.BrokerErrorCode],
+                    Error = errorCode,
                     ErrorDescription = CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription])
                 };
             }
 
-            var response =  new MsalTokenResponse
+            var response = new MsalTokenResponse
             {
                 Authority = responseDictionary.ContainsKey(BrokerResponseConst.Authority)
                     ? AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.Authority]))
@@ -124,10 +124,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 IdToken = responseDictionary[BrokerResponseConst.IdToken],
                 TokenType = BrokerResponseConst.Bearer,
                 CorrelationId = responseDictionary[BrokerResponseConst.CorrelationId],
-                Scope = responseDictionary[BrokerResponseConst.Scope],
-                ExpiresIn = responseDictionary.ContainsKey(BrokerResponseConst.ExpiresOn)
-                    ? long.Parse(responseDictionary[BrokerResponseConst.ExpiresOn].Split('.')[0], CultureInfo.InvariantCulture)
-                    : Convert.ToInt64(DateTime.UtcNow, CultureInfo.InvariantCulture),
+                Scope = responseDictionary[BrokerResponseConst.Scope],               
+                ExpiresIn = responseDictionary.TryGetValue(BrokerResponseConst.ExpiresOn, out string expiresOn) ?
+                                GetExpiresIn(expiresOn) : 
+                                0,
                 ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
                     ? responseDictionary[BrokerResponseConst.ClientInfo]
                     : null,
@@ -142,5 +142,52 @@ namespace Microsoft.Identity.Client.OAuth2
 
             return response;
         }
-    }
+
+        /// <remarks>
+        /// This method does not belong here - it is more tied to the Android code. However, that code is
+        /// not unit testable, and this one is. 
+        /// The values of the JSON response are based on 
+        /// https://github.com/AzureAD/microsoft-authentication-library-common-for-android/blob/dev/common/src/main/java/com/microsoft/identity/common/internal/broker/BrokerResult.java
+        /// </remarks>
+        internal static MsalTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
+        {
+            dynamic authResult = JObject.Parse(jsonResponse);
+            var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+
+            if (!string.IsNullOrEmpty(errorCode))
+            {
+                return new MsalTokenResponse
+                {
+                    Error = errorCode,
+                    ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
+                };
+            }
+
+            MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
+            {
+                Authority = authResult[BrokerResponseConst.Authority],
+                AccessToken = authResult[BrokerResponseConst.AccessToken],
+                IdToken = authResult[BrokerResponseConst.IdToken],
+                CorrelationId = correlationId, // Android response does not expose Correlation ID
+                Scope = authResult[BrokerResponseConst.AndroidScopes], // sadly for iOS this is "scope" and for Android "scopes"
+                ExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExpiresOn].ToString()),
+                ExtendedExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
+                ClientInfo = authResult[BrokerResponseConst.ClientInfo],
+                TokenType = authResult[BrokerResponseConst.TokenType] ?? "Bearer"
+            };
+
+            return msalTokenResponse;
+        }
+
+        private static long GetExpiresIn(string expiresOn)
+        {
+            if (string.IsNullOrEmpty(expiresOn))
+            {
+                return 0;
+            }
+
+            long expiresOnUnixTimestamp = long.Parse(expiresOn, CultureInfo.InvariantCulture);
+            return expiresOnUnixTimestamp - CoreHelpers.CurrDateTimeInUnixTimestamp();
+        }
+    }    
 }

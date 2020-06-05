@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             Secret = secret;
             ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(accessTokenExpiresOn);
             ExtendedExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(accessTokenExtendedExpiresOn);
-            CachedAt = CoreHelpers.CurrDateTimeInUnixTimestamp();
+            CachedAt = CoreHelpers.CurrDateTimeInUnixTimestamp().ToString(CultureInfo.InvariantCulture);
             RawClientInfo = rawClientInfo;
             KeyId = keyId;
             TokenType = tokenType;

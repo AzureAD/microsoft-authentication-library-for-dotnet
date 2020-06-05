@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
                 }
 
-                brokerTokenResponse = MsalTokenResponse.CreateFromBrokerResponse(responseDictionary);
+                brokerTokenResponse = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
             }
             else
             {

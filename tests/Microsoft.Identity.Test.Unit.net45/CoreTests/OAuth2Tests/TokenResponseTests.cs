@@ -2,11 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -47,5 +51,31 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 Assert.IsNotNull(response);
             }
         }
+
+        [TestMethod]
+        public void AndroidBrokerTokenResponseParseTest()
+        {
+            string unixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(40));
+            string androidBrokerResponse = TestConstants.AndroidBrokerResponse.Replace("1591196764", unixTimestamp); 
+            string correlationId = Guid.NewGuid().ToString();
+            // Act
+            var msalTokenResponse = MsalTokenResponse.CreateFromAndroidBrokerResponse(androidBrokerResponse, correlationId);
+
+            // Assert
+            Assert.AreEqual("secretAt", msalTokenResponse.AccessToken);
+            Assert.AreEqual(correlationId, msalTokenResponse.CorrelationId);
+            Assert.AreEqual("https://login.microsoftonline.com/common", msalTokenResponse.Authority);
+            Assert.AreEqual("clientInfo", msalTokenResponse.ClientInfo);
+            Assert.AreEqual("idT", msalTokenResponse.IdToken);
+            Assert.AreEqual("User.Read openid offline_access profile", msalTokenResponse.Scope);
+            Assert.AreEqual("Bearer", msalTokenResponse.TokenType);
+            Assert.IsTrue(msalTokenResponse.AccessTokenExpiresOn <= DateTimeOffset.Now + TimeSpan.FromMinutes(40));
+            Assert.IsTrue(msalTokenResponse.AccessTokenExtendedExpiresOn <= DateTimeOffset.Now + TimeSpan.FromMinutes(40));
+
+            Assert.IsTrue(msalTokenResponse.AccessTokenExpiresOn > DateTimeOffset.Now );
+            Assert.IsTrue(msalTokenResponse.AccessTokenExtendedExpiresOn > DateTimeOffset.Now );
+
+            Assert.IsNull(msalTokenResponse.RefreshToken);
+        }       
     }
 }

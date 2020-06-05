@@ -332,6 +332,41 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        // Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806
+        public void GetInvalidExpirationAccessTokenTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
+
+                var atItem = new MsalAccessTokenCacheItem(
+                    TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ClientId,
+                    TestConstants.s_scope.AsSingleString(),
+                    TestConstants.Utid,
+                    null,
+                    accessTokenExpiresOn: new DateTimeOffset(
+                        DateTime.UtcNow + 
+                        TimeSpan.FromDays(TokenCache.ExpirationTooLongInDays) +
+                        TimeSpan.FromMinutes(5)),
+                    accessTokenExtendedExpiresOn: DateTimeOffset.Now,
+                    _clientInfo,
+                    _homeAccountId);
+
+                atItem.Secret = atItem.GetKey().ToString();
+                cache.Accessor.SaveAccessToken(atItem);
+
+                var param = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityTestTenant,
+                    new SortedSet<string>(),
+                    cache,
+                    account: new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null));
+
+                Assert.IsNull(cache.FindAccessTokenAsync(param).Result);
+            }
+        }
+
+        [TestMethod]
         public void GetExpiredAccessToken_WithExtendedExpireStillValid_Test()
         {
             using (var harness = CreateTestHarness(isExtendedTokenLifetimeEnabled: true))
