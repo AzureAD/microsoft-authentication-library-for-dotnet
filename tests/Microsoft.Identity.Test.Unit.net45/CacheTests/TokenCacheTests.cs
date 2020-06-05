@@ -347,7 +347,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     accessTokenExpiresOn: new DateTimeOffset(
                         DateTime.UtcNow + 
-                        TimeSpan.FromDays(TokenCache.ExpirationTooLargeInDays) +
+                        TimeSpan.FromDays(TokenCache.ExpirationTooLongInDays) +
                         TimeSpan.FromMinutes(5)),
                     accessTokenExtendedExpiresOn: DateTimeOffset.Now,
                     _clientInfo,

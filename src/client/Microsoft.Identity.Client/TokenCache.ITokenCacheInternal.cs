@@ -339,7 +339,7 @@ namespace Microsoft.Identity.Client
                     DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                 {
                     // due to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806
-                    if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromDays(ExpirationTooLargeInDays))
+                    if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromDays(ExpirationTooLongInDays))
                     {
                         requestParams.RequestContext.Logger.Error(
                            "Access token expiration too large. This can be the result of a bug or corrupt cache. Token will be ignored as it is likely expired." +

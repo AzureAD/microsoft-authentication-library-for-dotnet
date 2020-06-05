@@ -266,6 +266,27 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                                                    ""id_token"": ""idtoken."",
                                                    ""client_info"": ""eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0""
                                                 }";
+
+        public const string AndroidBrokerResponse = @"
+{
+      ""access_token"":""secretAt"",
+      ""authority"":""https://login.microsoftonline.com/common"",
+      ""cached_at"":1591193165,
+      ""client_id"":""4a1aa1d5-c567-49d0-ad0b-cd957a47f842"",
+      ""client_info"":""clientInfo"",
+      ""environment"":""login.windows.net"",
+      ""expires_on"":1591196764,
+      ""ext_expires_on"":1591196764,
+      ""home_account_id"":""ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462"",
+      ""http_response_code"":0,
+      ""id_token"":""idT"",
+      ""local_account_id"":""ae821e4d-f408-451a-af82-882691148603"",
+      ""scopes"":""User.Read openid offline_access profile"",
+      ""success"":true,
+      ""tenant_id"":""49f548d0-12b7-4169-a390-bb5304d24462"",     
+      ""token_type"":""Bearer"",
+      ""username"":""some_user@contoso.com""
+   }";
     }
 
     internal static class Adfs2019LabConstants
