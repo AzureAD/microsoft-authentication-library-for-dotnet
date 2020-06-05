@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 AccessToken = authResult[BrokerResponseConst.AccessToken],
                 IdToken = authResult[BrokerResponseConst.IdToken],
                 CorrelationId = correlationId, // Android response does not expose Correlation ID
-                Scope = authResult[BrokerResponseConst.AndroidScopes], // sadly for iOS this is "scope" and for Android "scope"
+                Scope = authResult[BrokerResponseConst.AndroidScopes], // sadly for iOS this is "scope" and for Android "scopes"
                 ExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExpiresOn].ToString()),
                 ExtendedExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo],
