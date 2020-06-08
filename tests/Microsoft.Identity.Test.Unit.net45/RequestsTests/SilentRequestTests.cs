@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
@@ -25,6 +24,7 @@ using NSubstitute.Routing.Handlers;
 using Microsoft.Identity.Client.Internal.Broker;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {

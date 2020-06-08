@@ -1,14 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.IO;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json;
 
-namespace Microsoft.Identity.Client.Core
+namespace Microsoft.Identity.Client.Internal
 {
-    internal class IdTokenClaim
+    internal static class IdTokenClaim
     {
         public const string Issuer = "iss";
         public const string ObjectId = "oid";
@@ -68,7 +66,7 @@ namespace Microsoft.Identity.Client.Core
             }
 
             IdToken idTokenBody = null;
-            string[] idTokenSegments = idToken.Split(new[] {'.'});
+            string[] idTokenSegments = idToken.Split(new[] { '.' });
 
             if (idTokenSegments.Length < 2)
             {

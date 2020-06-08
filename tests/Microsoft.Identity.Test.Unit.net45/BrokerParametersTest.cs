@@ -3,12 +3,12 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client;
 using System;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit
 {

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -13,7 +14,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
 using Microsoft.Identity.Client.WsTrust;
 
-namespace Microsoft.Identity.Client.Core
+namespace Microsoft.Identity.Client.Internal
 {
     internal class ServiceBundle : IServiceBundle
     {
@@ -40,7 +41,7 @@ namespace Microsoft.Identity.Client.Core
             {
                 // This can return null if the device isn't sampled in.  There's no need for processing MATS events if we're not going to send them.
                 Mats = TelemetryClient.CreateMats(config, PlatformProxy, config.TelemetryConfig);
-                MatsTelemetryManager = Mats?.TelemetryManager ?? 
+                MatsTelemetryManager = Mats?.TelemetryManager ??
                     new TelemetryManager(config, PlatformProxy, config.TelemetryCallback);
             }
             else
@@ -49,10 +50,10 @@ namespace Microsoft.Identity.Client.Core
             }
 
             InstanceDiscoveryManager = new InstanceDiscoveryManager(
-                HttpManager, 
-                MatsTelemetryManager, 
-                shouldClearCaches, 
-                config.CustomInstanceDiscoveryMetadata, 
+                HttpManager,
+                MatsTelemetryManager,
+                shouldClearCaches,
+                config.CustomInstanceDiscoveryMetadata,
                 config.CustomInstanceDiscoveryMetadataUri);
 
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);

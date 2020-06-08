@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -68,7 +67,7 @@ namespace Microsoft.Identity.Client
 
         internal ClientApplicationBase(ApplicationConfiguration config)
         {
-            ServiceBundle = Core.ServiceBundle.Create(config);
+            ServiceBundle = Internal.ServiceBundle.Create(config);
 
             if (config.UserTokenLegacyCachePersistenceForTest != null)
             {
