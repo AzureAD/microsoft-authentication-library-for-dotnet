@@ -635,33 +635,36 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithB2CAuthority(TestConstants.B2CLoginAuthority)
                 .BuildConcrete();
 
-            var account = app.GetAccountByUserFlowAsync(TestConstants.B2CSignUpSignIn).Result;
-            Assert.IsNull(account);
+            var accounts = app.GetAccountsAsync(TestConstants.B2CSignUpSignIn).Result;
+            Assert.AreEqual(0, accounts.Count());
 
             await AssertException.TaskThrowsAsync<ArgumentException>(() =>
-              app.GetAccountByUserFlowAsync(string.Empty)).ConfigureAwait(false);
+              app.GetAccountsAsync(string.Empty)).ConfigureAwait(false);
 
-            account = PopulateB2CTokenCache(TestConstants.B2CSignUpSignIn, app);
+            accounts = PopulateB2CTokenCacheAsync(TestConstants.B2CSignUpSignIn, app).Result;
 
-            Assert.IsNotNull(account);
+            var userToFind = accounts.First();
+
+            Assert.IsNotNull(accounts);
             // one account in the cache for susi user flow
 
-            Assert.IsNull(account.Username);
-            Assert.AreEqual(TestConstants.B2CSuSiHomeAccountIdentifer, account.HomeAccountId.Identifier);
-            Assert.AreEqual(TestConstants.B2CEnvironment, account.Environment);
-            Assert.AreEqual(TestConstants.Utid, account.HomeAccountId.TenantId);
-            Assert.AreEqual(TestConstants.B2CSuSiHomeAccountObjectId, account.HomeAccountId.ObjectId);
+            Assert.IsNull(userToFind.Username);
+            Assert.AreEqual(TestConstants.B2CSuSiHomeAccountIdentifer, userToFind.HomeAccountId.Identifier);
+            Assert.AreEqual(TestConstants.B2CEnvironment, userToFind.Environment);
+            Assert.AreEqual(TestConstants.Utid, userToFind.HomeAccountId.TenantId);
+            Assert.AreEqual(TestConstants.B2CSuSiHomeAccountObjectId, userToFind.HomeAccountId.ObjectId);
 
-            account = PopulateB2CTokenCache(TestConstants.B2CEditProfile, app);
+            accounts = PopulateB2CTokenCacheAsync(TestConstants.B2CEditProfile, app).Result;
 
-            Assert.IsNotNull(account);
+            Assert.IsNotNull(accounts);
             // one account in the cache for edit profile user flow
 
-            Assert.IsNull(account.Username);
-            Assert.AreEqual(TestConstants.B2CEditProfileHomeAccountIdentifer, account.HomeAccountId.Identifier);
-            Assert.AreEqual(TestConstants.B2CEnvironment, account.Environment);
-            Assert.AreEqual(TestConstants.Utid, account.HomeAccountId.TenantId);
-            Assert.AreEqual(TestConstants.B2CEditProfileHomeAccountObjectId, account.HomeAccountId.ObjectId);
+            userToFind = accounts.First();
+            Assert.IsNull(userToFind.Username);
+            Assert.AreEqual(TestConstants.B2CEditProfileHomeAccountIdentifer, userToFind.HomeAccountId.Identifier);
+            Assert.AreEqual(TestConstants.B2CEnvironment, userToFind.Environment);
+            Assert.AreEqual(TestConstants.Utid, userToFind.HomeAccountId.TenantId);
+            Assert.AreEqual(TestConstants.B2CEditProfileHomeAccountObjectId, userToFind.HomeAccountId.ObjectId);
         }
 
         [TestMethod]
@@ -1140,7 +1143,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
         }
 
-        private IAccount PopulateB2CTokenCache(string userFlow, PublicClientApplication app)
+        private Task<IEnumerable<IAccount>> PopulateB2CTokenCacheAsync(string userFlow, PublicClientApplication app)
         {
             TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CSuSiHomeAccountObjectId,
                 TestConstants.Utid, TestConstants.ClientId, TestConstants.B2CEnvironment);
@@ -1152,7 +1155,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             TokenCacheHelper.AddAccountToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CEditProfileHomeAccountObjectId,
                 TestConstants.Utid, TestConstants.B2CEnvironment);
 
-            return app.GetAccountByUserFlowAsync(userFlow).Result;
+            return app.GetAccountsAsync(userFlow);
         }
     }
 }
