@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 
 namespace Xamarin_Manual
 {
@@ -102,6 +104,8 @@ namespace Xamarin_Manual
             _pca = PublicClientApplicationBuilder.Create(AuthConfig.ClientID)
               .WithRedirectUri(AuthConfig.BrokerRedirectUri) 
               .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
+              .WithLogging(
+                    (lvl, msg, pii) => Trace.WriteLine($"[{lvl}] {msg}"), LogLevel.Verbose, true)
               .WithBroker(swBroker.IsToggled)
               .Build();
         }

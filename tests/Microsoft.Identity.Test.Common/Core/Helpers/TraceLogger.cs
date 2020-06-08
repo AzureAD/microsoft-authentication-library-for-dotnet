@@ -3,7 +3,10 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -62,6 +65,21 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         public void InfoPiiWithPrefix(Exception exWithPii, string prefix)
         {
             Trace.WriteLine($"{_prefix}[Exception] Exception {exWithPii.Message} - {exWithPii}");
+        }
+
+        public void Log(LogLevel msalLogLevel, string messageWithPii, string messageScrubbed)
+        {
+            Trace.WriteLine($"{_prefix}[{msalLogLevel}] {messageWithPii ?? messageScrubbed}");
+        }
+
+        public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)
+        {
+            return new DurationLogHelper(this, measuredBlockName, logLevel);
+        }
+
+        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null)
+        {
+            return LogBlockDuration(methodName, logLevel);
         }
 
         public void Verbose(string messageScrubbed)

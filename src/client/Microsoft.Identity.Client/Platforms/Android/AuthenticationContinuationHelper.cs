@@ -6,7 +6,7 @@ using System.Globalization;
 using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.Platforms.Android;
 using Microsoft.Identity.Client.Platforms.Android.Broker;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
