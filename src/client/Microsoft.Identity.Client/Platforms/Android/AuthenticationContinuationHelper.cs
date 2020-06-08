@@ -33,6 +33,12 @@ namespace Microsoft.Identity.Client
             var logger = MsalLogger.Create(Guid.Empty, null);
             logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
 
+            if (data == null)
+            {
+                logger.Info("Null intent was received.");
+                return;
+            }
+
             AuthorizationResult authorizationResult;
             if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
             {
