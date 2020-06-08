@@ -178,10 +178,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             accessor.SaveRefreshToken(rtItem);
         }
 
-        public static void AddAccountToCache(ITokenCacheAccessor accessor, string uid, string utid)
+        public static void AddAccountToCache(
+            ITokenCacheAccessor accessor, 
+            string uid, 
+            string utid, 
+            string environment = TestConstants.ProductionPrefCacheEnvironment)
         {
             MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem(
-                TestConstants.ProductionPrefCacheEnvironment,
+                environment,
                 null,
                 MockHelpers.CreateClientInfo(uid, utid),
                 $"{uid}.{utid}",

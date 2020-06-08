@@ -135,6 +135,31 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache,
+        /// based on the user flow. This is for Azure AD B2C scenarios.
+        /// </summary>
+        /// <param name="userFlow">User flow identifier. The identifier is the user flow being targeted by the specific B2C authority/>.
+        /// </param>
+        public async Task<IAccount> GetAccountByUserFlowAsync(string userFlow)
+        {
+            if (string.IsNullOrWhiteSpace(userFlow))
+            {
+                throw new ArgumentException($"{nameof(userFlow)} should not be null or whitespace", nameof(userFlow));
+            }
+
+            var accounts = await GetAccountsAsync().ConfigureAwait(false);
+
+            foreach (var account in accounts)
+            {
+                string accountIdentifier = account.HomeAccountId.ObjectId.Split('.')[0];
+                if (accountIdentifier.EndsWith(userFlow.ToLowerInvariant()))
+                    return account;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Removes all tokens in the cache for the specified account.
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>

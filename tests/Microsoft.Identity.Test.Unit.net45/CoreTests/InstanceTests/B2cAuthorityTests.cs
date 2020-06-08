@@ -141,10 +141,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             string UriNoPort = TestConstants.B2CAuthority;
             string UriNoPortTailSlash = TestConstants.B2CAuthority;
 
-            const string UriDefaultPort = "https://login.microsoftonline.in:443/tfp/tenant/policy";
+            const string UriDefaultPort = "https://login.microsoftonline.in:443/tfp/tenant/b2c_1_susi";
 
-            const string UriCustomPort = "https://login.microsoftonline.in:444/tfp/tenant/policy";
-            const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/policy/";
+            const string UriCustomPort = "https://login.microsoftonline.in:444/tfp/tenant/b2c_1_susi";
+            const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/b2c_1_susi/";
             string UriVanityPort = TestConstants.B2CLoginAuthority;
 
             var authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));

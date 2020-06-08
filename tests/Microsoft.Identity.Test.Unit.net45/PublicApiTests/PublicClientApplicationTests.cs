@@ -628,6 +628,43 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task GetAccountByUserFlowTestsAsync()
+        {
+            var app = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithB2CAuthority(TestConstants.B2CLoginAuthority)
+                .BuildConcrete();
+
+            var account = app.GetAccountByUserFlowAsync(TestConstants.B2CSignUpSignIn).Result;
+            Assert.IsNull(account);
+
+            await AssertException.TaskThrowsAsync<ArgumentException>(() =>
+              app.GetAccountByUserFlowAsync(string.Empty)).ConfigureAwait(false);
+
+            account = PopulateB2CTokenCache(TestConstants.B2CSignUpSignIn, app);
+
+            Assert.IsNotNull(account);
+            // one account in the cache for susi user flow
+
+            Assert.IsNull(account.Username);
+            Assert.AreEqual(TestConstants.B2CSuSiHomeAccountIdentifer, account.HomeAccountId.Identifier);
+            Assert.AreEqual(TestConstants.B2CEnvironment, account.Environment);
+            Assert.AreEqual(TestConstants.Utid, account.HomeAccountId.TenantId);
+            Assert.AreEqual(TestConstants.B2CSuSiHomeAccountObjectId, account.HomeAccountId.ObjectId);
+
+            account = PopulateB2CTokenCache(TestConstants.B2CEditProfile, app);
+
+            Assert.IsNotNull(account);
+            // one account in the cache for edit profile user flow
+
+            Assert.IsNull(account.Username);
+            Assert.AreEqual(TestConstants.B2CEditProfileHomeAccountIdentifer, account.HomeAccountId.Identifier);
+            Assert.AreEqual(TestConstants.B2CEnvironment, account.Environment);
+            Assert.AreEqual(TestConstants.Utid, account.HomeAccountId.TenantId);
+            Assert.AreEqual(TestConstants.B2CEditProfileHomeAccountObjectId, account.HomeAccountId.ObjectId);
+        }
+
+        [TestMethod]
         [Description("Test for AcquireToken with user canceling authentication")]
         public async Task AcquireTokenWithAuthenticationCanceledTestAsync()
         {
@@ -1101,6 +1138,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     {
                         {"key1", "value1"}
                     });
+        }
+
+        private IAccount PopulateB2CTokenCache(string userFlow, PublicClientApplication app)
+        {
+            TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CSuSiHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.ClientId, TestConstants.B2CEnvironment);
+            TokenCacheHelper.AddAccountToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CSuSiHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.B2CEnvironment);
+
+            TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CEditProfileHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.ClientId, TestConstants.B2CEnvironment);
+            TokenCacheHelper.AddAccountToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CEditProfileHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.B2CEnvironment);
+
+            return app.GetAccountByUserFlowAsync(userFlow).Result;
         }
     }
 }
