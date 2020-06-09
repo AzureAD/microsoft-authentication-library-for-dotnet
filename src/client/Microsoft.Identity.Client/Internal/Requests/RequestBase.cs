@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return apiEvent;
         }
 
-        protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse)
+        internal async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse)
         {
             // developer passed in user object.
             AuthenticationRequestParameters.RequestContext.Logger.Info("Checking client info returned from the server..");
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 .ConfigureAwait(false);
         }
 
-        protected Task<MsalTokenResponse> SendTokenRequestAsync(
+        internal Task<MsalTokenResponse> SendTokenRequestAsync(
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {

@@ -247,6 +247,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             var pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
+               .WithDefaultRedirectUri()
                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                .WithTestLogging()
                .Build();

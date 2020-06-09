@@ -1,48 +1,77 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Internal.Broker
+namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class BrokerSilentRequest
+    internal class SilentBrokerAuthStretegy : ISilentAuthStrategy
     {
-        public Dictionary<string, string> BrokerPayload
-            = new Dictionary<string, string>();
-        internal IBroker Broker { get; }
+        internal AuthenticationRequestParameters _authenticationRequestParameters;
+        private ICacheSessionManager CacheManager => _authenticationRequestParameters.CacheSessionManager;
+        protected IServiceBundle _serviceBundle;
         private readonly AcquireTokenSilentParameters _silentParameters;
-        private readonly AuthenticationRequestParameters _authenticationRequestParameters;
-        private readonly IServiceBundle _serviceBundle;
-        private readonly ICoreLogger _logger;
+        private SilentRequest _silentRequest;
+        private IBroker _broker;
+        public Dictionary<string, string> BrokerPayload = new Dictionary<string, string>();
+        ICoreLogger _logger;
 
-        internal BrokerSilentRequest(
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenSilentParameters acquireTokenSilentParameters,
+        public SilentBrokerAuthStretegy(
+            SilentRequest request,
             IServiceBundle serviceBundle,
-            IBroker broker)
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenSilentParameters silentParameters)
         {
             _authenticationRequestParameters = authenticationRequestParameters;
-            _silentParameters = acquireTokenSilentParameters;
+            _silentParameters = silentParameters;
             _serviceBundle = serviceBundle;
-            Broker = broker;
-            _logger = _authenticationRequestParameters.RequestContext.Logger;
+            _silentRequest = request;
+            _broker = _serviceBundle.PlatformProxy.CreateBroker(null);
+            _logger = authenticationRequestParameters.RequestContext.Logger;
+        }
+
+        public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+
+            if (!_silentParameters.ForceRefresh && !_authenticationRequestParameters.HasClaims)
+            {
+                cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+
+                if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
+                {
+                    _logger.Info("Returning access token found in cache. RefreshOn exists ? "
+                        + cachedAccessTokenItem.RefreshOn.HasValue);
+                    _authenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+                    return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                _logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set");
+            }
+
+            var response = await SendTokenRequestToBrokerAsync().ConfigureAwait(false);
+            return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
-            if(!Broker.IsBrokerInstalledAndInvokable())
+            if (!_broker.IsBrokerInstalledAndInvokable())
             {
                 throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked);
             }
 
-            _logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
+            _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
             return await SendAndVerifyResponseAsync().ConfigureAwait(false);
         }
@@ -52,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             CreateRequestParametersForBroker();
 
             MsalTokenResponse msalTokenResponse =
-                await Broker.AcquireTokenUsingBrokerAsync(BrokerPayload).ConfigureAwait(false);
+                await _broker.AcquireTokenUsingBrokerAsync(BrokerPayload).ConfigureAwait(false);
 
             ValidateResponseFromBroker(msalTokenResponse);
             return msalTokenResponse;
@@ -97,6 +126,21 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
             throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
+        }
+
+        public Task PreRunAsync()
+        {
+            return null;
+        }
+
+        private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {
+            var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
+            return new AuthenticationResult(
+                cachedAccessTokenItem,
+                msalIdTokenItem,
+                _authenticationRequestParameters.AuthenticationScheme,
+                _authenticationRequestParameters.RequestContext.CorrelationId);
         }
     }
 }
