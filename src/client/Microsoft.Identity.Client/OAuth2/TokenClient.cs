@@ -7,13 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Net;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.OAuth2.Throttling;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.OAuth2
 {

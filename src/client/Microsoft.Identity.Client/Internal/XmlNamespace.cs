@@ -3,7 +3,7 @@
 
 using System.Xml.Linq;
 
-namespace Microsoft.Identity.Client.Core
+namespace Microsoft.Identity.Client.Internal
 {
     internal static class XmlNamespace
     {

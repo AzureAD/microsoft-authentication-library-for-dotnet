@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace XamarinDev
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
+    [XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class AccountCacheItemDetails : ContentPage
 	{
 		internal AccountCacheItemDetails (MsalAccountCacheItem msalAccountCacheItem)

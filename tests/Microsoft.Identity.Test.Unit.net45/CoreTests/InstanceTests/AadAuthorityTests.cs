@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Test.Common;
@@ -17,6 +16,7 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Client.UI;
 using System.Threading;
 using System.Web;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {

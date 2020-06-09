@@ -4,8 +4,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Validation;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {

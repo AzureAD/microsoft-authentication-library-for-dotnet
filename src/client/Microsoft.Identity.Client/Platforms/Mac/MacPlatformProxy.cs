@@ -2,17 +2,18 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Threading.Tasks;
-using System.Reflection;
-using System.Net.NetworkInformation;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
-using System.Diagnostics;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
@@ -71,7 +72,6 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             return null;
         }
 
-
         /// <inheritdoc />
         public override string GetBrokerOrRedirectUri(Uri redirectUri)
         {
@@ -112,12 +112,9 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             return Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString();
         }
 
-
         private static readonly Lazy<string> DeviceIdLazy = new Lazy<string>(
            () => NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
                                  .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault());
-
-
 
         /// <summary>
         /// Considered PII. Please ensure that it is hashed.

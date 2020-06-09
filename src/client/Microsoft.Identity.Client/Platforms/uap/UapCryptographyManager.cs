@@ -9,9 +9,9 @@ using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {

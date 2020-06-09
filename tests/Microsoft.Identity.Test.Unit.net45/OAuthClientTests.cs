@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -198,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit
                     () => client.ExecuteRequestAsync<OAuth2ResponseBase>(
                         requestUri,
                         HttpMethod.Post,
-                        new Client.Core.RequestContext(harness.ServiceBundle, Guid.NewGuid())), 
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid())), 
                     allowDerived: true)
                     .ConfigureAwait(false);
 

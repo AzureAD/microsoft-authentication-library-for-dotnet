@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;

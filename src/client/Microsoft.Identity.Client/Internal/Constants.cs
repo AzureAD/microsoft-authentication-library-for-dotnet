@@ -3,7 +3,7 @@
 
 using System.Globalization;
 
-namespace Microsoft.Identity.Client.Core
+namespace Microsoft.Identity.Client.Internal
 {
     internal static class Constants
     {
