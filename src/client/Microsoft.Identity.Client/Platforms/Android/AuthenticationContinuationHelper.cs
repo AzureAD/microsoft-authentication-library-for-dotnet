@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
 
             if (data == null)
             {
-                logger.Info("Null intent was received.");
+                logger.Info("SetAuthenticationContinuationEventArgs - ignoring intercepted null intent.");
                 return;
             }
 
