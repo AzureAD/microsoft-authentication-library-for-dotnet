@@ -13,6 +13,8 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -29,11 +31,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private static string s_correlationId;
         private readonly AndroidBrokerHelper _brokerHelper;
         private readonly ICoreLogger _logger;
-        private readonly Activity _activity;
+        private readonly Activity _parentActivity;
 
         public AndroidBroker(CoreUIParent uiParent, ICoreLogger logger)
         {
-            _activity = uiParent?.Activity;
+            _parentActivity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
         }
@@ -49,58 +51,63 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public async Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
+        public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             s_androidBrokerTokenResponse = null;
-            s_correlationId = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId);
+
+            BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(
+                authenticationRequestParameters, acquireTokenInteractiveParameters);
+
+            // There can only be 1 broker request at a time so keep track of the correlation id
+            s_correlationId = brokerRequest.CorrelationId;
 
             try
             {
-                // This task will kick off the broker and will block on the _readyForResponse semaphore
-                // When the broker activity ends, SetBrokerResult is called, which releases the semaphore. 
-                await AcquireTokenInternalAsync(brokerPayload).ConfigureAwait(false);
+                await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+
+                // todo: needed? 
+                // brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username);              
+
+                await AcquireTokenInteractiveViaBrokerAsync(brokerRequest).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _logger.Error("Android broker authentication failed.");
+                _logger.ErrorPiiWithPrefix(ex, "Broker interactive invocation failed.");
                 HandleBrokerOperationError(ex);
-                throw;
-            }
-
-            return s_androidBrokerTokenResponse;
-        }
-
-        private async Task AcquireTokenInternalAsync(IDictionary<string, string> brokerPayload)
-        {
-            try
-            {
-                HandleInstallUrl(brokerPayload);
-
-                await _brokerHelper.InitiateBrokerHandshakeAsync(_activity).ConfigureAwait(false);
-
-                brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username);
-
-                if (brokerPayload.ContainsKey(BrokerParameter.IsSilentBrokerRequest))
-                {
-                    s_androidBrokerTokenResponse = await AcquireTokenSilentViaBrokerAsync(brokerPayload).ConfigureAwait(false);
-                    return;
-                }
-
-                await AcquireTokenInteractiveViaBrokerAsync(brokerPayload).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger.ErrorPiiWithPrefix(ex, "Broker invocation failed.");
-                throw;
             }
 
             using (_logger.LogBlockDuration("waiting for broker response"))
-            {
+            {                
                 await s_readyForResponse.WaitAsync().ConfigureAwait(false);
+                return s_androidBrokerTokenResponse;
             }
         }
 
-        private async Task AcquireTokenInteractiveViaBrokerAsync(IDictionary<string, string> brokerPayload)
+        public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenSilentParameters acquireTokenSilentParameters)
+        {
+
+            BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
+                authenticationRequestParameters, acquireTokenSilentParameters);
+
+            try
+            {
+                await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                var androidBrokerTokenResponse = await AcquireTokenSilentViaBrokerAsync(brokerRequest).ConfigureAwait(false);
+                return androidBrokerTokenResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.ErrorPiiWithPrefix(ex, "Broker silent invocation failed.");
+                HandleBrokerOperationError(ex);
+                throw;
+            }
+        }      
+
+        private async Task AcquireTokenInteractiveViaBrokerAsync(BrokerRequest brokerRequest)
         {
             using (_logger.LogMethodDuration())
             {
@@ -109,7 +116,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                 _logger.Verbose("Starting Android Broker interactive authentication");
                 Intent brokerIntent = await _brokerHelper
-                    .GetIntentForInteractiveBrokerRequestAsync(brokerPayload, _activity)
+                    .GetIntentForInteractiveBrokerRequestAsync(brokerRequest, _parentActivity)
                     .ConfigureAwait(false);
 
                 if (brokerIntent != null)
@@ -121,7 +128,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             + " tid:" + AndroidNative.OS.Process.MyTid() + "uid:"
                             + AndroidNative.OS.Process.MyUid());
 
-                        _activity.StartActivityForResult(brokerIntent, 1001);
+                        _parentActivity.StartActivityForResult(brokerIntent, 1001);
                     }
                     catch (ActivityNotFoundException e)
                     {
@@ -132,17 +139,17 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        private async Task<MsalTokenResponse> AcquireTokenSilentViaBrokerAsync(IDictionary<string, string> brokerPayload)
+        private async Task<MsalTokenResponse> AcquireTokenSilentViaBrokerAsync(BrokerRequest brokerRequest)
         {
             // Don't send silent background request if account information is not provided
 
             using (_logger.LogMethodDuration())
             {
                 _logger.Verbose("User is specified for silent token request. Starting silent broker request.");
-                string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerPayload, _activity).ConfigureAwait(false);
+                string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerRequest, _parentActivity).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(silentResult))
                 {
-                    return MsalTokenResponse.CreateFromAndroidBrokerResponse(silentResult, s_correlationId);
+                    return MsalTokenResponse.CreateFromAndroidBrokerResponse(silentResult, brokerRequest.CorrelationId);
                 }
 
                 return new MsalTokenResponse
@@ -153,20 +160,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        private void HandleInstallUrl(IDictionary<string, string> brokerPayload)
+        public void HandleInstallUrl(string appLink)
         {
-            if (brokerPayload.ContainsKey(BrokerParameter.BrokerInstallUrl))
-            {
-                _logger.Info("Android Broker - broker payload contains install url");
+            _logger.Info("Android Broker - Starting ActionView activity to " + appLink);
+            _parentActivity.StartActivity(new Intent(Intent.ActionView, AndroidNative.Net.Uri.Parse(appLink)));
 
-                var appLink = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.BrokerInstallUrl);
-                _logger.Info("Android Broker - Starting ActionView activity to " + appLink);
-                _activity.StartActivity(new Intent(Intent.ActionView, AndroidNative.Net.Uri.Parse(appLink)));
-
-                throw new MsalClientException(
-                    MsalError.BrokerApplicationRequired,
-                    MsalErrorMessage.BrokerApplicationRequired);
-            }
+            throw new MsalClientException(
+                MsalError.BrokerApplicationRequired,
+                MsalErrorMessage.BrokerApplicationRequired);
         }
 
         internal static void SetBrokerResult(Intent data, int resultCode)
@@ -224,7 +225,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
+        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
         {
             using (_logger.LogMethodDuration())
             {
@@ -234,14 +235,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     return new List<IAccount>();
                 }
 
-                Dictionary<string, string> brokerPayload = new Dictionary<string, string>();
-                brokerPayload.Add(BrokerParameter.ClientId, clientID);
+                BrokerRequest brokerRequest = new BrokerRequest() { ClientId = clientID, RedirectUri = new Uri(redirectUri) };
 
                 try
                 {
-                    await _brokerHelper.InitiateBrokerHandshakeAsync(_activity).ConfigureAwait(false);
+                    await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
 
-                    return _brokerHelper.GetBrokerAccountsInAccountManager(brokerPayload);
+                    return _brokerHelper.GetBrokerAccountsInAccountManager(brokerRequest);
                 }
                 catch (Exception ex)
                 {
@@ -261,17 +261,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     _logger.Error("Android broker is not installed so no accounts will be removed.");
                     return;
                 }
-
-                Dictionary<string, string> brokerPayload = new Dictionary<string, string>();
-                brokerPayload.Add(BrokerParameter.ClientId, clientID);
-                brokerPayload.Add(BrokerConstants.Environment, account.Environment);
-                brokerPayload.Add(BrokerParameter.HomeAccountId, account.HomeAccountId.Identifier);
-
+           
                 try
                 {
-                    await _brokerHelper.InitiateBrokerHandshakeAsync(_activity).ConfigureAwait(false);
-
-                    _brokerHelper.RemoveBrokerAccountInAccountManager(brokerPayload);
+                    await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
+                    _brokerHelper.RemoveBrokerAccountInAccountManager(clientID, account);
                 }
                 catch (Exception ex)
                 {

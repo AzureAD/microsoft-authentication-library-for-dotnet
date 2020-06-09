@@ -122,6 +122,8 @@ namespace Xamarin_Manual
             {
                 await _pca.RemoveAsync(acc).ConfigureAwait(false);
             }
+
+            showCacheBtn_Clicked(null, e);
         }
 
         private async void showCacheBtn_Clicked(object sender, EventArgs e)
