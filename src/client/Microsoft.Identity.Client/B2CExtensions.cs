@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
-    internal static class B2CExtensions
+    /// <summary>
+    /// Extension methods for Azure AD B2C specific scenarios.
+    /// </summary>
+    public static class B2CExtensions
     {
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache,
