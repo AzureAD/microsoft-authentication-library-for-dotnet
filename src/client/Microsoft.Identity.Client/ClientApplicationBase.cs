@@ -3,21 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Linq;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
-using System.Threading;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
@@ -90,7 +82,7 @@ namespace Microsoft.Identity.Client
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                accounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
+                accounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
                 return accounts;
             }
 

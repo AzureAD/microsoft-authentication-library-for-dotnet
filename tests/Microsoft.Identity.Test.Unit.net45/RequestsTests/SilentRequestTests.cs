@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
                 Assert.AreEqual(brokerID, result.Account.Username);
-                await mockBroker.DidNotReceive().AcquireTokenUsingBrokerAsync(Arg.Any<Dictionary<string, string>>()).ConfigureAwait(false);
+                await mockBroker.DidNotReceiveWithAnyArgs().AcquireTokenSilentAsync(null, null).ConfigureAwait(false);
             }
         }
 
