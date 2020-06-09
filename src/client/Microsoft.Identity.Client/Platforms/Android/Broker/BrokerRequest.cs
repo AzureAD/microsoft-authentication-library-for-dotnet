@@ -4,7 +4,7 @@
 using Android.Runtime;
 using Microsoft.Identity.Json;
 
-namespace Microsoft.Identity.Client.Platforms.Android
+namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
     [JsonObject]
     [Preserve(AllMembers = true)]

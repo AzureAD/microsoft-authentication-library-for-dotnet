@@ -5,19 +5,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.ApplicationModel;
-using Windows.Networking;
-using Windows.Networking.Connectivity;
-using Windows.Security.ExchangeActiveSyncProvisioning;
-using Windows.Storage;
-using Windows.System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.UI;
+using Windows.ApplicationModel;
+using Windows.Networking;
+using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
+using Windows.Security.ExchangeActiveSyncProvisioning;
+using Windows.Storage;
+using Windows.System;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -93,7 +94,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
             throw new MsalClientException(
                 MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
                 MsalErrorMessage.UapCannotFindDomainUser);
-
         }
 
         public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)

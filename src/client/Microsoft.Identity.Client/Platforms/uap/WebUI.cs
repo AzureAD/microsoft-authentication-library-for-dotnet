@@ -5,8 +5,8 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Windows.ApplicationModel.Core;
@@ -106,13 +106,16 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 case WebAuthenticationStatus.Success:
                     result = AuthorizationResult.FromUri(webAuthenticationResult.ResponseData);
                     break;
+
                 case WebAuthenticationStatus.ErrorHttp:
                     result = AuthorizationResult.FromStatus(AuthorizationStatus.ErrorHttp);
                     result.Code = webAuthenticationResult.ResponseErrorDetail.ToString(CultureInfo.InvariantCulture);
                     break;
+
                 case WebAuthenticationStatus.UserCancel:
                     result = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
                     break;
+
                 default:
                     result = AuthorizationResult.FromStatus(
                         AuthorizationStatus.UnknownError,
