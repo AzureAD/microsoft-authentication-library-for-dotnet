@@ -16,6 +16,10 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using System.Globalization;
 using Security;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Internal;
+using System.Linq;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -83,50 +87,86 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
         }
 
-        public async Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
+        public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             using (_logger.LogMethodDuration())
             {
-                AddIosSpecificParametersToPayload(brokerPayload);
+                Dictionary<string, string> brokerRequest = CreateBrokerRequestDictionary(
+                    authenticationRequestParameters,
+                    acquireTokenInteractiveParameters);
 
-                await InvokeIosBrokerAsync(brokerPayload).ConfigureAwait(false);
+                await InvokeIosBrokerAsync(brokerRequest).ConfigureAwait(false);
 
                 return ProcessBrokerResponse();
             }
         }
 
-        private void AddIosSpecificParametersToPayload(Dictionary<string, string> brokerPayload)
+        private Dictionary<string, string> CreateBrokerRequestDictionary(
+            AuthenticationRequestParameters _authenticationRequestParameters,
+            AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
+        {
+            var brokerRequest = new Dictionary<string, string>(16);
+
+            brokerRequest.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+            string scopes = EnumerableExtensions.AsSingleString(_authenticationRequestParameters.Scope);
+            brokerRequest.Add(BrokerParameter.Scope, scopes);
+            brokerRequest.Add(BrokerParameter.ClientId, _authenticationRequestParameters.ClientId);
+            brokerRequest.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.CorrelationId.ToString());
+            brokerRequest.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
+            brokerRequest.Add(BrokerParameter.Force, "NO");
+            brokerRequest.Add(BrokerParameter.RedirectUri, _authenticationRequestParameters.RedirectUri.AbsoluteUri);
+
+            if (_authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
+            {
+                string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
+                brokerRequest.Add(BrokerParameter.ExtraQp, extraQP);
+            }
+
+            brokerRequest.Add(BrokerParameter.Username, _authenticationRequestParameters.Account?.Username ?? string.Empty);
+            brokerRequest.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
+            brokerRequest.Add(BrokerParameter.Prompt, acquireTokenInteractiveParameters.Prompt.PromptValue);
+            brokerRequest.Add(BrokerParameter.Claims, _authenticationRequestParameters.ClaimsAndClientCapabilities);
+
+            AddCommunicationParams(brokerRequest);
+
+            return brokerRequest;
+        }
+
+
+        public void HandleInstallUrl(string appLink)
+        {
+            DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(appLink)));
+
+            throw new MsalClientException(
+                MsalError.BrokerApplicationRequired,
+                MsalErrorMessage.BrokerApplicationRequired);
+        }
+
+        private void AddCommunicationParams(Dictionary<string, string> brokerRequest)
         {
             string encodedBrokerKey = Base64UrlHelpers.Encode(BrokerKeyHelper.GetRawBrokerKey(_logger));
-            brokerPayload[iOSBrokerConstants.BrokerKey] = encodedBrokerKey;
-            brokerPayload[iOSBrokerConstants.MsgProtocolVer] = BrokerParameter.MsgProtocolVersion3;
+            brokerRequest[iOSBrokerConstants.BrokerKey] = encodedBrokerKey;
+            brokerRequest[iOSBrokerConstants.MsgProtocolVer] = BrokerParameter.MsgProtocolVersion3;
 
             if (_brokerV3Installed)
             {
                 _brokerRequestNonce = Guid.NewGuid().ToString();
-                brokerPayload[iOSBrokerConstants.BrokerNonce] = _brokerRequestNonce;
+                brokerRequest[iOSBrokerConstants.BrokerNonce] = _brokerRequestNonce;
 
-                string applicationToken = TryReadBrokerApplicationTokenFromKeychain(brokerPayload);
+                string applicationToken = TryReadBrokerApplicationTokenFromKeychain(brokerRequest);
 
                 if (!string.IsNullOrEmpty(applicationToken))
                 {
-                    brokerPayload[iOSBrokerConstants.ApplicationToken] = applicationToken;
+                    brokerRequest[iOSBrokerConstants.ApplicationToken] = applicationToken;
                 }
-            }
-
-            if (brokerPayload.ContainsKey(iOSBrokerConstants.Claims))
-            {
-                brokerPayload[iOSBrokerConstants.SkipCache] = BrokerParameter.SkipCache;
-                string claims = Base64UrlHelpers.Encode(brokerPayload[BrokerParameter.Claims]);
-                brokerPayload[BrokerParameter.Claims] = claims;
             }
         }
 
         private async Task InvokeIosBrokerAsync(Dictionary<string, string> brokerPayload)
         {
             s_brokerResponseReady = new SemaphoreSlim(0);
-
-            HandleInstallUrl(brokerPayload);
 
             _logger.Info(iOSBrokerConstants.InvokeTheIosBroker);
             NSUrl url = new NSUrl(iOSBrokerConstants.InvokeV2Broker + brokerPayload.ToQueryParameter());
@@ -140,22 +180,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             using (_logger.LogBlockDuration("waiting for broker response"))
             {
                 await s_brokerResponseReady.WaitAsync().ConfigureAwait(false);
-            }
-        }
-
-        private void HandleInstallUrl(Dictionary<string, string> brokerPayload)
-        {
-            if (brokerPayload.ContainsKey(BrokerParameter.BrokerInstallUrl))
-            {
-                _logger.Info(iOSBrokerConstants.BrokerPayloadContainsInstallUrl);
-
-                string appLink = brokerPayload[BrokerParameter.BrokerInstallUrl];
-
-                DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(new NSUrl(appLink)));
-
-                throw new MsalClientException(
-                    MsalError.BrokerApplicationRequired,
-                    MsalErrorMessage.BrokerApplicationRequired);
             }
         }
 
@@ -186,7 +210,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return ResultFromBrokerResponse(responseDictionary);
             }
         }
-
         private MsalTokenResponse ResultFromBrokerResponse(Dictionary<string, string> responseDictionary)
         {
             MsalTokenResponse brokerTokenResponse;
@@ -214,7 +237,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 if (responseDictionary.ContainsKey(iOSBrokerConstants.ApplicationToken))
                 {
                     TryWriteBrokerApplicationTokenToKeychain(
-                        responseDictionary[BrokerResponseConst.ClientId], 
+                        responseDictionary[BrokerResponseConst.ClientId],
                         responseDictionary[iOSBrokerConstants.ApplicationToken]);
                 }
 
@@ -281,10 +304,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     iOSBrokerConstants.AttemptToSaveBrokerApplicationToken + "SecStatusCode: {0}",
                     secStatusCode));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new MsalClientException(
-                    MsalError.WritingApplicationTokenToKeychainFailed, 
+                    MsalError.WritingApplicationTokenToKeychainFailed,
                     MsalErrorMessage.WritingApplicationTokenToKeychainFailed + ex.Message);
             }
         }
@@ -304,10 +327,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
                 return appToken;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new MsalClientException(
-                    MsalError.ReadingApplicationTokenFromKeychainFailed, 
+                    MsalError.ReadingApplicationTokenFromKeychainFailed,
                     MsalErrorMessage.ReadingApplicationTokenFromKeychainFailed + ex.Message);
             }
         }
@@ -318,14 +341,31 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             s_brokerResponseReady?.Release();
         }
 
-        public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
-        {
-            throw new NotImplementedException();
-        }
-
+        #region Silent Flow - not supported
+        /// <summary>
+        /// iOS broker does not handle silent flow
+        /// </summary>
         public Task RemoveAccountAsync(string clientID, IAccount account)
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// iOS broker does not handle silent flow
+        /// </summary>
+        public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// iOS broker does not handle silent flow
+        /// </summary>
+        public Task<MsalTokenResponse> AcquireTokenSilentAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }
