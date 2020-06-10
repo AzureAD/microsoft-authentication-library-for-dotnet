@@ -19,8 +19,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class SilentRequest : RequestBase
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
-        private const string TheOnlyFamilyId = "1";
-        private ISilentAuthStrategy strategy;
+        private ISilentAuthStrategy clientStrategy;
+        private Lazy<ISilentAuthStrategy> brokerStrategy;
+        private ICoreLogger _logger;
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -29,17 +30,45 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, silentParameters)
         {
             _silentParameters = silentParameters;
-            strategy = SilentAuthStrategyFactory.GetSilentAuthStrategy(this, serviceBundle, authenticationRequestParameters, silentParameters);
+
+            brokerStrategy = new Lazy<ISilentAuthStrategy>(() => new SilentBrokerAuthStretegy(this, serviceBundle, authenticationRequestParameters, silentParameters));
+            clientStrategy = new SilentClientAuthStretegy(this, serviceBundle, authenticationRequestParameters, silentParameters);
+
+            _logger = authenticationRequestParameters.RequestContext.Logger;
         }
 
         internal async override Task PreRunAsync()
         {
-            await strategy.PreRunAsync().ConfigureAwait(false);
+            if (!AuthenticationRequestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            {
+                await clientStrategy.PreRunAsync().ConfigureAwait(false);
+            }
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            return await strategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                _logger.Info("Attempting to acquire token using client auth strategy...");
+                return await clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch(MsalException ex)
+            {
+                if (ex is MsalUiRequiredException || ex is MsalClientException)
+                {
+                    var errorCode = ex.ErrorCode;
+
+                    if (errorCode == MsalError.InvalidGrantError
+                     || errorCode == MsalError.NoTokensFoundError
+                     || errorCode == MsalError.NoAccountForLoginHint)
+                    {
+                        _logger.Info("client auth strategy failed to acquire a token. Attempting to use broker strategy");
+                        return await brokerStrategy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                }
+
+                throw ex;
+            }
         }
 
         protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
@@ -48,6 +77,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 apiEvent.LoginHint = _silentParameters.LoginHint;
             }
+        }
+
+        internal new async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)
+        {
+            return await base.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
         }
     }
 }

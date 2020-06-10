@@ -41,25 +41,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-
-            if (!_silentParameters.ForceRefresh && !_authenticationRequestParameters.HasClaims)
-            {
-                cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
-
-                if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())
-                {
-                    _logger.Info("Returning access token found in cache. RefreshOn exists ? "
-                        + cachedAccessTokenItem.RefreshOn.HasValue);
-                    _authenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-                    return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
-                }
-            }
-            else
-            {
-                _logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set");
-            }
-
             var response = await SendTokenRequestToBrokerAsync().ConfigureAwait(false);
             return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
         }
