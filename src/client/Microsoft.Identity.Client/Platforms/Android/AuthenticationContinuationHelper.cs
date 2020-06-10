@@ -50,7 +50,8 @@ namespace Microsoft.Identity.Client
             else if (data != null || AndroidConstants.AuthCodeReceived != (int)resultCode)
             {
                 authorizationResult = ProcessFromSystemWebview(requestCode, resultCode, data);
-            } else
+            } 
+            else
             {
                 logger.Info("SetAuthenticationContinuationEventArgs - ignoring intercepted null intent.");
                 return;
