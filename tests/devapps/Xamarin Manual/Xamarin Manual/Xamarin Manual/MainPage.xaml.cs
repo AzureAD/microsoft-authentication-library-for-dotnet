@@ -19,7 +19,7 @@ namespace Xamarin_Manual
     public partial class MainPage : ContentPage
     {
         private IPublicClientApplication _pca;
-        public static object CurrentActivity { get; set; }
+        public static object UiParent { get; set; }
 
         /// <summary>
         /// The ClientID is the Application ID found in the portal (https://go.microsoft.com/fwlink/?linkid=2083908). 
@@ -56,7 +56,7 @@ namespace Xamarin_Manual
             {
                 var builder = _pca
                     .AcquireTokenInteractive(AuthConfig.Scopes)
-                    .WithParentActivityOrWindow(CurrentActivity);                    
+                    .WithParentActivityOrWindow(UiParent);                    
 
                 builder = ConfigureWebview(builder);
 
@@ -102,7 +102,7 @@ namespace Xamarin_Manual
         private void CreatePca()
         {
             _pca = PublicClientApplicationBuilder.Create(AuthConfig.ClientID)
-              .WithRedirectUri(AuthConfig.BrokerRedirectUri) 
+              .WithRedirectUri(AuthConfig.RedirectUri) 
               .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
               .WithLogging(
                     (lvl, msg, pii) => Trace.WriteLine($"[{lvl}] {msg}"), LogLevel.Verbose, true)

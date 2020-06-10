@@ -16,7 +16,6 @@ namespace Xamarin_Manual.iOS
             // you can specify it here.
             UIApplication.Main(args, null, "AppDelegate");
 
-            throw new NotImplementedException("The iOS project has not been tested and will likely not work because of redirect uri issues");
         }
     }
 }
