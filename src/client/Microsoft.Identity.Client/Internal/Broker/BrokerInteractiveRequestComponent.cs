@@ -16,11 +16,8 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.Internal.Broker
 {
 
-    // TODO: bogavril - there is really no need for anything in this class to be public (including Broker and BrokerPayload)
-    // except for the ctor and ExecuteAsync. Everything else is testable by mocking IBroker.
     internal class BrokerInteractiveRequestComponent : ITokenRequestComponent
     {
-        internal Dictionary<string, string> BrokerPayload { get; set; } = new Dictionary<string, string>();
         internal IBroker Broker { get; }
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private readonly string _optionalBrokerInstallUrl; // can be null

@@ -4,7 +4,6 @@
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

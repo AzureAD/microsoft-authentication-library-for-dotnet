@@ -368,12 +368,5 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             mockHttpManager.AddInstanceDiscoveryMockHandler();
         }
 
-        private IBroker CreateMockBroker()
-        {
-            IBroker mockBroker = Substitute.For<IBroker>();
-            mockBroker.IsBrokerInstalledAndInvokable().ReturnsForAnyArgs(true);
-            mockBroker.AcquireTokenUsingBrokerAsync(null).ReturnsForAnyArgs(TestConstants.CreateMsalTokenResponse());
-            return mockBroker;
-        }
     }
 }
