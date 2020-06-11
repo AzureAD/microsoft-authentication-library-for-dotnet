@@ -10,6 +10,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -295,6 +296,56 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 accounts = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(accounts);
                 Assert.AreEqual(2, accounts.Count());
+            }
+        }
+
+        [TestMethod]
+        public void TestGetAccountsMergeWithBrokerTest()
+        {
+            var tokenCacheHelper = new TokenCacheHelper();
+
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+                //Adding local account to local cache
+                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor,
+                                                TestConstants.Uid,
+                                                TestConstants.Utid,
+                                                TestConstants.ClientId,
+                                                TestConstants.ProductionPrefCacheEnvironment,
+                                                "LocalAccount@microsoft.com");
+
+                //Mocking broker account
+                var localAccount = app.GetAccountsAsync().Result.FirstOrDefault();
+                var brokerAccount = new Account(localAccount.HomeAccountId.Identifier, "BrokerAccount@microsoft.com", localAccount.Environment);
+
+                var mockBroker = Substitute.For<IBroker>();
+                mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { brokerAccount });
+                mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
+
+                var platformProxy = Substitute.For<IPlatformProxy>();
+                platformProxy.CanBrokerSupportSilentAuth().Returns(true);
+                platformProxy.CreateBroker(null).Returns(mockBroker);
+
+                var accounts = app.GetAccountsAsync().Result;
+                var account = accounts.FirstOrDefault();
+
+                //Only the local account should be present
+                Assert.AreEqual(accounts.Count(), 1);
+                Assert.AreEqual("LocalAccount@microsoft.com", account.Username);
+
+                //Adding account with different home account id to broker cache
+                var brokerAccount2 = new Account(localAccount.HomeAccountId.Identifier + "2", "BrokerAccount2@microsoft.com", localAccount.Environment);
+
+                var accounts2 = app.GetAccountsAsync().Result;
+
+                //Both accounts should be present in the results
+                Assert.AreEqual(accounts2.Count(), 2);
+                Assert.IsTrue(accounts2.Where(x => x.Username == "LocalAccount@microsoft.com").Count() == 1);
+                Assert.IsTrue(accounts2.Where(x => x.Username == "BrokerAccount2@microsoft.com").Count() == 1);
             }
         }
 

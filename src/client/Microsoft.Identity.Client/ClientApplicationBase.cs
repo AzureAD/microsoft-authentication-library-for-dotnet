@@ -112,19 +112,19 @@ namespace Microsoft.Identity.Client
 
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                //Broker is available so accounts will be merged using home account ID with Broker taking priority
+                //Broker is available so accounts will be merged using home account ID with local accounts taking priority
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
                 brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
 
-                foreach(IAccount account in localAccounts)
+                foreach(IAccount account in brokerAccounts)
                 {
-                    if (brokerAccounts.Where(x => x.HomeAccountId == account.HomeAccountId).Count() == 0)
+                    if (localAccounts.Where(x => x.HomeAccountId == account.HomeAccountId).Count() == 0)
                     {
-                        (brokerAccounts as List<IAccount>).Add(account);
+                        (localAccounts as List<IAccount>).Add(account);
                     }
                 }
 
-                return brokerAccounts;
+                return localAccounts;
             }
 
             return localAccounts;

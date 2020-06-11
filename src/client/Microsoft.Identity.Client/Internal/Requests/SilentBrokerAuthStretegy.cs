@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected IServiceBundle _serviceBundle;
         private readonly AcquireTokenSilentParameters _silentParameters;
         private SilentRequest _silentRequest;
-        private IBroker _broker;
+        internal IBroker Broker { get; }
         public Dictionary<string, string> BrokerPayload = new Dictionary<string, string>();
         ICoreLogger _logger;
 
@@ -29,13 +29,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             SilentRequest request,
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenSilentParameters silentParameters)
+            AcquireTokenSilentParameters silentParameters,
+            IBroker broker)
         {
             _authenticationRequestParameters = authenticationRequestParameters;
             _silentParameters = silentParameters;
             _serviceBundle = serviceBundle;
             _silentRequest = request;
-            _broker = _serviceBundle.PlatformProxy.CreateBroker(null);
+            Broker = broker;
             _logger = authenticationRequestParameters.RequestContext.Logger;
         }
 
@@ -47,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
-            if (!_broker.IsBrokerInstalledAndInvokable())
+            if (!Broker.IsBrokerInstalledAndInvokable())
             {
                 throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked);
             }
@@ -62,7 +63,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CreateRequestParametersForBroker();
 
             MsalTokenResponse msalTokenResponse =
-                await _broker.AcquireTokenUsingBrokerAsync(BrokerPayload).ConfigureAwait(false);
+                await Broker.AcquireTokenUsingBrokerAsync(BrokerPayload).ConfigureAwait(false);
 
             ValidateResponseFromBroker(msalTokenResponse);
             return msalTokenResponse;

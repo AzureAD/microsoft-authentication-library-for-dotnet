@@ -9,6 +9,7 @@ using Microsoft.Identity.Client;
 using System;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -85,11 +86,12 @@ namespace Microsoft.Identity.Test.Unit
 
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
-                BrokerSilentRequest brokerSilentRequest =
-                    new BrokerSilentRequest(
+                SilentBrokerAuthStretegy brokerSilentRequest =
+                    new SilentBrokerAuthStretegy(
+                        new SilentRequest(harness.ServiceBundle, parameters, null),
+                        harness.ServiceBundle,
                         parameters,
                         acquireTokenSilentParameters,
-                        harness.ServiceBundle,
                         broker);
 
                 brokerSilentRequest.CreateRequestParametersForBroker();

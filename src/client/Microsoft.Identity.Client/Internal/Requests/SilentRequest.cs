@@ -19,8 +19,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class SilentRequest : RequestBase
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
-        private ISilentAuthStrategy clientStrategy;
-        private Lazy<ISilentAuthStrategy> brokerStrategy;
+        private ISilentAuthStrategy _clientStrategy;
+        private Lazy<ISilentAuthStrategy> _brokerStrategy;
         private ICoreLogger _logger;
 
         public SilentRequest(
@@ -31,17 +31,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             _silentParameters = silentParameters;
 
-            brokerStrategy = new Lazy<ISilentAuthStrategy>(() => new SilentBrokerAuthStretegy(this, serviceBundle, authenticationRequestParameters, silentParameters));
-            clientStrategy = new SilentClientAuthStretegy(this, serviceBundle, authenticationRequestParameters, silentParameters);
+            _brokerStrategy = new Lazy<ISilentAuthStrategy>(() => new SilentBrokerAuthStretegy(this, 
+                                                                                               serviceBundle, 
+                                                                                               authenticationRequestParameters, 
+                                                                                               silentParameters, 
+                                                                                               serviceBundle.PlatformProxy.CreateBroker(null)));
+            _clientStrategy = new SilentClientAuthStretegy(this, serviceBundle, authenticationRequestParameters, silentParameters);
 
             _logger = authenticationRequestParameters.RequestContext.Logger;
+        }
+
+        //For test
+        internal void SetStrategiesForTest(ISilentAuthStrategy clientStrategy, ISilentAuthStrategy brokerStrategy)
+        {
+            _brokerStrategy = new Lazy<ISilentAuthStrategy>(() => brokerStrategy);
+            _clientStrategy = clientStrategy;
         }
 
         internal async override Task PreRunAsync()
         {
             if (!AuthenticationRequestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                await clientStrategy.PreRunAsync().ConfigureAwait(false);
+                await _clientStrategy.PreRunAsync().ConfigureAwait(false);
             }
         }
 
@@ -50,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             try
             {
                 _logger.Info("Attempting to acquire token using client auth strategy...");
-                return await clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
             catch(MsalException ex)
             {
@@ -63,7 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                      || errorCode == MsalError.NoAccountForLoginHint)
                     {
                         _logger.Info("client auth strategy failed to acquire a token. Attempting to use broker strategy");
-                        return await brokerStrategy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                        return await _brokerStrategy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
 
@@ -82,6 +93,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal new async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)
         {
             return await base.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
+        }
+
+        //internal for test
+        internal async Task<AuthenticationResult> ExecuteTestAsync(CancellationToken cancellationToken)
+        {
+            return await ExecuteAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }
