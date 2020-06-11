@@ -5,10 +5,6 @@ using Microsoft.Identity.Client;
 
 namespace Xamarin_Manual.Droid
 {
-    //<data android:scheme="msauth"
-    //             android:host="com.companyname.xamarindev"
-    //             android:path="/t+Bk/nrTiK6yhmUDgd80TS5ZZT8="/>
-
     [Activity]
     [IntentFilter(new[] { Intent.ActionView },
        Categories = new[] { Intent.CategoryBrowsable, Intent.CategoryDefault },

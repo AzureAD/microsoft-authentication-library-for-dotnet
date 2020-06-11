@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Foundation;
+using Microsoft.Identity.Client;
 using UIKit;
 
 namespace Xamarin_Manual.iOS
@@ -25,7 +26,27 @@ namespace Xamarin_Manual.iOS
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
 
+            MainPage.UiParent = new UIViewController();
+
             return base.FinishedLaunching(app, options);
         }
+
+        public override bool OpenUrl(UIApplication app, NSUrl url, string sourceApplication, NSObject annotation)
+        {
+            if (AuthenticationContinuationHelper.IsBrokerResponse(sourceApplication))
+            {
+                System.Diagnostics.Debug.WriteLine("OpenURL called from AppDelegate {0}", url);
+                AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url);
+                return true;
+            }
+
+            else if (!AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(url))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
     }
 }

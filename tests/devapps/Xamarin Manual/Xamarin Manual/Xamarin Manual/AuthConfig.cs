@@ -1,4 +1,7 @@
-﻿namespace Xamarin_Manual
+﻿using System;
+using Xamarin.Forms;
+
+namespace Xamarin_Manual
 {
     public static class AuthConfig
     {
@@ -8,7 +11,21 @@
 
         public const string AndroidApkSignature = "t+Bk/nrTiK6yhmUDgd80TS5ZZT8=";
         public const string AndroidPackgeName = "com.companyname.xamarindev";
-        public readonly static string BrokerRedirectUri = 
-            $"msauth://{AndroidPackgeName}/{AndroidApkSignature}"; 
+
+        public static string RedirectUri
+        {
+            get
+            {
+                switch (Device.RuntimePlatform)
+                {
+                    case Device.iOS:
+                        return "msauth.com.companyname.XamarinDev://auth";
+                    case Device.Android:
+                        return $"msauth://{AndroidPackgeName}/{AndroidApkSignature}";
+                    default:
+                        throw new InvalidOperationException("Broker only supported on ios and android");
+                }
+            }
+        }
     }
 }

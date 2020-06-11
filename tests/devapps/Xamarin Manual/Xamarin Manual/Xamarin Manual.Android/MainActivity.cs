@@ -27,7 +27,7 @@ namespace Xamarin_Manual.Droid
             var app = new App();
             LoadApplication(app);
 
-            MainPage.CurrentActivity = this; // one activity in this sample...
+            MainPage.UiParent = this; // one activity in this sample...
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
