@@ -165,10 +165,10 @@ namespace Microsoft.Identity.Client.Internal
                 authorizationRequestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.LoginHint;
             }
 
-            if (_requestParams.RequestContext?.Logger?.CorrelationId != Guid.Empty)
+            if (_requestParams.RequestContext.CorrelationId != Guid.Empty)
             {
                 authorizationRequestParameters[OAuth2Parameter.CorrelationId] =
-                    _requestParams.RequestContext.Logger.CorrelationId.ToString();
+                    _requestParams.RequestContext.CorrelationId.ToString();
             }
 
             foreach (KeyValuePair<string, string> kvp in MsalIdHelper.GetMsalIdParameters(_requestParams.RequestContext.Logger))

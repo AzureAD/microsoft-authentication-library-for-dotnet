@@ -10,7 +10,6 @@ namespace Microsoft.Identity.Client.Core
 {
     internal interface ICoreLogger
     {
-        Guid CorrelationId { get; }
         string ClientName { get; }
         string ClientVersion { get; }
         bool PiiLoggingEnabled { get; }
@@ -28,7 +27,7 @@ namespace Microsoft.Identity.Client.Core
         void InfoPiiWithPrefix(Exception exWithPii, string prefix);
         void Verbose(string messageScrubbed);
         void VerbosePii(string messageWithPii, string messageScrubbed);
-        void Log(LogLevel msalLogLevel, string messageWithPii, string messageScrubbed);
+        void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed);
         DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose);
         DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null);
     }

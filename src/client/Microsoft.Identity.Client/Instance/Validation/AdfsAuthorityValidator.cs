@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                         httpResponse);
                 }
 
-                AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext, false);
+                AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext);
                 if (wfr.Links.FirstOrDefault(
                         a => a.Rel.Equals(Constants.DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource)) == null)
