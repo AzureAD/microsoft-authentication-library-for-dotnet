@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             BrokerPayload.Add(BrokerParameter.Scope, scopes);
             BrokerPayload.Add(BrokerParameter.ClientId, _authenticationRequestParameters.ClientId);
-            BrokerPayload.Add(BrokerParameter.CorrelationId, _logger.CorrelationId.ToString());
+            BrokerPayload.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.CorrelationId.ToString());
             BrokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
             BrokerPayload.Add(BrokerParameter.Force, "NO");
             BrokerPayload.Add(BrokerParameter.RedirectUri, _serviceBundle.Config.RedirectUri);

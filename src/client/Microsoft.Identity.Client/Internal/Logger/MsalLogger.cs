@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             bool isDefaultPlatformLoggingEnabled,
             LogCallback loggingCallback)
         {
-            CorrelationId = correlationId;
+            _correlationId = correlationId;
             PiiLoggingEnabled = enablePiiLogging;
             _loggingCallback = loggingCallback;
             _minLogLevel = logLevel;
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static ICoreLogger NullLogger => s_nullLogger.Value;
 
-        public Guid CorrelationId { get; }
+        private readonly Guid _correlationId;
 
         public bool PiiLoggingEnabled { get; }
 
@@ -134,11 +134,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             Log(LogLevel.Error, string.Empty, messageScrubbed);
         }
 
-        public void ErrorPii(Exception exWithPii)
-        {
-            Log(LogLevel.Error, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
-        }
-
+     
         public void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
         {
             Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + GetPiiScrubbedExceptionDetails(exWithPii));
@@ -149,6 +145,11 @@ namespace Microsoft.Identity.Client.Internal.Logger
             Log(LogLevel.Error, messageWithPii, messageScrubbed);
         }
 
+        public void ErrorPii(Exception exWithPii)
+        {
+            Log(LogLevel.Error, exWithPii.ToString(), GetPiiScrubbedExceptionDetails(exWithPii));
+        }
+
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
             if (_loggingCallback == null || logLevel > _minLogLevel)
@@ -156,10 +157,9 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 return;
             }
 
-            // format log message;
-            string correlationId = CorrelationId.Equals(Guid.Empty)
+            string correlationId = _correlationId.Equals(Guid.Empty)
                 ? string.Empty
-                : " - " + CorrelationId;
+                : " - " + _correlationId;
 
             var msalIdParameters = MsalIdHelper.GetMsalIdParameters(this);
             string os = "N/A";
