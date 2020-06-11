@@ -13,15 +13,11 @@ using Android.Content.PM;
 using Android.Util;
 using Java.Security;
 using Java.Util.Concurrent;
-using OperationCanceledException = Android.Accounts.OperationCanceledException;
-using Permission = Android.Content.PM.Permission;
 using Signature = Android.Content.PM.Signature;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
@@ -67,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
            .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase);
         }
 
-        public async Task<Intent> GetIntentForInteractiveBrokerRequestAsync(IDictionary<string, string> brokerPayload, Activity callerActivity)
+        public async Task<Intent> GetIntentForInteractiveBrokerRequestAsync(BrokerRequest brokerRequest, Activity callerActivity)
         {
             Intent intent = null;
 
@@ -114,7 +110,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     throw new MsalClientException(MsalError.NullIntentReturnedFromAndroidBroker, MsalErrorMessage.NullIntentReturnedFromBroker);
                 }
 
-                intent = GetInteractiveBrokerIntent(brokerPayload, intent);
+                intent = GetInteractiveBrokerIntent(brokerRequest, intent);
             }
             catch
             {
@@ -125,10 +121,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return intent;
         }
 
-        public async Task<string> GetBrokerAuthTokenSilentlyAsync(IDictionary<string, string> brokerPayload, Activity callerActivity)
+        public async Task<string> GetBrokerAuthTokenSilentlyAsync(BrokerRequest brokerRequest, Activity callerActivity)
         {
-            CheckForBrokerAccountInfoInAccountManager(brokerPayload, callerActivity);
-            Bundle silentOperationBundle = GetSilentBrokerBundle(brokerPayload);
+            CheckForBrokerAccountInfoInAccountManager(brokerRequest, callerActivity);
+            Bundle silentOperationBundle = CreateSilentBrokerBundle(brokerRequest);
             silentOperationBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.AcquireTokenSilent);
 
             IAccountManagerFuture result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
@@ -161,9 +157,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         /// This method is only used for Silent authnetication requests so that we can check to see if an account exists in the account manager before
         /// sending the silent request to the broker. 
         /// </summary>
-        public void CheckForBrokerAccountInfoInAccountManager(IDictionary<string, string> brokerPayload, Activity callerActivity)
+        public void CheckForBrokerAccountInfoInAccountManager(BrokerRequest brokerRequest, Activity callerActivity)
         {
-            var accounts = GetBrokerAccounts(brokerPayload, callerActivity);
+            var accounts = GetBrokerAccounts(brokerRequest, callerActivity);
 
             if (string.IsNullOrEmpty(accounts))
             {
@@ -171,9 +167,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
             }
 
-            string username = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username);
-            string homeAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId);
-            string localAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LocalAccountId);
+            string username = brokerRequest.UserName;
+            string homeAccountId = brokerRequest.HomeAccountId;
+            string localAccountId = brokerRequest.LocalAccountId;
 
             if (!string.IsNullOrEmpty(accounts))
             {
@@ -188,8 +184,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                     if (string.Equals(accountData[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
                     {
-                        brokerPayload[BrokerParameter.HomeAccountId] = accountDataHomeAccountID;
-                        brokerPayload[BrokerParameter.LocalAccountId] = accountDataLocalAccountID;
+                        // TODO: broker request should be immutable!
+                        brokerRequest.HomeAccountId = accountDataHomeAccountID;
+                        brokerRequest.LocalAccountId = accountDataLocalAccountID;
                         _logger.Info("Found broker account in Android account manager using the provided login hint.");
                         return;
                     }
@@ -207,9 +204,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
         }
 
-        private string GetBrokerAccounts(IDictionary<string, string> brokerPayload, Activity callerActivity)
+        private string GetBrokerAccounts(BrokerRequest brokerRequest, Activity callerActivity)
         {
-            Bundle getAccountsBundle = GetBrokerAccountBundle(brokerPayload);
+            Bundle getAccountsBundle = CreateBrokerAccountBundle(brokerRequest);
             getAccountsBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.GetAccounts);
 
             //This operation will acquire all of the accounts in the account manager for the given client ID
@@ -228,9 +225,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         /// <summary>
         /// This method will acquire all of the accounts in the account manager that have an access token for the given client ID.
         /// </summary>
-        public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(IDictionary<string, string> brokerPayload)
+        public IEnumerable<IAccount> GetBrokerAccountsInAccountManager(BrokerRequest brokerRequest)
         {
-            var accounts = GetBrokerAccounts(brokerPayload, null);
+            var accounts = GetBrokerAccounts(brokerRequest, null);
 
             if (string.IsNullOrEmpty(accounts))
             {
@@ -262,12 +259,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return brokerAccounts;
         }
 
-        public void RemoveBrokerAccountInAccountManager(IDictionary<string, string> brokerPayload)
+        public void RemoveBrokerAccountInAccountManager(string clientId, IAccount account)
         {
-            Bundle removeAccountBundle = GetRemoveBrokerAccountBundle(brokerPayload);
+            Bundle removeAccountBundle = CreateRemoveBrokerAccountBundle(clientId, account);
             removeAccountBundle.PutString(BrokerConstants.BrokerAccountManagerOperationKey, BrokerConstants.RemoveAccount);
 
-            var result = _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
+            _androidAccountManager.AddAccount(BrokerConstants.BrokerAccountType,
                 BrokerConstants.AuthtokenType,
                 null,
                 removeAccountBundle,
@@ -339,13 +336,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        private void ValidateBrokerRedirectURI(IDictionary<string, string> brokerPayload)
+        private void ValidateBrokerRedirectURI(BrokerRequest brokerRequest)
         {
             using (_logger.LogMethodDuration())
             {
                 string computedRedirectUri = GetRedirectUriForBroker();
 
-                if (!string.Equals(computedRedirectUri, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri), StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(computedRedirectUri, brokerRequest.RedirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
                 {
                     string msg = string.Format(CultureInfo.CurrentCulture, "The broker redirect URI is incorrect, it should be {0}. Please visit https://aka.ms/Brokered-Authentication-for-Android for more details.", computedRedirectUri);
                     _logger.Info(msg);
@@ -401,76 +398,43 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             return null;
         }
 
-        private Intent GetInteractiveBrokerIntent(IDictionary<string, string> brokerPayload, Intent brokerIntent)
+        private Intent GetInteractiveBrokerIntent(BrokerRequest brokerRequest, Intent brokerIntent)
         {
-            ValidateBrokerRedirectURI(brokerPayload);
-            BrokerRequest request = new BrokerRequest
-            {
-                Authority = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Authority),
-                Scopes = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Scope),
-                RedirectUri = GetEncodedRedirectUri(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri)),
-                ClientId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientId),
-                ClientAppName = Application.Context.PackageName,
-                ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MatchAll).VersionName,
-                ClientVersion = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientVersion),
-                CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
-                Prompt = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Prompt).ToUpperInvariant()
-            };
-
-            brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(request));
+            ValidateBrokerRedirectURI(brokerRequest);
+            brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(brokerRequest));
 
             return brokerIntent;
         }
 
-        private Bundle GetSilentBrokerBundle(IDictionary<string, string> brokerPayload)
+        private Bundle CreateSilentBrokerBundle(BrokerRequest brokerRequest)
         {
-            ValidateBrokerRedirectURI(brokerPayload);
+            ValidateBrokerRedirectURI(brokerRequest);
+            Bundle bundle = new Bundle();
+            bundle.PutString(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(brokerRequest));
+            bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
+
+            return bundle;
+        }
+       
+
+        private Bundle CreateBrokerAccountBundle(BrokerRequest brokerRequest)
+        {
             Bundle bundle = new Bundle();
 
-            BrokerRequest request = new BrokerRequest
-            {
-                Authority = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Authority),
-                Scopes = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Scope),
-                RedirectUri = GetEncodedRedirectUri(GetValueFromBrokerPayload(brokerPayload, BrokerParameter.RedirectUri)),
-                ClientId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientId),
-                ClientAppName = Application.Context.PackageName,
-                ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MatchAll).VersionName,
-                ClientVersion = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientVersion),
-                CorrelationId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.CorrelationId),
-                HomeAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId),
-                LocalAccountId = GetValueFromBrokerPayload(brokerPayload, BrokerParameter.LocalAccountId)
-            };
-
-            bundle.PutString(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(request));
+            bundle.PutString(BrokerConstants.AccountClientIdKey, brokerRequest.ClientId);
+            bundle.PutString(BrokerConstants.AccountRedirect, brokerRequest.UrlEncodedRedirectUri);
             bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
 
             return bundle;
         }
 
-        private string GetEncodedRedirectUri(string redirectUri)
-        {
-            Uri uri = new Uri(redirectUri);
-            return "msauth://" + uri.Host + "/" + System.Net.WebUtility.UrlEncode(uri.AbsolutePath.Substring(1));
-        }
-
-        private Bundle GetBrokerAccountBundle(IDictionary<string, string> brokerPayload)
+        private Bundle CreateRemoveBrokerAccountBundle(string clientId, IAccount account)
         {
             Bundle bundle = new Bundle();
 
-            bundle.PutString(BrokerConstants.AccountClientIdKey, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientId));
-            bundle.PutString(BrokerConstants.AccountRedirect, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientId));
-            bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
-
-            return bundle;
-        }
-
-        private Bundle GetRemoveBrokerAccountBundle(IDictionary<string, string> brokerPayload)
-        {
-            Bundle bundle = new Bundle();
-
-            bundle.PutString(BrokerConstants.AccountClientIdKey, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.ClientId));
-            bundle.PutString(BrokerConstants.Environment, GetValueFromBrokerPayload(brokerPayload, BrokerConstants.Environment));
-            bundle.PutString(BrokerConstants.HomeAccountIDKey, GetValueFromBrokerPayload(brokerPayload, BrokerParameter.HomeAccountId));
+            bundle.PutString(BrokerConstants.AccountClientIdKey, clientId);
+            bundle.PutString(BrokerConstants.Environment, account.Environment);
+            bundle.PutString(BrokerConstants.HomeAccountIDKey, account.HomeAccountId.Identifier);
 
             return bundle;
         }
