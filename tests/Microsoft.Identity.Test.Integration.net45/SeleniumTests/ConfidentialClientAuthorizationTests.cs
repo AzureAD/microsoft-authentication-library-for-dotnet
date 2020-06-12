@@ -73,6 +73,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            
             await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common").ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{TenantId}").ConfigureAwait(false);
         }

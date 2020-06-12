@@ -7,7 +7,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
+namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
     public class MsalTokenCacheKeysTests
