@@ -14,7 +14,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
-namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
+namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
     public class CacheFallbackOperationsTests
