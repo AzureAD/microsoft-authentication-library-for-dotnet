@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.Cache
 
             return other != null
                 && other.Authority == Authority
-                // && ResourceEquals(other.Resource) -- this is on purpose, see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1815
+                // do not use Resource for equality see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1815
                 && ClientIdEquals(other.ClientId)
                 && other.UniqueId == UniqueId
                 && DisplayableIdEquals(other.DisplayableId)
@@ -107,10 +107,10 @@ namespace Microsoft.Identity.Client.Cache
         {
             const string Delimiter = ":::";
             var hashString = Authority + Delimiter
-                          // + Resource.ToLowerInvariant() + Delimiter
-                           + ClientId.ToLowerInvariant() + Delimiter
+                          // do not use resource here
+                           + ClientId + Delimiter
                            + UniqueId + Delimiter
-                           + DisplayableId?.ToLowerInvariant() + Delimiter
+                           + DisplayableId + Delimiter
                            + (int)TokenSubjectType;
             return hashString.GetHashCode();
         }
