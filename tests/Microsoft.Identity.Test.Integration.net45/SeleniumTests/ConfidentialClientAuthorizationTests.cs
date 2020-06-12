@@ -67,7 +67,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
 
         [TestMethod]
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1507
         // Regression test for: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891
         public async Task SeleniumGetAuthCode_RedeemForAt_CommonAuthority_Async()
         {
@@ -75,7 +74,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             
             await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common").ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{TenantId}").ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}").ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, string authority)
