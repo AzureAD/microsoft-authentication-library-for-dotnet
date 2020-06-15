@@ -76,6 +76,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string ClientId { get; }
         public Uri RedirectUri { get; set; }
+
+        /// <summary>
+        /// The original redirect uri as a string, which preserves case. Useful for iOS broker, 
+        /// as redirect URI is case sensitive...
+        /// </summary>
+        public string OriginalRedirectUriString => _serviceBundle.Config.RedirectUri;
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
         public string ClaimsAndClientCapabilities { get; private set; }
@@ -84,11 +90,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>
         /// <remarks>If user configured claims, request should bypass cache</remarks>
-        public bool HasClaims
+        public string Claims
         {
             get
             {
-                return !string.IsNullOrEmpty(_commonParameters.Claims);
+                return _commonParameters.Claims;
             }
         }
 

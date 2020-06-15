@@ -840,6 +840,20 @@ namespace Microsoft.Identity.Client
         /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
         /// </summary>
         public const string ReadingApplicationTokenFromKeychainFailed = "reading_application_token_from_keychain_failed";
+        
+        /// <summary>
+        /// A broker key was generated but it was not saved to the KeyChain. 
+        /// <para>Mitigation</para> Make sure the app has permissions to write to the keychain group 'com.microsoft.adalcache'.
+        /// Capture and inspect the logs to see why the save operation failed.
+        /// </summary>
+        public const string BrokerKeySaveFailed = "ios_broker_key_save_failed";
+
+        /// <summary>
+        /// A broker key was generated but it was not retrived from the KeyChain. 
+        /// <para>Mitigation</para> Make sure the app has permissions to write to the keychain group 'com.microsoft.adalcache'.
+        /// Capture and inspect the logs to see why the fetch operation failed.
+        /// </summary>
+        public const string BrokerKeyFetchFailed = "ios_broker_key_fetch_failed";
 #endif
 
 #if ANDROID

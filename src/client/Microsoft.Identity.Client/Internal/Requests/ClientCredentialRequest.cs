@@ -38,7 +38,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            if (!_clientParameters.ForceRefresh && !AuthenticationRequestParameters.HasClaims)
+            if (!_clientParameters.ForceRefresh && 
+                string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 

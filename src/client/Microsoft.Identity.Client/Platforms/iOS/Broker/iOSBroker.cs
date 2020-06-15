@@ -104,30 +104,34 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
 
         private Dictionary<string, string> CreateBrokerRequestDictionary(
-            AuthenticationRequestParameters _authenticationRequestParameters,
+            AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             var brokerRequest = new Dictionary<string, string>(16);
 
-            brokerRequest.Add(BrokerParameter.Authority, _authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
-            string scopes = EnumerableExtensions.AsSingleString(_authenticationRequestParameters.Scope);
+            brokerRequest.Add(BrokerParameter.Authority, authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+            string scopes = EnumerableExtensions.AsSingleString(authenticationRequestParameters.Scope);
             brokerRequest.Add(BrokerParameter.Scope, scopes);
-            brokerRequest.Add(BrokerParameter.ClientId, _authenticationRequestParameters.ClientId);
-            brokerRequest.Add(BrokerParameter.CorrelationId, _authenticationRequestParameters.RequestContext.CorrelationId.ToString());
+            brokerRequest.Add(BrokerParameter.ClientId, authenticationRequestParameters.ClientId);
+            brokerRequest.Add(BrokerParameter.CorrelationId, authenticationRequestParameters.RequestContext.CorrelationId.ToString());
             brokerRequest.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
-            brokerRequest.Add(BrokerParameter.Force, "NO");
-            brokerRequest.Add(BrokerParameter.RedirectUri, _authenticationRequestParameters.RedirectUri.AbsoluteUri);
 
-            if (_authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
+            // this needs to be case sensitive because the AppBundle is case sensitive
+            brokerRequest.Add(BrokerParameter.RedirectUri, authenticationRequestParameters.OriginalRedirectUriString);
+
+            if (authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
             {
-                string extraQP = string.Join("&", _authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
+                string extraQP = string.Join("&", authenticationRequestParameters.ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
                 brokerRequest.Add(BrokerParameter.ExtraQp, extraQP);
             }
 
-            brokerRequest.Add(BrokerParameter.Username, _authenticationRequestParameters.Account?.Username ?? string.Empty);
+            brokerRequest.Add(BrokerParameter.Username, authenticationRequestParameters.Account?.Username ?? string.Empty);
             brokerRequest.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
             brokerRequest.Add(BrokerParameter.Prompt, acquireTokenInteractiveParameters.Prompt.PromptValue);
-            brokerRequest.Add(BrokerParameter.Claims, _authenticationRequestParameters.ClaimsAndClientCapabilities);
+            if (!string.IsNullOrEmpty(authenticationRequestParameters.Claims))
+            {
+                brokerRequest.Add(BrokerParameter.Claims, authenticationRequestParameters.Claims);
+            }
 
             AddCommunicationParams(brokerRequest);
 
@@ -146,7 +150,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private void AddCommunicationParams(Dictionary<string, string> brokerRequest)
         {
-            string encodedBrokerKey = Base64UrlHelpers.Encode(BrokerKeyHelper.GetRawBrokerKey(_logger));
+            string encodedBrokerKey = Base64UrlHelpers.Encode(BrokerKeyHelper.GetOrCreateBrokerKey(_logger));
             brokerRequest[iOSBrokerConstants.BrokerKey] = encodedBrokerKey;
             brokerRequest[iOSBrokerConstants.MsgProtocolVer] = BrokerParameter.MsgProtocolVersion3;
 
@@ -168,11 +172,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             s_brokerResponseReady = new SemaphoreSlim(0);
 
+            string paramsAsQuery = brokerPayload.ToQueryParameter();
             _logger.Info(iOSBrokerConstants.InvokeTheIosBroker);
-            NSUrl url = new NSUrl(iOSBrokerConstants.InvokeV2Broker + brokerPayload.ToQueryParameter());
+            NSUrl url = new NSUrl(iOSBrokerConstants.InvokeV2Broker + paramsAsQuery);
 
             _logger.VerbosePii(
-                iOSBrokerConstants.BrokerPayloadPii + brokerPayload.ToQueryParameter(),
+                iOSBrokerConstants.BrokerPayloadPii + paramsAsQuery,
                 iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
 
             DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));

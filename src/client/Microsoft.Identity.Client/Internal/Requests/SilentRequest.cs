@@ -31,10 +31,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             _silentParameters = silentParameters;
 
-            _brokerStrategyLazy = new Lazy<ISilentAuthRequestStrategy>(() => brokerStrategyOverride ?? new SilentBrokerAuthStrategy(this, 
-                                                                                               serviceBundle, 
-                                                                                               authenticationRequestParameters, 
-                                                                                               silentParameters, 
+            _brokerStrategyLazy = new Lazy<ISilentAuthRequestStrategy>(() => brokerStrategyOverride ?? new SilentBrokerAuthStrategy(this,
+                                                                                               serviceBundle,
+                                                                                               authenticationRequestParameters,
+                                                                                               silentParameters,
                                                                                                serviceBundle.PlatformProxy.CreateBroker(null)));
             _clientStrategy = clientStrategyOverride ?? new SilentClientAuthStretegy(this, serviceBundle, authenticationRequestParameters, silentParameters);
 
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _logger.Info("Attempting to acquire token using using local cache...");
                 return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
-            catch(MsalException ex)
+            catch (MsalException ex)
             {
                 if (ex is MsalUiRequiredException || ex is MsalClientException)
                 {
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
                 }
 
-                throw ex;
+                throw;
             }
         }
 

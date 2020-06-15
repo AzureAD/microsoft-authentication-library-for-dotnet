@@ -106,7 +106,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             br.ClientVersion = MsalIdHelper.GetMsalVersion();
 
             br.RedirectUri = _authenticationRequestParameters.RedirectUri;
-            br.Claims = _authenticationRequestParameters.ClaimsAndClientCapabilities;
+            if (!string.IsNullOrEmpty(br.Claims))
+            {
+                br.Claims = _authenticationRequestParameters.Claims;
+            }
 
             if (_authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
             {
