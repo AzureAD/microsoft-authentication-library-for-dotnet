@@ -62,6 +62,12 @@ namespace Microsoft.Identity.Client
         public const string BrokerNonceMismatch = "Broker response nonce does not match the request nonce sent by MSAL.NET." +
             "Please see https://aka.ms/msal-net-ios-13-broker for more details. ";
 
+        public static string iOSBrokerKeySaveFailed(string keyChainResult)
+        {
+            return "A broker key was generated but it was not saved to the KeyChain. " +
+                "KeyChain status code: " + keyChainResult;
+        }
+
         public const string StsMetadataRequestFailed =
             "Metadata request to Access Control service failed. Check InnerException for more details";
 
@@ -70,6 +76,8 @@ namespace Microsoft.Identity.Client
 
         public const string UnauthorizedHttpStatusCodeExpected =
             "Unauthorized Http Status Code (401) was expected in the response";
+        
+        internal const string iOSBrokerKeyFetchFailed = "A broker key was generated but it could not be retrived from the KeyChain. Please capture and inspect the logs to see why the fetch operation failed.";
 
         public const string UnauthorizedResponseExpected = "Unauthorized http response (status code 401) was expected";
         public const string UnexpectedAuthorityValidList = "Unexpected list of valid addresses";
@@ -288,14 +296,14 @@ namespace Microsoft.Identity.Client
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
         public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication";
         public static string AuthorityTypeMismatch(
-            AuthorityType appAuthorityType, 
+            AuthorityType appAuthorityType,
             AuthorityType requestAuthorityType)
-            {
+        {
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "A authority of type {0} was used at the application and of type {1} at the request level. " +
-                "Please use the same authority type between the two.", 
-                appAuthorityType, 
+                "Please use the same authority type between the two.",
+                appAuthorityType,
                 requestAuthorityType);
         }
 
