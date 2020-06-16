@@ -25,6 +25,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests.Silent;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {

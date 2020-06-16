@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Internal.Requests.Silent;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
