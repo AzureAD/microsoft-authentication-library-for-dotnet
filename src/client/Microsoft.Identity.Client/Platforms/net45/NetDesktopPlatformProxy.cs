@@ -209,10 +209,18 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         /// <inheritdoc />
         protected override string InternalGetDeviceId()
-        {
-            // Considered PII, ensure that it is hashed.
-            return NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
-                            .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault();
+        {            
+            try
+            {
+                // Considered PII, ensure that it is hashed.
+                return NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
+                                .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault();
+            }
+            catch(EntryPointNotFoundException)
+            {
+                // Thrown when ran in an Azure Runbook
+                return null;
+            }
         }
 
         /// <inheritdoc />
