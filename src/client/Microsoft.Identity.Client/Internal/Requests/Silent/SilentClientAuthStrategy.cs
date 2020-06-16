@@ -4,17 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Client.Internal.Requests
+namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
     internal class SilentClientAuthStretegy : ISilentAuthRequestStrategy
     {
@@ -23,7 +21,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected IServiceBundle ServiceBundle { get; }
         private readonly AcquireTokenSilentParameters _silentParameters;
         private const string TheOnlyFamilyId = "1";
-        private SilentRequest _silentRequest;
+        private readonly SilentRequest _silentRequest;
 
         public SilentClientAuthStretegy(
             SilentRequest request,
@@ -55,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ThrowIfNoScopesOnB2C();
 
-            if (!_silentParameters.ForceRefresh && !AuthenticationRequestParameters.HasClaims)
+            if (!_silentParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 

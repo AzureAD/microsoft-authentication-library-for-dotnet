@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using NSubstitute.ExceptionExtensions;
+using Microsoft.Identity.Client.Internal.Requests.Silent;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {

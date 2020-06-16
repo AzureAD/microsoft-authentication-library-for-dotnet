@@ -1,14 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -16,13 +14,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class SilentBrokerAuthStrategy : ISilentAuthRequestStrategy
     {
         internal AuthenticationRequestParameters _authenticationRequestParameters;
-        private ICacheSessionManager CacheManager => _authenticationRequestParameters.CacheSessionManager;
         protected IServiceBundle _serviceBundle;
         private readonly AcquireTokenSilentParameters _silentParameters;
-        private SilentRequest _silentRequest;
+        private readonly SilentRequest _silentRequest;
         internal IBroker Broker { get; }
-        public Dictionary<string, string> BrokerPayload = new Dictionary<string, string>();
-        ICoreLogger _logger;
+        private readonly ICoreLogger _logger;
 
         public SilentBrokerAuthStrategy(
             SilentRequest request,
@@ -41,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            var response = await SendTokenRequestToBrokerAsync().ConfigureAwait(false);
+            MsalTokenResponse response = await SendTokenRequestToBrokerAsync().ConfigureAwait(false);
             return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
         }
 
@@ -85,17 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public Task PreRunAsync()
         {
-            return null;
-        }
-
-        private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
-        {
-            var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
-            return new AuthenticationResult(
-                cachedAccessTokenItem,
-                msalIdTokenItem,
-                _authenticationRequestParameters.AuthenticationScheme,
-                _authenticationRequestParameters.RequestContext.CorrelationId);
-        }
+            return Task.Delay(0);
+        }      
     }
 }
