@@ -77,18 +77,15 @@ namespace Microsoft.Identity.Client
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-            IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
-
-            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
-            {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                accounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
-                return accounts;
-            }
+            IEnumerable<IAccount> localAccounts = Enumerable.Empty<IAccount>();
+            IEnumerable<IAccount> brokerAccounts = Enumerable.Empty<IAccount>();
 
             if (UserTokenCache == null)
             {
-                requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
+                if (!AppConfig.IsBrokerEnabled)
+                {
+                    requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
+                }
             }
             else
             {
@@ -101,10 +98,27 @@ namespace Microsoft.Identity.Client
                         new AcquireTokenCommonParameters(), 
                         requestContext));
 
-                accounts = await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
+                localAccounts = await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
             }
 
-            return accounts;
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            {
+                //Broker is available so accounts will be merged using home account ID with local accounts taking priority
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
+
+                foreach(IAccount account in brokerAccounts)
+                {
+                    if (!localAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
+                    {
+                        (localAccounts as List<IAccount>).Add(account);
+                    }
+                }
+
+                return localAccounts;
+            }
+
+            return localAccounts;
         }
 
         /// <summary>
@@ -126,17 +140,16 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public async Task RemoveAsync(IAccount account)
         {
-            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
-            {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                await broker.RemoveAccountAsync(AppConfig.ClientId, account).ConfigureAwait(false);
-                return;
-            }
-
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             if (account != null && UserTokenCacheInternal != null)
             {
                 await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
+            }
+
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            {
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                await broker.RemoveAccountAsync(AppConfig.ClientId, account).ConfigureAwait(false);
             }
         }
 

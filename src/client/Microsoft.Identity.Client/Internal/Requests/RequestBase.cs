@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 .ConfigureAwait(false);
         }
 
-        protected Task<MsalTokenResponse> SendTokenRequestAsync(
+        internal Task<MsalTokenResponse> SendTokenRequestAsync(
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
