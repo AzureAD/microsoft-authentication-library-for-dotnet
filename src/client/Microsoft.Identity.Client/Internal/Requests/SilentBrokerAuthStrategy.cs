@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +17,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class SilentBrokerAuthStretegy : ISilentAuthStrategy
+    internal class SilentBrokerAuthStrategy : ISilentAuthRequestStrategy
     {
         internal AuthenticationRequestParameters _authenticationRequestParameters;
         private ICacheSessionManager CacheManager => _authenticationRequestParameters.CacheSessionManager;
@@ -25,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public Dictionary<string, string> BrokerPayload = new Dictionary<string, string>();
         ICoreLogger _logger;
 
-        public SilentBrokerAuthStretegy(
+        public SilentBrokerAuthStrategy(
             SilentRequest request,
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -48,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
-            if (!Broker.IsBrokerInstalledAndInvokable())
+            if (Broker != null && !Broker.IsBrokerInstalledAndInvokable())
             {
                 throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked);
             }

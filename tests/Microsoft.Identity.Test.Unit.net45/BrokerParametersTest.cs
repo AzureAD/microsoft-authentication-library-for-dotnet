@@ -86,9 +86,9 @@ namespace Microsoft.Identity.Test.Unit
 
                 // Act
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
-                SilentBrokerAuthStretegy brokerSilentRequest =
-                    new SilentBrokerAuthStretegy(
-                        new SilentRequest(harness.ServiceBundle, parameters, null),
+                SilentBrokerAuthStrategy brokerSilentRequest =
+                    new SilentBrokerAuthStrategy(
+                        new SilentRequest(harness.ServiceBundle, parameters, acquireTokenSilentParameters),
                         harness.ServiceBundle,
                         parameters,
                         acquireTokenSilentParameters,

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +16,7 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class SilentClientAuthStretegy : ISilentAuthStrategy
+    internal class SilentClientAuthStretegy : ISilentAuthRequestStrategy
     {
         private AuthenticationRequestParameters AuthenticationRequestParameters { get; }
         private ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
@@ -130,7 +133,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void ThrowIfNoScopesOnB2C()
         {
-            // B2C will not issue an access token if no scopes are requested
+            // During AT Silent with no scopes, Unlike AAD, B2C will not issue an access token if no scopes are requested
             // And we don't want to refresh the RT on every ATS call
             // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/715 for details
 

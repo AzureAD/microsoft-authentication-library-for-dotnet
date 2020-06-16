@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client
 
                 foreach(IAccount account in brokerAccounts)
                 {
-                    if (localAccounts.Where(x => x.HomeAccountId == account.HomeAccountId).Count() == 0)
+                    if (!localAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
                     {
                         (localAccounts as List<IAccount>).Add(account);
                     }
