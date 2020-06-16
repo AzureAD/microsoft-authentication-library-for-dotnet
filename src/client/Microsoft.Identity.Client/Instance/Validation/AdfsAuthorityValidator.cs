@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Instance.Validation
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                         httpResponse);
                 }
 
-                AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext, false);
+                AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext);
                 if (wfr.Links.FirstOrDefault(
                         a => a.Rel.Equals(Constants.DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource)) == null)

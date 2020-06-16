@@ -10,9 +10,9 @@ using Microsoft.Identity.Client.AuthScheme.Bearer;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -334,12 +334,23 @@ namespace Microsoft.Identity.Client
         {
             if (msalAccessTokenCacheItem != null)
             {
+                
                 if (msalAccessTokenCacheItem.ExpiresOn >
                     DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                 {
+                    // due to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806
+                    if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromDays(ExpirationTooLongInDays))
+                    {
+                        requestParams.RequestContext.Logger.Error(
+                           "Access token expiration too large. This can be the result of a bug or corrupt cache. Token will be ignored as it is likely expired." +
+                           GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                        return null;
+                    }
+
                     requestParams.RequestContext.Logger.Info(
                         "Access token is not expired. Returning the found cache entry. " +
                         GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+
                     return msalAccessTokenCacheItem;
                 }
 

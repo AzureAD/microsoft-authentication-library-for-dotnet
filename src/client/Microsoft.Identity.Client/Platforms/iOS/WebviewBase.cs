@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using AuthenticationServices;
 #endif
 using Foundation;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using SafariServices;
 using UIKit;

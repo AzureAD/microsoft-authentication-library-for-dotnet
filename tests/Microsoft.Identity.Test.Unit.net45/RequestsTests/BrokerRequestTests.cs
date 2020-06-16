@@ -126,7 +126,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         broker,
                         "install_url");
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
-                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerInteractiveRequest.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
+
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(
+                    () => _brokerInteractiveRequest.Broker.AcquireTokenInteractiveAsync(
+                        parameters, new AcquireTokenInteractiveParameters())).ConfigureAwait(false);
             }
         }
 
@@ -147,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         broker);
 
                 Assert.AreEqual(false, _brokerSilentAuthStrategy.Broker.IsBrokerInstalledAndInvokable());
-                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerSilentAuthStrategy.Broker.AcquireTokenUsingBrokerAsync(new Dictionary<string, string>())).ConfigureAwait(false);
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => _brokerSilentAuthStrategy.Broker.AcquireTokenSilentAsync(_parameters, _acquireTokenSilentParameters)).ConfigureAwait(false);
             }
         }
 
@@ -158,7 +161,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
 
-                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.GetAccountsAsync(TestConstants.ClientId)).ConfigureAwait(false);
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(
+                    () => broker.GetAccountsAsync(TestConstants.ClientId, TestConstants.RedirectUri))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -179,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange
             var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = Substitute.For<IAccount>();
-            mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { expectedAccount });
+            mockBroker.GetAccountsAsync(TestConstants.ClientId, TestConstants.RedirectUri).Returns(new[] { expectedAccount });
             mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
@@ -205,7 +210,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Arrange
             var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = Substitute.For<IAccount>();
-            mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { expectedAccount });
+            mockBroker.GetAccountsAsync(TestConstants.ClientId, TestConstants.RedirectUri).Returns(new[] { expectedAccount });
             mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
@@ -234,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Arrange
                 var mockBroker = Substitute.For<IBroker>();
                 var expectedAccount = Substitute.For<IAccount>();
-                mockBroker.GetAccountsAsync(TestConstants.ClientId).Returns(new[] { expectedAccount });
+                mockBroker.GetAccountsAsync(TestConstants.ClientId, TestConstants.RedirectUri).Returns(new[] { expectedAccount });
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();

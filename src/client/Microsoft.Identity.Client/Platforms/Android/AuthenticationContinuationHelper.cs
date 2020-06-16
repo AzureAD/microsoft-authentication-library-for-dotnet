@@ -5,9 +5,11 @@ using System;
 using System.Globalization;
 using Android.App;
 using Android.Content;
+using Java.Sql;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.Platforms.Android;
+using Microsoft.Identity.Client.Platforms.Android.Broker;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
 using Microsoft.Identity.Client.UI;
 
@@ -33,20 +35,26 @@ namespace Microsoft.Identity.Client
             logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
 
             AuthorizationResult authorizationResult;
-            if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
+
+            if (data != null && data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
             {
                 authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
             }
-            else if (!String.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)) || requestCode == BrokerConstants.BrokerRequestId) 
+            else if (data != null && (!String.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)) || requestCode == BrokerConstants.BrokerRequestId))                
+            {
                 //The BrokerRequestId is an ID that is attached to the activity launch during brokered authentication
                 // that indicates that the response returned to this class is for the broker.
-            {
                 AndroidBroker.SetBrokerResult(data, (int)resultCode);
                 return;
             }
-            else
+            else if (data != null || AndroidConstants.AuthCodeReceived != (int)resultCode)
             {
                 authorizationResult = ProcessFromSystemWebview(requestCode, resultCode, data);
+            } 
+            else
+            {
+                logger.Info("SetAuthenticationContinuationEventArgs - ignoring intercepted null intent.");
+                return;
             }
 
             WebviewBase.SetAuthorizationResult(authorizationResult, logger);

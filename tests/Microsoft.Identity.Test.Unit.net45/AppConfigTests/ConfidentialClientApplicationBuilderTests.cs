@@ -7,7 +7,7 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

@@ -3,22 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Linq;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
-using System.Threading;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
@@ -68,7 +59,7 @@ namespace Microsoft.Identity.Client
 
         internal ClientApplicationBase(ApplicationConfiguration config)
         {
-            ServiceBundle = Core.ServiceBundle.Create(config);
+            ServiceBundle = Internal.ServiceBundle.Create(config);
 
             if (config.UserTokenLegacyCachePersistenceForTest != null)
             {
@@ -114,7 +105,7 @@ namespace Microsoft.Identity.Client
             {
                 //Broker is available so accounts will be merged using home account ID with local accounts taking priority
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId).ConfigureAwait(false);
+                brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
 
                 foreach(IAccount account in brokerAccounts)
                 {

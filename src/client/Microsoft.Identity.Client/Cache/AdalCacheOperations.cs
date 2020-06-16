@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Cache
                         (TokenSubjectType)int.Parse(kvpElements[3], CultureInfo.CurrentCulture),
                         resultEx.Result.UserInfo);
 
-                    dictionary.Add(key, resultEx);
+                    dictionary[key] = resultEx;
                 }
 
                 logger.Info(string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count));

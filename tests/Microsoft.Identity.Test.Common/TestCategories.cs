@@ -15,5 +15,7 @@ namespace Microsoft.Identity.Test.Common
 
         public const string ADFS = "ADFS";
 
+        public const string Regression = "Regression";
+
     }
 }

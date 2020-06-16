@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Json;
 using System.Collections.ObjectModel;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 _bodyParameters[key] = value;
             }
-        }        
+        }
 
         internal void AddHeader(string key, string value)
         {
@@ -79,12 +80,10 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext, bool expectErrorsOn200OK = false, bool addCommonHeaders = true)
         {
-            bool addCorrelationId = requestContext != null && !string.IsNullOrEmpty(requestContext.Logger.CorrelationId.ToString());
-            
             //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
             if (addCommonHeaders)
             {
-                AddCommonHeaders(requestContext, addCorrelationId);
+                AddCommonHeaders(requestContext);
             }
 
             HttpResponse response = null;
@@ -139,16 +138,13 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
             }
 
-            return CreateResponse<T>(response, requestContext, addCorrelationId);
-        }   
+            return CreateResponse<T>(response, requestContext);
+        }
 
-        private bool AddCommonHeaders(RequestContext requestContext, bool addCorrelationId)
+        private void AddCommonHeaders(RequestContext requestContext)
         {
-            if (addCorrelationId)
-            {
-                _headers.Add(OAuth2Header.CorrelationId, requestContext.Logger.CorrelationId.ToString());
-                _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
-            }
+            _headers.Add(OAuth2Header.CorrelationId, requestContext.CorrelationId.ToString());
+            _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
 
             if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientName))
             {
@@ -159,8 +155,6 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
             }
-
-            return addCorrelationId;
         }
 
         private void DecorateHttpEvent(HttpMethod method, RequestContext requestContext, HttpResponse response, HttpEvent httpEvent)
@@ -193,17 +187,14 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
-        public static T CreateResponse<T>(HttpResponse response, RequestContext requestContext, bool addCorrelationId)
+        public static T CreateResponse<T>(HttpResponse response, RequestContext requestContext)
         {
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 ThrowServerException(response, requestContext);
             }
 
-            if (addCorrelationId)
-            {
-                VerifyCorrelationIdHeaderInResponse(response.HeadersAsDictionary, requestContext);
-            }
+            VerifyCorrelationIdHeaderInResponse(response.HeadersAsDictionary, requestContext);
 
             return JsonHelper.DeserializeFromJson<T>(response.Body);
         }
@@ -311,7 +302,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     string correlationIdHeader = headers[trimmedKey].Trim();
                     if (string.Compare(
                             correlationIdHeader,
-                            requestContext.Logger.CorrelationId.ToString(),
+                            requestContext.CorrelationId.ToString(),
                             StringComparison.OrdinalIgnoreCase) != 0)
                     {
                         requestContext.Logger.WarningPii(
@@ -319,7 +310,7 @@ namespace Microsoft.Identity.Client.OAuth2
                                 CultureInfo.InvariantCulture,
                                 "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
                                 correlationIdHeader,
-                                requestContext.Logger.CorrelationId),
+                                requestContext.CorrelationId),
                             "Returned correlation id does not match the sent correlation id");
                     }
 
