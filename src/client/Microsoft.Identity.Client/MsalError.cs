@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para>
         /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, string)"/>
         /// or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
-        /// was called with a <c>loginHint</c> parameter which does not match any account in <see cref="IClientApplicationBase.GetAccountsAsync"/>
+        /// was called with a <c>loginHint</c> parameter which does not match any account in <see cref="IClientApplicationBase.GetAccountsAsync()"/>
         /// <para>Mitigation</para>
         /// If you are certain about the loginHint, call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
         /// </summary>

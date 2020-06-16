@@ -136,15 +136,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void CanonicalAuthorityInitTest()
         {
-            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-
             string UriNoPort = TestConstants.B2CAuthority;
             string UriNoPortTailSlash = TestConstants.B2CAuthority;
 
-            const string UriDefaultPort = "https://login.microsoftonline.in:443/tfp/tenant/policy";
+            string UriDefaultPort = $"https://login.microsoftonline.in:443/tfp/tenant/{TestConstants.B2CSignUpSignIn}";
 
-            const string UriCustomPort = "https://login.microsoftonline.in:444/tfp/tenant/policy";
-            const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/policy/";
+            string UriCustomPort = $"https://login.microsoftonline.in:444/tfp/tenant/{TestConstants.B2CSignUpSignIn}";
+            string UriCustomPortTailSlash = $"https://login.microsoftonline.in:444/tfp/tenant/{TestConstants.B2CSignUpSignIn}/";
             string UriVanityPort = TestConstants.B2CLoginAuthority;
 
             var authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));

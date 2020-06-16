@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
     public partial interface IClientApplicationBase
     {
         /// <summary>
-        /// In MSAL 1.x returned an enumeration of <see cref="IUser"/>. From MSAL 2.x, use <see cref="GetAccountsAsync"/> instead.
+        /// In MSAL 1.x returned an enumeration of <see cref="IUser"/>. From MSAL 2.x, use <see cref="GetAccountsAsync()"/> instead.
         /// See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client
         IEnumerable<IUser> Users { get; }
 
         /// <summary>
-        /// In MSAL 1.x, return a user from its identifier. From MSAL 2.x, use <see cref="GetAccountsAsync"/> instead.
+        /// In MSAL 1.x, return a user from its identifier. From MSAL 2.x, use <see cref="GetAccountsAsync()"/> instead.
         /// See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         /// <param name="identifier">Identifier of the user to retrieve</param>
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Client
     public partial class ClientApplicationBase
     {
         /// <summary>
-        /// In MSAL 1.x returned an enumeration of <see cref="IUser"/>. From MSAL 2.x, use <see cref="GetAccountsAsync"/> instead.
+        /// In MSAL 1.x returned an enumeration of <see cref="IUser"/>. From MSAL 2.x, use <see cref="GetAccountsAsync()"/> instead.
         /// See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Client
         public IEnumerable<IUser> Users { get { throw new NotImplementedException(); } }
 
         /// <summary>
-        /// In MSAL 1.x, return a user from its identifier. From MSAL 2.x, use <see cref="GetAccountsAsync"/> instead.
+        /// In MSAL 1.x, return a user from its identifier. From MSAL 2.x, use <see cref="GetAccountsAsync()"/> instead.
         /// See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         /// <param name="identifier">Identifier of the user to retrieve</param>
