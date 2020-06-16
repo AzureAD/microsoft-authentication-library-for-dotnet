@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
