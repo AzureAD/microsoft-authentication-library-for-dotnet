@@ -27,18 +27,5 @@
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="Internal\Requests\SilentBrokerAuthStrategy.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Internal\Requests\ISilentAuthRequestStrategy.cs" />
-    <Compile Include="Internal\Requests\SilentBrokerAuthStrategy.cs" />
-    <Compile Include="Internal\Requests\SilentClientAuthStrategy.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Internal\Requests\SilentClientAuthStrategy.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Internal\Requests\ISilentAuthRequestStrategy.cs" />
-  </ItemGroup>  
+
 </Project>
