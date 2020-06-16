@@ -51,6 +51,14 @@ namespace Microsoft.Identity.Client
         Task<IAccount> GetAccountAsync(string identifier);
 
         /// <summary>
+        /// Get the <see cref="IAccount"/> collection by its identifier among the accounts available in the token cache,
+        /// based on the user flow. This is for Azure AD B2C scenarios.
+        /// </summary>
+        /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
+        /// </param>
+        Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow);
+
+        /// <summary>
         /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache,
         /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
