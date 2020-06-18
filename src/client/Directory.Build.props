@@ -18,7 +18,7 @@
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.4.0-localbuild</MsalClientSemVer>
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.15.0-localbuild</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MsalClientSemVer)</Version>
 
@@ -47,6 +47,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DisableExtraReferences>true</DisableExtraReferences> <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
