@@ -8,7 +8,7 @@ New Features:
 
 Bug Fixes:
 
-**MSAL can now migrate from ADALV3 to MSALV3 when multiple resourceId's are used** MSAL will now  ignore ADAL resource strings when fetching RT to enable migration from ADALV3 to MSALV3 cachetokens. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1815)
+**MSAL can now migrate from ADALV3 to MSALV3 when multiple resourceId's are used**. MSAL will now  ignore ADAL resource strings when fetching RT to enable migration from ADALV3 to MSALV3 cachetokens. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1815)
 
 **MSAL msaintains correlation id in broker flows** MSAL will now maintain the correlation ID of the authentication request throughout it's entire execution. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1805)
 
