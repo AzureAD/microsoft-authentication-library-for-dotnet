@@ -2,7 +2,7 @@
 ============
 New Features:
 
-**MSAL has been upgraded to use Andorid X** MSAL.NET will now use the latest Android SDKs for it's Xamarin.Android platform. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1653)
+**MSAL has been upgraded to use Android X**. MSAL.NET will now use the latest Android SDKs for it's Xamarin.Android platform. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1653)
 
 **GetAccounts can now filter by user flow for B2C accounts** MSAL's GetAccounts() api will now allow you to pass in a user flow to filter B2C accounts by when quering the cache. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1889)
 
