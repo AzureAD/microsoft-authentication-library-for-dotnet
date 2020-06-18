@@ -1,3 +1,25 @@
+4.15
+============
+New Features:
+
+**MSAL has been upgraded to use Android X**. MSAL.NET will now use the latest Android SDKs for it's Xamarin.Android platform. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1653)
+
+**`GetAccounts()` can now filter by user flow for B2C accounts**. MSAL's `GetAccounts()` api will now allow you to pass in a user flow to filter B2C accounts when quering the cache. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1889)
+
+Bug Fixes:
+
+**MSAL can now migrate from ADALV3 to MSALV3 when multiple resourceId's are used**. MSAL will now  ignore ADAL resource strings when fetching RT to enable migration from ADALV3 to MSALV3 cachetokens. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1815)
+
+**MSAL will now maintain the correlation ID of the authentication request with broker specific interactions throughout it's entire execution**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1805)
+
+**MSAL will now return the correct value for `ExpiresOn` in the authentication result during brokered authentication**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806)
+
+**MSAL now has improved logic for `AcquireTokenSilent()`, `GetAccounts()` and `RemoveAccount()` during brokered authentication**. During brokered authentication, MSAL will now check its local cache for tokens first before sending the silent authentication request to broker. `GetAccounts()` will now merge the accounts from the local MSAL and broker caches when returning results. `RemoveAccount()` will now remove the account from both the local cache and the broker cache. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1820)
+
+**MSAL now has better error reporting during Integrated Windows Authentication**. MSAL will now return the error in the body on WsTrust parse errors. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1838)
+
+**MSAL will now handle null intents returned to `SetAuthenticationContinuationEventArgs`**. MSAL will now handle null intents returned to `SetAuthenticationContinuationEventArgs` to avoid throwing null reference exceptions. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/636)
+
 4.14.0
 ============
 New Features: 
