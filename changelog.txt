@@ -14,7 +14,7 @@ Bug Fixes:
 
 **MSAL will now return the correct value for `ExpiresOn` in the authentication result during brokered authentication**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806)
 
-**MSAL now has improved logic for AcquireTokenSilent(), GetAccounts() and RemoveAccount() during brokered authentication** During brokered authentication, MSAL will now check it's local cache for tokens first before sending the silent authenticaiton request to broker. GetAccounts will now merge the accouns from the local and broker caches when when returning results. RemoveAccount will now remove the account from both the local cache and the broker cache. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1820)
+**MSAL now has improved logic for `AcquireTokenSilent()`, `GetAccounts()` and `RemoveAccount()` during brokered authentication**. During brokered authentication, MSAL will now check its local cache for tokens first before sending the silent authentication request to broker. `GetAccounts()` will now merge the accounts from the local MSAL and broker caches when returning results. `RemoveAccount()` will now remove the account from both the local cache and the broker cache. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1820)
 
 **MSAL now has Better error reporting during Integrated Windows Authenticaiton** MSAL will now return the error body on WsTrust parse errors [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1838)
 
