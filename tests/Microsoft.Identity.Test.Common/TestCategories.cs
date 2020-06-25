@@ -14,8 +14,13 @@ namespace Microsoft.Identity.Test.Common
         public const string LabAccess = "LabAccess";
 
         public const string ADFS = "ADFS";
+        public const string MSA = "MSA";
 
         public const string Regression = "Regression";
+
+
+        public const string Arlington = "Arlington";
+
 
     }
 }

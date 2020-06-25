@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonDeviceCodeFlowTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
@@ -59,6 +60,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [TestCategory(TestCategories.ADFS)]
         public async Task DeviceCodeFlowAdfsTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
@@ -68,6 +70,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
@@ -76,6 +79,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
+        [TestCategory(TestCategories.MSA)]
+        [Ignore] // Failing sporadically https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1045664 
         public async Task DeviceCodeFlowMsaTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);

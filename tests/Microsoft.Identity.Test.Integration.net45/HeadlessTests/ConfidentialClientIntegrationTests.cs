@@ -187,6 +187,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonConfidentialClientWithClientSecretTestAsync()
         {
             await RunTestWithClientSecretAsync(ArlingtonConfidentialClientIDOBO,
@@ -395,6 +396,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonWebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
             var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);

@@ -60,6 +60,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
@@ -67,6 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
@@ -119,6 +121,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// </summary>
         /// <returns></returns>
         [TestMethod]
+        [TestCategory(TestCategories.MSA)]
         public async Task ROPC_MSA_Async()
         {
             var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);

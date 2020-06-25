@@ -56,6 +56,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
         public async Task Arlington_Interactive_AADAsync()
         {
             // Arrange
@@ -64,6 +65,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.MSA)]
         public async Task Interactive_MsaUser_Async()
         {
             // Arrange
@@ -111,6 +113,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
         public async Task Arlington_Interactive_AdfsV2019_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
