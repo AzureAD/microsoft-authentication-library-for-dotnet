@@ -113,5 +113,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         void /* for test */ SetBrokerForTest(IBroker broker);
 
         bool CanBrokerSupportSilentAuth();
+
+        IMsalHttpClientFactory CreateDefaultHttpClientFactory();
     }
 }

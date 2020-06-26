@@ -201,6 +201,11 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override bool UseEmbeddedWebViewDefault => false;
 
+        public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
+        {
+            return new NetCoreHttpClientFactory();
+        }
+
         /// <summary>
         ///  Is this a windows platform
         /// </summary>

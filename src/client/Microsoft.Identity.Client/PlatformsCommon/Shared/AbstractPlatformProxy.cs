@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new NotImplementedException();
         }
 
-        public virtual IBroker CreateBroker(CoreUIParent uIParent)
+        public virtual IBroker CreateBroker(CoreUIParent uiParent)
         {
             return OverloadBrokerForTest ?? new NullBroker();
         }
@@ -209,6 +209,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual IDeviceAuthManager CreateDeviceAuthManager()
         {
             return new NullDeviceAuthManager();
+        }
+
+        public virtual IMsalHttpClientFactory CreateDefaultHttpClientFactory()
+        {
+            return new SimpleHttpClientFactory();
         }
     }
 }

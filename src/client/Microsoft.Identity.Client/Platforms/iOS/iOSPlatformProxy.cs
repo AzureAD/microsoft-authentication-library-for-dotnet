@@ -159,14 +159,19 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         protected override IFeatureFlags CreateFeatureFlags() => new iOSFeatureFlags();
 
-        public override IBroker CreateBroker(CoreUIParent uIParent)
+        public override IBroker CreateBroker(CoreUIParent uiParent)
         {
             if (OverloadBrokerForTest != null)
             {
                 return OverloadBrokerForTest;
             }
 
-            return new iOSBroker(Logger, CryptographyManager, uIParent);
+            return new iOSBroker(Logger, CryptographyManager, uiParent);
+        }
+
+        public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
+        {
+            return new IosHttpClientFactory();
         }
     }
 }

@@ -94,6 +94,7 @@ namespace NetCoreTestApp
                         4. Acquire Token Interactive (via CustomWebUI)
                         5. Acquire Token Interactive
                         6. Acquire Token Silently
+                        7. Confidential Client
                         8. Clear cache
                         9. Rotate Tenant ID
                         0. Exit App
@@ -170,6 +171,23 @@ namespace NetCoreTestApp
 
                             break;
 
+                        case 7:
+                            for (int i = 0; i < 100; i++)
+                            {
+                                var cca = CreateCca();
+
+                                var resultX = await cca.AcquireTokenForClient(
+                                    new[] { "https://graph.microsoft.com/.default" })
+                                    .WithForceRefresh(true)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+
+                                await Task.Delay(500).ConfigureAwait(false);
+                                Console.WriteLine("Got a token");
+                            }
+
+                            Console.WriteLine("Finished");
+                            break;
                         case 8:
                             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                             foreach (var acc in accounts)
@@ -203,6 +221,25 @@ namespace NetCoreTestApp
                 Console.ReadLine();
             }
         }
+
+        private static IConfidentialClientApplication CreateCca()
+        {
+            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                .Create(s_clientIdForConfidentialApp)
+                .WithClientSecret(s_confidentialClientSecret)
+                .Build();          
+
+            return cca;
+        }
+
+        // Simple confidential client app with access to https://graph.microsoft.com/.default
+        private static readonly string s_clientIdForConfidentialApp =
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID");
+
+        // App secret for app above 
+        private static readonly string s_confidentialClientSecret =
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET");
+
 
         private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
