@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
         private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
         private const string AdfsCertName = "IDLABS-APP-Confidential-Client-Cert-OnPrem";
+        private const string AppCacheKey = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8_AppTokenCache";
         private KeyVaultSecretsProvider _keyVault;
         private static string _publicCloudCcaSecret;
         private static string _arlingtonCCASecret;
@@ -131,6 +132,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
@@ -141,6 +143,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
         }
 
         [TestMethod]
@@ -166,6 +169,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
@@ -176,6 +180,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
         }
 
         [TestMethod]
@@ -214,6 +219,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
@@ -223,6 +229,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
         }
 
         [TestMethod]
@@ -299,6 +306,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
             ValidateClaimsInAssertion(claims, ((ConfidentialClientApplication)confidentialApp).ClientCredential.SignedAssertion);
             MsalAssert.AssertAuthResult(authResult);
 
@@ -309,6 +317,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.IsTrue(appCacheRecorder.LastNotificationArgs.IsApplicationCache);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
         }
 
         private void ValidateClaimsInAssertion(IDictionary<string, string> claims, string assertion)
@@ -543,7 +552,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     break;
             }
 
-            //TODO: acquire scenario specific client ids from the lab resonse
+            //TODO: acquire scenario specific client ids from the lab response
 
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
 
@@ -566,11 +575,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(authResult.AccessToken))
+            var userCacheRecorder = confidentialApp.UserTokenCache.RecordAccess();
+
+            UserAssertion userAssertion = new UserAssertion(authResult.AccessToken);
+
+            string atHash = userAssertion.AssertionHash;
+
+            authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult, user);
+            Assert.AreEqual(atHash, userCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
         }
     }
 }

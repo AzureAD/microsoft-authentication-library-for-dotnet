@@ -86,6 +86,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string ClaimsAndClientCapabilities { get; private set; }
 
+        public string SuggestedCacheKey { get; set; }
+
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>

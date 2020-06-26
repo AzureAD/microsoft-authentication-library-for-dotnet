@@ -101,7 +101,6 @@ namespace Microsoft.Identity.Client.Cache
                 {
                     if (!_cacheRefreshedForRead) // double check locking
                     {
-                        
                         using (_requestParams.RequestContext.CreateTelemetryHelper(cacheEvent))
                         {
                             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
@@ -109,7 +108,8 @@ namespace Microsoft.Identity.Client.Cache
                                _requestParams.ClientId,
                                _requestParams.Account,
                                hasStateChanged: false, 
-                               TokenCacheInternal.IsApplicationCache);
+                               TokenCacheInternal.IsApplicationCache,
+                               _requestParams.SuggestedCacheKey ?? _requestParams.Account?.HomeAccountId?.Identifier);
 
                             try
                             {

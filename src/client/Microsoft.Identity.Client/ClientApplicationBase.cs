@@ -76,6 +76,18 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
+            return await GetAccountsAndSetCacheKeyAsync(null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
+        /// Also sets the cache key based on a given home account id, which is the account id of the home account for the user. 
+        /// This uniquely identifies the user across AAD tenants.
+        /// </summary>
+        /// <param name="homeAccountId">The identifier is the home account id of the account being targetted in the cache./>
+        /// </param>
+        private async Task<IEnumerable<IAccount>> GetAccountsAndSetCacheKeyAsync(string homeAccountId)
+        {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             IEnumerable<IAccount> localAccounts = Enumerable.Empty<IAccount>();
             IEnumerable<IAccount> brokerAccounts = Enumerable.Empty<IAccount>();
@@ -89,14 +101,17 @@ namespace Microsoft.Identity.Client
             }
             else
             {
+                var authParameters = new AuthenticationRequestParameters(
+                        ServiceBundle,
+                        UserTokenCacheInternal,
+                        new AcquireTokenCommonParameters(),
+                        requestContext);
+
+                authParameters.Account = new Account(homeAccountId, null, Authority);
                 // a simple session consisting of a single call
                 CacheSessionManager cacheSessionManager = new CacheSessionManager(
                     UserTokenCacheInternal,
-                    new AuthenticationRequestParameters(
-                        ServiceBundle, 
-                        UserTokenCacheInternal, 
-                        new AcquireTokenCommonParameters(), 
-                        requestContext));
+                     authParameters);
 
                 localAccounts = await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
             }
@@ -150,7 +165,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         public async Task<IAccount> GetAccountAsync(string accountId)
         {
-            var accounts = await GetAccountsAsync().ConfigureAwait(false);
+            var accounts = await GetAccountsAndSetCacheKeyAsync(accountId).ConfigureAwait(false);
             return accounts.FirstOrDefault(account => account.HomeAccountId.Identifier.Equals(accountId, StringComparison.OrdinalIgnoreCase));
         }
 
