@@ -10,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
@@ -18,8 +19,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                             IDisposable
     {
         private readonly TestContext _testContext;
-
-        public MockHttpManager(TestContext testContext = null)
+        
+        public MockHttpManager(TestContext testContext = null) : 
+            base(new SimpleHttpClientFactory())
         {
             _testContext = testContext;
         }
@@ -71,7 +73,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             var httpClient = new HttpClient(messageHandler)
             {
-                MaxResponseContentBufferSize = HttpClientFactory.MaxResponseContentBufferSizeInBytes
+                MaxResponseContentBufferSize = HttpClientConfig.MaxResponseContentBufferSizeInBytes
             };
 
             httpClient.DefaultRequestHeaders.Accept.Clear();
