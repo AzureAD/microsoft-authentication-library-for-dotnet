@@ -23,6 +23,14 @@ namespace NetCoreTestApp
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
 
+        // Confidential client app with access to https://graph.microsoft.com/.default
+        private static readonly string s_clientIdForConfidentialApp =
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID");
+
+        // App secret for app above 
+        private static readonly string s_confidentialClientSecret =
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET");
+
         private static readonly IEnumerable<string> s_scopes = new[] {
             "user.read", "openid" }; // used for WIA and U/P, can be empty
 
@@ -232,14 +240,7 @@ namespace NetCoreTestApp
             return cca;
         }
 
-        // Simple confidential client app with access to https://graph.microsoft.com/.default
-        private static readonly string s_clientIdForConfidentialApp =
-            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID");
-
-        // App secret for app above 
-        private static readonly string s_confidentialClientSecret =
-            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET");
-
+     
 
         private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
@@ -255,20 +256,6 @@ namespace NetCoreTestApp
             callGraphTask.Wait();
             Console.WriteLine("Result from calling the ME endpoint of the graph: " + callGraphTask.Result);
             Console.ResetColor();
-        }
-
-        private static X509Certificate2 GetCertificateByThumbprint(string thumbprint)
-        {
-            using (var store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
-            {
-                store.Open(OpenFlags.ReadOnly);
-                var certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
-                if (certs.Count > 0)
-                {
-                    return certs[0];
-                }
-                throw new InvalidOperationException($"Cannot find certificate with thumbprint '{thumbprint}'");
-            }
         }
 
         private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
