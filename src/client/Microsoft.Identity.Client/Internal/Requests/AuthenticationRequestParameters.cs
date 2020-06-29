@@ -75,6 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public bool HasScopes => Scope != null && Scope.Any();
 
         public string ClientId { get; }
+
         public Uri RedirectUri { get; set; }
 
         /// <summary>
@@ -86,7 +87,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string ClaimsAndClientCapabilities { get; private set; }
 
-        public string SuggestedCacheKey { get; set; }
+        /// <summary>
+        /// Used by Identity.Web (and others) to store token caches given the 1 cache per user pattern.
+        /// </summary>
+        public string SuggestedWebAppCacheKey { get; set; }
 
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
@@ -102,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
-        internal bool IsBrokerConfigured { get; set; }
+        internal bool IsBrokerConfigured { get; set; /* set only for test */ }
 
         public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
 
@@ -160,6 +164,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
             builder.AppendLine("ClaimsAndClientCapabilities - " + ClaimsAndClientCapabilities);
+            builder.AppendLine("Authority - " + AuthorityInfo?.CanonicalAuthority);
+            builder.AppendLine("ApiId - " + ApiId);
+            builder.AppendLine("SuggestedCacheKey - " + SuggestedWebAppCacheKey);
+            builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
+            builder.AppendLine("SendX5C - " + SendX5C);
+            builder.AppendLine("LoginHint - " + LoginHint);
+            builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
 
             string messageWithPii = builder.ToString();
 
@@ -170,6 +181,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 Environment.NewLine);
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
+            builder.AppendLine("ApiId - " + ApiId);
+            builder.AppendLine("SuggestedCacheKey - " + SuggestedWebAppCacheKey);
+            builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
+            builder.AppendLine("SendX5C - " + SendX5C);
+            builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
+            builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
+
             logger.InfoPii(messageWithPii, builder.ToString());
         }
 

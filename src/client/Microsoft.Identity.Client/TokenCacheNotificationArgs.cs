@@ -59,7 +59,18 @@ namespace Microsoft.Identity.Client
         public bool IsApplicationCache { get; }
 
         /// <summary>
-        ///
+        /// A suggested token cache key, which can be used with general purpose storage mechanisms that allow 
+        /// storing key-value pairs and key based retrieval. Useful in applications that store 1 token cache per user, 
+        /// the recommended pattern for web apps.
+        /// 
+        /// The value is: 
+        /// 
+        /// <list type="bullet">
+        /// <item>the homeAccountId for AcquireTokenSilent and GetAccount(homeAccountId)</item>
+        /// <item>clientID + "_AppTokenCache" for AcquireTokenForClient</item>
+        /// <item>the hash of the original token for AcquireTokenOnBehalfOf</item>
+        /// <item>null for all other calls, such as PubliClientApplication calls, which should persist the token cache in a single location</item>
+        /// </list>
         /// </summary>
         public string SuggestedCacheKey { get; }
     }

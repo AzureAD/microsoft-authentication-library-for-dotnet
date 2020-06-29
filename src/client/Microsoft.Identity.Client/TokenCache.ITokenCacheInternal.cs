@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client
                     account,
                     hasStateChanged: true,
                     (this as ITokenCacheInternal).IsApplicationCache,
-                    requestParams.SuggestedCacheKey ?? homeAccountId);
+                    requestParams.SuggestedWebAppCacheKey);
 
 #pragma warning disable CS0618 // Type or member is obsolete
                 HasStateChanged = true;

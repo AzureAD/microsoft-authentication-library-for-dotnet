@@ -39,11 +39,12 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
+            AuthenticationRequestParameters.SuggestedWebAppCacheKey = account.HomeAccountId?.Identifier;
 
             AuthenticationRequestParameters.Authority = Authority.CreateAuthorityForRequest(
                 ServiceBundle.Config.AuthorityInfo,
                 AuthenticationRequestParameters.AuthorityOverride,
-                account?.HomeAccountId?.TenantId);
+                account.HomeAccountId?.TenantId);
         }
 
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)

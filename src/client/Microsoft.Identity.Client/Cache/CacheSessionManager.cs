@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.Cache
                                _requestParams.Account,
                                hasStateChanged: false, 
                                TokenCacheInternal.IsApplicationCache,
-                               _requestParams.SuggestedCacheKey ?? _requestParams.Account?.HomeAccountId?.Identifier);
+                               _requestParams.SuggestedWebAppCacheKey);
 
                             try
                             {
