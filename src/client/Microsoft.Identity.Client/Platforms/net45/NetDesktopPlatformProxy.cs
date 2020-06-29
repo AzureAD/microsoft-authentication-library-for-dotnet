@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.net45.Http;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -316,6 +317,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
         public override IDeviceAuthManager CreateDeviceAuthManager()
         {
             return new NetDesktopDeviceAuthManager();
+        }
+
+        public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
+        {
+            return new NetDesktopHttpClientFactory();
         }
     }
 }
