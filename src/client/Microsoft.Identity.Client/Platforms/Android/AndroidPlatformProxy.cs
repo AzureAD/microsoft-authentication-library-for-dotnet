@@ -252,5 +252,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 return false;
             }
         }
+
+        public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
+        {
+            return new AndroidHttpClientFactory();
+        }
     }
 }

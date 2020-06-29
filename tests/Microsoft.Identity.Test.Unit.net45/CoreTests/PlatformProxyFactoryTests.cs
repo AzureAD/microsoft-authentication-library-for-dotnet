@@ -7,6 +7,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using System.Linq;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
 {
@@ -44,6 +46,59 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 proxy.CryptographyManager);
 
         }
+
+
+        [TestMethod]
+        public void PlatformProxy_HttpClient()
+        {
+            // Arrange
+            var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
+            var factory1 = proxy.CreateDefaultHttpClientFactory();
+            var factory2 = proxy.CreateDefaultHttpClientFactory();
+
+            // Act
+            var client1 = factory1.GetHttpClient();
+            var client2 = factory1.GetHttpClient();
+            var client3 = factory2.GetHttpClient();
+
+            // Assert
+            Assert.AreNotSame(factory1, factory2, "HttpClient factory does not need to be static");
+
+            Assert.AreSame(
+               client1, client2, "On NetDesktop and NetCore, the HttpClient should be static");
+            Assert.AreSame(
+               client2, client3, "On NetDesktop and NetCore, the HttpClient should be static");
+            Assert.AreEqual("application/json",
+                client1.DefaultRequestHeaders.Accept.Single().MediaType);
+            Assert.AreEqual(HttpClientConfig.MaxResponseContentBufferSizeInBytes,
+                client1.MaxResponseContentBufferSize);
+        }
+
+#if NET_CORE
+        [TestMethod]
+        public void PlatformProxy_HttpClient_NetCore()
+        {
+            // Arrange
+            var factory = PlatformProxyFactory.CreatePlatformProxy(null)
+                .CreateDefaultHttpClientFactory();          
+
+            // Assert
+            Assert.IsTrue(factory is Client.Platforms.netcore.NetCoreHttpClientFactory);
+        }
+#endif
+#if DESKTOP
+ [TestMethod]
+        public void PlatformProxy_HttpClient_NetDesktop()
+        {
+            // Arrange
+            var factory = PlatformProxyFactory.CreatePlatformProxy(null)
+                .CreateDefaultHttpClientFactory();          
+
+            // Assert
+            Assert.IsTrue(factory is 
+                Client.Platforms.net45.Http.NetDesktopHttpClientFactory);
+        }
+#endif
 
         [TestMethod]
         public void GetEnvRetrievesAValue()

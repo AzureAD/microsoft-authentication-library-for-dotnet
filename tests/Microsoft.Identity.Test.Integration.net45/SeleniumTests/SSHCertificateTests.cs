@@ -45,7 +45,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .AcquireTokenInteractive(s_scopes)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, Prompt.ForceLogin))
                 .WithSSHCertificateAuthenticationScheme(jwk, "key1")
-                .WithExtraQueryParameters(GetTestSliceParams())  // TODO: remove this once feature is in PROD
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 
@@ -58,7 +57,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             result = await pca
                 .AcquireTokenSilent(s_scopes, account)
                 .WithSSHCertificateAuthenticationScheme(jwk, "key1")
-                .WithExtraQueryParameters(GetTestSliceParams())  // TODO: remove this once feature is in PROD
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
             userCacheAccess.AssertAccessCounts(2, 1);
@@ -70,7 +68,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             result = await pca
                 .AcquireTokenSilent(s_scopes, account)
                 .WithSSHCertificateAuthenticationScheme(jwk, "key2")
-                .WithExtraQueryParameters(GetTestSliceParams())  // TODO: remove this once feature is in PROD
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
 

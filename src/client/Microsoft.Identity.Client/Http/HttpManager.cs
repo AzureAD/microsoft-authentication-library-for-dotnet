@@ -24,9 +24,10 @@ namespace Microsoft.Identity.Client.Http
     {
         private readonly IMsalHttpClientFactory _httpClientFactory;
 
-        public HttpManager(IMsalHttpClientFactory httpClientFactory = null)
+        public HttpManager(IMsalHttpClientFactory httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory ?? new HttpClientFactory();
+            _httpClientFactory = httpClientFactory ?? 
+                throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
         protected virtual HttpClient GetHttpClient()

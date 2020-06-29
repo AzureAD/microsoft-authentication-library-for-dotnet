@@ -34,7 +34,9 @@ namespace Microsoft.Identity.Client.Internal
                 config.LoggingCallback);
 
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
-            HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
+            HttpManager = config.HttpManager ?? new HttpManager(
+                config.HttpClientFactory ?? 
+                PlatformProxy.CreateDefaultHttpClientFactory());
 
             HttpTelemetryManager = new HttpTelemetryManager();
             if (config.TelemetryConfig != null)
