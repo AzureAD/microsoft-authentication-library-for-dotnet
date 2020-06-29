@@ -16,6 +16,11 @@ namespace Microsoft.Identity.Client.Platforms.net45.Http
         private readonly ConcurrentDictionary<EndpointCacheKey, bool> _endpoinsWithTcp =
             new ConcurrentDictionary<EndpointCacheKey, bool>();
 
+        public DnsSensitiveClientHandler()
+        {
+            base.InnerHandler = new HttpClientHandler() { UseDefaultCredentials = true };
+        }
+
         protected async override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
