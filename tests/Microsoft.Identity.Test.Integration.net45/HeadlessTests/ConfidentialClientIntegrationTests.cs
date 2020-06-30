@@ -587,6 +587,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(authResult, user);
             Assert.AreEqual(atHash, userCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
+
+            await confidentialApp.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNull(userCacheRecorder.LastNotificationArgs.SuggestedCacheKey);
         }
     }
 }

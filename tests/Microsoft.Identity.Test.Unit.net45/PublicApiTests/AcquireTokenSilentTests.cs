@@ -408,6 +408,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(MsalError.MultipleAccountsForLoginHint, exception.ErrorCode);
                 Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exception.Classification);
+                Assert.IsNull(cacheAccess.LastNotificationArgs.SuggestedCacheKey);
                 cacheAccess.AssertAccessCounts(1, 0);
             }
         }
@@ -479,6 +480,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual("my-uid.my-utid", cacheAccess.LastNotificationArgs.SuggestedCacheKey);
                 cacheAccess.AssertAccessCounts(1, 1);
             }
         }
