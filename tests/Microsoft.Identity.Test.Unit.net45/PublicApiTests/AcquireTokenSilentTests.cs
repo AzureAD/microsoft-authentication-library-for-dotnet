@@ -749,9 +749,46 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        #region Tests around tenant ID
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
+        [WorkItem(1909)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1909
+        public async Task AcquireTokenSilent_OverrideWithCommoX_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(ClientApplicationBase.DefaultAuthority)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                var tokenCacheHelper = new TokenCacheHelper();
+                tokenCacheHelper.PopulateCache(
+                    app.UserTokenCacheInternal.Accessor,
+                    overridenScopes: "openid profile email user.read", 
+                    addSecondAt: false);
+                
+                var cacheAccess = app.UserTokenCache.RecordAccess();
+
+                var acc = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
+                cacheAccess.AssertAccessCounts(1, 0);
+
+                AuthenticationResult result = await app
+                    .AcquireTokenSilent(new[] { "" }, acc)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                cacheAccess.AssertAccessCounts(2, 0);
+
+                await app
+                   .AcquireTokenSilent(null, acc)
+                   .ExecuteAsync().ConfigureAwait(false);
+
+                cacheAccess.AssertAccessCounts(3, 0);
+
+            }
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(1456)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1456
         public async Task AcquireTokenSilent_OverrideWithCommon_Async()
         {
@@ -775,6 +812,5 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        #endregion
     }
 }
