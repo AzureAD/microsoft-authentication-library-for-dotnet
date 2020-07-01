@@ -796,7 +796,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 cacheAccess.AssertAccessCounts(4, 0);
-                Assert.AreEqual(homeAccId, cacheAccess.LastNotificationArgs.SuggestedCacheKey);
+                Assert.IsNull(cacheAccess.LastNotificationArgs.SuggestedCacheKey, 
+                    "MSAL does not know the home account id of the account associated with this username. It needs to load the cache first.");
 
             }
         }
