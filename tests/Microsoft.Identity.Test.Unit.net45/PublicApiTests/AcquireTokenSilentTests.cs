@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             };
 
             httpManager.AddMockHandler(handler);
-        }    
+        }
 
         [TestMethod]
         public async Task AcquireTokenSilentScopeAndEmptyCacheTestAsync()
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         TestConstants.Utid,
                         TestConstants.s_userIdentifier,
                         TestConstants.ClientId,
-                        TestConstants.ScopeForAnotherResourceStr, 
+                        TestConstants.ScopeForAnotherResourceStr,
                         TestConstants.Bearer));
                 var cacheAccess = app.UserTokenCache.RecordAccess();
 
@@ -665,7 +665,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .AcquireTokenSilent(
                         TestConstants.s_scope.ToArray(),
                         new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null))
-                    .WithAuthority(TestConstants.AuthorityGuidTenant2)                    
+                    .WithAuthority(TestConstants.AuthorityGuidTenant2)
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None);
 
@@ -748,6 +748,56 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     var msalExc = (MsalUiRequiredException)ex.InnerException;
                     Assert.AreEqual(msalExc.ErrorCode, MsalError.InvalidGrantError);
                 }
+            }
+        }
+
+        [TestMethod]
+        public async Task SuggestedCacheKeyTestAsync()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+
+                var tokenCacheHelper = new TokenCacheHelper();
+                tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                var cacheAccess = app.UserTokenCache.RecordAccess();
+
+                // Act
+                var allAccounts = await app.GetAccountsAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNull(cacheAccess.LastNotificationArgs.SuggestedCacheKey, "Cannot suggest a key for GetAccounts");
+                Assert.AreEqual(1, allAccounts.Count());
+                cacheAccess.AssertAccessCounts(1, 0);
+
+                // Act
+                string homeAccId = allAccounts.Single().HomeAccountId.Identifier;
+                IAccount accountById = await app.GetAccountAsync(homeAccId).ConfigureAwait(false);
+                cacheAccess.AssertAccessCounts(2, 0);
+
+                // Assert
+                Assert.AreEqual(homeAccId, cacheAccess.LastNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(homeAccId, accountById.HomeAccountId.Identifier);
+
+                // Act
+                await app.AcquireTokenSilent(TestConstants.s_scope, accountById).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                cacheAccess.AssertAccessCounts(3, 0);
+                Assert.AreEqual(homeAccId, cacheAccess.LastNotificationArgs.SuggestedCacheKey);
+
+                // Act
+                await app.AcquireTokenSilent(TestConstants.s_scope, accountById.Username).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                cacheAccess.AssertAccessCounts(4, 0);
+                Assert.AreEqual(homeAccId, cacheAccess.LastNotificationArgs.SuggestedCacheKey);
+
             }
         }
 
