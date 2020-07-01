@@ -108,7 +108,8 @@ namespace Microsoft.Identity.Client.Cache
                                _requestParams.ClientId,
                                _requestParams.Account,
                                hasStateChanged: false, 
-                               TokenCacheInternal.IsApplicationCache,
+                               TokenCacheInternal.IsApplicationCache, 
+                               hasTokens: false);
                                _requestParams.SuggestedWebAppCacheKey);
 
                             try

@@ -16,7 +16,8 @@ namespace Microsoft.Identity.Client
             string clientId,
             IAccount account,
             bool hasStateChanged,
-            bool isAppCache,
+            bool isAppCache, 
+            bool hasTokens)
             string suggestedCacheKey = null)
         {
             TokenCache = tokenCacheSerializer;
@@ -24,6 +25,7 @@ namespace Microsoft.Identity.Client
             Account = account;
             HasStateChanged = hasStateChanged;
             IsApplicationCache = isAppCache;
+            HasTokens = hasTokens;
             SuggestedCacheKey = suggestedCacheKey;
         }
 
@@ -73,5 +75,10 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// </summary>
         public string SuggestedCacheKey { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool HasTokens { get; }
     }
 }
