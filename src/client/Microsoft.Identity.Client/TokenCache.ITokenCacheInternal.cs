@@ -748,52 +748,5 @@ namespace Microsoft.Identity.Client
                 .ToList()
                 .ForEach(accItem => _accessor.DeleteAccount(accItem.GetKey()));
         }
-
-        async Task ITokenCacheInternal.ClearAsync()
-        {
-            await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
-            try
-            {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
-                    this, 
-                    ClientId, 
-                    null, 
-                    true, 
-                    (this as ITokenCacheInternal).IsApplicationCache,
-                    null);
-
-                try
-                {
-                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
-                    await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
-
-                    ((ITokenCacheInternal)this).ClearMsalCache();
-                    ((ITokenCacheInternal)this).ClearAdalCache();
-                }
-                finally
-                {
-                    await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-                }
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
-        }
-
-        void ITokenCacheInternal.ClearAdalCache()
-        {
-            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(Logger, LegacyCachePersistence.LoadCache());
-            dictionary.Clear();
-            LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(Logger, dictionary));
-        }
-
-        void ITokenCacheInternal.ClearMsalCache()
-        {
-            _accessor.Clear();
-        }
     }
 }

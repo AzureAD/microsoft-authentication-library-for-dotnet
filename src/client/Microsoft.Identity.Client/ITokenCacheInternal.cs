@@ -58,11 +58,7 @@ namespace Microsoft.Identity.Client
         /// FOCI - check in the app metadata to see if the app is part of the family
         /// </summary>
         /// <returns>null if unkown, true or false if app metadata has details</returns>
-        Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId);
-
-        void ClearAdalCache();
-        void ClearMsalCache();
-        Task ClearAsync();
+        Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId);     
 
         void SetIosKeychainSecurityGroup(string securityGroup);
 
