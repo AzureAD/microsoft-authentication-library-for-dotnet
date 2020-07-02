@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [WorkItem(1548)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1548
-        public void FFF()
+        public void TokenCacheHitTest()
         {
             VerifyAccessTokenIsFound("openid profile user.read", new[] { "User.Read" });
             VerifyAccessTokenIsFound("openid profile User.Read", new[] { "User.Read", "offline_access" });
@@ -138,8 +138,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             VerifyAccessTokenIsFound("non_graph_scope", new string[0]);
             VerifyAccessTokenIsFound("openid profile User.Read", new string[0]);
             VerifyAccessTokenIsFound("openid profile User.Read", new[] { "User.Read" });
+            VerifyAccessTokenIsFound("", new[] { "" });
 
-            VerifyAccessTokenIsNotFound("", new[] { "" });
             VerifyAccessTokenIsNotFound("openid profile user.read", new[] { "non_graph_scope" });
             VerifyAccessTokenIsNotFound("openid profile user.read", new[] { "email" });
             VerifyAccessTokenIsNotFound("openid profile user.read", new[] { "user.read", "email" });
