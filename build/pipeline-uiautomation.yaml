@@ -37,8 +37,8 @@ stages:
 
   - job: 'BuildiOSAppCenterApp'
     pool:
-        name: Hosted Mac Internal
-        demands: Xamarin.iOS
+        name: Azure Pipelines
+        vmImage: internal-macos-10.15
 
     steps:
     - template: template-build-ios-automation.yaml
