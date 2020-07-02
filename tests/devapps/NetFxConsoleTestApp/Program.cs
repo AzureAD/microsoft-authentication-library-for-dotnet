@@ -343,8 +343,14 @@ namespace NetFx
                                 tokenCacheInternal.Accessor.SaveAccessToken(accessItem);
                             }
 
-                            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
-                                pca.UserTokenCache as ITokenCacheInternal, s_clientIdForPublicApp, null, true, false);
+                            TokenCacheNotificationArgs args = 
+                                new TokenCacheNotificationArgs(
+                                pca.UserTokenCache as ITokenCacheInternal, 
+                                s_clientIdForPublicApp, 
+                                null, 
+                                true, 
+                                false, 
+                                true);
 
                             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
 

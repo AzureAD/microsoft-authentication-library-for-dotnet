@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Client
         SemaphoreSlim Semaphore { get; }
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
-        bool IsApplicationCache { get; }
 
         #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
@@ -67,6 +66,14 @@ namespace Microsoft.Identity.Client
         Task OnAfterAccessAsync(TokenCacheNotificationArgs args);
         Task OnBeforeAccessAsync(TokenCacheNotificationArgs args);
         Task OnBeforeWriteAsync(TokenCacheNotificationArgs args);
+
+        bool IsApplicationCache { get; }
+
+        /// <summary>
+        /// Shows if MSAL's in-memory token cache has any kind of RT or non-expired AT. Does not trigger a cache notification.
+        /// Ignores ADAL's cache.
+        /// </summary>
+        bool HasTokensNoLocks();
 
         #endregion
     }
