@@ -802,7 +802,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        #region Tests around tenant ID
         [TestMethod]
         [TestCategory(TestCategories.Regression)]
         [WorkItem(1456)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1456
