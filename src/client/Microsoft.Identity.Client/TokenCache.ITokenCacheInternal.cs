@@ -111,13 +111,13 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-
                 var args = new TokenCacheNotificationArgs(
                     this,
                     ClientId,
                     account,
                     hasStateChanged: true,
-                    (this as ITokenCacheInternal).IsApplicationCache);
+                    (this as ITokenCacheInternal).IsApplicationCache,
+                    requestParams.SuggestedWebAppCacheKey);
 
 #pragma warning disable CS0618 // Type or member is obsolete
                 HasStateChanged = true;
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client
                     if (!requestParams.IsClientCredentialRequest &&
                         requestParams.AuthorityInfo.AuthorityType != AuthorityType.B2C)
                     {
-                        var authorityWithPrefferedCache = Authority.CreateAuthorityWithEnvironment(
+                        var authorityWithPreferredCache = Authority.CreateAuthorityWithEnvironment(
                                 requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo,
                                 instanceDiscoveryMetadata.PreferredCache);
 
@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Client
                             LegacyCachePersistence,
                             msalRefreshTokenCacheItem,
                             msalIdTokenCacheItem,
-                            authorityWithPrefferedCache.AuthorityInfo.CanonicalAuthority,
+                            authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority,
                             msalIdTokenCacheItem.IdToken.ObjectId,
                             response.Scope);
                     }
@@ -661,7 +661,13 @@ namespace Microsoft.Identity.Client
 
                 try
                 {
-                    var args = new TokenCacheNotificationArgs(this, ClientId, account, true, (this as ITokenCacheInternal).IsApplicationCache);
+                    var args = new TokenCacheNotificationArgs(
+                        this, 
+                        ClientId, 
+                        account, 
+                        true, 
+                        (this as ITokenCacheInternal).IsApplicationCache,
+                        account.HomeAccountId.Identifier);
 
                     try
                     {
@@ -748,7 +754,13 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(this, ClientId, null, true, (this as ITokenCacheInternal).IsApplicationCache);
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
+                    this, 
+                    ClientId, 
+                    null, 
+                    true, 
+                    (this as ITokenCacheInternal).IsApplicationCache,
+                    null);
 
                 try
                 {

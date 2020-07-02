@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.77
 // Licensed under the MIT License.
 
 using System;
@@ -76,49 +76,69 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
+            return await GetAccountsAndSetCacheKeyAsync(null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
+        /// Also sets the cache key based on a given home account id, which is the account id of the home account for the user. 
+        /// This uniquely identifies the user across AAD tenants.
+        /// </summary>
+        /// <param name="homeAccountId">The identifier is the home account id of the account being targetted in the cache./>
+        /// </param>
+        private async Task<IEnumerable<IAccount>> GetAccountsAndSetCacheKeyAsync(string homeAccountId)
+        {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-            IEnumerable<IAccount> localAccounts = Enumerable.Empty<IAccount>();
-            IEnumerable<IAccount> brokerAccounts = Enumerable.Empty<IAccount>();
 
-            if (UserTokenCache == null)
-            {
-                if (!AppConfig.IsBrokerEnabled)
-                {
-                    requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
-                }
-            }
-            else
-            {
-                // a simple session consisting of a single call
-                CacheSessionManager cacheSessionManager = new CacheSessionManager(
-                    UserTokenCacheInternal,
-                    new AuthenticationRequestParameters(
-                        ServiceBundle, 
-                        UserTokenCacheInternal, 
-                        new AcquireTokenCommonParameters(), 
-                        requestContext));
+            var accountsFromCache = await GetAccountsFromCacheAsync(homeAccountId, requestContext).ConfigureAwait(false);
+            IEnumerable<IAccount> cacheAndBrokerAccounts =                
+                await MergeWithBrokerAccountsAsync(accountsFromCache).ConfigureAwait(false);
+            
 
-                localAccounts = await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
-            }
+            return cacheAndBrokerAccounts;
+        }
 
+        private async Task<IEnumerable<IAccount>> MergeWithBrokerAccountsAsync(IEnumerable<IAccount> accountsFromCache)
+        {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
+                List<IAccount> allAccounts = new List<IAccount>(accountsFromCache);
                 //Broker is available so accounts will be merged using home account ID with local accounts taking priority
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
+                var brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
 
-                foreach(IAccount account in brokerAccounts)
+                foreach (IAccount account in brokerAccounts)
                 {
-                    if (!localAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
+                    if (!accountsFromCache.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
                     {
-                        (localAccounts as List<IAccount>).Add(account);
+                        allAccounts.Add(account);
                     }
                 }
 
-                return localAccounts;
+                return allAccounts;
             }
 
-            return localAccounts;
+            return accountsFromCache;
+        }
+
+        private async Task<IEnumerable<IAccount>> GetAccountsFromCacheAsync(
+            string homeAccountId,
+            RequestContext requestContext)
+        {
+            var authParameters = new AuthenticationRequestParameters(
+                    ServiceBundle,
+                    UserTokenCacheInternal,
+                    new AcquireTokenCommonParameters(),
+                    requestContext);
+
+            authParameters.SuggestedWebAppCacheKey = homeAccountId;
+
+            // a simple session consisting of a single call
+            CacheSessionManager cacheSessionManager = new CacheSessionManager(
+                UserTokenCacheInternal,
+                 authParameters);
+
+            return await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -136,7 +156,7 @@ namespace Microsoft.Identity.Client
 
             var accounts = await GetAccountsAsync().ConfigureAwait(false);
 
-            return accounts.Where(acc => 
+            return accounts.Where(acc =>
                 acc.HomeAccountId.ObjectId.Split('.')[0].EndsWith(
                     userFlow, StringComparison.OrdinalIgnoreCase));
         }
@@ -150,7 +170,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         public async Task<IAccount> GetAccountAsync(string accountId)
         {
-            var accounts = await GetAccountsAsync().ConfigureAwait(false);
+            var accounts = await GetAccountsAndSetCacheKeyAsync(accountId).ConfigureAwait(false);
             return accounts.FirstOrDefault(account => account.HomeAccountId.Identifier.Equals(accountId, StringComparison.OrdinalIgnoreCase));
         }
 
