@@ -13,7 +13,8 @@ namespace Microsoft.Identity.Client.Utils
         {
             foreach (string key in possibleContainedSet)
             {
-                if (!outerSet.Contains(key, StringComparer.OrdinalIgnoreCase))
+                if (!outerSet.Contains(key, StringComparer.OrdinalIgnoreCase) &&
+                    !string.IsNullOrEmpty(key))
                 {
                     return false;
                 }

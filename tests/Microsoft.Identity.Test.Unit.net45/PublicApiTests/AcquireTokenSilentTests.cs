@@ -804,7 +804,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         #region Tests around tenant ID
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(1456)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1456
         public async Task AcquireTokenSilent_OverrideWithCommon_Async()
         {
@@ -828,6 +828,5 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        #endregion
     }
 }
