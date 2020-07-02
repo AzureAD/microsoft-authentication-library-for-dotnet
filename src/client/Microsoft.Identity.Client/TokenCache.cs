@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
-        private const int DefaultExpirationBufferInMinutes = 5;
+        private static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
         internal const int ExpirationTooLongInDays = 10 * 365;
 
         private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;

@@ -117,6 +117,7 @@ namespace Microsoft.Identity.Client
                     account,
                     hasStateChanged: true,
                     (this as ITokenCacheInternal).IsApplicationCache,
+                    hasTokens: (this as ITokenCacheInternal).HasTokensNoLocks(),
                     requestParams.SuggestedWebAppCacheKey);
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -179,7 +180,16 @@ namespace Microsoft.Identity.Client
                 }
                 finally
                 {
-                    await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
+                    var args2 = new TokenCacheNotificationArgs(
+                     this,
+                     ClientId,
+                     account,
+                     hasStateChanged: true,
+                     (this as ITokenCacheInternal).IsApplicationCache,
+                     (this as ITokenCacheInternal).HasTokensNoLocks(),
+                     requestParams.SuggestedWebAppCacheKey);
+
+                    await (this as ITokenCacheInternal).OnAfterAccessAsync(args2).ConfigureAwait(false);
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -334,9 +344,8 @@ namespace Microsoft.Identity.Client
         {
             if (msalAccessTokenCacheItem != null)
             {
-                
-                if (msalAccessTokenCacheItem.ExpiresOn >
-                    DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+
+                if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + AccessTokenExpirationBuffer)
                 {
                     // due to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806
                     if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromDays(ExpirationTooLongInDays))
@@ -354,8 +363,8 @@ namespace Microsoft.Identity.Client
                     return msalAccessTokenCacheItem;
                 }
 
-                if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled && msalAccessTokenCacheItem.ExtendedExpiresOn >
-                    DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+                if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled && 
+                    msalAccessTokenCacheItem.ExtendedExpiresOn > DateTime.UtcNow + AccessTokenExpirationBuffer)
                 {
                     requestParams.RequestContext.Logger.Info(
                         "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
@@ -662,11 +671,12 @@ namespace Microsoft.Identity.Client
                 try
                 {
                     var args = new TokenCacheNotificationArgs(
-                        this, 
-                        ClientId, 
-                        account, 
-                        true, 
+                        this,
+                        ClientId,
+                        account,
+                        true,
                         (this as ITokenCacheInternal).IsApplicationCache,
+                        (this as ITokenCacheInternal).HasTokensNoLocks(), 
                         account.HomeAccountId.Identifier);
 
                     try
@@ -679,7 +689,15 @@ namespace Microsoft.Identity.Client
                     }
                     finally
                     {
-                        await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
+                        var afterAccessArgs = new TokenCacheNotificationArgs(
+                           this,
+                           ClientId,
+                           account,
+                           true,
+                           (this as ITokenCacheInternal).IsApplicationCache,
+                           hasTokens: (this as ITokenCacheInternal).HasTokensNoLocks());
+
+                        await (this as ITokenCacheInternal).OnAfterAccessAsync(afterAccessArgs).ConfigureAwait(false);
                     }
                 }
                 finally
@@ -693,6 +711,17 @@ namespace Microsoft.Identity.Client
             {
                 _semaphoreSlim.Release();
             }
+        }
+
+        bool ITokenCacheInternal.HasTokensNoLocks()
+        {
+            return _accessor.GetAllRefreshTokens().Any() ||
+                _accessor.GetAllAccessTokens().Any(at => !IsAtExpired(at));
+        }
+
+        private bool IsAtExpired(MsalAccessTokenCacheItem at)
+        {
+            return at.ExpiresOn < DateTime.UtcNow + AccessTokenExpirationBuffer;
         }
 
         void ITokenCacheInternal.RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext)

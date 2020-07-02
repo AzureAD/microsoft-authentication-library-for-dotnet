@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Cache
         private bool _cacheRefreshedForRead = false;
 
         public CacheSessionManager(
-            ITokenCacheInternal tokenCacheInternal, 
+            ITokenCacheInternal tokenCacheInternal,
             AuthenticationRequestParameters requestParams)
         {
             TokenCacheInternal = tokenCacheInternal ?? throw new ArgumentNullException(nameof(tokenCacheInternal));
@@ -103,21 +103,30 @@ namespace Microsoft.Identity.Client.Cache
                     {
                         using (_requestParams.RequestContext.CreateTelemetryHelper(cacheEvent))
                         {
-                            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
-                               TokenCacheInternal,
-                               _requestParams.ClientId,
-                               _requestParams.Account,
-                               hasStateChanged: false, 
-                               TokenCacheInternal.IsApplicationCache, 
-                               hasTokens: false);
-                               _requestParams.SuggestedWebAppCacheKey);
+
 
                             try
                             {
+                                var args = new TokenCacheNotificationArgs(
+                                   TokenCacheInternal,
+                                   _requestParams.ClientId,
+                                   _requestParams.Account,
+                                   hasStateChanged: false,
+                                   TokenCacheInternal.IsApplicationCache,
+                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                   _requestParams.SuggestedWebAppCacheKey);
                                 await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                             }
                             finally
                             {
+                                var args = new TokenCacheNotificationArgs(
+                                   TokenCacheInternal,
+                                   _requestParams.ClientId,
+                                   _requestParams.Account,
+                                   hasStateChanged: false,
+                                   TokenCacheInternal.IsApplicationCache,
+                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                   _requestParams.SuggestedWebAppCacheKey);
                                 await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                             }
 
