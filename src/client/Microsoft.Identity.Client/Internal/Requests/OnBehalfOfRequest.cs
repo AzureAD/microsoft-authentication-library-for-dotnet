@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // or new assertion has been passed. We should not use Refresh Token
             // for the user because the new incoming token may have updated claims
             // like mfa etc.
-            AuthenticationRequestParameters.SuggestedWebAppCacheKey = AuthenticationRequestParameters.UserAssertion.AssertionHash;
             MsalAccessTokenCacheItem msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
             if (msalAccessTokenItem != null)
             {

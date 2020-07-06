@@ -11,6 +11,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -27,8 +28,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Description("Test unified token cache")]
         public void UnifiedCache_MsalStoresToAndReadRtFromAdalCache()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var mocks = new MockHttpAndServiceBundle())
             {
+                var httpManager = mocks.HttpManager;
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -59,8 +61,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
                 var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid());
-                var accounts = app.UserTokenCacheInternal.GetAccountsAsync(
-                    TestConstants.AuthorityCommonTenant, requestContext).Result;
+
+                AuthenticationRequestParameters reqParams = new AuthenticationRequestParameters(
+                    mocks.ServiceBundle,
+                    app.UserTokenCacheInternal,
+                    new Client.ApiConfig.Parameters.AcquireTokenCommonParameters(),
+                    requestContext);
+
+                var accounts = app.UserTokenCacheInternal.GetAccountsAsync(reqParams).Result;
                 foreach (IAccount account in accounts)
                 {
                     app.UserTokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);

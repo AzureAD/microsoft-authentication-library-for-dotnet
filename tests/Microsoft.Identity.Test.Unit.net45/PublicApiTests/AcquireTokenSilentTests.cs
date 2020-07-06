@@ -778,10 +778,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 string homeAccId = allAccounts.Single().HomeAccountId.Identifier;
                 IAccount accountById = await app.GetAccountAsync(homeAccId).ConfigureAwait(false);
+                Assert.IsNotNull(accountById);
                 cacheAccess.AssertAccessCounts(2, 0);
 
                 // Assert
                 Assert.AreEqual(homeAccId, cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(homeAccId, cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
                 Assert.AreEqual(homeAccId, accountById.HomeAccountId.Identifier);
 
                 // Act
@@ -790,6 +792,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert
                 cacheAccess.AssertAccessCounts(3, 0);
                 Assert.AreEqual(homeAccId, cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(homeAccId, cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
 
                 // Act
                 await app.AcquireTokenSilent(TestConstants.s_scope, accountById.Username).ExecuteAsync().ConfigureAwait(false);
@@ -798,8 +801,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 cacheAccess.AssertAccessCounts(4, 0);
                 Assert.IsNull(cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey,
                     "MSAL does not know the home account id of the account associated with this username. It needs to load the cache first.");
-                ;
 
+                // Act
+                await app.RemoveAsync(accountById).ConfigureAwait(false);
+                cacheAccess.AssertAccessCounts(4, 1);
+                Assert.AreEqual(homeAccId, cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(homeAccId, cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
             }
         }
 

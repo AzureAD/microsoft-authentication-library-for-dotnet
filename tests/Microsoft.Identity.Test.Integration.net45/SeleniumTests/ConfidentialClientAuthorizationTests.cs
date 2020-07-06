@@ -93,11 +93,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .WithTestLogging()
                 .Build();
 
+            var cacheAccess = (cca as ConfidentialClientApplication).UserTokenCache.RecordAccess();
+
             Trace.WriteLine("Part 1 - Call GetAuthorizationRequestUrl to figure out where to go ");
             var startUri = await cca
                 .GetAuthorizationRequestUrl(s_scopes)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+
+            cacheAccess.AssertAccessCounts(0, 0);
 
             Trace.WriteLine("Part 2 - Use a browser to login and to capture the authorization code ");
             var seleniumUi = new SeleniumWebUI((driver) =>
@@ -120,6 +124,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+
+            cacheAccess.AssertAccessCounts(0, 1);
+            Assert.AreEqual(
+                result.Account.HomeAccountId.Identifier,
+                cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                result.Account.HomeAccountId.Identifier,
+                cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                result.Account.HomeAccountId.Identifier,
+                cacheAccess.LastBeforeWriteNotificationArgs.SuggestedCacheKey);
 
             return result;
         }

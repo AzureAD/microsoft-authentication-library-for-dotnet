@@ -21,6 +21,6 @@ namespace Microsoft.Identity.Client.Cache
         Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId);
         Task<bool?> IsAppFociMemberAsync(string familyId);
 
-        Task<IEnumerable<IAccount>> GetAccountsAsync(string authority);
+        Task<IEnumerable<IAccount>> GetAccountsAsync();
     }
 }

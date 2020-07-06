@@ -160,6 +160,7 @@ namespace NetFx
                         6. Acquire Token Silently - multiple requests in parallel
                         7. Acquire SSH Cert Interactive
                         8. Client Credentials 
+                        9. Get Account with ID
                         p. Toggle POP (currently {(s_usePoP ? "ON" : "OFF")}) 
                         c. Clear cache
                         r. Rotate Tenant ID
@@ -309,6 +310,9 @@ namespace NetFx
 
                             Console.WriteLine("Finished");
 
+                            break;
+                        case '9':
+                            var accres = await pca.GetAccountAsync("some_id").ConfigureAwait(false);
                             break;
                         case 'p': // toggle pop
                             s_usePoP = !s_usePoP;
