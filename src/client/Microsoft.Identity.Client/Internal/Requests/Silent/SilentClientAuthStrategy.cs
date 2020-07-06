@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
             AuthenticationRequestParameters.Account = account;
-            AuthenticationRequestParameters.SuggestedWebAppCacheKey = account.HomeAccountId?.Identifier;
 
             AuthenticationRequestParameters.Authority = Authority.CreateAuthorityForRequest(
                 ServiceBundle.Config.AuthorityInfo,
@@ -258,7 +257,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint)
         {
-            var accounts = await CacheManager.GetAccountsAsync(ServiceBundle.Config.AuthorityInfo.CanonicalAuthority)
+            var accounts = await CacheManager.GetAccountsAsync()
                 .ConfigureAwait(false);
 
             accounts = accounts

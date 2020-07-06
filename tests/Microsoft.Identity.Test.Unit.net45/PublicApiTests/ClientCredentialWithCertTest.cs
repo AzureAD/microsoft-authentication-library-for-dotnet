@@ -262,6 +262,11 @@ namespace Microsoft.Identity.Test.Unit
 
                 appCacheAccess.AssertAccessCounts(0, 0);
                 userCacheAccess.AssertAccessCounts(0, 1);
+
+                Assert.AreEqual(result.Account.HomeAccountId.Identifier,
+                    userCacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(result.Account.HomeAccountId.Identifier,
+                    userCacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);                
             }
         }
 

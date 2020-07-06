@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client
 
         #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
-        Task<IEnumerable<IAccount>> GetAccountsAsync(string authority, RequestContext requestContext);
+        Task<IEnumerable<IAccount>> GetAccountsAsync(AuthenticationRequestParameters requestParameters);
 
         /// <summary>
         /// Persists the AT and RT and updates app metadata (FOCI)

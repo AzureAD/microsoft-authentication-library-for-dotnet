@@ -68,10 +68,9 @@ namespace Microsoft.Identity.Client
         /// The value is: 
         /// 
         /// <list type="bullet">
-        /// <item>the homeAccountId for AcquireTokenSilent and GetAccount(homeAccountId)</item>
+        /// <item>the homeAccountId for AcquireTokenSilent, GetAccount(homeAccountId), RemoveAccount and when writing tokens on confidential client calls</item>
         /// <item>clientID + "_AppTokenCache" for AcquireTokenForClient</item>
         /// <item>the hash of the original token for AcquireTokenOnBehalfOf</item>
-        /// <item>null for all other calls, such as PubliClientApplication calls, which should persist the token cache in a single location</item>
         /// </list>
         /// </summary>
         public string SuggestedCacheKey { get; }
