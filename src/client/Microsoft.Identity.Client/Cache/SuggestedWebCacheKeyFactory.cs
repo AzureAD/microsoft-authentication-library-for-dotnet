@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Cache
                 return key;
             }
 
-            if (requestParameters.IsClientCredentialRequest || 
+            if (requestParameters.IsConfidentialClient || 
                 requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent)
             {
                 return homeAccountIdFromResponse;
