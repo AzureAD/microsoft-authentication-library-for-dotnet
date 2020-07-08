@@ -47,9 +47,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
         {
             try
             {
-                /* For app center builds, this will need to build on a hosted mac agent. The mac agent does not have the latest SDK's required to build 'ASWebAuthenticationSession'
-                * Until the agents are updated, appcenter build will need to ignore the use of 'ASWebAuthenticationSession' for iOS 12.*/
-
                 if (UIDevice.CurrentDevice.CheckSystemVersion(12, 0))
                 {
                     asWebAuthenticationSession = new AuthenticationServices.ASWebAuthenticationSession(new NSUrl(authorizationUri.AbsoluteUri),
