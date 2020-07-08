@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Running asserts");
 
             userCacheAccess.AssertAccessCounts(0, 1);
-            Assert.IsFalse(userCacheAccess.LastNotificationArgs.IsApplicationCache);
+            Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));

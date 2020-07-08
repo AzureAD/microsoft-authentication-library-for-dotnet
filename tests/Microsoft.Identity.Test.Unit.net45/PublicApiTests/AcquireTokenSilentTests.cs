@@ -408,7 +408,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(MsalError.MultipleAccountsForLoginHint, exception.ErrorCode);
                 Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exception.Classification);
-                Assert.IsNull(cacheAccess.LastNotificationArgs.SuggestedCacheKey);
+                Assert.IsNull(cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
                 cacheAccess.AssertAccessCounts(1, 0);
             }
         }
@@ -480,7 +480,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-                Assert.AreEqual("my-uid.my-utid", cacheAccess.LastNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual("my-uid.my-utid", cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
                 cacheAccess.AssertAccessCounts(1, 1);
             }
         }
@@ -771,17 +771,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var allAccounts = await app.GetAccountsAsync().ConfigureAwait(false);
 
                 // Assert
-                Assert.IsNull(cacheAccess.LastNotificationArgs.SuggestedCacheKey, "Cannot suggest a key for GetAccounts");
+                Assert.IsNull(cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey, "Cannot suggest a key for GetAccounts");
                 Assert.AreEqual(1, allAccounts.Count());
                 cacheAccess.AssertAccessCounts(1, 0);
 
                 // Act
                 string homeAccId = allAccounts.Single().HomeAccountId.Identifier;
                 IAccount accountById = await app.GetAccountAsync(homeAccId).ConfigureAwait(false);
+                Assert.IsNotNull(accountById);
                 cacheAccess.AssertAccessCounts(2, 0);
 
                 // Assert
-                Assert.AreEqual(homeAccId, cacheAccess.LastNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(homeAccId, cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(homeAccId, cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
                 Assert.AreEqual(homeAccId, accountById.HomeAccountId.Identifier);
 
                 // Act
@@ -789,22 +791,27 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 cacheAccess.AssertAccessCounts(3, 0);
-                Assert.AreEqual(homeAccId, cacheAccess.LastNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(homeAccId, cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(homeAccId, cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
 
                 // Act
                 await app.AcquireTokenSilent(TestConstants.s_scope, accountById.Username).ExecuteAsync().ConfigureAwait(false);
 
                 // Assert
                 cacheAccess.AssertAccessCounts(4, 0);
-                Assert.IsNull(cacheAccess.LastNotificationArgs.SuggestedCacheKey, 
+                Assert.IsNull(cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey,
                     "MSAL does not know the home account id of the account associated with this username. It needs to load the cache first.");
 
+                // Act
+                await app.RemoveAsync(accountById).ConfigureAwait(false);
+                cacheAccess.AssertAccessCounts(4, 1);
+                Assert.AreEqual(homeAccId, cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual(homeAccId, cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
             }
         }
 
-        #region Tests around tenant ID
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(1456)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1456
         public async Task AcquireTokenSilent_OverrideWithCommon_Async()
         {
@@ -828,6 +835,5 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        #endregion
     }
 }

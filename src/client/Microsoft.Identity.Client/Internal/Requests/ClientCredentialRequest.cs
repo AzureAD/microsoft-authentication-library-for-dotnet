@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!_clientParameters.ForceRefresh && 
                 string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
-                AuthenticationRequestParameters.SuggestedWebAppCacheKey = AuthenticationRequestParameters.ClientId + "_AppTokenCache";
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
                 if (cachedAccessTokenItem != null && !cachedAccessTokenItem.NeedsRefresh())

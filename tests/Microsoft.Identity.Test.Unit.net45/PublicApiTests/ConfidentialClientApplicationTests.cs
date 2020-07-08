@@ -879,7 +879,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
 
-                await app.UserTokenCacheInternal.ClearAsync().ConfigureAwait(false);
+                app.UserTokenCacheInternal.Accessor.Clear();
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
                 result = await ((IByRefreshToken)app)
                     .AcquireTokenByRefreshToken(TestConstants.s_scope, "SomeRefreshToken")

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.77
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client
 {
@@ -71,34 +72,92 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        internal virtual AuthenticationRequestParameters CreateRequestParameters(
+            AcquireTokenCommonParameters commonParameters,
+            RequestContext requestContext,
+            ITokenCacheInternal cache)
+        {
+            return new AuthenticationRequestParameters(
+                ServiceBundle,
+                cache,
+                commonParameters,
+                requestContext);
+        }
+
+        #region Accounts
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            return await GetAccountsAndSetCacheKeyAsync(null).ConfigureAwait(false);
+            return await GetAccountsInternalAsync(ApiIds.GetAccounts).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
-        /// Also sets the cache key based on a given home account id, which is the account id of the home account for the user. 
-        /// This uniquely identifies the user across AAD tenants.
+        /// Get the <see cref="IAccount"/> collection by its identifier among the accounts available in the token cache,
+        /// based on the user flow. This is for Azure AD B2C scenarios.
         /// </summary>
-        /// <param name="homeAccountId">The identifier is the home account id of the account being targetted in the cache./>
+        /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
         /// </param>
-        private async Task<IEnumerable<IAccount>> GetAccountsAndSetCacheKeyAsync(string homeAccountId)
+        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
+        {
+            if (string.IsNullOrWhiteSpace(userFlow))
+            {
+                throw new ArgumentException($"{nameof(userFlow)} should not be null or whitespace", nameof(userFlow));
+            }
+
+            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountsByUserFlow).ConfigureAwait(false);
+
+            return accounts.Where(acc =>
+                acc.HomeAccountId.ObjectId.Split('.')[0].EndsWith(
+                    userFlow, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
+        /// </summary>
+        /// <param name="accountId">Account identifier. The identifier is typically the
+        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
+        /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
+        /// </param>
+        public async Task<IAccount> GetAccountAsync(string accountId)
+        {
+            var accounts = await GetAccountsFromCacheAsync(ApiIds.GetAccountById, accountId).ConfigureAwait(false);
+            return accounts.SingleOrDefault();
+        }
+
+        /// <summary>
+        /// Removes all tokens in the cache for the specified account.
+        /// </summary>
+        /// <param name="account">Instance of the account that needs to be removed</param>
+        public async Task RemoveAsync(IAccount account)
         {
             RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
 
-            var accountsFromCache = await GetAccountsFromCacheAsync(homeAccountId, requestContext).ConfigureAwait(false);
-            IEnumerable<IAccount> cacheAndBrokerAccounts =                
-                await MergeWithBrokerAccountsAsync(accountsFromCache).ConfigureAwait(false);
-            
+            if (account != null && UserTokenCacheInternal != null)
+            {
+                await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
+            }
+
+            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
+            {
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                await broker.RemoveAccountAsync(AppConfig.ClientId, account).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter = null)
+        {
+            var accountsFromCache = await GetAccountsFromCacheAsync(apiId, homeAccountIdFilter).ConfigureAwait(false);
+            IEnumerable<IAccount> cacheAndBrokerAccounts =
+                await MergeWithBrokerAccountsAsync(accountsFromCache, homeAccountIdFilter).ConfigureAwait(false);
 
             return cacheAndBrokerAccounts;
         }
 
-        private async Task<IEnumerable<IAccount>> MergeWithBrokerAccountsAsync(IEnumerable<IAccount> accountsFromCache)
+        private async Task<IEnumerable<IAccount>> MergeWithBrokerAccountsAsync(
+            IEnumerable<IAccount> accountsFromCache, 
+            string homeAccountIdFilter = null)
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
@@ -106,6 +165,14 @@ namespace Microsoft.Identity.Client
                 //Broker is available so accounts will be merged using home account ID with local accounts taking priority
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
                 var brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
+                
+                if (!string.IsNullOrEmpty(homeAccountIdFilter))
+                {
+                    brokerAccounts = brokerAccounts.Where(
+                        acc => homeAccountIdFilter.Equals(
+                            acc.HomeAccountId.Identifier,
+                            StringComparison.OrdinalIgnoreCase));
+                }
 
                 foreach (IAccount account in brokerAccounts)
                 {
@@ -122,87 +189,24 @@ namespace Microsoft.Identity.Client
         }
 
         private async Task<IEnumerable<IAccount>> GetAccountsFromCacheAsync(
-            string homeAccountId,
-            RequestContext requestContext)
+            ApiIds apiId,
+            string homeAccountIdFilter)
         {
+            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
+
             var authParameters = new AuthenticationRequestParameters(
                     ServiceBundle,
                     UserTokenCacheInternal,
-                    new AcquireTokenCommonParameters(),
-                    requestContext);
-
-            authParameters.SuggestedWebAppCacheKey = homeAccountId;
+                    new AcquireTokenCommonParameters() { ApiId = apiId },
+                    requestContext,
+                    homeAccountIdFilter);
 
             // a simple session consisting of a single call
             CacheSessionManager cacheSessionManager = new CacheSessionManager(
                 UserTokenCacheInternal,
-                 authParameters);
+                authParameters);
 
-            return await cacheSessionManager.GetAccountsAsync(Authority).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Get the <see cref="IAccount"/> collection by its identifier among the accounts available in the token cache,
-        /// based on the user flow. This is for Azure AD B2C scenarios.
-        /// </summary>
-        /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
-        /// </param>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
-        {
-            if (string.IsNullOrWhiteSpace(userFlow))
-            {
-                throw new ArgumentException($"{nameof(userFlow)} should not be null or whitespace", nameof(userFlow));
-            }
-
-            var accounts = await GetAccountsAsync().ConfigureAwait(false);
-
-            return accounts.Where(acc =>
-                acc.HomeAccountId.ObjectId.Split('.')[0].EndsWith(
-                    userFlow, StringComparison.OrdinalIgnoreCase));
-        }
-
-        /// <summary>
-        /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
-        /// </summary>
-        /// <param name="accountId">Account identifier. The identifier is typically the
-        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
-        /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
-        /// </param>
-        public async Task<IAccount> GetAccountAsync(string accountId)
-        {
-            var accounts = await GetAccountsAndSetCacheKeyAsync(accountId).ConfigureAwait(false);
-            return accounts.FirstOrDefault(account => account.HomeAccountId.Identifier.Equals(accountId, StringComparison.OrdinalIgnoreCase));
-        }
-
-        /// <summary>
-        /// Removes all tokens in the cache for the specified account.
-        /// </summary>
-        /// <param name="account">Instance of the account that needs to be removed</param>
-        public async Task RemoveAsync(IAccount account)
-        {
-            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
-            if (account != null && UserTokenCacheInternal != null)
-            {
-                await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
-            }
-
-            if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
-            {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                await broker.RemoveAccountAsync(AppConfig.ClientId, account).ConfigureAwait(false);
-            }
-        }
-
-        internal virtual AuthenticationRequestParameters CreateRequestParameters(
-            AcquireTokenCommonParameters commonParameters,
-            RequestContext requestContext,
-            ITokenCacheInternal cache)
-        {
-            return new AuthenticationRequestParameters(
-                ServiceBundle,
-                cache,
-                commonParameters,
-                requestContext);
+            return await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
         }
 
         // This implementation should ONLY be called for cases where we aren't participating in
@@ -212,6 +216,8 @@ namespace Microsoft.Identity.Client
         {
             return new RequestContext(ServiceBundle, correlationId);
         }
+
+        #endregion
 
         /// <summary>
         /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.

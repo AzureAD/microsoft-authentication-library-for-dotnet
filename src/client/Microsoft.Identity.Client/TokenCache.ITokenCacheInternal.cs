@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client
             string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
             string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
             string homeAccountId = GetHomeAccountId(requestParams, response, idToken);
+            string suggestedWebCacheKey = SuggestedWebCacheKeyFactory.GetKeyFromResponse(requestParams, homeAccountId);
 
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
@@ -117,7 +118,8 @@ namespace Microsoft.Identity.Client
                     account,
                     hasStateChanged: true,
                     (this as ITokenCacheInternal).IsApplicationCache,
-                    requestParams.SuggestedWebAppCacheKey);
+                    hasTokens: (this as ITokenCacheInternal).HasTokensNoLocks(),
+                    suggestedCacheKey: suggestedWebCacheKey);
 
 #pragma warning disable CS0618 // Type or member is obsolete
                 HasStateChanged = true;
@@ -179,7 +181,16 @@ namespace Microsoft.Identity.Client
                 }
                 finally
                 {
-                    await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
+                    var args2 = new TokenCacheNotificationArgs(
+                     this,
+                     ClientId,
+                     account,
+                     hasStateChanged: true,
+                     (this as ITokenCacheInternal).IsApplicationCache,
+                     (this as ITokenCacheInternal).HasTokensNoLocks(),
+                     suggestedCacheKey: suggestedWebCacheKey);
+
+                    await (this as ITokenCacheInternal).OnAfterAccessAsync(args2).ConfigureAwait(false);
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -334,9 +345,8 @@ namespace Microsoft.Identity.Client
         {
             if (msalAccessTokenCacheItem != null)
             {
-                
-                if (msalAccessTokenCacheItem.ExpiresOn >
-                    DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+
+                if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + AccessTokenExpirationBuffer)
                 {
                     // due to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806
                     if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromDays(ExpirationTooLongInDays))
@@ -354,8 +364,8 @@ namespace Microsoft.Identity.Client
                     return msalAccessTokenCacheItem;
                 }
 
-                if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled && msalAccessTokenCacheItem.ExtendedExpiresOn >
-                    DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+                if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled && 
+                    msalAccessTokenCacheItem.ExtendedExpiresOn > DateTime.UtcNow + AccessTokenExpirationBuffer)
                 {
                     requestParams.RequestContext.Logger.Info(
                         "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
@@ -546,14 +556,17 @@ namespace Microsoft.Identity.Client
         /// all the environments in the token cache are known to MSAL, as MSAL keeps a list of
         /// known environments in <see cref="KnownMetadataProvider"/>
         /// </remarks>
-        async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(string authority, RequestContext requestContext)
+        async Task<IEnumerable<IAccount>> ITokenCacheInternal.GetAccountsAsync(AuthenticationRequestParameters requestParameters)
         {
-            var environment = Authority.GetEnviroment(authority);
+            var logger = requestParameters.RequestContext.Logger;
+            var environment = Authority.GetEnviroment(requestParameters.AuthorityInfo.CanonicalAuthority);
             bool filterByClientId = !_featureFlags.IsFociEnabled;
 
-            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
+            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);            
             IEnumerable<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
 
+            logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache.");
+             
             AdalUsersForMsal adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 Logger,
                 LegacyCachePersistence,
@@ -567,12 +580,14 @@ namespace Microsoft.Identity.Client
             allEnvironmentsInCache.UnionWith(adalUsersResult.GetAdalUserEnviroments());
 
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                authority,
+                requestParameters.AuthorityInfo.CanonicalAuthority,
                 allEnvironmentsInCache,
-                requestContext).ConfigureAwait(false);
+                requestParameters.RequestContext).ConfigureAwait(false);
 
             rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment));
             accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+
+            logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache after environment filtering.");            
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
             foreach (MsalRefreshTokenCacheItem rtItem in rtCacheItems)
@@ -596,6 +611,15 @@ namespace Microsoft.Identity.Client
                 instanceMetadata.Aliases,
                 adalUsersResult,
                 clientInfoToAccountMap);
+
+            if (!string.IsNullOrEmpty(requestParameters.HomeAccountId))
+            {
+                accounts = accounts.Where(acc => acc.HomeAccountId.Identifier.Equals(
+                    requestParameters.HomeAccountId,
+                    StringComparison.OrdinalIgnoreCase));
+
+                logger.Verbose($"Filtered by home account id. Remaning accounts {accounts.Count()}");
+            }
 
             return accounts;
         }
@@ -660,13 +684,14 @@ namespace Microsoft.Identity.Client
                 requestContext.Logger.Info("Removing user from cache..");
 
                 try
-                {
+                {                    
                     var args = new TokenCacheNotificationArgs(
-                        this, 
-                        ClientId, 
-                        account, 
-                        true, 
+                        this,
+                        ClientId,
+                        account,
+                        true,
                         (this as ITokenCacheInternal).IsApplicationCache,
+                        (this as ITokenCacheInternal).HasTokensNoLocks(), 
                         account.HomeAccountId.Identifier);
 
                     try
@@ -679,7 +704,16 @@ namespace Microsoft.Identity.Client
                     }
                     finally
                     {
-                        await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
+                        var afterAccessArgs = new TokenCacheNotificationArgs(
+                           this,
+                           ClientId,
+                           account,
+                           true,
+                           (this as ITokenCacheInternal).IsApplicationCache,
+                           hasTokens: (this as ITokenCacheInternal).HasTokensNoLocks(),
+                           account.HomeAccountId.Identifier);
+
+                        await (this as ITokenCacheInternal).OnAfterAccessAsync(afterAccessArgs).ConfigureAwait(false);
                     }
                 }
                 finally
@@ -693,6 +727,17 @@ namespace Microsoft.Identity.Client
             {
                 _semaphoreSlim.Release();
             }
+        }
+
+        bool ITokenCacheInternal.HasTokensNoLocks()
+        {
+            return _accessor.GetAllRefreshTokens().Any() ||
+                _accessor.GetAllAccessTokens().Any(at => !IsAtExpired(at));
+        }
+
+        private bool IsAtExpired(MsalAccessTokenCacheItem at)
+        {
+            return at.ExpiresOn < DateTime.UtcNow + AccessTokenExpirationBuffer;
         }
 
         void ITokenCacheInternal.RemoveMsalAccountWithNoLocks(IAccount account, RequestContext requestContext)
@@ -747,53 +792,6 @@ namespace Microsoft.Identity.Client
                                item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase))
                 .ToList()
                 .ForEach(accItem => _accessor.DeleteAccount(accItem.GetKey()));
-        }
-
-        async Task ITokenCacheInternal.ClearAsync()
-        {
-            await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
-            try
-            {
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
-                    this, 
-                    ClientId, 
-                    null, 
-                    true, 
-                    (this as ITokenCacheInternal).IsApplicationCache,
-                    null);
-
-                try
-                {
-                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
-                    await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
-
-                    ((ITokenCacheInternal)this).ClearMsalCache();
-                    ((ITokenCacheInternal)this).ClearAdalCache();
-                }
-                finally
-                {
-                    await (this as ITokenCacheInternal).OnAfterAccessAsync(args).ConfigureAwait(false);
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-                }
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
-        }
-
-        void ITokenCacheInternal.ClearAdalCache()
-        {
-            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(Logger, LegacyCachePersistence.LoadCache());
-            dictionary.Clear();
-            LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(Logger, dictionary));
-        }
-
-        void ITokenCacheInternal.ClearMsalCache()
-        {
-            _accessor.Clear();
         }
     }
 }

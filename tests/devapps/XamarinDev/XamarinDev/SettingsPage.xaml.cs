@@ -45,19 +45,20 @@ namespace XamarinDev
 
         private void OnClearAllCache(object sender, EventArgs e)
         {
-            App.MsalPublicClient.UserTokenCacheInternal.ClearAsync();
+            App.MsalPublicClient.UserTokenCacheInternal.LegacyPersistence.WriteCache(new byte[0]);
+            App.MsalPublicClient.UserTokenCacheInternal.Accessor.Clear();
             RefreshView();
         }
 
         private void OnClearAdalCache(object sender, EventArgs e)
         {
-            App.MsalPublicClient.UserTokenCacheInternal.ClearAdalCache();
+            App.MsalPublicClient.UserTokenCacheInternal.LegacyPersistence.WriteCache(new byte[0]);
             RefreshView();
         }
 
         private void OnClearMsalCache(object sender, EventArgs e)
         {
-            App.MsalPublicClient.UserTokenCacheInternal.ClearMsalCache();
+            App.MsalPublicClient.UserTokenCacheInternal.Accessor.Clear();
             RefreshView();
         }
 
