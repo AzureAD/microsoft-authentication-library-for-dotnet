@@ -8,6 +8,7 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using Android.Util;
 using Android.Webkit;
 using Android.Widget;
 using Microsoft.Identity.Client.Utils;
@@ -37,8 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
             webSettings.UserAgentString = userAgent + BrokerConstants.ClientTlsNotSupported;
-            // TODO(migration): Figure out how to get logger into this class.  MsalLogger.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
-            
+
             webSettings.JavaScriptEnabled = true;
             webSettings.LoadWithOverviewMode = true;
             webSettings.DomStorageEnabled = true;
@@ -94,7 +94,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 Uri uri = new Uri(url);
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    // TODO(migration): Figure out how to get logger into this class.  MsalLogger.Default.Verbose("It is browser launch request");
                     OpenLinkInBrowser(url, Activity);
                     view.StopLoading();
                     Activity.Finish();
@@ -103,7 +102,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
                 if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    // TODO(migration): Figure out how to get logger into this class.  MsalLogger.Default.Verbose("It is an azure authenticator install request");
                     view.StopLoading();
                     Finish(Activity, url);
                     return true;
@@ -115,7 +113,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     return true;
                 }
 
-                if (!url.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase) && !uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                if (!url.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase) && 
+                    !uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
                 {
                     UriBuilder errorUri = new UriBuilder(_callback)
                     {
@@ -123,7 +122,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                             CultureInfo.InvariantCulture,
                             "error={0}&error_description={1}",
                             MsalError.NonHttpsRedirectNotSupported,
-                            MsalErrorMessage.NonHttpsRedirectNotSupported)
+                            MsalErrorMessage.NonHttpsRedirectNotSupported + " - " + CoreHelpers.UrlEncode(uri.AbsoluteUri))
                     };
                     Finish(Activity, errorUri.ToString());
                     return true;
