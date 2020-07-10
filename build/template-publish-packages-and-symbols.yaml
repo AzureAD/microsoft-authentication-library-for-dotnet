@@ -19,7 +19,7 @@ steps:
   displayName: 'Publish Artifact: packages'
   inputs:
     PathtoPublish: '${{ parameters.ArtifactPublishPath }}'
-    ArtifactName: ${{ parameters.DropArtifactName }}''
+    ArtifactName: '${{ parameters.DropArtifactName }}'
 
 - task: NuGetCommand@2
   displayName: 'Publish packages to VSTS feed'
