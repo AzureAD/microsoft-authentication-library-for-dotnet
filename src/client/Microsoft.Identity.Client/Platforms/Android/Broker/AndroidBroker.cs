@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             _parentActivity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            AuthenticationContinuationHelper.UnreliableLogger = _logger;
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
         }
 
@@ -170,24 +171,29 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 MsalErrorMessage.BrokerApplicationRequired);
         }
 
-        internal static void SetBrokerResult(Intent data, int resultCode)
+        internal static void SetBrokerResult(Intent data, int resultCode, ICoreLogger unreliableLogger)
         {
             try
             {
                 if (data == null)
                 {
+                    unreliableLogger?.Info("Data is null, stopping.");
                     return;
                 }
 
                 switch (resultCode)
                 {
                     case (int)BrokerResponseCode.ResponseReceived:
+                        unreliableLogger?.Info("Response received, decoding...");
+
                         s_androidBrokerTokenResponse =
                             MsalTokenResponse.CreateFromAndroidBrokerResponse(
                                 data.GetStringExtra(BrokerConstants.BrokerResultV2),
                                 s_correlationId);
                         break;
                     case (int)BrokerResponseCode.UserCancelled:
+                        unreliableLogger?.Info("Response received - user cancelled");
+
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
                             Error = MsalError.AuthenticationCanceledError,
@@ -195,15 +201,26 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         };
                         break;
                     case (int)BrokerResponseCode.BrowserCodeError:
+                        unreliableLogger?.Info("Response received - error ");
+
                         dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
-                        string error = string.Empty;
-                        string errorDescription = string.Empty;
+                        string error = null;
+                        string errorDescription = null;
 
                         if (errorResult != null)
                         {
                             error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
                             errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+
+                            unreliableLogger?.Error($"error: {error} errorDescription {errorDescription}");
                         }
+                        else
+                        {
+                            error = BrokerConstants.BrokerUnknownErrorCode;
+                            errorDescription = "Error Code received, but no error could be extracted";
+                            unreliableLogger?.Error("Error response received, but not error could be extracted");
+                        }
+
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
                             Error = error,
@@ -211,6 +228,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         };
                         break;
                     default:
+                        unreliableLogger?.Error("Unkwown broker response");
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
                             Error = BrokerConstants.BrokerUnknownErrorCode,

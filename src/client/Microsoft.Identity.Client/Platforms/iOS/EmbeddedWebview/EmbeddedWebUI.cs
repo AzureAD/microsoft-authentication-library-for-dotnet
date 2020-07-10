@@ -22,6 +22,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
+            AuthenticationContinuationHelper.UnreliableLogger = requestContext.Logger;
+            requestContext.Logger.InfoPii(
+                $"Starting the iOS embedded webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
+                $"Starting the iOS embedded webui. Redirect URI: {redirectUri}"); 
+                
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
             await returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -43,6 +48,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 UIWindow window = UIApplication.SharedApplication.KeyWindow;
                 viewController = CoreUIParent.FindCurrentViewController(window.RootViewController);
             });
+
             try
             {
                 viewController.InvokeOnMainThread(() =>

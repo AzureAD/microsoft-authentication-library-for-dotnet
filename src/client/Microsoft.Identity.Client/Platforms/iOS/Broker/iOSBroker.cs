@@ -91,6 +91,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            AuthenticationContinuationHelper.UnreliableLogger = _logger;
             using (_logger.LogMethodDuration())
             {
                 Dictionary<string, string> brokerRequest = CreateBrokerRequestDictionary(

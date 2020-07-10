@@ -30,6 +30,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
+            AuthenticationContinuationHelper.UnreliableLogger = requestContext.Logger;
+
             returnedUriReady = new SemaphoreSlim(0);
 
             try
