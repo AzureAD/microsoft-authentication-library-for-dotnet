@@ -1,3 +1,11 @@
+4.16.1
+============
+
+Bug Fixes:
+
+**Improved error message for embedded webview http redirect failure**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1264)
+**SuggestedCacheKey property in TokenCacheNotificationArgs** now works correctly in the case of AcquireTokenByAuthorizationCode. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1902)
+
 4.16
 ============
 
