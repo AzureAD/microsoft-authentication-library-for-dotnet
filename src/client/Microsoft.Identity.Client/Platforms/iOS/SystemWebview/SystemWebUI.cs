@@ -23,6 +23,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
+            AuthenticationContinuationHelper.UnreliableLogger = requestContext.Logger;
+            requestContext.Logger.InfoPii(
+              $"Starting the iOS system webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
+              $"Starting the iOS system webui. Redirect URI: {redirectUri}");
+
             viewController = null;
             InvokeOnMainThread(() =>
             {
