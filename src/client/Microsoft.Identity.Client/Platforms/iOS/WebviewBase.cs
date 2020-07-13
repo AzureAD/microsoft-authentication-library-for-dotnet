@@ -15,9 +15,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal abstract class WebviewBase : NSObject, IWebUI, ISFSafariViewControllerDelegate
     {
-        protected static SemaphoreSlim returnedUriReady;
-        protected static AuthorizationResult authorizationResult;
-        protected static UIViewController viewController;
+        protected static SemaphoreSlim s_returnedUriReady;
+        protected static AuthorizationResult s_authorizationResult;
+        protected static UIViewController s_viewController;
+
         protected SFSafariViewController safariViewController;
         protected SFAuthenticationSession sfAuthenticationSession;
         protected ASWebAuthenticationSession asWebAuthenticationSession;
@@ -25,10 +26,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         protected NSObject didEnterBackgroundNotification;
         protected NSObject willEnterForegroundNotification;
 
-        public WebviewBase()
+        protected WebviewBase()
         {
-            didEnterBackgroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.DidEnterBackgroundNotification, OnMoveToBackground);
-            willEnterForegroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.WillEnterForegroundNotification, OnMoveToForeground);
+            didEnterBackgroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(
+                UIApplication.DidEnterBackgroundNotification, OnMoveToBackground);
+            willEnterForegroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(
+                UIApplication.WillEnterForegroundNotification, OnMoveToForeground);
         }
 
         public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(
@@ -37,15 +40,28 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             RequestContext requestContext,
             CancellationToken cancellationToken);
 
-        public static bool ContinueAuthentication(string url)
+        public static bool ContinueAuthentication(string url, Core.ICoreLogger unreliableLogger)
         {
-            if (returnedUriReady == null)
+            if (s_returnedUriReady == null)
             {
+                bool containsBrokerSubString = url.Contains(iOSBrokerConstants.IdentifyiOSBrokerFromResponseUrl);
+                
+                unreliableLogger?.Warning(
+                    "Not expecting navigation to come back to WebviewBase. " +
+                    "This can indicate  a badly setup OpenUrl hook " +
+                    "where SetBrokerContinuationEventArgs is not called.");
+
+                unreliableLogger?.WarningPii(
+                    $"Url: {url} is broker url? {containsBrokerSubString}",
+                    $"Is broker url? {containsBrokerSubString}");
+                
                 return false;
             }
 
-            authorizationResult = AuthorizationResult.FromUri(url);
-            returnedUriReady.Release();
+            s_authorizationResult = AuthorizationResult.FromUri(url);
+            unreliableLogger?.Verbose("Response url parsed and the result is " + s_authorizationResult.Status);
+
+            s_returnedUriReady.Release();
 
             return true;
         }

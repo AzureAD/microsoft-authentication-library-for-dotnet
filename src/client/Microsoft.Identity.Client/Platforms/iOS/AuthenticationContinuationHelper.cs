@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
                 "AuthenticationContinuationHelper - SetAuthenticationContinuationEventArgs url: " + url,
                 "AuthenticationContinuationHelper - SetAuthenticationContinuationEventArgs ");            
 
-            return WebviewBase.ContinueAuthentication(url.AbsoluteString);
+            return WebviewBase.ContinueAuthentication(url.AbsoluteString, UnreliableLogger);
         }
 
         /// <summary>

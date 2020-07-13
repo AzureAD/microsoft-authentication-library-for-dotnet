@@ -27,17 +27,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 $"Starting the iOS embedded webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
                 $"Starting the iOS embedded webui. Redirect URI: {redirectUri}"); 
                 
-            returnedUriReady = new SemaphoreSlim(0);
+            s_returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
-            await returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await s_returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-            return authorizationResult;
+            return s_authorizationResult;
         }
 
         public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
         {
-            authorizationResult = authorizationResultInput;
-            returnedUriReady.Release();
+            s_authorizationResult = authorizationResultInput;
+            s_returnedUriReady.Release();
         }
 
         public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
