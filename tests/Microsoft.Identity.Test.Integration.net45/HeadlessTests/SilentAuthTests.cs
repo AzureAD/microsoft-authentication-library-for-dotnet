@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsFalse(at1.Equals(at2, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsFalse(at1.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsFalse(at2.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
-            Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
         }
 
         private static void SetCacheSerializationToFile(IPublicClientApplication pca, string filePath)

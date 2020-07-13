@@ -11,13 +11,6 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class AuthenticationResultMetadata
     {
-        /// <summary>
-        /// Default constructor for the class AuthenticationResultMetadata
-        /// </summary>
-        public AuthenticationResultMetadata()
-        {
-            
-        }
 
         /// <summary>
         /// Constructor for the class AuthenticationResultMetadata
@@ -31,6 +24,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// The source of the token in the result.
         /// </summary>
-        public TokenSource TokenSource { get; set; }
+        public TokenSource TokenSource { get; }
     }
 }
