@@ -91,7 +91,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            ValidateRedirectUri(authenticationRequestParameters.RedirectUri);
             AuthenticationContinuationHelper.UnreliableLogger = _logger;
+
             using (_logger.LogMethodDuration())
             {
                 Dictionary<string, string> brokerRequest = CreateBrokerRequestDictionary(
@@ -101,6 +103,19 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 await InvokeIosBrokerAsync(brokerRequest).ConfigureAwait(false);
 
                 return ProcessBrokerResponse();
+            }
+        }
+
+        private void ValidateRedirectUri(Uri redirectUri)
+        {
+            string bundle = NSBundle.MainBundle.BundleIdentifier;
+            string expectedRedirectUri = $"msauth.{bundle}://auth";
+            if (!string.Equals(expectedRedirectUri, redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new MsalClientException(
+                    MsalError.CannotInvokeBroker,
+                    $"The broker redirect URI is incorrect, it should be {expectedRedirectUri} - " +
+                    $"please visit https://aka.ms/msal-net-xamarin for details about redirect URIs.");
             }
         }
 
