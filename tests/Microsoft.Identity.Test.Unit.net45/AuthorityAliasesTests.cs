@@ -21,13 +21,9 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
-    public class AuthorityAliasesTests
+    public class AuthorityAliasesTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
+      
 
         [TestMethod]
         [Description("Test authority migration")]
@@ -37,8 +33,9 @@ namespace Microsoft.Identity.Test.Unit
             // (it is taken from metadata in instance discovery response),
             // except very first network call - instance discovery
 
-            using (var httpManager = new MockHttpManager())
+            using (var harness = base.CreateTestHarness())
             {
+                var httpManager = harness.HttpManager;
                 var authorityUri = new Uri(
                     string.Format(
                         CultureInfo.InvariantCulture,
@@ -122,10 +119,7 @@ namespace Microsoft.Identity.Test.Unit
                     catch (MsalUiRequiredException)
                     {
                     }
-                    catch (Exception)
-                    {
-                        Assert.Fail();
-                    }
+                  
 
                     Assert.IsNull(result);
                 }
