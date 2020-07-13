@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
-            Assert.Equals(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+            Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
 
             // Call again to ensure token cache is hit
             authResult = await confidentialApp
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
-            Assert.Equals(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.Cache);
+            Assert.AreEqual(authResult.AuthenticationResultMetadata.TokenSource, TokenSource.Cache);
         }
 
         [TestMethod]
