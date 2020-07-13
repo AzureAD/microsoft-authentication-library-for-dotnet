@@ -101,6 +101,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public string Authority { get; private set; }
 
+        public TokenSource TokenSource { get; private set; }
+
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {
             if  (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
@@ -124,13 +126,14 @@ namespace Microsoft.Identity.Client.OAuth2
                 IdToken = responseDictionary[BrokerResponseConst.IdToken],
                 TokenType = BrokerResponseConst.Bearer,
                 CorrelationId = responseDictionary[BrokerResponseConst.CorrelationId],
-                Scope = responseDictionary[BrokerResponseConst.Scope],               
+                Scope = responseDictionary[BrokerResponseConst.Scope],
                 ExpiresIn = responseDictionary.TryGetValue(BrokerResponseConst.ExpiresOn, out string expiresOn) ?
-                                GetExpiresIn(expiresOn) : 
+                                GetExpiresIn(expiresOn) :
                                 0,
                 ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
                     ? responseDictionary[BrokerResponseConst.ClientInfo]
                     : null,
+                TokenSource = TokenSource.Broker
             };
 
             if (responseDictionary.ContainsKey(TokenResponseClaim.RefreshIn))
@@ -173,7 +176,8 @@ namespace Microsoft.Identity.Client.OAuth2
                 ExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExpiresOn].ToString()),
                 ExtendedExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
-                TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer"
+                TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
+                TokenSource = TokenSource.Broker
             };
 
             return msalTokenResponse;

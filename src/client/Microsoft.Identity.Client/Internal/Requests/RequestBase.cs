@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 idtItem, 
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
-                TokenSource.IdentityProvider);
+                msalTokenResponse.TokenSource == TokenSource.None? TokenSource.IdentityProvider : msalTokenResponse.TokenSource);
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)

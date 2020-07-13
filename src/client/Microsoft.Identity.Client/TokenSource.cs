@@ -12,6 +12,10 @@ namespace Microsoft.Identity.Client
     public enum TokenSource
     {
         /// <summary>
+        /// The source of access and Id token is not set.
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// The source of access and Id token is MSAL's cache.
         /// </summary>
         Cache,
