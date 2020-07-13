@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 "tid",
                 new Account("aid", "user", "env"),
                 "idt", new[] { "scope" }, Guid.NewGuid(),
+                new AuthenticationResultMetadata(TokenSource.Cache),
                 "SomeTokenType");
 
             Assert.AreEqual("SomeTokenType at", ar.CreateAuthorizationHeader());
