@@ -326,7 +326,7 @@ namespace Microsoft.Identity.Client.Cache
                 adalCache.Clear();
 
                 throw new MsalClientException(
-                    MsalError.InvalidAdalCacheMultipleRTs, 
+                    MsalError.InvalidAdalCacheMultipleRTs,
                     MsalErrorMessage.InvalidAdalCacheMultipleRTs);
             }
 
