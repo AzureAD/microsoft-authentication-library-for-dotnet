@@ -319,7 +319,7 @@ namespace Microsoft.Identity.Client.Cache
             if (rtGroupsByEnv.Any(g => g.Count() > 1))
             {
                 //Due to the fact that there is a problem with the ADAL cache that causes this exception, The ADAL cache will be removed when 
-                //this exception is triggered so that the can sign in interactivly and repopulate the cache.
+                //this exception is triggered so that users can sign in interactivly and repopulate the cache.
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
                     AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
 
