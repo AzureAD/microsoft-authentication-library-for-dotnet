@@ -324,10 +324,9 @@ namespace Microsoft.Identity.Client.Cache
                     AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
 
                 adalCache.Clear();
-
-                throw new MsalClientException(
-                    MsalError.InvalidAdalCacheMultipleRTs,
-                    MsalErrorMessage.InvalidAdalCacheMultipleRTs);
+                logger.Error(MsalErrorMessage.InvalidAdalCacheMultipleRTs);
+                legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(logger, adalCache));
+                return null;
             }
 
             return adalRts.FirstOrDefault();
