@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             else
             {
-                logger.Info("No pending request for response from web ui.");
+                logger?.Info("No pending request for response from web ui.");
             }
         }
 

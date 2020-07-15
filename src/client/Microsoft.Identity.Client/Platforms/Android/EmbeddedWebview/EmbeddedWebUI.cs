@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            AuthenticationContinuationHelper.UnreliableLogger = requestContext.Logger;
+            AuthenticationContinuationHelper.LastRequestLogger = requestContext.Logger;
 
             returnedUriReady = new SemaphoreSlim(0);
 
