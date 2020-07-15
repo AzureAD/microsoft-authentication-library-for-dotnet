@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client
         /// Because this class needs to be static, we can only inject a logger from each request at a time, so 
         /// the correlation IDs from here are not reliable.
         /// </summary>
-        internal static ICoreLogger UnreliableLogger { get; set; } // can be null
+        internal static ICoreLogger LastRequestLogger { get; set; } // can be null
 
         /// <summary>
         /// Sets authentication response from the webview for token acquisition continuation.
@@ -35,14 +35,14 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            UnreliableLogger?.Info($"SetAuthenticationContinuationEventArgs - resultCode: {(int)resultCode} requestCode: {requestCode}");
+            LastRequestLogger?.Info($"SetAuthenticationContinuationEventArgs - resultCode: {(int)resultCode} requestCode: {requestCode}");
 
             AuthorizationResult authorizationResult;
 
             if (data?.Action?.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase) == true)
             {
                 authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
-                WebviewBase.SetAuthorizationResult(authorizationResult, UnreliableLogger);
+                WebviewBase.SetAuthorizationResult(authorizationResult, LastRequestLogger);
                 return;
             }
 
@@ -50,20 +50,20 @@ namespace Microsoft.Identity.Client
             {
                 //The BrokerRequestId is an ID that is attached to the activity launch during brokered authentication
                 // that indicates that the response returned to this class is for the broker.
-                UnreliableLogger?.Info("Processing result from broker.");
-                AndroidBroker.SetBrokerResult(data, (int)resultCode, UnreliableLogger);
+                LastRequestLogger?.Info("Processing result from broker.");
+                AndroidBroker.SetBrokerResult(data, (int)resultCode, LastRequestLogger);
                 return;
             }
 
             if (data != null || AndroidConstants.AuthCodeReceived != (int)resultCode)
             {
-                UnreliableLogger?.Info("Processing result from system webview.");
+                LastRequestLogger?.Info("Processing result from system webview.");
                 authorizationResult = ProcessFromSystemWebview(requestCode, resultCode, data);
-                WebviewBase.SetAuthorizationResult(authorizationResult, UnreliableLogger);
+                WebviewBase.SetAuthorizationResult(authorizationResult, LastRequestLogger);
                 return;
             }
 
-            UnreliableLogger?.Info("SetAuthenticationContinuationEventArgs - ignoring intercepted null intent.");
+            LastRequestLogger?.Info("SetAuthenticationContinuationEventArgs - ignoring intercepted null intent.");
 
         }
 

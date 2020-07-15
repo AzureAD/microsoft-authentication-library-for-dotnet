@@ -13,7 +13,7 @@ using UIKit;
 
 namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 {
-    internal class SystemWebUI : WebviewBase, IDisposable
+    internal class SystemWebUI : WebviewBase
     {
         public RequestContext RequestContext { get; set; }
 
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            AuthenticationContinuationHelper.UnreliableLogger = requestContext.Logger;
+            AuthenticationContinuationHelper.LastRequestLogger = requestContext.Logger;
             requestContext.Logger.InfoPii(
               $"Starting the iOS system webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
               $"Starting the iOS system webui. Redirect URI: {redirectUri}");
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                             }
                             else
                             {
-                                ContinueAuthentication(callbackUrl.ToString());
+                                ContinueAuthentication(callbackUrl.ToString(), RequestContext.Logger);
                             }
                         });
 
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                             }
                             else
                             {
-                                ContinueAuthentication(callbackUrl.ToString());
+                                ContinueAuthentication(callbackUrl.ToString(), RequestContext.Logger);
                             }
                         });
 

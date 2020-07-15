@@ -40,18 +40,18 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             RequestContext requestContext,
             CancellationToken cancellationToken);
 
-        public static bool ContinueAuthentication(string url, Core.ICoreLogger unreliableLogger)
+        public static bool ContinueAuthentication(string url, Core.ICoreLogger logger)
         {
             if (s_returnedUriReady == null)
             {
                 bool containsBrokerSubString = url.Contains(iOSBrokerConstants.IdentifyiOSBrokerFromResponseUrl);
                 
-                unreliableLogger?.Warning(
+                logger?.Warning(
                     "Not expecting navigation to come back to WebviewBase. " +
                     "This can indicate  a badly setup OpenUrl hook " +
                     "where SetBrokerContinuationEventArgs is not called.");
 
-                unreliableLogger?.WarningPii(
+                logger?.WarningPii(
                     $"Url: {url} is broker url? {containsBrokerSubString}",
                     $"Is broker url? {containsBrokerSubString}");
                 
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
 
             s_authorizationResult = AuthorizationResult.FromUri(url);
-            unreliableLogger?.Verbose("Response url parsed and the result is " + s_authorizationResult.Status);
+            logger?.Verbose("Response url parsed and the result is " + s_authorizationResult.Status);
 
             s_returnedUriReady.Release();
 

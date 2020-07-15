@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             ValidateRedirectUri(authenticationRequestParameters.RedirectUri);
-            AuthenticationContinuationHelper.UnreliableLogger = _logger;
+            AuthenticationContinuationHelper.LastRequestLogger = _logger;
 
             using (_logger.LogMethodDuration())
             {

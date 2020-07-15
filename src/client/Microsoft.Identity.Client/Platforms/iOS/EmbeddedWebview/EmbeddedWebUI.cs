@@ -11,7 +11,7 @@ using UIKit;
 
 namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 {
-    internal class EmbeddedWebUI : WebviewBase, IDisposable
+    internal class EmbeddedWebUI : WebviewBase
     {
         public RequestContext RequestContext { get; internal set; }
         public CoreUIParent CoreUIParent { get; set; }
@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            AuthenticationContinuationHelper.UnreliableLogger = requestContext.Logger;
+            AuthenticationContinuationHelper.LastRequestLogger = requestContext.Logger;
             requestContext.Logger.InfoPii(
                 $"Starting the iOS embedded webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
                 $"Starting the iOS embedded webui. Redirect URI: {redirectUri}"); 
@@ -84,6 +84,5 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
             return redirectUri;
         }
-
     }
 }

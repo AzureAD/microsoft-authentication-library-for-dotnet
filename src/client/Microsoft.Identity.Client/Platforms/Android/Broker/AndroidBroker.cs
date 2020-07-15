@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             _parentActivity = uiParent?.Activity;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            AuthenticationContinuationHelper.UnreliableLogger = _logger;
+            AuthenticationContinuationHelper.LastRequestLogger = _logger;
             _brokerHelper = new AndroidBrokerHelper(Application.Context, logger);
         }
 
