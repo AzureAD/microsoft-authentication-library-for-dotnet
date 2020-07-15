@@ -13,10 +13,19 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Internal;
+using System.Linq;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Client.UI;
+using NSubstitute;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Platforms.net45;
+using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
-    public class MyReceiver : ITelemetryReceiver
+    public class MyReceiver :   ITelemetryReceiver
     {
         public List<Dictionary<string, string>> EventsReceived { get; private set; }
 
@@ -41,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     }
 
     [TestClass]
-    public class TelemetryTests
+    public class TelemetryTests : TestBase
     {
         private const string ClientId = "a1b3c3d4";
 
@@ -92,6 +101,71 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
+
+        [TestMethod]
+        public void NoTelemetryLogicIfNoCallbackOrConfig()
+        {
+
+            _telemetryManager = new TelemetryManager(
+                _serviceBundle.Config,
+                _platformProxy,
+                null,
+                true);
+
+            var correlationId = Guid.NewGuid().AsMatsCorrelationId();
+
+            var e1 = new ApiEvent(_logger, _crypto, correlationId) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+            _telemetryManager.StartEvent(e1);
+            _telemetryManager.StopEvent(e1);
+
+            Assert.IsTrue(!_telemetryManager._completedEvents.Any());
+
+        }
+
+        [TestMethod]
+        public async Task DoNotCallPlatformProxyAsync()
+        {
+            // Arrange
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                               .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                               .WithHttpManager(harness.HttpManager)
+                               .WithPlatformProxy(new NoDeviceIdProxy(new NullLogger()))
+                               .WithRedirectUri("http://localhost")
+                               .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                // Act
+                await app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert - NoDeviceIdProxy would fail if InternalGetDeviceId is called
+            }
+        }
+
+        internal class NoDeviceIdProxy : NetDesktopPlatformProxy
+        {
+            public NoDeviceIdProxy(ICoreLogger logger) : base(logger)
+            {
+            }
+
+            protected override string InternalGetDeviceId()
+            {
+                Assert.Fail("Should not call GetDeviceId");
+                return null;
+            }
+        }
+
 
         [TestMethod]
         [TestCategory("TelemetryInternalAPI")]

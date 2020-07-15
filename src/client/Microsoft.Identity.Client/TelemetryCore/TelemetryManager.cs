@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 
 namespace Microsoft.Identity.Client.TelemetryCore
@@ -46,15 +45,33 @@ namespace Microsoft.Identity.Client.TelemetryCore
             _onlySendFailureTelemetry = onlySendFailureTelemetry;
         }
 
+        private bool IsMatsConfigured
+        {
+            get
+            {
+                return Callback != null ||
+                    _applicationConfiguration.TelemetryConfig != null;
+            }
+        }
+
         public TelemetryCallback Callback { get; }
 
         public void StartEvent(EventBase eventToStart)
         {
+            if (!IsMatsConfigured)
+            {
+                return;
+            }
             _eventsInProgress[new EventKey(eventToStart)] = eventToStart;
         }
 
         public void StopEvent(EventBase eventToStop)
         {
+            if (!IsMatsConfigured)
+            {
+                return;
+            }
+
             var eventKey = new EventKey(eventToStop);
 
             // Locate the same name event in the EventsInProgress map
@@ -102,6 +119,11 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public void Flush(string correlationId)
         {
+            if (!IsMatsConfigured)
+            {
+                return;
+            }
+
             if (!_completedEvents.ContainsKey(correlationId))
             {
                 // No completed Events returned for RequestId
