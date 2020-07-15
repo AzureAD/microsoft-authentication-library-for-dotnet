@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public string Authority { get; private set; }
 
-        public TokenSource TokenSource { get; private set; }
+        public TokenSource TokenSource { get; set; }
 
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {

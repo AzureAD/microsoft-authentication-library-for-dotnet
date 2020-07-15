@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private ITokenRequestComponent _authCodeExchangeComponentOverride;
         private ITokenRequestComponent _brokerExchangeComponentOverride;
         private readonly MsalTokenResponse _msalTokenResponse = TestConstants.CreateMsalTokenResponse();
+        private readonly MsalTokenResponse _msalTokenResponseWithTokenSource = TestConstants.CreateMsalTokenResponseWithTokenSource();
         private const string AuthCodeWithAppLink = "msauth://wpj?username=joe@contoso.onmicrosoft.com&app_link=itms%3a%2f%2fitunes.apple.com%2fapp%2fazure-authenticator%2fid983156458%3fmt%3d8";
 
 
@@ -77,6 +78,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Assert - common stuff
                 Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
                 Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
@@ -122,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 requestParams.IsBrokerConfigured = true;
                 _brokerExchangeComponentOverride
                     .FetchTokensAsync(default)
-                    .Returns(Task.FromResult(_msalTokenResponse));
+                    .Returns(Task.FromResult(_msalTokenResponseWithTokenSource));
 
                 InteractiveRequest interactiveRequest = new InteractiveRequest(
                        requestParams,
@@ -136,6 +138,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Assert - common stuff
                 Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
                 Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 

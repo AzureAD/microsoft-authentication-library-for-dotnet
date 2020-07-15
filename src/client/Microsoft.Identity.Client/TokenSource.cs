@@ -12,17 +12,13 @@ namespace Microsoft.Identity.Client
     public enum TokenSource
     {
         /// <summary>
-        /// The source of access and Id token is not set.
+        /// The source of the access and Id token is Identity Provider - Azure Active Directory (AAD), ADFS or AAD B2C.
         /// </summary>
-        None = 0,
+        IdentityProvider,
         /// <summary>
         /// The source of access and Id token is MSAL's cache.
         /// </summary>
         Cache,
-        /// <summary>
-        /// The source of the access and Id token is Identity Provider - Azure Active Directory (AAD), ADFS or AAD B2C.
-        /// </summary>
-        IdentityProvider,
         /// <summary>
         /// The source of the access and Id token is a broker application - Authenticator or Company Portal. Brokers are supported only on Android and iOS.
         /// </summary>
