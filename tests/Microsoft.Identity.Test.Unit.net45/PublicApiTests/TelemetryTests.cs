@@ -18,9 +18,6 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Client.UI;
-using NSubstitute;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.Platforms.net45;
 using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -155,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        internal class MockProxy : NetDesktopPlatformProxy
+        internal class MockProxy : Client.Platforms.net45.NetDesktopPlatformProxy
         {
 
             public MockProxy() : base(new NullLogger())
