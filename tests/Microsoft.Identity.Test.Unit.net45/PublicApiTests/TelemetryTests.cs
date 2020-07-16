@@ -122,6 +122,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         }
 
+#if DESKTOP
         [TestMethod]
         public async Task DoNotCallPlatformProxyAsync()
         {
@@ -129,11 +130,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var harness = new MockHttpAndServiceBundle())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-
+                var mockProxy = new MockProxy();
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                .WithHttpManager(harness.HttpManager)
-                               .WithPlatformProxy(new NoDeviceIdProxy(new NullLogger()))
+                               .WithPlatformProxy(mockProxy)
                                .WithRedirectUri("http://localhost")
                                .BuildConcrete();
 
@@ -150,21 +151,25 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert - NoDeviceIdProxy would fail if InternalGetDeviceId is called
+                Assert.IsFalse(mockProxy.InternalDeviceIdWasCalled);
             }
         }
 
-        internal class NoDeviceIdProxy : NetDesktopPlatformProxy
+        internal class MockProxy : NetDesktopPlatformProxy
         {
-            public NoDeviceIdProxy(ICoreLogger logger) : base(logger)
+
+            public MockProxy() : base(new NullLogger())
             {
             }
+            public bool InternalDeviceIdWasCalled { get; private set; }
 
             protected override string InternalGetDeviceId()
             {
-                Assert.Fail("Should not call GetDeviceId");
+                InternalDeviceIdWasCalled = true;
                 return null;
             }
         }
+#endif
 
 
         [TestMethod]
