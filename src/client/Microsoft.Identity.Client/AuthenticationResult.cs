@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Client
         /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
         /// <param name="correlationId">The correlation id of the authentication request</param>
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
+        /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         public AuthenticationResult(
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -47,6 +48,7 @@ namespace Microsoft.Identity.Client
             string idToken,
             IEnumerable<string> scopes,
             Guid correlationId,
+            AuthenticationResultMetadata authenticationResultMetadata,
             string tokenType = "Bearer")
         {
             AccessToken = accessToken;
@@ -60,13 +62,15 @@ namespace Microsoft.Identity.Client
             Scopes = scopes;
             CorrelationId = correlationId;
             TokenType = tokenType;
+            AuthenticationResultMetadata = authenticationResultMetadata;
         }
 
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem,
             IAuthenticationScheme authenticationScheme,
-            Guid correlationID)
+            Guid correlationID,
+            TokenSource tokenSource)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
             string homeAccountId =
@@ -105,6 +109,7 @@ namespace Microsoft.Identity.Client
             TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             CorrelationId = correlationID;
+            AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
         }
 
         /// <summary>
@@ -177,6 +182,11 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="CreateAuthorizationHeader"/> for getting an HTTP authorization header from an AuthenticationResult.
         /// </summary>
         internal string TokenType { get; }
+
+        /// <summary>
+        /// Contains metadata for the Authentication result.
+        /// </summary>
+        public AuthenticationResultMetadata AuthenticationResultMetadata { get; }
 
         /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so

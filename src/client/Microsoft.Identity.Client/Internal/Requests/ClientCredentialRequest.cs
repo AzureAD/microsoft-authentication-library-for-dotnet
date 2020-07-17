@@ -51,7 +51,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         cachedAccessTokenItem,
                         null,
                         AuthenticationRequestParameters.AuthenticationScheme,
-                        AuthenticationRequestParameters.RequestContext.CorrelationId);
+                        AuthenticationRequestParameters.RequestContext.CorrelationId,
+                        TokenSource.Cache);
                 }
             }
             else
@@ -76,7 +77,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         cachedAccessTokenItem,
                         null,
                         AuthenticationRequestParameters.AuthenticationScheme,
-                        AuthenticationRequestParameters.RequestContext.CorrelationId);
+                        AuthenticationRequestParameters.RequestContext.CorrelationId,
+                        TokenSource.Cache);
                 }
 
                 logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable.");

@@ -50,7 +50,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     msalAccessTokenItem, 
                     null,
                     AuthenticationRequestParameters.AuthenticationScheme,
-                    AuthenticationRequestParameters.RequestContext.CorrelationId);
+                    AuthenticationRequestParameters.RequestContext.CorrelationId,
+                    TokenSource.Cache);
             }
 
 

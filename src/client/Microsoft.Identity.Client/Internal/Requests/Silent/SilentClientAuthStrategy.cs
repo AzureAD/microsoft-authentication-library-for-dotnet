@@ -126,7 +126,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 cachedAccessTokenItem,
                 msalIdTokenItem,
                 AuthenticationRequestParameters.AuthenticationScheme,
-                AuthenticationRequestParameters.RequestContext.CorrelationId);
+                AuthenticationRequestParameters.RequestContext.CorrelationId,
+                TokenSource.Cache);
         }
 
         private void ThrowIfNoScopesOnB2C()
