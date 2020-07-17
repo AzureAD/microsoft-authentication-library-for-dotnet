@@ -318,9 +318,15 @@ namespace Microsoft.Identity.Client.Cache
             // if we have more than 1 RT per env, there is smth wrong with the ADAL cache
             if (rtGroupsByEnv.Any(g => g.Count() > 1))
             {
-                throw new MsalClientException(
-                    MsalError.InvalidAdalCacheMultipleRTs, 
-                    MsalErrorMessage.InvalidAdalCacheMultipleRTs);
+                //Due to the fact that there is a problem with the ADAL cache that causes this exception, The ADAL cache will be removed when 
+                //this exception is triggered so that users can sign in interactivly and repopulate the cache.
+                IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
+                    AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
+
+                adalCache.Clear();
+                logger.Error(MsalErrorMessage.InvalidAdalCacheMultipleRTs);
+                legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(logger, adalCache));
+                return null;
             }
 
             return adalRts.FirstOrDefault();
