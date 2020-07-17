@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
-        [TestCategory(TestCategories.Regression)] //
+        [TestCategory(TestCategories.Regression)] //#1773
         public async Task HttpListenerException_Cancellation_Async()
         {
             var webUI = CreateTestWebUI();
