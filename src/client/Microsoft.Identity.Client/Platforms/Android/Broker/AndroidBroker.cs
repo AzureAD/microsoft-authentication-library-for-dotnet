@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Error("Android broker is not installed so no accounts will be returned.");
+                    _logger.Error("Android broker is either not installed or is not reachable so no accounts will be returned.");
                     return new List<IAccount>();
                 }
 
@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Error("Android broker is not installed so no accounts will be removed.");
+                    _logger.Error("Android broker is either not installed or not reachable so no accounts will be removed.");
                     return;
                 }
            
@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private void HandleBrokerOperationError(Exception ex)
         {
-            _logger.Error(MsalErrorMessage.AndroidBrokerCannotBeInvoked);
+            _logger.Error(ex.Message + MsalErrorMessage.AndroidBrokerCannotBeInvoked);
             if (ex is MsalException)
                 throw ex;
             else
