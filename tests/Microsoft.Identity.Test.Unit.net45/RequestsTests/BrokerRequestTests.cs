@@ -82,6 +82,50 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public void BrokerInteractionRequiredErrorResponseTest()
+        {
+            CreateBrokerHelper();
+
+            var response = new MsalTokenResponse
+            {
+                Error = MsalError.InteractionRequired,
+                ErrorDescription = MsalError.InteractionRequired
+            };
+
+            ValidateBrokerResponse(
+                response,
+                exception =>
+                {
+                    var exc = exception as MsalUiRequiredException;
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalError.BrokerResponseReturnedError, exc.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.BrokerResponseReturnedError, exc.Message);
+                });
+        }
+
+        [TestMethod]
+        public void BrokerInvalidGrantErrorResponseTest()
+        {
+            CreateBrokerHelper();
+
+            var response = new MsalTokenResponse
+            {
+                Error = MsalError.InvalidGrantError,
+                ErrorDescription = MsalError.InvalidGrantError
+            };
+
+            ValidateBrokerResponse(
+                response,
+                exception =>
+                {
+                    var exc = exception as MsalUiRequiredException;
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalError.BrokerResponseReturnedError, exc.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.BrokerResponseReturnedError, exc.Message);
+                });
+        }
+
+        [TestMethod]
         public void BrokerUnknownErrorResponseTest()
         {
             CreateBrokerHelper();

@@ -83,7 +83,12 @@ namespace Microsoft.Identity.Client.Internal.Broker
             {
                 _logger.Info(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
-                throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
+
+                throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse.Error,
+                                                                     MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription,
+                                                                     msalTokenResponse.SubError,
+                                                                     msalTokenResponse.CorrelationId,
+                                                                     msalTokenResponse.HttpResponse);
             }
 
 
