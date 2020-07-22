@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Error("Android broker is either not installed or is not reachable so no accounts will be returned.");
+                    _logger.Warning("Android broker is either not installed or is not reachable so no accounts will be returned.");
                     return new List<IAccount>();
                 }
 
@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Error("Android broker is either not installed or not reachable so no accounts will be removed.");
+                    _logger.Warning("Android broker is either not installed or not reachable so no accounts will be removed.");
                     return;
                 }
            

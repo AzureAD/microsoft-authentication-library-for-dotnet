@@ -86,7 +86,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
                 throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse.Error,
                                                                      MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription,
-                                                                     msalTokenResponse.SubError,
+                                                                     string.IsNullOrEmpty(msalTokenResponse.SubError)?
+                                                                     MsalError.UnknownBrokerError : msalTokenResponse.SubError,
                                                                      msalTokenResponse.CorrelationId,
                                                                      msalTokenResponse.HttpResponse);
             }

@@ -80,9 +80,12 @@ namespace Microsoft.Identity.Client
                 ex = new MsalServiceException(errorCode, errorMessage);
             }
 
-            ex.ResponseBody = brokerHttpResponse.Body;
-            ex.StatusCode = (int)brokerHttpResponse.StatusCode;
-            ex.Headers = brokerHttpResponse.Headers;
+            if (brokerHttpResponse != null)
+            {
+                ex.ResponseBody = brokerHttpResponse.Body;
+                ex.StatusCode = (int)brokerHttpResponse.StatusCode;
+                ex.Headers = brokerHttpResponse.Headers;
+            }
 
             ex.CorrelationId = correlationId;
             ex.SubError = subErrorCode;
