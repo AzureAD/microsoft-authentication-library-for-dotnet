@@ -91,10 +91,22 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <returns><see cref="RSACryptoServiceProvider"/> initialized with private key from <paramref name="certificate"/></returns>
         private static RSACryptoServiceProvider GetCryptoProviderForSha256(X509Certificate2 certificate)
         {
+            RSACryptoServiceProvider rsaProvider;
+
 #if NET45
-            var rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
+            try
+            {
+                rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
+            }
+            catch (CryptographicException e)
+            {
+                throw new MsalClientException(
+                    MsalError.CryptoNet45,
+                    MsalErrorMessage.CryptoNet45,
+                    e);
+            }
 #else
-            var rsaProvider = certificate.GetRSAPrivateKey() as RSACryptoServiceProvider;
+            rsaProvider = certificate.GetRSAPrivateKey() as RSACryptoServiceProvider;
 #endif
 
             if (rsaProvider == null)
