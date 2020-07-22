@@ -91,7 +91,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <returns><see cref="RSACryptoServiceProvider"/> initialized with private key from <paramref name="certificate"/></returns>
         private static RSACryptoServiceProvider GetCryptoProviderForSha256(X509Certificate2 certificate)
         {
+#if NET45
             var rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
+#else
+            var rsaProvider = certificate.GetRSAPrivateKey() as RSACryptoServiceProvider;
+#endif
+
             if (rsaProvider == null)
             {
                 throw new MsalClientException("The provided certificate has a key that is not accessable.");
