@@ -442,9 +442,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNull(authResult.IdToken);
         }
-
-        // Test ignored on net45 due to bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1726
-#if NET_CORE
+        
         [TestMethod]
         [TestCategory(TestCategories.ADFS)]
         public async Task ClientCreds_WithCertificate_Adfs_Async()
@@ -468,7 +466,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNull(authResult.IdToken);
         }
-#endif
+
 
         [TestMethod]
         [TestCategory(TestCategories.ADFS)]
