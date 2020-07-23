@@ -322,13 +322,6 @@ namespace Microsoft.Identity.Client
             "or use a different certificate type (non-CNG) or sign your own assertion " +
             "as described at https://aka.ms/msal-net-signed-assertion";
 
-        public const string CryptoNet45 = 
-            "Could not use the certificate for signing. See inner exception for details. " +
-            "Possible cause: this may be a known issue with apps build againt .NET Desktop 4.6 or lower. " +
-            "Either target a higher version of .NET desktop - 4.6.1 and above, " +
-            "or use a different certificate type (non-CNG) or sign your own assertion " +
-            "as described at https://aka.ms/msal-net-signed-assertion";
-
         public static string ExperimentalFeature(string methodName)
         {
             return string.Format(
