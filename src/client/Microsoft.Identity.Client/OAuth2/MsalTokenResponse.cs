@@ -8,6 +8,7 @@ using System.Globalization;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -102,6 +103,8 @@ namespace Microsoft.Identity.Client.OAuth2
         public string Authority { get; private set; }
 
         public TokenSource TokenSource { get; set; }
+
+        public HttpResponse HttpResponse { get; set; }
 
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {

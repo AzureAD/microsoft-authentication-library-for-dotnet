@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -221,10 +222,18 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             unreliableLogger?.Error("Error response received, but not error could be extracted");
                         }
 
+                        var httpResponse = new HttpResponse();
+                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody];
+                        httpResponse.Headers = errorResult[BrokerResponseConst.BrokerHttpHeaders];
+                        httpResponse.StatusCode = errorResult[BrokerResponseConst.BrokerHttpStatusCode];
+
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
                             Error = error,
                             ErrorDescription = errorDescription,
+                            SubError = errorResult[BrokerResponseConst.BrokerSubError],
+                            HttpResponse = httpResponse,
+                            CorrelationId = s_correlationId
                         };
                         break;
                     default:
@@ -233,6 +242,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         {
                             Error = BrokerConstants.BrokerUnknownErrorCode,
                             ErrorDescription = "Broker result not returned from android broker.",
+                            CorrelationId = s_correlationId
                         };
                         break;
                 }
@@ -249,7 +259,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Error("Android broker is not installed so no accounts will be returned.");
+                    _logger.Warning("Android broker is either not installed or is not reachable so no accounts will be returned.");
                     return new List<IAccount>();
                 }
 
@@ -276,7 +286,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Error("Android broker is not installed so no accounts will be removed.");
+                    _logger.Warning("Android broker is either not installed or not reachable so no accounts will be removed.");
                     return;
                 }
            
@@ -296,7 +306,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private void HandleBrokerOperationError(Exception ex)
         {
-            _logger.Error(MsalErrorMessage.AndroidBrokerCannotBeInvoked);
+            _logger.Error(ex.Message + MsalErrorMessage.AndroidBrokerCannotBeInvoked);
             if (ex is MsalException)
                 throw ex;
             else

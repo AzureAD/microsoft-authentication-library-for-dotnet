@@ -148,6 +148,12 @@ namespace Microsoft.Identity.Client
         public const string UnknownError = "unknown_error";
 
         /// <summary>
+        /// Unknown broker error occured.
+        /// <para>Mitigation</para> None. You might want to inform the end user.
+        /// </summary>
+        public const string UnknownBrokerError = "unknown_broker_error";
+
+        /// <summary>
         /// Authentication failed.
         /// <para>What happens?</para>
         /// The authentication failed. For instance the user did not enter the right password
