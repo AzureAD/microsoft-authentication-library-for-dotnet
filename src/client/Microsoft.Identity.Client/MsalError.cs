@@ -798,6 +798,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidAdalCacheMultipleRTs = "invalid_adal_cache";
 
+        /// <summary>
+        /// <para>What happens?</para>MSAL cannot use the certificate for signing.
+        /// <para>Mitigation</para>Possible cause: use of CNG certificates with .Net classic 4.6 or lower. Either target a higher version of .NET desktop - 4.6.1 and above, or use a different certificate type (non-CNG) 
+        /// or sign your own assertion as described at https://aka.ms/msal-net-signed-assertion
+        /// </summary>
+        public const string CryptoNet45 = "crypto_net45";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
