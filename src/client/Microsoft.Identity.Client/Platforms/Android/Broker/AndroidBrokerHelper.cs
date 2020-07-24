@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 if (!success)
                 {
                     _logger.Warning($"Android Broker Silent call failed. " +
-                        $"This ussually means that the RT cannot be refreshed and interaction is required. " +
+                        $"This usually means that the RT cannot be refreshed and interaction is required. " +
                         $"BundleResult: {bundleResult} Result string: {responseJson}");
                 }
 
