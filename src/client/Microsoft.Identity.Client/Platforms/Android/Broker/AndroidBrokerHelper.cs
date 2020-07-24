@@ -19,6 +19,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -142,11 +143,16 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                      TimeUnit.Seconds)
                      .ConfigureAwait(false);
 
-                if (bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success))
+                bool success = bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success);
+                _logger.Info($"Android Broker Silent call result - success? {success}.");
+
+                if (!success)
                 {
-                    _logger.Info("Android Broker succsesfully refreshed the access token.");
-                    return bundleResult.GetString(BrokerConstants.BrokerResultV2);
+                    _logger.Error($"Android Broker Silent call failed - {bundleResult}");
                 }
+
+                // upstream logic knows how to extract potential errors from this result
+                return bundleResult.GetString(BrokerConstants.BrokerResultV2);
             }
 
             _logger.Info("Android Broker didn't return any results.");
@@ -415,7 +421,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             return bundle;
         }
-       
+
 
         private Bundle CreateBrokerAccountBundle(BrokerRequest brokerRequest)
         {
