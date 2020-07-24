@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 return new MsalTokenResponse
                 {
                     Error = MsalError.BrokerResponseReturnedError,
-                    ErrorDescription = "Unkown broker error. Failed to acquire token silently from the broker." + MsalErrorMessage.AndroidBrokerCannotBeInvoked,
+                    ErrorDescription = "Unknown broker error. Failed to acquire token silently from the broker. " + MsalErrorMessage.AndroidBrokerCannotBeInvoked,
                 };
             }
         }
