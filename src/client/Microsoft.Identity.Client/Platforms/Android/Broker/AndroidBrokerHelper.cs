@@ -143,16 +143,20 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                      TimeUnit.Seconds)
                      .ConfigureAwait(false);
 
+                string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
+
                 bool success = bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success);
                 _logger.Info($"Android Broker Silent call result - success? {success}.");
 
                 if (!success)
                 {
-                    _logger.Error($"Android Broker Silent call failed - {bundleResult}");
+                    _logger.Warning($"Android Broker Silent call failed. " +
+                        $"This ussually means that the RT cannot be refreshed and interaction is required. " +
+                        $"BundleResult: {bundleResult} Result string: {responseJson}");
                 }
 
                 // upstream logic knows how to extract potential errors from this result
-                return bundleResult.GetString(BrokerConstants.BrokerResultV2);
+                return responseJson;
             }
 
             _logger.Info("Android Broker didn't return any results.");
