@@ -328,7 +328,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public override IBroker CreateBroker(CoreUIParent uiParent)
         {
-            return new WamBroker();
+            return new WamBroker(uiParent, Logger);
         }
 
         public override bool CanBrokerSupportSilentAuth()
