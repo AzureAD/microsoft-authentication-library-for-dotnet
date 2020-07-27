@@ -46,6 +46,7 @@ namespace NetFx
         private static readonly HttpMethod s_popMethod = HttpMethod.Get;
 
         private static bool s_usePoP = false;
+        private static bool s_useBroker = false;
 
         // These are not really secret as they do not protect anything, but validaton tools will complain
         // if we have secrets in the code. 
@@ -64,7 +65,7 @@ namespace NetFx
             Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET");
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly IEnumerable<string> s_scopes = new[] { "" };
+        private static readonly IEnumerable<string> s_scopes = new[] { "User.Read" };
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -107,13 +108,19 @@ namespace NetFx
         }
         private static IPublicClientApplication CreatePca()
         {
-            IPublicClientApplication pca = PublicClientApplicationBuilder
+            var builder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
                             //.WithClientCapabilities(new[] { "llt" })
-                            .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
-                            .Build();
+                            .WithRedirectUri("http://localhost"); // required for DefaultOsBrowser
+
+            if (s_useBroker)
+            {
+                builder = builder.WithBroker(true);
+            }
+
+            var pca = builder.Build();
 
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
@@ -148,6 +155,7 @@ namespace NetFx
                 Console.Clear();
 
                 Console.WriteLine("Authority: " + GetAuthority());
+                Console.WriteLine("Use WAM: " + s_useBroker);
                 await DisplayAccountsAsync(pca).ConfigureAwait(false);
 
                 // display menu
@@ -162,6 +170,7 @@ namespace NetFx
                         8. Client Credentials 
                         9. Get Account with ID
                         p. Toggle POP (currently {(s_usePoP ? "ON" : "OFF")}) 
+                        b. Toggle broker
                         c. Clear cache
                         r. Rotate Tenant ID
                         e. Expire all ATs
@@ -317,6 +326,12 @@ namespace NetFx
                         case 'p': // toggle pop
                             s_usePoP = !s_usePoP;
                             break;
+                        case 'b':
+                            s_useBroker = !s_useBroker;
+                            pca = CreatePca();
+                            RunConsoleAppLogicAsync(pca).Wait();
+
+                            break;
 
                         case 'c':
                             var accounts2 = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -329,7 +344,7 @@ namespace NetFx
                         case 'r': // rotate tid
 
                             s_currentAuthority = (s_currentAuthority + 1) % s_authorities.Length;
-                            pca = CreatePca();                            
+                            pca = CreatePca();
                             RunConsoleAppLogicAsync(pca).Wait();
                             break;
 
@@ -347,13 +362,13 @@ namespace NetFx
                                 tokenCacheInternal.Accessor.SaveAccessToken(accessItem);
                             }
 
-                            TokenCacheNotificationArgs args = 
+                            TokenCacheNotificationArgs args =
                                 new TokenCacheNotificationArgs(
-                                pca.UserTokenCache as ITokenCacheInternal, 
-                                s_clientIdForPublicApp, 
-                                null, 
-                                true, 
-                                false, 
+                                pca.UserTokenCache as ITokenCacheInternal,
+                                s_clientIdForPublicApp,
+                                null,
+                                true,
+                                false,
                                 true);
 
                             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -556,5 +571,5 @@ namespace NetFx
                 { "dc", "prod-wst-test1" },
             };
         }
-    }   
+    }
 }

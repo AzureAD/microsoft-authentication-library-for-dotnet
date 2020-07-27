@@ -21,7 +21,8 @@ using Microsoft.Win32;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.net45.Http;
-using Microsoft.Identity.Client.PlatformsCommon;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.netdesktop.Broker;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -323,6 +324,16 @@ namespace Microsoft.Identity.Client.Platforms.net45
         public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
         {
             return new NetDesktopHttpClientFactory();
+        }
+
+        public override IBroker CreateBroker(CoreUIParent uiParent)
+        {
+            return new WamBroker();
+        }
+
+        public override bool CanBrokerSupportSilentAuth()
+        {
+            return true;
         }
     }
 }
