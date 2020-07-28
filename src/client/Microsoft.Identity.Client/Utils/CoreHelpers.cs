@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Utils
@@ -52,6 +53,37 @@ namespace Microsoft.Identity.Client.Utils
             DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalMilliseconds;
             return unixTimestamp;
+        }
+
+        public static long GetDurationFromWindowsTimestamp(string windowsTimestampInFuture, ICoreLogger logger)
+        {
+            if (string.IsNullOrEmpty(windowsTimestampInFuture))
+            {
+                return 0;
+            }
+
+            if (!ulong.TryParse(windowsTimestampInFuture, out ulong winTimestamp) || 
+                winTimestamp <= 11644473600 ||
+                winTimestamp == ulong.MaxValue)
+            {
+                logger.Warning("Invalid Universal time " + windowsTimestampInFuture);
+                return 0;
+            }
+
+            ulong unixTimestamp = winTimestamp - 11644473600;
+
+            return (long)unixTimestamp - CurrDateTimeInUnixTimestamp();
+        }
+
+        public static long GetDurationFromNowInSeconds(string unixTimestampInFuture)
+        {
+            if (string.IsNullOrEmpty(unixTimestampInFuture))
+            {
+                return 0;
+            }
+
+            long expiresOnUnixTimestamp = long.Parse(unixTimestampInFuture, CultureInfo.InvariantCulture);
+            return expiresOnUnixTimestamp - CurrDateTimeInUnixTimestamp();
         }
 
         public static string CreateString(byte[] bytes)

@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _commonParameters = commonParameters;
 
             Authority = Authority.CreateAuthorityForRequest(serviceBundle.Config.AuthorityInfo, commonParameters.AuthorityOverride);
+            OriginalAuthority = Authority;
 
             ClientId = serviceBundle.Config.ClientId;
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
@@ -69,6 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public RequestContext RequestContext { get; }
         public Authority Authority { get; set; }
+        public Authority OriginalAuthority { get; set; } //TODO: bogavril - too many authorities
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
         public Authority TenantUpdatedCanonicalAuthority { get; set; }
@@ -83,7 +85,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
        
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
-        public string ClaimsAndClientCapabilities { get; private set; }    
+        public string ClaimsAndClientCapabilities { get; private set; }
+
+        public Guid CorrelationId => _commonParameters.CorrelationId;
 
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
@@ -168,6 +172,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("LoginHint - " + LoginHint);
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
             builder.AppendLine("HomeAccountId - " + HomeAccountId);
+            builder.AppendLine("CorrelationId - " + CorrelationId);
 
             string messageWithPii = builder.ToString();
 
@@ -184,7 +189,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
             builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
-
+            builder.AppendLine("CorrelationId - " + CorrelationId);
 
             logger.InfoPii(messageWithPii, builder.ToString());
         }

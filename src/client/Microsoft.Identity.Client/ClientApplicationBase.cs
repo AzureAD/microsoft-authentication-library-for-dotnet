@@ -184,6 +184,7 @@ namespace Microsoft.Identity.Client
             List<IAccount> allAccounts = new List<IAccount>(cacheAccounts);
 
             foreach (IAccount account in brokerAccounts)
+            
             {
                 if (!cacheAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
                 {

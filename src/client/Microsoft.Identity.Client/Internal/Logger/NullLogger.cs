@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return new DurationLogHelper(this, measuredBlockName, logLevel);
         }
 
-        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null)
+        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
             return LogBlockDuration(methodName, logLevel);
         }

@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public DateTimeOffset? AccessTokenRefreshOn { get; private set; }
 
-        public string Authority { get; private set; }
+        public string Authority { get;  set; }
 
         public TokenSource TokenSource { get; set; }
 
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 CorrelationId = responseDictionary[BrokerResponseConst.CorrelationId],
                 Scope = responseDictionary[BrokerResponseConst.Scope],
                 ExpiresIn = responseDictionary.TryGetValue(BrokerResponseConst.ExpiresOn, out string expiresOn) ?
-                                GetExpiresIn(expiresOn) :
+                                CoreHelpers.GetDurationFromNowInSeconds(expiresOn) :
                                 0,
                 ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
                     ? responseDictionary[BrokerResponseConst.ClientInfo]
@@ -176,25 +176,14 @@ namespace Microsoft.Identity.Client.OAuth2
                 IdToken = authResult[BrokerResponseConst.IdToken].ToString(),
                 CorrelationId = correlationId, // Android response does not expose Correlation ID
                 Scope = authResult[BrokerResponseConst.AndroidScopes].ToString(), // sadly for iOS this is "scope" and for Android "scopes"
-                ExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExpiresOn].ToString()),
-                ExtendedExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
+                ExpiresIn = CoreHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExpiresOn].ToString()),
+                ExtendedExpiresIn = CoreHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
                 TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
                 TokenSource = TokenSource.Broker
             };
 
             return msalTokenResponse;
-        }
-
-        private static long GetExpiresIn(string expiresOn)
-        {
-            if (string.IsNullOrEmpty(expiresOn))
-            {
-                return 0;
-            }
-
-            long expiresOnUnixTimestamp = long.Parse(expiresOn, CultureInfo.InvariantCulture);
-            return expiresOnUnixTimestamp - CoreHelpers.CurrDateTimeInUnixTimestamp();
         }
     }    
 }
