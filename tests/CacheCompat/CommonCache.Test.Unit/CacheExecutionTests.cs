@@ -131,9 +131,8 @@ namespace CommonCache.Test.Unit
         [DataTestMethod]
         [DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalV3 msal v3 cache")]
         [DataRow(CacheProgramType.MsalPython, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalPython->AdalV5 msal v3 cache")]
-        // Ignored due to https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/235
-        //[DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalPython msal v3 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalPython msal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalPython msal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalPython msal v3 cache")]
         public async Task TestMsalPythonCacheCompatibilityAsync(
             CacheProgramType interactiveType,
             CacheProgramType silentType,
@@ -148,8 +147,7 @@ namespace CommonCache.Test.Unit
         [DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalV3 msal v3 cache")]
         [DataRow(CacheProgramType.MsalJava, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalJava->AdalV5 msal v3 cache")]
         [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalJava msal v3 cache")]
-        // Ignored due to https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/235
-        // [DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalPython msal v3 cache")]
+        [DataRow(CacheProgramType.MsalJava, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalJava->MsalPython msal v3 cache")]
         [DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalJava, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalJava msal v3 cache")]
         public async Task TestMsalJavaCacheCompatibilityAsync(
             CacheProgramType interactiveType,
