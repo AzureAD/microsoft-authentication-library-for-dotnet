@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public RequestContext RequestContext { get; }
         public Authority Authority { get; set; }
-        public Authority OriginalAuthority { get; set; } //TODO: bogavril - too many authorities
+        public Authority OriginalAuthority { get; set; } //TODO: bogavril - not needed
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
         public Authority TenantUpdatedCanonicalAuthority { get; set; }
