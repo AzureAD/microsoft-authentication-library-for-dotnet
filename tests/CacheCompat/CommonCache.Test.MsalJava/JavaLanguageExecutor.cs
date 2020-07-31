@@ -33,7 +33,7 @@ namespace CommonCache.Test.MsalJava
 
             try
             {
-                string compileArguments = $"-f \"{pomFilePath}\" compile versions:use-latest-releases";
+                string compileArguments = $"-f \"{pomFilePath}\" compile";
                 Console.WriteLine($"Calling:  {executablePath} {compileArguments}");
                 var compileResults = await processUtils.RunProcessAsync(executablePath, compileArguments, cancellationToken).ConfigureAwait(false);
             }
