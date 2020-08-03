@@ -121,5 +121,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("login.microsoftonline.de"));
             Assert.IsTrue(KnownMetadataProvider.IsKnownEnvironment("LOGIN.microsoftonline.de"));
         }
+
+        [TestMethod]
+        public void KnownMetadataProvider_publicEnvironment()
+        {
+            Assert.IsFalse(KnownMetadataProvider.isKnownPublicEnvironment(""));
+            Assert.IsFalse(KnownMetadataProvider.isKnownPublicEnvironment(null));
+            Assert.IsFalse(KnownMetadataProvider.isKnownPublicEnvironment("unknown"));
+            Assert.IsFalse(KnownMetadataProvider.isKnownPublicEnvironment("login.microsoftonline.de"));
+
+            Assert.IsTrue(KnownMetadataProvider.isKnownPublicEnvironment("login.microsoft.com"));
+            Assert.IsTrue(KnownMetadataProvider.isKnownPublicEnvironment("login.microsoftonline.com"));
+            Assert.IsTrue(KnownMetadataProvider.isKnownPublicEnvironment("Login.microsoftonline.com"));
+        }
     }
 }

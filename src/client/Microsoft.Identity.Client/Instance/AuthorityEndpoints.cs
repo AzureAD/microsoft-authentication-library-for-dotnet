@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -40,13 +41,22 @@ namespace Microsoft.Identity.Client.Instance
         {
             InstanceDiscoveryMetadataEntry metadata = await
                 requestParameters.RequestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                    requestParameters.AuthorityInfo.CanonicalAuthority,
-                    requestParameters.RequestContext)
+                    requestParameters.WithAzureRegion ? 
+                        await buildAuthorityWithRegionAsync(requestParameters.AuthorityInfo).ConfigureAwait(false) : 
+                        requestParameters.AuthorityInfo.CanonicalAuthority,
+                    requestParameters.RequestContext,
+                    requestParameters.WithAzureRegion)
                 .ConfigureAwait(false);
 
             requestParameters.Authority = Authority.CreateAuthorityWithEnvironment(
                     requestParameters.AuthorityInfo,
                     metadata.PreferredNetwork);
+        }
+
+        private async static Task<string> buildAuthorityWithRegionAsync(AuthorityInfo authorityInfo)
+        {
+            string region = await RegionDiscovery.GetInstance.getRegionAsync().ConfigureAwait(false);
+            return authorityInfo.CanonicalAuthority.Insert(8, $"{region}.");
         }
     }
 }

@@ -16,12 +16,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// </summary>
         public bool SendX5C { get; set; }
 
+        /// <summary>
+        /// </summary>
+        public bool WithAzureRegion { get; set; }
+
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)
         {
             var builder = new StringBuilder();
             builder.AppendLine("=== AcquireTokenForClientParameters ===");
             builder.AppendLine("SendX5C: " + SendX5C);
+            builder.AppendLine("WithAzureRegion: " + WithAzureRegion);
             builder.AppendLine("ForceRefresh: " + ForceRefresh);
             logger.Info(builder.ToString());
         }

@@ -798,6 +798,17 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidAdalCacheMultipleRTs = "invalid_adal_cache";
 
+        /// <summary>
+        /// Region discovery failed.
+        /// </summary>
+        public const string RegionDiscoveryFailed = "region_discovery_failed";
+
+        /// <summary>
+        /// <para>What happens?</para>WithAzureRegion is set to true with non public cloud
+        /// <para>Mitigation</para>Region discovery is currently enabled only for public cloud.
+        /// </summary>
+        public const string RegionDiscoveryNotEnabled = "region_discovery_unavailable";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

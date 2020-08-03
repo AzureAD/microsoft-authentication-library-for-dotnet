@@ -1,12 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -28,12 +30,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (AuthenticationRequestParameters.Scope == null || !AuthenticationRequestParameters.Scope.Any())
-            {
-                throw new MsalClientException(
-                    MsalError.ScopesRequired,
-                    MsalErrorMessage.ScopesRequired);
-            }
+            validateRequest();
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
@@ -83,6 +80,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable.");
                 throw;
+            }
+        }
+
+        private void validateRequest()
+        {
+            if (AuthenticationRequestParameters.Scope == null || !AuthenticationRequestParameters.Scope.Any())
+            {
+                throw new MsalClientException(
+                    MsalError.ScopesRequired,
+                    MsalErrorMessage.ScopesRequired);
+            }
+
+            // Throw exception if WithAzureRegion is set to true and the cloud is not public.
+            if (_clientParameters.WithAzureRegion && !KnownMetadataProvider.isKnownPublicEnvironment(AuthenticationRequestParameters.AuthorityInfo.Host))
+            {
+                throw new MsalClientException(
+                    MsalError.RegionDiscoveryNotEnabled, 
+                    MsalErrorMessage.RegionDiscoveryNotAvailable);
             }
         }
 

@@ -114,7 +114,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
             string authority, 
-            RequestContext requestContext)
+            RequestContext requestContext,
+            bool withAzureRegion = false)
         {
             AuthorityType type = Authority.GetAuthorityType(authority);
             Uri authorityUri = new Uri(authority);
@@ -125,7 +126,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 case AuthorityType.Aad:
                     InstanceDiscoveryMetadataEntry entry =
                     _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
+                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri, withAzureRegion).ConfigureAwait(false);
 
                     if (entry == null)
                     {
@@ -151,7 +152,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         private async Task<InstanceDiscoveryMetadataEntry> FetchNetworkMetadataOrFallbackAsync(
             RequestContext requestContext, 
-            Uri authorityUri)
+            Uri authorityUri,
+            bool withAzureRegion)
         {
             try
             {
@@ -159,6 +161,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
             catch (MsalServiceException ex)
             {
+                if (withAzureRegion)
+                {
+                    requestContext.Logger.Info("[Instance Discovery] Instance discovery failed. MSAL will continue to build instance metadata with region and authority.");
+                    return CreateEntryForSingleAuthority(authorityUri);
+                }
+
                 if (!requestContext.ServiceBundle.Config.AuthorityInfo.ValidateAuthority)
                 {
                     requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery as validate authority is set to false.");

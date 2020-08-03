@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
@@ -66,6 +67,20 @@ namespace Microsoft.Identity.Client
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C, withSendX5C);
             Parameters.SendX5C = withSendX5C;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies if the token request should be sent to regional ESTS.
+        /// By default the value for this variable is false.
+        /// </summary>
+        /// <param name="withAzureRegion"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>.
+        /// The default is <c>false</c></param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool withAzureRegion)
+        {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAzureRegion, withAzureRegion);
+            Parameters.WithAzureRegion = withAzureRegion;
             return this;
         }
 

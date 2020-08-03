@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         WithCustomWebUi,
         WithSystemBrowserOptions,
         WithSSHAuthenticationScheme,
-        WithPoPScheme
+        WithPoPScheme,
+        WithAzureRegion
     }
 }
