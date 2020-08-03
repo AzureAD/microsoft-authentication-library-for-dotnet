@@ -31,6 +31,10 @@ namespace Microsoft.Identity.Client
             MsalAccountCacheItem msalAccountCacheItem = null;
 
             IdToken idToken = IdToken.Parse(response.IdToken);
+            if (idToken == null)
+            {
+                requestParams.RequestContext.Logger.Info("ID Token not present in response.");
+            }
 
             var tenantId = Authority
                 .CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority.AuthorityInfo.CanonicalAuthority)
@@ -312,8 +316,9 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
         {
-            // this is OBO flow. match the cache entry with assertion hash,
-            // Authority, ScopeSet and client Id.
+            // this is OBO flow. match the cache entry with assertion hash,            
+            // Because there is no filtering on TenantID, it may be possible to find multiple tokens for the same assertion
+            // but MSAL is not able to resolve the authority like in the case of AcquireTokenSilent because 
             if (requestParams.UserAssertion != null)
             {
                 return tokenCacheItems.FilterWithLogging(item =>
