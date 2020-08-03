@@ -312,30 +312,47 @@ namespace Microsoft.Identity.Client
             return tokenCacheItems;
         }
 
+
         private static IEnumerable<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(
             AuthenticationRequestParameters requestParams,
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
         {
-            // this is OBO flow. match the cache entry with assertion hash,            
-            // Because there is no filtering on TenantID, it may be possible to find multiple tokens for the same assertion
-            // but MSAL is not able to resolve the authority like in the case of AcquireTokenSilent because 
-            if (requestParams.UserAssertion != null)
+            string requestTenantId = requestParams.Authority.TenantId;
+            bool filterByTenantId = true;
+
+            if (requestParams.UserAssertion != null) // OBO
             {
-                return tokenCacheItems.FilterWithLogging(item =>
+                tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.UserAssertionHash) &&
                                 item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
                                 "Filtering by user assertion id");
+
+                // OBO calls FindAccessTokenAsync directly, but we are not able to resolve the authority 
+                // unless the developer has configured a tenanted authority. If they have configured /common
+                // then we cannot filter by tenant and will use whatever is in the cache.
+                filterByTenantId = 
+                    !string.IsNullOrEmpty(requestTenantId) && 
+                    !AadAuthority.IsCommonOrganizationsOrConsumersTenant(requestTenantId);                                
             }
 
-            string requestTenantId = requestParams.Authority.TenantId;
+            if (filterByTenantId)
+            {
+                tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
+                    string.Equals(item.TenantId ?? string.Empty, requestTenantId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
+                    requestParams.RequestContext.Logger,
+                    "Filtering by tenant id");
+            }
+            else
+            {
+                requestParams.RequestContext.Logger.Warning("Have not filtered by tenant ID. " +
+                    "This can happen in OBO scenario where authority is /common or /organizations. " +
+                    "Please use tenanted authority.");
+            }
 
-            tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
-                string.Equals(item.TenantId ?? string.Empty, requestTenantId ?? string.Empty, StringComparison.OrdinalIgnoreCase),
-                requestParams.RequestContext.Logger,
-                "Filtering by tenant id");
-
-            if (!requestParams.IsClientCredentialRequest)
+            // Only AcquireTokenSilent has an IAccount in the request that can be used for filtering
+            if (requestParams.ApiId != TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient &&
+                requestParams.ApiId != TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
                                 requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
