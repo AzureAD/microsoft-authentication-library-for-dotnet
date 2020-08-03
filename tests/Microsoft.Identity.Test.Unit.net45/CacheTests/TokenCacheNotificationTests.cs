@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -41,11 +42,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // AcquireTokenInteractive will save a token to the cache, but needs more setup
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 MsalMockHelpers.ConfigureMockWebUI(pca);
-                await RunAfterAccessFailureAsync(pca, () => 
+                await RunAfterAccessFailureAsync(pca, () =>
                     pca.AcquireTokenInteractive(new[] { "User.Read" }).ExecuteAsync())
                         .ConfigureAwait(false);
 
@@ -197,7 +197,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     pca.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(pca.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = await pca
@@ -213,6 +212,62 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, numBeforeWriteCalls);
 
             Assert.IsNotNull(serializedPayload);
+        }
+
+        [TestMethod]
+        public async Task TestAccountAcrossMultipleClientIdsAsync()
+        {
+            using (var _harness = CreateTestHarness())
+            {
+                // Arrange
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(_harness.HttpManager)
+                    .BuildConcrete();
+
+                Trace.WriteLine("Step 1 - call GetAccounts with empty cache - no accounts, no tokens");
+                var cacheAccessRecorder1 = app.UserTokenCache.RecordAccess();
+                var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+
+                Assert.IsFalse(cacheAccessRecorder1.LastBeforeAccessNotificationArgs.HasTokens);
+                Assert.IsNull(cacheAccessRecorder1.LastBeforeWriteNotificationArgs);
+                Assert.IsFalse(cacheAccessRecorder1.LastAfterAccessNotificationArgs.HasTokens);
+                Assert.IsFalse(accounts.Any());
+
+                Trace.WriteLine("Step 2 - call AcquireTokenInteractive - it will save new tokens in the cache");
+                MsalMockHelpers.ConfigureMockWebUI(
+                        app.ServiceBundle.PlatformProxy,
+                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+                var cacheAccessRecorder2 = app.UserTokenCache.RecordAccess();
+
+                await app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsFalse(cacheAccessRecorder2.LastBeforeAccessNotificationArgs.HasTokens);
+                Assert.IsFalse(cacheAccessRecorder2.LastBeforeWriteNotificationArgs.HasTokens);
+                Assert.IsTrue(cacheAccessRecorder2.LastAfterAccessNotificationArgs.HasTokens);
+
+                Trace.WriteLine("Step 3 - call GetAccounts - now with 1 account");
+                var cacheAccessRecorder3 = app.UserTokenCache.RecordAccess();
+                accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+
+                Assert.IsTrue(cacheAccessRecorder3.LastBeforeAccessNotificationArgs.HasTokens);
+                Assert.IsNull(cacheAccessRecorder3.LastBeforeWriteNotificationArgs);
+                Assert.IsTrue(cacheAccessRecorder3.LastAfterAccessNotificationArgs.HasTokens);
+                Assert.IsTrue(accounts.Any());
+
+                Trace.WriteLine("Step 4 - call RemoveAccounts - this will delete all the tokens");
+                var cacheAccessRecorder4 = app.UserTokenCache.RecordAccess();
+                await app.RemoveAsync(accounts.Single()).ConfigureAwait(false);
+
+                Assert.IsTrue(cacheAccessRecorder4.LastBeforeAccessNotificationArgs.HasTokens);
+                Assert.IsTrue(cacheAccessRecorder4.LastBeforeWriteNotificationArgs.HasTokens);
+                Assert.IsFalse(cacheAccessRecorder4.LastAfterAccessNotificationArgs.HasTokens);
+            }
         }
     }
 }

@@ -7,7 +7,9 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -47,6 +49,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             };
 
             _harness = base.CreateTestHarness();
+
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
@@ -336,6 +339,35 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreSame(_expectedResult, actualResult, "The known metadata provider should be queried second");
             _knownMetadataProvider.Received(1).GetMetadata("some_env.com", otherEnvs, Arg.Any<ICoreLogger>());
             await _networkMetadataProvider.Received(1).GetMetadataAsync(authorityUri, _testRequestContext).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ValidateAuthorityFalse_SkipsNetworkCall_Async()
+        {
+            // Arrange
+            var validationException = new MsalServiceException(MsalError.InvalidInstance, "authority validation failed");
+
+            // Inject authority in service bundle
+            var httpManager = new MockHttpManager();
+            var appConfig = new ApplicationConfiguration()
+            {
+                HttpManager = httpManager,
+                AuthorityInfo = AuthorityInfo.FromAuthorityUri(Authority, false)
+            };
+
+            var serviceBundle = ServiceBundle.Create(appConfig);
+
+            RequestContext requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+
+            // network fails with invalid_instance exception
+            _networkMetadataProvider
+                .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), requestContext))
+                .Do(x => throw validationException);
+
+            InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryAsync(Authority, requestContext).ConfigureAwait(false);
+
+            // Since the validateAuthority is set to false, proceed without alias. 
+            ValidateSingleEntryMetadata(new Uri(Authority), actualResult);
         }
 
         private async Task ValidateSelfEntryAsync(Uri authority)

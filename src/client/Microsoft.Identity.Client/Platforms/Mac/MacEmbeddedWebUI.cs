@@ -1,14 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.UI;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AppKit;
 using Foundation;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {

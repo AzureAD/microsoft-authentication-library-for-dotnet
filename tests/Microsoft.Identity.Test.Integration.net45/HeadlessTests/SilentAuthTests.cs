@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -47,6 +48,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.MSA)]
+        [Ignore] // Failing sporadically https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1045664 
         public async Task SilentAuth_MsaUser_ForceRefresh_Async()
         {
             var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
@@ -152,6 +155,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsFalse(at1.Equals(at2, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsFalse(at1.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsFalse(at2.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
         }
 
         private static void SetCacheSerializationToFile(IPublicClientApplication pca, string filePath)

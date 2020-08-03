@@ -5,9 +5,11 @@ using System;
 using System.Globalization;
 using Android.App;
 using Android.Content;
+using Java.Sql;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.Platforms.Android;
+using Microsoft.Identity.Client.Platforms.Android.Broker;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
 using Microsoft.Identity.Client.UI;
 
@@ -19,6 +21,12 @@ namespace Microsoft.Identity.Client
     public static class AuthenticationContinuationHelper
     {
         /// <summary>
+        /// Because this class needs to be static, we can only inject a logger from each request at a time, so 
+        /// the correlation IDs from here are not reliable.
+        /// </summary>
+        internal static ICoreLogger LastRequestLogger { get; set; } // can be null
+
+        /// <summary>
         /// Sets authentication response from the webview for token acquisition continuation.
         /// </summary>
         /// <param name="requestCode">Request response code</param>
@@ -27,29 +35,36 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            // TODO(migration): how can a public static method get access to the proper ClientRequestBase to wire into the logger and appropriate requestcontext?
-            // Can we move this call to be somewhere on the ClientApplicationBase or something else that's wired into that?
-            var logger = MsalLogger.Create(Guid.Empty, null);
-            logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
+            LastRequestLogger?.Info($"SetAuthenticationContinuationEventArgs - resultCode: {(int)resultCode} requestCode: {requestCode}");
 
             AuthorizationResult authorizationResult;
-            if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
+
+            if (data?.Action?.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase) == true)
             {
                 authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
-            }
-            else if (!String.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)) || requestCode == BrokerConstants.BrokerRequestId) 
-                //The BrokerRequestId is an ID that is attached to the activity launch during brokered authentication
-                // that indicates that the response returned to this class is for the broker.
-            {
-                AndroidBroker.SetBrokerResult(data, (int)resultCode);
+                WebviewBase.SetAuthorizationResult(authorizationResult, LastRequestLogger);
                 return;
             }
-            else
+
+            if (data != null && (!string.IsNullOrEmpty(data.GetStringExtra(BrokerConstants.BrokerResultV2)) || requestCode == BrokerConstants.BrokerRequestId))
             {
-                authorizationResult = ProcessFromSystemWebview(requestCode, resultCode, data);
+                //The BrokerRequestId is an ID that is attached to the activity launch during brokered authentication
+                // that indicates that the response returned to this class is for the broker.
+                LastRequestLogger?.Info("Processing result from broker.");
+                AndroidBroker.SetBrokerResult(data, (int)resultCode, LastRequestLogger);
+                return;
             }
 
-            WebviewBase.SetAuthorizationResult(authorizationResult, logger);
+            if (data != null || AndroidConstants.AuthCodeReceived != (int)resultCode)
+            {
+                LastRequestLogger?.Info("Processing result from system webview.");
+                authorizationResult = ProcessFromSystemWebview(requestCode, resultCode, data);
+                WebviewBase.SetAuthorizationResult(authorizationResult, LastRequestLogger);
+                return;
+            }
+
+            LastRequestLogger?.Info("SetAuthenticationContinuationEventArgs - ignoring intercepted null intent.");
+
         }
 
         private static AuthorizationResult ProcessFromEmbeddedWebview(int requestCode, Result resultCode, Intent data)

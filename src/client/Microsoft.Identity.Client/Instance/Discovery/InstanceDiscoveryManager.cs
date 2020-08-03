@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 
@@ -123,10 +123,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             switch (type)
             {
                 case AuthorityType.Aad:
-
                     InstanceDiscoveryMetadataEntry entry =
-                        _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                        await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
+                    _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
+                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
 
                     if (entry == null)
                     {
@@ -137,7 +136,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     }
 
                     return entry;
-
+                    
+                    
                 // ADFS and B2C do not support instance discovery 
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:
@@ -159,6 +159,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
             catch (MsalServiceException ex)
             {
+                if (!requestContext.ServiceBundle.Config.AuthorityInfo.ValidateAuthority)
+                {
+                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery as validate authority is set to false.");
+                    return CreateEntryForSingleAuthority(authorityUri);
+                }
+
                 // Validate Authority exception
                 if (ex.ErrorCode == MsalError.InvalidInstance)
                 {

@@ -17,7 +17,8 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
 using Microsoft.Identity.Client.Internal.Broker;
-
+using Microsoft.Identity.Client.Platforms.Android.Broker;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -29,8 +30,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
         private const string ChromePackage = "com.android.chrome";
+        // this is used to check if anything can open custom tabs.
+        // Must use the classic support. Leaving the reference androidx intent
+        //#if __ANDROID_29__
+        //        private const string CustomTabService = "androidx.browser.customtabs.action.CustomTabsService";
+        //#else
         private const string CustomTabService = "android.support.customtabs.action.CustomTabsService";
-
+        //#endif
         public AndroidPlatformProxy(ICoreLogger logger) : base(logger)
         {
         }
@@ -63,9 +69,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             if (global::Android.OS.Build.VERSION.SdkInt < global::Android.OS.BuildVersionCodes.Lollipop)
             {
+#pragma warning disable CS0618 // For backwards compat only
                 return global::Android.OS.Build.CpuAbi;
+#pragma warning restore CS0618 
             }
-
             IList<string> supportedABIs = global::Android.OS.Build.SupportedAbis;
             if (supportedABIs != null && supportedABIs.Count > 0)
             {
@@ -77,7 +84,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         protected override string InternalGetOperatingSystem()
         {
-            return global::Android.OS.Build.VERSION.Sdk;
+            return ((int)global::Android.OS.Build.VERSION.SdkInt)
+                .ToString(CultureInfo.InvariantCulture);
         }
 
         protected override string InternalGetDeviceModel()
@@ -106,7 +114,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
-        protected override  string InternalGetCallingApplicationName()
+        protected override string InternalGetCallingApplicationName()
         {
             return global::Android.App.Application.Context.ApplicationInfo?.LoadLabel(global::Android.App.Application.Context.PackageManager);
         }
@@ -115,7 +123,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
-        protected override  string InternalGetCallingApplicationVersion()
+        protected override string InternalGetCallingApplicationVersion()
         {
             return global::Android.App.Application.Context.PackageManager.GetPackageInfo(global::Android.App.Application.Context.PackageName, 0)?.VersionName;
         }
@@ -124,7 +132,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
-        protected override  string InternalGetDeviceId()
+        protected override string InternalGetDeviceId()
         {
             return global::Android.Provider.Settings.Secure.GetString(
                 global::Android.App.Application.Context.ContentResolver,
@@ -233,7 +241,21 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public override bool CanBrokerSupportSilentAuth()
         {
-            return true;
+            IBroker broker = CreateBroker(null);
+
+            if (broker.IsBrokerInstalledAndInvokable())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
+        {
+            return new AndroidHttpClientFactory();
         }
     }
 }

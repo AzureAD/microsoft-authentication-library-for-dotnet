@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security;
 using System.Security.Cryptography;
 using System.Threading;
@@ -84,8 +85,7 @@ namespace NetFx
             Console.ResetColor();
             Console.BackgroundColor = ConsoleColor.Black;
             var pca = CreatePca();
-            var cca = CreateCca();
-            RunConsoleAppLogicAsync(pca, cca).Wait();
+            RunConsoleAppLogicAsync(pca).Wait();
         }
 
         private static string GetAuthority()
@@ -101,7 +101,7 @@ namespace NetFx
                 .Build();
 
             BindCache(cca.UserTokenCache, UserCacheFile);
-            //BindCache(cca.AppTokenCache, AppCacheFilePath);
+            BindCache(cca.AppTokenCache, UserCacheFile);
 
             return cca;
         }
@@ -141,8 +141,7 @@ namespace NetFx
 
 
         private static async Task RunConsoleAppLogicAsync(
-            IPublicClientApplication pca,
-            IConfidentialClientApplication cca)
+            IPublicClientApplication pca)
         {
             while (true)
             {
@@ -161,6 +160,7 @@ namespace NetFx
                         6. Acquire Token Silently - multiple requests in parallel
                         7. Acquire SSH Cert Interactive
                         8. Client Credentials 
+                        9. Get Account with ID
                         p. Toggle POP (currently {(s_usePoP ? "ON" : "OFF")}) 
                         c. Clear cache
                         r. Rotate Tenant ID
@@ -294,11 +294,25 @@ namespace NetFx
                             break;
                         case '8':
 
-                            authTask = cca.AcquireTokenForClient(
-                                new[] { "https://graph.microsoft.com/.default" }).
-                                ExecuteAsync();
+                            for (int i = 0; i < 100; i++)
+                            {
+                                var cca = CreateCca();
 
-                            await FetchTokenAndCallApiAsync(pca, authTask).ConfigureAwait(false);
+                                var resultX = await cca.AcquireTokenForClient(
+                                    new[] { "https://graph.microsoft.com/.default" })
+                                    .WithForceRefresh(true)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+
+                                await Task.Delay(500).ConfigureAwait(false);
+                                Console.WriteLine("Got a token");
+                            }
+
+                            Console.WriteLine("Finished");
+
+                            break;
+                        case '9':
+                            var accres = await pca.GetAccountAsync("some_id").ConfigureAwait(false);
                             break;
                         case 'p': // toggle pop
                             s_usePoP = !s_usePoP;
@@ -315,9 +329,8 @@ namespace NetFx
                         case 'r': // rotate tid
 
                             s_currentAuthority = (s_currentAuthority + 1) % s_authorities.Length;
-                            pca = CreatePca();
-                            cca = CreateCca();
-                            RunConsoleAppLogicAsync(pca, cca).Wait();
+                            pca = CreatePca();                            
+                            RunConsoleAppLogicAsync(pca).Wait();
                             break;
 
                         case 'e': // expire all ATs
@@ -334,8 +347,14 @@ namespace NetFx
                                 tokenCacheInternal.Accessor.SaveAccessToken(accessItem);
                             }
 
-                            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs(
-                                pca.UserTokenCache as ITokenCacheInternal, s_clientIdForPublicApp, null, true, false);
+                            TokenCacheNotificationArgs args = 
+                                new TokenCacheNotificationArgs(
+                                pca.UserTokenCache as ITokenCacheInternal, 
+                                s_clientIdForPublicApp, 
+                                null, 
+                                true, 
+                                false, 
+                                true);
 
                             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
 
@@ -537,5 +556,5 @@ namespace NetFx
                 { "dc", "prod-wst-test1" },
             };
         }
-    }
+    }   
 }

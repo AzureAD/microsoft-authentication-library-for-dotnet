@@ -18,6 +18,7 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using System.Threading;
 using System.Collections.ObjectModel;
+using Windows.Security.Authentication.Web;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -29,18 +30,19 @@ namespace UWP_standalone
     public sealed partial class MainPage : Page
     {
         private IPublicClientApplication _pca;
-        private static readonly string s_clientID = "4a1aa1d5-c567-49d0-ad0b-cd957a47f842";
+        private static readonly string s_clientID = "81179aff-797c-49c3-94bd-04ff14feec7d";
         private static readonly string s_authority = "https://login.microsoftonline.com/common/";
         private static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
         private const string CacheFileName = "msal_user_cache.json";
 
-        private const string NullRedirectUri = "None - WEB redirect uri";
+        private const string SSORedirectUri = "https://sso";
         private readonly ObservableCollection<string> _redirectUris = new ObservableCollection<string>();
 
         public MainPage()
         {
             InitializeComponent();
-            _redirectUris.Add(NullRedirectUri);
+            Uri  s = WebAuthenticationBroker.GetCurrentApplicationCallbackUri();
+            _redirectUris.Add(SSORedirectUri);
             _redirectUris.Add("https://MyDirectorySearcherApp");
         }
 
@@ -87,14 +89,11 @@ namespace UWP_standalone
         {
             if (redirectUriCbx.SelectedValue == null)
             {
-                return null;
+                return SSORedirectUri;
             }
 
             string selectedRedirectUri = redirectUriCbx.SelectedValue.ToString();
-            if (selectedRedirectUri == NullRedirectUri)
-            {
-                return null;
-            }
+           
 
             return selectedRedirectUri;
         }

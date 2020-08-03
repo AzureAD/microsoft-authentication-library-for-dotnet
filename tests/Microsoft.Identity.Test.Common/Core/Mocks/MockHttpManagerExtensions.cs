@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 
@@ -141,17 +140,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 });
         }
 
-        public static void AddMockHandlerForTenantEndpointDiscovery(this MockHttpManager httpManager, string authority, string qp = "")
-        {
-            httpManager.AddMockHandler(
-                new MockHttpMessageHandler
-                {
-                    ExpectedUrl = authority + "v2.0/.well-known/openid-configuration",
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(authority, qp)
-                });
-        }
-
         public static void AddMockHandlerContentNotFound(this MockHttpManager httpManager, HttpMethod httpMethod, string url = "")
         {
             httpManager.AddMockHandler(
@@ -209,13 +197,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.contoso.com")
                 });
 
-            //add mock response for tenant endpoint discovery
-            httpManager.AddMockHandler(new MockHttpMessageHandler
-            {
-                ExpectedMethod = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.OnPremiseAuthority)
-            });
-
             httpManager.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Post,
@@ -226,9 +207,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static MockHttpMessageHandler AddAllMocks(this MockHttpManager httpManager, TokenResponseType aadResponse)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(
-                TestConstants.AuthorityUtidTenant);
-
             return AddTokenResponse(httpManager, aadResponse);
         }
 

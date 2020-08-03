@@ -85,6 +85,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .AcquireTokenSilent(s_oboServiceScope, user.Upn)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             }
             catch (MsalUiRequiredException)
             {
@@ -93,6 +94,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, securePassword)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             }
 
             MsalAssert.AssertAuthResult(authResult, user);

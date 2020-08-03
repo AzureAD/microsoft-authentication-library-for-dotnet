@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
@@ -190,7 +191,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new NotImplementedException();
         }
 
-        public virtual IBroker CreateBroker(CoreUIParent uIParent)
+        public virtual IBroker CreateBroker(CoreUIParent uiParent)
         {
             return OverloadBrokerForTest ?? new NullBroker();
         }
@@ -208,6 +209,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual IDeviceAuthManager CreateDeviceAuthManager()
         {
             return new NullDeviceAuthManager();
+        }
+
+        public virtual IMsalHttpClientFactory CreateDefaultHttpClientFactory()
+        {
+            return new SimpleHttpClientFactory();
         }
     }
 }

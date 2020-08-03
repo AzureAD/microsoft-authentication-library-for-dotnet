@@ -9,10 +9,13 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <DefineConstants>$(DefineConstants);WINDOWS_APP_RUNTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid9)'">
     <DefineConstants>$(DefineConstants);ANDROID_RUNTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid10)'">
+    <DefineConstants>$(DefineConstants);ANDROID_RUNTIME</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' OR '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <DefineConstants>$(DefineConstants);DESKTOP_RUNTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">
@@ -23,5 +26,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
-  </ItemGroup>  
+  </ItemGroup>
+
 </Project>

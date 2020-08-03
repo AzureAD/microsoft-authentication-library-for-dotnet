@@ -9,9 +9,9 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [WorkItem(1548)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1548
-        public void FFF()
+        public void TokenCacheHitTest()
         {
             VerifyAccessTokenIsFound("openid profile user.read", new[] { "User.Read" });
             VerifyAccessTokenIsFound("openid profile User.Read", new[] { "User.Read", "offline_access" });
@@ -138,8 +138,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             VerifyAccessTokenIsFound("non_graph_scope", new string[0]);
             VerifyAccessTokenIsFound("openid profile User.Read", new string[0]);
             VerifyAccessTokenIsFound("openid profile User.Read", new[] { "User.Read" });
+            VerifyAccessTokenIsFound("", new[] { "" });
 
-            VerifyAccessTokenIsNotFound("", new[] { "" });
             VerifyAccessTokenIsNotFound("openid profile user.read", new[] { "non_graph_scope" });
             VerifyAccessTokenIsNotFound("openid profile user.read", new[] { "email" });
             VerifyAccessTokenIsNotFound("openid profile user.read", new[] { "user.read", "email" });
@@ -316,6 +316,41 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     new DateTimeOffset(DateTime.UtcNow),
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo, 
+                    _homeAccountId);
+
+                atItem.Secret = atItem.GetKey().ToString();
+                cache.Accessor.SaveAccessToken(atItem);
+
+                var param = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityTestTenant,
+                    new SortedSet<string>(),
+                    cache,
+                    account: new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null));
+
+                Assert.IsNull(cache.FindAccessTokenAsync(param).Result);
+            }
+        }
+
+        [TestMethod]
+        // Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806
+        public void GetInvalidExpirationAccessTokenTest()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
+
+                var atItem = new MsalAccessTokenCacheItem(
+                    TestConstants.ProductionPrefNetworkEnvironment,
+                    TestConstants.ClientId,
+                    TestConstants.s_scope.AsSingleString(),
+                    TestConstants.Utid,
+                    null,
+                    accessTokenExpiresOn: new DateTimeOffset(
+                        DateTime.UtcNow + 
+                        TimeSpan.FromDays(TokenCache.ExpirationTooLongInDays) +
+                        TimeSpan.FromMinutes(5)),
+                    accessTokenExtendedExpiresOn: DateTimeOffset.Now,
+                    _clientInfo,
                     _homeAccountId);
 
                 atItem.Secret = atItem.GetKey().ToString();

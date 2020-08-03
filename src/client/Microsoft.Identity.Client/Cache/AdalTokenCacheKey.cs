@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Cache
     /// <see cref="AdalTokenCacheKey"/> can be used with Linq to access items from the TokenCache dictionary.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    internal sealed class AdalTokenCacheKey
+    internal sealed class AdalTokenCacheKey : IEquatable<AdalTokenCacheKey>
     {
         internal AdalTokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, AdalUserInfo adalUserInfo)
             : this(authority, resource, clientId, tokenSubjectType, adalUserInfo?.UniqueId, adalUserInfo?.DisplayableId)
@@ -49,6 +49,9 @@ namespace Microsoft.Identity.Client.Cache
 
         public string Authority { get; }
 
+        /// <summary>
+        /// For the purposes of MSAL, the resource is irrelevant, since only RTs can be migrated.
+        /// </summary>
         public string Resource { get; }
 
         public string ClientId { get; }
@@ -87,7 +90,7 @@ namespace Microsoft.Identity.Client.Cache
 
             return other != null
                 && other.Authority == Authority
-                && ResourceEquals(other.Resource)
+                // do not use Resource for equality see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1815
                 && ClientIdEquals(other.ClientId)
                 && other.UniqueId == UniqueId
                 && DisplayableIdEquals(other.DisplayableId)
@@ -104,27 +107,23 @@ namespace Microsoft.Identity.Client.Cache
         {
             const string Delimiter = ":::";
             var hashString = Authority + Delimiter
-                           + Resource.ToLowerInvariant() + Delimiter
-                           + ClientId.ToLowerInvariant() + Delimiter
+                          // do not use resource here
+                           + ClientId + Delimiter
                            + UniqueId + Delimiter
-                           + DisplayableId?.ToLowerInvariant() + Delimiter
+                           + DisplayableId + Delimiter
                            + (int)TokenSubjectType;
             return hashString.GetHashCode();
         }
 
-        internal bool ResourceEquals(string otherResource)
+
+        private bool ClientIdEquals(string otherClientId)
         {
-            return string.Compare(otherResource, Resource, StringComparison.OrdinalIgnoreCase) == 0;
+            return string.Equals(otherClientId, ClientId, StringComparison.OrdinalIgnoreCase);
         }
 
-        internal bool ClientIdEquals(string otherClientId)
+        private bool DisplayableIdEquals(string otherDisplayableId)
         {
-            return string.Compare(otherClientId, ClientId, StringComparison.OrdinalIgnoreCase) == 0;
-        }
-
-        internal bool DisplayableIdEquals(string otherDisplayableId)
-        {
-            return string.Compare(otherDisplayableId, DisplayableId, StringComparison.OrdinalIgnoreCase) == 0;
+            return string.Equals(otherDisplayableId, DisplayableId, StringComparison.OrdinalIgnoreCase);
         }
 
         private string DebuggerDisplay =>

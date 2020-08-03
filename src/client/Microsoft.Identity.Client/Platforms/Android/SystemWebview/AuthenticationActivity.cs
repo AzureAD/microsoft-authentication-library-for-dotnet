@@ -9,8 +9,11 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+#if __ANDROID_29__
+using AndroidX.Browser.CustomTabs;
+#else
 using Android.Support.CustomTabs;
-using Microsoft.Identity.Client.Core;
+#endif
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Uri = Android.Net.Uri;
@@ -31,8 +34,15 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
         public AuthenticationActivity()
         { }
 
+        // this is used to check if anything can open custom tabs.
+        // Must use the classic support. Leaving the reference androidx intent
+//#if __ANDROID_29__
+//        private readonly string _customTabsServiceAction =
+//            "androidx.browser.customtabs.action.CustomTabsService";
+//#else
         private readonly string _customTabsServiceAction =
             "android.support.customtabs.action.CustomTabsService";
+//#endif
 
         private string _requestUrl;
         private int _requestId;

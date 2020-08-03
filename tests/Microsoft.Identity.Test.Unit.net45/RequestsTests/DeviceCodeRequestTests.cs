@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = CreateTestHarness())
             {
-                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 var handler = new MockHttpMessageHandler()
                 {
                     ExpectedMethod = HttpMethod.Post,
@@ -336,17 +336,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 extraQueryParameters: TestConstants.ExtraQueryParameters,
                 claims: TestConstants.Claims);
 
-            if (isAdfs)
+            if (!isAdfs)
             {
-                harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateAdfsOpenIdConfigurationResponse(TestConstants.OnPremiseAuthority)
-                });
-            }
-            else
-            {
-                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
             }
 
             expectedScopes = new HashSet<string>();

@@ -68,14 +68,20 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
         public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
 
-        public const string B2CPolicy = "policy";
-        public static readonly string B2CAuthority = $"https://login.microsoftonline.in/tfp/tenant/{B2CPolicy}/";
-        public static readonly string B2CLoginAuthority = $"https://sometenantid.b2clogin.com/tfp/sometenantid/{B2CPolicy}/";
-        public static readonly string B2CLoginAuthorityWrongHost = $"https://anothertenantid.b2clogin.com/tfp/sometenantid/{B2CPolicy}/";
-        public static readonly string B2CCustomDomain = $"https://catsareamazing.com/tfp/catsareamazing/{B2CPolicy}/";
-        public static readonly string B2CLoginAuthorityUsGov = $"https://sometenantid.b2clogin.us/tfp/sometenantid/{B2CPolicy}/";
-        public static readonly string B2CLoginAuthorityMoonCake = $"https://sometenantid.b2clogin.cn/tfp/sometenantid/{B2CPolicy}/";
-        public static readonly string B2CLoginAuthorityBlackforest = $"https://sometenantid.b2clogin.de/tfp/sometenantid/{B2CPolicy}/";
+        public const string B2CSignUpSignIn = "b2c_1_susi";
+        public const string B2CEditProfile = "b2c_1_editprofile";
+        public const string B2CEnvironment = "sometenantid.b2clogin.com";
+        public static readonly string B2CAuthority = $"https://login.microsoftonline.in/tfp/tenant/{B2CSignUpSignIn}/";
+        public static readonly string B2CLoginAuthority = $"https://sometenantid.b2clogin.com/tfp/sometenantid/{B2CSignUpSignIn}/";
+        public static readonly string B2CLoginAuthorityWrongHost = $"https://anothertenantid.b2clogin.com/tfp/sometenantid/{B2CSignUpSignIn}/";
+        public static readonly string B2CCustomDomain = $"https://catsareamazing.com/tfp/catsareamazing/{B2CSignUpSignIn}/";
+        public static readonly string B2CLoginAuthorityUsGov = $"https://sometenantid.b2clogin.us/tfp/sometenantid/{B2CSignUpSignIn}/";
+        public static readonly string B2CLoginAuthorityMoonCake = $"https://sometenantid.b2clogin.cn/tfp/sometenantid/{B2CSignUpSignIn}/";
+        public static readonly string B2CLoginAuthorityBlackforest = $"https://sometenantid.b2clogin.de/tfp/sometenantid/{B2CSignUpSignIn}/";
+        public static readonly string B2CSuSiHomeAccountIdentifer = $"{Uid}-{B2CSignUpSignIn}.{Utid}";
+        public static readonly string B2CSuSiHomeAccountObjectId = $"{Uid}-{B2CSignUpSignIn}";
+        public static readonly string B2CEditProfileHomeAccountIdentifer = $"{Uid}-{B2CEditProfile}.{Utid}";
+        public static readonly string B2CEditProfileHomeAccountObjectId = $"{Uid}-{B2CEditProfile}";
 
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
@@ -192,6 +198,22 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
             };
         }
 
+        public static MsalTokenResponse CreateMsalTokenResponseWithTokenSource()
+        {
+            return new MsalTokenResponse
+            {
+                IdToken = MockHelpers.CreateIdToken(UniqueId, DisplayableId),
+                AccessToken = "access-token",
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = "refresh-token",
+                Scope = s_scope.AsSingleString(),
+                TokenType = "Bearer",
+                TokenSource = TokenSource.Broker
+            };
+        }
+
         public static readonly Account s_user = new Account(s_userIdentifier, DisplayableId, ProductionPrefNetworkEnvironment);
 
         public const string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
@@ -266,6 +288,27 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
                                                    ""id_token"": ""idtoken."",
                                                    ""client_info"": ""eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0""
                                                 }";
+
+        public const string AndroidBrokerResponse = @"
+{
+      ""access_token"":""secretAt"",
+      ""authority"":""https://login.microsoftonline.com/common"",
+      ""cached_at"":1591193165,
+      ""client_id"":""4a1aa1d5-c567-49d0-ad0b-cd957a47f842"",
+      ""client_info"":""clientInfo"",
+      ""environment"":""login.windows.net"",
+      ""expires_on"":1591196764,
+      ""ext_expires_on"":1591196764,
+      ""home_account_id"":""ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462"",
+      ""http_response_code"":0,
+      ""id_token"":""idT"",
+      ""local_account_id"":""ae821e4d-f408-451a-af82-882691148603"",
+      ""scopes"":""User.Read openid offline_access profile"",
+      ""success"":true,
+      ""tenant_id"":""49f548d0-12b7-4169-a390-bb5304d24462"",     
+      ""token_type"":""Bearer"",
+      ""username"":""some_user@contoso.com""
+   }";
     }
 
     internal static class Adfs2019LabConstants

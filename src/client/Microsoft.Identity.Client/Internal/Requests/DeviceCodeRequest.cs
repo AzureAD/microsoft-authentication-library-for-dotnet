@@ -7,9 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -43,10 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.Scope, deviceCodeScopes.AsSingleString());
             client.AddBodyParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.ClaimsAndClientCapabilities);
 
-            string deviceCodeEndpoint = AuthenticationRequestParameters.Endpoints.TokenEndpoint
-                                                                       .Replace("token", "devicecode");
-
-            var builder = new UriBuilder(deviceCodeEndpoint);
+            var builder = new UriBuilder(AuthenticationRequestParameters.Endpoints.DeviceCodeEndpoint);
             builder.AppendQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters);
 
             var response = await client.ExecuteRequestAsync<DeviceCodeResponse>(

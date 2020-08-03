@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CLoginAuthority);
 
                 AuthenticationResult result = app
@@ -68,7 +67,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CAuthority);
 
                 AuthenticationResult result = app
@@ -97,7 +95,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CLoginAuthority);
 
                 AuthenticationResult result = app
@@ -126,7 +123,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CCustomDomain);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CCustomDomain);
 
                 AuthenticationResult result = app
@@ -188,7 +184,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     "?error=access_denied&error_description=AADB2C90091%3a+The+user+has+cancelled+entering+self-asserted+information.")
                 };
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
                 MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
 
                 try
@@ -247,7 +242,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
                 // Arrange 1 - interactive call with 0 scopes
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.B2CLoginAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.B2CLoginAuthority,
                     responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.B2CTokenResponseWithoutAT));
@@ -296,7 +290,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             };
 
             MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
-            harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(authority);
             harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority);
 
             var result = app

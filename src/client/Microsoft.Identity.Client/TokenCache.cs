@@ -9,6 +9,7 @@ using System.Threading;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -30,7 +31,8 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
-        private const int DefaultExpirationBufferInMinutes = 5;
+        private static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
+        internal const int ExpirationTooLongInDays = 10 * 365;
 
         private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
         private readonly IFeatureFlags _featureFlags;

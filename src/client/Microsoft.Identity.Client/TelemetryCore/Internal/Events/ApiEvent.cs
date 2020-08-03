@@ -43,6 +43,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             AcquireTokenSilent = 1007,
             AcquireTokenByDeviceCode = 1008,
             GetAuthorizationRequestUrl = 1009,
+
+            GetAccounts = 1010,
+            GetAccountById = 1011,
+            GetAccountsByUserFlow = 1012,
+            RemoveAccount = 1013
         }
 
         private readonly ICryptographyManager _cryptographyManager;

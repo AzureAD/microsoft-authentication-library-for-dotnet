@@ -314,12 +314,14 @@ namespace XamarinDev
             acquireResponseTitleLabel.Text = EmptyResult;
         }
 
-        private void CreateExceptionMessage(Exception exception)
+        private async void CreateExceptionMessage(Exception exception)
         {
             if (exception is MsalException msalException)
             {
-                acquireResponseLabel.Text = string.Format(CultureInfo.InvariantCulture, "MsalException -\nError Code: {0}\nMessage: {1}",
+                var formattedMessage = string.Format(CultureInfo.InvariantCulture, "MsalException -\nError Code: {0}\nMessage: {1}",
                     msalException.ErrorCode, msalException.Message);
+                acquireResponseLabel.Text = formattedMessage;
+                LogPage.AddToLog(formattedMessage, false);
             }
             else
             {
@@ -327,6 +329,8 @@ namespace XamarinDev
             }
 
             System.Console.WriteLine(exception.Message);
+
+            await DisplayAlert("An error occured. Check Logs", exception.Message, "OK").ConfigureAwait(false);
         }
     }
 }

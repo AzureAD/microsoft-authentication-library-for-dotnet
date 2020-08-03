@@ -67,14 +67,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
 
         [TestMethod]
-        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1507
         // Regression test for: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891
         public async Task SeleniumGetAuthCode_RedeemForAt_CommonAuthority_Async()
         {
             // Arrange
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            
             await RunTestForUserAsync(labResponse, "https://login.microsoftonline.com/common").ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{TenantId}").ConfigureAwait(false);
+            await RunTestForUserAsync(labResponse, $"https://login.microsoftonline.com/{labResponse.User.TenantId}").ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, string authority)
@@ -93,11 +93,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .WithTestLogging()
                 .Build();
 
+            var cacheAccess = (cca as ConfidentialClientApplication).UserTokenCache.RecordAccess();
+
             Trace.WriteLine("Part 1 - Call GetAuthorizationRequestUrl to figure out where to go ");
             var startUri = await cca
                 .GetAuthorizationRequestUrl(s_scopes)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+
+            cacheAccess.AssertAccessCounts(0, 0);
 
             Trace.WriteLine("Part 2 - Use a browser to login and to capture the authorization code ");
             var seleniumUi = new SeleniumWebUI((driver) =>
@@ -120,6 +124,17 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+
+            cacheAccess.AssertAccessCounts(0, 1);
+            Assert.AreEqual(
+                result.Account.HomeAccountId.Identifier,
+                cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                result.Account.HomeAccountId.Identifier,
+                cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(
+                result.Account.HomeAccountId.Identifier,
+                cacheAccess.LastBeforeWriteNotificationArgs.SuggestedCacheKey);
 
             return result;
         }

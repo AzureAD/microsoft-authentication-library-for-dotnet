@@ -19,6 +19,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidGrantError = "invalid_grant";
 
+        /// <summary>
+        /// Standard OAuth2 protocol error code. It indicates that the application needs to expose the UI to the user
+        /// so the user can do an interactive log-in to get a token with updated claims.
+        /// <para>Mitigation:</para> If your application is a <see cref="T:IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
+        /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
+        /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation
+        /// </summary>
+        public const string InteractionRequired = "interaction_required";
+
 #if !DESKTOP && !NET_CORE
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
@@ -52,7 +61,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para>
         /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, string)"/>
         /// or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
-        /// was called with a <c>loginHint</c> parameter which does not match any account in <see cref="IClientApplicationBase.GetAccountsAsync"/>
+        /// was called with a <c>loginHint</c> parameter which does not match any account in <see cref="IClientApplicationBase.GetAccountsAsync()"/>
         /// <para>Mitigation</para>
         /// If you are certain about the loginHint, call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
         /// </summary>
@@ -137,6 +146,12 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para> None. You might want to inform the end user.
         /// </summary>
         public const string UnknownError = "unknown_error";
+
+        /// <summary>
+        /// Unknown broker error occured.
+        /// <para>Mitigation</para> None. You might want to inform the end user.
+        /// </summary>
+        public const string UnknownBrokerError = "unknown_broker_error";
 
         /// <summary>
         /// Authentication failed.
@@ -614,6 +629,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "Client_Credential_Authentication_Types_Are_Mutually_Exclusive";
 
+        /// <summary>
+        /// <para>What happens?</para>You configured MSAL confidential client authentication without an authentication type (Certificate, Secret, Client Assertion)
+        /// <para>Mitigation</para>Either call ConfidentialClientApplicationBuilder.WithClientSecret, ConfidentialClientApplicationBuilder.WithCertificate, ConfidentialClientApplicationBuilder.WithClientAssertion
+        /// </summary>
+        public const string ClientCredentialAuthenticationTypeMustBeDefined = "Client_Credentials_Required_In_Confidential_Client_Application";
+
         #region InvalidGrant suberrors
         /// <summary>
         /// Issue can be resolved by user interaction during the interactive authentication flow.
@@ -783,6 +804,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidAdalCacheMultipleRTs = "invalid_adal_cache";
 
+        /// <summary>
+        /// <para>What happens?</para>MSAL cannot use the certificate for signing.
+        /// <para>Mitigation</para>Possible cause: use of CNG certificates with .Net classic 4.6 or lower. Either target a higher version of .NET desktop - 4.6.1 and above, or use a different certificate type (non-CNG) 
+        /// or sign your own assertion as described at https://aka.ms/msal-net-signed-assertion
+        /// </summary>
+        public const string CryptoNet45 = "crypto_net45";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
@@ -825,6 +853,20 @@ namespace Microsoft.Identity.Client
         /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
         /// </summary>
         public const string ReadingApplicationTokenFromKeychainFailed = "reading_application_token_from_keychain_failed";
+        
+        /// <summary>
+        /// A broker key was generated but it was not saved to the KeyChain. 
+        /// <para>Mitigation</para> Make sure the app has permissions to write to the keychain group 'com.microsoft.adalcache'.
+        /// Capture and inspect the logs to see why the save operation failed.
+        /// </summary>
+        public const string BrokerKeySaveFailed = "ios_broker_key_save_failed";
+
+        /// <summary>
+        /// A broker key was generated but it was not retrived from the KeyChain. 
+        /// <para>Mitigation</para> Make sure the app has permissions to write to the keychain group 'com.microsoft.adalcache'.
+        /// Capture and inspect the logs to see why the fetch operation failed.
+        /// </summary>
+        public const string BrokerKeyFetchFailed = "ios_broker_key_fetch_failed";
 #endif
 
 #if ANDROID

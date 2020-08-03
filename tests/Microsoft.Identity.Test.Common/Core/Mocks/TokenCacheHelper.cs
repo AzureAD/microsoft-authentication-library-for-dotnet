@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 
@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string environment = TestConstants.ProductionPrefCacheEnvironment,
             string displayableId = TestConstants.DisplayableId,
             string rtSecret = TestConstants.RTSecret,
+            string overridenScopes = null, 
             bool expiredAccessTokens = false, 
             bool addSecondAt = true)
         {
@@ -59,7 +60,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                 environment,
                 clientId,
-                TestConstants.s_scope.AsSingleString(),
+                overridenScopes ?? TestConstants.s_scope.AsSingleString(),
                 utid,
                 "",
                 accessTokenExpiresOn,
@@ -178,10 +179,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             accessor.SaveRefreshToken(rtItem);
         }
 
-        public static void AddAccountToCache(ITokenCacheAccessor accessor, string uid, string utid)
+        public static void AddAccountToCache(
+            ITokenCacheAccessor accessor, 
+            string uid, 
+            string utid, 
+            string environment = TestConstants.ProductionPrefCacheEnvironment)
         {
             MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem(
-                TestConstants.ProductionPrefCacheEnvironment,
+                environment,
                 null,
                 MockHelpers.CreateClientInfo(uid, utid),
                 $"{uid}.{utid}",

@@ -24,19 +24,16 @@ namespace Microsoft.Identity.Client
             MsalServiceException ex = null;
             var oAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
 
-            if (string.Equals(oAuth2Response?.Error, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase))
+            if (IsInvalidGrant(oAuth2Response?.Error, oAuth2Response?.SubError) || IsInteractionRequired(oAuth2Response?.Error))
             {
-                if (IsUiInteractionRequired(oAuth2Response?.SubError))
-                {
-                    ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
-                }
+                ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
             }
 
             if (string.Equals(oAuth2Response?.Error, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
             {
                 ex = new MsalServiceException(
                     MsalError.InvalidClient,
-                    MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription, 
+                    MsalErrorMessage.InvalidClient + " Original exception: " + oAuth2Response?.ErrorDescription,
                     innerException);
             }
 
@@ -57,7 +54,57 @@ namespace Microsoft.Identity.Client
             return ex;
         }
 
-        internal static bool IsUiInteractionRequired(string subError)
+        internal static MsalServiceException FromBrokerResponse(
+          string errorCode,
+          string errorMessage,
+          string subErrorCode,
+          string correlationId,
+          HttpResponse brokerHttpResponse)
+        {
+            MsalServiceException ex = null;
+
+            if (IsInvalidGrant(errorCode, subErrorCode) || IsInteractionRequired(errorCode))
+            {
+                ex = new MsalUiRequiredException(errorCode, errorMessage);
+            }
+
+            if (string.Equals(errorCode, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
+            {
+                ex = new MsalServiceException(
+                    MsalError.InvalidClient,
+                    MsalErrorMessage.InvalidClient + " Original exception: " + errorMessage);
+            }
+
+            if (ex == null)
+            {
+                ex = new MsalServiceException(errorCode, errorMessage);
+            }
+
+            if (brokerHttpResponse != null)
+            {
+                ex.ResponseBody = brokerHttpResponse.Body;
+                ex.StatusCode = (int)brokerHttpResponse.StatusCode;
+                ex.Headers = brokerHttpResponse.Headers;
+            }
+
+            ex.CorrelationId = correlationId;
+            ex.SubError = subErrorCode;
+
+            return ex;
+        }
+
+        private static bool IsInteractionRequired(string errorCode)
+        {
+            return string.Equals(errorCode, MsalError.InteractionRequired, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsInvalidGrant(string errorCode, string subErrorCode)
+        {
+            return string.Equals(errorCode, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase)
+                             && IsInvalidGrantSubError(subErrorCode);
+        }
+
+        private static bool IsInvalidGrantSubError(string subError)
         {
             if (string.IsNullOrEmpty(subError))
             {

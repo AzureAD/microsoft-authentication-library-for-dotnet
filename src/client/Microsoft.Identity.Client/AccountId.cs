@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
                 return false;
             }
 
-            return string.Compare(Identifier, otherMsalAccountId.Identifier, StringComparison.OrdinalIgnoreCase) == 0;
+            return string.Equals(Identifier, otherMsalAccountId.Identifier, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

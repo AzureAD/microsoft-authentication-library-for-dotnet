@@ -1,0 +1,54 @@
+steps:
+- task: AzureKeyVault@1
+  displayName: 'Azure Key Vault: BuildAutomation'
+  inputs:
+    azureSubscription: '.NET Keyvault'
+    KeyVaultName: buildautomation
+    SecretsFilter: AppCenterDotNetiOSTestCertPassword
+
+- task: DownloadSecureFile@1
+  displayName: 'Download Certificate'
+  inputs:
+    secureFile: AppCenteriOSBuildCert.p12
+
+- task: DownloadSecureFile@1
+  displayName: 'Download Provisioning Provile'
+  inputs:
+    secureFile: 'TestFile.mobileprovision'
+
+- task: DotNetCoreInstaller@0
+  displayName: 'Use .NET Core sdk 2.1.502'
+  inputs:
+    version: 2.1.502
+
+- task: NuGetCommand@2
+  displayName: 'NuGet restore'
+  inputs:
+    restoreSolution: LibsMacOS.sln
+
+- task: XamariniOS@1
+  displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
+  inputs:
+    solutionFile: LibsMacOS.sln
+    configuration: Debug
+    clean: true
+    runNugetRestore: false
+    args: '/p:APPCENTER_BUILD=1 /p:RunCodeAnalysis=false'
+    buildToolOption: msbuild
+    signingP12File: '$(Agent.TempDirectory)/AppCenteriOSBuildCert.p12'
+    signingP12Password: '$(AppCenterDotNetiOSTestCertPassword)'
+    signingProvisioningProfileFile: '$(Agent.TempDirectory)/TestFile.mobileprovision'
+
+- task: CopyFiles@2
+  displayName: 'Copy ipa to staging directory'
+  inputs:
+    SourceFolder: tests/devapps/XForms/XForms.iOS/bin/iPhone/Debug
+    Contents: '**/*.ipa'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    CleanTargetFolder: true
+    OverWrite: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Xamarin.iOS'
+  inputs:
+    ArtifactName: Xamarin.iOS

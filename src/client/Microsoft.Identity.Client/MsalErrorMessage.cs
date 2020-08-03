@@ -62,6 +62,12 @@ namespace Microsoft.Identity.Client
         public const string BrokerNonceMismatch = "Broker response nonce does not match the request nonce sent by MSAL.NET." +
             "Please see https://aka.ms/msal-net-ios-13-broker for more details. ";
 
+        public static string iOSBrokerKeySaveFailed(string keyChainResult)
+        {
+            return "A broker key was generated but it was not saved to the KeyChain. " +
+                "KeyChain status code: " + keyChainResult;
+        }
+
         public const string StsMetadataRequestFailed =
             "Metadata request to Access Control service failed. Check InnerException for more details";
 
@@ -70,6 +76,8 @@ namespace Microsoft.Identity.Client
 
         public const string UnauthorizedHttpStatusCodeExpected =
             "Unauthorized Http Status Code (401) was expected in the response";
+        
+        internal const string iOSBrokerKeyFetchFailed = "A broker key was generated but it could not be retrived from the KeyChain. Please capture and inspect the logs to see why the fetch operation failed.";
 
         public const string UnauthorizedResponseExpected = "Unauthorized http response (status code 401) was expected";
         public const string UnexpectedAuthorityValidList = "Unexpected list of valid addresses";
@@ -170,6 +178,7 @@ namespace Microsoft.Identity.Client
         public const string PlatformNotSupported = "Platform Not Supported";
 
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1}";
+        public const string ParsingWsTrustResponseFailedErrorTemplate = "Federated service at {0} parse error: Body {1}";
         public const string UnknownUserType = "Unknown User Type";
 
         public const string InternalErrorCacheEmptyUsername =
@@ -221,6 +230,7 @@ namespace Microsoft.Identity.Client
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
 
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "ClientSecret, Certificate and ClientAssertion are mutually exclusive properties. Only specify one. See https://aka.ms/msal-net-client-credentials";
+        public const string ClientCredentialAuthenticationTypeMustBeDefined = "One client credential type required either: ClientSecret, Certificate OR ClientAssertion must be defined when creating a Confidential Client. Only specify one. See https://aka.ms/msal-net-client-credentials";
         public const string ClientIdMustBeAGuid = "Error: ClientId is not a Guid.";
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
@@ -286,24 +296,31 @@ namespace Microsoft.Identity.Client
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines.";
         public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication";
         public static string AuthorityTypeMismatch(
-            AuthorityType appAuthorityType, 
+            AuthorityType appAuthorityType,
             AuthorityType requestAuthorityType)
-            {
+        {
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "A authority of type {0} was used at the application and of type {1} at the request level. " +
-                "Please use the same authority type between the two.", 
-                appAuthorityType, 
+                "Please use the same authority type between the two.",
+                appAuthorityType,
                 requestAuthorityType);
         }
 
         public const string NoAndroidBrokerAccountFound = "Android account manager could not find an account that matched the provided account information.";
-        public const string AndroidBrokerCannotBeInvoked = "In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).";
+        public const string AndroidBrokerCannotBeInvoked = " - In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater). see https://aka.ms/Brokered-Authentication-for-Android";
         public const string CustomMetadataInstanceOrUri = "You have configured your own instance metadata using both an Uri and a string. Only one is supported. " +
             "See https://aka.ms/msal-net-custom-instance-metadata for more details.";
 
         public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow.";
-        public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Mitigation: Delete the ADAL cache. If you do not maintain an ADAL cache, this may be a bug in MSAL.";
+        public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Deleting invalid ADAL cache.";
+
+        public const string CryptoNet45 = 
+            "Could not use the certificate for signing. See inner exception for details. " +
+            "Possible cause: this may be a known issue with apps build against .NET Desktop 4.6 or lower. " +
+            "Either target a higher version of .NET desktop - 4.6.1 and above, " +
+            "or use a different certificate type (non-CNG) or sign your own assertion " +
+            "as described at https://aka.ms/msal-net-signed-assertion";
 
         public static string ExperimentalFeature(string methodName)
         {

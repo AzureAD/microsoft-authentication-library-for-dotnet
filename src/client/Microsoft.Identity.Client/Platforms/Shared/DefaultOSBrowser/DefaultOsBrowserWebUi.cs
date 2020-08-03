@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
@@ -58,24 +59,31 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            
-            var authCodeUri = await InterceptAuthorizationUriAsync(
-                authorizationUri,
-                redirectUri,
-                cancellationToken)
-                .ConfigureAwait(true);
-
-            if (!authCodeUri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) ||
-               !authCodeUri.AbsolutePath.Equals(redirectUri.AbsolutePath))
+            try
             {
-                throw new MsalClientException(
-                    MsalError.LoopbackResponseUriMismatch,
-                    MsalErrorMessage.RedirectUriMismatch(
-                        authCodeUri.AbsolutePath,
-                        redirectUri.AbsolutePath));
-            }
+                var authCodeUri = await InterceptAuthorizationUriAsync(
+                    authorizationUri,
+                    redirectUri,
+                    cancellationToken)
+                    .ConfigureAwait(true);
 
-            return AuthorizationResult.FromUri(authCodeUri.OriginalString);
+                if (!authCodeUri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) ||
+                   !authCodeUri.AbsolutePath.Equals(redirectUri.AbsolutePath))
+                {
+                    throw new MsalClientException(
+                        MsalError.LoopbackResponseUriMismatch,
+                        MsalErrorMessage.RedirectUriMismatch(
+                            authCodeUri.AbsolutePath,
+                            redirectUri.AbsolutePath));
+                }
+
+                return AuthorizationResult.FromUri(authCodeUri.OriginalString);
+            }
+            catch (System.Net.HttpListenerException) // sometimes this exception sneaks out (see issue 1773)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                throw;
+            }
         }
 
         public Uri UpdateRedirectUri(Uri redirectUri)
@@ -132,8 +140,10 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             Func<Uri, Task> defaultBrowserAction = (Uri u) => _platformProxy.StartDefaultOsBrowserAsync(u.AbsoluteUri);
             Func<Uri, Task> openBrowserAction = _webViewOptions?.OpenBrowserAsync ?? defaultBrowserAction;
 
+            cancellationToken.ThrowIfCancellationRequested();
             await openBrowserAction(authorizationUri).ConfigureAwait(false);
 
+            cancellationToken.ThrowIfCancellationRequested();
             return await _uriInterceptor.ListenToSingleRequestAndRespondAsync(
                 redirectUri.Port,
                 GetResponseMessage,

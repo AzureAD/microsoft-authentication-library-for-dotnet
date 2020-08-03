@@ -90,7 +90,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             using (_harness = CreateTestHarness())
             {
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithHttpManager(_harness.HttpManager)
@@ -108,7 +107,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Assert.IsNull(result.HttpRequest, "No calls are made to the token endpoint");
 
                 Trace.WriteLine("Step 3. Acquire Token Silent successful - via refresh_token flow");
-                _harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 1); // Previous_request = 2|1|||
@@ -117,6 +115,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.FailInvalidGrant, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: true); // Current_request = 2 | ATS_ID, 1 |
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
+
+                // invalid grant error puts MSAL in a throttled state - simulate some time passing for this
+                _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
+                    UiRequiredProvider.s_uiRequiredExpiration.Add(TimeSpan.FromSeconds(1)));
 
                 Guid step4Correlationid = result.Correlationid;
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true and failure = interaction_required");

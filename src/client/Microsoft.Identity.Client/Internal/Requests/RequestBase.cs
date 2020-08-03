@@ -3,7 +3,6 @@
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.OAuth2;
@@ -186,7 +185,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ClientInfo fromServer = null;
 
             if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
-                !AuthenticationRequestParameters.IsRefreshTokenRequest &&
+                AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenByRefreshToken &&
                 AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs)
             {
                 //client_info is not returned from client credential flows because there is no user present.
@@ -211,7 +210,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 atItem, 
                 idtItem, 
                 AuthenticationRequestParameters.AuthenticationScheme,
-                AuthenticationRequestParameters.RequestContext.CorrelationId);
+                AuthenticationRequestParameters.RequestContext.CorrelationId,
+                msalTokenResponse.TokenSource);
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 .ConfigureAwait(false);
         }
 
-        protected Task<MsalTokenResponse> SendTokenRequestAsync(
+        internal Task<MsalTokenResponse> SendTokenRequestAsync(
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {

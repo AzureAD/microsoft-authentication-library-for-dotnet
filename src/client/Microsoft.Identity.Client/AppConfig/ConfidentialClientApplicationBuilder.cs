@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -26,9 +25,9 @@ namespace Microsoft.Identity.Client
         /// Constructor of a ConfidentialClientApplicationBuilder from application configuration options.
         /// See https://aka.ms/msal-net-application-configuration
         /// </summary>
-        /// <param name="options">Public client applications configuration options</param>
+        /// <param name="options">Confidential client applications configuration options</param>
         /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
-        /// parameters, and to create a public client application instance</returns>
+        /// parameters, and to create a confidential client application instance</returns>
         public static ConfidentialClientApplicationBuilder CreateWithApplicationOptions(
             ConfidentialClientApplicationOptions options)
         {
@@ -49,7 +48,7 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)/.</param>
         /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
-        /// parameters, and to create a public client application instance</returns>
+        /// parameters, and to create a confidential client application instance</returns>
         public static ConfidentialClientApplicationBuilder Create(string clientId)
         {
             var config = new ApplicationConfiguration();

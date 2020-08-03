@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Test.Common;
@@ -16,6 +15,8 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Client.UI;
 using System.Threading;
+using System.Web;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -37,114 +38,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             CoreAssert.IsImmutable<AuthorityInfo>();
         }
 #endif
-        [TestMethod]
-        public void SuccessfulValidationTest()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                // add mock response for instance validation
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
-                        ExpectedQueryParams = new Dictionary<string, string>
-                        {
-                            {"api-version", "1.1"},
-                            {
-                                "authorization_endpoint",
-                                "https%3A%2F%2Flogin.microsoftonline.in%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"
-                            },
-                        },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                            "{\"tenant_discovery_endpoint\":\"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration\"}")
-                    });
 
-                // add mock response for tenant endpoint discovery
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
-                    });
-
-                Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", true);
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
-
-                var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
-                var endpoints = resolver.ResolveEndpointsAsync(
-                    instance.AuthorityInfo,
-                    null,
-                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
-                    .GetAwaiter().GetResult();
-
-                Assert.AreEqual(
-                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
-                    endpoints.AuthorizationEndpoint);
-                Assert.AreEqual(
-                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
-                    endpoints.TokenEndpoint);
-                Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token", 
-                    endpoints.SelfSignedJwtAudience);
-                Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
-            }
-        }
-
-        [TestMethod]
-        public void ValidationOffSuccessTest()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                // add mock response for tenant endpoint discovery
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
-                    });
-
-                Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com");
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
-
-                var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
-                var endpoints = resolver.ResolveEndpointsAsync(
-                    instance.AuthorityInfo,
-                    null,
-                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
-
-                Assert.AreEqual(
-                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
-                    endpoints.AuthorizationEndpoint);
-                Assert.AreEqual(
-                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
-                    endpoints.TokenEndpoint);
-                Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token", 
-                    endpoints.SelfSignedJwtAudience);
-            }
-        }
 
         [TestMethod]
         public void CreateEndpointsWithCommonTenantTest()
         {
             using (var harness = CreateTestHarness())
             {
-                // add mock response for tenant endpoint discovery
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfigurationCommon.json")))
-                    });
-
                 Authority instance = Authority.CreateAuthority("https://login.microsoftonline.com/common");
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
@@ -194,6 +94,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+                TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority, validateAuthority: true);
                 try
                 {
                     var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
@@ -212,83 +114,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 }
             }
         }
-
-        [TestMethod]
-        public void FailedValidationMissingFieldsTest()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                // add mock response for instance validation
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://login.windows.net/common/discovery/instance",
-                        ExpectedQueryParams = new Dictionary<string, string>
-                        {
-                            {"api-version", "1.0"},
-                            {"authorization_endpoint", "https://login.microsoft0nline.com/mytenant.com/oauth2/v2.0/authorize"},
-                        },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage("{}")
-                    });
-
-                Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com");
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
-                try
-                {
-                    var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
-                    var endpoints = resolver.ResolveEndpointsAsync(
-                        instance.AuthorityInfo,
-                        null,
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
-                        .ConfigureAwait(false).GetAwaiter().GetResult();
-
-                    Assert.Fail("validation should have failed here");
-                }
-                catch (Exception exc)
-                {
-                    Assert.IsNotNull(exc);
-                }
-            }
-        }
-
-        [TestMethod]
-        public void FailedTenantDiscoveryMissingEndpointsTest()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                // add mock response for tenant endpoint discovery
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
-                        ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(
-                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-MissingFields.json")))
-                    });
-
-                Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com");
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
-                try
-                {
-                    var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
-                    var endpoints = resolver.ResolveEndpointsAsync(
-                        instance.AuthorityInfo,
-                        null,
-                    new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
-                        .ConfigureAwait(false).GetAwaiter().GetResult();
-
-                    Assert.Fail("validation should have failed here");
-                }
-                catch (MsalClientException exc)
-                {
-                    Assert.AreEqual(MsalError.TenantDiscoveryFailedError, exc.ErrorCode);
-                }
-            }
-        }
+       
 
         [TestMethod]
         public void CanonicalAuthorityInitTest()
@@ -317,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void TenantSpecificAuthorityInitTest()
         {
             var host = String.Concat("https://", TestConstants.ProductionPrefNetworkEnvironment);
-            var expectedAuthority = String.Concat(host, "/" , TestConstants.TenantId, "/");
+            var expectedAuthority = String.Concat(host, "/", TestConstants.TenantId, "/");
 
             var publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                              .WithAuthority(host, TestConstants.TenantId)
@@ -366,7 +192,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
 
             //Check additional path segments
-            fullAuthority = String.Concat(host , TestConstants.TenantId, "/ABCD!@#$TEST//");
+            fullAuthority = String.Concat(host, TestConstants.TenantId, "/ABCD!@#$TEST//");
 
             publicClient = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                          .WithAuthority(new Uri(fullAuthority))
@@ -389,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(
                 TestConstants.AuthorityCommonTenant);
 
-            Assert.AreEqual("common", authority.GetTenantId());
+            Assert.AreEqual("common", authority.TenantId);
 
             string updatedAuthority = authority.GetTenantedAuthority(TestConstants.Utid);
             Assert.AreEqual(TestConstants.AuthorityUtidTenant, updatedAuthority);
@@ -401,7 +227,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, TestConstants.AuthorityUtidTenant);
         }
-               
+
         [TestMethod]
         //Test for bug #1292 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1292)
         public void AuthorityCustomPortTest()
@@ -424,7 +250,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(customPortAuthority);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(customPortAuthority);
                 harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
 

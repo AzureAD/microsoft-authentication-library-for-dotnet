@@ -1,3 +1,88 @@
+4.17.0
+============
+
+New Features:
+
+**Addition of an enum TokenSource to indicate the source of a token** which can be cache, identity provider or broker. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1728)
+
+Bug Fixes:
+
+**Fix for CryptographicException when using CNG certificate**. Added support for .net classic 4.6.1. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1726)
+**Fix for ArgumentNullException thrown by MsalExtensionException constructor**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1947)
+**Reduce response time for GetDeviceId**. MSAL now will disable MATS telemetry if it is not configured. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1912)
+**Fix for System.Net.HttpListenerException when system browser flow is cancelled**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1773)
+
+4.16.1
+============
+
+Bug Fixes:
+
+**Improved error message for embedded webview http redirect failure**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1264)
+**SuggestedCacheKey property in TokenCacheNotificationArgs** now works correctly in the case of AcquireTokenByAuthorizationCode. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1902)
+
+4.16
+============
+
+New Features:
+
+**MSAL exposes a SuggestedCacheKey property in TokenCacheNotificationArgs**. This property will help determine the token cache location in web site / web api / daemon app scenarios, making it easier to adapt MSAL's token cache to a general purpose distributed cache. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1902)
+
+**MSAL hardnes its HTTP stack to prevent port exhaustion**. Before this improvement, MSAL would use an `HttpClient` object for each request. In high scale scenarios, this can lead to port exhaustion, as disposing of `HttpClient` does not release ports. With this improvement, MSAL uses a static `HttpClient`, which prevents port exhaustion, combined with platform specific techniques to respect DNS changes. This change affects .net classic and .net core implementations. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1756)
+
+Bug Fixes:
+
+**MSAL no longer misses the cache when an empty scope is requested**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1909)
+
+4.15
+============
+New Features:
+
+**MSAL has been upgraded to use Android X**. MSAL.NET will now use the latest Android SDKs for it's Xamarin.Android platform. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1653)
+
+**`GetAccounts()` can now filter by user flow for B2C accounts**. MSAL's `GetAccounts()` api will now allow you to pass in a user flow to filter B2C accounts when quering the cache. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1889)
+
+Bug Fixes:
+
+**MSAL can now migrate from ADALV3 to MSALV3 when multiple resourceId's are used**. MSAL will now  ignore ADAL resource strings when fetching RT to enable migration from ADALV3 to MSALV3 cachetokens. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1815)
+
+**MSAL will now maintain the correlation ID of the authentication request with broker specific interactions throughout it's entire execution**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1805)
+
+**MSAL will now return the correct value for `ExpiresOn` in the authentication result during brokered authentication**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806)
+
+**MSAL now has improved logic for `AcquireTokenSilent()`, `GetAccounts()` and `RemoveAccount()` during brokered authentication**. During brokered authentication, MSAL will now check its local cache for tokens first before sending the silent authentication request to broker. `GetAccounts()` will now merge the accounts from the local MSAL and broker caches when returning results. `RemoveAccount()` will now remove the account from both the local cache and the broker cache. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1820)
+
+**MSAL now has better error reporting during Integrated Windows Authentication**. MSAL will now return the error in the body on WsTrust parse errors. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1838)
+
+**MSAL will now handle null intents returned to `SetAuthenticationContinuationEventArgs`**. MSAL will now handle null intents returned to `SetAuthenticationContinuationEventArgs` to avoid throwing null reference exceptions. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/636)
+
+4.14.0
+============
+New Features: 
+
+**MSAL no longer calls the OIDC metadata endpoint, as it can infer the authorization and token URLs based on the authority URL. This will speed up token acquisition, especially for multi-tenant applications, as fewer network calls will be made. For details see [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1750)
+
+**Client throttling extended support** MSAL will throttle all /token calls during an event in which the server sends a Retry-After header, thus ensuring the Retry-After instruction is observed. MSAL will also throttle server requests that result in `MsalUiRequiredException` being thrown, for example when the user is required to perform MFA but the app keeps trying to acquire a token silently. For details see [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1624)
+
+Bug Fixes:
+
+**MSAL .NET now respects the ValidateAuthority=false flag. See [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1791)
+
+**When the Android broker (Authenticator / Company Portal) is configured but it is not installed, MSAL should revert to using its own cache to try to perform the AcquireTokenSilent call. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1809)
+
+4.13.0
+============
+New Features: 
+
+**Client throttling is supported in Public Client Applications** MSAL will now implement client side throttling to reduce excessive authentication requests sent to the service: In the case where the Azure AD service replies with an HTTP error implying throttling, MSAL.NET now respects itself the delay imposed by the service by throwing an exception telling the application after which delay/when it will be able to acquire a token again without even attempting to call the service. For details see [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1624)
+
+**MSAL now can perform device authentication on Desktop** On Operating systems prior to Windows 10 (Windows 7, 8, 8.1 and their server conterparts) MSAL.NET is able to perform device authentication using PKey Authentication. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1543)
+
+Bug Fixes:
+
+**MSAL .NET would throw a null ref when no authentication type was specified when creating a confidential client application** MSAL .NET now verifies the developer has specified one client credential (client secret, certificate, or client assertion) when using a confidential client application. See [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1795)
+
+**GetAccountsAsync() used to return 0 accounts when the broker was not installed** (on Xamarin.Android). MSAL will now return accounts from the local MSAL cache when the broker is not installed and WithBroker(trus) is used. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1775)
+
 4.12.0
 ============
 New Features: 

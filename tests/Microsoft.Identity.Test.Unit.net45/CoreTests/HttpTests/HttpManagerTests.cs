@@ -31,7 +31,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddResponseMockHandlerForPost(MockHelpers.CreateSuccessTokenResponseMessage());
+                var mock = MockHelpers.CreateSuccessTokenResponseMessage();
+                string actualResponseBody = mock.Content.ReadAsStringAsync().Result;
+                httpManager.AddResponseMockHandlerForPost(mock);
 
                 var response = httpManager.SendPostAsync(
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
@@ -41,7 +43,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-                Assert.AreEqual(MockHelpers.DefaultTokenResponse, response.Body);
+                Assert.AreEqual(
+                    actualResponseBody,
+                    response.Body);
             }
         }
 
@@ -61,7 +65,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddResponseMockHandlerForPost(MockHelpers.CreateSuccessTokenResponseMessage(), bodyParameters, queryParams);
+                var mock = MockHelpers.CreateSuccessTokenResponseMessage();
+                string actualResponseBody = mock.Content.ReadAsStringAsync().Result;
+
+                httpManager.AddResponseMockHandlerForPost(mock, bodyParameters, queryParams);
 
                 var response = httpManager.SendPostAsync(
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
@@ -71,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-                Assert.AreEqual(MockHelpers.DefaultTokenResponse, response.Body);
+                Assert.AreEqual(actualResponseBody, response.Body);
             }
         }
 
@@ -95,7 +102,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-                Assert.AreEqual(MockHelpers.DefaultTokenResponse, response.Body);
             }
         }
 

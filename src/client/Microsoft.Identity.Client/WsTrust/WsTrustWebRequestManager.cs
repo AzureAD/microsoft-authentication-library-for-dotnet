@@ -9,8 +9,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 
@@ -101,8 +101,14 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (System.Xml.XmlException ex)
             {
+                string message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        MsalErrorMessage.ParsingWsTrustResponseFailedErrorTemplate,
+                        wsTrustEndpoint.Uri,
+                        resp.Body);
+
                 throw new MsalClientException(
-                    MsalError.ParsingWsTrustResponseFailed, MsalError.ParsingWsTrustResponseFailed, ex);
+                    MsalError.ParsingWsTrustResponseFailed, message, ex);
             }
         }
 

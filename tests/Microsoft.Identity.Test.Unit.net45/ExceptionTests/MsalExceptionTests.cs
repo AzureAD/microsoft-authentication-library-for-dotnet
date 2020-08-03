@@ -6,9 +6,9 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.ExceptionTests
 {
+
     [TestClass]
     public class MsalExceptionTests
     {
@@ -28,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             ""error_description"":""AADSTS90002: Tenant 'x' not found. "", ""error_codes"":[90002],""timestamp"":""2019-01-28 14:16:04Z"",
             ""trace_id"":""43f14373-8d7d-466e-a5f1-6e3889291e00"",
             ""correlation_id"":""6347d33d-941a-4c35-9912-a9cf54fb1b3e""}";
-
 
         [TestMethod]
         public void ParamValidation()
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalException = new MsalClientException(ExCode, ExMessage);
 
             // Assert
-            var msalClientException = msalException as MsalClientException;
+            var msalClientException = msalException;
             Assert.AreEqual(ExCode, msalClientException.ErrorCode);
             Assert.AreEqual(ExMessage, msalClientException.Message);
             Assert.IsNull(msalClientException.InnerException);
@@ -110,7 +110,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalException.CorrelationId);
             Assert.AreEqual(suberror ?? "", msalException.SubError );
 
-
             if (expectUiRequiredException)
             {
                 Assert.AreEqual(expectedClassification, (msalException as MsalUiRequiredException).Classification);
@@ -144,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse);
 
             // Assert
-            var msalServiceException = msalException as MsalServiceException;
+            var msalServiceException = msalException;
             Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
             Assert.AreEqual(ExMessage, msalServiceException.Message);
             Assert.AreEqual("some_claims", msalServiceException.Claims);
@@ -168,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse);
 
             // Assert
-            var msalServiceException = msalException as MsalServiceException;
+            var msalServiceException = msalException;
             Assert.AreEqual(MsalError.InvalidClient, msalServiceException.ErrorCode);
             Assert.IsTrue(msalServiceException.Message.Contains(MsalErrorMessage.InvalidClient));
             ValidateExceptionProductInformation(msalException);
@@ -192,7 +191,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse, innerException);
 
             // Assert
-            var msalServiceException = msalException as MsalServiceException;
+            var msalServiceException = msalException;
             Assert.AreEqual(innerException, msalServiceException.InnerException);
             Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
             Assert.AreEqual(JsonError, msalServiceException.ResponseBody);
@@ -236,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 innerException);
 
             // Assert
-            var msalUiRequiredException = msalException as MsalUiRequiredException;
+            var msalUiRequiredException = msalException;
             Assert.AreEqual(innerException, msalUiRequiredException.InnerException);
             Assert.AreEqual(ExCode, msalUiRequiredException.ErrorCode);
             Assert.IsNull(msalUiRequiredException.Claims);
@@ -282,7 +281,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, msalhttpResponse);
 
             // Assert
-            var msalServiceException = msalException as MsalServiceException;
+            var msalServiceException = msalException;
             Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
             Assert.AreEqual(responseBody, msalServiceException.ResponseBody);
             Assert.AreEqual(ExMessage, msalServiceException.Message);

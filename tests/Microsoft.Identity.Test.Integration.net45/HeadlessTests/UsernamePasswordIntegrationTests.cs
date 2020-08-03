@@ -60,6 +60,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
@@ -67,6 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
@@ -108,6 +110,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(authResult);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
         }
@@ -119,6 +122,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// </summary>
         /// <returns></returns>
         [TestMethod]
+        [TestCategory(TestCategories.MSA)]
         public async Task ROPC_MSA_Async()
         {
             var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
@@ -201,6 +205,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ConfigureAwait(false);
 
             Assert.IsNotNull(authResult);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));
@@ -253,6 +258,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.IsNotNull(authResult);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
             Assert.IsTrue(string.Equals(labResponse.User.Upn, authResult.Account.Username, StringComparison.InvariantCultureIgnoreCase));

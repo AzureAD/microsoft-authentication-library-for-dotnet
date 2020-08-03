@@ -4,11 +4,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-#if !IS_APPCENTER_BUILD
 using AuthenticationServices;
-#endif
 using Foundation;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using SafariServices;
 using UIKit;
@@ -17,24 +15,23 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal abstract class WebviewBase : NSObject, IWebUI, ISFSafariViewControllerDelegate
     {
-        protected static SemaphoreSlim returnedUriReady;
-        protected static AuthorizationResult authorizationResult;
-        protected static UIViewController viewController;
+        protected static SemaphoreSlim s_returnedUriReady;
+        protected static AuthorizationResult s_authorizationResult;
+        protected static UIViewController s_viewController;
+
         protected SFSafariViewController safariViewController;
         protected SFAuthenticationSession sfAuthenticationSession;
-        /* For app center builds, this will need to build on a hosted mac agent. The mac agent does not have the latest SDK's required to build 'ASWebAuthenticationSession'
-        * Until the agents are updated, appcenter build will need to ignore the use of 'ASWebAuthenticationSession' for iOS 12.*/
-#if !IS_APPCENTER_BUILD
         protected ASWebAuthenticationSession asWebAuthenticationSession;
-#endif
         protected nint taskId = UIApplication.BackgroundTaskInvalid;
         protected NSObject didEnterBackgroundNotification;
         protected NSObject willEnterForegroundNotification;
 
-        public WebviewBase()
+        protected WebviewBase()
         {
-            didEnterBackgroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.DidEnterBackgroundNotification, OnMoveToBackground);
-            willEnterForegroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.WillEnterForegroundNotification, OnMoveToForeground);
+            didEnterBackgroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(
+                UIApplication.DidEnterBackgroundNotification, OnMoveToBackground);
+            willEnterForegroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(
+                UIApplication.WillEnterForegroundNotification, OnMoveToForeground);
         }
 
         public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(
@@ -43,15 +40,28 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             RequestContext requestContext,
             CancellationToken cancellationToken);
 
-        public static bool ContinueAuthentication(string url)
+        public static bool ContinueAuthentication(string url, Core.ICoreLogger logger)
         {
-            if (returnedUriReady == null)
+            if (s_returnedUriReady == null)
             {
+                bool containsBrokerSubString = url.Contains(iOSBrokerConstants.IdentifyiOSBrokerFromResponseUrl);
+                
+                logger?.Warning(
+                    "Not expecting navigation to come back to WebviewBase. " +
+                    "This can indicate  a badly setup OpenUrl hook " +
+                    "where SetBrokerContinuationEventArgs is not called.");
+
+                logger?.WarningPii(
+                    $"Url: {url} is broker url? {containsBrokerSubString}",
+                    $"Is broker url? {containsBrokerSubString}");
+                
                 return false;
             }
 
-            authorizationResult = AuthorizationResult.FromUri(url);
-            returnedUriReady.Release();
+            s_authorizationResult = AuthorizationResult.FromUri(url);
+            logger?.Verbose("Response url parsed and the result is " + s_authorizationResult.Status);
+
+            s_returnedUriReady.Release();
 
             return true;
         }

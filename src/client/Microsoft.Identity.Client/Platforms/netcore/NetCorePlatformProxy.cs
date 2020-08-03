@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using System.ComponentModel;
 using System.Text;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.netcore
 {
@@ -199,6 +200,11 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         }
 
         public override bool UseEmbeddedWebViewDefault => false;
+
+        public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
+        {
+            return new NetCoreHttpClientFactory();
+        }
 
         /// <summary>
         ///  Is this a windows platform

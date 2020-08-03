@@ -13,9 +13,11 @@ namespace XamarinDev
         public static PublicClientApplication MsalPublicClient;
 
         public static object RootViewController { get; set; }
-
-        public const string DefaultClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8"; // in msidentity-samples-testing tenant -> PublicClientSample
-
+#if !IS_APPCENTER_BUILD
+        public const string DefaultClientId = "4a1aa1d5-c567-49d0-ad0b-cd957a47f842"; // in msidentity-samples-testing tenant -> PublicClientSample
+#else
+        public const string DefaultClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8"; // UI Automation Test App ID
+#endif
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
         public static string BrokerRedirectUri
@@ -27,7 +29,12 @@ namespace XamarinDev
                     case Device.iOS:
                         return "msauth.com.companyname.XamarinDev://auth";
                     case Device.Android:
-                        return "msauth://com.companyname.xamarindev/FHNONvDstzaj3bKe2+WAEGZOwJI=";
+#if !IS_APPCENTER_BUILD
+                        //This value needs to be calculated from the certificate used to sign the package. See https://aka.ms/MSAL_NET_Broker_Redirect_URI
+                        return "Broker Redirect URI";
+#else
+                        return "msauth://com.companyname.xamarindev/Fy2zjTiLYs5sXM3sGy+PGcv8MaQ=";
+#endif
                     default:
                         throw new InvalidOperationException("Broker only supported on ios and android");
                 }
@@ -81,7 +88,6 @@ namespace XamarinDev
                 builder.WithBroker();
                 builder = builder.WithRedirectUri(BrokerRedirectUri);
             }
-
             else
             {
                 builder.WithRedirectUri(DefaultMobileRedirectUri);

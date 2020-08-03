@@ -8,8 +8,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -216,6 +217,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(accounts);
                 Assert.IsFalse(accounts.Any());
                 tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+                
                 accounts = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(accounts);
                 Assert.AreEqual(1, accounts.Count());
@@ -325,7 +327,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Assert 
             Assert.IsFalse(accounts.Any(), "No accounts should be returned because the existing account to a different client");
             cacheAccessRecorder.AssertAccessCounts(1, 0);
-
+            
             // Arrange
 
             // Populate for clientid2
@@ -341,6 +343,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Act
             accounts = await app.GetAccountsAsync().ConfigureAwait(false);
             cacheAccessRecorder.AssertAccessCounts(2, 0);
+            Assert.IsTrue(cacheAccessRecorder.LastAfterAccessNotificationArgs.HasTokens);
 
             await app.RemoveAsync(accounts.Single()).ConfigureAwait(false);
 
@@ -352,7 +355,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                expectedAccountCount: 0,
                expectedIdtCount: 1,
                expectedAppMetadataCount: 2); // app metadata is never deleted
-
         }
 
         [TestMethod]

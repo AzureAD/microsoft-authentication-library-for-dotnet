@@ -16,13 +16,17 @@ namespace Microsoft.Identity.Client
             string clientId,
             IAccount account,
             bool hasStateChanged,
-            bool isAppCache)
+            bool isAppCache, 
+            bool hasTokens,
+            string suggestedCacheKey = null)
         {
             TokenCache = tokenCacheSerializer;
             ClientId = clientId;
             Account = account;
             HasStateChanged = hasStateChanged;
             IsApplicationCache = isAppCache;
+            HasTokens = hasTokens;
+            SuggestedCacheKey = suggestedCacheKey;
         }
 
         /// <summary>
@@ -55,5 +59,29 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-app-cache-serialization for details.
         /// </remarks>
         public bool IsApplicationCache { get; }
+
+        /// <summary>
+        /// A suggested token cache key, which can be used with general purpose storage mechanisms that allow 
+        /// storing key-value pairs and key based retrieval. Useful in applications that store 1 token cache per user, 
+        /// the recommended pattern for web apps.
+        /// 
+        /// The value is: 
+        /// 
+        /// <list type="bullet">
+        /// <item>the homeAccountId for AcquireTokenSilent, GetAccount(homeAccountId), RemoveAccount and when writing tokens on confidential client calls</item>
+        /// <item>clientID + "_AppTokenCache" for AcquireTokenForClient</item>
+        /// <item>the hash of the original token for AcquireTokenOnBehalfOf</item>
+        /// </list>
+        /// </summary>
+        public string SuggestedCacheKey { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// If this flag is false in the OnAfterAccessAsync notification, the token cache can be deleted.        
+        /// MSAL takes into consideration access tokens expiration when computing this flag, but not refresh token expiration, which is not known to MSAL.7
+        /// </remarks>
+        public bool HasTokens { get; }
     }
 }

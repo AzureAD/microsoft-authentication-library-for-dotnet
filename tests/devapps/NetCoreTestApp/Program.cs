@@ -23,6 +23,14 @@ namespace NetCoreTestApp
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
 
+        // Confidential client app with access to https://graph.microsoft.com/.default
+        private static readonly string s_clientIdForConfidentialApp =
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_ID");
+
+        // App secret for app above 
+        private static readonly string s_confidentialClientSecret =
+            Environment.GetEnvironmentVariable("LAB_APP_CLIENT_SECRET");
+
         private static readonly IEnumerable<string> s_scopes = new[] {
             "user.read", "openid" }; // used for WIA and U/P, can be empty
 
@@ -94,6 +102,7 @@ namespace NetCoreTestApp
                         4. Acquire Token Interactive (via CustomWebUI)
                         5. Acquire Token Interactive
                         6. Acquire Token Silently
+                        7. Confidential Client
                         8. Clear cache
                         9. Rotate Tenant ID
                         0. Exit App
@@ -170,6 +179,23 @@ namespace NetCoreTestApp
 
                             break;
 
+                        case 7:
+                            for (int i = 0; i < 100; i++)
+                            {
+                                var cca = CreateCca();
+
+                                var resultX = await cca.AcquireTokenForClient(
+                                    new[] { "https://graph.microsoft.com/.default" })
+                                    .WithForceRefresh(true)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+
+                                await Task.Delay(500).ConfigureAwait(false);
+                                Console.WriteLine("Got a token");
+                            }
+
+                            Console.WriteLine("Finished");
+                            break;
                         case 8:
                             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                             foreach (var acc in accounts)
@@ -204,6 +230,18 @@ namespace NetCoreTestApp
             }
         }
 
+        private static IConfidentialClientApplication CreateCca()
+        {
+            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                .Create(s_clientIdForConfidentialApp)
+                .WithClientSecret(s_confidentialClientSecret)
+                .Build();          
+
+            return cca;
+        }
+
+     
+
         private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
             await authTask.ConfigureAwait(false);
@@ -218,20 +256,6 @@ namespace NetCoreTestApp
             callGraphTask.Wait();
             Console.WriteLine("Result from calling the ME endpoint of the graph: " + callGraphTask.Result);
             Console.ResetColor();
-        }
-
-        private static X509Certificate2 GetCertificateByThumbprint(string thumbprint)
-        {
-            using (var store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
-            {
-                store.Open(OpenFlags.ReadOnly);
-                var certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
-                if (certs.Count > 0)
-                {
-                    return certs[0];
-                }
-                throw new InvalidOperationException($"Cannot find certificate with thumbprint '{thumbprint}'");
-            }
         }
 
         private static async Task DisplayAccountsAsync(IPublicClientApplication pca)

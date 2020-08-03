@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -13,6 +11,10 @@ namespace Microsoft.Identity.Client.Instance
     {
         public const string DefaultTrustedHost = "login.microsoftonline.com";
         public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
+
+        private const string TokenEndpointTemplate = "{0}oauth2/v2.0/token";
+        private const string DeviceCodeEndpointTemplate = "{0}oauth2/v2.0/devicecode";
+        private const string AuthorizationEndpointTemplate = "{0}oauth2/v2.0/authorize";
 
         private static readonly ISet<string> s_tenantlessTenantNames = new HashSet<string>(
           new[]
@@ -25,19 +27,15 @@ namespace Microsoft.Identity.Client.Instance
 
         internal AadAuthority(AuthorityInfo authorityInfo) : base(authorityInfo)
         {
+            TenantId = GetFirstPathSegment(AuthorityInfo.CanonicalAuthority);
         }
 
-        internal override string GetTenantId()
-        {
-            return GetFirstPathSegment(AuthorityInfo.CanonicalAuthority);
-        }
+        internal override string TenantId { get; }
 
         internal bool IsCommonOrganizationsOrConsumersTenant()
         {
-            string tenantId = this.GetTenantId();
-
-            return !string.IsNullOrEmpty(tenantId) &&
-                s_tenantlessTenantNames.Contains(tenantId);
+            return !string.IsNullOrEmpty(TenantId) &&
+                s_tenantlessTenantNames.Contains(TenantId);
         }
 
         internal override string GetTenantedAuthority(string tenantId)
@@ -55,6 +53,25 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             return AuthorityInfo.CanonicalAuthority;
+        }
+
+        internal override AuthorityEndpoints GetHardcodedEndpoints()
+        {
+            string tokenEndpoint = string.Format(
+                    CultureInfo.InvariantCulture,
+                    TokenEndpointTemplate,
+                    AuthorityInfo.CanonicalAuthority);
+
+            string authorizationEndpoint = string.Format(CultureInfo.InvariantCulture,
+                    AuthorizationEndpointTemplate,
+                    AuthorityInfo.CanonicalAuthority);
+
+            string deviceEndpoint = string.Format(
+                CultureInfo.InvariantCulture,
+                DeviceCodeEndpointTemplate,
+                AuthorityInfo.CanonicalAuthority);
+
+            return new AuthorityEndpoints(authorizationEndpoint, tokenEndpoint, deviceEndpoint);
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -19,11 +19,10 @@ namespace Microsoft.Identity.Client
         SemaphoreSlim Semaphore { get; }
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
-        bool IsApplicationCache { get; }
 
         #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, RequestContext requestContext);
-        Task<IEnumerable<IAccount>> GetAccountsAsync(string authority, RequestContext requestContext);
+        Task<IEnumerable<IAccount>> GetAccountsAsync(AuthenticationRequestParameters requestParameters);
 
         /// <summary>
         /// Persists the AT and RT and updates app metadata (FOCI)
@@ -58,11 +57,7 @@ namespace Microsoft.Identity.Client
         /// FOCI - check in the app metadata to see if the app is part of the family
         /// </summary>
         /// <returns>null if unkown, true or false if app metadata has details</returns>
-        Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId);
-
-        void ClearAdalCache();
-        void ClearMsalCache();
-        Task ClearAsync();
+        Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId);     
 
         void SetIosKeychainSecurityGroup(string securityGroup);
 
@@ -71,6 +66,14 @@ namespace Microsoft.Identity.Client
         Task OnAfterAccessAsync(TokenCacheNotificationArgs args);
         Task OnBeforeAccessAsync(TokenCacheNotificationArgs args);
         Task OnBeforeWriteAsync(TokenCacheNotificationArgs args);
+
+        bool IsApplicationCache { get; }
+
+        /// <summary>
+        /// Shows if MSAL's in-memory token cache has any kind of RT or non-expired AT. Does not trigger a cache notification.
+        /// Ignores ADAL's cache.
+        /// </summary>
+        bool HasTokensNoLocks();
 
         #endregion
     }

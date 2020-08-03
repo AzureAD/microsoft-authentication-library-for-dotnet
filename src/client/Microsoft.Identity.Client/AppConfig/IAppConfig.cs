@@ -67,6 +67,7 @@ namespace Microsoft.Identity.Client
         IDictionary<string, string> ExtraQueryParameters { get; }
 
         /// <summary>
+        /// Indicates whether or not the current application object is configured to use brokered authentication.
         /// </summary>
         bool IsBrokerEnabled { get; }
 

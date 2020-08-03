@@ -12,8 +12,8 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
@@ -105,7 +105,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 };
 
                 MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 try
                 {
@@ -154,7 +153,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 };
 
                 MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 try
                 {
@@ -189,8 +187,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
 
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -235,7 +231,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 Guid correlationId = Guid.NewGuid();
@@ -251,7 +246,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
                 Assert.AreEqual(TestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
+                Assert.IsNull(userCacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey, "Don't suggest keys for public client");
+                Assert.IsNull(userCacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey, "Don't suggest keys for public client");
                 userCacheAccess.AssertAccessCounts(0, 1);
+
 
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
@@ -322,7 +320,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app
@@ -389,7 +386,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app
@@ -475,7 +471,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app
@@ -565,8 +560,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithTelemetry(new TraceTelemetryConfig())
                                                                             .BuildConcrete();
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
-
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
@@ -638,6 +631,46 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task GetAccountByUserFlowTestsAsync()
+        {
+            var app = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithB2CAuthority(TestConstants.B2CLoginAuthority)
+                .BuildConcrete();
+
+            var accounts = app.GetAccountsAsync(TestConstants.B2CSignUpSignIn).Result;
+            Assert.AreEqual(0, accounts.Count());
+
+            await AssertException.TaskThrowsAsync<ArgumentException>(() =>
+              app.GetAccountsAsync(string.Empty)).ConfigureAwait(false);
+
+            accounts = PopulateB2CTokenCacheAsync(TestConstants.B2CSignUpSignIn, app).Result;
+
+            var userToFind = accounts.First();
+
+            Assert.IsNotNull(accounts);
+            // one account in the cache for susi user flow
+
+            Assert.IsNull(userToFind.Username);
+            Assert.AreEqual(TestConstants.B2CSuSiHomeAccountIdentifer, userToFind.HomeAccountId.Identifier);
+            Assert.AreEqual(TestConstants.B2CEnvironment, userToFind.Environment);
+            Assert.AreEqual(TestConstants.Utid, userToFind.HomeAccountId.TenantId);
+            Assert.AreEqual(TestConstants.B2CSuSiHomeAccountObjectId, userToFind.HomeAccountId.ObjectId);
+
+            accounts = PopulateB2CTokenCacheAsync(TestConstants.B2CEditProfile, app).Result;
+
+            Assert.IsNotNull(accounts);
+            // one account in the cache for edit profile user flow
+
+            userToFind = accounts.First();
+            Assert.IsNull(userToFind.Username);
+            Assert.AreEqual(TestConstants.B2CEditProfileHomeAccountIdentifer, userToFind.HomeAccountId.Identifier);
+            Assert.AreEqual(TestConstants.B2CEnvironment, userToFind.Environment);
+            Assert.AreEqual(TestConstants.Utid, userToFind.HomeAccountId.TenantId);
+            Assert.AreEqual(TestConstants.B2CEditProfileHomeAccountObjectId, userToFind.HomeAccountId.ObjectId);
+        }
+
+        [TestMethod]
         [Description("Test for AcquireToken with user canceling authentication")]
         public async Task AcquireTokenWithAuthenticationCanceledTestAsync()
         {
@@ -659,7 +692,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MockResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel)
                 };
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
 
                 try
@@ -708,7 +740,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=access_denied")
                 };
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
 
                 try
@@ -892,7 +923,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 await app
@@ -1083,7 +1113,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app
@@ -1115,6 +1144,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     {
                         {"key1", "value1"}
                     });
+        }
+
+        private Task<IEnumerable<IAccount>> PopulateB2CTokenCacheAsync(string userFlow, PublicClientApplication app)
+        {
+            TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CSuSiHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.ClientId, TestConstants.B2CEnvironment);
+            TokenCacheHelper.AddAccountToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CSuSiHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.B2CEnvironment);
+
+            TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CEditProfileHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.ClientId, TestConstants.B2CEnvironment);
+            TokenCacheHelper.AddAccountToCache(app.UserTokenCacheInternal.Accessor, TestConstants.B2CEditProfileHomeAccountObjectId,
+                TestConstants.Utid, TestConstants.B2CEnvironment);
+
+            return app.GetAccountsAsync(userFlow);
         }
     }
 }

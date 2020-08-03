@@ -1,19 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Instance.Validation;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {
+    /// <summary>
+    /// Responsible for figuring out authority endpoints
+    /// </summary>
     internal class AuthorityEndpointResolutionManager : IAuthorityEndpointResolutionManager
     {
         private static readonly ConcurrentDictionary<string, AuthorityEndpointCacheEntry> s_endpointCacheEntries =
@@ -43,58 +41,17 @@ namespace Microsoft.Identity.Client.Instance
 
             requestContext.Logger.Info(LogMessages.ResolvingAuthorityEndpointsFalse);
 
-            var endpointManager = OpenIdConfigurationEndpointManagerFactory.Create(authorityInfo, _serviceBundle);
+            var validator = AuthorityValidatorFactory.Create(authorityInfo, _serviceBundle);
 
-            string openIdConfigurationEndpoint = await endpointManager.ValidateAuthorityAndGetOpenIdDiscoveryEndpointAsync(
-                                                     authorityInfo,
-                                                     userPrincipalName,
-                                                     requestContext).ConfigureAwait(false);
+            // TODO: move this away from here?
+            await validator.ValidateAuthorityAsync(authorityInfo, requestContext).ConfigureAwait(false);
 
-            // Discover endpoints via openid-configuration
-            var edr = await DiscoverEndpointsAsync(openIdConfigurationEndpoint, requestContext).ConfigureAwait(false);
-
-            if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
-            {
-                throw new MsalClientException(
-                    MsalError.TenantDiscoveryFailedError,
-                    MsalErrorMessage.AuthorizeEndpointWasNotFoundInTheOpenIdConfiguration);
-            }
-
-            if (string.IsNullOrEmpty(edr.TokenEndpoint))
-            {
-                throw new MsalClientException(
-                    MsalError.TenantDiscoveryFailedError,
-                    MsalErrorMessage.TokenEndpointWasNotFoundInTheOpenIdConfiguration);
-            }
-
-            if (string.IsNullOrEmpty(edr.Issuer))
-            {
-                throw new MsalClientException(
-                    MsalError.TenantDiscoveryFailedError,
-                    MsalErrorMessage.IssuerWasNotFoundInTheOpenIdConfiguration);
-            }
-
+            //TODO: stop using AuthorityInfo on its own
             var authority = Authority.CreateAuthority(authorityInfo);
-            var tenantId = authority.GetTenantId();
 
-            string authorizationEndpoint = ReplaceTenantToken(edr.AuthorizationEndpoint, tenantId);
-            string tokenEndpoint = ReplaceTenantToken(edr.TokenEndpoint, tenantId);
-
-            endpoints = new AuthorityEndpoints(
-                authorizationEndpoint,
-                tokenEndpoint,
-                tokenEndpoint);
-
+            endpoints = authority.GetHardcodedEndpoints();
             Add(authorityInfo, userPrincipalName, endpoints);
             return endpoints;
-        }
-
-        private static string ReplaceTenantToken(string template, string tenantId)
-        {
-            // some templates use {tenant}, some {tenantid}
-            template = template.Replace(Constants.Tenant, tenantId, StringComparison.OrdinalIgnoreCase);
-            template = template.Replace(Constants.TenantId, tenantId, StringComparison.OrdinalIgnoreCase);
-            return template;
         }
 
         private bool TryGetCacheValue(AuthorityInfo authorityInfo, string userPrincipalName, out AuthorityEndpoints endpoints)
@@ -112,12 +69,10 @@ namespace Microsoft.Identity.Client.Instance
                 return true;
             }
 
-            if (!string.IsNullOrEmpty(userPrincipalName))
+            if (!string.IsNullOrEmpty(userPrincipalName) &&
+                !cacheEntry.ValidForDomainsList.Contains(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName)))
             {
-                if (!cacheEntry.ValidForDomainsList.Contains(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName)))
-                {
-                    return false;
-                }
+                return false;
             }
 
             endpoints = cacheEntry.Endpoints;
@@ -147,17 +102,6 @@ namespace Microsoft.Identity.Client.Instance
             }
 
             s_endpointCacheEntries.TryAdd(authorityInfo.CanonicalAuthority, updatedCacheEntry);
-        }
-
-        private async Task<TenantDiscoveryResponse> DiscoverEndpointsAsync(
-             string openIdConfigurationEndpoint,
-             RequestContext requestContext)
-        {
-            var client = new OAuth2Client(requestContext.Logger, _serviceBundle.HttpManager, _serviceBundle.MatsTelemetryManager);
-            return await client.ExecuteRequestAsync<TenantDiscoveryResponse>(
-                       new Uri(openIdConfigurationEndpoint),
-                       HttpMethod.Get,
-                       requestContext).ConfigureAwait(false);
         }
 
         private class AuthorityEndpointCacheEntry

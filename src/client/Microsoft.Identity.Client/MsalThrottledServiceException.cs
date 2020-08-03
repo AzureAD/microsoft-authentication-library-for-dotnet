@@ -7,8 +7,8 @@ namespace Microsoft.Identity.Client
     /// Exception type thrown when MSAL detects that an application is trying to acquire a token too often, as a result of: 
     /// - A previous request resulted in an HTTP response containing a Retry-After header which was not followed.
     /// - A previous request resulted in an HTTP 429 or 5xx, which indicates a problem with the server.
-    /// 
-    /// The properties of this exception are identical to the original exceptin
+    ///     
+    /// The properties of this exception are identical to the original exception
     /// 
     /// For more details see https://aka.ms/msal-net-throttling
     /// </summary>

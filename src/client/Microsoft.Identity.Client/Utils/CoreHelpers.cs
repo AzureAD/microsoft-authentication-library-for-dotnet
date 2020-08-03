@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Utils
 {
@@ -40,11 +40,11 @@ namespace Microsoft.Identity.Client.Utils
             return unixTimestamp.ToString(CultureInfo.InvariantCulture);
         }
 
-        public static string CurrDateTimeInUnixTimestamp()
+        public static long CurrDateTimeInUnixTimestamp()
         {
             var unixEpochDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             long unixTimestamp = (long)DateTime.UtcNow.Subtract(unixEpochDateTime).TotalSeconds;
-            return unixTimestamp.ToString(CultureInfo.InvariantCulture);
+            return unixTimestamp;
         }
 
         public static long DateTimeToUnixTimestampMilliseconds(DateTimeOffset dateTimeOffset)

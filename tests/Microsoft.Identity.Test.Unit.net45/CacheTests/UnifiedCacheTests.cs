@@ -6,10 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -24,8 +28,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Description("Test unified token cache")]
         public void UnifiedCache_MsalStoresToAndReadRtFromAdalCache()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var mocks = new MockHttpAndServiceBundle())
             {
+                var httpManager = mocks.HttpManager;
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -39,7 +44,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                 AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 HttpResponseMessage response = MockHelpers.CreateSuccessTokenResponseMessageWithUid(
                     TestConstants.Uid, 
                     TestConstants.Utid, 
@@ -57,15 +61,20 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
                 var requestContext = new RequestContext(app.ServiceBundle, Guid.NewGuid());
-                var accounts = app.UserTokenCacheInternal.GetAccountsAsync(
-                    TestConstants.AuthorityCommonTenant, requestContext).Result;
+
+                AuthenticationRequestParameters reqParams = new AuthenticationRequestParameters(
+                    mocks.ServiceBundle,
+                    app.UserTokenCacheInternal,
+                    new Client.ApiConfig.Parameters.AcquireTokenCommonParameters(),
+                    requestContext);
+
+                var accounts = app.UserTokenCacheInternal.GetAccountsAsync(reqParams).Result;
                 foreach (IAccount account in accounts)
                 {
                     app.UserTokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
                 }
 
                 Assert.AreEqual(0, httpManager.QueueSize);
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityUtidTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -123,7 +132,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     app.ServiceBundle.PlatformProxy,
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 AuthenticationResult result = app
@@ -187,8 +195,58 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [Description("Test for duplicate key in ADAL cache")]
-        public void UnifiedCache_ProcessAdalDictionaryForDuplicateKeyTest()
+        [Description("Tokens for different resources should not result in multiple entries, because" +
+            "refresh tokens are not scope / resource bound.")]
+        [TestCategory(TestCategories.Regression)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1815
+
+        public async Task UnifiedCache_ProcessAdalDictionaryForDuplicateKey_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var app = PublicClientApplicationBuilder
+                          .Create(TestConstants.ClientId)
+                          .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                          .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
+                          .WithHttpManager(harness.HttpManager)
+                          .BuildConcrete();
+
+                CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, TestConstants.s_scope.ToString());
+
+                var adalUsers =
+                    CacheFallbackOperations.GetAllAdalUsersForMsal(
+                        harness.ServiceBundle.DefaultLogger,
+                        app.UserTokenCacheInternal.LegacyPersistence,
+                        TestConstants.ClientId);
+
+                CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, "user.read");
+
+                AdalUsersForMsal adalUsers2 =
+                    CacheFallbackOperations.GetAllAdalUsersForMsal(
+                        harness.ServiceBundle.DefaultLogger,
+                        app.UserTokenCacheInternal.LegacyPersistence,
+                        TestConstants.ClientId);
+
+                Assert.AreEqual(
+                    adalUsers.GetUsersWithClientInfo(null).Single().Key,
+                    adalUsers2.GetUsersWithClientInfo(null).Single().Key);
+
+                var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(1, accounts.Count(), "The 2 RTs belong to the same user");
+
+                // The ADAL cache contains access tokens, but these are NOT usable by MSAL / v2 endpoint. 
+                // MSAL will however use the RT from ADAL to fetch new access tokens...
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid);
+                var res = await app.AcquireTokenSilent(TestConstants.s_scope, accounts.First()).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(res);
+            }
+        }
+
+        [TestMethod]
+        [Description("Test for duplicate key in ADAL cache. If ")]
+        [TestCategory(TestCategories.Regression)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1815
+        public void UnifiedCache_ProcessAdalDictionaryForDuplicateKey_Resources_Test()
         {
             using (var harness = CreateTestHarness())
             {
@@ -240,7 +298,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 {
                     UserInfo = new AdalUserInfo()
                     {
-                        UniqueId = TestConstants.UniqueId,
+                        UniqueId = TestConstants.Uid,
                         DisplayableId = TestConstants.s_user.Username
                     }
                 },

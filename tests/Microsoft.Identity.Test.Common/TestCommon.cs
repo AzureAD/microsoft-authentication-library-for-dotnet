@@ -4,14 +4,13 @@
 using System;
 using System.Reflection;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
 using NSubstitute;
 
@@ -53,7 +52,8 @@ namespace Microsoft.Identity.Test.Common
             bool isExtendedTokenLifetimeEnabled = false,
             bool enablePiiLogging = false,
             string clientId = TestConstants.ClientId,
-            bool clearCaches = true)
+            bool clearCaches = true,
+            bool validateAuthority = true)
         {
             var appConfig = new ApplicationConfiguration()
             {
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Common
                 LogLevel = LogLevel.Verbose,
                 EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
-                AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, false)
+                AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, validateAuthority)
             };
 
             return new ServiceBundle(appConfig, clearCaches);
@@ -79,12 +79,6 @@ namespace Microsoft.Identity.Test.Common
         public static IServiceBundle CreateDefaultAdfsServiceBundle()
         {
             return CreateServiceBundleWithCustomHttpManager(null, authority: TestConstants.OnPremiseAuthority);
-        }
-
-        internal static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
-        {
-            mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
         }
     }
 }

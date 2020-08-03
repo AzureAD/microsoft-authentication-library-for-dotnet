@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Cache
         public const string ClientInfo = "client_info";
         public const string FamilyId = "family_id";
         public const string AppMetadata = "appmetadata";
-        public const string KeyId = "key_id";
+        public const string KeyId = "kid";
         public const string TokenType = "token_type";
 
 
