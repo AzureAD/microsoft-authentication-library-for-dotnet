@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -56,7 +57,11 @@ namespace Microsoft.Identity.Client.Instance
         private async static Task<string> buildAuthorityWithRegionAsync(AuthorityInfo authorityInfo)
         {
             string region = await RegionDiscovery.GetInstance.getRegionAsync().ConfigureAwait(false);
-            return authorityInfo.CanonicalAuthority.Insert(8, $"{region}.");
+
+            var builder = new UriBuilder(authorityInfo.CanonicalAuthority);
+            builder.Host = $"{region}.{builder.Host}";
+
+            return builder.Uri.ToString();
         }
     }
 }
