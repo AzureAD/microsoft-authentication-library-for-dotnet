@@ -689,7 +689,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
-                    cache);
+                    cache,
+                    apiId: ApiEvent.ApiIds.AcquireTokenOnBehalfOf);
                 authParams.UserAssertion = new UserAssertion(atKey);
 
                 ((TokenCache)cache).AfterAccess = AfterAccessNoChangeNotification;

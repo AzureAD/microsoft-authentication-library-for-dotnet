@@ -355,7 +355,7 @@ namespace Microsoft.Identity.Client
                 requestParams.ApiId != TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
-                                requestParams.Account?.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                                requestParams.Account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
                                 "Filtering by home account id");
             }
