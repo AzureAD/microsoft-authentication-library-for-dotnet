@@ -67,6 +67,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
         [DllImport("Netapi32.dll")]
         public static extern int NetApiBufferFree(IntPtr Buffer);
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
         [StructLayout(LayoutKind.Sequential)]
         private struct SYSTEM_INFO
         {

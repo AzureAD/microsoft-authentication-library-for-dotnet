@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
@@ -17,12 +17,10 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
     internal class AadPlugin : IWamPlugin
     {
         private readonly ICoreLogger _logger;
-        private readonly CoreUIParent _uiParent;
 
-        public AadPlugin(ICoreLogger logger, CoreUIParent uiParent)
+        public AadPlugin(ICoreLogger logger)
         {
             _logger = logger;
-            _uiParent = uiParent;
         }
 
         public Task<MsalTokenResponse> AcquireTokenInteractiveAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
@@ -120,24 +118,24 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
             if (setLoginHint)
             {
-                request.AppProperties.Add("LoginHint", authenticationRequestParameters.LoginHint);
+                request.Properties.Add("LoginHint", authenticationRequestParameters.LoginHint);
             }
 
             // TODO: bogavril - add support for ROPC ?
 
-            request.AppProperties.Add("wam_compat", "2.0");
+            request.Properties.Add("wam_compat", "2.0");
             if (ApiInformation.IsPropertyPresent("Windows.Security.Authentication.Web.Core.WebTokenRequest", "CorrelationId"))
             {
                 request.CorrelationId = authenticationRequestParameters.CorrelationId.ToString();
             }
             else
             {
-                request.AppProperties.Add("correlationId", authenticationRequestParameters.CorrelationId.ToString());
+                request.Properties.Add("correlationId", authenticationRequestParameters.CorrelationId.ToString());
             }
 
             if (!string.IsNullOrEmpty(authenticationRequestParameters.ClaimsAndClientCapabilities))
             {
-                request.AppProperties.Add("claims", authenticationRequestParameters.ClaimsAndClientCapabilities);
+                request.Properties.Add("claims", authenticationRequestParameters.ClaimsAndClientCapabilities);
             }
 
             return Task.FromResult(request);
@@ -182,9 +180,13 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             _logger.InfoPii("Result from WAM scopes: " + scopes,
                 "Result from WAM has scopes? " + hasScopes);
 
+            foreach (var kvp in webTokenResponse.Properties)
+            {
+                Trace.WriteLine($"Other params {kvp.Key}: {kvp.Value}");
+            }
+
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
-                Authority = authority,
                 AccessToken = webTokenResponse.Token,
                 IdToken = idToken,
                 CorrelationId = correlationId,
@@ -209,7 +211,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             if (status == WebTokenRequestStatus.ProviderError)
             {
                 if (errorCode == 0xcaa20005)
-                    return "ServerTemporarilyUnavailable"; //TODO bogavril: find existing error codes for these
+                    return "WAM_server_temporarily_unavailable"; //TODO bogavril: find existing error codes for these
 
                 unchecked // as per https://stackoverflow.com/questions/34198173/conversion-of-hresult-between-c-and-c-sharp
                 {
@@ -218,17 +220,17 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                          || hresultFacility == 0xAA7 // FACILITY_ADAL_URLMON in AAD WAM plugin
                          || hresultFacility == 0xAA8) // FACILITY_ADAL_INTERNET in AAD WAM plugin
                     {
-                        return "NoNetwork";
+                        return "WAM_no_network";
                     }
 
                     if (hresultFacility == 0xAA1) // FACILITY_ADAL_DEVELOPER in AAD WAM plugin
                     {
-                        return "ApiContractViolation";
+                        return "WAM_internal_error_ApiContractViolation";
                     }
                 }
             }
 
-            return "UnexpectedBrokerError";
+            return "WAM_unexpected_aad_error";
         }
 
     }
