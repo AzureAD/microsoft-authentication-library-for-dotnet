@@ -1,3 +1,41 @@
+4.17.1
+============
+
+Bug Fixes:
+
+** ID token related information is no longer lost in the second call of AcquireTokenOnBehalfOf ** [Issue #1950 for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1950)
+** AcquireTokenOnBehalfOf now respects the WithAuthority modifer enabling multi-tenant resources access ** [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1965)
+
+4.17.0
+============
+
+New Features:
+
+**New enum TokenSource indicates the source of a token** (cache, identity provider or broker). [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1728)
+
+Bug Fixes:
+
+**Fix for CryptographicException when using CNG certificate**. Added support for .net classic 4.6.1. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1726)
+**Fix for ArgumentNullException thrown by MsalExtensionException constructor**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1947)
+**Reduce response time for GetDeviceId**. MSAL now will disable MATS telemetry if it is not configured. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1912)
+**Fix for System.Net.HttpListenerException when system browser flow is cancelled**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1773)
+
+
+4.16
+============
+
+New Features:
+
+**MSAL exposes a SuggestedCacheKey property in TokenCacheNotificationArgs**. This property will help determine the token cache location in web site / web api / daemon app scenarios, making it easier to adapt MSAL's token cache to a general purpose distributed cache. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1902)
+
+**MSAL hardnes its HTTP stack to prevent port exhaustion**. Before this improvement, MSAL would use an `HttpClient` object for each request. In high scale scenarios, this can lead to port exhaustion, as disposing of `HttpClient` does not release ports. With this improvement, MSAL uses a static `HttpClient`, which prevents port exhaustion, combined with platform specific techniques to respect DNS changes. This change affects .net classic and .net core implementations. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1756)
+
+Bug Fixes:
+
+**MSAL no longer misses the cache when an empty scope is requested**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1909)
+
+
+
 4.16
 ============
 
