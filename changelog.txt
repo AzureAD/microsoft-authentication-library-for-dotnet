@@ -1,9 +1,17 @@
+4.17.1
+============
+
+Bug Fixes:
+
+** ID token related information is no longer lost in the second call of AcquireTokenOnBehalfOf ** [Issue #1950 for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1950)
+** AcquireTokenOnBehalfOf now respects the WithAuthority modifer enabling multi-tenant resources access ** [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1965)
+
 4.17.0
 ============
 
 New Features:
 
-**Addition of an enum TokenSource to indicate the source of a token** which can be cache, identity provider or broker. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1728)
+**New enum TokenSource indicates the source of a token** (cache, identity provider or broker). [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1728)
 
 Bug Fixes:
 
