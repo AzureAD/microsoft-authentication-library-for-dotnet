@@ -17,6 +17,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Microsoft.Identity.Test.Unit.WebUITests
 {
@@ -77,6 +78,34 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             await _tcpInterceptor.Received(1).ListenToSingleRequestAndRespondAsync(
                 TestPort, Arg.Any<Func<Uri, MessageAndHttpCode>>(), CancellationToken.None).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Regression)] //#1773
+        public async Task HttpListenerException_Cancellation_Async()
+        {
+            var webUI = CreateTestWebUI();
+            var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
+
+            CancellationTokenSource cts = new CancellationTokenSource();
+            _tcpInterceptor.When(x => x.ListenToSingleRequestAndRespondAsync(
+                TestPort,
+                Arg.Any<Func<Uri, MessageAndHttpCode>>(),
+                cts.Token))
+               .Do(x =>
+               {
+                   cts.Cancel();
+                   throw new HttpListenerException();
+               });
+
+            // Act
+            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                () => webUI.AcquireAuthorizationAsync(
+                    new Uri(TestAuthorizationRequestUri),
+                    new Uri(TestRedirectUri),
+                    requestContext,
+                    cts.Token))
+                .ConfigureAwait(false);
         }
 
         [TestMethod]

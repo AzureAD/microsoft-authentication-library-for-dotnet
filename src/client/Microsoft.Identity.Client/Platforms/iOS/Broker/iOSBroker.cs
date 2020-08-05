@@ -91,6 +91,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            ValidateRedirectUri(authenticationRequestParameters.RedirectUri);
+            AuthenticationContinuationHelper.LastRequestLogger = _logger;
+
             using (_logger.LogMethodDuration())
             {
                 Dictionary<string, string> brokerRequest = CreateBrokerRequestDictionary(
@@ -101,6 +104,31 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
                 return ProcessBrokerResponse();
             }
+        }
+
+        private void ValidateRedirectUri(Uri redirectUri)
+        {
+            string bundleId = NSBundle.MainBundle.BundleIdentifier;
+            string expectedRedirectUri = $"msauth.{bundleId}://auth";
+
+            // MSAL style redirect uri - case sensitive
+            if (string.Equals(expectedRedirectUri, redirectUri.AbsoluteUri, StringComparison.Ordinal))
+            {
+                _logger.Verbose("Valid MSAL style redirect Uri detected.");
+                return;
+            }
+
+            // ADAL style redirect uri - my_scheme://{bundleID} 
+            if (redirectUri.Authority.Equals(bundleId, StringComparison.Ordinal))
+            {
+                _logger.Verbose("Valid ADAL style redirect Uri detected.");
+                return;
+            }
+
+            throw new MsalClientException(
+                MsalError.CannotInvokeBroker,
+                $"The broker redirect URI is incorrect, it should be {expectedRedirectUri} or app_scheme ://{bundleId} - " +
+                $"please visit https://aka.ms/msal-net-xamarin for details about redirect URIs.");
         }
 
         private Dictionary<string, string> CreateBrokerRequestDictionary(

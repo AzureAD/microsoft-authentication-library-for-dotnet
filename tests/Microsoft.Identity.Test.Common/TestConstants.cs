@@ -198,6 +198,22 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
             };
         }
 
+        public static MsalTokenResponse CreateMsalTokenResponseWithTokenSource()
+        {
+            return new MsalTokenResponse
+            {
+                IdToken = MockHelpers.CreateIdToken(UniqueId, DisplayableId),
+                AccessToken = "access-token",
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = "refresh-token",
+                Scope = s_scope.AsSingleString(),
+                TokenType = "Bearer",
+                TokenSource = TokenSource.Broker
+            };
+        }
+
         public static readonly Account s_user = new Account(s_userIdentifier, DisplayableId, ProductionPrefNetworkEnvironment);
 
         public const string OnPremiseAuthority = "https://fs.contoso.com/adfs/";

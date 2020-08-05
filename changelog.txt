@@ -20,7 +20,6 @@ Bug Fixes:
 **Reduce response time for GetDeviceId**. MSAL now will disable MATS telemetry if it is not configured. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1912)
 **Fix for System.Net.HttpListenerException when system browser flow is cancelled**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1773)
 
-
 4.16
 ============
 
@@ -35,6 +34,15 @@ Bug Fixes:
 **MSAL no longer misses the cache when an empty scope is requested**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1909)
 
 
+=======
+4.16.1
+============
+
+Bug Fixes:
+
+**Improved error message for embedded webview http redirect failure**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1264)
+**SuggestedCacheKey property in TokenCacheNotificationArgs** now works correctly in the case of AcquireTokenByAuthorizationCode. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1902)
+>>>>>>> master
 
 4.16
 ============

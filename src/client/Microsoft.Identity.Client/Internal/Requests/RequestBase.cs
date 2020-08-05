@@ -210,7 +210,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 atItem, 
                 idtItem, 
                 AuthenticationRequestParameters.AuthenticationScheme,
-                AuthenticationRequestParameters.RequestContext.CorrelationId);
+                AuthenticationRequestParameters.RequestContext.CorrelationId,
+                msalTokenResponse.TokenSource);
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)

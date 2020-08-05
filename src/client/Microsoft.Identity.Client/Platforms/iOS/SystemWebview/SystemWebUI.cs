@@ -13,7 +13,7 @@ using UIKit;
 
 namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 {
-    internal class SystemWebUI : WebviewBase, IDisposable
+    internal class SystemWebUI : WebviewBase
     {
         public RequestContext RequestContext { get; set; }
 
@@ -23,24 +23,29 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            viewController = null;
+            AuthenticationContinuationHelper.LastRequestLogger = requestContext.Logger;
+            requestContext.Logger.InfoPii(
+              $"Starting the iOS system webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
+              $"Starting the iOS system webui. Redirect URI: {redirectUri}");
+
+            s_viewController = null;
             InvokeOnMainThread(() =>
             {
                 UIWindow window = UIApplication.SharedApplication.KeyWindow;
-                viewController = CoreUIParent.FindCurrentViewController(window.RootViewController);
+                s_viewController = CoreUIParent.FindCurrentViewController(window.RootViewController);
             });
 
-            returnedUriReady = new SemaphoreSlim(0);
+            s_returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
-            await returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await s_returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             //dismiss safariviewcontroller
-            viewController.InvokeOnMainThread(() =>
+            s_viewController.InvokeOnMainThread(() =>
             {
                 safariViewController?.DismissViewController(false, null);
             });
 
-            return authorizationResult;
+            return s_authorizationResult;
         }
 
         public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
@@ -58,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                             }
                             else
                             {
-                                ContinueAuthentication(callbackUrl.ToString());
+                                ContinueAuthentication(callbackUrl.ToString(), RequestContext.Logger);
                             }
                         });
 
@@ -88,7 +93,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                             }
                             else
                             {
-                                ContinueAuthentication(callbackUrl.ToString());
+                                ContinueAuthentication(callbackUrl.ToString(), RequestContext.Logger);
                             }
                         });
 
@@ -100,9 +105,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
                     {
                         Delegate = this
                     };
-                    viewController.InvokeOnMainThread(() =>
+                    s_viewController.InvokeOnMainThread(() =>
                     {
-                        viewController.PresentViewController(safariViewController, false, null);
+                        s_viewController.PresentViewController(safariViewController, false, null);
                     });
                 }
             }
@@ -118,13 +123,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 
         public void ProcessCompletionHandlerError(NSError error)
         {
-            if (returnedUriReady != null)
+            if (s_returnedUriReady != null)
             {
                 // The authorizationResult is set on the class and sent back to the InteractiveRequest
                 // There it's processed in VerifyAuthorizationResult() and an MsalClientException
                 // will be thrown.
-                authorizationResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
-                returnedUriReady.Release();
+                s_authorizationResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
+                s_returnedUriReady.Release();
             }
         }
 
@@ -133,10 +138,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
         {
             controller.DismissViewController(true, null);
 
-            if (returnedUriReady != null)
+            if (s_returnedUriReady != null)
             {
-                authorizationResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
-                returnedUriReady.Release();
+                s_authorizationResult = AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel);
+                s_returnedUriReady.Release();
             }
         }
 

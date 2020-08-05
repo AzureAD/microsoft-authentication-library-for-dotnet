@@ -2,16 +2,18 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
 
   <PropertyGroup>
-    <TargetFrameworkNetDesktop>net45</TargetFrameworkNetDesktop>
+    <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
+    
+    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
     <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
 
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
   </PropertyGroup>  
@@ -87,7 +89,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid10)'">
     <TargetFrameworkVersion>v10.0</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+  <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
     <!-- These are for MSAL json/* build infra -->
     <DefineConstants>$(DefineConstants);HAVE_ADO_NET;HAVE_APP_DOMAIN;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CAS;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_CONCURRENT_COLLECTIONS;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DB_NULL_TYPE_CODE;HAVE_DYNAMIC;HAVE_EMPTY_TYPES;HAVE_ENTITY_FRAMEWORK;HAVE_EXPRESSIONS;HAVE_FAST_REVERSE;HAVE_FSHARP_TYPES;HAVE_FULL_REFLECTION;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_MEMORY_BARRIER;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_EMIT;HAVE_SECURITY_SAFE_CRITICAL_ATTRIBUTE;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;HAVE_CONCURRENT_DICTIONARY;$(AdditionalConstants)</DefineConstants>
@@ -158,15 +160,15 @@
     <!-- 4.3.0 has CVE-2019-0657 -->
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
+    <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
     <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
 
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
-    <Compile Update="$(PathToMsalSources)\Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
+    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
+    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.cs" SubType="Component" />
+    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\WinFormWebAuthenticationDialog.cs" SubType="Form" />
+    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
+    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -248,11 +250,11 @@
 
   <!-- This is here to workaround designer issues so VS sees them appropriately -->
   <ItemGroup>
-    <None Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
-    <None Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
-    <None Update="$(PathToMsalSources)\Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
-    <None Update="$(PathToMsalSources)\Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
-    <None Update="$(PathToMsalSources)\Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
+    <None Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
+    <None Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.cs" SubType="Component" />
+    <None Update="$(PathToMsalSources)\Platforms\netdesktop\WinFormWebAuthenticationDialog.cs" SubType="Form" />
+    <None Update="$(PathToMsalSources)\Platforms\netdesktop\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
+    <None Update="$(PathToMsalSources)\Platforms\netdesktop\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
   </ItemGroup>
 
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">

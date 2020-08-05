@@ -206,6 +206,39 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        public void GetAllAdalEntriesForMsal_MultipleRTsPerEnv()
+        {
+            // Arrange
+            PopulateLegacyWithRtAndId(
+                          _legacyCachePersistence,
+                          TestConstants.ClientId,
+                          TestConstants.ProductionPrefNetworkEnvironment,
+                          "uid",
+                          "tenantId",
+                          "user1");
+
+            PopulateLegacyWithRtAndId(
+                _legacyCachePersistence,
+                TestConstants.ClientId,
+                TestConstants.ProductionPrefNetworkEnvironment,
+                "uid",
+                "tenantId",
+                "user2");
+
+            // Act
+            var rt = CacheFallbackOperations.GetAdalEntryForMsal(
+                _logger,
+                _legacyCachePersistence,
+                new[] { TestConstants.ProductionPrefNetworkEnvironment },
+                TestConstants.ClientId,
+                null,
+                "uid");
+
+            // Assert
+            Assert.IsNull(rt, "Null should be returned.");
+        }
+
+        [TestMethod]
         public void RemoveAdalUser_RemovesUserWithSameId()
         {
             // Arrange

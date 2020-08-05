@@ -148,6 +148,12 @@ namespace Microsoft.Identity.Client
         public const string UnknownError = "unknown_error";
 
         /// <summary>
+        /// Unknown broker error occured.
+        /// <para>Mitigation</para> None. You might want to inform the end user.
+        /// </summary>
+        public const string UnknownBrokerError = "unknown_broker_error";
+
+        /// <summary>
         /// Authentication failed.
         /// <para>What happens?</para>
         /// The authentication failed. For instance the user did not enter the right password
@@ -797,6 +803,13 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Delete the ADAL cache. If you do not maintain an ADAL cache, this may be a bug in MSAL.
         /// </summary>
         public const string InvalidAdalCacheMultipleRTs = "invalid_adal_cache";
+
+        /// <summary>
+        /// <para>What happens?</para>MSAL cannot use the certificate for signing.
+        /// <para>Mitigation</para>Possible cause: use of CNG certificates with .Net classic 4.6 or lower. Either target a higher version of .NET desktop - 4.6.1 and above, or use a different certificate type (non-CNG) 
+        /// or sign your own assertion as described at https://aka.ms/msal-net-signed-assertion
+        /// </summary>
+        public const string CryptoNet45 = "crypto_net45";
 
 #if iOS
         /// <summary>
