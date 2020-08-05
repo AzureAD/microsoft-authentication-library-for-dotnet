@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _commonParameters = commonParameters;
 
             Authority = Authority.CreateAuthorityForRequest(serviceBundle.Config.AuthorityInfo, commonParameters.AuthorityOverride);
-            OriginalAuthority = Authority;
 
             ClientId = serviceBundle.Config.ClientId;
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
@@ -69,10 +68,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public ApiEvent.ApiIds ApiId => _commonParameters.ApiId;
 
         public RequestContext RequestContext { get; }
+
+        /// <summary>
+        /// Authority used by MSAL for most operations. After the /token call, the tenant ID is 
+        /// always known and TenantUpdatedCanonicalAuthority is also created
+        /// </summary>
         public Authority Authority { get; set; }
-        public Authority OriginalAuthority { get; set; } //TODO: bogavril - not needed
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
+
+        /// <summary>
+        /// After the /token request MSAL knows the exact tenant id and this gets populated
+        /// </summary>
         public Authority TenantUpdatedCanonicalAuthority { get; set; }
         public ICacheSessionManager CacheSessionManager { get; }
         public HashSet<string> Scope { get; }

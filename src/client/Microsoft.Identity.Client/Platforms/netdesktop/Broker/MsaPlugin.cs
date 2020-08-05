@@ -2,29 +2,27 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IdentityModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
+using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
-using Windows.Storage.Streams;
 
 namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 {
     internal class MsaPlugin : IWamPlugin
     {
+        private const string MsaErrorCode = "wam_msa_internal_error";
         private readonly ICoreLogger _logger;
-        private readonly CoreUIParent _uiParent;
 
-        public MsaPlugin(ICoreLogger logger, CoreUIParent uiParent)
+        public MsaPlugin(ICoreLogger logger)
         {
             _logger = logger;
-            _uiParent = uiParent;
         }
 
         public async Task<WebTokenRequest> CreateWebTokenRequestAsync(
@@ -33,7 +31,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             bool isAccountInWam,
             AuthenticationRequestParameters authenticationRequestParameters)
         {
-            // TODO: review logic around adding a new account, as it involves looking at the default account
             bool setLoginHint = false;
             bool addNewAccount = false;
 
@@ -47,31 +44,37 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 }
                 else
                 {
+                    // TODO: review logic around this
                     addNewAccount = !(await WamBroker.IsDefaultAccountMsaAsync().ConfigureAwait(false));
                 }
             }
 
-            var promptType = setLoginHint ? WebTokenRequestPromptType.ForceAuthentication : WebTokenRequestPromptType.Default;
+            var promptType = (setLoginHint || addNewAccount) ? 
+                WebTokenRequestPromptType.ForceAuthentication : 
+                WebTokenRequestPromptType.Default;
 
+            string scopes = WamBroker.GetEffectiveScopes(authenticationRequestParameters.Scope);
             WebTokenRequest request = new WebTokenRequest(
                 provider,
-                WamBroker.GetEffectiveScopes(authenticationRequestParameters.Scope),
+                scopes,
                 authenticationRequestParameters.ClientId,
                 promptType);
 
             if (addNewAccount || setLoginHint)
             {
-                request.AppProperties.Add("Client_uiflow", "new_account"); // launch add account flow
+                // TODO: what does this do?
+                request.Properties.Add("Client_uiflow", "new_account"); // launch add account flow
 
                 if (setLoginHint)
                 {
-                    request.AppProperties.Add("LoginHint", loginHint); // prefill username
+                    request.Properties.Add("LoginHint", loginHint); // prefill username
                 }
             }
 
-            request.AppProperties.Add("api-version", "2.0"); // request V2 tokens over V1
-            request.AppProperties.Add("oauth2_batch", "1"); // request tokens as OAuth style name/value pairs
-            request.AppProperties.Add("x-client-info", "1"); // request client_info
+            request.Properties.Add("api-version", "2.0"); // request V2 tokens over V1
+            request.Properties.Add("oauth2_batch", "1"); // request tokens as OAuth style name/value pairs
+            request.Properties.Add("x-client-info", "1"); // request client_info
+
             if (ApiInformation.IsPropertyPresent("Windows.Security.Authentication.Web.Core.WebTokenRequest", "CorrelationId"))
             {
                 request.CorrelationId = authenticationRequestParameters.CorrelationId.ToString();
@@ -161,24 +164,14 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
         public string MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
         {
+
             if (status != WebTokenRequestStatus.UserInteractionRequired)
             {
-                return "UnexpectedBrokerError";
+                return MsaErrorCode;
             }
 
-            //TODO: need to translate these HR errors  https://github.com/AzureAD/microsoft-authentication-library-for-cpp/blob/75de1a8aee5f83d86941de6081fa351f207d9446/source/windows/broker/MSATokenRequest.cpp#L104
-            //  
-            // switch errorCode
-            // case HRESULT_FROM_WIN32(ERROR_NETWORK_UNREACHABLE):
-            //    // Network unavailable. Retry after fixing network.
-            //    statusInternal = StatusInternal::NoNetwork;
-            //    break;
-            //case ONL_E_INVALID_APPLICATION:
-            //    // Intentional fall thru to next.
-            //case ONL_E_INVALID_AUTHENTICATION_TARGET:
-            //    // Permanent failure. Caller not configured correctly, or request has invalid parameters.
-            //    statusInternal = StatusInternal::ApiContractViolation;
-            //    break;
+            // TODO: can further drill into errors by looking at HResult 
+            // https://github.com/AzureAD/microsoft-authentication-library-for-cpp/blob/75de1a8aee5f83d86941de6081fa351f207d9446/source/windows/broker/MSATokenRequest.cpp#L104
 
             return MsalError.InteractionRequired;
         }
@@ -191,12 +184,12 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 //TODO: better to throw exceptions directly to have stack trace
                 return new MsalTokenResponse()
                 {
-                    Error = "wam_msa_internal_error",
+                    Error = MsaErrorCode,
                     ErrorDescription = "Bad token format, msaTokens was unexpectedly empty"
                 };
             }
 
-            string accessToken = null, idToken = null, clientInfo = null;
+            string accessToken = null, idToken = null, clientInfo = null, tokenType = null, scopes = null, correlationId = null;
             long expiresIn = 0;
 
             foreach (string keyValuePairString in msaTokens.Split('&'))
@@ -204,14 +197,12 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 string[] keyValuePair = keyValuePairString.Split('=');
                 if (keyValuePair.Length != 2)
                 {
-                    return new MsalTokenResponse()
-                    {
-                        Error = "wam_msa_internal_error",
-                        ErrorDescription = "Bad token format, expected '=' separated pair"
-                    };
+                    throw new MsalClientException(
+                        MsaErrorCode,
+                        "Bad token response format, expected '=' separated pair");
                 }
 
-                if (keyValuePair[0] == "access_token")
+                if (keyValuePair[0] == "access_token") //TODO: access token looks wierd!
                 {
                     accessToken = keyValuePair[1];
                 }
@@ -219,37 +210,57 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 {
                     idToken = keyValuePair[1];
                 }
+                else if (keyValuePair[0] == "token_type")
+                {
+                    tokenType = keyValuePair[1];
+                }
+                else if (keyValuePair[0] == "scope")
+                {
+                    scopes = keyValuePair[1];
+                }
                 else if (keyValuePair[0] == "client_info")
                 {
                     clientInfo = keyValuePair[1];
                 }
                 else if (keyValuePair[0] == "expires_in")
                 {
-                    //TODO: IMPORTANT!!! review how to extract expires in
-                    //const nlohmann::json j = { { token[0], token[1] } };
-                    //const int64_t expiresIn = JsonUtils::ParseIntOrThrow(0x23619640 /* tag_9yzza */, j, "expires_in");
-                    //_expiresOn = TimeUtils::GetTimePointNow() + chrono::seconds(expiresIn);
                     expiresIn = long.Parse(keyValuePair[1], CultureInfo.InvariantCulture);
                 }
-                else
+                else if (keyValuePair[0] == "correlation")
                 {
-                    // TODO: C++ code saves the remaining properties, but I did not find a reason why
-                    // TODO: figure out the other values!
-                    Debug.WriteLine($"{keyValuePair[0]}={keyValuePair[1]}");
+                    correlationId = keyValuePair[1];
                 }
+                //else
+                //{
+                //    // TODO: C++ code saves the remaining properties, but I did not find a reason why                    
+                //    Debug.WriteLine($"{keyValuePair[0]}={keyValuePair[1]}");
+                //}
             }
+
+            if (string.IsNullOrEmpty(tokenType) || string.Equals("bearer", tokenType, System.StringComparison.InvariantCultureIgnoreCase))
+            {
+                tokenType = "Bearer";
+            }
+
+            if (string.IsNullOrEmpty(scopes))
+            {
+                throw new MsalClientException(
+                    MsaErrorCode,
+                    "Bad token response format, no scopes");
+            }
+
+            var responseScopes = scopes.Replace("%20", " ");
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
-                Authority = "TODO",
                 AccessToken = accessToken,
                 IdToken = idToken,
-                CorrelationId = "TODO",
-                Scope = "TODO", // TODO: are scopes nicely returned like AAD ?
+                CorrelationId = correlationId,
+                Scope = responseScopes,
                 ExpiresIn = expiresIn,
                 ExtendedExpiresIn = 0, // not supported on MSA
                 ClientInfo = clientInfo,
-                TokenType = "Bearer", // TODO: bogavril - token type?
+                TokenType = tokenType,
                 TokenSource = TokenSource.Broker
             };
 

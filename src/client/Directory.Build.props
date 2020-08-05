@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
-    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
+    <!--<TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     
     <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
@@ -11,12 +11,12 @@
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
-    <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
+    <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>-->
 
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
-  </PropertyGroup>  
+  </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
@@ -49,7 +49,8 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <DisableExtraReferences>true</DisableExtraReferences> <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
+    <DisableExtraReferences>true</DisableExtraReferences>
+    <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -141,13 +142,16 @@
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
     <!-- 4.3.0 has CVE-2019-0657 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />    
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Shared\NetStdCore\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
@@ -185,7 +189,7 @@
     <PackageReference Include="System.ServiceModel.Http" Version="4.5.3" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.5.3" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.5.3" />
-    
+
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />

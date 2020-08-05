@@ -100,8 +100,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public DateTimeOffset? AccessTokenRefreshOn { get; private set; }
 
-        public string Authority { get;  set; }
-
         public TokenSource TokenSource { get; set; }
 
         public HttpResponse HttpResponse { get; set; }
@@ -119,9 +117,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
             var response = new MsalTokenResponse
             {
-                Authority = responseDictionary.ContainsKey(BrokerResponseConst.Authority)
-                    ? AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.Authority]))
-                    : null,
                 AccessToken = responseDictionary[BrokerResponseConst.AccessToken],
                 RefreshToken = responseDictionary.ContainsKey(BrokerResponseConst.RefreshToken)
                     ? responseDictionary[BrokerResponseConst.RefreshToken]
@@ -171,7 +166,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
-                Authority = authResult[BrokerResponseConst.Authority].ToString(),
                 AccessToken = authResult[BrokerResponseConst.AccessToken].ToString(),
                 IdToken = authResult[BrokerResponseConst.IdToken].ToString(),
                 CorrelationId = correlationId, // Android response does not expose Correlation ID
