@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
@@ -35,6 +36,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private readonly IKnownMetadataProvider _knownMetadataProvider;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
         private readonly INetworkMetadataProvider _networkMetadataProvider;
+        private readonly IRegionDiscoveryProvider _regionDiscoveryProvider;
 
         public InstanceDiscoveryManager(
           IHttpManager httpManager,
@@ -48,7 +50,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 shouldClearCaches,
                 userProvidedInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProvidedInstanceDiscoveryResponse) : null,
                 userProvidedInstanceDiscoveryUri,
-                null, null, null)
+                null, null, null, null)
         {
         }
 
@@ -60,7 +62,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             Uri userProvidedInstanceDiscoveryUri = null,
             IKnownMetadataProvider knownMetadataProvider = null,
             INetworkCacheMetadataProvider networkCacheMetadataProvider = null,
-            INetworkMetadataProvider networkMetadataProvider = null)
+            INetworkMetadataProvider networkMetadataProvider = null,
+            IRegionDiscoveryProvider regionDiscovery = null)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
@@ -75,6 +78,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     _telemetryManager, 
                     _networkCacheMetadataProvider, 
                     userProvidedInstanceDiscoveryUri);
+
+            _regionDiscoveryProvider = regionDiscovery ??
+                new RegionDiscoveryProvider(_httpManager);
 
             if (shouldClearCaches)
             {
@@ -114,10 +120,16 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
             string authority, 
-            RequestContext requestContext,
-            bool withAzureRegion = false)
+            RequestContext requestContext)
         {
+            var autoDetectRegion = requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion;
             AuthorityType type = Authority.GetAuthorityType(authority);
+
+            if (autoDetectRegion)
+            {
+                authority = await BuildAuthorityWithRegionAsync(authority).ConfigureAwait(false);
+            }
+
             Uri authorityUri = new Uri(authority);
             string environment = authorityUri.Host;
 
@@ -126,7 +138,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 case AuthorityType.Aad:
                     InstanceDiscoveryMetadataEntry entry =
                     _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri, withAzureRegion).ConfigureAwait(false);
+                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri, autoDetectRegion).ConfigureAwait(false);
 
                     if (entry == null)
                     {
@@ -153,7 +165,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private async Task<InstanceDiscoveryMetadataEntry> FetchNetworkMetadataOrFallbackAsync(
             RequestContext requestContext, 
             Uri authorityUri,
-            bool withAzureRegion)
+            bool autoDetectRegion)
         {
             try
             {
@@ -161,7 +173,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
             catch (MsalServiceException ex)
             {
-                if (withAzureRegion)
+                if (autoDetectRegion)
                 {
                     requestContext.Logger.Info("[Instance Discovery] Instance discovery failed. MSAL will continue to build instance metadata with region and authority.");
                     return CreateEntryForSingleAuthority(authorityUri);
@@ -202,6 +214,16 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 PreferredCache = authority.Host,
                 PreferredNetwork = authority.Host
             };
+        }
+
+        private async Task<string> BuildAuthorityWithRegionAsync(string canonicalAuthority)
+        {
+            string region = await _regionDiscoveryProvider.getRegionAsync().ConfigureAwait(false);
+
+            var builder = new UriBuilder(canonicalAuthority);
+            builder.Host = $"{region}.{builder.Host}";
+
+            return builder.Uri.ToString();
         }
     }
 }

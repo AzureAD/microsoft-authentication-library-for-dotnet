@@ -85,6 +85,7 @@ namespace Microsoft.Identity.Client
         public AuthorityType AuthorityType { get; }
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
+        public bool AutoDetectRegion { get; set; }
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)

@@ -42,26 +42,13 @@ namespace Microsoft.Identity.Client.Instance
         {
             InstanceDiscoveryMetadataEntry metadata = await
                 requestParameters.RequestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                    requestParameters.WithAzureRegion ? 
-                        await buildAuthorityWithRegionAsync(requestParameters.AuthorityInfo).ConfigureAwait(false) : 
-                        requestParameters.AuthorityInfo.CanonicalAuthority,
-                    requestParameters.RequestContext,
-                    requestParameters.WithAzureRegion)
+                    requestParameters.AuthorityInfo.CanonicalAuthority,
+                    requestParameters.RequestContext)
                 .ConfigureAwait(false);
 
             requestParameters.Authority = Authority.CreateAuthorityWithEnvironment(
                     requestParameters.AuthorityInfo,
                     metadata.PreferredNetwork);
-        }
-
-        private async static Task<string> buildAuthorityWithRegionAsync(AuthorityInfo authorityInfo)
-        {
-            string region = await RegionDiscovery.GetInstance.getRegionAsync().ConfigureAwait(false);
-
-            var builder = new UriBuilder(authorityInfo.CanonicalAuthority);
-            builder.Host = $"{region}.{builder.Host}";
-
-            return builder.Uri.ToString();
         }
     }
 }

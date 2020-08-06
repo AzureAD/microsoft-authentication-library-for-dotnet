@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             requestParams.SendX5C = clientParameters.SendX5C;
             requestParams.WithAzureRegion = clientParameters.WithAzureRegion;
+            requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion = clientParameters.WithAzureRegion;
 
             var handler = new ClientCredentialRequest(
                 ServiceBundle,

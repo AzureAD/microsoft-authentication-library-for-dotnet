@@ -18,8 +18,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
            string authority,
-           RequestContext requestContext,
-           bool withAzureRegion = false);
+           RequestContext requestContext);
 
     }
 }
