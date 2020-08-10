@@ -26,12 +26,12 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
                 CancellationToken.None).ConfigureAwait(false);
         }
 
-        public void ValidateInteractiveParameters(bool expectedSendX5C = false, bool expectedForceRefresh = false, bool expectedWithAzureRegion = false)
+        public void ValidateInteractiveParameters(bool expectedSendX5C = false, bool expectedForceRefresh = false, bool expectedAutoDetectRegion = false)
         {
             Assert.IsNotNull(ClientParametersReceived);
             Assert.AreEqual(expectedSendX5C, ClientParametersReceived.SendX5C);
             Assert.AreEqual(expectedForceRefresh, ClientParametersReceived.ForceRefresh);
-            Assert.AreEqual(expectedWithAzureRegion, ClientParametersReceived.WithAzureRegion);
+            Assert.AreEqual(expectedAutoDetectRegion, ClientParametersReceived.AutoDetectRegion);
         }
     }
 }

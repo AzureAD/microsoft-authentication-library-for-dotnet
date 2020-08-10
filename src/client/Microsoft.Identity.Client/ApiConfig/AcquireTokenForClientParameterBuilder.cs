@@ -74,13 +74,13 @@ namespace Microsoft.Identity.Client
         /// Specifies if the token request should be sent to regional ESTS.
         /// By default the value for this variable is false.
         /// </summary>
-        /// <param name="withAzureRegion"><c>true</c> if the token request should be sent to regional ESTS. Otherwise <c>false</c>.
+        /// <param name="autoDetectRegion"><c>true</c> if the token request should be sent to regional ESTS. Otherwise <c>false</c>.
         /// The default is <c>false</c></param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool withAzureRegion)
+        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool autoDetectRegion)
         {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAzureRegion, withAzureRegion);
-            Parameters.WithAzureRegion = withAzureRegion;
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAzureRegion, autoDetectRegion);
+            Parameters.AutoDetectRegion = autoDetectRegion;
             return this;
         }
 

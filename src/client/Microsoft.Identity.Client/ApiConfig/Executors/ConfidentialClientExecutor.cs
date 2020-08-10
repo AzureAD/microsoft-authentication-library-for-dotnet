@@ -57,8 +57,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _confidentialClientApplication.AppTokenCacheInternal);
 
             requestParams.SendX5C = clientParameters.SendX5C;
-            requestParams.WithAzureRegion = clientParameters.WithAzureRegion;
-            requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion = clientParameters.WithAzureRegion;
+            requestParams.AutoDetectRegion = clientParameters.AutoDetectRegion;
+            requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion = clientParameters.AutoDetectRegion;
 
             var handler = new ClientCredentialRequest(
                 ServiceBundle,

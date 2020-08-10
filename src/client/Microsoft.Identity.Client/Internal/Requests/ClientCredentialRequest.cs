@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            validateRequest();
+            ValidateRequest();
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void validateRequest()
+        private void ValidateRequest()
         {
             if (AuthenticationRequestParameters.Scope == null || !AuthenticationRequestParameters.Scope.Any())
             {
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             // Throw exception if WithAzureRegion is set to true and the cloud is not public.
-            if (_clientParameters.WithAzureRegion && !KnownMetadataProvider.isKnownPublicEnvironment(AuthenticationRequestParameters.AuthorityInfo.Host))
+            if (_clientParameters.AutoDetectRegion && !KnownMetadataProvider.isKnownPublicEnvironment(AuthenticationRequestParameters.AuthorityInfo.Host))
             {
                 throw new MsalClientException(
                     MsalError.RegionDiscoveryNotEnabled, 

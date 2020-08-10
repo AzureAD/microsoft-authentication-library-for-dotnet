@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public ClientCredentialWrapper ClientCredential { get; set; }
 
-        public bool WithAzureRegion { get; set; }
+        public bool AutoDetectRegion { get; set; }
 #endif
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Authority - " + AuthorityInfo?.CanonicalAuthority);
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
-            builder.AppendLine("WithAzureRegion - " + WithAzureRegion);
+            builder.AppendLine("WithAzureRegion - " + AutoDetectRegion);
             builder.AppendLine("SendX5C - " + SendX5C);
             builder.AppendLine("LoginHint - " + LoginHint);
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
-            builder.AppendLine("WithAzureRegion - " + WithAzureRegion);
+            builder.AppendLine("WithAzureRegion - " + AutoDetectRegion);
             builder.AppendLine("SendX5C - " + SendX5C);
             builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);

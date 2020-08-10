@@ -40,9 +40,16 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             InstanceDiscoveryMetadataEntry publicCloudEntry = new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { "login.microsoftonline.com", "login.windows.net", "login.microsoft.com", "sts.windows.net", "login.windows-ppe.net" },
+                Aliases = new[] { "login.microsoftonline.com", "login.windows.net", "login.microsoft.com", "sts.windows.net" },
                 PreferredNetwork = "login.microsoftonline.com",
                 PreferredCache = "login.windows.net"
+            };
+
+            InstanceDiscoveryMetadataEntry ppePublicCloudEntry = new InstanceDiscoveryMetadataEntry()
+            {
+                Aliases = new[] { "login.windows-ppe.net" },
+                PreferredNetwork = "login.windows-ppe.net",
+                PreferredCache = "login.windows-ppe.net"
             };
 
             InstanceDiscoveryMetadataEntry cloudEntryChina = new InstanceDiscoveryMetadataEntry()

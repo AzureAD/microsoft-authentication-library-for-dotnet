@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         /// <summary>
         /// </summary>
-        public bool WithAzureRegion { get; set; }
+        public bool AutoDetectRegion { get; set; }
 
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             var builder = new StringBuilder();
             builder.AppendLine("=== AcquireTokenForClientParameters ===");
             builder.AppendLine("SendX5C: " + SendX5C);
-            builder.AppendLine("WithAzureRegion: " + WithAzureRegion);
+            builder.AppendLine("WithAzureRegion: " + AutoDetectRegion);
             builder.AppendLine("ForceRefresh: " + ForceRefresh);
             logger.Info(builder.ToString());
         }
