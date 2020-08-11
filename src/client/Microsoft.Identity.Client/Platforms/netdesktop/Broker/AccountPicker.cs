@@ -18,86 +18,37 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
         private readonly ICoreLogger _logger;
         private readonly SynchronizationContext _synchronizationContext;
         private readonly Authority _authority;
-
+        private readonly bool _isMsaPassthrough;
         private volatile WebAccountProvider _provider;
 
 
-        public AccountPicker(IntPtr parentHandle, ICoreLogger logger, SynchronizationContext synchronizationContext, Authority authority)
+        public AccountPicker(
+            IntPtr parentHandle, 
+            ICoreLogger logger, 
+            SynchronizationContext synchronizationContext, 
+            Authority authority, 
+            bool isMsaPassthrough)
         {
             _parentHandle = parentHandle;
             _logger = logger;
             _synchronizationContext = synchronizationContext;
             _authority = authority;
+            _isMsaPassthrough = isMsaPassthrough;
         }
 
         public async Task<WebAccountProvider> DetermineAccountInteractivelyAsync()
         {
             WebAccountProvider result = null;
 
-            var showPicker = new Action(async () =>
+            if (_synchronizationContext == null)
             {
-                result = await ShowPickerAsync().ConfigureAwait(true);
-            });
-
-            var showPickerTcs = new Action<object>(async (tcs) =>
-            {
-                try
-                {
-                    result = await ShowPickerAsync().ConfigureAwait(true);
-                    ((TaskCompletionSource<object>)tcs).TrySetResult(null);
-                }
-                catch (Exception e)
-                {
-                    // Need to catch the exception here and put on the TCS which is the task we are waiting on so that
-                    // the exception comming out of Authenticate is correctly thrown.
-                    ((TaskCompletionSource<object>)tcs).TrySetException(e);
-                }
-            });
-
-            // TODO: need to check these cases, I don't think the account picker works for anything else except the UI thread
-
-            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
-            {
-                if (_synchronizationContext != null)
-                {
-                    var tcs = new TaskCompletionSource<object>();
-                    _synchronizationContext.Post(new SendOrPostCallback(showPickerTcs), tcs);
-                    await tcs.Task.ConfigureAwait(true);
-                }
-                else
-                {
-                    using (var staTaskScheduler = new StaTaskScheduler(1))
-                    {
-                        try
-                        {
-                            Task.Factory.StartNew(
-                                showPicker,
-                                default,
-                                TaskCreationOptions.None,
-                                staTaskScheduler).Wait();
-                        }
-                        catch (AggregateException ae)
-                        {
-                            _logger.ErrorPii(ae.InnerException);
-                            // Any exception thrown as a result of running task will cause AggregateException to be thrown with
-                            // actual exception as inner.
-                            Exception innerException = ae.InnerExceptions[0];
-
-                            // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
-                            if (innerException is AggregateException)
-                            {
-                                innerException = ((AggregateException)innerException).InnerExceptions[0];
-                            }
-
-                            throw innerException;
-                        }                      
-                    }
-                }
+                throw new MsalClientException("wam_ui_thread_only");
             }
-            else
-            {
-                showPicker();
-            }
+
+            // at this point we should be back on the ui thread
+            await _synchronizationContext;
+
+            result = await ShowPickerAsync().ConfigureAwait(true);
 
             return result;
         }
@@ -167,6 +118,14 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                       new WebAccountProviderCommand(
                           await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "consumers"),
                           WebAccountProviderCommandInvoked));
+
+                    if (_isMsaPassthrough)
+                    {
+                        e.WebAccountProviderCommands.Add(
+                           new WebAccountProviderCommand(
+                           await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "organizations"),
+                           WebAccountProviderCommandInvoked));
+                    }
                 }
                 else
                 {
