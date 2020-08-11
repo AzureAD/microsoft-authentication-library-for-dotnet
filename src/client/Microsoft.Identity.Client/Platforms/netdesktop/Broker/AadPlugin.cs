@@ -23,12 +23,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             _logger = logger;
         }
 
-        public Task<MsalTokenResponse> AcquireTokenInteractiveAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
-        {
-            throw new NotImplementedException();
-        }
-
-
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
         {
             var webAccounProvider = await WamBroker.GetAccountProviderAsync("organizations").ConfigureAwait(false);
@@ -180,10 +174,10 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             _logger.InfoPii("Result from WAM scopes: " + scopes,
                 "Result from WAM has scopes? " + hasScopes);
 
-            foreach (var kvp in webTokenResponse.Properties)
-            {
-                Trace.WriteLine($"Other params {kvp.Key}: {kvp.Value}");
-            }
+            //foreach (var kvp in webTokenResponse.Properties)
+            //{
+            //    Trace.WriteLine($"Other params {kvp.Key}: {kvp.Value}");
+            //}
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {

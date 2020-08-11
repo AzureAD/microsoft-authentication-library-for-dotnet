@@ -20,7 +20,7 @@
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.15.0-localbuild</MsalClientSemVer>
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MsalClientSemVer)</Version>
 
@@ -173,6 +173,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.17134.1000" /> <!-- for WAM -->
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />

@@ -2,40 +2,48 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
-using System.Windows.Threading;
 using Microsoft.Identity.Client;
-using Windows.Storage.Streams;
-using Windows.UI.WebUI;
 
 namespace NetDesktopWinForms
 {
     public partial class Form1 : Form
     {
 
-        public static List<ClientEntry> s_clients = new List<ClientEntry>()
+        private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
             new ClientEntry() { Id = "1d18b3b0-251b-4714-a02a-9956cec86c2d", Name = "1d18b3b0-251b-4714-a02a-9956cec86c2d (App in 49f)"},
             new ClientEntry() { Id = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1", Name = "872cd9fa-d31f-45e0-9eab-6e460a02d1f1 (VS)"},
             new ClientEntry() { Id = "655015be-5021-4afc-a683-a4223eb5d0e5", Name = "655015be-5021-4afc-a683-a4223eb5d0e5"}
         };
 
+        private static BindingList<IAccount> s_accounts = new BindingList<IAccount>();
+
         public Form1()
         {
             InitializeComponent();
-            var bindingSource1 = new BindingSource();
-            bindingSource1.DataSource = s_clients;
+            var clientIdBindingSource = new BindingSource();
+            clientIdBindingSource.DataSource = s_clients;
 
-            clientIdCbx.DataSource = bindingSource1.DataSource;
+            clientIdCbx.DataSource = clientIdBindingSource.DataSource;
 
             clientIdCbx.DisplayMember = "Name";
             clientIdCbx.ValueMember = "Id";
+
+            var accountBidingSource = new BindingSource();
+            accountBidingSource.DataSource = s_accounts;
+
+
+            cbxAccount.DataSource = accountBidingSource;
+
+            cbxAccount.DisplayMember = "Username";
+            cbxAccount.ValueMember = "Username";
+            cbxAccount.SelectedItem = null;
         }
 
         public static readonly string UserCacheFile =
@@ -44,11 +52,24 @@ namespace NetDesktopWinForms
 
         private IPublicClientApplication CreatePca()
         {
-            string clientId = (this.clientIdCbx.SelectedItem as ClientEntry).Id;
+            string clientId = (this.clientIdCbx.SelectedItem as ClientEntry)?.Id ?? this.clientIdCbx.Text;
+            bool msaPt = IsMsaPassthroughConfigured();
+            string extraQp = null;
+            if (msaPt)
+            {
+                // TODO: better config option, e.g. WithMsaPt(true), 
+                extraQp = "MSAL_MSA_PT=1"; // not an actual QP, MSAL will simply use this to provide good experience for MSA-PT
+            }
+
             var pca = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
                 .WithBroker(this.useBrokerChk.Checked)
+                // there is no need to construct the PCA with this redirect URI, 
+                // but WAM uses it. We could enforce it.
+                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                .WithExtraQueryParameters(extraQp)
+                .WithLogging((x,y,z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
             BindCache(pca.UserTokenCache, UserCacheFile);
@@ -95,35 +116,50 @@ namespace NetDesktopWinForms
 
         private async Task<AuthenticationResult> RunAtsAsync(IPublicClientApplication pca)
         {
-            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            string reqAuthority = pca.Authority;
+            
+
             string loginHint = GetLoginHint();
-            if (cbxUseAccount.Checked == true)
+            if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
-                IAccount account =
-                    string.IsNullOrEmpty(loginHint) ?
-                        accounts.FirstOrDefault() :
-                        accounts.First(aa => aa.Username.StartsWith(loginHint));
-                Log($"ATS with IAccount for {account?.Username}");
-                return await pca.AcquireTokenSilent(GetScopes(), account)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-
+                throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account");
             }
 
-            if (string.IsNullOrEmpty(loginHint))
+            if (!string.IsNullOrEmpty(loginHint))
             {
-                Log($"ATS with no account or login hint ... will fail with UiRequiredEx");
+                if (IsMsaPassthroughConfigured())
+                {
+                    throw new InvalidAsynchronousStateException(
+                        "[TEST APP FAILURE] Do not use login hint on AcquireTokenSilent for MSA-Passthrough. Use the IAccount overload.");
+                }
 
-                return await pca.AcquireTokenSilent(GetScopes(), (IAccount)null)
+                Log($"ATS with login hint: " + loginHint);
+                return await pca.AcquireTokenSilent(GetScopes(), loginHint)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+            }
+
+            if (cbxAccount.SelectedIndex > 0)
+            {
+                var acc = cbxAccount.SelectedItem as IAccount;
+
+                // Today, apps using MSA-PT must manually target the correct tenant 
+                if ( IsMsaPassthroughConfigured() && acc.HomeAccountId.TenantId == "9188040d-6c67-4c5b-b112-36a304b66dad")
+                {
+                    reqAuthority = "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a";
+                }
+
+                Log($"ATS with IAccount for {acc?.Username ?? "null"}");
+                return await pca.AcquireTokenSilent(GetScopes(), acc)
+                    .WithAuthority(reqAuthority)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+            }
+
+            Log($"ATS with no account or login hint ... will fail with UiRequiredEx");
+            return await pca.AcquireTokenSilent(GetScopes(), (IAccount)null)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
-            }
-
-            Log($"ATS with login hint: " + loginHint);
-            return await pca.AcquireTokenSilent(GetScopes(), loginHint)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
         }
 
         private string[] GetScopes()
@@ -181,25 +217,31 @@ namespace NetDesktopWinForms
 
         private async Task<AuthenticationResult> RunAtiAsync(IPublicClientApplication pca)
         {
+            string loginHint = GetLoginHint();
+            if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
+            {
+                throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account, but not both");
+            }
+
             AuthenticationResult result = null;
 
             var builder = pca.AcquireTokenInteractive(GetScopes())
                 .WithPrompt(GetPrompt());
-            string loginHint = GetLoginHint();
 
             if (!string.IsNullOrEmpty(loginHint))
             {
-                if (cbxUseAccount.Checked == true)
-                {
-                    var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-                    var account = accounts.FirstOrDefault(aa => aa.Username.StartsWith(loginHint));
-                    Log($"ATI WithAccount for account {account?.Username ?? "null" }");
-                    builder = builder.WithAccount(account);
-                }
-                else
-                {
-                    builder = builder.WithLoginHint(loginHint);
-                }
+                Log($"ATI WithLoginHint  {loginHint}");
+                builder = builder.WithLoginHint(loginHint);
+            }
+            else if (cbxAccount.SelectedIndex != 0)
+            {
+                var acc = cbxAccount.SelectedItem as IAccount;
+                Log($"ATI WithAccount for account {acc?.Username ?? "null" }");
+                builder = builder.WithAccount(acc);
+            }
+            else
+            {
+                Log($"ATI without login_hint or account. It should display the account picker");
             }
 
             result = await builder.ExecuteAsync().ConfigureAwait(false);
@@ -219,50 +261,79 @@ namespace NetDesktopWinForms
             return loginHint;
         }
 
-        private Prompt GetPrompt()
+        /// <summary>
+        /// It should be possible to omit this if the Account Picker is never invoked, e.g. Office, 
+        /// by using a special auth flow based on a transfer token 
+        /// </summary>
+        /// <returns></returns>
+        private bool IsMsaPassthroughConfigured()
         {
-            string prompt = null;
-            promptCbx.Invoke((MethodInvoker)delegate
+            bool msa = false;
+            cbxMsaPt.Invoke((MethodInvoker)delegate
             {
-                prompt = promptCbx.Text;
+                msa = cbxMsaPt.Enabled;
             });
 
-            if (string.IsNullOrEmpty(prompt))
-                return Prompt.SelectAccount;
+            return msa;
+        }
+
+        private Prompt GetPrompt()
+        {
+            return Prompt.SelectAccount; // TODO... WAM only works has "default" and "Force" prompts...
+            //string prompt = null;
+            //promptCbx.Invoke((MethodInvoker)delegate
+            //{
+            //    prompt = promptCbx.Text;
+            //});
+
+            //if (string.IsNullOrEmpty(prompt))
+            //    return Prompt.SelectAccount;
 
 
-            switch (prompt)
-            {
+            //switch (prompt)
+            //{
 
-                case "select_account":
-                    return Prompt.SelectAccount;
-                case "force_login":
-                    return Prompt.ForceLogin;
-                case "no_prompt":
-                    return Prompt.NoPrompt;
-                case "consent":
-                    return Prompt.Consent;
-                case "never":
-                    return Prompt.Never;
+            //    case "select_account":
+            //        return Prompt.SelectAccount;
+            //    case "force_login":
+            //        return Prompt.ForceLogin;
+            //    case "no_prompt":
+            //        return Prompt.NoPrompt;
+            //    case "consent":
+            //        return Prompt.Consent;
+            //    case "never":
+            //        return Prompt.Never;
 
 
-                default:
-                    throw new NotImplementedException();
-            }
+            //    default:
+            //        throw new NotImplementedException();
+            //}
         }
 
         private async void accBtn_Click(object sender, EventArgs e)
         {
             var pca = CreatePca();
-            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-            string msg = string.Join(
-                " ",
-                accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
+
+            s_accounts.Clear();
+            s_accounts.Add(new NullAccount());
+
+            foreach (var acc in accounts)
+            {
+                s_accounts.Add(acc);
+            }
+
+            string msg = "Accounts " + Environment.NewLine +
+                string.Join(
+                    " ",
+                    accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
             Log(msg);
         }
 
         private async void atsAtiBtn_Click(object sender, EventArgs e)
         {
+            var syncContext = SynchronizationContext.Current;
+
             var pca = CreatePca();
 
             try
@@ -274,6 +345,8 @@ namespace NetDesktopWinForms
             }
             catch (MsalUiRequiredException ex)
             {
+                await syncContext;
+
                 Log("UI required Exception! " + ex.ErrorCode + " " + ex.Message);
                 try
                 {
@@ -324,5 +397,14 @@ namespace NetDesktopWinForms
     {
         public string Name { get; set; }
         public string Id { get; set; }
+    }
+
+    public class NullAccount : IAccount
+    {
+        public string Username => "";
+
+        public string Environment => "";
+
+        public AccountId HomeAccountId => null;
     }
 }
