@@ -115,8 +115,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
         public ClientCredentialWrapper ClientCredential { get; set; }
-
-        public bool AutoDetectRegion { get; set; }
 #endif
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
@@ -172,7 +170,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Authority - " + AuthorityInfo?.CanonicalAuthority);
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
-            builder.AppendLine("WithAzureRegion - " + AutoDetectRegion);
             builder.AppendLine("SendX5C - " + SendX5C);
             builder.AppendLine("LoginHint - " + LoginHint);
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
@@ -189,7 +186,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
-            builder.AppendLine("WithAzureRegion - " + AutoDetectRegion);
             builder.AppendLine("SendX5C - " + SendX5C);
             builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);

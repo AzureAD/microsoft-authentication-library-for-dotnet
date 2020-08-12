@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Region
             var cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
             if (cachedEntry != null)
             {
-                logger.Verbose($"[Instance Discovery] The network provider found an entry for {environment}");
+                logger.Verbose($"[Region Discovery] The network provider found an entry for {environment}");
                 return cachedEntry;
             }
 
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Region
             CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
 
             cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
-            logger.Verbose($"[Instance Discovery] After hitting the discovery endpoint, the network provider found an entry for {environment} ? {cachedEntry != null}");
+            logger.Verbose($"[Region Discovery] Created an entry for the regional environment {environment} ? {cachedEntry != null}");
 
             return cachedEntry;
         }
@@ -113,10 +113,17 @@ namespace Microsoft.Identity.Client.Region
         private async Task<Uri> BuildAuthorityWithRegionAsync(Uri canonicalAuthority, ICoreLogger logger)
         {
             string region = await GetRegionAsync(logger).ConfigureAwait(false);
-
             var builder = new UriBuilder(canonicalAuthority);
-            builder.Host = $"{region}.{builder.Host}";
 
+            if (KnownMetadataProvider.IsPublicEnvironment(canonicalAuthority.Host))
+            {
+                builder.Host = $"{region}.login.microsoft.com";
+            } 
+            else
+            {
+                builder.Host = $"{region}.{builder.Host}";
+            }
+            
             return builder.Uri;
         }
     }

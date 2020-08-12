@@ -45,13 +45,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 PreferredCache = "login.windows.net"
             };
 
-            InstanceDiscoveryMetadataEntry ppePublicCloudEntry = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { "login.windows-ppe.net" },
-                PreferredNetwork = "login.windows-ppe.net",
-                PreferredCache = "login.windows-ppe.net"
-            };
-
             InstanceDiscoveryMetadataEntry cloudEntryChina = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { "login.partner.microsoftonline.cn", "login.chinacloudapi.cn" },
@@ -88,7 +81,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             AddToPublicEnvironment(publicCloudEntry);
         }
 
-        public static bool isKnownPublicEnvironment(string environment)
+        public static bool IsPublicEnvironment(string environment)
         {
             return s_knownPublicEnvironments.Contains(environment);
         }
