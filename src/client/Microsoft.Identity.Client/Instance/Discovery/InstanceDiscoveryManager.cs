@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     userProvidedInstanceDiscoveryUri);
 
             _regionDiscoveryProvider = regionDiscovery ??
-                new RegionDiscoveryProvider(_httpManager);
+                new RegionDiscoveryProvider(_httpManager, _networkCacheMetadataProvider);
 
             if (shouldClearCaches)
             {
@@ -123,13 +123,13 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             RequestContext requestContext)
         {
             var autoDetectRegion = requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion;
-            AuthorityType type = Authority.GetAuthorityType(authority);
 
             if (autoDetectRegion)
             {
-                authority = await BuildAuthorityWithRegionAsync(authority).ConfigureAwait(false);
+                return await _regionDiscoveryProvider.GetMetadataAsync(new Uri(authority), requestContext).ConfigureAwait(false);
             }
 
+            AuthorityType type = Authority.GetAuthorityType(authority);
             Uri authorityUri = new Uri(authority);
             string environment = authorityUri.Host;
 
@@ -216,16 +216,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 PreferredCache = authority.Host,
                 PreferredNetwork = authority.Host
             };
-        }
-
-        private async Task<string> BuildAuthorityWithRegionAsync(string canonicalAuthority)
-        {
-            string region = await _regionDiscoveryProvider.getRegionAsync().ConfigureAwait(false);
-
-            var builder = new UriBuilder(canonicalAuthority);
-            builder.Host = $"{region}.{builder.Host}";
-
-            return builder.Uri.ToString();
         }
     }
 }

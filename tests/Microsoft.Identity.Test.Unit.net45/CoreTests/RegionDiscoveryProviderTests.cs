@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium.Remote;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
 {
@@ -18,7 +17,19 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
     public class RegionDiscoveryProviderTests : TestBase
     {
         private const string Region = "centralus";
-        private MockHttpManager mockHttpManager = new MockHttpManager();
+        private MockHttpAndServiceBundle _harness;
+        private MockHttpManager _httpManager;
+        private RequestContext _testRequestContext;
+
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            base.TestInitialize();
+
+            _harness = base.CreateTestHarness();
+            _httpManager = _harness.HttpManager;
+            _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
+        }
 
         [TestMethod]
         public async Task SuccessfulResponseFromEnvironmentVariableAsync ()
@@ -27,11 +38,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", Region);
 
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(mockHttpManager);
-                var regionDiscovered = await regionDiscoveryProvider.getRegionAsync().ConfigureAwait(false);
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
+                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-                Assert.IsNotNull(regionDiscovered);
-                Assert.AreEqual(Region, regionDiscovered);
+                Assert.IsNotNull(regionalMetadata);
+                Assert.AreEqual("centralus.login.microsoftonline.com", regionalMetadata.PreferredNetwork);
             }
             finally
             {
@@ -46,12 +57,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
                         ResourceHelper.GetTestResourceRelativePath("local-imds-response.json"))));
 
-            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(mockHttpManager);
-            var regionDiscovered = await regionDiscoveryProvider.getRegionAsync().ConfigureAwait(false);
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
+            InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
-            Assert.IsNotNull(regionDiscovered);
-            Assert.AreEqual(Region, regionDiscovered);
-            
+            Assert.IsNotNull(regionalMetadata);
+            Assert.AreEqual("centralus.login.microsoftonline.com", regionalMetadata.PreferredNetwork);
+
         }
 
         [TestMethod]
@@ -61,8 +72,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             try
             {
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(mockHttpManager);
-                var region = await regionDiscoveryProvider.getRegionAsync().ConfigureAwait(false);
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
+                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+                Assert.Fail("Exception should be thrown.");
             }
             catch (MsalClientException e)
             {
@@ -74,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
         private void AddMockedResponse(HttpResponseMessage responseMessage)
         {
-            mockHttpManager.AddMockHandler(
+            _httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,

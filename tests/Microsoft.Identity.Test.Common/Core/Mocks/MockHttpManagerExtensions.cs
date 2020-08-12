@@ -273,7 +273,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             this MockHttpManager httpManager,
             string response)
         {
-            var responseMessage = MockHelpers.CreateSuccessResponseMessage(response);
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -283,7 +282,23 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                          {
                             {"Metadata", "true"}
                          },
-                        ResponseMessage = responseMessage
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
+                    });
+        }
+
+        public static void AddRegionDiscoveryMockHandlerNotFound(
+            this MockHttpManager httpManager)
+        {
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/api-version=2019-06-01",
+                        ExpectedRequestHeaders = new Dictionary<string, string>
+                         {
+                            {"Metadata", "true"}
+                         },
+                        ResponseMessage = MockHelpers.CreateFailureMessage(HttpStatusCode.NotFound, "")
                     });
         }
     }

@@ -30,7 +30,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            ValidateRequest();
+            if (AuthenticationRequestParameters.Scope == null || !AuthenticationRequestParameters.Scope.Any())
+            {
+                throw new MsalClientException(
+                    MsalError.ScopesRequired,
+                    MsalErrorMessage.ScopesRequired);
+            }
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
@@ -80,24 +85,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable.");
                 throw;
-            }
-        }
-
-        private void ValidateRequest()
-        {
-            if (AuthenticationRequestParameters.Scope == null || !AuthenticationRequestParameters.Scope.Any())
-            {
-                throw new MsalClientException(
-                    MsalError.ScopesRequired,
-                    MsalErrorMessage.ScopesRequired);
-            }
-
-            // Throw exception if WithAzureRegion is set to true and the cloud is not public.
-            if (_clientParameters.AutoDetectRegion && !KnownMetadataProvider.isKnownPublicEnvironment(AuthenticationRequestParameters.AuthorityInfo.Host))
-            {
-                throw new MsalClientException(
-                    MsalError.RegionDiscoveryNotEnabled, 
-                    MsalErrorMessage.RegionDiscoveryNotAvailable);
             }
         }
 

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Region
 {
     internal interface IRegionDiscoveryProvider
     {
-        Task<string> getRegionAsync();
+        Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext);
     }
 }
