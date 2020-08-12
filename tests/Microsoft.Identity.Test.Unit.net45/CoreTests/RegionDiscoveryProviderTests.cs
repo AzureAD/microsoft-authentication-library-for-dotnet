@@ -66,6 +66,26 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
+        public async Task NonPublicCloudTestAsync()
+        {
+            try
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", Region);
+
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.someenv.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+                Assert.IsNotNull(regionalMetadata);
+                Assert.AreEqual("centralus.login.someenv.com", regionalMetadata.PreferredNetwork);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+            }
+
+        }
+
+        [TestMethod]
         public async Task ErrorResponseFromLocalImdsAsync()
         {
             AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound)); 
