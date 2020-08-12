@@ -38,11 +38,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", Region);
 
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
                 InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.IsNotNull(regionalMetadata);
-                Assert.AreEqual("centralus.login.microsoftonline.com", regionalMetadata.PreferredNetwork);
+                Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
             }
             finally
             {
@@ -57,11 +57,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
                         ResourceHelper.GetTestResourceRelativePath("local-imds-response.json"))));
 
-            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
             InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual("centralus.login.microsoftonline.com", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
 
         }
 
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             try
             {
-                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
                 InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.Fail("Exception should be thrown.");

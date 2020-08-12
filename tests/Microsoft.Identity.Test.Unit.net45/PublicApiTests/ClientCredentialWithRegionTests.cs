@@ -75,29 +75,35 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test when region is received from environment variable")]
         public async Task fetchRegionFromEnvironmentAsync()
         {
-            using (var harness = CreateTestHarness())
+            try
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", "uscentral");
+                using (var harness = CreateTestHarness())
+                {
+                    Environment.SetEnvironmentVariable("REGION_NAME", "uscentral");
 
-                var app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
-                    .WithRedirectUri(TestConstants.RedirectUri)
-                    .WithHttpManager(harness.HttpManager)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .BuildConcrete();
+                    var app = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
+                        .WithRedirectUri(TestConstants.RedirectUri)
+                        .WithHttpManager(harness.HttpManager)
+                        .WithClientSecret(TestConstants.ClientSecret)
+                        .BuildConcrete();
 
-                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
-                AuthenticationResult result = await app
-                    .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAzureRegion(true)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
+                    AuthenticationResult result = await app
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .WithAzureRegion(true)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
 
-                Assert.IsNotNull(result.AccessToken);
+                    Assert.IsNotNull(result.AccessToken);
+                }
             }
-
+            finally
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+            }
         }
 
         [TestMethod]
