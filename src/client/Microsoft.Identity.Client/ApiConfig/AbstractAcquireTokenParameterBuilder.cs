@@ -83,7 +83,8 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
         {
-            CommonParameters.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
+            CommonParameters.ExtraQueryParameters = extraQueryParameters ?? 
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             return (T)this;
         }
 

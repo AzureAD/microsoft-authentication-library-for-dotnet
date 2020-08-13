@@ -22,7 +22,7 @@ namespace NetDesktopWinForms
             new ClientEntry() { Id = "655015be-5021-4afc-a683-a4223eb5d0e5", Name = "655015be-5021-4afc-a683-a4223eb5d0e5"}
         };
 
-        private static BindingList<IAccount> s_accounts = new BindingList<IAccount>();
+        private static BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
 
         public Form1()
         {
@@ -35,14 +35,13 @@ namespace NetDesktopWinForms
             clientIdCbx.DisplayMember = "Name";
             clientIdCbx.ValueMember = "Id";
 
-            var accountBidingSource = new BindingSource();
-            accountBidingSource.DataSource = s_accounts;
+            //var accountBidingSource = new BindingSource();
+            //accountBidingSource.DataSource = s_accounts;
 
 
-            cbxAccount.DataSource = accountBidingSource;
+            cbxAccount.DataSource = s_accounts;
 
-            cbxAccount.DisplayMember = "Username";
-            cbxAccount.ValueMember = "Username";
+            cbxAccount.DisplayMember = "DisplayValue";
             cbxAccount.SelectedItem = null;
         }
 
@@ -141,7 +140,7 @@ namespace NetDesktopWinForms
 
             if (cbxAccount.SelectedIndex > 0)
             {
-                var acc = cbxAccount.SelectedItem as IAccount;
+                var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 // Today, apps using MSA-PT must manually target the correct tenant 
                 if ( IsMsaPassthroughConfigured() && acc.HomeAccountId.TenantId == "9188040d-6c67-4c5b-b112-36a304b66dad")
@@ -233,9 +232,9 @@ namespace NetDesktopWinForms
                 Log($"ATI WithLoginHint  {loginHint}");
                 builder = builder.WithLoginHint(loginHint);
             }
-            else if (cbxAccount.SelectedIndex != 0)
+            else if (cbxAccount.SelectedIndex > 0)
             {
-                var acc = cbxAccount.SelectedItem as IAccount;
+                var acc = (cbxAccount.SelectedItem as AccountModel).Account;
                 Log($"ATI WithAccount for account {acc?.Username ?? "null" }");
                 builder = builder.WithAccount(acc);
             }
@@ -310,22 +309,22 @@ namespace NetDesktopWinForms
             //}
         }
 
-        private async void accBtn_Click(object sender, EventArgs e)
+        private async void getAccountsBtn_Click(object sender, EventArgs e)
         {
             var pca = CreatePca();
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
 
             s_accounts.Clear();
-            s_accounts.Add(new NullAccount());
+            s_accounts.Add(new AccountModel(new NullAccount()));
 
             foreach (var acc in accounts)
             {
-                s_accounts.Add(acc);
+                s_accounts.Add(new AccountModel(acc));
             }
 
             string msg = "Accounts " + Environment.NewLine +
                 string.Join(
-                    " ",
+                     Environment.NewLine,
                     accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
             Log(msg);
         }
@@ -397,6 +396,26 @@ namespace NetDesktopWinForms
     {
         public string Name { get; set; }
         public string Id { get; set; }
+    }
+
+    public class AccountModel
+    {
+        public IAccount Account { get; }
+
+        public string DisplayValue { get; }
+        //public string IdValue => $"{_account.HomeAccountId.Identifier}";
+
+        public AccountModel(IAccount account)
+        {
+            Account = account;
+            string env = string.IsNullOrEmpty(Account?.Environment) || Account.Environment == "login.microsoftonline.com" ?
+                "" : 
+                $"({Account.Environment})";
+
+            DisplayValue = $"{Account.Username} {env}";
+        }
+
+
     }
 
     public class NullAccount : IAccount

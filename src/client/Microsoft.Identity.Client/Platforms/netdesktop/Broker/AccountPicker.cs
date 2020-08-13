@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             {
                 deferral = e.GetDeferral();
 
-                if (string.Equals("common", _authority.TenantId) || WamBroker.MSA_PASSTHROUGH == true)
+                if (string.Equals("common", _authority.TenantId) || _isMsaPassthrough )
                 {
                     _logger.Verbose("Displaying selector for common");
                     e.WebAccountProviderCommands.Add(

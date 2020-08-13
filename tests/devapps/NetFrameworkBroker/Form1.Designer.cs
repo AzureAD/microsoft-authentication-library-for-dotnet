@@ -188,7 +188,7 @@
             this.accBtn.TabIndex = 15;
             this.accBtn.Text = "Get Accounts";
             this.accBtn.UseVisualStyleBackColor = true;
-            this.accBtn.Click += new System.EventHandler(this.accBtn_Click);
+            this.accBtn.Click += new System.EventHandler(this.getAccountsBtn_Click);
             // 
             // clearBtn
             // 

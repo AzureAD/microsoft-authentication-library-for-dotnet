@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -150,8 +151,11 @@ namespace Microsoft.Identity.Client
         {
             var accountsFromCache = await GetAccountsFromCacheAsync(apiId, homeAccountIdFilter).ConfigureAwait(false);
             var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter).ConfigureAwait(false);
+
+            ServiceBundle.DefaultLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromCache.Count()} broker accounts");
             IEnumerable<IAccount> cacheAndBrokerAccounts = MergeAccounts(accountsFromCache, accountsFromBroker);
 
+            ServiceBundle.DefaultLogger.Verbose($"Returning {cacheAndBrokerAccounts.Count()} accounts");
             return cacheAndBrokerAccounts;
         }
 
@@ -159,7 +163,6 @@ namespace Microsoft.Identity.Client
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {                
-                //Broker is available so accounts will be merged using home account ID with local accounts taking priority
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
                 var brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
 
@@ -171,10 +174,32 @@ namespace Microsoft.Identity.Client
                             StringComparison.OrdinalIgnoreCase));
                 }
 
+                brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts).ConfigureAwait(false);
                 return brokerAccounts;
             }
 
             return Enumerable.Empty<IAccount>();
+        }
+
+        private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts)
+        {
+            ServiceBundle.DefaultLogger.Verbose($"Filtering broker accounts by env. Before fitering: " + brokerAccounts.Count());
+
+            ISet<string> allEnvs = new HashSet<string>(
+                brokerAccounts.Select(aci => aci.Environment),
+                StringComparer.OrdinalIgnoreCase);
+            
+            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                Authority,
+                allEnvs,
+                CreateRequestContext(Guid.NewGuid())).ConfigureAwait(false);
+
+            
+            brokerAccounts = brokerAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+
+            ServiceBundle.DefaultLogger.Verbose($"After fitering: " + brokerAccounts.Count());
+
+            return brokerAccounts;
         }
 
         private IEnumerable<IAccount> MergeAccounts(
