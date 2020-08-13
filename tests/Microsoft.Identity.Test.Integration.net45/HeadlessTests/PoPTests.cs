@@ -20,7 +20,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     // Currently PoP is supported only on .Net Classic
-#if DESKTOP
+#if DESKTOP || NET_CORE
     // Note: these tests require permission to a KeyVault Microsoft account;
     // Please ignore them if you are not a Microsoft FTE, they will run as part of the CI build
     [TestClass]

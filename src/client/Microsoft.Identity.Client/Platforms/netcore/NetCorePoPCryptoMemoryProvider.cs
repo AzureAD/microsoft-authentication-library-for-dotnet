@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     {
                         s_SigningKey = RSA.Create();
                         s_SigningKey.KeySize = RsaKeySize;
-                        s_KeyTimeValidTo = DateTime.Now;
+                        s_KeyTimeValidTo = DateTime.Now + TimeSpan.FromSeconds(s_DefaultKeyExpirationTime);
                         return s_SigningKey;
                     }
 
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         private bool CheckKeyExpiration()
         {
-            return ConvertToTimeT(s_KeyTimeValidTo + TimeSpan.FromSeconds(s_DefaultKeyExpirationTime)) > ConvertToTimeT(DateTime.Now);
+            return ConvertToTimeT(s_KeyTimeValidTo) < ConvertToTimeT(DateTime.Now);
         }
 
         internal static long ConvertToTimeT(DateTime time)
