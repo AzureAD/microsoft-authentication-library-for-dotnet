@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Utils;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
+using Windows.System;
 
 namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 {
@@ -31,9 +32,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
         private readonly ICoreLogger _logger;
         private readonly IntPtr _parentHandle;
         private readonly SynchronizationContext _syncronizationContext;
-
-        // TODO: temprorary
-        public const bool MSA_PASSTHROUGH = false;
 
 
         public WamBroker(CoreUIParent uiParent, ICoreLogger logger)
@@ -151,7 +149,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             //string aut = "https://login.windows-ppe.net/organizations";
             webTokenRequest.Properties.Add(
                             "authority",
-                            authenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
+                            authenticationRequestParameters.UserConfiguredAuthority.AuthorityInfo.CanonicalAuthority);
             webTokenRequest.Properties.Add(
                 "validateAuthority",
                 authenticationRequestParameters.AuthorityInfo.ValidateAuthority ? "yes" : "no");
@@ -160,12 +158,13 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
         private async Task<MsalTokenResponse> AcquireInteractiveWithPickerAsync(
             AuthenticationRequestParameters authenticationRequestParameters)
         {
+            bool isMsaPassthrough = IsMsaPassthrough(authenticationRequestParameters);
             var accountPicker = new AccountPicker(
                 _parentHandle,
                 _logger,
                 _syncronizationContext,
                 authenticationRequestParameters.Authority,
-                IsMsaPassthrough(authenticationRequestParameters));
+                isMsaPassthrough);
             WebTokenRequest webTokenRequest = null;
 
             IWamPlugin wamPlugin = null;
@@ -179,7 +178,8 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                     throw new MsalClientException(MsalError.AuthenticationCanceledError, "WAM Account Picker did not return an account.");
                 }
 
-                wamPlugin = accountProvider.Authority == "consumers" ? _msaPlugin : _aadPlugin; //TODO: needs testing
+                wamPlugin = (accountProvider.Authority == "consumers" && !isMsaPassthrough) ?
+                    _msaPlugin : _aadPlugin; //TODO: Does not work with MSA PT :(
 
                 webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                      accountProvider,
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
         private bool IsMsaPassthrough(AuthenticationRequestParameters authenticationRequestParameters)
         {
             return 
-                authenticationRequestParameters.ExtraQueryParameters.TryGetValue("MSAL_MSA_PT", out string val) &&
+                authenticationRequestParameters.ExtraQueryParameters.TryGetValue("msal_msa_pt", out string val) &&
                 string.Equals("1", val);
         }
 
@@ -278,8 +278,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                         .ConfigureAwait(false);
                 }
 
-
-                // TODO: store WAM client IDs to support 3rd parties
                 WebAccount webAccount = await FindWamAccountForMsalAccountAsync(
                     provider,
                     wamPlugin,
@@ -309,16 +307,13 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 using (_logger.LogBlockDuration("WAM:GetTokenSilentlyAsync:"))
                 {
                     wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest, webAccount);
-
-                    // TODO bogavril - WAM allows to sign in with "default" account. MSAL has no such concept.                    
-                    // wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest);
-
                 }
 
                 return CreateMsalTokenResponse(wamResult, wamPlugin, isInteractive: false);
             }
         }
 
+        // TODO: what about other clouds?
         private async Task<WebAccount> FindWamAccountForMsalAccountAsync(
            WebAccountProvider provider,
            IWamPlugin wamPlugin,
@@ -344,6 +339,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                     return webAccount;
                 }
 
+                
                 if (string.Equals(loginHint, webAccount.UserName, StringComparison.OrdinalIgnoreCase))
                 {
                     matchedAccountByLoginHint = webAccount;
@@ -367,9 +363,13 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             switch (wamResponse.ResponseStatus)
             {
                 case WebTokenRequestStatus.Success:
+                    _logger.Info("WAM response status success");
+                    return wamPlugin.ParseSuccesfullWamResponse(wamResponse.ResponseData[0]);
+
                 // Account Switch occurs when a login hint is passed to WAM but the user chooses a different account for login.
                 // MSAL treats this as a success scenario
                 case WebTokenRequestStatus.AccountSwitch:
+                    _logger.Info("WAM response status account switch. Treating as success");
                     return wamPlugin.ParseSuccesfullWamResponse(wamResponse.ResponseData[0]);
                     
                 case WebTokenRequestStatus.UserInteractionRequired:
@@ -405,8 +405,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 ErrorDescription = errorMessage
             };
         }
-
-
 
         private void AddExtraParamsToRequest(WebTokenRequest webTokenRequest, IDictionary<string, string> extraQueryParameters)
         {
