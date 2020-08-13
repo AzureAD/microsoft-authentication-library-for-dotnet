@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// <remarks>
     /// Key creation and storage only works on Windows. See https://stackoverflow.com/questions/41986995/implement-rsa-in-net-core/42006084 for more details.
     /// </remarks>
-    internal class NetCorePoPCryptoMemoryProvider : IPoPCryptoProvider, IDisposable
+    internal class NetCorePoPCryptoProvider : IPoPCryptoProvider, IDisposable
     {
         internal /* internal for test only */ const int RsaKeySize = 2048;
         internal /* internal for test only */ const string ContainerName = "com.microsoft.msal";
@@ -47,14 +47,14 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         // This is a singleton because the key is the same on a device
-        private static readonly Lazy<NetCorePoPCryptoMemoryProvider> lazyInstance =
-            new Lazy<NetCorePoPCryptoMemoryProvider>(() => new NetCorePoPCryptoMemoryProvider());
+        private static readonly Lazy<NetCorePoPCryptoProvider> lazyInstance =
+            new Lazy<NetCorePoPCryptoProvider>(() => new NetCorePoPCryptoProvider());
 
-        public static NetCorePoPCryptoMemoryProvider Instance { get { return lazyInstance.Value; } }
+        public static NetCorePoPCryptoProvider Instance { get { return lazyInstance.Value; } }
 
         public string CannonicalPublicKeyJwk { get; }
 
-        private NetCorePoPCryptoMemoryProvider(bool persistKey = false)
+        private NetCorePoPCryptoProvider(bool persistKey = false)
         {
             s_PersistKey = persistKey;
 

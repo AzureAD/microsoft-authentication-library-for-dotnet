@@ -16,6 +16,8 @@ using Microsoft.Identity.Client.UI;
 using System.ComponentModel;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Platforms.net45;
 
 namespace Microsoft.Identity.Client.Platforms.netcore
 {
@@ -204,6 +206,11 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         public override IMsalHttpClientFactory CreateDefaultHttpClientFactory()
         {
             return new NetCoreHttpClientFactory();
+        }
+
+        public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
+        {
+            return NetCorePoPCryptoProvider.Instance;
         }
 
         /// <summary>
