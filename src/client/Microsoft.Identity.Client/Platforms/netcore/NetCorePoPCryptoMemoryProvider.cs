@@ -4,6 +4,7 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.net45
@@ -15,11 +16,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// <remarks>
     /// Key creation and storage only works on Windows. See https://stackoverflow.com/questions/41986995/implement-rsa-in-net-core/42006084 for more details.
     /// </remarks>
-    internal class NetCorePoPCryptoMemoryProvider
+    internal class NetCorePoPCryptoMemoryProvider : IPoPCryptoProvider, IDisposable
     {
         internal /* internal for test only */ const int RsaKeySize = 2048;
         internal /* internal for test only */ const string ContainerName = "com.microsoft.msal";
-        private static RSA s_InMemorySigningKey;
+        private static RSA s_SigningKey;
         private bool s_PersistKey;
         private DateTime s_KeyTimeValidTo;
         private readonly uint s_DefaultKeyExpirationTime = 60 * 60 * 8; // Eight Hours
@@ -32,12 +33,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 {
                     if (CheckKeyExpiration())
                     {
-                        s_InMemorySigningKey = RSA.Create();
-                        s_InMemorySigningKey.KeySize = RsaKeySize;
-                        return s_InMemorySigningKey;
+                        s_SigningKey = RSA.Create();
+                        s_SigningKey.KeySize = RsaKeySize;
+                        s_KeyTimeValidTo = DateTime.Now;
+                        return s_SigningKey;
                     }
 
-                    return s_InMemorySigningKey;
+                    return s_SigningKey;
                 }
 
                 return GetOrCreatePersistededKey(ContainerName);
@@ -54,15 +56,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         private NetCorePoPCryptoMemoryProvider(bool persistKey = false)
         {
-            if (persistKey)
-            {
-                s_InMemorySigningKey = GetOrCreatePersistededKey(ContainerName);
-            }
+            s_PersistKey = persistKey;
 
-            RSAParameters publicKeyInfo = s_InMemorySigningKey.ExportParameters(false);
+            RSAParameters publicKeyInfo = s_SigningKey.ExportParameters(false);
 
             CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyInfo);
-            s_PersistKey = persistKey;
         }
 
 
@@ -73,7 +71,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         private bool CheckKeyExpiration()
         {
-            return ConvertToTimeT(s_KeyTimeValidTo) <= ConvertToTimeT(DateTime.Now);
+            return ConvertToTimeT(s_KeyTimeValidTo + TimeSpan.FromSeconds(s_DefaultKeyExpirationTime)) > ConvertToTimeT(DateTime.Now);
         }
 
         internal static long ConvertToTimeT(DateTime time)
@@ -113,6 +111,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
         private static string ComputeCannonicalJwk(RSAParameters rsaPublicKey)
         {
             return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
+        }
+
+        public void Dispose()
+        {
+            s_SigningKey.Dispose();
         }
     }
 }

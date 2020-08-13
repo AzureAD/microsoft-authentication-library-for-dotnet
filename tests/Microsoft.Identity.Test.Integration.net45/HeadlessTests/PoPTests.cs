@@ -10,11 +10,11 @@ using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -30,7 +30,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
 
         private static readonly string[] s_scopes = { "User.Read" };
+        private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
 
+        private const string PublicCloudConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+        private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+        private static string s_publicCloudCcaSecret;
+        private KeyVaultSecretsProvider _keyVault;
 
         // Doesn't exist, but the POP validator endpoint will check if the POP token matches this HTTP request 
 
@@ -50,6 +55,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 _popValidationEndpointSecret = LabUserHelper.KeyVaultSecretsProvider.GetSecret(
                     "https://buildautomation.vault.azure.net/secrets/automation-pop-validation-endpoint/841fc7c2ccdd48d7a9ef727e4ae84325").Value;
+            }
+
+            if (_keyVault == null)
+            {
+                _keyVault = new KeyVaultSecretsProvider();
+                s_publicCloudCcaSecret = _keyVault.GetSecret(TestConstants.MsalCCAKeyVaultUri).Value;
             }
         }
 
@@ -186,6 +197,39 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await VerifyPoPTokenAsync(
                 clientId,
                 request2).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ConfidentialClientWithClientSecretTestAsync()
+        {
+            await RunTestWithClientSecretAsync(PublicCloudConfidentialClientID,
+                                                           PublicCloudTestAuthority,
+                                                           s_publicCloudCcaSecret).ConfigureAwait(false);
+        }
+
+        public async Task RunTestWithClientSecretAsync(string clientID, string authority, string secret)
+        {
+            HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+
+            var confidentialClientAuthority = authority;
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(clientID)
+                .WithExperimentalFeatures()
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientSecret(secret)
+                .WithTestLogging()
+                .Build();
+
+            await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPosession(request1)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
+            await VerifyPoPTokenAsync(
+                clientID,
+                request1).ConfigureAwait(false);
         }
 
         private class NoAccessHttpClientFactory : IMsalHttpClientFactory

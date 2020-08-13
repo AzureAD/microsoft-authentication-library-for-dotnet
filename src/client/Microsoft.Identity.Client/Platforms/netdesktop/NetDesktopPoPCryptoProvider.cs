@@ -20,8 +20,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
     {
         internal /* internal for test only */ const int RsaKeySize = 2048;
         internal /* internal for test only */ const string ContainerName = "com.microsoft.msal";
-        private readonly RSACryptoServiceProvider s_InMemorySigningKey;
+        private static RSACryptoServiceProvider s_SigningKey;
         private bool s_PersistKey = false;
+        private DateTime s_KeyTimeValidTo;
+        private readonly uint s_DefaultKeyExpirationTime = 60 * 60 * 8; // Eight Hours
 
         // This is a singleton because the key is the same on a device
         private static readonly Lazy<NetDesktopPoPCryptoProvider> lazyInstance =
@@ -31,16 +33,17 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             get
             {
-                if (s_PersistKey)
+                if (!s_PersistKey)
                 {
-                    if (!CheckKeyExpiration())
+                    if (CheckKeyExpiration())
                     {
-                        s_SigningKey = RSA.Create();
+                        s_SigningKey = new RSACryptoServiceProvider();
                         s_SigningKey.KeySize = RsaKeySize;
+                        s_KeyTimeValidTo = DateTime.Now + TimeSpan.FromSeconds(s_DefaultKeyExpirationTime);
                         return s_SigningKey;
                     }
 
-                    return 
+                    return s_SigningKey;
                 }
 
                 return GetOrCreatePersistededKey(ContainerName);
@@ -49,12 +52,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public static NetDesktopPoPCryptoProvider Instance { get { return lazyInstance.Value; } }
 
-        private NetDesktopPoPCryptoProvider(bool persisKey = false)
+        private NetDesktopPoPCryptoProvider(bool persistKey = false)
         {
-            if (persisKey)
-            {
-                s_InMemorySigningKey = GetOrCreatePersistededKey(ContainerName);
-            }
+            s_PersistKey = persistKey;
             
             RSAParameters publicKeyInfo = RsaKey.ExportParameters(false);
 
@@ -102,12 +102,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public void Dispose()
         {
-            s_InMemorySigningKey.Dispose();
+            s_SigningKey.Dispose();
         }
 
         private bool CheckKeyExpiration()
         {
-            return ConvertToTimeT(s_KeyTimeValidTo) <= ConvertToTimeT(DateTime.Now);
+            return ConvertToTimeT(s_KeyTimeValidTo) < ConvertToTimeT(DateTime.Now);
         }
 
         internal static long ConvertToTimeT(DateTime time)
