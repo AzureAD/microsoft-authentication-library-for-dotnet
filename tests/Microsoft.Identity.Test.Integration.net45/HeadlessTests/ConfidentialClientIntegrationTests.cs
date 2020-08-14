@@ -602,5 +602,28 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await confidentialApp.GetAccountsAsync().ConfigureAwait(false);
             Assert.IsNull(userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
         }
+
+        [TestMethod]
+        public async Task ClientCredentialWithAzureRegionAsync()
+        {
+            var dict = new Dictionary<string, string>
+            {
+                ["allowestsrnonmsi"] = "true"
+            };
+
+            Environment.SetEnvironmentVariable("REGION_NAME", "westus");
+            var cca = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithAuthority(PublicCloudTestAuthority)
+                .Build();
+
+            var result = await cca.AcquireTokenForClient(s_keyvaultScope)
+                .WithAzureRegion(true)
+                .WithExtraQueryParameters(dict)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+        }
     }
 }
