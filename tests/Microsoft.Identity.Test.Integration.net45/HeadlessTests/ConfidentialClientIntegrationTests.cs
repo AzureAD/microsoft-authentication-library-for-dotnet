@@ -604,14 +604,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task ClientCredentialWithAzureRegionAsync()
+        public async Task RegionalAuthHappyPathAsync()
         {
             var dict = new Dictionary<string, string>
             {
                 ["allowestsrnonmsi"] = "true"
             };
 
-            Environment.SetEnvironmentVariable("REGION_NAME", "westus");
+            Environment.SetEnvironmentVariable("REGION_NAME", "centralus");
             var cca = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
                 .WithClientSecret(s_publicCloudCcaSecret)
                 .WithAuthority(PublicCloudTestAuthority)

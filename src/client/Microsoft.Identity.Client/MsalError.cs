@@ -804,8 +804,8 @@ namespace Microsoft.Identity.Client
         public const string RegionDiscoveryFailed = "region_discovery_failed";
 
         /// <summary>
-        /// <para>What happens?</para>WithAzureRegion is set to true with non public cloud
-        /// <para>Mitigation</para>Region discovery is currently enabled only for public cloud.
+        /// <para>What happens?</para>WithAzureRegion is set to true
+        /// <para>Mitigation</para>Region discovery cannot be performed for ADFS authority.
         /// </summary>
         public const string RegionDiscoveryNotEnabled = "region_discovery_unavailable";
 
