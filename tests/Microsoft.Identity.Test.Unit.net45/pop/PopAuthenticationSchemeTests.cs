@@ -12,6 +12,10 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Client;
+using System.Threading;
+using Microsoft.Identity.Client.PlatformsCommon;
+using Microsoft.Identity.Client.Platforms.net45;
 
 namespace Microsoft.Identity.Test.Unit.PoP
 {
@@ -81,7 +85,69 @@ namespace Microsoft.Identity.Test.Unit.PoP
             Assert.IsTrue(jwkFromPopAssertion["jwk"].DeepEquals(initialJwk));
         }
 
+        [TestMethod]
+        public void ValidateKeyExpiration()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
 
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .BuildConcrete();
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                Guid correlationId = Guid.NewGuid();
+
+                var provider = new NetDesktopPoPCryptoProvider();
+                TestClock testClock = new TestClock();
+                testClock.TestTime = DateTime.UtcNow;
+                provider.Clock = testClock;
+
+                app.AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithProofOfPosession(request1, provider)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                var JWK = provider.CannonicalPublicKeyJwk;
+                //Advance time 7 hours. Should still be the same key
+                testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 7);
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+                app.AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithProofOfPosession(request1, provider)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(JWK == provider.CannonicalPublicKeyJwk);
+                //Advance time 1 hour. Should be a different key
+                testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 1);
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+                app.AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithProofOfPosession(request1, provider)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(JWK != provider.CannonicalPublicKeyJwk);
+            }
+        }
+
+        internal MockHttpAndServiceBundle CreateTestHarness(
+                                            TelemetryCallback telemetryCallback = null,
+                                            LogCallback logCallback = null,
+                                            bool isExtendedTokenLifetimeEnabled = false)
+        {
+            return new MockHttpAndServiceBundle(
+                telemetryCallback,
+                logCallback,
+                isExtendedTokenLifetimeEnabled,
+                testContext: null);
+        }
 
         private static string AssertSimpleClaim(JwtSecurityToken jwt, string expectedKey, string optionalExpectedValue = null)
         {
@@ -91,6 +157,19 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 Assert.AreEqual(optionalExpectedValue, value);
             }
             return value;
+        }
+    }
+
+    class TestClock : IClock
+    {
+        public DateTime TestTime { get; set; }
+
+        public DateTime Now
+        {
+            get
+            {
+                return TestTime;
+            }
         }
     }
 }

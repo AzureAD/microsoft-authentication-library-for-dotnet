@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
-            return NetCorePoPCryptoProvider.Instance;
+            return new NetCorePoPCryptoProvider();
         }
 
         /// <summary>

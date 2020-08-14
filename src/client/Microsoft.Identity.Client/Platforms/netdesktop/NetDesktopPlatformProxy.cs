@@ -311,7 +311,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
-            return NetDesktopPoPCryptoProvider.Instance;
+            return new NetDesktopPoPCryptoProvider();
         }
 
         public override IDeviceAuthManager CreateDeviceAuthManager()

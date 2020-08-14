@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -197,14 +198,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await VerifyPoPTokenAsync(
                 clientId,
                 request2).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task ConfidentialClientWithClientSecretTestAsync()
-        {
-            await RunTestWithClientSecretAsync(PublicCloudConfidentialClientID,
-                                                           PublicCloudTestAuthority,
-                                                           s_publicCloudCcaSecret).ConfigureAwait(false);
         }
 
         public async Task RunTestWithClientSecretAsync(string clientID, string authority, string secret)
