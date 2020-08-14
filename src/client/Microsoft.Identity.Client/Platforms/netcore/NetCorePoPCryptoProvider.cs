@@ -30,21 +30,23 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             get
             {
-
-                if (PopCryptoHelper.CheckKeyExpiration(_KeyTimeValidTo, Clock))
+                lock (s_SigningKey)
                 {
-                    s_SigningKey = RSA.Create();
-                    s_SigningKey.KeySize = RsaKeySize;
-                    _KeyTimeValidTo = Clock.Now + TimeSpan.FromSeconds(_DefaultKeyExpirationTime);
+                    if (PopCryptoHelper.CheckKeyExpiration(_KeyTimeValidTo, Clock))
+                    {
+                        s_SigningKey = RSA.Create();
+                        s_SigningKey.KeySize = RsaKeySize;
+                        _KeyTimeValidTo = Clock.Now + TimeSpan.FromSeconds(_DefaultKeyExpirationTime);
 
-                    RSAParameters publicKeyInfo = s_SigningKey.ExportParameters(false);
+                        RSAParameters publicKeyInfo = s_SigningKey.ExportParameters(false);
 
-                    CannonicalPublicKeyJwk = PopCryptoHelper.ComputeCannonicalJwk(publicKeyInfo);
+                        CannonicalPublicKeyJwk = PopCryptoHelper.ComputeCannonicalJwk(publicKeyInfo);
+
+                        return s_SigningKey;
+                    }
 
                     return s_SigningKey;
                 }
-
-                return s_SigningKey;
             }
         }
 
