@@ -22,7 +22,7 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.net45.Http;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Platforms.netdesktop.Broker;
+
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -328,12 +328,18 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public override IBroker CreateBroker(CoreUIParent uiParent)
         {
-            return new WamBroker(uiParent, Logger);
+#if NET45
+            throw new PlatformNotSupportedException("Windows Authentication Manager (WAM) integration is not available on the current platform - it is only available on .NET 4.6.1+, .NET Core 3.0+ (Windows only) and UWP");
+#else // net461
+            return new Features.WamBroker.WamBroker(uiParent, Logger);           
+#endif
         }
 
         public override bool CanBrokerSupportSilentAuth()
         {
             return true;
         }
+
+        public override bool BrokerSupportsWamAccounts => true;
     }
 }

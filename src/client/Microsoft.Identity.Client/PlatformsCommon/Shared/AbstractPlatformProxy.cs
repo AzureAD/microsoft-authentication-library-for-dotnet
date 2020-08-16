@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected abstract IWebUIFactory CreateWebUiFactory();
         protected abstract IFeatureFlags CreateFeatureFlags();
 
-        
+
 
         protected abstract string InternalGetDeviceModel();
         protected abstract string InternalGetOperatingSystem();
@@ -200,7 +200,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return false;
         }
-        
+
+        public virtual bool BrokerSupportsWamAccounts => false;
+
         public virtual IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
             throw new NotImplementedException();

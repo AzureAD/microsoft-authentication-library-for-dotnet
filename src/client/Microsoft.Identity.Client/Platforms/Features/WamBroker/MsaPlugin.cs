@@ -1,19 +1,19 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.IdentityModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
+namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal class MsaPlugin : IWamPlugin
     {
@@ -44,16 +44,15 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 }
                 else
                 {
-                    // TODO: review logic around this
                     addNewAccount = !(await WamBroker.IsDefaultAccountMsaAsync().ConfigureAwait(false));
                 }
             }
 
-            var promptType = (setLoginHint || addNewAccount) ? 
-                WebTokenRequestPromptType.ForceAuthentication : 
+            var promptType = (setLoginHint || addNewAccount) ?
+                WebTokenRequestPromptType.ForceAuthentication :
                 WebTokenRequestPromptType.Default;
 
-            string scopes = WamBroker.GetEffectiveScopes(authenticationRequestParameters.Scope);
+            string scopes = ScopeHelper.GetMsalScopes(authenticationRequestParameters.Scope).AsSingleString();
             WebTokenRequest request = new WebTokenRequest(
                 provider,
                 scopes,
@@ -62,7 +61,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
             if (addNewAccount || setLoginHint)
             {
-                // TODO: what does this do?
                 request.Properties.Add("Client_uiflow", "new_account"); // launch add account flow
 
                 if (setLoginHint)
@@ -89,8 +87,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
         public string GetHomeAccountIdOrNull(WebAccount webAccount)
         {
-            const string msaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad"; // TODO: bogavril - is there a different value in PPE?
-
             if (!webAccount.Properties.TryGetValue("SafeCustomerId", out string cid))
             {
                 _logger.Warning("[WAM MSA Plugin] MSAL account cannot be created without MSA CID");
@@ -99,7 +95,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
             if (!TryConvertCidToGuid(cid, out string localAccountId))
             {
-                _logger.WarningPii($"[WAM MSA Plugin] Invalid CID: {cid}", $"[WAM MSA Provider] Invalid CID, lenght {cid.Length}");
+                _logger.WarningPii($"[WAM MSA Plugin] Invalid CID: {cid}", $"[WAM MSA Provider] Invalid CID, length {cid.Length}");
                 return null;
             }
 
@@ -108,7 +104,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 return null;
             }
 
-            string homeAccountId = localAccountId + "." + msaTenantId;
+            string homeAccountId = localAccountId + "." + Constants.MsaTenantId;
             return homeAccountId;
         }
 
@@ -136,7 +132,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
         private IAccount ConvertToMsalAccountOrNull(WebAccount webAccount)
         {
-            const string environment = "login.windows.net"; //TODO: bogavril - other clouds?
+            const string environment = "login.windows.net"; //TODO: is MSA available in other clouds?
             string homeAccountId = GetHomeAccountIdOrNull(webAccount);
 
             return new Account(homeAccountId, webAccount.UserName, environment);
@@ -181,12 +177,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             string msaTokens = webTokenResponse.Token;
             if (string.IsNullOrEmpty(msaTokens))
             {
-                //TODO: better to throw exceptions directly to have stack trace
-                return new MsalTokenResponse()
-                {
-                    Error = MsaErrorCode,
-                    ErrorDescription = "Bad token format, msaTokens was unexpectedly empty"
-                };
+                throw new MsalServiceException(MsaErrorCode, "Bad token format, msaTokens was unexpectedly empty");
             }
 
             string accessToken = null, idToken = null, clientInfo = null, tokenType = null, scopes = null, correlationId = null;
@@ -202,7 +193,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                         "Bad token response format, expected '=' separated pair");
                 }
 
-                if (keyValuePair[0] == "access_token") //TODO: access token looks wierd!
+                if (keyValuePair[0] == "access_token")
                 {
                     accessToken = keyValuePair[1];
                 }
@@ -261,6 +252,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 ExtendedExpiresIn = 0, // not supported on MSA
                 ClientInfo = clientInfo,
                 TokenType = tokenType,
+                WamAccountId = webTokenResponse.WebAccount.Id,
                 TokenSource = TokenSource.Broker
             };
 

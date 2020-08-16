@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Core;
@@ -50,6 +49,19 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             return list;
+        }
+
+        internal static void MergeDifferentEntries<TKey, TValue>(
+            this IDictionary<TKey, TValue> source,
+            IDictionary<TKey, TValue> other)
+        {
+            other?.ToList().ForEach(x =>
+            {
+                if (!source.ContainsKey(x.Key))
+                {
+                    source[x.Key] = x.Value;
+                }
+            });
         }
     }
 }

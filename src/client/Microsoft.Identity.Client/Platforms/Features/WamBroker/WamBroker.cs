@@ -1,6 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -9,20 +10,18 @@ using System.Windows.Forms;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.net45;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
-using Windows.System;
 
-namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
+namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
-    //TODO: bogavril - C++ impl catches all exceptions and emits telemetry - consider the same?
     internal class WamBroker : IBroker
     {
         private readonly IWamPlugin _aadPlugin;
@@ -43,7 +42,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
             _aadPlugin = new AadPlugin(_logger);
             _msaPlugin = new MsaPlugin(_logger);
-
         }
 
         /// <summary>
@@ -131,7 +129,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             }
             catch (Exception ex)
             {
-                // TODO: needs some testing to understand the kind of exceptions thrown here and how to extract more details
                 _logger.ErrorPii(ex);
                 throw new MsalServiceException("wam_interactive_error", "See inner exception for details", ex);
             }
@@ -171,7 +168,8 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             WebTokenRequestResult wamResult = null;
             try
             {
-                var accountProvider = await accountPicker.DetermineAccountInteractivelyAsync().ConfigureAwait(false);
+                WebAccountProvider accountProvider = await
+                    accountPicker.DetermineAccountInteractivelyAsync().ConfigureAwait(false);
 
                 if (accountProvider == null)
                 {
@@ -179,8 +177,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 }
 
                 wamPlugin = (accountProvider.Authority == "consumers" && !isMsaPassthrough) ?
-                    _msaPlugin : _aadPlugin; //TODO: Does not work with MSA PT :(
-
+                    _msaPlugin : _aadPlugin; //TODO: Does not work with MSA PT ...
                 webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                      accountProvider,
                      isInteractive: true,
@@ -192,7 +189,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             }
             catch (Exception ex) when (!(ex is MsalException))
             {
-                // TODO: needs some testing to understand the kind of exceptions thrown here and how to extract more details
                 _logger.ErrorPii(ex);
                 throw new MsalServiceException(
                     "wam_interactive_picker_error",
@@ -241,17 +237,18 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
         private void AddPOPParamsToRequest(WebTokenRequest webTokenRequest)
         {
-            // TODO bogavril: add POP support by adding "token_type" = "pop" and "req_cnf" = req_cnf
+            // TODO: add POP support by adding "token_type" = "pop" and "req_cnf" = req_cnf
         }
 
         private bool IsMsaPassthrough(AuthenticationRequestParameters authenticationRequestParameters)
         {
-            return 
-                authenticationRequestParameters.ExtraQueryParameters.TryGetValue("msal_msa_pt", out string val) &&
-                string.Equals("1", val);
+            // TODO: not currently working
+            //return 
+            //    authenticationRequestParameters.ExtraQueryParameters.TryGetValue("msal_msa_pt", out string val) &&
+            //    string.Equals("1", val);
+            return false;
         }
 
-        // TODO: bogavril - in C++ impl, ROPC is also included here. Will ommit for now.
         public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
@@ -261,8 +258,8 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 // Important: MSAL will have already resolved the authority by now, 
                 // so we are not expecting "common" or "organizations" but a tenanted authority
                 bool isMsa = IsMsaRequest(
-                    authenticationRequestParameters.Authority, 
-                    null, 
+                    authenticationRequestParameters.Authority,
+                    null,
                     IsMsaPassthrough(authenticationRequestParameters));
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
@@ -313,7 +310,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             }
         }
 
-        // TODO: what about other clouds?
         private async Task<WebAccount> FindWamAccountForMsalAccountAsync(
            WebAccountProvider provider,
            IWamPlugin wamPlugin,
@@ -328,6 +324,31 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
             WamProxy wamProxy = new WamProxy(provider, _logger);
 
+            IAccountInternal accountInternal = (account as IAccountInternal);
+            if (accountInternal?.WamAccountIds != null &&
+                accountInternal.WamAccountIds.TryGetValue(clientId, out string wamAccountId))
+            {
+                _logger.Info("WAM will try to find an account based on the wam account id from the cache");
+                WebAccount result = await wamProxy.FindWebAccountByIdAsync(wamAccountId).ConfigureAwait(false);
+
+                if (result != null)
+                {
+                    return result;
+                }
+
+                _logger.Warning("WAM account was not found for given wam account id.");
+            }
+
+            return await FindAccountByHomeAccIdOrLoginHintAsync(wamPlugin, account, loginHint, clientId, wamProxy).ConfigureAwait(false);
+        }
+
+        private static async Task<WebAccount> FindAccountByHomeAccIdOrLoginHintAsync(
+            IWamPlugin wamPlugin,
+            IAccount account,
+            string loginHint,
+            string clientId,
+            WamProxy wamProxy)
+        {
             var webAccounts = await wamProxy.FindAllWebAccountsAsync(clientId).ConfigureAwait(false);
 
             WebAccount matchedAccountByLoginHint = null;
@@ -339,7 +360,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                     return webAccount;
                 }
 
-                
+
                 if (string.Equals(loginHint, webAccount.UserName, StringComparison.OrdinalIgnoreCase))
                 {
                     matchedAccountByLoginHint = webAccount;
@@ -371,7 +392,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 case WebTokenRequestStatus.AccountSwitch:
                     _logger.Info("WAM response status account switch. Treating as success");
                     return wamPlugin.ParseSuccesfullWamResponse(wamResponse.ResponseData[0]);
-                    
+
                 case WebTokenRequestStatus.UserInteractionRequired:
                     errorCode =
                         wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError.ErrorCode, isInteractive);
@@ -446,14 +467,14 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             string authorityTenant = authority.TenantId;
 
             // common 
-            if (string.Equals("common", authorityTenant, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Constants.CommonTenant, authorityTenant, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Info($"[WAM Broker] Tenant is common.");
                 return IsHomeTidMSA(homeTenantId);
             }
 
             // org
-            if (string.Equals("organizations", authorityTenant, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Constants.OrganizationsTenant, authorityTenant, StringComparison.OrdinalIgnoreCase))
             {
                 if (msaPassthrough)
                 {
@@ -492,8 +513,8 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
         private static bool IsConsumerTenantId(string tenantId)
         {
             return
-                string.Equals("consumenrs", tenantId, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals("9188040d-6c67-4c5b-b112-36a304b66dad", tenantId, StringComparison.OrdinalIgnoreCase);
+                string.Equals(Constants.ConsumerTenant, tenantId, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(Constants.MsaTenantId, tenantId, StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
@@ -522,7 +543,10 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
         public bool IsBrokerInstalledAndInvokable()
         {
-            return true;
+            // Win 10 RS3 - WAM might work on lower version via AccountPicker and using account IDs
+            return ApiInformation.IsMethodPresent(
+                "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
+                "FindAllAccountsAsync");
         }
 
         public Task RemoveAccountAsync(string clientID, IAccount account)
@@ -540,19 +564,13 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
         public static async Task<bool> IsDefaultAccountMsaAsync()
         {
             var provider = await GetDefaultAccountProviderAsync().ConfigureAwait(false);
-            return provider != null && string.Equals("consumers", provider.Authority);
-        }
-
-        public static string GetEffectiveScopes(ISet<string> scopes) // TODO: consolidate with MSAL logic
-        {
-            var effectiveScopeSet = scopes.Union(OAuth2Value.ReservedScopes);
-            return effectiveScopeSet.AsSingleString();
+            return provider != null && string.Equals(Constants.ConsumerTenant, provider.Authority);
         }
 
         public static async Task<WebAccountProvider> GetAccountProviderAsync(string authorityOrTenant)
         {
             WebAccountProvider provider = await WebAuthenticationCoreManager.FindAccountProviderAsync(
-                "https://login.microsoft.com", // TODO bogavril: what about other clouds?
+                "https://login.microsoft.com",
                authorityOrTenant);
 
             return provider;

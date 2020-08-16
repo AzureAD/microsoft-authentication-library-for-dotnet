@@ -186,13 +186,12 @@ namespace Microsoft.Identity.Client
             return homeAccIdMatch && clientIdMatch;
         }
 
-        private static List<IAccount> UpdateWithAdalAccounts(
+        private static void UpdateMapWithAdalAccountsWithClientInfo(
             string envFromRequest,
             IEnumerable<string> envAliases,
             AdalUsersForMsal adalUsers,
             IDictionary<string, Account> clientInfoToAccountMap)
         {
-            var accounts = new List<IAccount>();
 
             foreach (KeyValuePair<string, AdalUserInfo> pair in adalUsers.GetUsersWithClientInfo(envAliases))
             {
@@ -205,6 +204,15 @@ namespace Microsoft.Identity.Client
                             accountIdentifier, pair.Value.DisplayableId, envFromRequest);
                 }
             }
+        }
+
+        private static List<IAccount> UpdateWithAdalAccountsWithoutClientInfo(
+            string envFromRequest,
+            IEnumerable<string> envAliases,
+            AdalUsersForMsal adalUsers,
+            IDictionary<string, Account> clientInfoToAccountMap)
+        {
+            var accounts = new List<IAccount>();
 
             accounts.AddRange(clientInfoToAccountMap.Values);
             var uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();

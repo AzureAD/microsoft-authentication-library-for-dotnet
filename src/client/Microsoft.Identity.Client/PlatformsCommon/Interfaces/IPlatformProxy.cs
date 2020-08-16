@@ -112,7 +112,18 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         void /* for test */ SetBrokerForTest(IBroker broker);
 
+        /// <summary>
+        /// Most brokers take care of both silent auth and interactive auth, however some (iOS) 
+        /// does not support silent auth and gives the RT back to MSAL.
+        /// </summary>
+        /// <returns></returns>
         bool CanBrokerSupportSilentAuth();
+
+        /// <summary>
+        /// WAM broker has a deeper integration into MSAL because MSAL needs to store 
+        /// WAM account IDs in the token cache. 
+        /// </summary>
+        bool BrokerSupportsWamAccounts { get; }
 
         IMsalHttpClientFactory CreateDefaultHttpClientFactory();
     }
