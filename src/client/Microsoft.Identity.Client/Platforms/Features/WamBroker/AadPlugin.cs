@@ -1,9 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
@@ -12,7 +13,7 @@ using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
+namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal class AadPlugin : IWamPlugin
     {
@@ -26,7 +27,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
         {
             var webAccounProvider = await WamBroker.GetAccountProviderAsync("organizations").ConfigureAwait(false);
-            WamProxy wamProxy = new WamProxy(webAccounProvider, _logger); //TODO: not suitable for unit testing
+            WamProxy wamProxy = new WamProxy(webAccounProvider, _logger);
 
             var webAccounts = await wamProxy.FindAllWebAccountsAsync(clientID).ConfigureAwait(false);
 
@@ -38,11 +39,12 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             _logger.Info($"[WAM AAD Provider] GetAccountsAsync converted {webAccounts.Count()} MSAL accounts");
             return msalAccounts;
         }
-      
+
 
         private Account ConvertToMsalAccountOrNull(WebAccount webAccount)
         {
             string username = webAccount.UserName;
+            string wamId = webAccount.Id;
 
             if (!webAccount.Properties.TryGetValue("Authority", out string authority))
             {
@@ -54,11 +56,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             }
 
             string environment = (new Uri(authority)).Host;
-
-
-            // TODO bogavril - this TODO was copied from C++ implementation and may not be relevant for MSAL .net
-            // AAD WAM plugin returns both guest and home accounts as part of FindAllAccountAsync call.
-            // We will need to de-dupe WAM accounts before writing them to MSAL cache.
             string homeAccountId = GetHomeAccountIdOrNull(webAccount);
 
             if (homeAccountId != null)
@@ -90,7 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             }
 
             return oid + "." + tenantId;
-        }       
+        }
 
         public Task<WebTokenRequest> CreateWebTokenRequestAsync(
             WebAccountProvider provider,
@@ -106,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
             WebTokenRequest request = new WebTokenRequest(
                 provider,
-                WamBroker.GetEffectiveScopes(authenticationRequestParameters.Scope),
+                ScopeHelper.GetMsalScopes(authenticationRequestParameters.Scope).AsSingleString(),
                 authenticationRequestParameters.ClientId,
                 wamPrompt);
 
@@ -114,8 +111,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             {
                 request.Properties.Add("LoginHint", authenticationRequestParameters.LoginHint);
             }
-
-            // TODO: bogavril - add support for ROPC ?
 
             request.Properties.Add("wam_compat", "2.0");
             if (ApiInformation.IsPropertyPresent("Windows.Security.Authentication.Web.Core.WebTokenRequest", "CorrelationId"))
@@ -174,10 +169,10 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             _logger.InfoPii("Result from WAM scopes: " + scopes,
                 "Result from WAM has scopes? " + hasScopes);
 
-            //foreach (var kvp in webTokenResponse.Properties)
-            //{
-            //    Trace.WriteLine($"Other params {kvp.Key}: {kvp.Value}");
-            //}
+            foreach (var kvp in webTokenResponse.Properties)
+            {
+                Trace.WriteLine($"Other params {kvp.Key}: {kvp.Value}");
+            }
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
@@ -188,7 +183,8 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
                 ExpiresIn = CoreHelpers.GetDurationFromWindowsTimestamp(expiresOn, _logger),
                 ExtendedExpiresIn = CoreHelpers.GetDurationFromWindowsTimestamp(extendedExpiresOn, _logger),
                 ClientInfo = clientInfo,
-                TokenType = "Bearer", // TODO: bogavril - token type?
+                TokenType = "Bearer",
+                WamAccountId = webTokenResponse.WebAccount.Id,
                 TokenSource = TokenSource.Broker
             };
 
@@ -205,7 +201,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             if (status == WebTokenRequestStatus.ProviderError)
             {
                 if (errorCode == 0xcaa20005)
-                    return "WAM_server_temporarily_unavailable"; //TODO bogavril: find existing error codes for these
+                    return "WAM_server_temporarily_unavailable";
 
                 unchecked // as per https://stackoverflow.com/questions/34198173/conversion-of-hresult-between-c-and-c-sharp
                 {

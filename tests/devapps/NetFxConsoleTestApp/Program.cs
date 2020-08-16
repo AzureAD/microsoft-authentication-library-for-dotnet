@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security;
 using System.Security.Cryptography;
 using System.Threading;
@@ -38,7 +37,7 @@ namespace NetFx
     },  
   }";
         // This app has http://localhost redirect uri registered
-        private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
+        private static readonly string s_clientIdForPublicApp = "c0186a6c-0bfc-4d83-9543-c2295b676f3b";
 
         private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
         private const string PoPUri = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
@@ -46,7 +45,7 @@ namespace NetFx
         private static readonly HttpMethod s_popMethod = HttpMethod.Get;
 
         private static bool s_usePoP = false;
-        private static bool s_useBroker = false;
+        private static bool s_useBroker = true;
 
         // These are not really secret as they do not protect anything, but validaton tools will complain
         // if we have secrets in the code. 
@@ -65,7 +64,7 @@ namespace NetFx
             Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET");
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly IEnumerable<string> s_scopes = new[] { "User.Read" };
+        private static readonly IEnumerable<string> s_scopes = new[] { "User.Read",  };
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -100,6 +99,9 @@ namespace NetFx
                 .Create(s_clientIdForConfidentialApp)
                 .WithClientSecret(s_confidentialClientSecret)
                 .Build();
+
+            //cca.AcquireTokenOnBehalfOf(null, null).WithAuthority
+            
 
             BindCache(cca.UserTokenCache, UserCacheFile);
             BindCache(cca.AppTokenCache, UserCacheFile);
@@ -150,6 +152,8 @@ namespace NetFx
         private static async Task RunConsoleAppLogicAsync(
             IPublicClientApplication pca)
         {
+
+
             while (true)
             {
                 Console.Clear();
@@ -164,11 +168,13 @@ namespace NetFx
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
                         4. Acquire Token Interactive                         
+                        $. Acquire Token Interactive with login hint
                         5. Acquire Token Silently
                         6. Acquire Token Silently - multiple requests in parallel
                         7. Acquire SSH Cert Interactive
                         8. Client Credentials 
                         9. Get Account with ID
+                        a. Acquire Token Silently with MSA passthrough workaround
                         p. Toggle POP (currently {(s_usePoP ? "ON" : "OFF")}) 
                         b. Toggle broker
                         c. Clear cache
@@ -223,35 +229,56 @@ namespace NetFx
 
                             break;
                         case '4':
-
+                            
                             var interactiveBuilder = pca.AcquireTokenInteractive(s_scopes);                            
                             interactiveBuilder = ConfigurePoP(interactiveBuilder);
+                                                       
+                            //interactiveBuilder = interactiveBuilder.WithAccount(account2);
 
                             result = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
-
-                          
-
-
-
                             await CallApiAsync(pca, result).ConfigureAwait(false);
 
                             break;
+                        case '$':
 
-                        case '5': // acquire token silent
+                            IAccount account4 = pca.GetAccountsAsync().Result.FirstOrDefault();
+                            var interactiveBuilder2 = pca.AcquireTokenInteractive(s_scopes);
+                            interactiveBuilder = ConfigurePoP(interactiveBuilder2);
+
+                            interactiveBuilder = interactiveBuilder.WithLoginHint(account4.Username);
+
+                            result = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
+                            await CallApiAsync(pca, result).ConfigureAwait(false);
+
+                            break;
+                        case '5':
+                            IAccount account3 = pca.GetAccountsAsync().Result.FirstOrDefault();
+                            if (account3 == null)
+                            {
+                                Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
+                            }
+                            AcquireTokenSilentParameterBuilder silentBuilder2 = pca.AcquireTokenSilent(s_scopes, account3);
+                            result = await silentBuilder2.ExecuteAsync().ConfigureAwait(false);
+                            await CallApiAsync(pca, result).ConfigureAwait(false);
+                            break;
+
+                        case 'a': // acquire token silent with MSA-passthrough
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
+
                             if (account == null)
                             {
                                 Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
                             }
 
-                            //if (s_usePoP)
-                            //{
-                            //    silentBuilder = silentBuilder
-                            //        .WithExtraQueryParameters(GetTestSliceParams())
-                            //        .WithProofOfPosession(new HttpRequestMessage(s_popMethod, PoPUri));
-                            //}
-
                             AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(s_scopes, account);
+
+                            if (s_usePoP)
+                            {
+                                silentBuilder = silentBuilder
+                                    .WithExtraQueryParameters(GetTestSliceParams())
+                                    .WithProofOfPosession(new HttpRequestMessage(s_popMethod, PoPUri));
+                            }
+
 
                             // this is the same in all clouds
                             const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
@@ -260,10 +287,10 @@ namespace NetFx
                             string publicCloudEnv = "https://login.microsoftonline.com/";
                             string msaTenantIdPublicCloud = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
 
-                            if (account!= null && account.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
+                            if (account != null && account.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
                             {
                                 var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
-                              
+
                                 silentBuilder = silentBuilder.WithAuthority(msaAuthority);
                             }
 

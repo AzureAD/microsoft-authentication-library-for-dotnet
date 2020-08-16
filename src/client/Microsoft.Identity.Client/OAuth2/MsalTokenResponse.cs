@@ -95,6 +95,8 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonProperty(PropertyName = TokenResponseClaim.FamilyId)]
         public string FamilyId { get; set; }
 
+        public string WamAccountId { get; set; }
+
         public DateTimeOffset AccessTokenExpiresOn { get; private set; }
         public DateTimeOffset AccessTokenExtendedExpiresOn { get; private set; }
 

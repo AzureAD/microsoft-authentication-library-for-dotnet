@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 
+using System.Collections.Generic;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>

@@ -51,6 +51,7 @@
             this.cbxAccount = new System.Windows.Forms.ComboBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.cbxMsaPt = new System.Windows.Forms.CheckBox();
+            this.btnExpire = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // resultTbx
@@ -202,7 +203,7 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(493, 147);
+            this.btnClearCache.Location = new System.Drawing.Point(512, 162);
             this.btnClearCache.Name = "btnClearCache";
             this.btnClearCache.Size = new System.Drawing.Size(115, 23);
             this.btnClearCache.TabIndex = 17;
@@ -261,8 +262,6 @@
             // cbxMsaPt
             // 
             this.cbxMsaPt.AutoSize = true;
-            this.cbxMsaPt.Checked = true;
-            this.cbxMsaPt.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbxMsaPt.Location = new System.Drawing.Point(95, 101);
             this.cbxMsaPt.Name = "cbxMsaPt";
             this.cbxMsaPt.Size = new System.Drawing.Size(111, 17);
@@ -270,11 +269,22 @@
             this.cbxMsaPt.Text = "MSA-Passthrough";
             this.cbxMsaPt.UseVisualStyleBackColor = true;
             // 
+            // btnExpire
+            // 
+            this.btnExpire.Location = new System.Drawing.Point(512, 133);
+            this.btnExpire.Name = "btnExpire";
+            this.btnExpire.Size = new System.Drawing.Size(115, 23);
+            this.btnExpire.TabIndex = 24;
+            this.btnExpire.Text = "Expire ATs";
+            this.btnExpire.UseVisualStyleBackColor = true;
+            this.btnExpire.Click += new System.EventHandler(this.btnExpire_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(639, 613);
+            this.Controls.Add(this.btnExpire);
             this.Controls.Add(this.cbxMsaPt);
             this.Controls.Add(this.cbxAccount);
             this.Controls.Add(this.label6);
@@ -296,7 +306,7 @@
             this.Controls.Add(this.authorityCbx);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.resultTbx);
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -328,6 +338,7 @@
         private System.Windows.Forms.ComboBox cbxAccount;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.CheckBox cbxMsaPt;
+        private System.Windows.Forms.Button btnExpire;
     }
 }
 

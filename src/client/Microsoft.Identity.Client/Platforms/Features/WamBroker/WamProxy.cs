@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,10 +9,9 @@ using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
+namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal class WamProxy
-
     {
         private readonly WebAccountProvider _webAccountProvider;
         private readonly ICoreLogger _logger;
@@ -21,7 +22,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
             _logger = logger;
         }
 
-       
         public async Task<IEnumerable<WebAccount>> FindAllWebAccountsAsync(string clientID)
         {
             // Win 10 RS3 release and above
@@ -36,11 +36,10 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
             FindAllAccountsResult findResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(_webAccountProvider, clientID);
 
+            // This is expected to happen with the MSA provider, which does not allow account listing
             if (findResult.Status != FindAllWebAccountsStatus.Success)
             {
                 var error = findResult.ProviderError;
-
-                // TODO: bogavril - exceptions vs silent failures
                 _logger.Error($"[WAM Proxy] WebAuthenticationCoreManager.FindAllAccountsAsync failed " +
                     $" with error code {error.ErrorCode} error message {error.ErrorMessage} and status {findResult.Status}");
 
@@ -49,6 +48,11 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop.Broker
 
             _logger.Info($"[WAM Proxy] FindAllWebAccountsAsync returning {findResult.Accounts.Count()} WAM accounts");
             return findResult.Accounts;
+        }
+
+        public async Task<WebAccount> FindWebAccountByIdAsync(string accountId)
+        {
+            return await WebAuthenticationCoreManager.FindAccountAsync(_webAccountProvider, accountId);
         }
     }
 }

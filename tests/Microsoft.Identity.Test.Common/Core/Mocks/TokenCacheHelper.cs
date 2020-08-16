@@ -114,6 +114,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 displayableId,
                 utid,
                 null,
+                null, 
                 null);
 
             accessor.SaveAccount(accountCacheItem);
@@ -166,6 +167,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 null, 
                 TestConstants.Utid,
                 null, 
+                null, 
                 null);
 
             accessor.SaveAccount(accountCacheItem);
@@ -200,6 +202,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 null, 
                 null, 
                 utid, 
+                null, 
                 null, 
                 null);
 

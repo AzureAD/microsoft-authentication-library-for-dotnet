@@ -87,6 +87,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return LogBlockDuration(methodName, logLevel);
         }
 
+        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
+        {
+            return LogBlockDuration(methodName, logLevel);
+        }
+
         public void Verbose(string messageScrubbed)
         {
             Trace.WriteLine($"{_prefix}[Verbose] {messageScrubbed}");

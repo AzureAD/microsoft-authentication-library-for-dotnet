@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -51,7 +53,7 @@ namespace NetDesktopWinForms
 
         private IPublicClientApplication CreatePca()
         {
-            string clientId = (this.clientIdCbx.SelectedItem as ClientEntry)?.Id ?? this.clientIdCbx.Text;
+            string clientId = GetClientId();
             bool msaPt = IsMsaPassthroughConfigured();
             string extraQp = null;
             if (msaPt)
@@ -68,12 +70,13 @@ namespace NetDesktopWinForms
                 // but WAM uses it. We could enforce it.
                 .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
                 .WithExtraQueryParameters(extraQp)
-                .WithLogging((x,y,z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
         }
+
 
         private static void BindCache(ITokenCache tokenCache, string file)
         {
@@ -171,6 +174,19 @@ namespace NetDesktopWinForms
 
             return result;
         }
+
+        private string GetClientId()
+        {
+            string clientId = null;
+
+            clientIdCbx.Invoke((MethodInvoker)delegate
+                {
+                    clientId = (this.clientIdCbx.SelectedItem as ClientEntry)?.Id ?? this.clientIdCbx.Text;
+                });
+
+            return clientId;
+        }
+
 
         private void LogResult(AuthenticationResult ar)
         {
@@ -270,7 +286,7 @@ namespace NetDesktopWinForms
             bool msa = false;
             cbxMsaPt.Invoke((MethodInvoker)delegate
             {
-                msa = cbxMsaPt.Enabled;
+                msa = cbxMsaPt.Checked;
             });
 
             return msa;
@@ -389,6 +405,39 @@ namespace NetDesktopWinForms
             }
 
 
+        }
+
+        private async void btnExpire_Click(object sender, EventArgs e)
+        {
+            var pca = CreatePca();
+
+            // do smth that loads the cache first
+            await pca.GetAccountsAsync().ConfigureAwait(false);
+
+            string expiredValue = ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
+                    .ToString(CultureInfo.InvariantCulture);
+
+            var accessor = pca.UserTokenCache.GetType()
+                .GetRuntimeProperties()
+                .Single(p => p.Name == "Microsoft.Identity.Client.ITokenCacheInternal.Accessor")
+                .GetValue(pca.UserTokenCache);
+
+            var internalAccessTokens = accessor.GetType().GetMethod("GetAllAccessTokens").Invoke(accessor, null) as IEnumerable<object>;
+
+            foreach (var internalAt in internalAccessTokens)
+            {
+                internalAt.GetType().GetRuntimeMethods().Single(m => m.Name == "set_ExpiresOnUnixTimestamp").Invoke(internalAt, new[] { expiredValue });
+                accessor.GetType().GetMethod("SaveAccessToken").Invoke(accessor, new[] { internalAt });
+            }
+
+            var ctor = typeof(TokenCacheNotificationArgs).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Single();
+
+            var argz = ctor.Invoke(new object[] { pca.UserTokenCache, GetClientId(), null, true, false, true, null });
+            var task = pca.UserTokenCache.GetType().GetRuntimeMethods()
+                .Single(m => m.Name == "Microsoft.Identity.Client.ITokenCacheInternal.OnAfterAccessAsync")
+                .Invoke(pca.UserTokenCache, new[] { argz });
+
+            await(task as Task).ConfigureAwait(false);
         }
     }
 
