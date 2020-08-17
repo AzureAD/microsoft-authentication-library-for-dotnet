@@ -80,13 +80,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string ClientId { get; }
 
         public Uri RedirectUri { get; set; }
-
-
-        /// <summary>
-        /// The original redirect uri as a string, which preserves case. Useful for iOS broker, 
-        /// as redirect URI is case sensitive...
-        /// </summary>
-        public string OriginalRedirectUriString => _serviceBundle.Config.RedirectUri;
+       
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
         public string ClaimsAndClientCapabilities { get; private set; }    

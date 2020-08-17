@@ -7,6 +7,8 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.Internal;
+using System.Globalization;
+using Microsoft.Identity.Client.Internal.Logger;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
@@ -51,6 +53,32 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 RedirectUriHelper.Validate(new Uri(Constants.DefaultRedirectUri), true));
 
               RedirectUriHelper.Validate(new Uri(Constants.DefaultRedirectUri), false);
+        }
+
+        [TestMethod]
+        public void iOSBrokerRedirectUri()
+        {
+            string bundleId = "bundleId";
+
+            RedirectUriHelper.ValidateIosBrokerRedirectUri(new Uri($"msauth.{bundleId}://auth"), bundleId, new NullLogger());
+            RedirectUriHelper.ValidateIosBrokerRedirectUri(new Uri($"msauth.{bundleId}://auth/"), bundleId, new NullLogger());
+            RedirectUriHelper.ValidateIosBrokerRedirectUri(new Uri($"myscheme://{bundleId}"), bundleId, new NullLogger());
+            RedirectUriHelper.ValidateIosBrokerRedirectUri(new Uri($"myscheme://{bundleId}/"), bundleId, new NullLogger());
+            RedirectUriHelper.ValidateIosBrokerRedirectUri(new Uri($"myscheme://{bundleId}/suffix"), bundleId, new NullLogger());
+
+            // the comparison MUST be case sensitive 
+            Assert.ThrowsException<MsalClientException>(() =>
+               RedirectUriHelper.ValidateIosBrokerRedirectUri(
+                   new Uri($"msauth.{bundleId.ToUpper(CultureInfo.InvariantCulture)}://auth"),
+                   bundleId, new NullLogger()));
+
+            Assert.ThrowsException<MsalClientException>(() =>
+              RedirectUriHelper.ValidateIosBrokerRedirectUri(
+                  new Uri($"other.{bundleId}://auth"), bundleId, new NullLogger()));
+
+            Assert.ThrowsException<MsalClientException>(() =>
+                RedirectUriHelper.ValidateIosBrokerRedirectUri(
+                  new Uri($"msauth.{bundleId}://other"), bundleId, new NullLogger()));
         }
     }
 }
