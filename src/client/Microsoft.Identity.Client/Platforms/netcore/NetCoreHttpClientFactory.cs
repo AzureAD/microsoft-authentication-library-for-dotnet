@@ -23,23 +23,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     PooledConnectionLifetime = HttpClientConfig.ConnectionLifeTime,
                     PooledConnectionIdleTimeout = HttpClientConfig.ConnectionLifeTime,
                     MaxConnectionsPerServer = HttpClientConfig.MaxConnections,
-                    
                 };
 
                 s_httpClient = new HttpClient(handler);
 
                 HttpClientConfig.ConfigureRequestHeadersAndSize(s_httpClient);
-                ConfigureServicePointManager();
             }
-        }
-
-        private static void ConfigureServicePointManager()
-        {
-            // Default is 2 minutes, see https://msdn.microsoft.com/en-us/library/system.net.servicepointmanager.dnsrefreshtimeout(v=vs.110).aspx
-            ServicePointManager.DnsRefreshTimeout = (int)HttpClientConfig.ConnectionLifeTime.TotalMilliseconds;
-
-            // Increases the concurrent outbound connections
-            ServicePointManager.DefaultConnectionLimit = HttpClientConfig.MaxConnections;
         }
 
         public HttpClient GetHttpClient()
