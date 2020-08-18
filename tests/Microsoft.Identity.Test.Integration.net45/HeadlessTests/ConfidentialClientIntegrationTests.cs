@@ -49,9 +49,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string ArlingtonCloudHost = "https://login.microsoftonline.us/";
 
         private const string RedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
-        private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+        private static readonly string PublicCloudTestAuthority = $"https://login.windows.net/{TenantId}";
+        private const string TenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
         private const string AdfsCertName = "IDLABS-APP-Confidential-Client-Cert-OnPrem";
-        private const string AppCacheKey = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8_AppTokenCache";
+        private static readonly string AppCacheKey = 
+            $"{PublicCloudConfidentialClientID}.{TenantId}_AppTokenCache";
+
         private KeyVaultSecretsProvider _keyVault;
         private static string s_publicCloudCcaSecret;
         private static string s_arlingtonCCASecret;
@@ -184,7 +187,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
-            Assert.AreEqual(PublicCloudConfidentialClientID + "_AppTokenCache", appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);            
         }
 
         [TestMethod]
@@ -234,7 +237,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(2, 1);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
-            Assert.AreEqual(clientID + "_AppTokenCache", appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(AppCacheKey, appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
         }
 
