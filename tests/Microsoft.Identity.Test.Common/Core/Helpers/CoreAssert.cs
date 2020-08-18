@@ -15,8 +15,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     {
         public static void AreScopesEqual(string scopesExpected, string scopesActual)
         {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
+            var expectedScopes = ScopeHelper.ConvertStringToScopeSet(scopesExpected);
+            var actualScopes = ScopeHelper.ConvertStringToScopeSet(scopesActual);
 
             // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
             Assert.AreEqual(expectedScopes.Count, actualScopes.Count);

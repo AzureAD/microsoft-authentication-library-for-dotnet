@@ -11,6 +11,7 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Unit.PoP
 {
@@ -44,10 +45,8 @@ namespace Microsoft.Identity.Test.Unit.PoP
             var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
             popCryptoProvider.CannonicalPublicKeyJwk.Returns(JWK);
             const string AtSecret = "secret";
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem = new MsalAccessTokenCacheItem()
-            {
-                Secret = AtSecret
-            };
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = TokenCacheHelper.CreateAccessTokenItem();
+            msalAccessTokenCacheItem.Secret = AtSecret;
 
             // Act
             PoPAuthenticationScheme authenticationScheme = new PoPAuthenticationScheme(httpRequest, popCryptoProvider);
@@ -82,7 +81,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
             Assert.IsTrue(jwkFromPopAssertion["jwk"].DeepEquals(initialJwk));
         }
 
-       
+
 
         private static string AssertSimpleClaim(JwtSecurityToken jwt, string expectedKey, string optionalExpectedValue = null)
         {

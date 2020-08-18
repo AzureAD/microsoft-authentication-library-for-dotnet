@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return null;
         }
 
-        private void ValidateScopeInput(SortedSet<string> scopesToValidate)
+        private void ValidateScopeInput(HashSet<string> scopesToValidate)
         {
             if (scopesToValidate.Contains(AuthenticationRequestParameters.ClientId))
             {

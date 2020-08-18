@@ -16,11 +16,11 @@ namespace Microsoft.Identity.Test.Unit
 {
     internal static class TestConstants
     {
-        public static SortedSet<string> s_scope
+        public static HashSet<string> s_scope
         {
             get
             {
-                return new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
+                return new HashSet<string>(new[] { "r1/scope1", "r1/scope2" });
             }
         }
 

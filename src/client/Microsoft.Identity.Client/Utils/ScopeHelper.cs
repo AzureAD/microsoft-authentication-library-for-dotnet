@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Utils
 {
@@ -13,8 +14,7 @@ namespace Microsoft.Identity.Client.Utils
         {
             foreach (string key in possibleContainedSet)
             {
-                if (!outerSet.Contains(key, StringComparer.OrdinalIgnoreCase) &&
-                    !string.IsNullOrEmpty(key))
+                if (!outerSet.Contains(key) && !string.IsNullOrEmpty(key))
                 {
                     return false;
                 }
@@ -23,23 +23,31 @@ namespace Microsoft.Identity.Client.Utils
             return true;
         }
 
-        internal static SortedSet<string> ConvertStringToLowercaseSortedSet(string singleString)
+        public static HashSet<string> GetMsalScopes(HashSet<string> userScopes)
+        {
+            return new HashSet<string>(userScopes.Concat(OAuth2Value.ReservedScopes));
+        }
+
+        public static HashSet<string> ConvertStringToScopeSet(string singleString)
         {
             if (string.IsNullOrEmpty(singleString))
             {
-                return new SortedSet<string>();
+                return new HashSet<string>();
             }
 
-            return new SortedSet<string>(singleString.ToLowerInvariant().Split(new[] { " " }, StringSplitOptions.None));
+            return new HashSet<string>(
+                singleString.Split(' '), 
+                StringComparer.OrdinalIgnoreCase);
         }
 
-        internal static SortedSet<string> CreateSortedSetFromEnumerable(IEnumerable<string> input)
+        public static HashSet<string> CreateScopeSet(IEnumerable<string> input)
         {
-            if (input == null || !input.Any())
+            if (input == null)
             {
-                return new SortedSet<string>();
+                return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             }
-            return new SortedSet<string>(input);
-        }
+
+            return new HashSet<string>(input, StringComparer.OrdinalIgnoreCase);
+        }    
     }
 }

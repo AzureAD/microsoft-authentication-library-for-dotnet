@@ -13,11 +13,6 @@ namespace Microsoft.Identity.Client.Cache.Items
 {
     internal class MsalAccessTokenCacheItem : MsalCredentialCacheItemBase
     {
-        internal MsalAccessTokenCacheItem()
-        {
-            CredentialType = StorageJsonValues.CredentialTypeAccessToken;
-        }
-
         internal MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,
@@ -28,7 +23,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             : this(
                 preferredCacheEnv,
                 clientId,
-                response.Scope,
+                response.Scope, // token providers send pre-sorted (alphabetically) scopes
                 tenantId,
                 response.AccessToken,
                 response.AccessTokenExpiresOn,
@@ -39,6 +34,13 @@ namespace Microsoft.Identity.Client.Cache.Items
                 response.AccessTokenRefreshOn,
                 response.TokenType)
         {
+        }
+
+        internal /* for test only */ MsalAccessTokenCacheItem(string scopes)
+        {
+            CredentialType = StorageJsonValues.CredentialTypeAccessToken;
+            _scopes = scopes;
+            ScopeSet = ScopeHelper.ConvertStringToScopeSet(_scopes);
         }
 
         internal /* for test only */ MsalAccessTokenCacheItem(
@@ -53,11 +55,10 @@ namespace Microsoft.Identity.Client.Cache.Items
             string homeAccountId,
             string keyId = null,
             DateTimeOffset? accessTokenRefreshOn = null,
-            string tokenType = StorageJsonValues.TokenTypeBearer) : this()
+            string tokenType = StorageJsonValues.TokenTypeBearer) : this(scopes)
         {
             Environment = preferredCacheEnv;
             ClientId = clientId;
-            NormalizedScopes = scopes;
             TenantId = tenantId;
             Secret = secret;
             ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(accessTokenExpiresOn);
@@ -73,7 +74,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             HomeAccountId = homeAccountId;
-        }
+        }        
 
         private string _tenantId;
 
@@ -83,11 +84,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             set => _tenantId = value ?? string.Empty;
         }
 
-        /// <summary>
-        /// String comprised of scopes that have been lowercased and ordered.
-        /// </summary>
-        /// <remarks>Normalization is important when creating unique keys.</remarks>
-        internal string NormalizedScopes { get; set; }
+        private string _scopes;
+
         internal string CachedAt { get; set; }
         internal string ExpiresOnUnixTimestamp { get; set; }
         internal string ExtendedExpiresOnUnixTimestamp { get; set; }
@@ -116,7 +114,10 @@ namespace Microsoft.Identity.Client.Cache.Items
                                     IsAdfs ? string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, "adfs") :
                                     string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
 
-        internal SortedSet<string> ScopeSet => ScopeHelper.ConvertStringToLowercaseSortedSet(NormalizedScopes);
+        internal HashSet<string> ScopeSet
+        {
+            get;
+        }
 
         internal DateTimeOffset ExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExpiresOnUnixTimestamp);
         internal DateTimeOffset ExtendedExpiresOn => CoreHelpers.UnixTimestampStringToDateTime(ExtendedExpiresOnUnixTimestamp);
@@ -157,10 +158,9 @@ namespace Microsoft.Identity.Client.Cache.Items
                 extendedExpiresOn = ext_expires_on;
             }
 
-            var item = new MsalAccessTokenCacheItem
+            var item = new MsalAccessTokenCacheItem(JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target))
             {
-                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
-                NormalizedScopes = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target),
+                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),                
                 CachedAt = cachedAt.ToString(CultureInfo.InvariantCulture),
                 ExpiresOnUnixTimestamp = expiresOn.ToString(CultureInfo.InvariantCulture),
                 ExtendedExpiresOnUnixTimestamp = extendedExpiresOn.ToString(CultureInfo.InvariantCulture),
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             var json = base.ToJObject();
 
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
-            SetItemIfValueNotNull(json, StorageJsonKeys.Target, NormalizedScopes);
+            SetItemIfValueNotNull(json, StorageJsonKeys.Target, _scopes);
             SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, UserAssertionHash);
             SetItemIfValueNotNull(json, StorageJsonKeys.CachedAt, CachedAt);
             SetItemIfValueNotNull(json, StorageJsonKeys.ExpiresOn, ExpiresOnUnixTimestamp);
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TenantId,
                 HomeAccountId,
                 ClientId,
-                NormalizedScopes,
+                _scopes, 
                 TokenType);
         }
 
