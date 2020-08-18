@@ -15,7 +15,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Client;
 using System.Threading;
 using Microsoft.Identity.Client.PlatformsCommon;
-using Microsoft.Identity.Client.Platforms.net45;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Test.Unit.PoP
 {
@@ -103,10 +103,10 @@ namespace Microsoft.Identity.Test.Unit.PoP
 
                 Guid correlationId = Guid.NewGuid();
 
-                var provider = new NetDesktopPoPCryptoProvider();
+                var provider = new NetSharedPoPCryptoProvider();
                 TestClock testClock = new TestClock();
                 testClock.TestTime = DateTime.UtcNow;
-                provider.Clock = testClock;
+                provider.SetTimer(testClock);
 
                 app.AcquireTokenInteractive(TestConstants.s_scope)
                     .WithProofOfPosession(request1, provider)
@@ -160,16 +160,13 @@ namespace Microsoft.Identity.Test.Unit.PoP
         }
     }
 
-    class TestClock : IClock
+    class TestClock : ITimeService
     {
         public DateTime TestTime { get; set; }
 
-        public DateTime Now
+        public DateTime GetUtcNow()
         {
-            get
-            {
-                return TestTime;
-            }
+            return TestTime;
         }
     }
 }

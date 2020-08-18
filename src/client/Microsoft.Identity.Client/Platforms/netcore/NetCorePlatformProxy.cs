@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon;
 
 namespace Microsoft.Identity.Client.Platforms.netcore
 {
@@ -209,7 +210,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
-            return new NetCorePoPCryptoProvider();
+            return new NetSharedPoPCryptoProvider();
         }
 
         /// <summary>
