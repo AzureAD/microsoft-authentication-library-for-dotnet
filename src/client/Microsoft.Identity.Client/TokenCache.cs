@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             IEnumerable<string> environmentAliases,
             string tenantId,
-            SortedSet<string> scopeSet,
+            HashSet<string> scopeSet,
             string homeAccountId, 
             string tokenType)
         {
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client
                     (accessToken.IsAdfs || accessToken.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase)) &&
                     accessToken.ScopeSet.Overlaps(scopeSet))
                 {
-                    requestParams.RequestContext.Logger.Verbose("Intersecting scopes found - " + accessToken.NormalizedScopes);
+                    requestParams.RequestContext.Logger.Verbose("Intersecting scopes found");
                     accessTokenItemList.Add(accessToken);
                 }
             }

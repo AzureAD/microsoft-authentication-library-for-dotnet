@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ClientId = serviceBundle.Config.ClientId;
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
-            Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
+            Scope = ScopeHelper.CreateScopeSet(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
             IsBrokerConfigured = serviceBundle.Config.IsBrokerEnabled;
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthorityEndpoints Endpoints { get; set; }
         public Authority TenantUpdatedCanonicalAuthority { get; set; }
         public ICacheSessionManager CacheSessionManager { get; }
-        public SortedSet<string> Scope { get; }
+        public HashSet<string> Scope { get; }
 
         public bool HasScopes => Scope != null && Scope.Any();
 

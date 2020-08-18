@@ -598,7 +598,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(uri);
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
                 ValidateCommonQueryParams(qp);
-                Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
+                CollectionAssert.AreEquivalent(
+                    "offline_access openid profile r1/scope1 r1/scope2".Split(' '),
+                    qp["scope"].Split(' '));
             }
         }
 
@@ -674,7 +676,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     uri.AbsoluteUri.StartsWith(TestConstants.AuthorityGuestTenant, StringComparison.CurrentCulture));
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
                 ValidateCommonQueryParams(qp, CustomRedirectUri);
-                Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2 r2/scope1 r2/scope2", qp["scope"]);
+                CollectionAssert.AreEquivalent(
+                    "offline_access openid profile r1/scope1 r1/scope2 r2/scope1 r2/scope2".Split(' '),
+                    qp["scope"].Split(' '));
                 Assert.IsFalse(qp.ContainsKey("client_secret"));
                 Assert.AreEqual("qp", qp["extra"]);
             }

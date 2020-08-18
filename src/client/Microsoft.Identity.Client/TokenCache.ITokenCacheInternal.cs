@@ -290,7 +290,8 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
         {
-            var requestScopes = requestParams.Scope.Except(OAuth2Value.ReservedScopes, StringComparer.OrdinalIgnoreCase);
+            var requestScopes = requestParams.Scope.Where(s => 
+                !OAuth2Value.ReservedScopes.Contains(s));
 
             tokenCacheItems = tokenCacheItems.FilterWithLogging(
                 item => ScopeHelper.ScopeContains(item.ScopeSet, requestScopes),
