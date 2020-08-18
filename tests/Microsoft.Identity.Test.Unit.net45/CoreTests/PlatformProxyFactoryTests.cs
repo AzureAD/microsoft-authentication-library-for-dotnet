@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
+using System.Net;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
 {
@@ -99,6 +100,39 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 Client.Platforms.net45.Http.NetDesktopHttpClientFactory);
         }
 #endif
+
+        [TestMethod]
+        public void PlatformProxy_HttpClient_DoesNotSetGlobalProperties()
+        {
+            // Arrange
+            int originalDnsTimeout = ServicePointManager.DnsRefreshTimeout;
+            int originalConnLimit = ServicePointManager.DefaultConnectionLimit;
+
+            try
+            {
+                int newDnsTimeout = 1001;
+                int newConnLimit = 42;
+
+                ServicePointManager.DnsRefreshTimeout = newDnsTimeout;
+                ServicePointManager.DefaultConnectionLimit = newConnLimit;
+
+                // Act
+                var factory = PlatformProxyFactory.CreatePlatformProxy(null)
+                    .CreateDefaultHttpClientFactory();
+                _ = factory.GetHttpClient();
+
+                // Assert - the factory does not override these global properties
+                Assert.AreEqual(newDnsTimeout, ServicePointManager.DnsRefreshTimeout);
+                Assert.AreEqual(newConnLimit, ServicePointManager.DefaultConnectionLimit);
+
+            }
+            finally
+            {
+                ServicePointManager.DnsRefreshTimeout = originalDnsTimeout;
+                ServicePointManager.DefaultConnectionLimit = originalConnLimit;
+            }
+
+        }
 
         [TestMethod]
         public void GetEnvRetrievesAValue()
