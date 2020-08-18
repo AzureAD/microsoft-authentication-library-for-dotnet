@@ -480,7 +480,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
-                Assert.AreEqual("my-uid.my-utid", cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual($"{TestConstants.ClientId}.my-uid.my-utid", cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
                 cacheAccess.AssertAccessCounts(1, 1);
             }
         }
@@ -782,8 +782,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 cacheAccess.AssertAccessCounts(2, 0);
 
                 // Assert
-                Assert.AreEqual(homeAccId, cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
-                Assert.AreEqual(homeAccId, cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual($"{TestConstants.ClientId}.{homeAccId}", cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual($"{TestConstants.ClientId}.{homeAccId}", cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
                 Assert.AreEqual(homeAccId, accountById.HomeAccountId.Identifier);
 
                 // Act
@@ -791,8 +791,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 cacheAccess.AssertAccessCounts(3, 0);
-                Assert.AreEqual(homeAccId, cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
-                Assert.AreEqual(homeAccId, cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual($"{TestConstants.ClientId}.{homeAccId}", cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual($"{TestConstants.ClientId}.{homeAccId}", cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
 
                 // Act
                 await app.AcquireTokenSilent(TestConstants.s_scope, accountById.Username).ExecuteAsync().ConfigureAwait(false);
@@ -805,8 +805,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 await app.RemoveAsync(accountById).ConfigureAwait(false);
                 cacheAccess.AssertAccessCounts(4, 1);
-                Assert.AreEqual(homeAccId, cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
-                Assert.AreEqual(homeAccId, cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual($"{TestConstants.ClientId}.{homeAccId}", cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+                Assert.AreEqual($"{TestConstants.ClientId}.{homeAccId}", cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
             }
         }
 

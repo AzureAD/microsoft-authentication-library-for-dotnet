@@ -127,13 +127,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             cacheAccess.AssertAccessCounts(0, 1);
             Assert.AreEqual(
-                result.Account.HomeAccountId.Identifier,
+                $"{ConfidentialClientID}.{result.Account.HomeAccountId.Identifier}",
                 cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(
-                result.Account.HomeAccountId.Identifier,
+                $"{ConfidentialClientID}.{result.Account.HomeAccountId.Identifier}",
                 cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(
-                result.Account.HomeAccountId.Identifier,
+                $"{ConfidentialClientID}.{result.Account.HomeAccountId.Identifier}",
                 cacheAccess.LastBeforeWriteNotificationArgs.SuggestedCacheKey);
 
             return result;
