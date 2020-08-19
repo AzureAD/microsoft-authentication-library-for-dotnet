@@ -74,12 +74,12 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             ValidateClassification(string.Empty, UiRequiredExceptionClassification.None);
             ValidateClassification("new_value", UiRequiredExceptionClassification.None);
 
-            ValidateClassification(MsalError.BasicAction,          UiRequiredExceptionClassification.BasicAction);
-            ValidateClassification(MsalError.AdditionalAction,     UiRequiredExceptionClassification.AdditionalAction);
-            ValidateClassification(MsalError.MessageOnly,          UiRequiredExceptionClassification.MessageOnly);
-            ValidateClassification(MsalError.ConsentRequired,      UiRequiredExceptionClassification.ConsentRequired);
-            ValidateClassification(MsalError.UserPasswordExpired,  UiRequiredExceptionClassification.UserPasswordExpired);
-                                   
+            ValidateClassification(MsalError.BasicAction, UiRequiredExceptionClassification.BasicAction);
+            ValidateClassification(MsalError.AdditionalAction, UiRequiredExceptionClassification.AdditionalAction);
+            ValidateClassification(MsalError.MessageOnly, UiRequiredExceptionClassification.MessageOnly);
+            ValidateClassification(MsalError.ConsentRequired, UiRequiredExceptionClassification.ConsentRequired);
+            ValidateClassification(MsalError.UserPasswordExpired, UiRequiredExceptionClassification.UserPasswordExpired);
+
             ValidateClassification(MsalError.BadToken, UiRequiredExceptionClassification.None);
             ValidateClassification(MsalError.TokenExpired, UiRequiredExceptionClassification.None);
             ValidateClassification(MsalError.ProtectionPolicyRequired, UiRequiredExceptionClassification.None, false);
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         }
 
         private static void ValidateClassification(
-            string suberror, 
+            string suberror,
             UiRequiredExceptionClassification expectedClassification,
             bool expectUiRequiredException = true)
         {
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(ExMessage, msalException.Message);
             Assert.AreEqual("some_claims", msalException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalException.CorrelationId);
-            Assert.AreEqual(suberror ?? "", msalException.SubError );
+            Assert.AreEqual(suberror ?? "", msalException.SubError);
 
             if (expectUiRequiredException)
             {
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             // Arrange
             HttpResponse httpResponse = new HttpResponse()
             {
-                Body =  JsonError.Replace("invalid_grant", "invalid_client"),
+                Body = JsonError.Replace("invalid_grant", "invalid_client"),
                 StatusCode = HttpStatusCode.BadRequest, // 400
             };
 
@@ -360,6 +360,25 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsFalse(ex is MsalUiRequiredException);
 
             ValidateExceptionProductInformation(ex);
+        }
+
+        [TestMethod]
+        public void ExceptionsPropertiesHavePublicSetters()
+        {
+            AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "Headers");
+            AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "ResponseBody");
+            AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "CorrelationId");
+        }
+
+        private void AssertPropertyHasPublicGetAndSet(Type t, string propertyName)
+        {
+            var prop = t.GetProperty(propertyName);
+
+            var getProp = prop.GetGetMethod(false);
+            var setProp = prop.GetSetMethod(false);
+
+            Assert.IsNotNull(getProp, $"Getter is not public for {propertyName}");
+            Assert.IsNotNull(setProp, $"Setter is not public for {propertyName}");
         }
     }
 }
