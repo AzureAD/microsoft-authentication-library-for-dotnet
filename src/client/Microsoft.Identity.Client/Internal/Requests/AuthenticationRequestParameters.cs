@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public ICacheSessionManager CacheSessionManager { get; }
         public HashSet<string> Scope { get; }
 
-        public bool HasScopes => Scope != null && Scope.Any();
+        public bool HasScopes => Scope != null && Scope.Count > 0;
 
         public string ClientId { get; }
 

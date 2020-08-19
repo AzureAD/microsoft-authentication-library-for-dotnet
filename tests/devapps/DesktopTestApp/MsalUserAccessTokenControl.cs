@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
@@ -29,7 +30,7 @@ namespace DesktopTestApp
             _cache = cache;
             _item = item;
             accessTokenAuthorityLabel.Text = _item.Authority;
-            accessTokenScopesLabel.Text = _item.NormalizedScopes;
+            accessTokenScopesLabel.Text = string.Join(" ", _item.ScopeSet.ToArray());
             expiresOnLabel.Text = _item.ExpiresOn.ToString(CultureInfo.CurrentCulture);
         }
 

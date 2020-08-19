@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
@@ -29,7 +30,7 @@ namespace XamarinDev
             userAssertionHashLabel.Text = msalAccessTokenCacheItem.UserAssertionHash;
 
             expiresOnLabel.Text = msalAccessTokenCacheItem.ExpiresOn.ToString(CultureInfo.InvariantCulture);
-            scopesLabel.Text = msalAccessTokenCacheItem.NormalizedScopes;
+            scopesLabel.Text = msalAccessTokenCacheItem.ScopeSet.AsSingleString();
 
             cachedAtLabel.Text = CoreHelpers
                 .UnixTimestampStringToDateTime(msalAccessTokenCacheItem.CachedAt)
