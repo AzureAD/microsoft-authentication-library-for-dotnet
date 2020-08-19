@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client.Internal
 
         private Dictionary<string, string> CreateAuthorizationRequestParameters(Uri redirectUriOverride = null)
         {
-            var extraScopesToConsent = new HashSet<string>();
+            var extraScopesToConsent = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (!_interactiveParameters.ExtraScopesToConsent.IsNullOrEmpty())
             {
                 extraScopesToConsent = ScopeHelper.CreateScopeSet(_interactiveParameters.ExtraScopesToConsent);
