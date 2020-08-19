@@ -49,6 +49,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
+// same code path between .net fwk and .net core, so run only once
+#if DESKTOP
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.Arlington)]
@@ -87,6 +89,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "msa user").ConfigureAwait(false);
         }
+#endif
 
         private async Task AcquireTokenWithDeviceCodeFlowAsync(LabResponse labResponse, string userType)
         {

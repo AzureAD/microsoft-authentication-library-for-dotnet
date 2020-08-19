@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string[] s_scopes = { "User.Read" };
 
         public TestContext TestContext { get; set; }
+#if NET_CORE
 
         [TestMethod]
         public async Task AuthorityMigrationAsync()
@@ -150,6 +151,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 processedMetadata,
                 new InstanceDiscoveryMetadataEntryComparer());
         }
+
+        #endif
+
     }
 
     internal class InstanceDiscoveryMetadataEntryComparer : IEqualityComparer<InstanceDiscoveryMetadataEntry>
