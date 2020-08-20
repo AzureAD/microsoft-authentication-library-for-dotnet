@@ -21,6 +21,7 @@ using Microsoft.Win32;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.net45.Http;
+using Microsoft.Identity.Client.PlatformsCommon;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -41,13 +42,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
             {
                 switch (Environment.OSVersion.Platform)
                 {
-                case PlatformID.Win32S:
-                case PlatformID.Win32Windows:
-                case PlatformID.Win32NT:
-                case PlatformID.WinCE:
-                    return true;
-                default:
-                    return false;
+                    case PlatformID.Win32S:
+                    case PlatformID.Win32Windows:
+                    case PlatformID.Win32NT:
+                    case PlatformID.WinCE:
+                        return true;
+                    default:
+                        return false;
                 }
             }
         }
@@ -210,14 +211,14 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         /// <inheritdoc />
         protected override string InternalGetDeviceId()
-        {            
+        {
             try
             {
                 // Considered PII, ensure that it is hashed.
                 return NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
                                 .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault();
             }
-            catch(EntryPointNotFoundException)
+            catch (EntryPointNotFoundException)
             {
                 // Thrown when ran in an Azure Runbook
                 return null;
@@ -311,7 +312,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
-            return new NetDesktopPoPCryptoProvider();
+            return new NetSharedPoPCryptoProvider();
         }
 
         public override IDeviceAuthManager CreateDeviceAuthManager()
