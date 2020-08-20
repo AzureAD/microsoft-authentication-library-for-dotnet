@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon
 #elif NET_CORE
         private static RSA s_SigningKey;
 #endif
+        private static readonly object _keyLock = new object();
         private DateTime _keyTimeValidTo;
         private readonly uint _defaultKeyExpirationTime = 60 * 60 * 8; // Eight Hours
         private ITimeService _timer;
@@ -36,23 +37,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon
         {
             get
             {
-                lock (s_SigningKey)
+                lock (_keyLock)
                 {
                     if (CheckKeyExpiration(_keyTimeValidTo, _timer))
                     {
-#if DESKTOP
-                        s_SigningKey = new RSACryptoServiceProvider();
-#elif NET_CORE
-                        s_SigningKey = RSA.Create();
-#endif
-                        s_SigningKey.KeySize = RsaKeySize;
-                        _keyTimeValidTo = _timer.GetUtcNow() + TimeSpan.FromSeconds(_defaultKeyExpirationTime);
-
-                        RSAParameters publicKeyInfo = s_SigningKey.ExportParameters(false);
-
-                        CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyInfo);
-
-                        return s_SigningKey;
+                        InitializeSigningKey();
                     }
 
                     return s_SigningKey;
@@ -60,9 +49,25 @@ namespace Microsoft.Identity.Client.PlatformsCommon
             }
         }
 
+        private void InitializeSigningKey()
+        {
+#if DESKTOP
+            s_SigningKey = new RSACryptoServiceProvider();
+#elif NET_CORE
+            s_SigningKey = RSA.Create();
+#endif
+            s_SigningKey.KeySize = RsaKeySize;
+            _keyTimeValidTo = DateTime.UtcNow + TimeSpan.FromSeconds(_defaultKeyExpirationTime);
+
+            RSAParameters publicKeyInfo = s_SigningKey.ExportParameters(false);
+
+            CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyInfo);
+        }
+
         public NetSharedPoPCryptoProvider(/*for testing only*/ITimeService timer = null)
         {
             _timer = timer ?? new TimeService();
+            InitializeSigningKey();
         }
 
         public byte[] Sign(byte[] payload)

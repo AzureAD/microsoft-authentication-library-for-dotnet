@@ -16,11 +16,14 @@ using Microsoft.Identity.Client;
 using System.Threading;
 using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.Utils;
+using System.Threading.Tasks;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Test.Unit.PoP
 {
     [TestClass]
-    public class PopAuthenticationSchemeTests
+    public class PopAuthenticationSchemeTests : TestBase
     {
         // Key and JWT copied from the JWT spec https://tools.ietf.org/html/rfc7638#section-3
         private const string JWK = "{\"e\":\"AQAB\",\"kty\":\"RSA\",\"n\":\"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw\"}";
@@ -86,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
         }
 
         [TestMethod]
-        public void ValidateKeyExpiration()
+        public async Task ValidateKeyExpirationAsync()
         {
             using (var harness = CreateTestHarness())
             {
@@ -94,19 +97,28 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetry(new TraceTelemetryConfig())
+                                                                            .WithExperimentalFeatures()
                                                                             .BuildConcrete();
 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant,
+                    null,
+                    null,
+                    false,
+                    MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
 
                 Guid correlationId = Guid.NewGuid();
                 TestClock testClock = new TestClock();
                 testClock.TestTime = DateTime.UtcNow;
                 var provider = new NetSharedPoPCryptoProvider(testClock);
 
-                app.AcquireTokenInteractive(TestConstants.s_scope)
+                await app.AcquireTokenInteractive(TestConstants.s_scope)
                     .WithProofOfPosession(request1, provider)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -115,36 +127,36 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 //Advance time 7 hours. Should still be the same key
                 testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 7);
 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
-                app.AcquireTokenInteractive(TestConstants.s_scope)
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant,
+                    null,
+                    null,
+                    false,
+                    MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
+
+                await app.AcquireTokenInteractive(TestConstants.s_scope)
                     .WithProofOfPosession(request1, provider)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
                 Assert.IsTrue(JWK == provider.CannonicalPublicKeyJwk);
-                //Advance time 1 hour. Should be a different key
-                testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 1);
+                //Advance time 2 hours. Should be a different key
+                testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 2);
 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
-                app.AcquireTokenInteractive(TestConstants.s_scope)
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant,
+                    null,
+                    null,
+                    false,
+                    MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
+
+                await app.AcquireTokenInteractive(TestConstants.s_scope)
                     .WithProofOfPosession(request1, provider)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
                 Assert.IsTrue(JWK != provider.CannonicalPublicKeyJwk);
             }
-        }
-
-        internal MockHttpAndServiceBundle CreateTestHarness(
-                                            TelemetryCallback telemetryCallback = null,
-                                            LogCallback logCallback = null,
-                                            bool isExtendedTokenLifetimeEnabled = false)
-        {
-            return new MockHttpAndServiceBundle(
-                telemetryCallback,
-                logCallback,
-                isExtendedTokenLifetimeEnabled,
-                testContext: null);
         }
 
         private static string AssertSimpleClaim(JwtSecurityToken jwt, string expectedKey, string optionalExpectedValue = null)

@@ -66,6 +66,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             "\",\"id_token_expires_in\":\"3600\"}";
         }
 
+        public static string GetPopTokenResponse()
+        {
+            return
+          "{\"token_type\":\"pop\",\"expires_in\":\"3599\",\"scope\":" +
+          "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
+          ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+          ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+          ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
+          "\",\"id_token_expires_in\":\"3600\"}";
+        }
+
         public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)
         {
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
