@@ -102,11 +102,9 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
                 Guid correlationId = Guid.NewGuid();
-
-                var provider = new NetSharedPoPCryptoProvider();
                 TestClock testClock = new TestClock();
                 testClock.TestTime = DateTime.UtcNow;
-                provider.SetTimer(testClock);
+                var provider = new NetSharedPoPCryptoProvider(testClock);
 
                 app.AcquireTokenInteractive(TestConstants.s_scope)
                     .WithProofOfPosession(request1, provider)

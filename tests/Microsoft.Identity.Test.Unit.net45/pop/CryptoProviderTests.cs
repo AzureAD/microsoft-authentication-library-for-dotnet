@@ -28,6 +28,5 @@ namespace Microsoft.Identity.Test.Unit.PoP
             Assert.AreEqual("RSA", jwkObj.kty.ToString());
         }
     }
-
 }
 #endif

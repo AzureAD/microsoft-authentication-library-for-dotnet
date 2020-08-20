@@ -62,14 +62,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon
 
         public NetSharedPoPCryptoProvider(/*for testing only*/ITimeService timer = null)
         {
-            if (timer == null)
-            {
-                _timer = new TimeService();
-            }
-            else
-            {
-                _timer = timer;
-            }
+            _timer = timer ?? new TimeService();
         }
 
         public byte[] Sign(byte[] payload)
@@ -86,14 +79,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon
         /// Creates the cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
         /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint
         /// </summary>
-        internal static string ComputeCannonicalJwk(RSAParameters rsaPublicKey)
+        private static string ComputeCannonicalJwk(RSAParameters rsaPublicKey)
         {
             return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
-        }
-
-        internal void SetTimer(ITimeService timer)
-        {
-            _timer = timer;
         }
 
         public static byte[] Sign(RSA RsaKey, byte[] payload)
