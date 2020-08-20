@@ -18,10 +18,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal class MsaPlugin : IWamPlugin
     {
         private const string MsaErrorCode = "wam_msa_internal_error";
+        private readonly IWamProxy _wamProxy;
         private readonly ICoreLogger _logger;
 
-        public MsaPlugin(ICoreLogger logger)
+        public MsaPlugin(IWamProxy wamProxy, ICoreLogger logger)
         {
+            _wamProxy = wamProxy;
             _logger = logger;
         }
 
@@ -117,9 +119,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
         {
             var webAccounProvider = await WamBroker.GetAccountProviderAsync("consumers").ConfigureAwait(false);
-            WamProxy wamProxy = new WamProxy(webAccounProvider, _logger);
 
-            var webAccounts = await wamProxy.FindAllWebAccountsAsync(clientID).ConfigureAwait(false);
+            var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccounProvider, clientID).ConfigureAwait(false);
 
             var msalAccounts = webAccounts
                 .Select(webAcc => ConvertToMsalAccountOrNull(webAcc))
@@ -228,7 +229,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 //}
             }
 
-            if (string.IsNullOrEmpty(tokenType) || string.Equals("bearer", tokenType, System.StringComparison.InvariantCultureIgnoreCase))
+            if (string.IsNullOrEmpty(tokenType) || string.Equals("bearer", tokenType, System.StringComparison.OrdinalIgnoreCase))
             {
                 tokenType = "Bearer";
             }

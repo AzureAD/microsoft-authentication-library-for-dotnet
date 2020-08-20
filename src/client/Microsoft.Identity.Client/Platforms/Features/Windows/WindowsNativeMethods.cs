@@ -4,10 +4,8 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.Features.Windows
 {
     internal static class WindowsNativeMethods
     {
@@ -36,18 +34,18 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 GetNativeSystemInfo(ref systemInfo);
                 switch (systemInfo.wProcessorArchitecture)
                 {
-                case PROCESSOR_ARCHITECTURE_AMD64:
-                case PROCESSOR_ARCHITECTURE_IA64:
-                    return "x64";
+                    case PROCESSOR_ARCHITECTURE_AMD64:
+                    case PROCESSOR_ARCHITECTURE_IA64:
+                        return "x64";
 
-                case PROCESSOR_ARCHITECTURE_ARM:
-                    return "ARM";
+                    case PROCESSOR_ARCHITECTURE_ARM:
+                        return "ARM";
 
-                case PROCESSOR_ARCHITECTURE_INTEL:
-                    return "x86";
+                    case PROCESSOR_ARCHITECTURE_INTEL:
+                        return "x86";
 
-                default:
-                    return "Unknown";
+                    default:
+                        return "Unknown";
                 }
             }
             catch (Exception)

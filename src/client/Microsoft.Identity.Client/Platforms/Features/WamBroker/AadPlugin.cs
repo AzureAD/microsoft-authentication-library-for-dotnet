@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -17,19 +16,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal class AadPlugin : IWamPlugin
     {
+        private readonly IWamProxy _wamProxy;
         private readonly ICoreLogger _logger;
 
-        public AadPlugin(ICoreLogger logger)
+        public AadPlugin(IWamProxy wamProxy, ICoreLogger logger)
         {
+            _wamProxy = wamProxy;
             _logger = logger;
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
         {
             var webAccounProvider = await WamBroker.GetAccountProviderAsync("organizations").ConfigureAwait(false);
-            WamProxy wamProxy = new WamProxy(webAccounProvider, _logger);
 
-            var webAccounts = await wamProxy.FindAllWebAccountsAsync(clientID).ConfigureAwait(false);
+            var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccounProvider, clientID).ConfigureAwait(false);
 
             var msalAccounts = webAccounts
                 .Select(webAcc => ConvertToMsalAccountOrNull(webAcc))
@@ -44,7 +44,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private Account ConvertToMsalAccountOrNull(WebAccount webAccount)
         {
             string username = webAccount.UserName;
-            string wamId = webAccount.Id;
 
             if (!webAccount.Properties.TryGetValue("Authority", out string authority))
             {
@@ -169,10 +168,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _logger.InfoPii("Result from WAM scopes: " + scopes,
                 "Result from WAM has scopes? " + hasScopes);
 
-            foreach (var kvp in webTokenResponse.Properties)
-            {
-                Trace.WriteLine($"Other params {kvp.Key}: {kvp.Value}");
-            }
+            //foreach (var kvp in webTokenResponse.Properties)
+            //{
+            //    Debug.WriteLine($"Other params {kvp.Key}: {kvp.Value}");
+            //}
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {

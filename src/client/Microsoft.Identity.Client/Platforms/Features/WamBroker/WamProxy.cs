@@ -11,48 +11,92 @@ using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
-    internal class WamProxy
+    internal class WamProxy : IWamProxy
     {
-        private readonly WebAccountProvider _webAccountProvider;
         private readonly ICoreLogger _logger;
 
-        public WamProxy(WebAccountProvider webAccountProvider, ICoreLogger logger)
+        public WamProxy(ICoreLogger logger)
         {
-            _webAccountProvider = webAccountProvider;
             _logger = logger;
         }
 
-        public async Task<IEnumerable<WebAccount>> FindAllWebAccountsAsync(string clientID)
+        public async Task<WebTokenRequestResult> GetTokenSilentlyAsync(WebAccount webAccount, WebTokenRequest webTokenRequest)
         {
-            // Win 10 RS3 release and above
-            if (!ApiInformation.IsMethodPresent(
-               "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
-               "FindAllAccountsAsync"))
+            using (_logger.LogBlockDuration("WAM:AcquireSilentlyAsync:"))
             {
-                _logger.Info("[WamProxy] FindAllAccountsAsync method does not exist (it was introduced in Win 10 RS3). " +
-                    "Returning 0 broker accounts. ");
-                return Enumerable.Empty<WebAccount>();
+                var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest, webAccount);
+                return wamResult;
             }
-
-            FindAllAccountsResult findResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(_webAccountProvider, clientID);
-
-            // This is expected to happen with the MSA provider, which does not allow account listing
-            if (findResult.Status != FindAllWebAccountsStatus.Success)
-            {
-                var error = findResult.ProviderError;
-                _logger.Error($"[WAM Proxy] WebAuthenticationCoreManager.FindAllAccountsAsync failed " +
-                    $" with error code {error.ErrorCode} error message {error.ErrorMessage} and status {findResult.Status}");
-
-                return Enumerable.Empty<WebAccount>();
-            }
-
-            _logger.Info($"[WAM Proxy] FindAllWebAccountsAsync returning {findResult.Accounts.Count()} WAM accounts");
-            return findResult.Accounts;
         }
 
-        public async Task<WebAccount> FindWebAccountByIdAsync(string accountId)
+        public async Task<WebTokenRequestResult> RequestTokenForWindowAsync(
+            IntPtr _parentHandle,
+            WebTokenRequest webTokenRequest)
         {
-            return await WebAuthenticationCoreManager.FindAccountAsync(_webAccountProvider, accountId);
+#if WINDOWS_APP
+            WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(webTokenRequest);
+#else
+
+            var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenForWindowAsync(
+                _parentHandle, webTokenRequest);
+#endif
+            return wamResult;
+        }
+
+        public async Task<WebTokenRequestResult> RequestTokenForWindowAsync(
+           IntPtr _parentHandle,
+           WebTokenRequest webTokenRequest,
+           WebAccount wamAccount)
+        {
+#if WINDOWS_APP
+            WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(
+                webTokenRequest, 
+                wamAccount);
+#else
+
+            var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(
+                _parentHandle, webTokenRequest, wamAccount);
+#endif
+            return wamResult;
+        }
+
+        public async Task<WebAccount> FindAccountAsync(WebAccountProvider provider, string wamAccountId)
+        {
+            using (_logger.LogBlockDuration("WAM:FindAccountAsync:"))
+            {
+                return await WebAuthenticationCoreManager.FindAccountAsync(provider, wamAccountId);
+            }
+        }
+
+        public async Task<IReadOnlyList<WebAccount>> FindAllWebAccountsAsync(WebAccountProvider provider, string clientID)
+        {
+            using (_logger.LogBlockDuration("WAM:FindAllWebAccountsAsync:"))
+            {
+                // Win 10 RS3 release and above
+                if (!ApiInformation.IsMethodPresent(
+                   "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
+                   "FindAllAccountsAsync"))
+                {
+                    _logger.Info("[WamProxy] FindAllAccountsAsync method does not exist (it was introduced in Win 10 RS3). " +
+                        "Returning 0 broker accounts. ");
+                    return Enumerable.Empty<WebAccount>().ToList();
+                }
+
+                FindAllAccountsResult findResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider, clientID);
+
+                // This is expected to happen with the MSA provider, which does not allow account listing
+                if (findResult.Status != FindAllWebAccountsStatus.Success)
+                {
+                    var error = findResult.ProviderError;
+                    _logger.Error($"[WAM Proxy] WebAuthenticationCoreManager.FindAllAccountsAsync failed " +
+                        $" with error code {error.ErrorCode} error message {error.ErrorMessage} and status {findResult.Status}");
+
+                    return Enumerable.Empty<WebAccount>().ToList();
+                }
+
+                _logger.Info($"[WAM Proxy] FindAllWebAccountsAsync returning {findResult.Accounts.Count()} WAM accounts");
+                return findResult.Accounts;
+            }
         }
     }
 }
