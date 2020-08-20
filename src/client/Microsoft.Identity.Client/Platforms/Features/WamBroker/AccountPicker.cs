@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             _parentHandle = parentHandle;
             _logger = logger;
-            _synchronizationContext = synchronizationContext;
+            _synchronizationContext = synchronizationContext ?? throw new ArgumentNullException(nameof(synchronizationContext));
             _authority = authority;
             _isMsaPassthrough = isMsaPassthrough;
         }
@@ -38,11 +38,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         public async Task<WebAccountProvider> DetermineAccountInteractivelyAsync()
         {
             WebAccountProvider result = null;
-
-            if (_synchronizationContext == null)
-            {
-                throw new MsalClientException("wam_ui_thread_only");
-            }
 
             // go back to the ui thread
             await _synchronizationContext;
@@ -57,11 +52,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AccountsSettingsPane retaccountPane = null;
             try
             {
+#if WINDOWS_APP
+                retaccountPane = AccountsSettingsPane.GetForCurrentView();
+                retaccountPane.AccountCommandsRequested += Authenticator_AccountCommandsRequested;
+                await AccountsSettingsPane.ShowAddAccountAsync();
+#else
                 retaccountPane = AccountsSettingsPaneInterop.GetForWindow(_parentHandle);
                 retaccountPane.AccountCommandsRequested += Authenticator_AccountCommandsRequested;
                 await AccountsSettingsPaneInterop.ShowAddAccountForWindowAsync(_parentHandle);
-
-
+#endif
                 return _provider;
             }
             catch (Exception e)
@@ -87,7 +86,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 deferral = e.GetDeferral();
 
-                if (string.Equals("common", _authority.TenantId) || _isMsaPassthrough)
+                if (string.Equals("common", _authority.TenantId) )
                 {
                     _logger.Verbose("Displaying selector for common");
                     e.WebAccountProviderCommands.Add(

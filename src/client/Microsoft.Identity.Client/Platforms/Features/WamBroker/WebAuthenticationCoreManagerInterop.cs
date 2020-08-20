@@ -9,6 +9,7 @@ using Windows.UI.ApplicationSettings;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
+#if !WINDOWS_APP
     internal static class WebAuthenticationCoreManagerInterop
     {
         public static IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr hWnd, WebTokenRequest request)
@@ -111,4 +112,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return accountsSettingsPaneInterop.ShowAddAccountForWindowAsync(hWnd, ref guid);
         }
     }
+#endif
 }
