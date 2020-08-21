@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.PlatformsCommon;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
