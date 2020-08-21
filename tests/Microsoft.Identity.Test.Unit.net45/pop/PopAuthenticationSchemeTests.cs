@@ -96,10 +96,10 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
 
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithHttpManager(harness.HttpManager)
-                                                                            .WithExperimentalFeatures()
-                                                                            .BuildConcrete();
+                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                .WithHttpManager(harness.HttpManager)
+                                .WithExperimentalFeatures()
+                                .BuildConcrete();
 
 
                 MsalMockHelpers.ConfigureMockWebUI(
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 Guid correlationId = Guid.NewGuid();
                 TestClock testClock = new TestClock();
                 testClock.TestTime = DateTime.UtcNow;
-                var provider = new NetSharedPoPCryptoProvider(testClock);
+                var provider = PoPProviderFactory.GetOrCreateProvider(testClock);
 
                 await app.AcquireTokenInteractive(TestConstants.s_scope)
                     .WithProofOfPosession(request1, provider)
@@ -134,6 +134,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                     false,
                     MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
 
+                provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenInteractive(TestConstants.s_scope)
                     .WithProofOfPosession(request1, provider)
                     .ExecuteAsync(CancellationToken.None)
@@ -150,6 +151,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                     false,
                     MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
 
+                provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenInteractive(TestConstants.s_scope)
                     .WithProofOfPosession(request1, provider)
                     .ExecuteAsync(CancellationToken.None)

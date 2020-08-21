@@ -13,6 +13,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     /// All symetric operations are SHA256
     /// </summary>
     /// <remarks>
+    /// Important: The 2 methods on this interface will be called at different times but MUST return details of 
+    /// the same private / public key pair, i.e. do not change to a different key pair mid way. Best to have this class immutable.
+    /// 
     /// Ideally there should be a single public / private key pair associated with a machine, so implementers of this interface
     /// should consider exposing a singleton.
     /// </remarks>

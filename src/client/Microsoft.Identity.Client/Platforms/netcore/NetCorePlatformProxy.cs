@@ -208,9 +208,11 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return new NetCoreHttpClientFactory();
         }
 
+        
+
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
-            return new NetSharedPoPCryptoProvider();
+            return PoPProviderFactory.GetOrCreateProvider();
         }
 
         /// <summary>
