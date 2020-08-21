@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.PlatformsCommon
+namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
 
     /// <summary>
@@ -14,7 +14,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon
     internal class InMemoryCryptoProvider : IPoPCryptoProvider
     {
         internal /* internal for test only */ const int RsaKeySize = 2048;
-
 
 #if NET45
         private RSACryptoServiceProvider _signingKey;

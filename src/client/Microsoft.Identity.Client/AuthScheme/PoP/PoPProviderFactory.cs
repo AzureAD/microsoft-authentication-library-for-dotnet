@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.PlatformsCommon
+namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     /// <summary>
     /// This factory ensures key rotation every 8h
