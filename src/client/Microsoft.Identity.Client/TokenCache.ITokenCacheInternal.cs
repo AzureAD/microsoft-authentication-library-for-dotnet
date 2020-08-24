@@ -658,7 +658,7 @@ namespace Microsoft.Identity.Client
                     StringComparison.OrdinalIgnoreCase));
 
                 if (logger.IsLoggingEnabled(LogLevel.Verbose))
-                    logger.Verbose($"Filtered by home account id. Remaning accounts {accounts.Count()}");
+                    logger.Verbose($"Filtered by home account id. Remaining accounts {accounts.Count()} ");
             }
 
             return accounts;
