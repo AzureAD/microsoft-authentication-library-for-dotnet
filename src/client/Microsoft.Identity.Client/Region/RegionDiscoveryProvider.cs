@@ -20,7 +20,6 @@ namespace Microsoft.Identity.Client.Region
         private readonly Uri _ImdsUri;
         private IDictionary<string, string> Headers;
         private readonly IHttpManager _httpManager;
-        private static string region;
         private static INetworkCacheMetadataProvider _networkCacheMetadataProvider;
 
         public RegionDiscoveryProvider(IHttpManager httpManager, INetworkCacheMetadataProvider networkCacheMetadataProvider = null)
@@ -62,11 +61,6 @@ namespace Microsoft.Identity.Client.Region
                 return Environment.GetEnvironmentVariable(RegionName);
             }
 
-            if (!region.IsNullOrEmpty())
-            {
-                return region;
-            }
-
             try
             {
                 HttpResponse response = await _httpManager.SendGetAsync(_ImdsUri, Headers, logger).ConfigureAwait(false);
@@ -81,8 +75,6 @@ namespace Microsoft.Identity.Client.Region
                 LocalImdsResponse localImdsResponse = JsonHelper.DeserializeFromJson<LocalImdsResponse>(response.Body);
 
                 logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
-
-                region = localImdsResponse.location;
                 return localImdsResponse.location;
             }
             catch (Exception e)

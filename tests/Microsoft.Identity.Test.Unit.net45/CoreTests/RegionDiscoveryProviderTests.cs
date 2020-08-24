@@ -31,6 +31,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
         }
 
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            _harness?.Dispose();
+            base.TestCleanup();
+        }
+
         [TestMethod]
         public async Task SuccessfulResponseFromEnvironmentVariableAsync ()
         {
@@ -54,6 +61,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task SuccessfulResponseFromLocalImdsAsync ()
         {
+
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
                         ResourceHelper.GetTestResourceRelativePath("local-imds-response.json"))));
 

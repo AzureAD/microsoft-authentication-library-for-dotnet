@@ -18,6 +18,24 @@ namespace Microsoft.Identity.Test.Unit
     [DeploymentItem(@"Resources\local-imds-response.json")]
     public class ConfidentialClientWithRegionTests : TestBase
     {
+        private MockHttpAndServiceBundle _harness;
+        private MockHttpManager _httpManager;
+
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            base.TestInitialize();
+
+            _harness = base.CreateTestHarness();
+            _httpManager = _harness.HttpManager;
+        }
+
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            _harness?.Dispose();
+            base.TestCleanup();
+        }
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(bool clientCredentialFlow)
         {
             return new MockHttpMessageHandler()
@@ -47,28 +65,25 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test for regional auth with successful instance discovery.")]
         public async Task happyPathAsync()
         {
-            using (var harness = CreateTestHarness())
-            {
-                SetupMocks(harness.HttpManager);
+            SetupMocks(_httpManager);
 
-                var app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
-                    .WithRedirectUri(TestConstants.RedirectUri)
-                    .WithHttpManager(harness.HttpManager)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .BuildConcrete();
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
+                .WithRedirectUri(TestConstants.RedirectUri)
+                .WithHttpManager(_httpManager)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
 
-                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+            _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
-                AuthenticationResult result = await app
-                    .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAzureRegion(true)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
+            AuthenticationResult result = await app
+                .AcquireTokenForClient(TestConstants.s_scope)
+                .WithAzureRegion(true)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
 
-                Assert.IsNotNull(result.AccessToken);
-            }
+            Assert.IsNotNull(result.AccessToken);
         } 
 
         [TestMethod]
@@ -77,28 +92,25 @@ namespace Microsoft.Identity.Test.Unit
         {
             try
             {
-                using (var harness = CreateTestHarness())
-                {
-                    Environment.SetEnvironmentVariable("REGION_NAME", "uscentral");
+                Environment.SetEnvironmentVariable("REGION_NAME", "uscentral");
 
-                    var app = ConfidentialClientApplicationBuilder
-                        .Create(TestConstants.ClientId)
-                        .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
-                        .WithRedirectUri(TestConstants.RedirectUri)
-                        .WithHttpManager(harness.HttpManager)
-                        .WithClientSecret(TestConstants.ClientSecret)
-                        .BuildConcrete();
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
+                    .WithRedirectUri(TestConstants.RedirectUri)
+                    .WithHttpManager(_httpManager)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .BuildConcrete();
 
-                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
+                _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
-                    AuthenticationResult result = await app
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithAzureRegion(true)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAzureRegion(true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
-                    Assert.IsNotNull(result.AccessToken);
-                }
+                Assert.IsNotNull(result.AccessToken);
             }
             finally
             {
@@ -110,34 +122,31 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test when the region could not be fetched")]
         public async Task RegionNotFoundAsync()
         {
-            using (var harness = CreateTestHarness())
-            {
-                harness.HttpManager.AddRegionDiscoveryMockHandlerNotFound();
+            _httpManager.AddRegionDiscoveryMockHandlerNotFound();
 
-                var app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
-                    .WithRedirectUri(TestConstants.RedirectUri)
-                    .WithHttpManager(harness.HttpManager)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .BuildConcrete();
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
+                .WithRedirectUri(TestConstants.RedirectUri)
+                .WithHttpManager(_httpManager)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
                 
-                try
-                {
-                    AuthenticationResult result = await app
-                    .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAzureRegion(true)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
+            try
+            {
+                AuthenticationResult result = await app
+                .AcquireTokenForClient(TestConstants.s_scope)
+                .WithAzureRegion(true)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
 
-                    Assert.Fail("Exception should be thrown");
-                }
-                catch(MsalClientException e)
-                {
-                    Assert.IsNotNull(e);
-                    Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.RegionDiscoveryFailed, e.Message);
-                }
+                Assert.Fail("Exception should be thrown");
+            }
+            catch(MsalClientException e)
+            {
+                Assert.IsNotNull(e);
+                Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.RegionDiscoveryFailed, e.Message);
             }
         }
     }
