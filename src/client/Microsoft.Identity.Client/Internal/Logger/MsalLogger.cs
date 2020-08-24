@@ -152,53 +152,51 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            if (!IsLoggingEnabled(logLevel))
+            if (IsLoggingEnabled(logLevel))
             {
-                return;
-            }
+                string correlationId = _correlationId.Equals(Guid.Empty)
+                    ? string.Empty
+                    : " - " + _correlationId;
 
-            string correlationId = _correlationId.Equals(Guid.Empty)
-                ? string.Empty
-                : " - " + _correlationId;
-
-            var msalIdParameters = MsalIdHelper.GetMsalIdParameters(this);
-            string os = "N/A";
-            if (msalIdParameters.TryGetValue(MsalIdParameter.OS, out string osValue))
-            {
-                os = osValue;
-            }
-
-            bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
-            // If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
-            bool isLoggingPii = messageWithPiiExists && PiiLoggingEnabled;
-            string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
-
-            string log = string.Format(CultureInfo.InvariantCulture, "{0} MSAL {1} {2} {3} [{4}{5}]{6} {7}",
-                isLoggingPii ? "(True)" : "(False)",
-                MsalIdHelper.GetMsalVersion(),
-                msalIdParameters[MsalIdParameter.Product],
-                os, DateTime.UtcNow, correlationId, ClientInformation, messageToLog);
-
-            if (_isDefaultPlatformLoggingEnabled)
-            {
-                switch (logLevel)
+                var msalIdParameters = MsalIdHelper.GetMsalIdParameters(this);
+                string os = "N/A";
+                if (msalIdParameters.TryGetValue(MsalIdParameter.OS, out string osValue))
                 {
-                    case LogLevel.Error:
-                        _platformLogger.Error(log);
-                        break;
-                    case LogLevel.Warning:
-                        _platformLogger.Warning(log);
-                        break;
-                    case LogLevel.Info:
-                        _platformLogger.Information(log);
-                        break;
-                    case LogLevel.Verbose:
-                        _platformLogger.Verbose(log);
-                        break;
+                    os = osValue;
                 }
-            }
 
-            _loggingCallback.Invoke(logLevel, log, isLoggingPii);
+                bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
+                // If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
+                bool isLoggingPii = messageWithPiiExists && PiiLoggingEnabled;
+                string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
+
+                string log = string.Format(CultureInfo.InvariantCulture, "{0} MSAL {1} {2} {3} [{4}{5}]{6} {7}",
+                    isLoggingPii ? "(True)" : "(False)",
+                    MsalIdHelper.GetMsalVersion(),
+                    msalIdParameters[MsalIdParameter.Product],
+                    os, DateTime.UtcNow, correlationId, ClientInformation, messageToLog);
+
+                if (_isDefaultPlatformLoggingEnabled)
+                {
+                    switch (logLevel)
+                    {
+                        case LogLevel.Error:
+                            _platformLogger.Error(log);
+                            break;
+                        case LogLevel.Warning:
+                            _platformLogger.Warning(log);
+                            break;
+                        case LogLevel.Info:
+                            _platformLogger.Information(log);
+                            break;
+                        case LogLevel.Verbose:
+                            _platformLogger.Verbose(log);
+                            break;
+                    }
+                }
+
+                _loggingCallback.Invoke(logLevel, log, isLoggingPii);
+            }
         }
 
         internal static string GetPiiScrubbedExceptionDetails(Exception ex)
@@ -247,7 +245,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
-            return _loggingCallback == null || logLevel > _minLogLevel;
+            return _loggingCallback != null && logLevel <= _minLogLevel;
         }
     }
 }
