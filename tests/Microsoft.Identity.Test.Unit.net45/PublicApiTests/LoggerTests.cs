@@ -233,5 +233,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             logger.VerbosePii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(4, counter);
         }
+
+        [TestMethod]
+        public void IsEnabled()
+        {
+            var infoLoggerWithCallback = new MsalLogger(Guid.Empty, null, null, LogLevel.Info, true, true, _callback);
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Info));
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Error));
+            Assert.IsTrue(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Warning));
+            Assert.IsFalse(infoLoggerWithCallback.IsLoggingEnabled(LogLevel.Verbose));
+
+            var loggerNoCallback = new MsalLogger(Guid.Empty, null, null, LogLevel.Warning, true, true, null);
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Info));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Error));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Warning));
+            Assert.IsFalse(loggerNoCallback.IsLoggingEnabled(LogLevel.Verbose));
+
+        }
+
     }
 }

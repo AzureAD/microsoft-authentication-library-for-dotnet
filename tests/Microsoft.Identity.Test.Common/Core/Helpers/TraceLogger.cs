@@ -67,6 +67,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             Trace.WriteLine($"{_prefix}[Exception] Exception {exWithPii.Message} - {exWithPii}");
         }
 
+        public bool IsLoggingEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
         public void Log(LogLevel msalLogLevel, string messageWithPii, string messageScrubbed)
         {
             Trace.WriteLine($"{_prefix}[{msalLogLevel}] {messageWithPii ?? messageScrubbed}");
