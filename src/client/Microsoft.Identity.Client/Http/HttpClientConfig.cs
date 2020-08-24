@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Http
     internal static class HttpClientConfig
     {
         public const long MaxResponseContentBufferSizeInBytes = 1024 * 1024;
-        public const int MaxConnections = 30; // default depends on rutnime but it is much smaller
+        public const int MaxConnections = 50; // default depends on rutnime but it is much smaller
         public static readonly TimeSpan ConnectionLifeTime = TimeSpan.FromMinutes(1);
 
         public static void ConfigureRequestHeadersAndSize(HttpClient httpClient)

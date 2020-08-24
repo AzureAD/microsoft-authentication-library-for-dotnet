@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     public partial class InteractiveFlowTests
     {
         [TestMethod]
+        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2004
         public async Task Interactive_SSHCert_Async()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);

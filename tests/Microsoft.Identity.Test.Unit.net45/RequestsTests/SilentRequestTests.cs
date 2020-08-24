@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
-                    ScopeHelper.CreateSortedSetFromEnumerable(
+                    ScopeHelper.CreateScopeSet(
                         new[]
                         {
                             "some-scope1",
@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             public AuthenticationRequestParameters CreateRequestParams(
                 ITokenCacheInternal cache,
-                SortedSet<string> scopes,
+                HashSet<string> scopes,
                 IDictionary<string, string> extraQueryParams = null,
                 string claims = null,
                 AuthorityInfo authorityOverride = null)

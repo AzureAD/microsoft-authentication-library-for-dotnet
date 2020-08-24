@@ -17,6 +17,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         internal void PopulateCacheForClientCredential(ITokenCacheAccessor accessor)
         {
+
+            var atItem = CreateAccessTokenItem();
+            accessor.SaveAccessToken(atItem);
+        }
+
+        internal static MsalAccessTokenCacheItem CreateAccessTokenItem()
+        {
             string clientInfo = MockHelpers.CreateClientInfo();
             string homeAccId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
 
@@ -31,7 +38,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                MockHelpers.CreateClientInfo(),
                homeAccId);
 
-            accessor.SaveAccessToken(atItem);
+            return atItem;
         }
 
         internal void PopulateCache(

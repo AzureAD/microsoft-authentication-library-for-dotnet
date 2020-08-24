@@ -19,6 +19,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -142,11 +143,20 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                      TimeUnit.Seconds)
                      .ConfigureAwait(false);
 
-                if (bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success))
+                string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
+
+                bool success = bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success);
+                _logger.Info($"Android Broker Silent call result - success? {success}.");
+
+                if (!success)
                 {
-                    _logger.Info("Android Broker succsesfully refreshed the access token.");
-                    return bundleResult.GetString(BrokerConstants.BrokerResultV2);
+                    _logger.Warning($"Android Broker Silent call failed. " +
+                        $"This usually means that the RT cannot be refreshed and interaction is required. " +
+                        $"BundleResult: {bundleResult} Result string: {responseJson}");
                 }
+
+                // upstream logic knows how to extract potential errors from this result
+                return responseJson;
             }
 
             _logger.Info("Android Broker didn't return any results.");
@@ -308,7 +318,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             return;
                         }
 
-                        throw new MsalClientException("Could not negotiate protocol version with broker. ");
+                        throw new MsalClientException("Could not negotiate protocol version with broker.");
                     }
 
                     throw new MsalClientException("Could not communicate with broker via account manager");
@@ -415,7 +425,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             return bundle;
         }
-       
+
 
         private Bundle CreateBrokerAccountBundle(BrokerRequest brokerRequest)
         {

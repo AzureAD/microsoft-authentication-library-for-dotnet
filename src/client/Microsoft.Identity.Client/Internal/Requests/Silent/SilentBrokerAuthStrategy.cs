@@ -72,7 +72,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 _logger.Info(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
-                throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
+
+                throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse.Error,
+                                                     MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription,
+                                                     string.IsNullOrEmpty(msalTokenResponse.SubError) ?
+                                                     MsalError.UnknownBrokerError : msalTokenResponse.SubError,
+                                                     msalTokenResponse.CorrelationId,
+                                                     msalTokenResponse.HttpResponse);
             }
 
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);

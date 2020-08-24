@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (AuthenticationRequestParameters.Scope == null || !AuthenticationRequestParameters.Scope.Any())
+            if (AuthenticationRequestParameters.Scope == null || AuthenticationRequestParameters.Scope.Count == 0)
             {
                 throw new MsalClientException(
                     MsalError.ScopesRequired,
@@ -44,11 +44,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
             if (msalAccessTokenItem != null)
             {
+                var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(msalAccessTokenItem.GetIdTokenItemKey()).ConfigureAwait(false);
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    "OBO found a valid access token in the cache. ID token also found? " + (msalIdTokenItem != null));
+
                 AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
                 return new AuthenticationResult(
-                    msalAccessTokenItem, 
-                    null,
+                    msalAccessTokenItem,
+                    msalIdTokenItem,
                     AuthenticationRequestParameters.AuthenticationScheme,
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache);

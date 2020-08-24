@@ -130,6 +130,9 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
+        // Important: to allow developers to unit test MSAL, we need to ensure that all properties have public setters or can be set via
+        // public constructors
+
         #region Public Properties
         /// <summary>
         /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c> in the inner
@@ -161,7 +164,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Raw response body received from the server.
         /// </summary>
-        public string ResponseBody { get; internal set; }
+        public string ResponseBody { get; set; }
 
 
         /// <summary>
@@ -171,12 +174,12 @@ namespace Microsoft.Identity.Client
         /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the
         /// time specified in the Retry-After header to avoid a retry storm.
         /// </remarks>
-        public HttpResponseHeaders Headers { get; internal set; }
+        public HttpResponseHeaders Headers { get; set; }
 
         /// <summary>
         /// An ID that can used to piece up a single authentication flow.
         /// </summary>
-        public string CorrelationId { get; internal set; }
+        public string CorrelationId { get; set; }
 
         #endregion
 

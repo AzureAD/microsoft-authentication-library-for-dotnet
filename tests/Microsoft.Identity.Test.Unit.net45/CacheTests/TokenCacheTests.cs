@@ -689,7 +689,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var authParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityTestTenant,
                     TestConstants.s_scope,
-                    cache);
+                    cache,
+                    apiId: ApiEvent.ApiIds.AcquireTokenOnBehalfOf);
                 authParams.UserAssertion = new UserAssertion(atKey);
 
                 ((TokenCache)cache).AfterAccess = AfterAccessNoChangeNotification;
@@ -1067,7 +1068,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             _tokenCacheHelper.PopulateCacheWithOneAccessToken(cache.Accessor);
 
-            var requestParams = CreateAuthenticationRequestParameters(serviceBundle, scopes: new SortedSet<string>());
+            var requestParams = CreateAuthenticationRequestParameters(
+                serviceBundle, 
+                scopes: new HashSet<string>());
             requestParams.Account = TestConstants.s_user;
 
             string scopeInCache = TestConstants.s_scope.FirstOrDefault();
@@ -1112,7 +1115,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private AuthenticationRequestParameters CreateAuthenticationRequestParameters(
             IServiceBundle serviceBundle,
             Authority authority = null,
-            SortedSet<string> scopes = null,
+            HashSet<string> scopes = null,
             RequestContext requestContext = null)
         {
             var commonParameters = new AcquireTokenCommonParameters
