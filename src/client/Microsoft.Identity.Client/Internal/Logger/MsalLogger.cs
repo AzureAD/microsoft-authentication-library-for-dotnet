@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            if (_loggingCallback == null || logLevel > _minLogLevel)
+            if (!IsLoggingEnabled())
             {
                 return;
             }
@@ -243,6 +243,11 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null)
         {
             return LogBlockDuration(methodName, logLevel);
+        }
+
+        public bool IsLoggingEnabled(LogLevel logLevel)
+        {
+            return _loggingCallback == null || logLevel > _minLogLevel;
         }
     }
 }

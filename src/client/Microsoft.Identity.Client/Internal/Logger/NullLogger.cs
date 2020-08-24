@@ -84,5 +84,10 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
             return LogBlockDuration(methodName, logLevel);
         }
+
+        public bool IsLoggingEnabled(LogLevel logLevel)
+        {
+            return false;
+        }
     }
 }

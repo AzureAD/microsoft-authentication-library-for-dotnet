@@ -37,11 +37,17 @@ namespace Microsoft.Identity.Client.Utils
             ICoreLogger logger,
             string logPrefix)
         {
-            int numberBefore = list.Count();
-            list = list.Where(predicate).ToList();
-            int numberAfter = list.Count();
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
+                logger.Verbose($"{logPrefix} - item count before: {list.Count()} ");
+            }
 
-            logger.Info($"{logPrefix} item count before {numberBefore} after {numberAfter}");
+            list = list.Where(predicate);
+
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
+                logger.Verbose($"{logPrefix} - item count after: {list.Count()} ");
+            }
 
             return list;
         }
