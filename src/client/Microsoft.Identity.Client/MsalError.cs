@@ -805,6 +805,17 @@ namespace Microsoft.Identity.Client
         public const string InvalidAdalCacheMultipleRTs = "invalid_adal_cache";
 
         /// <summary>
+        /// Region discovery failed.
+        /// </summary>
+        public const string RegionDiscoveryFailed = "region_discovery_failed";
+
+        /// <summary>
+        /// <para>What happens?</para>WithAzureRegion is set to true
+        /// <para>Mitigation</para>Region discovery cannot be performed for ADFS authority.
+        /// </summary>
+        public const string RegionDiscoveryNotEnabled = "region_discovery_unavailable";
+
+        /// <summary>
         /// <para>What happens?</para>MSAL cannot use the certificate for signing.
         /// <para>Mitigation</para>Possible cause: use of CNG certificates with .Net classic 4.6 or lower. Either target a higher version of .NET desktop - 4.6.1 and above, or use a different certificate type (non-CNG) 
         /// or sign your own assertion as described at https://aka.ms/msal-net-signed-assertion

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -266,6 +267,39 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
             httpManager.AddMockHandler(handler);
             return responseMessage;
+        }
+
+        public static void AddRegionDiscoveryMockHandler(
+            this MockHttpManager httpManager,
+            string response)
+        {
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/api-version=2019-06-01",
+                        ExpectedRequestHeaders = new Dictionary<string, string>
+                         {
+                            {"Metadata", "true"}
+                         },
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
+                    });
+        }
+
+        public static void AddRegionDiscoveryMockHandlerNotFound(
+            this MockHttpManager httpManager)
+        {
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/api-version=2019-06-01",
+                        ExpectedRequestHeaders = new Dictionary<string, string>
+                         {
+                            {"Metadata", "true"}
+                         },
+                        ResponseMessage = MockHelpers.CreateFailureMessage(HttpStatusCode.NotFound, "")
+                    });
         }
     }
 

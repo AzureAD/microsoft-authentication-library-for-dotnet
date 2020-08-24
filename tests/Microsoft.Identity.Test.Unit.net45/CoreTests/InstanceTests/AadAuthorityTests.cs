@@ -34,8 +34,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             CoreAssert.IsImmutable<AadAuthority>();
             CoreAssert.IsImmutable<AdfsAuthority>();
             CoreAssert.IsImmutable<B2CAuthority>();
-            CoreAssert.IsImmutable<Authority>();
-            CoreAssert.IsImmutable<AuthorityInfo>();
         }
 #endif
 

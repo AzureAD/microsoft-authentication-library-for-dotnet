@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
@@ -16,6 +17,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             new Dictionary<string, InstanceDiscoveryMetadataEntry>();
 
         private static readonly ISet<string> s_knownEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ISet<string> s_knownPublicEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         static KnownMetadataProvider()
         {
@@ -25,6 +27,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 {
                     s_knownEntries[alias] = entry;
                     s_knownEnvironments.Add(alias);
+                }
+            }
+
+            void AddToPublicEnvironment(InstanceDiscoveryMetadataEntry entry)
+            {
+                foreach (string alias in entry.Aliases)
+                {
+                    s_knownPublicEnvironments.Add(alias);
                 }
             }
 
@@ -68,6 +78,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             AddToKnownCache(cloudEntryGermanay);
             AddToKnownCache(usGovCloudEntry);
             AddToKnownCache(usCloudEntry);
+            AddToPublicEnvironment(publicCloudEntry);
+        }
+
+        public static bool IsPublicEnvironment(string environment)
+        {
+            return s_knownPublicEnvironments.Contains(environment);
         }
 
         public InstanceDiscoveryMetadataEntry GetMetadata(
@@ -95,6 +111,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 $"[Instance Discovery] Could not use known metadata provider because at least one environment in the cache is not known");
             return null;
         }
+
 
         public static bool IsKnownEnvironment(string environment)
         {
