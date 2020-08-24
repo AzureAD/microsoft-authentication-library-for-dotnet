@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)
         {
-            if (!IsLoggingEnabled())
+            if (!IsLoggingEnabled(logLevel))
             {
                 return;
             }
