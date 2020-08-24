@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Http
@@ -21,7 +22,6 @@ namespace Microsoft.Identity.Client.Http
                 throw new MsalClientException(
                     MsalError.NoRedirectUri,
                     MsalErrorMessage.NoRedirectUri);
-
             }
 
             if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
@@ -43,5 +43,31 @@ namespace Microsoft.Identity.Client.Http
             }
         }
 
+        public static void ValidateIosBrokerRedirectUri(Uri redirectUri, string bundleId, ICoreLogger logger)
+        {
+            string expectedRedirectUri = $"msauth.{bundleId}://auth";
+
+            // It's important to use the original string here because the bundleId is case sensitive
+            string actualRedirectUriString = redirectUri.OriginalString;
+
+            // MSAL style redirect uri - case sensitive
+            if (string.Equals(expectedRedirectUri, actualRedirectUriString.TrimEnd('/'), StringComparison.Ordinal))
+            {
+                logger.Verbose("Valid MSAL style redirect Uri detected.");
+                return;
+            }
+
+            // ADAL style redirect uri - my_scheme://{bundleID} 
+            if (redirectUri.Authority.Equals(bundleId, StringComparison.OrdinalIgnoreCase))
+            {
+                logger.Verbose("Valid ADAL style redirect Uri detected.");
+                return;
+            }
+
+            throw new MsalClientException(
+                MsalError.CannotInvokeBroker,
+                $"The broker redirect URI is incorrect, it should be {expectedRedirectUri} or app_scheme ://{bundleId} - " +
+                $"please visit https://aka.ms/msal-net-xamarin for details about redirect URIs.");
+        }
     }
 }

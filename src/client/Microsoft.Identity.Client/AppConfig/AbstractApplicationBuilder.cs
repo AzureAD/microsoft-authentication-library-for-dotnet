@@ -643,8 +643,8 @@ namespace Microsoft.Identity.Client
         /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
         /// worldwide cloud, Azure German Cloud, US government ...)</param>
         /// <param name="tenant">Domain name associated with the Azure AD tenant from which
-        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// to sign-in users. This can also be a guid</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,

@@ -18,7 +18,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid10)'">
     <DefineConstants>$(DefineConstants);ANDROID_BUILDTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' OR '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <DefineConstants>$(DefineConstants);DESKTOP_BUILDTIME</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">

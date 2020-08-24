@@ -21,6 +21,10 @@ using NSubstitute;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using NSubstitute.ExceptionExtensions;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
+using Microsoft.Identity.Client.Http;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -31,6 +35,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private SilentBrokerAuthStrategy _brokerSilentAuthStrategy;
         private AuthenticationRequestParameters _parameters;
         private AcquireTokenSilentParameters _acquireTokenSilentParameters;
+        private HttpResponse _brokerHttpResponse;
 
         [TestMethod]
         public void BrokerResponseTest()
@@ -78,6 +83,58 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.IsNotNull(exc);
                     Assert.AreEqual(response.Error, exc.ErrorCode);
                     Assert.AreEqual(MsalErrorMessage.BrokerResponseError + response.ErrorDescription, exc.Message);
+                });
+        }
+
+        [TestMethod]
+        public void BrokerInteractionRequiredErrorResponseTest()
+        {
+            CreateBrokerHelper();
+
+            var response = new MsalTokenResponse
+            {
+                Error = MsalError.InteractionRequired,
+                ErrorDescription = MsalError.InteractionRequired,
+                HttpResponse = _brokerHttpResponse
+            };
+
+            ValidateBrokerResponse(
+                response,
+                exception =>
+                {
+                    var exc = exception as MsalUiRequiredException;
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalError.InteractionRequired, exc.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.BrokerResponseError + MsalError.InteractionRequired, exc.Message);
+                    Assert.AreEqual(exc.StatusCode, (int)HttpStatusCode.Unauthorized);
+                    Assert.AreEqual(exc.ResponseBody, "SomeBody");
+                    Assert.IsNotNull(exc.Headers);
+                });
+        }
+
+        [TestMethod]
+        public void BrokerInvalidGrantErrorResponseTest()
+        {
+            CreateBrokerHelper();
+
+            var response = new MsalTokenResponse
+            {
+                Error = MsalError.InvalidGrantError,
+                ErrorDescription = MsalError.InvalidGrantError,
+                HttpResponse = _brokerHttpResponse
+            };
+
+            ValidateBrokerResponse(
+                response,
+                exception =>
+                {
+                    var exc = exception as MsalUiRequiredException;
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalError.InvalidGrantError, exc.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.BrokerResponseError + MsalError.InvalidGrantError, exc.Message);
+                    Assert.AreEqual(exc.StatusCode, (int)HttpStatusCode.Unauthorized);
+                    Assert.AreEqual(exc.ResponseBody, "SomeBody");
+                    Assert.IsNotNull(exc.Headers);
                 });
         }
 
@@ -348,6 +405,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         _parameters,
                         _acquireTokenSilentParameters,
                         broker);
+
+            _brokerHttpResponse = new HttpResponse();
+            _brokerHttpResponse.Body = "SomeBody";
+            _brokerHttpResponse.StatusCode = HttpStatusCode.Unauthorized;
+            _brokerHttpResponse.Headers = new HttpResponseMessage().Headers;
 
             return harness;
         }

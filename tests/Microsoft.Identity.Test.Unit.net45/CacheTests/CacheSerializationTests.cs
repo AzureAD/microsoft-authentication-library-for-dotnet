@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private MsalAccessTokenCacheItem CreateAccessTokenItem()
         {
-            return new MsalAccessTokenCacheItem
+            return new MsalAccessTokenCacheItem(TestConstants.ScopeStr)
             {
                 ClientId = TestConstants.ClientId,
                 Environment = "env",
@@ -47,10 +47,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 CachedAt = "34567",
                 HomeAccountId = TestConstants.HomeAccountId,
                 IsExtendedLifeTimeToken = false,
-                NormalizedScopes = TestConstants.ScopeStr,
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
-                RawClientInfo = string.Empty, 
+                RawClientInfo = string.Empty,
                 UserAssertionHash = "assertion hash",
                 TokenType = StorageJsonValues.TokenTypeBearer
             };
@@ -641,7 +640,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, accessor.GetAllAccounts().Count());
             Assert.AreEqual(0, accessor.GetAllAppMetadata().Count());
 
-            var expectedAccessTokenItem = new MsalAccessTokenCacheItem
+            var expectedAccessTokenItem = new MsalAccessTokenCacheItem("User.Read User.ReadBasic.All profile openid email")
             {
                 AdditionalFieldsJson = "{\r\n  \"access_token_type\": \"Bearer\"\r\n}",
                 Environment = "login.windows.net",
@@ -652,8 +651,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 CachedAt = "1548803419",
                 ExpiresOnUnixTimestamp = "1548846619",
                 ExtendedExpiresOnUnixTimestamp = "1548846619",
-                NormalizedScopes = "User.Read User.ReadBasic.All profile openid email",
-                UserAssertionHash = string.Empty, 
+                UserAssertionHash = string.Empty,
                 TokenType = StorageJsonValues.TokenTypeBearer
             };
             AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.GetAllAccessTokens().First());
@@ -815,8 +813,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.ExpiresOn, actual.ExpiresOn, nameof(actual.ExpiresOn));
             Assert.AreEqual(expected.ExtendedExpiresOn, actual.ExtendedExpiresOn, nameof(actual.ExtendedExpiresOn));
             Assert.AreEqual(expected.IsExtendedLifeTimeToken, actual.IsExtendedLifeTimeToken, nameof(actual.IsExtendedLifeTimeToken));
-            Assert.AreEqual(expected.NormalizedScopes, actual.NormalizedScopes, nameof(actual.NormalizedScopes));
-            CollectionAssert.AreEqual(expected.ScopeSet, actual.ScopeSet, nameof(actual.ScopeSet));
+            Assert.AreEqual(expected.GetKey().ToString(), actual.GetKey().ToString());
+            CollectionAssert.AreEqual(expected.ScopeSet.ToList(), actual.ScopeSet.ToList(), nameof(actual.ScopeSet));
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
             Assert.AreEqual(expected.UserAssertionHash, actual.UserAssertionHash, nameof(actual.UserAssertionHash));
             Assert.AreEqual(expected.RefreshOnUnixTimestamp, actual.RefreshOnUnixTimestamp, nameof(actual.RefreshOnUnixTimestamp));

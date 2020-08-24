@@ -32,6 +32,14 @@ namespace Microsoft.Identity.Client.WsTrust
                     errorMessage = GetFaultMessage(fault);
                 }
             }
+
+            // If the parse fails for whatever reason we should include the entire body otherwise
+            // there is no indication what went wrong
+            if (string.IsNullOrWhiteSpace(errorMessage))
+            {
+                errorMessage = responseDocument.ToString();
+            }
+
             return errorMessage;
         }
 

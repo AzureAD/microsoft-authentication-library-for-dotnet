@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client.OAuth2
@@ -96,8 +97,8 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string ScopeOfflineAccess = "offline_access";
         public const string ScopeProfile = "profile";
 
-        public static readonly SortedSet<string> ReservedScopes =
-          new SortedSet<string> { ScopeOpenId, ScopeProfile, ScopeOfflineAccess };
+        public static readonly HashSet<string> ReservedScopes =
+          new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ScopeOpenId, ScopeProfile, ScopeOfflineAccess };
     }
 
     internal class PromptValue

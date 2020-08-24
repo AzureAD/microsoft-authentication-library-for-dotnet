@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security;
@@ -10,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -51,8 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         #endregion
 
-        [TestMethod]
-       // [Ignore] //Fails when running on AzureDevOps https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1530
+        [TestMethod]        
         public async Task OBO_WithCache_MultipleUsers_Async()
         {
             var aadUser1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
@@ -78,7 +77,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
             s_inMemoryTokenCache.Bind(pca.UserTokenCache);
-
             try
             {
                 authResult = await pca
@@ -108,26 +106,21 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
             s_inMemoryTokenCache.Bind(cca.UserTokenCache);
 
-            try
-            {
-                authResult = await cca
-                  .AcquireTokenSilent(s_scopes, user.Upn)
-                  .ExecuteAsync()
-                  .ConfigureAwait(false);
-            }
-            catch (MsalUiRequiredException)
-            {
-                Assert.IsFalse(silentCallShouldSucceed, "ATS should have found a token, but it didn't");
-
-                authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(authResult.AccessToken))
+            authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(authResult.AccessToken))
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-            }
+            
+            Assert.AreEqual(
+                silentCallShouldSucceed, 
+                authResult.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
 
             MsalAssert.AssertAuthResult(authResult, user);
+            Assert.IsNotNull(authResult.IdToken); // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1950
             Assert.IsTrue(authResult.Scopes.Any(s => string.Equals(s, s_scopes.Single(), StringComparison.OrdinalIgnoreCase)));
 
             return cca;
         }
+
+      
     }
 }

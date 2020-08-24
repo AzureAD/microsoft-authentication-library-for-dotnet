@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
-            options.AddArguments("headless");
+            //options.AddArguments("headless");
 
             var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
             if (string.IsNullOrEmpty(env))
@@ -96,14 +96,14 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         #endregion
 
         public static IWebElement WaitForElementToBeVisibleAndEnabled(
-            this IWebDriver driver, 
-            By by, 
-            TimeSpan waitTime = default, 
+            this IWebDriver driver,
+            By by,
+            TimeSpan waitTime = default,
             bool ignoreFailures = false)
         {
             Trace.WriteLine($"[Selenium UI] Waiting for {by.ToString()} to be visible and enabled");
             var webDriverWait = new WebDriverWait(
-                driver, 
+                driver,
                 waitTime != default ? waitTime : ExplicitTimespan);
 
             try
@@ -183,6 +183,22 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             EnterPassword(driver, user, fields);
 
             HandleConsent(driver, user, fields, prompt);
+            HandleStaySignedIn(driver);
+        }
+
+        private static void HandleStaySignedIn(IWebDriver driver)
+        {
+            try
+            {
+                Trace.WriteLine("Finding the Stay Signed In - Yes button");
+                var yesBtn = driver.WaitForElementToBeVisibleAndEnabled(
+                    By.Id(CoreUiTestConstants.WebSubmitId));
+                yesBtn?.Click();
+            }
+            catch
+            {
+                Trace.WriteLine("Stay Signed In button not found");
+            }
         }
 
         private static void HandleConsent(IWebDriver driver, LabUser user, UserInformationFieldIds fields, Prompt prompt)
@@ -194,7 +210,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 {
                     Trace.WriteLine("Finding accept prompt");
                     var acceptBtn = driver.WaitForElementToBeVisibleAndEnabled(
-                        ByIds(CoreUiTestConstants.ConsentAcceptId, fields.AADSignInButtonId), 
+                        ByIds(CoreUiTestConstants.ConsentAcceptId, fields.AADSignInButtonId),
                         waitTime: ShortExplicitTimespan,
                         ignoreFailures: true);
                     acceptBtn?.Click();
@@ -260,7 +276,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         }
 
         public static void PerformDeviceCodeLogin(
-            DeviceCodeResult deviceCodeResult, 
+            DeviceCodeResult deviceCodeResult,
             LabUser user,
             TestContext testContext,
             bool isAdfs = false)
@@ -289,6 +305,8 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     seleniumDriver.PerformLogin(user, Prompt.SelectAccount, false, isAdfs);
                     Thread.Sleep(1000); // allow the browser to redirect
 
+                    seleniumDriver?.SaveScreenshot(testContext, "device_code_end");
+
                     Trace.WriteLine("Authentication complete");
                 }
                 catch (Exception ex)
@@ -298,7 +316,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     throw;
                 }
             }
-            
+
         }
     }
 }

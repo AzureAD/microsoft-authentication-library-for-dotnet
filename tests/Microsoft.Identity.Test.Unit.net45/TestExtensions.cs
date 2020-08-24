@@ -30,13 +30,13 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(expectedAppMetadataCount, accessor.GetAllAppMetadata().Count());
         }
 
-        public static void InitializeTokenCacheFromFile(this IPublicClientApplication pca, string resourceFile, bool updateATExpiry = false)
+        public static void InitializeTokenCacheFromFile(this IClientApplicationBase app, string resourceFile, bool updateATExpiry = false)
         {
             string tokenCacheAsString = File.ReadAllText(resourceFile);
-            InitializeTokenCacheFromString(pca, tokenCacheAsString, updateATExpiry);
+            InitializeTokenCacheFromString(app, tokenCacheAsString, updateATExpiry);
         }
 
-        public static void InitializeTokenCacheFromString(this IPublicClientApplication pca, string content, bool updateATExpiry = false)
+        public static void InitializeTokenCacheFromString(this IClientApplicationBase app, string content, bool updateATExpiry = false)
         {
             if (updateATExpiry)
             {
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit
 
 
             byte[] tokenCacheBlob = new UTF8Encoding().GetBytes(content);
-            ((ITokenCacheSerializer)pca.UserTokenCache).DeserializeMsalV3(tokenCacheBlob);
+            ((ITokenCacheSerializer)app.UserTokenCache).DeserializeMsalV3(tokenCacheBlob);
         }
     }
 }

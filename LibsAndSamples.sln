@@ -139,6 +139,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-publish-packages-and-symbols.yaml = build\template-publish-packages-and-symbols.yaml
 		build\template-python-config.yaml = build\template-python-config.yaml
 		build\template-restore-build-libsandsamples.yaml = build\template-restore-build-libsandsamples.yaml
+		build\template-run-device-auth-tests.yaml = build\template-run-device-auth-tests.yaml
 		build\template-run-integration-tests.yaml = build\template-run-integration-tests.yaml
 		build\template-run-unit-tests.yaml = build\template-run-unit-tests.yaml
 		build\template-sign-binary.yaml = build\template-sign-binary.yaml
@@ -146,13 +147,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UWP standalone", "tests\devapps\UWP standalone\UWP standalone.csproj", "{0D94EE36-D7FF-4B5E-8B15-71B8926811E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Integration.Win8", "tests\Microsoft.Identity.Test.Integration.Win8\Microsoft.Identity.Test.Integration.Win8.csproj", "{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Manual Xamarin DevApp", "Manual Xamarin DevApp", "{3EF8B2B5-03B0-40D0-B8C0-CF06D2233C99}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin Manual.Android", "tests\devapps\Xamarin Manual\Xamarin Manual\Xamarin Manual.Android\Xamarin Manual.Android.csproj", "{578EFC35-BF3C-4F81-B8B7-083F021B7EC6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin Manual.iOS", "tests\devapps\Xamarin Manual\Xamarin Manual\Xamarin Manual.iOS\Xamarin Manual.iOS.csproj", "{98BFC982-4DEC-487D-982C-FC8E877C4F3A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin Manual", "tests\devapps\Xamarin Manual\Xamarin Manual\Xamarin Manual\Xamarin Manual.csproj", "{EDAE1E1E-18C0-42C2-BEA2-4C2BCB023868}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xamarin Manual", "tests\devapps\Xamarin Manual\Xamarin Manual\Xamarin Manual\Xamarin Manual.csproj", "{EDAE1E1E-18C0-42C2-BEA2-4C2BCB023868}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1126,6 +1129,34 @@ Global
 		{0D94EE36-D7FF-4B5E-8B15-71B8926811E2}.Release|x86.ActiveCfg = Release|x86
 		{0D94EE36-D7FF-4B5E-8B15-71B8926811E2}.Release|x86.Build.0 = Release|x86
 		{0D94EE36-D7FF-4B5E-8B15-71B8926811E2}.Release|x86.Deploy.0 = Release|x86
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|ARM.Build.0 = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|x64.Build.0 = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Debug|x86.Build.0 = Debug|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|ARM.ActiveCfg = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|ARM.Build.0 = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|ARM64.Build.0 = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|iPhone.Build.0 = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|x64.ActiveCfg = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|x64.Build.0 = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|x86.ActiveCfg = Release|Any CPU
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C}.Release|x86.Build.0 = Release|Any CPU
 		{578EFC35-BF3C-4F81-B8B7-083F021B7EC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{578EFC35-BF3C-4F81-B8B7-083F021B7EC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{578EFC35-BF3C-4F81-B8B7-083F021B7EC6}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
@@ -1263,6 +1294,7 @@ Global
 		{839E9613-D234-44D3-94E2-3C85C35603D8} = {DFE52FB6-1B8E-4854-AA9B-854101A5B9BA}
 		{EA983957-DC2F-4D9E-A2E3-79ADEB5CEB26} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
 		{0D94EE36-D7FF-4B5E-8B15-71B8926811E2} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
+		{B22B9B5D-9B2E-4B8F-8EDD-D706B4AA942C} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{3EF8B2B5-03B0-40D0-B8C0-CF06D2233C99} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{578EFC35-BF3C-4F81-B8B7-083F021B7EC6} = {3EF8B2B5-03B0-40D0-B8C0-CF06D2233C99}
 		{98BFC982-4DEC-487D-982C-FC8E877C4F3A} = {3EF8B2B5-03B0-40D0-B8C0-CF06D2233C99}

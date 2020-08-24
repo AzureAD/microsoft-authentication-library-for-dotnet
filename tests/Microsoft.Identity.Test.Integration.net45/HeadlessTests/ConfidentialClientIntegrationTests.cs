@@ -95,7 +95,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var uriParams1 = HttpUtility.ParseQueryString(uri1.Query);
             var uriParams2 = HttpUtility.ParseQueryString(uri2.Query);
 
-            CoreAssert.AreEqual("offline_access openid profile User.Read", uriParams1["scope"], uriParams2["scope"]);
+            CollectionAssert.AreEquivalent(
+                "offline_access openid profile User.Read".Split(' '),
+                uriParams1["scope"].Split(' '));
+            CollectionAssert.AreEquivalent(
+                "offline_access openid profile User.Read".Split(' '),
+                uriParams2["scope"].Split(' '));
             CoreAssert.AreEqual("code", uriParams1["response_type"], uriParams2["response_type"]);
             CoreAssert.AreEqual(PublicCloudConfidentialClientID, uriParams1["client_id"], uriParams2["client_id"]);
             CoreAssert.AreEqual(RedirectUri, uriParams1["redirect_uri"], uriParams2["redirect_uri"]);
@@ -449,9 +454,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNull(authResult.IdToken);
         }
-
-        // Test ignored on net45 due to bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1726
-#if NET_CORE
+        
         [TestMethod]
         [TestCategory(TestCategories.ADFS)]
         public async Task ClientCreds_WithCertificate_Adfs_Async()
@@ -476,7 +479,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNull(authResult.IdToken);
         }
-#endif
+
 
         [TestMethod]
         [TestCategory(TestCategories.ADFS)]

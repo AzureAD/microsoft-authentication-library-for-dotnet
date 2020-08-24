@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using System.Linq;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -109,26 +110,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private void ValidateRedirectUri(Uri redirectUri)
         {
             string bundleId = NSBundle.MainBundle.BundleIdentifier;
-            string expectedRedirectUri = $"msauth.{bundleId}://auth";
-
-            // MSAL style redirect uri - case sensitive
-            if (string.Equals(expectedRedirectUri, redirectUri.AbsoluteUri, StringComparison.Ordinal))
-            {
-                _logger.Verbose("Valid MSAL style redirect Uri detected.");
-                return;
-            }
-
-            // ADAL style redirect uri - my_scheme://{bundleID} 
-            if (redirectUri.Authority.Equals(bundleId, StringComparison.Ordinal))
-            {
-                _logger.Verbose("Valid ADAL style redirect Uri detected.");
-                return;
-            }
-
-            throw new MsalClientException(
-                MsalError.CannotInvokeBroker,
-                $"The broker redirect URI is incorrect, it should be {expectedRedirectUri} or app_scheme ://{bundleId} - " +
-                $"please visit https://aka.ms/msal-net-xamarin for details about redirect URIs.");
+            RedirectUriHelper.ValidateIosBrokerRedirectUri(redirectUri, bundleId, _logger);
         }
 
         private Dictionary<string, string> CreateBrokerRequestDictionary(
@@ -145,7 +127,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             brokerRequest.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
 
             // this needs to be case sensitive because the AppBundle is case sensitive
-            brokerRequest.Add(BrokerParameter.RedirectUri, authenticationRequestParameters.OriginalRedirectUriString);
+            brokerRequest.Add(
+                BrokerParameter.RedirectUri, 
+                authenticationRequestParameters.RedirectUri.OriginalString);
 
             if (authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
             {

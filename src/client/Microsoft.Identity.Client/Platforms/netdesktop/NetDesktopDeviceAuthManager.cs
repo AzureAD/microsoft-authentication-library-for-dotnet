@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             CngKey key = NetDesktopCryptographyManager.GetCngPrivateKey(certificate);
             byte[] sig = null;
-            using (RSACng rsa = new RSACng(key))
+            using (Native.RSACng rsa = new Native.RSACng(key))
             {
                 rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
                 sig = rsa.SignData(responseJWT.GetResponseToSign().ToByteArray());

@@ -311,12 +311,19 @@ namespace Microsoft.Identity.Client
         }
 
         public const string NoAndroidBrokerAccountFound = "Android account manager could not find an account that matched the provided account information.";
-        public const string AndroidBrokerCannotBeInvoked = "In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater).";
+        public const string AndroidBrokerCannotBeInvoked = " - In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater). see https://aka.ms/Brokered-Authentication-for-Android";
         public const string CustomMetadataInstanceOrUri = "You have configured your own instance metadata using both an Uri and a string. Only one is supported. " +
             "See https://aka.ms/msal-net-custom-instance-metadata for more details.";
 
         public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow.";
         public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Deleting invalid ADAL cache.";
+
+        public const string CryptoNet45 = 
+            "Could not use the certificate for signing. See inner exception for details. " +
+            "Possible cause: this may be a known issue with apps build against .NET Desktop 4.6 or lower. " +
+            "Either target a higher version of .NET desktop - 4.6.1 and above, " +
+            "or use a different certificate type (non-CNG) or sign your own assertion " +
+            "as described at https://aka.ms/msal-net-signed-assertion";
 
         public static string ExperimentalFeature(string methodName)
         {

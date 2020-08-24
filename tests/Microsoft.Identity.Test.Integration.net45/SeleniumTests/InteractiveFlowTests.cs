@@ -54,6 +54,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
+#if DESKTOP // no point in running these tests on NetCore - the code path is similar
 
         [TestMethod]
         [TestCategory(TestCategories.Arlington)]
@@ -73,7 +74,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-#if DESKTOP // no point in running these tests on NetCore - the code path is similar
 
         [TestMethod]
         public async Task Interactive_AdfsV3_FederatedAsync()

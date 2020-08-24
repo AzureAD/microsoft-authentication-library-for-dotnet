@@ -132,10 +132,10 @@ namespace Microsoft.Identity.Client.Internal
 
         private Dictionary<string, string> CreateAuthorizationRequestParameters(Uri redirectUriOverride = null)
         {
-            var extraScopesToConsent = new SortedSet<string>();
+            var extraScopesToConsent = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (!_interactiveParameters.ExtraScopesToConsent.IsNullOrEmpty())
             {
-                extraScopesToConsent = ScopeHelper.CreateSortedSetFromEnumerable(_interactiveParameters.ExtraScopesToConsent);
+                extraScopesToConsent = ScopeHelper.CreateScopeSet(_interactiveParameters.ExtraScopesToConsent);
             }
 
             if (extraScopesToConsent.Contains(_requestParams.ClientId))
@@ -143,8 +143,8 @@ namespace Microsoft.Identity.Client.Internal
                 throw new ArgumentException("API does not accept client id as a user-provided scope");
             }
 
-            SortedSet<string> unionScope = GetDecoratedScope(
-                new SortedSet<string>(_requestParams.Scope.Union(extraScopesToConsent)));
+            var unionScope = ScopeHelper.GetMsalScopes(
+                new HashSet<string>(_requestParams.Scope.Concat(extraScopesToConsent)));
 
             var authorizationRequestParameters = new Dictionary<string, string>
             {
@@ -202,19 +202,6 @@ namespace Microsoft.Identity.Client.Internal
 
                 requestParameters[kvp.Key] = kvp.Value;
             }
-        }
-
-        private SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
-        {
-            // OAuth spec states that scopes are case sensitive, but 
-            // merge the reserved scopes in a case insensitive way, to 
-            // avoid sending things like "openid OpenId" (note that EVO is tollerant of this)
-            SortedSet<string> set = new SortedSet<string>(
-                inputScope.ToArray(),
-                StringComparer.OrdinalIgnoreCase);
-
-            set.UnionWith(OAuth2Value.ReservedScopes);
-            return set;
         }
 
         private void VerifyAuthorizationResult(AuthorizationResult authorizationResult, string originalState)

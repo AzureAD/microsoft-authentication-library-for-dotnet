@@ -12,6 +12,10 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string BrokerErrorDomain = "broker_error_domain";
         public const string BrokerErrorCode = "broker_error_code";
         public const string BrokerErrorDescription = "error_description";
+        public const string BrokerSubError = "oauth_sub_error";
+        public const string BrokerHttpHeaders = "http_response_headers";
+        public const string BrokerHttpBody = "http_response_body";
+        public const string BrokerHttpStatusCode = "http_response_code";
 
         public const string BrokerErrorMessage = "broker_error_message";
 

@@ -77,11 +77,19 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
 
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            var rsa = GetCryptoProviderForSha256(certificate);
+
+#if NET45
+            var rsa = GetCryptoProviderForSha256_Net45(certificate);
             using (var sha = new SHA256Cng())
             {
                 return rsa.SignData(messageBytes, sha);
-            };
+            }
+#else
+            using (var key = certificate.GetRSAPrivateKey())
+            {
+                return key.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            }
+#endif
         }
 
         /// <summary>
@@ -89,9 +97,23 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// </summary>
         /// <param name="certificate">Certificate including private key with which to initialize the <see cref="RSACryptoServiceProvider"/> with</param>
         /// <returns><see cref="RSACryptoServiceProvider"/> initialized with private key from <paramref name="certificate"/></returns>
-        private static RSACryptoServiceProvider GetCryptoProviderForSha256(X509Certificate2 certificate)
+        private static RSACryptoServiceProvider GetCryptoProviderForSha256_Net45(X509Certificate2 certificate)
         {
-            var rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
+            RSACryptoServiceProvider rsaProvider;
+
+
+            try
+            {
+                rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
+            }
+            catch (CryptographicException e)
+            {
+                throw new MsalClientException(
+                    MsalError.CryptoNet45,
+                    MsalErrorMessage.CryptoNet45,
+                    e);
+            }
+
             if (rsaProvider == null)
             {
                 throw new MsalClientException("The provided certificate has a key that is not accessable.");
