@@ -12,11 +12,18 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Client;
+using System.Threading;
+using Microsoft.Identity.Client.PlatformsCommon;
+using Microsoft.Identity.Client.Utils;
+using System.Threading.Tasks;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Test.Unit.PoP
 {
     [TestClass]
-    public class PopAuthenticationSchemeTests
+    public class PopAuthenticationSchemeTests : TestBase
     {
         // Key and JWT copied from the JWT spec https://tools.ietf.org/html/rfc7638#section-3
         private const string JWK = "{\"e\":\"AQAB\",\"kty\":\"RSA\",\"n\":\"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw\"}";
@@ -81,7 +88,78 @@ namespace Microsoft.Identity.Test.Unit.PoP
             Assert.IsTrue(jwkFromPopAssertion["jwk"].DeepEquals(initialJwk));
         }
 
+        [TestMethod]
+        public async Task ValidateKeyExpirationAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
 
+                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                .WithHttpManager(harness.HttpManager)
+                                .WithExperimentalFeatures()
+                                .BuildConcrete();
+
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant,
+                    null,
+                    null,
+                    false,
+                    MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
+
+                Guid correlationId = Guid.NewGuid();
+                TestClock testClock = new TestClock();
+                testClock.TestTime = DateTime.UtcNow;
+                var provider = PoPProviderFactory.GetOrCreateProvider(testClock);
+
+                await app.AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithProofOfPosession(request1, provider)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                var JWK = provider.CannonicalPublicKeyJwk;
+                //Advance time 7 hours. Should still be the same key
+                testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 7);
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant,
+                    null,
+                    null,
+                    false,
+                    MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
+
+                provider = PoPProviderFactory.GetOrCreateProvider(testClock);
+                await app.AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithProofOfPosession(request1, provider)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(JWK == provider.CannonicalPublicKeyJwk);
+                //Advance time 2 hours. Should be a different key
+                testClock.TestTime = testClock.TestTime + TimeSpan.FromSeconds(60 * 60 * 2);
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityCommonTenant,
+                    null,
+                    null,
+                    false,
+                    MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
+
+                provider = PoPProviderFactory.GetOrCreateProvider(testClock);
+                await app.AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithProofOfPosession(request1, provider)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(JWK != provider.CannonicalPublicKeyJwk);
+            }
+        }
 
         private static string AssertSimpleClaim(JwtSecurityToken jwt, string expectedKey, string optionalExpectedValue = null)
         {
@@ -91,6 +169,16 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 Assert.AreEqual(optionalExpectedValue, value);
             }
             return value;
+        }
+    }
+
+    class TestClock : ITimeService
+    {
+        public DateTime TestTime { get; set; }
+
+        public DateTime GetUtcNow()
+        {
+            return TestTime;
         }
     }
 }
