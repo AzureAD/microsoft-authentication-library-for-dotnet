@@ -248,14 +248,15 @@ namespace Microsoft.Identity.Client
         async Task<MsalAccessTokenCacheItem> ITokenCacheInternal.FindAccessTokenAsync(
             AuthenticationRequestParameters requestParams)
         {
+            var logger = requestParams.RequestContext.Logger;
             // no authority passed
             if (requestParams.AuthorityInfo?.CanonicalAuthority == null)
             {
-                requestParams.RequestContext.Logger.Warning("No authority provided. Skipping cache lookup ");
+                logger.Warning("No authority provided. Skipping cache lookup ");
                 return null;
             }
 
-            requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
+            logger.Info("Looking up access token in the cache.");
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
@@ -264,11 +265,14 @@ namespace Microsoft.Identity.Client
             // no match found after initial filtering
             if (!tokenCacheItems.Any())
             {
-                requestParams.RequestContext.Logger.Info("No matching entry found for user or assertion");
+                logger.Info("No matching entry found for user or assertion");
                 return null;
             }
 
-            requestParams.RequestContext.Logger.Info("Matching entry count - " + tokenCacheItems.Count());
+            if (logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                logger.Info("Matching entry count - " + tokenCacheItems.Count());
+            }
 
             tokenCacheItems = FilterByScopes(requestParams, tokenCacheItems);
             tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);
@@ -276,7 +280,7 @@ namespace Microsoft.Identity.Client
             // no match
             if (!tokenCacheItems.Any())
             {
-                requestParams.RequestContext.Logger.Info("No tokens found for matching authority, client_id, user and scopes.");
+                logger.Info("No tokens found for matching authority, client_id, user and scopes.");
                 return null;
             }
 
@@ -290,7 +294,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems)
         {
-            var requestScopes = requestParams.Scope.Where(s => 
+            var requestScopes = requestParams.Scope.Where(s =>
                 !OAuth2Value.ReservedScopes.Contains(s));
 
             tokenCacheItems = tokenCacheItems.FilterWithLogging(
@@ -332,9 +336,9 @@ namespace Microsoft.Identity.Client
                 // OBO calls FindAccessTokenAsync directly, but we are not able to resolve the authority 
                 // unless the developer has configured a tenanted authority. If they have configured /common
                 // then we cannot filter by tenant and will use whatever is in the cache.
-                filterByTenantId = 
-                    !string.IsNullOrEmpty(requestTenantId) && 
-                    !AadAuthority.IsCommonOrganizationsOrConsumersTenant(requestTenantId);                                
+                filterByTenantId =
+                    !string.IsNullOrEmpty(requestTenantId) &&
+                    !AadAuthority.IsCommonOrganizationsOrConsumersTenant(requestTenantId);
             }
 
             if (filterByTenantId)
@@ -366,6 +370,7 @@ namespace Microsoft.Identity.Client
 
         private MsalAccessTokenCacheItem GetUnexpiredAccessTokenOrNull(AuthenticationRequestParameters requestParams, MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
+            var logger = requestParams.RequestContext.Logger;
             if (msalAccessTokenCacheItem != null)
             {
 
@@ -374,33 +379,42 @@ namespace Microsoft.Identity.Client
                     // due to https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1806
                     if (msalAccessTokenCacheItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromDays(ExpirationTooLongInDays))
                     {
-                        requestParams.RequestContext.Logger.Error(
+                        logger.Error(
                            "Access token expiration too large. This can be the result of a bug or corrupt cache. Token will be ignored as it is likely expired." +
                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
                         return null;
                     }
 
-                    requestParams.RequestContext.Logger.Info(
-                        "Access token is not expired. Returning the found cache entry. " +
-                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                    if (logger.IsLoggingEnabled(LogLevel.Info))
+                    {
+                        logger.Info(
+                            "Access token is not expired. Returning the found cache entry. " +
+                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                    }
 
                     return msalAccessTokenCacheItem;
                 }
 
-                if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled && 
+                if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled &&
                     msalAccessTokenCacheItem.ExtendedExpiresOn > DateTime.UtcNow + AccessTokenExpirationBuffer)
                 {
-                    requestParams.RequestContext.Logger.Info(
-                        "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
-                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                    if (logger.IsLoggingEnabled(LogLevel.Info))
+                    {
+                        logger.Info(
+                            "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
+                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                    }
 
                     msalAccessTokenCacheItem.IsExtendedLifeTimeToken = true;
                     return msalAccessTokenCacheItem;
                 }
 
-                requestParams.RequestContext.Logger.Info(
-                    "Access token has expired or about to expire. " +
-                    GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                if (logger.IsLoggingEnabled(LogLevel.Info))
+                {
+                    logger.Info(
+                        "Access token has expired or about to expire. " +
+                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                }
             }
 
             return null;
@@ -585,11 +599,12 @@ namespace Microsoft.Identity.Client
             var environment = Authority.GetEnviroment(requestParameters.AuthorityInfo.CanonicalAuthority);
             bool filterByClientId = !_featureFlags.IsFociEnabled;
 
-            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);            
+            IEnumerable<MsalRefreshTokenCacheItem> rtCacheItems = GetAllRefreshTokensWithNoLocks(filterByClientId);
             IEnumerable<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
 
-            logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache.");
-             
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache.");
+
             AdalUsersForMsal adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 Logger,
                 LegacyCachePersistence,
@@ -610,7 +625,8 @@ namespace Microsoft.Identity.Client
             rtCacheItems = rtCacheItems.Where(rt => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(rt.Environment));
             accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 
-            logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache after environment filtering.");            
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache after environment filtering.");
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
             foreach (MsalRefreshTokenCacheItem rtItem in rtCacheItems)
@@ -641,7 +657,8 @@ namespace Microsoft.Identity.Client
                     requestParameters.HomeAccountId,
                     StringComparison.OrdinalIgnoreCase));
 
-                logger.Verbose($"Filtered by home account id. Remaning accounts {accounts.Count()}");
+                if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                    logger.Verbose($"Filtered by home account id. Remaining accounts {accounts.Count()} ");
             }
 
             return accounts;
@@ -707,14 +724,14 @@ namespace Microsoft.Identity.Client
                 requestContext.Logger.Info("Removing user from cache..");
 
                 try
-                {                    
+                {
                     var args = new TokenCacheNotificationArgs(
                         this,
                         ClientId,
                         account,
                         true,
                         (this as ITokenCacheInternal).IsApplicationCache,
-                        (this as ITokenCacheInternal).HasTokensNoLocks(), 
+                        (this as ITokenCacheInternal).HasTokensNoLocks(),
                         account.HomeAccountId.Identifier);
 
                     try

@@ -17,6 +17,7 @@ namespace Microsoft.Identity.Client
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
         internal AbstractClientAppBaseAcquireTokenParameterBuilder(IClientApplicationBaseExecutor clientApplicationBaseExecutor)
+            : base(clientApplicationBaseExecutor.ServiceBundle)
         {
             ClientApplicationBaseExecutor = clientApplicationBaseExecutor;
         }

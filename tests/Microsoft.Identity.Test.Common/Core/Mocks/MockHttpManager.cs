@@ -86,5 +86,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
         }
+
     }
 }
