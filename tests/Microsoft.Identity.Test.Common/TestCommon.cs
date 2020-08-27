@@ -55,6 +55,7 @@ namespace Microsoft.Identity.Test.Common
             bool clearCaches = true,
             bool validateAuthority = true)
         {
+            
             var appConfig = new ApplicationConfiguration()
             {
                 ClientId = clientId,
@@ -66,8 +67,7 @@ namespace Microsoft.Identity.Test.Common
                 EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
                 AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, validateAuthority)
-            };
-
+            };            
             return new ServiceBundle(appConfig, clearCaches);
         }
 

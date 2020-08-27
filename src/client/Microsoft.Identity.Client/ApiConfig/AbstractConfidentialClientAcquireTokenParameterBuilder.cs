@@ -2,9 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
@@ -19,6 +22,7 @@ namespace Microsoft.Identity.Client
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
         internal AbstractConfidentialClientAcquireTokenParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
+            : base(confidentialClientApplicationExecutor.ServiceBundle)
         {
             ConfidentialClientApplicationExecutor = confidentialClientApplicationExecutor;
         }

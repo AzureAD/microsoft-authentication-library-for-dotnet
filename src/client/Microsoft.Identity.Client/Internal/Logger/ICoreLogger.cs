@@ -28,6 +28,12 @@ namespace Microsoft.Identity.Client.Core
         void Verbose(string messageScrubbed);
         void VerbosePii(string messageWithPii, string messageScrubbed);
         void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed);
+
+        /// <summary>
+        /// For expensive logging messsages (e.g. when the log message evaluates a variable), 
+        /// it is better to check the log level ahead of time so as not to evaluate the expensive message and then discard it.
+        /// </summary>
+        bool IsLoggingEnabled(LogLevel logLevel);
         DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose);
         DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null);
     }
