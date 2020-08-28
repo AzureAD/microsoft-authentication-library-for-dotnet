@@ -5,12 +5,12 @@ steps:
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Build Artifacts'
   inputs:
-    artifactName: DeviceAuth
+    artifactName: drop
     itemPattern: '**/*'
     enabled: false
 
 - task: VSTest@2
   displayName: 'DeviceAuthTests'
   inputs:
-    testAssemblyVer2: '(System.ArtifactsDirectory)/DeviceAuth/**/*'
+    testAssemblyVer2: '(System.ArtifactsDirectory)/drop/DeviceAuth/**/*'
     diagnosticsEnabled: True
