@@ -1,10 +1,20 @@
+4.18.0
+============
+New Features:
+**MsalServiceException now allows for the setting of the headers, the response body and the correlation id**. This allows developers to more easily mock the MsalServiceException. See issue [#1977](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1977) for details.
+**MSAL now supports regionalization to keep traffic inside a geographical area**. See issue [#1956](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1956) for details.
+**MSAL now supports Proof of Possession (POP) on confidential client applications**. See issue [#1946](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1946) for details.
+
+Bug Fixes:
+**When the parsing of a WsTrust error fails, MSAL will now return the entire body**. This allows for a better understanding of the error. See issue [#1984](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1984) for details.
+
 4.17.1
 ============
 
 Bug Fixes:
 
-** ID token related information is no longer lost in the second call of AcquireTokenOnBehalfOf ** [Issue #1950 for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1950)
-** AcquireTokenOnBehalfOf now respects the WithAuthority modifer enabling multi-tenant resources access ** [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1965)
+**ID token related information is no longer lost in the second call of AcquireTokenOnBehalfOf**. [Issue #1950 for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1950)
+**AcquireTokenOnBehalfOf now respects the WithAuthority modifer enabling multi-tenant resources access**. [Issue for details](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1965)
 
 4.17.0
 ============
