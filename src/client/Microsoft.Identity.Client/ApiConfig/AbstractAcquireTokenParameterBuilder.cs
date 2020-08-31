@@ -25,6 +25,11 @@ namespace Microsoft.Identity.Client
     {
         internal IServiceBundle ServiceBundle { get; }
 
+        /// <summary>
+        /// Default constructor for AbstractAcquireTokenParameterBuilder
+        /// </summary>
+        protected AbstractAcquireTokenParameterBuilder() { }
+
         internal AbstractAcquireTokenParameterBuilder(IServiceBundle serviceBundle)
         {
             ServiceBundle = serviceBundle;
