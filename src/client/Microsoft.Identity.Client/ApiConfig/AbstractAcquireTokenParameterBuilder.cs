@@ -28,7 +28,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Default constructor for AbstractAcquireTokenParameterBuilder
         /// </summary>
-        [Obsolete("Please use the derived classes to construct this object.")]
         protected AbstractAcquireTokenParameterBuilder() { }
 
         internal AbstractAcquireTokenParameterBuilder(IServiceBundle serviceBundle)
