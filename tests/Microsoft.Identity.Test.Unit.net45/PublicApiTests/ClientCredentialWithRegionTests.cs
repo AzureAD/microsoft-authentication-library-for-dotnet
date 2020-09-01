@@ -73,13 +73,13 @@ namespace Microsoft.Identity.Test.Unit
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithHttpManager(_httpManager)
                 .WithClientSecret(TestConstants.ClientSecret)
+                .WithExperimentalFeatures(true)
                 .BuildConcrete();
 
             _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
             AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithAzureRegion(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -100,13 +100,13 @@ namespace Microsoft.Identity.Test.Unit
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(_httpManager)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAzureRegion(true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -130,13 +130,13 @@ namespace Microsoft.Identity.Test.Unit
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithHttpManager(_httpManager)
                 .WithClientSecret(TestConstants.ClientSecret)
+                .WithExperimentalFeatures(true)
                 .BuildConcrete();
                 
             try
             {
                 AuthenticationResult result = await app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithAzureRegion(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 

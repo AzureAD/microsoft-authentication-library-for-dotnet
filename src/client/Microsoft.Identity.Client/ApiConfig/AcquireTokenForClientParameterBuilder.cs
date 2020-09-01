@@ -70,23 +70,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <summary>
-        /// Specifies if the token request should be sent to regional ESTS.
-        /// If set, MSAL tries to auto-detect and use a regional Azure authority. This helps keep the authentication traffic inside the Azure region. 
-        /// If the region cannot be determined (e.g. not running on Azure), MSALClientException is thrown with error code region_discovery_failed.
-        /// This feature requires configuration at tenant level.
-        /// By default the value for this variable is false.
-        /// </summary>
-        /// <param name="autoDetectRegion"><c>true</c> if the token request should be sent to regional ESTS. Otherwise <c>false</c>.
-        /// The default is <c>false</c></param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool autoDetectRegion)
-        {
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAzureRegion, autoDetectRegion);
-            Parameters.AutoDetectRegion = autoDetectRegion;
-            return this;
-        }
-
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

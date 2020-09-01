@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
@@ -56,15 +57,16 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal);
 
-            if (clientParameters.AutoDetectRegion && requestContext.ServiceBundle.Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
+            var autoDetectRegion = requestContext.ServiceBundle.Config.ExperimentalFeaturesEnabled;
+
+            if (autoDetectRegion && requestContext.ServiceBundle.Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
             {
                 throw new MsalClientException(MsalError.RegionDiscoveryNotEnabled, MsalErrorMessage.RegionDiscoveryNotAvailable);
             }
 
-                requestParams.SendX5C = clientParameters.SendX5C;
-            requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion = clientParameters.AutoDetectRegion;
-
-            
+            requestParams.SendX5C = clientParameters.SendX5C;
+            requestContext.ServiceBundle.Config.AuthorityInfo.AutoDetectRegion = autoDetectRegion;
+            commonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.AutoDetectRegion, autoDetectRegion);
 
             var handler = new ClientCredentialRequest(
                 ServiceBundle,

@@ -619,10 +619,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
                 .WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(PublicCloudConfidentialClientID, claims))
                 .WithAuthority(PublicCloudTestAuthority)
+                .WithExperimentalFeatures(true)
                 .Build();
 
             var result = await cca.AcquireTokenForClient(s_keyvaultScope)
-                .WithAzureRegion(true)
                 .WithExtraQueryParameters(dict)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
