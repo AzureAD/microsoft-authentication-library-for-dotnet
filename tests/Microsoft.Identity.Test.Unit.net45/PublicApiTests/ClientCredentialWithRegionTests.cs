@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Test.Unit
             _harness?.Dispose();
             base.TestCleanup();
         }
+
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(bool clientCredentialFlow)
         {
             return new MockHttpMessageHandler()
@@ -67,13 +68,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             SetupMocks(_httpManager);
 
-            var app = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
-                .WithRedirectUri(TestConstants.RedirectUri)
-                .WithHttpManager(_httpManager)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .BuildConcrete();
+            var app = createApp();
 
             _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
@@ -94,13 +89,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", "uscentral");
 
-                var app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
-                    .WithRedirectUri(TestConstants.RedirectUri)
-                    .WithHttpManager(_httpManager)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .BuildConcrete();
+                var app = createApp();
 
                 _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
@@ -124,13 +113,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             _httpManager.AddRegionDiscoveryMockHandlerNotFound();
 
-            var app = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
-                .WithRedirectUri(TestConstants.RedirectUri)
-                .WithHttpManager(_httpManager)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .BuildConcrete();
+            var app = createApp();
                 
             try
             {
@@ -148,6 +131,20 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.RegionDiscoveryFailed, e.Message);
             }
+        }
+
+        private IConfidentialClientApplication createApp()
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority))
+                .WithRedirectUri(TestConstants.RedirectUri)
+                .WithHttpManager(_httpManager)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+
+            return app;
         }
     }
 }
