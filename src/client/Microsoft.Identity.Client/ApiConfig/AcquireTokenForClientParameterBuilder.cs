@@ -82,6 +82,13 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithAzureRegion(bool autoDetectRegion)
         {
+            if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithAzureRegion)));
+            }
+
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAzureRegion, autoDetectRegion);
             Parameters.AutoDetectRegion = autoDetectRegion;
             return this;
