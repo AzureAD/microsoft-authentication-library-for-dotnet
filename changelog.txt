@@ -7,6 +7,7 @@ New Features:
 
 Bug Fixes:
 **When the parsing of a WsTrust error fails, MSAL will now return the entire body**. This allows for a better understanding of the error. See issue [#1984](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1984) for details.
+**When creating an HttpClient we were forcing a ServicePointManager.DefaultConnectionLimit = 30 **. The fix removes the setting of the connection limit (though the max limit in the config setting is updated to 50 connections it's not set for net desktop and net core. See issue [#1992](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1992).
 
 4.17.1
 ============
