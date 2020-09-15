@@ -173,14 +173,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
             catch (MsalServiceException ex)
             {
-                if (autoDetectRegion)
-                {
-                    requestContext.Logger.Info("[Instance Discovery] Instance discovery failed. MSAL will continue to build instance metadata with region and authority.");
-                    InstanceDiscoveryMetadataEntry entry = CreateEntryForSingleAuthority(authorityUri);
-                    _networkCacheMetadataProvider.AddMetadata(authorityUri.Host, entry);
-                    return entry;
-                }
-
                 if (!requestContext.ServiceBundle.Config.AuthorityInfo.ValidateAuthority)
                 {
                     requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery as validate authority is set to false.");
