@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Region
                 logger.Verbose($"[Region Discovery] The network provider found an entry for {environment}");
             }
 
-            requestContext.ApiEvent.RegionDiscovered = cachedEntry.PreferredNetwork.Split(new char[] { '.'})[0];
+            requestContext.ApiEvent.RegionDiscovered = cachedEntry.PreferredNetwork.Split('.')[0];
             return cachedEntry;
         }
 

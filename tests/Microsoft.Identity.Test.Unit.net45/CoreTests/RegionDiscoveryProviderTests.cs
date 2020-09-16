@@ -7,6 +7,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,6 +22,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         private MockHttpAndServiceBundle _harness;
         private MockHttpManager _httpManager;
         private RequestContext _testRequestContext;
+        private ApiEvent _apiEvent;
 
         [TestInitialize]
         public override void TestInitialize()
@@ -29,6 +32,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             _harness = base.CreateTestHarness();
             _httpManager = _harness.HttpManager;
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
+            _apiEvent = new ApiEvent(
+                _harness.ServiceBundle.DefaultLogger, 
+                _harness.ServiceBundle.PlatformProxy.CryptographyManager, 
+                Guid.NewGuid().AsMatsCorrelationId());
+            _testRequestContext.ApiEvent = _apiEvent;
         }
 
         [TestCleanup]
@@ -50,6 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
                 Assert.IsNotNull(regionalMetadata);
                 Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+                Assert.AreEqual(Region, _apiEvent.RegionDiscovered);
             }
             finally
             {

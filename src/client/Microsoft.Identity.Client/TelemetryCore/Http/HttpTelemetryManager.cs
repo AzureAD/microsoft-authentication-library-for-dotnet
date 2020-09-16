@@ -108,8 +108,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionDiscovered, out string regionDiscovered);
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
-                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}|" +
-                $"|{regionDiscovered}|";
+                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}|{regionDiscovered}";
         }
 
 
