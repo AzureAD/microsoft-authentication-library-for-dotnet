@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string PublicCloudConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
         private KeyVaultSecretsProvider _keyVault;
-        private Dictionary<string, string> Dict = new Dictionary<string, string>
+        private Dictionary<string, string> _dict = new Dictionary<string, string>
         {
             ["allowestsrnonmsi"] = "true"
         };
@@ -39,16 +39,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetInternalStaticCaches();
+
             if (_keyVault == null)
             {
                 _keyVault = new KeyVaultSecretsProvider();
             }
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            TestCommon.ResetInternalStaticCaches();
         }
 
         [TestMethod]
@@ -59,7 +55,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var result = await cca.AcquireTokenForClient(s_keyvaultScope)
                 .WithAzureRegion(true)
-                .WithExtraQueryParameters(Dict)
+                .WithExtraQueryParameters(_dict)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -81,7 +77,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 await cca.AcquireTokenForClient(s_keyvaultScope)
                 .WithAzureRegion(true)
-                .WithExtraQueryParameters(Dict)
+                .WithExtraQueryParameters(_dict)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -103,7 +99,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 await cca.AcquireTokenForClient(s_keyvaultScope)
                 .WithAzureRegion(true)
-                .WithExtraQueryParameters(Dict)
+                .WithExtraQueryParameters(_dict)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

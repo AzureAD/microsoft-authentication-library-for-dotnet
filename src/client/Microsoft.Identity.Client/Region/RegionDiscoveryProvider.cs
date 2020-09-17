@@ -80,6 +80,10 @@ namespace Microsoft.Identity.Client.Region
                 logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
                 return localImdsResponse.location;
             }
+            catch (MsalClientException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 logger.Info("[Region discovery] Call to local imds failed." + e.Message);

@@ -76,6 +76,7 @@ namespace Microsoft.Identity.Client
         /// If the region cannot be determined (e.g. not running on Azure), MSALClientException is thrown with error code region_discovery_failed.
         /// This feature requires configuration at tenant level.
         /// By default the value for this variable is false.
+        /// See https://aka.ms/msal-net-region-discovery for more details.
         /// </summary>
         /// <param name="autoDetectRegion"><c>true</c> if the token request should be sent to regional ESTS. Otherwise <c>false</c>.
         /// The default is <c>false</c></param>
