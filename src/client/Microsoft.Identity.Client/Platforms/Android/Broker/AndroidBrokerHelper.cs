@@ -318,7 +318,27 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             return;
                         }
 
-                        throw new MsalClientException("Could not negotiate protocol version with broker.");
+                        dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
+                        string error = null;
+                        string errorDescription = null;
+
+                        if (errorResult != null)
+                        {
+                            error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                            errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+
+                            _logger.Error($"error: {error} errorDescription {errorDescription}");
+
+                        }
+                        else
+                        {
+                            error = BrokerConstants.BrokerUnknownErrorCode;
+                            errorDescription = "Error Code received during hand shake, but no error could be extracted";
+                            _logger.Error("Error response received during hand shake, but not error could be extracted");
+                        }
+
+                        throw new MsalClientException(error, 
+                            "Could not negotiate protocol version with broker due to the following error: " + errorDescription);
                     }
 
                     throw new MsalClientException("Could not communicate with broker via account manager");
