@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         [TestMethod]
         public void Deserialize_AdalResultWrapper()
         {
-            DateTimeOffset dateTimeOffset = DateTime.MinValue;
+            DateTimeOffset dateTimeOffset = DateTimeOffset.MinValue;
             string s= JsonHelper.SerializeToJson(dateTimeOffset);
 
             string json = @"{
