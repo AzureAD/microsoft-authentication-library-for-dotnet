@@ -10,6 +10,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Http
     internal class NetDesktopHttpClientFactory : IMsalHttpClientFactory
     {
         private static HttpClient s_httpClient;
+        private static object s_lock = new object();
 
         public HttpClient GetHttpClient()
         {
@@ -21,9 +22,12 @@ namespace Microsoft.Identity.Client.Platforms.net45.Http
         {
             if (s_httpClient == null)
             {
-                s_httpClient = new HttpClient(new DnsSensitiveClientHandler());
+                lock (s_lock)
+                {
+                    s_httpClient = new HttpClient(new DnsSensitiveClientHandler());
 
-                HttpClientConfig.ConfigureRequestHeadersAndSize(s_httpClient);
+                    HttpClientConfig.ConfigureRequestHeadersAndSize(s_httpClient);
+                }
             }
         }       
     }

@@ -10,6 +10,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     internal class NetCoreHttpClientFactory : IMsalHttpClientFactory
     {
         private static HttpClient s_httpClient;
+        private static object s_lock = new object();
 
         private static void EnsureInitialized()
         {
@@ -25,9 +26,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     MaxConnectionsPerServer = HttpClientConfig.MaxConnections,
                 };
 
-                s_httpClient = new HttpClient(handler);
+                lock (s_lock)
+                {
+                    s_httpClient = new HttpClient(handler);
 
-                HttpClientConfig.ConfigureRequestHeadersAndSize(s_httpClient);
+                    HttpClientConfig.ConfigureRequestHeadersAndSize(s_httpClient);
+                }
             }
         }
 
