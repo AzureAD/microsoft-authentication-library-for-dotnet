@@ -319,25 +319,26 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         }
 
                         dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
-                        string error = null;
+                        string errorCode = null;
                         string errorDescription = null;
 
-                        if (errorResult != null)
+                        if (!string.IsNullOrEmpty(errorResult))
                         {
-                            error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
+                            errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
                             errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
 
-                            _logger.Error($"error: {error} errorDescription {errorDescription}");
+                            _logger.Error($"An error occurred during hand shake with the broker. Error: {errorCode} Error Description: {errorDescription}");
 
                         }
                         else
                         {
-                            error = BrokerConstants.BrokerUnknownErrorCode;
-                            errorDescription = "Error Code received during hand shake, but no error could be extracted";
-                            _logger.Error("Error response received during hand shake, but not error could be extracted");
+                            errorCode = BrokerConstants.BrokerUnknownErrorCode;
+                            errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned";
+
+                            _logger.Error(errorDescription);
                         }
 
-                        throw new MsalClientException(error, 
+                        throw new MsalClientException(errorCode, 
                             "Could not negotiate protocol version with broker due to the following error: " + errorDescription);
                     }
 
