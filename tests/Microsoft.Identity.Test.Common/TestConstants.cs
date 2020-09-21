@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
-        public const string AutomationTestThumbprint = "57B11F2FDBCDA0FDF34837FC7E89A90AD7CBBC1E";
+        public const string AutomationTestThumbprint = "97D8C9DB3C84874D0363DCA540778461B2291780";
         public const string RSATestCertThumbprint = "3051A5BE699BC4596EE47E9FEBBF48DBA85BE67B";
 
         public static readonly SortedSet<string> s_scopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
