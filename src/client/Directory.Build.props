@@ -149,16 +149,6 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Shared\NetStdCore\**\*.cs" />
 
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
-    <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
-    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
-    <!-- 4.3.0 has CVE-2019-0657 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
