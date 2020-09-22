@@ -89,7 +89,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 $"{TelemetryConstants.HttpTelemetrySchemaVersion2}|" +
                 $"{_successfulSilentCallCount}|" +
                 $"{failedRequests}|" +
-                $"{errors}|{platformFields}";
+                $"{errors}|" +
+                $"{platformFields}";
 
             // TODO: fix this
             if (data.Length > 3800)
@@ -117,7 +118,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionDiscovered, out string regionDiscovered);
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
-                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}|{regionDiscovered}";
+                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
+                $"|{regionDiscovered}";
         }
 
 
