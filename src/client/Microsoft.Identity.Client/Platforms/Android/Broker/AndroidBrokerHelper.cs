@@ -320,25 +320,22 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                         dynamic errorResult = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2));
                         string errorCode = null;
-                        string errorMessage = null;
+                        string errorDescription = null;
 
                         if (!string.IsNullOrEmpty(errorResult))
                         {
                             errorCode = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
-                            errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
-
-                            _logger.Error($"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}");
-
+                            string errorMessage = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
+                            errorDescription = $"An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}"; 
                         }
                         else
                         {
                             errorCode = BrokerConstants.BrokerUnknownErrorCode;
-                            errorMessage = "An error occurred during hand shake with the broker, no detailed error information was returned";
-
-                            _logger.Error(errorMessage);
+                            errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned";
                         }
 
-                        throw new MsalClientException(errorCode, errorMessage);
+                        _logger.Error(errorDescription);
+                        throw new MsalClientException(errorCode, errorDescription);
                     }
 
                     throw new MsalClientException("Could not communicate with broker via account manager");
