@@ -338,8 +338,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             _logger.Error(errorDescription);
                         }
 
-                        throw new MsalClientException(errorCode, 
-                            "Could not negotiate protocol version with broker due to the following error: " + errorDescription);
+                        throw new MsalClientException(errorCode, errorDescription);
                     }
 
                     throw new MsalClientException("Could not communicate with broker via account manager");
