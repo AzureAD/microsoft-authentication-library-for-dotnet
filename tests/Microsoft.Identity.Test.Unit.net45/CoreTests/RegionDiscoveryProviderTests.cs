@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
     [DeploymentItem("Resources\\local-imds-response.json")]
     public class RegionDiscoveryProviderTests : TestBase
     {
-        private const string Region = "centralus";
         private MockHttpAndServiceBundle _harness;
         private MockHttpManager _httpManager;
         private RequestContext _testRequestContext;
@@ -51,18 +50,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             try
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", Region);
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
                 IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
                 InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.IsNotNull(regionalMetadata);
                 Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
-                Assert.AreEqual(Region, _apiEvent.RegionDiscovered);
+                Assert.AreEqual(TestConstants.Region, _apiEvent.RegionDiscovered);
             }
             finally
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             }
             
         }
@@ -87,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             try
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", Region);
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
                 IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
                 InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.someenv.com/common/"), _testRequestContext).ConfigureAwait(false);
@@ -97,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
             finally
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             }
 
         }

@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task RegionalAuthHappyPathAsync()
         {
             var cca = createApp();
-            Environment.SetEnvironmentVariable("REGION_NAME", "centralus");
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
             var result = await cca.AcquireTokenForClient(s_keyvaultScope)
                 .WithAzureRegion(true)
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(PublicCloudTestAuthority)
                 .WithTestLogging()
                 .Build();
-            Environment.SetEnvironmentVariable("REGION_NAME", "centralus");
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
             try
             {
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task RegionalAuthRegionUndiscoveredAsync()
         {
             var cca = createApp();
-            Environment.SetEnvironmentVariable("REGION_NAME", "");
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
 
             try
             {

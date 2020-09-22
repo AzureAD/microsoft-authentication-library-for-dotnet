@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 case AuthorityType.Aad:
                     InstanceDiscoveryMetadataEntry entry =
                     _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri, autoDetectRegion).ConfigureAwait(false);
+                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
 
                     if (entry == null)
                     {
@@ -164,8 +164,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         private async Task<InstanceDiscoveryMetadataEntry> FetchNetworkMetadataOrFallbackAsync(
             RequestContext requestContext, 
-            Uri authorityUri,
-            bool autoDetectRegion)
+            Uri authorityUri)
         {
             try
             {
