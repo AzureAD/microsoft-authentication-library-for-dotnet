@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Android.App;
 using Android.Content;
@@ -9,6 +10,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Webkit;
 using Android.Widget;
+using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
@@ -108,6 +110,24 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 if (url.StartsWith(_callback, StringComparison.OrdinalIgnoreCase))
                 {
                     Finish(Activity, url);
+                    return true;
+                }
+
+                if (url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.OrdinalIgnoreCase))
+                {
+                    string query = uri.Query;
+                    if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
+                    {
+                        query = query.Substring(1);
+                    }
+
+                    Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
+                    string responseHeader = DeviceAuthHelper.GetBypassChallengeResponse(keyPair);
+                    Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>();
+                    pkeyAuthEmptyResponse[BrokerConstants.ChallangeResponseHeader] = responseHeader;
+
+                    view.LoadUrl(keyPair["SubmitUrl"], pkeyAuthEmptyResponse);
+
                     return true;
                 }
 
