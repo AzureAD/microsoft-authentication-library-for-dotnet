@@ -68,7 +68,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
                 string correlationId = ev[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey];
                 string apiId = ev[MsalTelemetryBlobEventNames.ApiIdConstStrKey];
-                string region = ev[MsalTelemetryBlobEventNames.RegionDiscovered];
 
                 if (!firstFailure)
                     failedRequests.Append(",");
@@ -77,10 +76,15 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 failedRequests.Append(",");
                 failedRequests.Append(ev.CorrelationId);
 
-                if (!firstFailure)
-                    platformFields.Append(",");
+                if (ev.ContainsKey(MsalTelemetryBlobEventNames.RegionDiscovered))
+                {
+                    string region = ev[MsalTelemetryBlobEventNames.RegionDiscovered];
 
-                platformFields.Append(region);
+                    if (!firstFailure)
+                        platformFields.Append(",");
+
+                    platformFields.Append(region);
+                }
 
                 firstFailure = false;
             }
