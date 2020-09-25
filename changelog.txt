@@ -6,7 +6,7 @@ New Features:
 Bug Fixes:
 **The creation of HTTPClient is now threadsafe** This will prevent threading issues MSAL.NETs HttpClient. See Issue [2034](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2034)
 **MSAL will now add missing data from broker communication issues** this will allow us to more easily diagnose broker authentication issues on Android. See Issues [2045](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2045)
-
+**MSAL now properly bypasses device auth challenges on mobile** This will allow users to bypass challenges when the web client cannot handle client TLS. [See Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2052)
 
 4.18.0
 ============
