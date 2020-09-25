@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
         public const string LoginHintKey = EventNamePrefix + "login_hint";
         public const string IsAccessTokenCacheHitKey = EventNamePrefix + "at_cache_hit";
+        public const string RegionDiscoveredKey = EventNamePrefix + "region_discovered";
 
         public enum ApiIds
         {
@@ -150,6 +151,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
                 this[LoginHintKey] = value != null && _logger.PiiLoggingEnabled
                                          ? HashPersonalIdentifier(_cryptographyManager, value)
                                          : null;
+        }
+
+        public string RegionDiscovered
+        {
+            get => this.ContainsKey(RegionDiscoveredKey) ? this[RegionDiscoveredKey] : null;
+            set => this[RegionDiscoveredKey] = value;
         }
     }
 }

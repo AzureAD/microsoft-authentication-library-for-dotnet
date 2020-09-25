@@ -7,6 +7,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -16,10 +18,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
     [DeploymentItem("Resources\\local-imds-response.json")]
     public class RegionDiscoveryProviderTests : TestBase
     {
-        private const string Region = "centralus";
         private MockHttpAndServiceBundle _harness;
         private MockHttpManager _httpManager;
         private RequestContext _testRequestContext;
+        private ApiEvent _apiEvent;
 
         [TestInitialize]
         public override void TestInitialize()
@@ -29,6 +31,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             _harness = base.CreateTestHarness();
             _httpManager = _harness.HttpManager;
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
+            _apiEvent = new ApiEvent(
+                _harness.ServiceBundle.DefaultLogger, 
+                _harness.ServiceBundle.PlatformProxy.CryptographyManager, 
+                Guid.NewGuid().AsMatsCorrelationId());
+            _testRequestContext.ApiEvent = _apiEvent;
         }
 
         [TestCleanup]
@@ -43,17 +50,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             try
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", Region);
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
                 IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
                 InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.IsNotNull(regionalMetadata);
                 Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+                Assert.AreEqual(TestConstants.Region, _apiEvent.RegionDiscovered);
             }
             finally
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             }
             
         }
@@ -78,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             try
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", Region);
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
                 IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
                 InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.someenv.com/common/"), _testRequestContext).ConfigureAwait(false);
@@ -88,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
             finally
             {
-                Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             }
 
         }
@@ -119,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/api-version=2019-06-01",
+                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/api-version=2020-06-01",
                         ExpectedRequestHeaders = new Dictionary<string, string>
                          {
                             {"Metadata", "true"}

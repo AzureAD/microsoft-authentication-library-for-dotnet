@@ -49,12 +49,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
         /// Csv expected format:
         ///      2|silent_successful_count|failed_requests|errors|platform_fields
         ///      failed_request is: api_id_1,correlation_id_1,api_id_2,correlation_id_2|error_1,error_2
+        ///      platform_fields: region_1,region_2
         /// </summary>
         public string GetLastRequestHeader()
         {
             var failedRequests = new StringBuilder();
             var errors = new StringBuilder();
             bool firstFailure = true;
+            var platformFields = new StringBuilder();
 
             foreach (var ev in _failedEvents)
             {
@@ -74,6 +76,16 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 failedRequests.Append(",");
                 failedRequests.Append(ev.CorrelationId);
 
+                if (ev.ContainsKey(MsalTelemetryBlobEventNames.RegionDiscovered))
+                {
+                    string region = ev[MsalTelemetryBlobEventNames.RegionDiscovered];
+
+                    if (!firstFailure)
+                        platformFields.Append(",");
+
+                    platformFields.Append(region);
+                }
+
                 firstFailure = false;
             }
 
@@ -81,7 +93,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 $"{TelemetryConstants.HttpTelemetrySchemaVersion2}|" +
                 $"{_successfulSilentCallCount}|" +
                 $"{failedRequests}|" +
-                $"{errors}|";
+                $"{errors}|" +
+                $"{platformFields}";
 
             // TODO: fix this
             if (data.Length > 3800)
@@ -95,6 +108,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// Expected format: 2|api_id,force_refresh|platform_config
+        /// platform_config: region
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
@@ -105,9 +119,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
+            eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionDiscovered, out string regionDiscovered);
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
-                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}|";
+                $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
+                $"|{regionDiscovered}";
         }
 
 

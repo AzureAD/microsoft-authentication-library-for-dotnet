@@ -16,6 +16,7 @@ namespace Microsoft.Identity.Test.Unit
 {
     internal static class TestConstants
     {
+
         public static HashSet<string> s_scope
         {
             get
@@ -48,6 +49,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
+        public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
 
         public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
@@ -59,6 +61,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityUtid2Tenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid2 + "/";
         public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
         public const string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
+        public const string AuthorityRegional = "https://" + ProductionPrefRegionalEnvironment + "/" + TenantId + "/";
         public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";
 
         public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
@@ -119,6 +122,9 @@ namespace Microsoft.Identity.Test.Unit
         public const string FamilyName = "Doe";
         public const string Username = "joe@localhost.com";
         public const string PKeyAuthResponse = "PKeyAuth Context=\"context\",Version=\"1.0\"";
+
+        public const string RegionName = "REGION_NAME";
+        public const string Region = "centralus";
 
         //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
         public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj

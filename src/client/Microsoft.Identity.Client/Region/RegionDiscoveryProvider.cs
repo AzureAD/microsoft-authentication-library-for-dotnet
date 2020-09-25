@@ -10,6 +10,8 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Region
@@ -25,7 +27,10 @@ namespace Microsoft.Identity.Client.Region
         public RegionDiscoveryProvider(IHttpManager httpManager, INetworkCacheMetadataProvider networkCacheMetadataProvider = null)
         {
             _httpManager = httpManager;
-            _ImdsUri = new Uri("http://169.254.169.254/metadata/instance/compute/api-version=2019-06-01");
+
+            // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
+            _ImdsUri = new Uri("http://169.254.169.254/metadata/instance/compute/api-version=2020-06-01");
+
             Headers = new Dictionary<string, string>();
             Headers.Add("Metadata", "true");
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
@@ -33,22 +38,23 @@ namespace Microsoft.Identity.Client.Region
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
-            var logger = requestContext.Logger;
-
+            ICoreLogger logger = requestContext.Logger;
             string environment = authority.Host;
-            var cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
-            if (cachedEntry != null)
+            InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
+            
+            if (cachedEntry == null)
+            {
+                Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext.Logger).ConfigureAwait(false);
+                CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
+
+                cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
+                logger.Verbose($"[Region Discovery] Created metadata for the regional environment {environment} ? {cachedEntry != null}");
+            } else
             {
                 logger.Verbose($"[Region Discovery] The network provider found an entry for {environment}");
-                return cachedEntry;
             }
 
-            Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext.Logger).ConfigureAwait(false);
-            CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
-
-            cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
-            logger.Verbose($"[Region Discovery] Created an entry for the regional environment {environment} ? {cachedEntry != null}");
-
+            requestContext.ApiEvent.RegionDiscovered = cachedEntry.PreferredNetwork.Split('.')[0];
             return cachedEntry;
         }
 
@@ -77,10 +83,14 @@ namespace Microsoft.Identity.Client.Region
                 logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
                 return localImdsResponse.location;
             }
+            catch (MsalClientException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 logger.Info("[Region discovery] Call to local imds failed." + e.Message);
-                throw;
+                throw new MsalClientException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed);
             }
         }
 

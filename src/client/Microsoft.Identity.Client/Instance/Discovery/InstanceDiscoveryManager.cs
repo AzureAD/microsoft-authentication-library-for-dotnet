@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 case AuthorityType.Aad:
                     InstanceDiscoveryMetadataEntry entry =
                     _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri, autoDetectRegion).ConfigureAwait(false);
+                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
 
                     if (entry == null)
                     {
@@ -164,8 +164,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         private async Task<InstanceDiscoveryMetadataEntry> FetchNetworkMetadataOrFallbackAsync(
             RequestContext requestContext, 
-            Uri authorityUri,
-            bool autoDetectRegion)
+            Uri authorityUri)
         {
             try
             {
@@ -173,14 +172,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
             catch (MsalServiceException ex)
             {
-                if (autoDetectRegion)
-                {
-                    requestContext.Logger.Info("[Instance Discovery] Instance discovery failed. MSAL will continue to build instance metadata with region and authority.");
-                    InstanceDiscoveryMetadataEntry entry = CreateEntryForSingleAuthority(authorityUri);
-                    _networkCacheMetadataProvider.AddMetadata(authorityUri.Host, entry);
-                    return entry;
-                }
-
                 if (!requestContext.ServiceBundle.Config.AuthorityInfo.ValidateAuthority)
                 {
                     requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery as validate authority is set to false.");
