@@ -1,3 +1,13 @@
+4.19
+============
+New Features:
+**MSAL now adds telemetry data for the detected region** See Issue [#2018](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2018)
+
+Bug Fixes:
+**The creation of HTTPClient is now threadsafe** This will prevent threading issues MSAL.NETs HttpClient. See Issue [2034](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2034)
+**MSAL will now add missing data from broker communication issues** this will allow us to more easily diagnose broker authentication issues on Android. See Issues [2045](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2045)
+
+
 4.18.0
 ============
 New Features:
