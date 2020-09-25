@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Net.Http;
 using Microsoft.Identity.Client.Http;
 
@@ -17,19 +18,19 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// </remarks>
     internal class SimpleHttpClientFactory : IMsalHttpClientFactory
     {
-        private readonly HttpClient _httpClient;
+        private static readonly Lazy<HttpClient> _httpClient = new Lazy<HttpClient>(() => InitializeClient());
 
-
-        public SimpleHttpClientFactory()
+        private static HttpClient InitializeClient()
         {
-            _httpClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
-            HttpClientConfig.ConfigureRequestHeadersAndSize(_httpClient);
+            var httpClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
+            HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
+
+            return httpClient;
         }
 
         public HttpClient GetHttpClient()
         {
-            return _httpClient;
+            return _httpClient.Value;
         }
-
     }
 }
