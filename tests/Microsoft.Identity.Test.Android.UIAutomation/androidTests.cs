@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenSilentTest,
 
                 AcquireTokenADFSV3InteractiveFederatedTest,
-                //AcquireTokenADFSV4InteractiveFederatedTest,
+                AcquireTokenADFSV4InteractiveFederatedTest,
                 AcquireTokenADFSV2019InteractiveFederatedTest,
 
                 B2CLocalAccountAcquireTokenTest,
