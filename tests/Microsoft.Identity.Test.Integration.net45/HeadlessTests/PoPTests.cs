@@ -79,6 +79,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await BearerAndPoP_CanCoexist_Async(labResponse).ConfigureAwait(false);
         }
 
+        [TestMethod]
+        public async Task PopCCAAsync()
+        {
+            await RunTestWithClientSecretAsync(PublicCloudConfidentialClientID, PublicCloudTestAuthority, s_publicCloudCcaSecret).ConfigureAwait(false);
+        }
+
         private async Task BearerAndPoP_CanCoexist_Async(LabResponse labResponse)
         {
             // Arrange 
