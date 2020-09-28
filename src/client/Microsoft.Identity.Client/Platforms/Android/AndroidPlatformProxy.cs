@@ -94,12 +94,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         /// <inheritdoc />
-        public override string GetBrokerOrRedirectUri(Uri redirectUri)
-        {
-            return redirectUri.OriginalString;
-        }
-
-        /// <inheritdoc />
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
             return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);

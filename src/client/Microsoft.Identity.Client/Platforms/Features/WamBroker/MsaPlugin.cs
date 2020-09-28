@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -19,19 +20,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     {
         private const string MsaErrorCode = "wam_msa_internal_error";
         private readonly IWamProxy _wamProxy;
+        private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly ICoreLogger _logger;
 
-        public MsaPlugin(IWamProxy wamProxy, ICoreLogger logger)
+        public MsaPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, ICoreLogger logger)
         {
             _wamProxy = wamProxy;
+            _webAccountProviderFactory = webAccountProviderFactory;
             _logger = logger;
         }
 
         public async Task<WebTokenRequest> CreateWebTokenRequestAsync(
             WebAccountProvider provider,
+            AuthenticationRequestParameters authenticationRequestParameters,
+            bool isForceLoginPrompt,
             bool isInteractive,
-            bool isAccountInWam,
-            AuthenticationRequestParameters authenticationRequestParameters)
+            bool isAccountInWam)
         {
             bool setLoginHint = false;
             bool addNewAccount = false;
@@ -46,11 +50,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 }
                 else
                 {
-                    addNewAccount = !(await WamBroker.IsDefaultAccountMsaAsync().ConfigureAwait(false));
+                    addNewAccount = !(await _webAccountProviderFactory.IsDefaultAccountMsaAsync().ConfigureAwait(false));
                 }
             }
 
-            var promptType = (setLoginHint || addNewAccount) ?
+            var promptType = (setLoginHint || addNewAccount || (isForceLoginPrompt && isInteractive)) ?
                 WebTokenRequestPromptType.ForceAuthentication :
                 WebTokenRequestPromptType.Default;
 
@@ -118,7 +122,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// </summary>
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
         {
-            var webAccounProvider = await WamBroker.GetAccountProviderAsync("consumers").ConfigureAwait(false);
+            var webAccounProvider = await _webAccountProviderFactory.GetAccountProviderAsync("consumers").ConfigureAwait(false);
 
             var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccounProvider, clientID).ConfigureAwait(false);
 
@@ -178,7 +182,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string msaTokens = webTokenResponse.Token;
             if (string.IsNullOrEmpty(msaTokens))
             {
-                throw new MsalServiceException(MsaErrorCode, "Bad token format, msaTokens was unexpectedly empty");
+                throw new MsalServiceException(MsaErrorCode, "Internal error - bad token format, msaTokens was unexpectedly empty");
             }
 
             string accessToken = null, idToken = null, clientInfo = null, tokenType = null, scopes = null, correlationId = null;
@@ -191,7 +195,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 {
                     throw new MsalClientException(
                         MsaErrorCode,
-                        "Bad token response format, expected '=' separated pair");
+                        "Internal error - bad token response format, expected '=' separated pair");
                 }
 
                 if (keyValuePair[0] == "access_token")
@@ -238,7 +242,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 throw new MsalClientException(
                     MsaErrorCode,
-                    "Bad token response format, no scopes");
+                    "Internal error - bad token response format, no scopes");
             }
 
             var responseScopes = scopes.Replace("%20", " ");
@@ -258,8 +262,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             };
 
             return msalTokenResponse;
-        }
+        }      
     }
-
-
 }

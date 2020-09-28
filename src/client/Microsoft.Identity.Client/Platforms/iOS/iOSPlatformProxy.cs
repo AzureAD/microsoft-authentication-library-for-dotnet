@@ -71,13 +71,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return UIDevice.CurrentDevice.Model;
         }
 
-
-        /// <inheritdoc />
-        public override string GetBrokerOrRedirectUri(Uri redirectUri)
-        {
-            return redirectUri.OriginalString;
-        }
-
         /// <inheritdoc />
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {

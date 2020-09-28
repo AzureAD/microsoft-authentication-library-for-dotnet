@@ -132,13 +132,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
             var deviceInformation = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
             return deviceInformation.SystemProductName;
         }
-
-        /// <inheritdoc />
-        public override string GetBrokerOrRedirectUri(Uri redirectUri)
-        {
-            return redirectUri.OriginalString;
-        }
-
         public override bool BrokerSupportsWamAccounts => true;
 
         public override bool CanBrokerSupportSilentAuth()

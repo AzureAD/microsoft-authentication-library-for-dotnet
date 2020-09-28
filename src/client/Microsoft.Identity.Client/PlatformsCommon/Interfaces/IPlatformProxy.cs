@@ -65,11 +65,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         string GetDeviceId();
 
         /// <summary>
-        /// Get the redirect Uri as string, or the a broker specified value
-        /// </summary>
-        string GetBrokerOrRedirectUri(Uri redirectUri); // TODO: bogavril - does not seem needed.
-
-        /// <summary>
         /// Gets the default redirect uri for the platform, which sometimes includes the clientId
         /// </summary>
         string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false);

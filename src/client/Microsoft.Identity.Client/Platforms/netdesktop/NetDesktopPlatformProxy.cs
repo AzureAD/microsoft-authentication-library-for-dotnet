@@ -143,12 +143,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
-        public override string GetBrokerOrRedirectUri(Uri redirectUri)
-        {
-            return redirectUri.OriginalString;
-        }
-
-        /// <inheritdoc />
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
             if (useRecommendedRedirectUri)
@@ -331,7 +325,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 #if NET45
             throw new PlatformNotSupportedException("Windows Authentication Manager (WAM) integration is not available on the current platform - it is only available on .NET 4.6.1+, .NET Core 3.0+ (Windows only) and UWP");
 #else // net461
-            return new Features.WamBroker.WamBroker(uiParent, Logger);           
+            return base.OverloadBrokerForTest ?? new Features.WamBroker.WamBroker(uiParent, Logger);           
 #endif
         }
 
