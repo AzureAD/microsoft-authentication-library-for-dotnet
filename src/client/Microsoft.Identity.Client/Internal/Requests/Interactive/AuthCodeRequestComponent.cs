@@ -176,7 +176,11 @@ namespace Microsoft.Identity.Client.Internal
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }
 
-            if (_interactiveParameters.Prompt.PromptValue != Prompt.NoPrompt.PromptValue)
+            if (_interactiveParameters.Prompt == Prompt.NotSpecified)
+            {
+                authorizationRequestParameters[OAuth2Parameter.Prompt] = Prompt.SelectAccount.PromptValue;
+            }
+            else if (_interactiveParameters.Prompt.PromptValue != Prompt.NoPrompt.PromptValue)
             {
                 authorizationRequestParameters[OAuth2Parameter.Prompt] = _interactiveParameters.Prompt.PromptValue;
             }

@@ -271,6 +271,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     null,
                     "uTId1",
                     null,
+                    null, 
                     null);
 
                 app.UserTokenCacheInternal.Accessor.SaveAccount(accountCacheItem);

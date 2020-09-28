@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -360,6 +361,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string asJson = item.ToJsonString();
             var item2 = MsalAccountCacheItem.FromJsonString(asJson);
 
+            AssertAccountCacheItemsAreEqual(item, item2);
+        }
+
+        [TestMethod]
+        public void TestSerializeAccountWithWamId()
+        {
+            MsalAccountCacheItem item = CreateAccountItem();
+            item.WamAccountIds = new Dictionary<string, string>() { { "client_id_1", "wam_id_1" }, { "client_id_2", "wam_id_2" } };
+            string asJson = item.ToJsonString();
+
+            var item2 = MsalAccountCacheItem.FromJsonString(asJson);
             AssertAccountCacheItemsAreEqual(item, item2);
         }
 
@@ -856,6 +868,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.LocalAccountId, actual.LocalAccountId, nameof(actual.LocalAccountId));
             Assert.AreEqual(expected.AuthorityType, actual.AuthorityType, nameof(actual.AuthorityType));
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
+            CoreAssert.AssertDictionariesAreEqual(expected.WamAccountIds, actual.WamAccountIds, StringComparer.Ordinal);
         }
     }
 }

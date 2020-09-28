@@ -64,7 +64,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             // Assert
             Assert.AreEqual("secretAt", msalTokenResponse.AccessToken);
             Assert.AreEqual(correlationId, msalTokenResponse.CorrelationId);
-            Assert.AreEqual("https://login.microsoftonline.com/common", msalTokenResponse.Authority);
             Assert.AreEqual("clientInfo", msalTokenResponse.ClientInfo);
             Assert.AreEqual("idT", msalTokenResponse.IdToken);
             Assert.AreEqual("User.Read openid offline_access profile", msalTokenResponse.Scope);

@@ -121,9 +121,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <inheritdoc />
-        public abstract string GetBrokerOrRedirectUri(Uri redirectUri);
-
-        /// <inheritdoc />
         public abstract string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false);
 
         /// <inheritdoc />

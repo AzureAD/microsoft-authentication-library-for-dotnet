@@ -17,17 +17,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal class AadPlugin : IWamPlugin
     {
         private readonly IWamProxy _wamProxy;
+        private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly ICoreLogger _logger;
 
-        public AadPlugin(IWamProxy wamProxy, ICoreLogger logger)
+        public AadPlugin(IWamProxy wamProxy, IWebAccountProviderFactory webAccountProviderFactory, ICoreLogger logger)
         {
             _wamProxy = wamProxy;
+            _webAccountProviderFactory = webAccountProviderFactory;
             _logger = logger;
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
         {
-            var webAccounProvider = await WamBroker.GetAccountProviderAsync("organizations").ConfigureAwait(false);
+            var webAccounProvider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations").ConfigureAwait(false);
 
             var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccounProvider, clientID).ConfigureAwait(false);
 
@@ -90,13 +92,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public Task<WebTokenRequest> CreateWebTokenRequestAsync(
             WebAccountProvider provider,
+            AuthenticationRequestParameters authenticationRequestParameters,
+            bool isForceLoginPrompt,
             bool isInteractive,
-            bool isAccountInWam,
-            AuthenticationRequestParameters authenticationRequestParameters)
+            bool isAccountInWam)
         {
-
             bool setLoginHint = isInteractive && !isAccountInWam && !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint);
-            var wamPrompt = setLoginHint ?
+            var wamPrompt = setLoginHint || (isInteractive && isForceLoginPrompt) ?
                 WebTokenRequestPromptType.ForceAuthentication :
                 WebTokenRequestPromptType.Default;
 

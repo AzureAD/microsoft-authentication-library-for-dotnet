@@ -95,9 +95,10 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string AuthorityType { get; set; }
 
         /// <summary>
-        /// WAM special implementation: MSA accounts cannot be discovered through WAM
+        /// WAM special implementation: MSA accounts (and also AAD accounts on UWP) cannot be discovered through WAM
         /// however the broker offers an interactive experience for the user to login, even with an MSA account.
-        /// After an interactive login, MSAL must be able to silently login the MSA user, so the key piece of information
+        /// After an interactive login, MSAL must be able to silently login the MSA user. To do this, MSAL must save the 
+        /// account ID in its token cache. Accounts with associated WAM account ID can be used in silent WAM flows.
         /// </summary>
         internal IDictionary<string, string> WamAccountIds { get; set; }
 

@@ -234,7 +234,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId,
                 idToken,
                 "idlab@msidlab4.onmicrosoft.com",
-                AadTenantId);
+                AadTenantId, 
+                null);
 
             var expectedJsonObject = new JObject
             {
@@ -537,7 +538,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId,
                 IdToken.Parse(response.IdToken),
                 "Missing from the token response",
-                B2CTenantId);
+                B2CTenantId, 
+                null);
 
             var expectedJsonObject = new JObject
             {
@@ -710,7 +712,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId,
                 IdToken.Parse(response.IdToken),
                 "Missing from the token response",
-                B2CTenantId);
+                B2CTenantId, 
+                null);
 
             var expectedJsonObject = new JObject
             {
@@ -919,7 +922,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId,
                 IdToken.Parse(response.IdToken),
                 "idlab@msidlab4.onmicrosoft.com",
-                AadTenantId);
+                AadTenantId, 
+                null);
 
             var expectedJsonObject = new JObject
             {

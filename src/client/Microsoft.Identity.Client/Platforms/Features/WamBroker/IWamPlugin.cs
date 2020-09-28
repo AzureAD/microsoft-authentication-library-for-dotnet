@@ -15,9 +15,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         Task<WebTokenRequest> CreateWebTokenRequestAsync(
             WebAccountProvider provider,
+            AuthenticationRequestParameters authenticationRequestParameters,
+            bool isForceLoginPrompt,
             bool isInteractive,
-            bool isAccountInWam,
-            AuthenticationRequestParameters authenticationRequestParameters);
+            bool isAccountInWam);
 
         MsalTokenResponse ParseSuccesfullWamResponse(WebTokenResponse webTokenResponse);
 
