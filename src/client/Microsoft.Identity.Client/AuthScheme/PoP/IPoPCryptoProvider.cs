@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     /// Ideally there should be a single public / private key pair associated with a machine, so implementers of this interface
     /// should consider exposing a singleton.
     /// </remarks>
-    internal interface IPoPCryptoProvider
+    public interface IPoPCryptoProvider
     {
         /// <summary>
         /// The cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3

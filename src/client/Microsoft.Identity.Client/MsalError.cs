@@ -822,6 +822,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string CryptoNet45 = "crypto_net45";
 
+        /// <summary>
+        /// Proof of posession authentication attempt is missing a an endpoint to bing to.
+        /// </summary>
+        public const string PopUriCannotBeNull = "Pop_Uri_Cannot_Be_Null";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.

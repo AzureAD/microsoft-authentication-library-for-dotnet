@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -23,6 +25,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
+        public bool UsingProofOfPossesion { get; set; }
+        public HttpMethod PopMethod { get; set; }
+        public Uri PopUri { get; set; }
+        public IPoPCryptoProvider PopCryptoProvider { get; set; }
 
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
 
