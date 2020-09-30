@@ -12,13 +12,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// </summary>
     /// <remarks>
     /// This implementation is not suitable for high-scale applications / confidential client scenarios
-    /// because creating new HttpClients leads to a port exhaustion issue. 
+    /// because a static HttpClient might run into DNS issues (and creating new HttpClients leads to a port exhaustion issue).
     /// Mobile platforms should use HttpClientHandlers that are platform specific.
-    /// See platform specific implementations for details on these issues.
+    /// .NET Core should use the IHttpClientFactory, but MSAL cannot take a dependency on it as it has too many dependencies itself.
     /// </remarks>
     internal class SimpleHttpClientFactory : IMsalHttpClientFactory
     {
-        private static readonly Lazy<HttpClient> _httpClient = new Lazy<HttpClient>(() => InitializeClient());
+        private static readonly Lazy<HttpClient> s_httpClient = new Lazy<HttpClient>(() => InitializeClient());
 
         private static HttpClient InitializeClient()
         {
@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public HttpClient GetHttpClient()
         {
-            return _httpClient.Value;
+            return s_httpClient.Value;
         }
     }
 }

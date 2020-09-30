@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 using System.Net;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
 {
@@ -81,10 +82,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             // Arrange
             var factory = PlatformProxyFactory.CreatePlatformProxy(null)
-                .CreateDefaultHttpClientFactory();          
+                .CreateDefaultHttpClientFactory();
+
+            // Act
+            var client1 = factory.GetHttpClient();
+            var client2 = factory.GetHttpClient();
 
             // Assert
-            Assert.IsTrue(factory is Client.Platforms.netcore.NetCoreHttpClientFactory);
+            Assert.IsTrue(factory is SimpleHttpClientFactory);
+            Assert.AreSame(client1, client2, "On NetDesktop and NetCore, the HttpClient should be static");
+
+
         }
 #endif
 #if DESKTOP
