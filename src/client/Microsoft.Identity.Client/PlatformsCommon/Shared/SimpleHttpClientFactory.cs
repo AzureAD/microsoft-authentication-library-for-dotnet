@@ -22,7 +22,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         private static HttpClient InitializeClient()
         {
-            var httpClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
+            var httpClient = new HttpClient(new HttpClientHandler() { 
+                /* important for IWA */ UseDefaultCredentials = true });
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
 
             return httpClient;
