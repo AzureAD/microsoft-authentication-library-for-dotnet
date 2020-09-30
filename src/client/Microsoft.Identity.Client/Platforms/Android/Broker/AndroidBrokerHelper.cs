@@ -105,6 +105,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 {
                     _logger.Error("An error occured when trying to communicate with account manager: " + ex.Message);
                 }
+                catch (Exception ex)
+                {
+                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
+                }
 
                 intent = (Intent)bundleResult?.GetParcelable(AccountManager.KeyIntent);
 
@@ -160,6 +164,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 catch (OperationCanceledException ex)
                 {
                     _logger.Error("An error occured when trying to communicate with account manager: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
                 }
 
                 string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
@@ -336,6 +344,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         catch (OperationCanceledException ex)
                         {
                             _logger.Error("An error occured when trying to communicate with account manager: " + ex.Message);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
                         }
 
                         var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
