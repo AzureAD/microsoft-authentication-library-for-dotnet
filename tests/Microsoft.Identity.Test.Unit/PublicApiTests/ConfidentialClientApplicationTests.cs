@@ -356,21 +356,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                               .WithHttpManager(httpManager)
                               .WithTelemetry(telemetryCallback);
 
+            ConfidentialClientApplication app;
+
             switch (credentialType)
             {
                 case CredentialType.CertificateAndClaims:
                     builder = builder.WithClientClaims(cert, TestConstants.s_clientAssertionClaims);
+                    app = builder.BuildConcrete();
+                    Assert.AreEqual(cert, app.Certificate);
                     break;
                 case CredentialType.SignedAssertion:
                     builder = builder.WithClientAssertion(TestConstants.DefaultClientAssertion);
+                    app = builder.BuildConcrete();
+                    Assert.IsNull(app.Certificate);
                     break;
                 case CredentialType.Certificate:
                 default:
                     builder = builder.WithCertificate(cert);
+                    app = builder.BuildConcrete();
+                    Assert.AreEqual(cert, app.Certificate);
                     break;
             }
 
-            var app = builder.BuildConcrete();
 
             for (int i = 0; i < tokenResponses; i++)
             {
