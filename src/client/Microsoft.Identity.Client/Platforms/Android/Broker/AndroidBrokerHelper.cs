@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
+using OperationCanceledException = Android.Accounts.OperationCanceledException;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -91,10 +92,19 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     _logger.Info("Android account manager didn't return any results for interactive broker request.");
                 }
 
-                Bundle bundleResult = (Bundle)await result.GetResultAsync(
-                     AccountManagerTimeoutSeconds,
-                     TimeUnit.Seconds)
-                     .ConfigureAwait(false);
+                Bundle bundleResult = null;
+
+                try
+                {
+                    bundleResult = (Bundle)await result.GetResultAsync(
+                         AccountManagerTimeoutSeconds,
+                         TimeUnit.Seconds)
+                         .ConfigureAwait(false);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    _logger.Error("An error occured when trying to communicate with account manager: " + ex.Message);
+                }
 
                 intent = (Intent)bundleResult?.GetParcelable(AccountManager.KeyIntent);
 
@@ -138,10 +148,19 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (result != null)
             {
-                Bundle bundleResult = (Bundle)await result.GetResultAsync(
-                     AccountManagerTimeoutSeconds,
-                     TimeUnit.Seconds)
-                     .ConfigureAwait(false);
+                Bundle bundleResult = null;
+
+                try
+                {
+                    bundleResult = (Bundle)await result.GetResultAsync(
+                         AccountManagerTimeoutSeconds,
+                         TimeUnit.Seconds)
+                         .ConfigureAwait(false);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    _logger.Error("An error occured when trying to communicate with account manager: " + ex.Message);
+                }
 
                 string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
 
@@ -305,10 +324,19 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                     if (result != null)
                     {
-                        Bundle bundleResult = (Bundle)await result.GetResultAsync(
-                            AccountManagerTimeoutSeconds,
-                            TimeUnit.Seconds)
-                            .ConfigureAwait(false);
+                        Bundle bundleResult = null;
+                        
+                        try
+                        {
+                            bundleResult = (Bundle)await result.GetResultAsync(
+                                AccountManagerTimeoutSeconds,
+                                TimeUnit.Seconds)
+                                .ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException ex)
+                        {
+                            _logger.Error("An error occured when trying to communicate with account manager: " + ex.Message);
+                        }
 
                         var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
 
