@@ -28,7 +28,7 @@ steps:
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
 
-    - task: VSTest@2
+- task: VSTest@2
   displayName: 'Run unit tests (.NET CORE)'
   inputs:
     testSelector: 'testAssemblies'
