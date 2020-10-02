@@ -224,14 +224,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         }
 
                         var httpResponse = new HttpResponse();
-                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody];
-                        httpResponse.Headers = errorResult[BrokerResponseConst.BrokerHttpHeaders];
-
-                        HttpStatusCode status;
-                        if (Enum.TryParse(errorResult[BrokerResponseConst.BrokerHttpStatusCode], out status))
-                        {
-                            httpResponse.StatusCode = status;
-                        }
+                        //TODO: figure out how to get status code properly deserialized from JObject
+                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody]?.ToString();
 
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
