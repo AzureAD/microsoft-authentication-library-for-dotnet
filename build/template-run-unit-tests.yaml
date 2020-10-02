@@ -5,18 +5,25 @@ parameters:
   BuildConfiguration: 'debug'
 
 steps:
-- task: DotNetCoreCLI@2
+#- task: DotNetCoreCLI@2
+#  displayName: 'Run unit tests'
+#  inputs:
+#    command: test
+#    projects: |
+#     tests/Microsoft.Identity.Test.Unit/*.csproj
+#    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
+#
+#- task: DotNetCoreCLI@2
+#  displayName: 'Run cache compat tests'
+#  inputs:
+#    command: test
+#    projects: |
+#     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
+#    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
+
+- task: VSTest@2
   displayName: 'Run unit tests'
   inputs:
-    command: test
-    projects: |
-     tests/Microsoft.Identity.Test.Unit/*.csproj
-    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Run cache compat tests'
-  inputs:
-    command: test
-    projects: |
-     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
-    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\**\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
