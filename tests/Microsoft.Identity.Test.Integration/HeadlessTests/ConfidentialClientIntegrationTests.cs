@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
@@ -92,8 +93,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(uri1.Host, uri2.Host);
             Assert.AreEqual(uri1.LocalPath, uri2.LocalPath);
 
-            var uriParams1 = HttpUtility.ParseQueryString(uri1.Query);
-            var uriParams2 = HttpUtility.ParseQueryString(uri2.Query);
+            var uriParams1 = uri1.ParseQueryString();
+            var uriParams2 = uri2.ParseQueryString();
 
             CollectionAssert.AreEquivalent(
                 "offline_access openid profile User.Read".Split(' '),

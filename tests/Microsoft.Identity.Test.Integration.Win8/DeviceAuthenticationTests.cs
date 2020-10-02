@@ -7,7 +7,7 @@ using System.Net;
 using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Json.Linq;
-using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

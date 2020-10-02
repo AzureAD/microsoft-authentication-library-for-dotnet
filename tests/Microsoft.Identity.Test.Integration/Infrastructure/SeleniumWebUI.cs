@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -205,7 +206,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         private static MessageAndHttpCode GetMessageToShowInBroswerAfterAuth(Uri uri)
         {
             // Parse the uri to understand if an error was returned. This is done just to show the user a nice error message in the browser.
-            var authCodeQueryKeyValue = HttpUtility.ParseQueryString(uri.Query);
+            var authCodeQueryKeyValue = uri.ParseQueryString();
             string errorString = authCodeQueryKeyValue.Get("error");
             if (!string.IsNullOrEmpty(errorString))
             {

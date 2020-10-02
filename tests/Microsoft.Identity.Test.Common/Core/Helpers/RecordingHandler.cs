@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
+namespace Microsoft.Identity.Test.Common
 {
     public class RecordingHandler : DelegatingHandler
     {

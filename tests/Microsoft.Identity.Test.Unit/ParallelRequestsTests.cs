@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Act
             using (new PerformanceValidator(
                 NumberOfRequests *
-                    (2 * CacheAccessPenaltyMs + NetworkAccessPenaltyMs /* refresh the RT */ + 100 /* internal logic */) +
+                    (2 * CacheAccessPenaltyMs + NetworkAccessPenaltyMs /* refresh the RT */ + 1000 /* internal logic */) +
                     2 * NetworkAccessPenaltyMs, /* one time discovery calls */
                 "AcquireTokenSilent in parallel should take roughly 100ms for its internal logic, " +
                 "plus the time needed to access the cache, the network, and all the thread context switches"))

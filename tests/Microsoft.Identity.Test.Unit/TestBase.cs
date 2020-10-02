@@ -30,6 +30,11 @@ namespace Microsoft.Identity.Test.Unit
         [TestInitialize]
         public virtual void TestInitialize()
         {
+#if DESKTOP
+            Trace.WriteLine("Framework: .NET FX");
+#elif NET_CORE
+            Trace.WriteLine("Framework: .NET Core");
+#endif
             Trace.WriteLine("Test started " + TestContext.TestName);
             TestCommon.ResetInternalStaticCaches();
         }

@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
+namespace Microsoft.Identity.Test.Common
 {
     public class HttpSnifferClientFactory : IMsalHttpClientFactory
     {
