@@ -21,7 +21,7 @@ steps:
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\net4*\Microsoft.Identity.Test.Integration.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
 
-    - task: VSTest@2
+- task: VSTest@2
   displayName: 'Run unit tests (.NET Core)'
   inputs:
     testSelector: 'testAssemblies'
