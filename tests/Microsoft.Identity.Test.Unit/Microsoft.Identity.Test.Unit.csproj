@@ -1,12 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
-    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
+    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <AssemblyName>Microsoft.Identity.Test.Unit.net45</AssemblyName>
-    <RootNamespace>Microsoft.Identity.Test.Unit</RootNamespace>
-    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,14 +16,15 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
-    <PackageReference Include="StrongNamer" Version="0.0.8" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.4.0" />
     <PackageReference Include="System.Windows.Forms" Version="4.0.0" />
     <!-- This reference is a workaround for a bug in .net46
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-
+    
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
+    <PackageReference Include="coverlet.collector" Version="1.2.0" />
 
     <Compile Remove="Resources\**" />
     <EmbeddedResource Remove="Resources\**" />
@@ -37,7 +34,11 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" />
-  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
+    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net472' ">
+    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
+  </PropertyGroup>
+
 </Project>

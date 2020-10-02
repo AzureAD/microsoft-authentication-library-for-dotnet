@@ -10,6 +10,6 @@ steps:
   inputs:
     command: test
     projects: |
-     tests/Microsoft.Identity.Test.Unit.*/*.csproj
+     tests/Microsoft.Identity.Test.Unit/*.csproj
      tests/CacheCompat/CommonCache.Test.Unit/*.csproj
     arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'

@@ -20,7 +20,5 @@ namespace Microsoft.Identity.Test.Common
 
 
         public const string Arlington = "Arlington";
-
-
     }
 }

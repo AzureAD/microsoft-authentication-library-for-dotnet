@@ -14,6 +14,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Test.Unit
 {
