@@ -43,23 +43,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public AuthenticationRequestParameters CreateAuthenticationRequestParameters(
             string authority,
-            IEnumerable<string> scopes,
-            ITokenCacheInternal tokenCache,
+            IEnumerable<string> scopes = null,
+            ITokenCacheInternal tokenCache = null,
             IAccount account = null,
             IDictionary<string, string> extraQueryParameters = null,
             string claims = null,
             ApiEvent.ApiIds apiId = ApiEvent.ApiIds.None)
-        {
-            if (tokenCache == null)
-            {
-                throw new ArgumentNullException(nameof(tokenCache));
-            }
+        {            
+            scopes = scopes ?? TestConstants.s_scope;
+            tokenCache = tokenCache ?? new TokenCache(ServiceBundle, false);
 
             var commonParameters = new AcquireTokenCommonParameters
             {
                 Scopes = scopes ?? TestConstants.s_scope,
                 ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>(),
-                Claims = claims, 
+                Claims = claims,
                 ApiId = apiId
             };
 

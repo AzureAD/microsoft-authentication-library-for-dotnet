@@ -40,6 +40,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string Utid2 = "my-utid2";
         public const string Common = "common";
         public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
+        public const string AadTenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
+        public const string MsaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad";
         public const string AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/751a212b-4003-416e-b600-e1f48e40db9f/";
         public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string> { { "client_ip", "some_ip" }, { "aud", "some_audience" } };
         public const string RTSecret = "someRT";
@@ -66,6 +68,8 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
         public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/organizations/";
+        public const string AuthorityConsumersTenant = "https://" + ProductionPrefNetworkEnvironment + "/consumers/";
+        public const string AuthorityConsumerTidTenant = "https://" + ProductionPrefNetworkEnvironment + "/9188040d-6c67-4c5b-b112-36a304b66dad/";
         public const string AuthorityGuidTenant = "https://" + ProductionPrefNetworkEnvironment + "/12345679/";
         public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/987654321/";
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";

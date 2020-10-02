@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Security.Authentication.Web.Core;
@@ -55,6 +56,41 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr appWindow, WebTokenRequest request, [System.Runtime.InteropServices.In] ref Guid riid);
         IAsyncOperation<WebTokenRequestResult> RequestTokenWithWebAccountForWindowAsync(IntPtr appWindow, WebTokenRequest request, WebAccount webAccount, [System.Runtime.InteropServices.In] ref Guid riid);
     }
+
+    [System.Runtime.InteropServices.Guid("67A7C5CA-83F6-44C6-A3B1-0EB69E41FA8A")]
+    [System.Runtime.InteropServices.InterfaceType(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIInspectable)]
+    internal interface IWebTokenResponse
+    {
+        //
+        // Summary:
+        //     Gets the properties of the response
+        //
+        // Returns:
+        //     The properties of the response.
+        IDictionary<string, string> Properties { get; }
+        //
+        // Summary:
+        //     Gets the error returned by the provider, if any.
+        //
+        // Returns:
+        //     The error returned by the provider.
+        WebProviderError ProviderError { get; }
+        //
+        // Summary:
+        //     Gets the authentication token.
+        //
+        // Returns:
+        //     The authentication token.
+        string Token { get; }
+        //
+        // Summary:
+        //     Gets the web account for the request.
+        //
+        // Returns:
+        //     The web account for the request.
+        WebAccount WebAccount { get; }
+    }
+
 
     //------------------------IAccountsSettingsPaneInterop----------------------------
     //MIDL_INTERFACE("D3EE12AD-3865-4362-9746-B75A682DF0E6")

@@ -19,8 +19,12 @@ using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-#if !WINDOWS_APP
+#if DESKTOP || NET_CORE
 using Microsoft.Identity.Client.Platforms.Features.Windows;
+using System.Runtime.InteropServices;
+#endif
+
+#if DESKTOP
 using System.Windows.Forms;
 #endif
 
@@ -270,30 +274,25 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 #if WINDOWS_APP
             // On UWP there is no need for a window handle
             return IntPtr.Zero;
-#else
-            if (uiParent == null || uiParent.OwnerWindow == null)
-            {
-                return WindowsNativeMethods.GetForegroundWindow();
-            }
+#elif DESKTOP
 
-            if (uiParent.OwnerWindow is IntPtr ptr)
+            if (uiParent?.OwnerWindow is IntPtr ptr)
             {
                 _logger.Info("Owner window specified as IntPtr.");
                 return ptr;
             }
 
-            // TODO: this takes a dependency to WinForms, maybe not a good idea right now for .net core 
-            if (uiParent.OwnerWindow is IWin32Window window) 
+            if (uiParent?.OwnerWindow is IWin32Window window) 
             {
                 _logger.Info("Owner window specified as IWin32Window.");
                 return window.Handle;
             }
 
-            throw new MsalClientException(
-                "wam_invalid_parent_window",
-                "Invalid parent window type, expecting IntPtr but got " + uiParent.GetType());
-#endif
+            return WindowsNativeMethods.GetForegroundWindow();
 
+#elif NET_CORE
+            return WindowsNativeMethods.GetForegroundWindow();
+#endif
         }
 
         private void AddPOPParamsToRequest(WebTokenRequest webTokenRequest)
@@ -340,30 +339,28 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     provider,
                     wamPlugin,
                     authenticationRequestParameters.Account,
-                    authenticationRequestParameters.LoginHint,
+                    null, // ATS requires an account object, login_hint is not supported on its own
                     authenticationRequestParameters.ClientId).ConfigureAwait(false);
 
                 if (webAccount == null)
                 {
-                    return new MsalTokenResponse()
-                    {
-                        Error = MsalError.InteractionRequired, // this will get translated to MSALUiRequiredEx
-                        ErrorDescription = "Could not find a WAM account for the silent requst"
-                    };
+                    throw new MsalUiRequiredException(
+                        MsalError.InteractionRequired,
+                        "Could not find a WAM account for the silent request.");                    
                 }
 
                 WebTokenRequest webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                     provider,
                     authenticationRequestParameters,
                     isForceLoginPrompt: false,
-                    isAccountInWam: webAccount != null,
+                    isAccountInWam: true,
                     isInteractive: false)
                     .ConfigureAwait(false);
 
                 AddCommonParamsToRequest(authenticationRequestParameters, webTokenRequest);
 
-                WebTokenRequestResult wamResult;
-                wamResult = await _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).ConfigureAwait(false);
+                WebTokenRequestResult wamResult = 
+                    await _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).ConfigureAwait(false);
 
                 return CreateMsalTokenResponse(wamResult, wamPlugin, isInteractive: false);
             }
@@ -418,7 +415,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     return wamAccount;
                 }
 
-
                 if (string.Equals(loginHint, wamAccount.UserName, StringComparison.OrdinalIgnoreCase))
                 {
                     matchedAccountByLoginHint = wamAccount;
@@ -453,8 +449,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         }
 
         public bool IsBrokerInstalledAndInvokable()
-        {            
-            // Win 10 RS3 - WAM might work on lower version via AccountPicker and using account IDs
+        {
+#if NET_CORE
+            if (!netcore.NetCorePlatformProxy.IsWindowsPlatform())
+            {
+                return false;
+            }
+#endif
+            // Win 10 RS3 
             return ApiInformation.IsMethodPresent(
                 "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
                 "FindAllAccountsAsync");
@@ -569,12 +571,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 throw new MsalClientException(
                     "wam_no_b2c",
-                    "WAM broker is not supported in conjuction with a B2C authority");
+                    "WAM broker is not supported in conjunction with a B2C authority");
             }
 
             if (authority.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
             {
-                _logger.Info("[WAM Broker] ADFS authority - using only AAD plugin ");
+                _logger.Info("[WAM Broker] ADFS authority - using only AAD plugin");
                 return false;
             }
 
