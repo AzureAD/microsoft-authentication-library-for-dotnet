@@ -1,5 +1,4 @@
 ﻿using System;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,8 +13,8 @@ using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
-#if DESKTOP
     [TestClass]
+    [TestCategory("Broker")]
     public class WamGetAccountsTests : TestBase
     {
         [TestMethod]
@@ -170,5 +169,4 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             };
         }
     }
-#endif
 }

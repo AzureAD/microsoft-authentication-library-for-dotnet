@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
@@ -33,11 +34,14 @@ namespace Microsoft.Identity.Client.Utils
 
         public static IDictionary<string, string> ExtractInnerJsonAsDictionary(JObject json, string key)
         {
-            if (json.TryGetValue(key, out var val))
+            if (json.TryGetValue(key, out JToken val))
             {
-                string strVal = val.ToObject<string>();
+                IDictionary<string, JToken> valueAsDict = (JObject)val;
+                Dictionary<string, string> dictionary =
+                    valueAsDict.ToDictionary(pair => pair.Key, pair => (string)pair.Value);
+
                 json.Remove(key);
-                return JsonConvert.DeserializeObject<Dictionary<string, string>>(strVal);
+                return dictionary;
             }
 
             return null;

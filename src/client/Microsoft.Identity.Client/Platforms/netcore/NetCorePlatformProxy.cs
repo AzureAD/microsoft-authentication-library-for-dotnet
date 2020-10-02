@@ -2,22 +2,22 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Shared.NetStdCore;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.UI;
-using System.ComponentModel;
-using System.Text;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.AuthScheme.PoP;
-using Microsoft.Identity.Client.PlatformsCommon;
 
 namespace Microsoft.Identity.Client.Platforms.netcore
 {
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             if (IsWindowsPlatform())
             {
                 uint userNameSize = 0;
-                WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
+                Features.Windows.WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
                 if (userNameSize == 0)
                 {
                     throw new MsalClientException(
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 }
 
                 var sb = new StringBuilder((int)userNameSize);
-                if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
+                if (!Features.Windows.WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
                 {
                     throw new MsalClientException(
                         MsalError.GetUserNameFailed,
@@ -201,6 +201,17 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             return PoPProviderFactory.GetOrCreateProvider();
         }
+        public override IBroker CreateBroker(CoreUIParent uiParent)
+        {
+            return base.OverloadBrokerForTest ?? new Features.WamBroker.WamBroker(uiParent, Logger);
+        }
+
+        public override bool CanBrokerSupportSilentAuth()
+        {
+            return true;
+        }
+
+        public override bool BrokerSupportsWamAccounts => true;
 
         /// <summary>
         ///  Is this a windows platform

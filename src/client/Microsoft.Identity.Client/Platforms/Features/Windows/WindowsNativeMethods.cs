@@ -82,6 +82,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.Windows
             public readonly int dwAllocationGranularity;
             public readonly short wProcessorLevel;
             public readonly short wProcessorRevision;
-        }
+        }       
     }
 }

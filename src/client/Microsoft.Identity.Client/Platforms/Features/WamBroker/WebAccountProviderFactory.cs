@@ -6,11 +6,6 @@ using Microsoft.Identity.Client.Internal;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-#if !WINDOWS_APP
-using Microsoft.Identity.Client.Platforms.Features.Windows;
-using System.Windows.Forms;
-#endif
-
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal class WebAccountProviderFactory : IWebAccountProviderFactory

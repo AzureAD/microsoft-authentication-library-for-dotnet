@@ -173,8 +173,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             if (WamAccountIds != null && WamAccountIds.Any())
             {
-                string wamAccountIdsJson = JsonConvert.SerializeObject(WamAccountIds);
-                SetItemIfValueNotNull(json, StorageJsonKeys.WamAccountIds, wamAccountIdsJson);
+                json[StorageJsonKeys.WamAccountIds] = JObject.FromObject(WamAccountIds);                
             }
 
             return json;

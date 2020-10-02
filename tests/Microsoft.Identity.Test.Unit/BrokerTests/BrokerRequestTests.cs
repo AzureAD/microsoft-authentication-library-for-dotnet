@@ -30,6 +30,7 @@ using Microsoft.Identity.Client.AuthScheme;
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
     [TestClass]
+    [TestCategory("Broker")]
     public class BrokerRequestTests : TestBase
     {
         private BrokerInteractiveRequestComponent _brokerInteractiveRequest;
@@ -38,130 +39,139 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private AcquireTokenSilentParameters _acquireTokenSilentParameters;
         private HttpResponse _brokerHttpResponse;
 
+
         [TestMethod]
         public void BrokerResponseTest()
         {
             // Arrange
-            CreateBrokerHelper();
-
-            var response = new MsalTokenResponse
+            using (CreateBrokerHelper())
             {
-                IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                AccessToken = "access-token",
-                ClientInfo = MockHelpers.CreateClientInfo(),
-                ExpiresIn = 3599,
-                CorrelationId = "correlation-id",
-                RefreshToken = "refresh-token",
-                Scope = TestConstants.s_scope.AsSingleString(),
-                TokenType = "Bearer"
-            };
+                var response = new MsalTokenResponse
+                {
+                    IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                    AccessToken = "access-token",
+                    ClientInfo = MockHelpers.CreateClientInfo(),
+                    ExpiresIn = 3599,
+                    CorrelationId = "correlation-id",
+                    RefreshToken = "refresh-token",
+                    Scope = TestConstants.s_scope.AsSingleString(),
+                    TokenType = "Bearer"
+                };
 
-            // Act
-            _brokerInteractiveRequest.ValidateResponseFromBroker(response);
+                // Act
+                _brokerInteractiveRequest.ValidateResponseFromBroker(response);
 
-            // Assert
-            Assert.IsNotNull(response);
-            Assert.AreEqual("access-token", response.AccessToken);
-            Assert.AreEqual(MockHelpers.CreateClientInfo(), response.ClientInfo);
+                // Assert
+                Assert.IsNotNull(response);
+                Assert.AreEqual("access-token", response.AccessToken);
+                Assert.AreEqual(MockHelpers.CreateClientInfo(), response.ClientInfo);
+            }
         }
 
         [TestMethod]
         public void BrokerErrorResponseTest()
         {
-            CreateBrokerHelper();
-
-            var response = new MsalTokenResponse
+            using (CreateBrokerHelper())
             {
-                Error = "MSALErrorDomain",
-                ErrorDescription = "error_description: Server returned less scopes than requested"
-            };
-
-            ValidateBrokerResponse(
-                response,
-                exception =>
+                var response = new MsalTokenResponse
                 {
-                    var exc = exception as MsalServiceException;
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(response.Error, exc.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.BrokerResponseError + response.ErrorDescription, exc.Message);
-                });
+                    Error = "MSALErrorDomain",
+                    ErrorDescription = "error_description: Server returned less scopes than requested"
+                };
+
+                ValidateBrokerResponse(
+                    response,
+                    exception =>
+                    {
+                        var exc = exception as MsalServiceException;
+                        Assert.IsNotNull(exc);
+                        Assert.AreEqual(response.Error, exc.ErrorCode);
+                        Assert.AreEqual(MsalErrorMessage.BrokerResponseError + response.ErrorDescription, exc.Message);
+                    });
+
+            }
         }
 
         [TestMethod]
         public void BrokerInteractionRequiredErrorResponseTest()
         {
-            CreateBrokerHelper();
-
-            var response = new MsalTokenResponse
+            using (CreateBrokerHelper())
             {
-                Error = MsalError.InteractionRequired,
-                ErrorDescription = MsalError.InteractionRequired,
-                HttpResponse = _brokerHttpResponse
-            };
 
-            ValidateBrokerResponse(
-                response,
-                exception =>
+                var response = new MsalTokenResponse
                 {
-                    var exc = exception as MsalUiRequiredException;
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.InteractionRequired, exc.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.BrokerResponseError + MsalError.InteractionRequired, exc.Message);
-                    Assert.AreEqual(exc.StatusCode, (int)HttpStatusCode.Unauthorized);
-                    Assert.AreEqual(exc.ResponseBody, "SomeBody");
-                    Assert.IsNotNull(exc.Headers);
-                });
+                    Error = MsalError.InteractionRequired,
+                    ErrorDescription = MsalError.InteractionRequired,
+                    HttpResponse = _brokerHttpResponse
+                };
+
+                ValidateBrokerResponse(
+                    response,
+                    exception =>
+                    {
+                        var exc = exception as MsalUiRequiredException;
+                        Assert.IsNotNull(exc);
+                        Assert.AreEqual(MsalError.InteractionRequired, exc.ErrorCode);
+                        Assert.AreEqual(MsalErrorMessage.BrokerResponseError + MsalError.InteractionRequired, exc.Message);
+                        Assert.AreEqual(exc.StatusCode, (int)HttpStatusCode.Unauthorized);
+                        Assert.AreEqual(exc.ResponseBody, "SomeBody");
+                        Assert.IsNotNull(exc.Headers);
+                    });
+            }
         }
 
         [TestMethod]
         public void BrokerInvalidGrantErrorResponseTest()
         {
-            CreateBrokerHelper();
-
-            var response = new MsalTokenResponse
+            using (CreateBrokerHelper())
             {
-                Error = MsalError.InvalidGrantError,
-                ErrorDescription = MsalError.InvalidGrantError,
-                HttpResponse = _brokerHttpResponse
-            };
 
-            ValidateBrokerResponse(
-                response,
-                exception =>
+                var response = new MsalTokenResponse
                 {
-                    var exc = exception as MsalUiRequiredException;
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.InvalidGrantError, exc.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.BrokerResponseError + MsalError.InvalidGrantError, exc.Message);
-                    Assert.AreEqual(exc.StatusCode, (int)HttpStatusCode.Unauthorized);
-                    Assert.AreEqual(exc.ResponseBody, "SomeBody");
-                    Assert.IsNotNull(exc.Headers);
-                });
+                    Error = MsalError.InvalidGrantError,
+                    ErrorDescription = MsalError.InvalidGrantError,
+                    HttpResponse = _brokerHttpResponse
+                };
+
+                ValidateBrokerResponse(
+                    response,
+                    exception =>
+                    {
+                        var exc = exception as MsalUiRequiredException;
+                        Assert.IsNotNull(exc);
+                        Assert.AreEqual(MsalError.InvalidGrantError, exc.ErrorCode);
+                        Assert.AreEqual(MsalErrorMessage.BrokerResponseError + MsalError.InvalidGrantError, exc.Message);
+                        Assert.AreEqual(exc.StatusCode, (int)HttpStatusCode.Unauthorized);
+                        Assert.AreEqual(exc.ResponseBody, "SomeBody");
+                        Assert.IsNotNull(exc.Headers);
+                    });
+            }
         }
 
         [TestMethod]
         public void BrokerUnknownErrorResponseTest()
         {
-            CreateBrokerHelper();
-
-            var response = new MsalTokenResponse
+            using (CreateBrokerHelper())
             {
-                Error = null,
-                ErrorDescription = null
-            };
 
-            ValidateBrokerResponse(
-                response,
-                exception =>
+                var response = new MsalTokenResponse
                 {
-                    var exc = exception as MsalServiceException;
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.BrokerResponseReturnedError, exc.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.BrokerResponseReturnedError, exc.Message);
-                });
+                    Error = null,
+                    ErrorDescription = null
+                };
+
+                ValidateBrokerResponse(
+                    response,
+                    exception =>
+                    {
+                        var exc = exception as MsalServiceException;
+                        Assert.IsNotNull(exc);
+                        Assert.AreEqual(MsalError.BrokerResponseReturnedError, exc.ErrorCode);
+                        Assert.AreEqual(MsalErrorMessage.BrokerResponseReturnedError, exc.Message);
+                    });
+            }
         }
 
-#if DESKTOP
         [TestMethod]
         public void BrokerInteractiveRequestTest()
         {
@@ -207,10 +217,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         broker);
 
                 Assert.AreEqual(true, _brokerSilentAuthStrategy.Broker.IsBrokerInstalledAndInvokable());
-                
+
             }
         }
-#endif
 
         [TestMethod]
         public void BrokerGetAccountsAsyncOnUnsupportedPlatformTest()
@@ -396,34 +405,34 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private MockHttpAndServiceBundle CreateBrokerHelper()
         {
             MockHttpAndServiceBundle harness = CreateTestHarness();
-            
-                _parameters = harness.CreateAuthenticationRequestParameters(
-                    TestConstants.AuthorityHomeTenant,
-                    TestConstants.s_scope,
-                    new TokenCache(harness.ServiceBundle, false),
-                    extraQueryParameters: TestConstants.ExtraQueryParameters,
-                    claims: TestConstants.Claims);
 
-                _parameters.IsBrokerConfigured = true;
+            _parameters = harness.CreateAuthenticationRequestParameters(
+                TestConstants.AuthorityHomeTenant,
+                TestConstants.s_scope,
+                new TokenCache(harness.ServiceBundle, false),
+                extraQueryParameters: TestConstants.ExtraQueryParameters,
+                claims: TestConstants.Claims);
 
-                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
-                _acquireTokenSilentParameters = new AcquireTokenSilentParameters();
+            _parameters.IsBrokerConfigured = true;
 
-                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
-                _brokerInteractiveRequest =
-                    new BrokerInteractiveRequestComponent(
-                        _parameters,
-                        interactiveParameters,
-                        broker,
-                        "install_url");
+            AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
+            _acquireTokenSilentParameters = new AcquireTokenSilentParameters();
 
-                _brokerSilentAuthStrategy =
-                    new SilentBrokerAuthStrategy(
-                        new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters),
-                        harness.ServiceBundle,
-                        _parameters,
-                        _acquireTokenSilentParameters,
-                        broker);
+            IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+            _brokerInteractiveRequest =
+                new BrokerInteractiveRequestComponent(
+                    _parameters,
+                    interactiveParameters,
+                    broker,
+                    "install_url");
+
+            _brokerSilentAuthStrategy =
+                new SilentBrokerAuthStrategy(
+                    new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters),
+                    harness.ServiceBundle,
+                    _parameters,
+                    _acquireTokenSilentParameters,
+                    broker);
 
             _brokerHttpResponse = new HttpResponse();
             _brokerHttpResponse.Body = "SomeBody";

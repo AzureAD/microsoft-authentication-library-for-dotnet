@@ -371,6 +371,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             item.WamAccountIds = new Dictionary<string, string>() { { "client_id_1", "wam_id_1" }, { "client_id_2", "wam_id_2" } };
             string asJson = item.ToJsonString();
 
+            Assert.IsTrue(asJson.Contains(@" ""wam_account_ids"": {
+    ""client_id_1"": ""wam_id_1"",
+    ""client_id_2"": ""wam_id_2""
+  }"));
+
             var item2 = MsalAccountCacheItem.FromJsonString(asJson);
             AssertAccountCacheItemsAreEqual(item, item2);
         }
