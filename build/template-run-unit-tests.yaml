@@ -5,11 +5,24 @@ parameters:
   BuildConfiguration: 'debug'
 
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Run unit tests'
+
+- task: VSTest@2
+  displayName: 'Run unit tests (.NET FX)'
   inputs:
-    command: test
-    projects: |
-     tests/Microsoft.Identity.Test.Unit.*/*.csproj
-     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
-    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+
+- task: VSTest@2
+  displayName: 'Run unit tests (.NET CORE)'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\netcore*\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+
+- task: VSTest@2
+  displayName: 'Run cache compat tests'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit'
+    searchFolder: '$(System.DefaultWorkingDirectory)'

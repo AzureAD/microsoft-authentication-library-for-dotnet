@@ -1,15 +1,18 @@
 # template-run-integration-tests.yaml
 # Run all integration tests across the LibsAndSamples.sln project
 
-parameters:
-  BuildConfiguration: 'debug'
-
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Run integration Tests'
+
+- task: VSTest@2
+  displayName: 'Run integration tests (.NET FX)'
   inputs:
-    command: test
-    projects: |
-     tests/Microsoft.Identity.Test.Integration.net45/Microsoft.Identity.Test.Integration.*.csproj
-     tests/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.*.csproj
-    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\net4*\Microsoft.Identity.Test.Integration.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+
+- task: VSTest@2
+  displayName: 'Run integration tests (.NET Core)'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\netcore*\Microsoft.Identity.Test.Integration.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
