@@ -16,6 +16,7 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
+using System.Net;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -223,9 +224,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         }
 
                         var httpResponse = new HttpResponse();
-                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody];
-                        httpResponse.Headers = errorResult[BrokerResponseConst.BrokerHttpHeaders];
-                        httpResponse.StatusCode = errorResult[BrokerResponseConst.BrokerHttpStatusCode];
+                        //TODO: figure out how to get status code properly deserialized from JObject
+                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody]?.ToString();
 
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
