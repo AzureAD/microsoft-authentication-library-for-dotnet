@@ -22,10 +22,17 @@ steps:
 #    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
 
 - task: VSTest@2
-  displayName: 'Run unit tests'
+  displayName: 'Run unit tests (.NET FX)'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\Microsoft.Identity.Test.Unit.dll'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+
+    - task: VSTest@2
+  displayName: 'Run unit tests (.NET CORE)'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\netcore*\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
 
 - task: VSTest@2

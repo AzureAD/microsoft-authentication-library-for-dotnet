@@ -5,10 +5,25 @@ parameters:
   BuildConfiguration: 'debug'
 
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Run integration Tests'
+#- task: DotNetCoreCLI@2
+#  displayName: 'Run integration Tests'
+#  inputs:
+#    command: test
+#    projects: |
+#     tests/Microsoft.Identity.Test.Integration/Microsoft.Identity.Test.Integration.*.csproj
+#    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore'
+
+
+- task: VSTest@2
+  displayName: 'Run unit tests (.NET FX)'
   inputs:
-    command: test
-    projects: |
-     tests/Microsoft.Identity.Test.Integration/Microsoft.Identity.Test.Integration.*.csproj
-    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\net4*\Microsoft.Identity.Test.Integration.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+
+    - task: VSTest@2
+  displayName: 'Run unit tests (.NET Core)'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\netcore*\Microsoft.Identity.Test.Integration.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
