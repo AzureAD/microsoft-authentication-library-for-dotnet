@@ -25,5 +25,12 @@ steps:
   displayName: 'Run unit tests'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\**\Microsoft.Identity.Test.Unit.dll'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+
+- task: VSTest@2
+  displayName: 'Run cache compat tests'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit'
     searchFolder: '$(System.DefaultWorkingDirectory)'
