@@ -17,11 +17,11 @@ namespace Microsoft.Identity.Test.Unit.PoP
         {
             var provider = new InMemoryCryptoProvider();
             string jwk = provider.CannonicalPublicKeyJwk;
-            dynamic jwkObj = JObject.Parse(jwk);
+            JObject jwkObj = JObject.Parse(jwk);
 
-            Assert.IsNotNull(jwkObj.E);
-            Assert.IsNotNull(jwkObj.N);
-            Assert.AreEqual("RSA", jwkObj.kty.ToString());
+            Assert.IsNotNull(jwkObj["E"]);
+            Assert.IsNotNull(jwkObj["N"]);
+            Assert.AreEqual("RSA", jwkObj["kty"].ToString());
         }
     }
 }
