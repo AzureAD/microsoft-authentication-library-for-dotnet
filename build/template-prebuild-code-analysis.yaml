@@ -13,6 +13,7 @@ steps:
   displayName: 'Run CredScan'
   inputs:
     suppressionsFile: 'build/credscan-exclusion.json'
+    toolMajorVersion: V2
     debugMode: false
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
