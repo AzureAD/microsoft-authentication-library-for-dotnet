@@ -12,6 +12,8 @@ steps:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
+    codeCoverageEnabled: true
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET CORE)'
@@ -19,6 +21,8 @@ steps:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\netcore*\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
+    codeCoverageEnabled: true
 
 - task: VSTest@2
   displayName: 'Run cache compat tests'
