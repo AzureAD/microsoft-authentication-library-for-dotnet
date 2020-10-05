@@ -20,6 +20,17 @@ steps:
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\netcore*\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
 
+# install python and run cache tests
+- task: stevedower.python.PythonScript.PythonScript@1
+  displayName: 'Update PIP'
+  inputs:
+    arguments: '-m pip install --upgrade pip'
+
+- task: stevedower.python.PythonScript.PythonScript@1
+  displayName: 'Install MSAL.Python PIP'
+  inputs:
+    arguments: '-m pip install msal'
+
 - task: VSTest@2
   displayName: 'Run cache compat tests'
   inputs:

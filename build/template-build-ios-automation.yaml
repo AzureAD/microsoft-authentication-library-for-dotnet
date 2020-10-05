@@ -16,11 +16,6 @@ steps:
   inputs:
     secureFile: 'TestFile.mobileprovision'
 
-- task: DotNetCoreInstaller@0
-  displayName: 'Use .NET Core sdk 2.1.502'
-  inputs:
-    version: 2.1.502
-
 - task: NuGetCommand@2
   displayName: 'NuGet restore'
   inputs:
