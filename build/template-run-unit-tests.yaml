@@ -28,5 +28,6 @@ steps:
   displayName: 'Run cache compat tests'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit'
+    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
+    codeCoverageEnabled: true
