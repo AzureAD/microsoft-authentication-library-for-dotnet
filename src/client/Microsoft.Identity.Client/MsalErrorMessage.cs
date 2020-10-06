@@ -97,6 +97,8 @@ namespace Microsoft.Identity.Client
             +
             "2. An error occurred during a silent web authentication that prevented the http authentication flow from completing in a short enough time frame";
 
+        public const string StateMismatchErrorMessage = "Returned state({0}) from authorize endpoint is not the same as the one sent({1}). See https://aka.ms/msal-statemismatcherror for more details.";
+
         public const string UserRealmDiscoveryFailed = "User realm discovery failed";
 
         public const string WsTrustEndpointNotFoundInMetadataDocument =
