@@ -11,7 +11,6 @@ steps:
   displayName: 'NuGet restore LibsAndSamples.sln'
   inputs:
     solution: LibsAndSamples.sln
-    vsVersion: '15.0'
     msbuildArgs: '/t:restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
@@ -20,7 +19,6 @@ steps:
   displayName: 'Build solution LibsAndSamples.sln'
   inputs:
     solution: LibsAndSamples.sln
-    vsVersion: '15.0'
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
