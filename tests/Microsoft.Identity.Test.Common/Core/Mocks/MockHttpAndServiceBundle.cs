@@ -42,13 +42,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public AuthenticationRequestParameters CreateAuthenticationRequestParameters(
-            string authority,
+            string authority,            
             IEnumerable<string> scopes = null,
             ITokenCacheInternal tokenCache = null,
             IAccount account = null,
             IDictionary<string, string> extraQueryParameters = null,
             string claims = null,
-            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.None)
+            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.None, 
+            bool validateAuthority = false)
         {            
             scopes = scopes ?? TestConstants.s_scope;
             tokenCache = tokenCache ?? new TokenCache(ServiceBundle, false);
@@ -68,7 +69,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 new RequestContext(ServiceBundle, Guid.NewGuid()))
             {
                 Account = account,
-                Authority = Authority.CreateAuthority(authority)
+                Authority = Authority.CreateAuthority(authority, validateAuthority)
             };
         }
     }

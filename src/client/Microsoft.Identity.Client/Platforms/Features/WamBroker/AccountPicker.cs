@@ -11,7 +11,7 @@ using Windows.UI.ApplicationSettings;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
-    internal class AccountPicker
+    internal class AccountPicker : IAccountPicker
     {
         private readonly IntPtr _parentHandle;
         private readonly ICoreLogger _logger;
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 deferral = e.GetDeferral();
 
-                if (string.Equals("common", _authority.TenantId) )
+                if (string.Equals("common", _authority.TenantId))
                 {
                     _logger.Verbose("Displaying selector for common");
                     e.WebAccountProviderCommands.Add(

@@ -20,16 +20,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _logger = logger;
         }
 
-        public async Task<WebTokenRequestResult> GetTokenSilentlyAsync(WebAccount webAccount, WebTokenRequest webTokenRequest)
+        public async Task<IWebTokenRequestResultWrapper> GetTokenSilentlyAsync(WebAccount webAccount, WebTokenRequest webTokenRequest)
         {
             using (_logger.LogBlockDuration("WAM:AcquireSilentlyAsync:"))
             {
                 var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest, webAccount);
-                return wamResult;
+                return new WebTokenRequestResultWrapper(wamResult);
             }
         }
 
-        public async Task<WebTokenRequestResult> RequestTokenForWindowAsync(
+        public async Task<IWebTokenRequestResultWrapper> RequestTokenForWindowAsync(
             IntPtr _parentHandle,
             WebTokenRequest webTokenRequest)
         {
@@ -40,10 +40,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenForWindowAsync(
                 _parentHandle, webTokenRequest);
 #endif
-            return wamResult;
+            return new WebTokenRequestResultWrapper(wamResult);
         }
 
-        public async Task<WebTokenRequestResult> RequestTokenForWindowAsync(
+        public async Task<IWebTokenRequestResultWrapper> RequestTokenForWindowAsync(
            IntPtr _parentHandle,
            WebTokenRequest webTokenRequest,
            WebAccount wamAccount)
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(
                 _parentHandle, webTokenRequest, wamAccount);
 #endif
-            return wamResult;
+            return new WebTokenRequestResultWrapper(wamResult);
         }
 
         public async Task<WebAccount> FindAccountAsync(WebAccountProvider provider, string wamAccountId)

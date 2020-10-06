@@ -10,13 +10,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal interface IWamProxy
     {
-        Task<WebTokenRequestResult> GetTokenSilentlyAsync(WebAccount webAccount, WebTokenRequest webTokenRequest);
+        Task<IWebTokenRequestResultWrapper> GetTokenSilentlyAsync(WebAccount webAccount, WebTokenRequest webTokenRequest);
         Task<IReadOnlyList<WebAccount>> FindAllWebAccountsAsync(WebAccountProvider provider, string clientID);
-        Task<WebTokenRequestResult> RequestTokenForWindowAsync(
+        Task<IWebTokenRequestResultWrapper> RequestTokenForWindowAsync(
             IntPtr _parentHandle, 
             WebTokenRequest webTokenRequest, 
             WebAccount wamAccount);
-        Task<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr _parentHandle, WebTokenRequest webTokenRequest);
+        Task<IWebTokenRequestResultWrapper> RequestTokenForWindowAsync(IntPtr _parentHandle, WebTokenRequest webTokenRequest);
         Task<WebAccount> FindAccountAsync(WebAccountProvider provider, string wamAccountId);
     }
 }
