@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
 using Microsoft.Identity.Client.AuthScheme.PoP;
@@ -26,9 +27,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public AuthorityInfo AuthorityOverride { get; set; }
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
         public bool UsingProofOfPossesion { get; set; }
-        public HttpMethod PopMethod { get; set; }
-        public Uri PopUri { get; set; }
-        public IPoPCryptoProvider PopCryptoProvider { get; set; }
+        public PopAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
 
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
 

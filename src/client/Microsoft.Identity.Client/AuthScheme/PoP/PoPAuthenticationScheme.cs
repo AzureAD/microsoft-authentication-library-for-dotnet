@@ -20,7 +20,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        private readonly HttpRequestMessage _httpRequestMessage;
+        private readonly Uri _requestUri;
+        private readonly HttpMethod _httpMethod;
         private readonly IPoPCryptoProvider _popCryptoProvider;
 
         /// <summary>
@@ -30,12 +31,13 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public PoPAuthenticationScheme(HttpRequestMessage httpRequestMessage, IPoPCryptoProvider popCryptoProvider)
+        public PoPAuthenticationScheme(Uri requestUri, HttpMethod httpMethod, IPoPCryptoProvider popCryptoProvider)
         {
-            _httpRequestMessage = httpRequestMessage ?? throw new ArgumentNullException(nameof(httpRequestMessage));
+            _requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            _httpMethod = httpMethod;
             _popCryptoProvider = popCryptoProvider ?? throw new ArgumentNullException(nameof(popCryptoProvider));
 
-            var keyThumbprint = ComputeRsaThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
+            var keyThumbprint = ComputeRsaThumbprint(computeCannonicalJwk(computeCannonicalJwk(_popCryptoProvider.RsaPublicKey)));
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
@@ -66,14 +68,14 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 { JsonWebTokenConstants.ReservedHeaderParameters.Type, PoPRequestParameters.PoPTokenType}
             };
 
-            JToken popAssertion = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
+            JToken popAssertion = JToken.Parse(computeCannonicalJwk(_popCryptoProvider.RsaPublicKey));
 
             var payload = new JObject(
                 new JProperty(PoPClaimTypes.At, msalAccessTokenCacheItem.Secret),
                 new JProperty(PoPClaimTypes.Ts, (long)(DateTime.UtcNow - s_jwtBaselineTime).TotalSeconds ),
-                new JProperty(PoPClaimTypes.HttpMethod, _httpRequestMessage.Method.ToString()),
-                new JProperty(PoPClaimTypes.Host, _httpRequestMessage.RequestUri.Host),
-                new JProperty(PoPClaimTypes.Path, _httpRequestMessage.RequestUri.AbsolutePath),
+                new JProperty(PoPClaimTypes.HttpMethod, _httpMethod.ToString()),
+                new JProperty(PoPClaimTypes.Host, _requestUri.Host),
+                new JProperty(PoPClaimTypes.Path, _requestUri.AbsolutePath),
                 new JProperty(PoPClaimTypes.Nonce, CreateNonce()),
                 new JProperty(PoPClaimTypes.Cnf, new JObject(
                     new JProperty(PoPClaimTypes.JWK, popAssertion))));
@@ -81,11 +83,16 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             string popToken =  CreateJWS(payload.ToString(Json.Formatting.None), header.ToString(Json.Formatting.None));
 
             // For POP, we can also update the HttpRequest with the authentication header
-            _httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(
-                AuthorizationHeaderPrefix,
-                popToken);
+            //_httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(
+            //    AuthorizationHeaderPrefix,
+            //    popToken);
 
             return popToken;
+        }
+
+        private static string computeCannonicalJwk(RSAParameters rsaPublicKey)
+        {
+            return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
 
         private static string CreateNonce()

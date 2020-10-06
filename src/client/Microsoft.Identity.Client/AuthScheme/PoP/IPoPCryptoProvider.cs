@@ -22,9 +22,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     public interface IPoPCryptoProvider
     {
         /// <summary>
-        /// The cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
+        /// 
         /// </summary>
-        string CannonicalPublicKeyJwk { get; }
+        RSAParameters PublicKeyInfo { get; private set; }
 
         /// <summary>
         /// Signs the byte array using the private key
