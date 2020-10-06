@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -40,6 +41,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
             AppTokenCacheInternal = new TokenCache(ServiceBundle, true);
+            Certificate = configuration.ClientCredentialCertificate;
         }
 
         /// <summary>
@@ -155,6 +157,11 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms
         /// </remarks>
         public ITokenCache AppTokenCache => AppTokenCacheInternal;
+
+        /// <summary>
+        /// The certificate used to create this <see cref="ConfidentialClientApplication"/>, if any.
+        /// </summary>
+        public X509Certificate2 Certificate { get; }
 
         internal ITokenCacheInternal AppTokenCacheInternal { get; set; }
 
