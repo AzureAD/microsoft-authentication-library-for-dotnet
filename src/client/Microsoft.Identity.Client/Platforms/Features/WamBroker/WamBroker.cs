@@ -36,6 +36,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IWamPlugin _msaPlugin;
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
+        private readonly IAccountPickerFactory _accountPickerFactory;
         private readonly ICoreLogger _logger;
         private readonly IntPtr _parentHandle;
         private readonly SynchronizationContext _synchronizationContext;
@@ -48,7 +49,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             IWamPlugin testAadPlugin = null, 
             IWamPlugin testmsaPlugin = null, 
             IWamProxy wamProxy = null, 
-            IWebAccountProviderFactory webAccountProviderFactory = null)
+            IWebAccountProviderFactory webAccountProviderFactory = null, 
+            IAccountPickerFactory accountPickerFactory = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _wamProxy = wamProxy ?? new WamProxy(_logger);
@@ -56,7 +58,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _synchronizationContext = uiParent?.SynchronizationContext;
 
             _webAccountProviderFactory = webAccountProviderFactory ?? new WebAccountProviderFactory();
-
+            _accountPickerFactory = accountPickerFactory ?? new AccountPickerFactory();
             _aadPlugin = testAadPlugin ?? new AadPlugin(_wamProxy, _webAccountProviderFactory, _logger);
             _msaPlugin = testmsaPlugin ?? new MsaPlugin(_wamProxy, _webAccountProviderFactory, _logger);
         }
@@ -85,8 +87,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (_synchronizationContext == null)
             {
                 throw new MsalClientException(
-                    "wam_ui_thread_only",
-                    "AcquireTokenInteractive must be called from the UI thread");
+                    MsalError.WamUiThread,
+                    "AcquireTokenInteractive must be called from the UI thread when using WAM.");
             }
 
             bool forceLoginPrompt = IsForceLoginPrompt(acquireTokenInteractiveParameters.Prompt);
@@ -110,7 +112,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     provider = await _webAccountProviderFactory.GetAccountProviderAsync(authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority)
                         .ConfigureAwait(false);
                 }
-                WebTokenRequestResult wamResult = null;
 
                 var wamAccount = await FindWamAccountForMsalAccountAsync(
                     provider,
@@ -121,14 +122,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 if (wamAccount != null)
                 {
-                    wamResult = await AcquireInteractiveWithoutPickerAsync(
+                    var wamResult = await AcquireInteractiveWithoutPickerAsync(
                         authenticationRequestParameters,
                         forceLoginPrompt,
                         wamPlugin,
                         provider,
                         wamAccount)
                         .ConfigureAwait(false);
-
                     return CreateMsalTokenResponse(wamResult, wamPlugin, isInteractive: true);
                 }
             }
@@ -138,9 +138,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 .ConfigureAwait(false);
         }
 
-        private static bool IsForceLoginPrompt(Prompt prompt)
+        internal /* internal for test only */ static bool IsForceLoginPrompt(Prompt prompt)
         {
-            if (prompt == Prompt.NotSpecified)
+            if (prompt == Prompt.NotSpecified || prompt == Prompt.NoPrompt)
             {
                 return false;
             }
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 $"The broker does not support the prompt {prompt.PromptValue}. You can specify Prompt.ForceLogin or Prompt.SelectAccount to force authentication, or do not specify any value for the default broker behavior (recommended).");
         }
 
-        private async Task<WebTokenRequestResult> AcquireInteractiveWithoutPickerAsync(
+        private async Task<IWebTokenRequestResultWrapper> AcquireInteractiveWithoutPickerAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             bool forceLoginPrompt,
             IWamPlugin wamPlugin,
@@ -174,10 +174,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             try
             {
-                // UWP requies being on the UI thread
+#if WINDOWS_APP
+                // UWP requires being on the UI thread
                 await _synchronizationContext;
+#endif
 
-                var wamResult = await _wamProxy.RequestTokenForWindowAsync(_parentHandle, webTokenRequest, wamAccount).ConfigureAwait(false);
+                var wamResult = await _wamProxy.RequestTokenForWindowAsync(
+                    _parentHandle, 
+                    webTokenRequest, 
+                    wamAccount).ConfigureAwait(false);
                 return wamResult;
 
             }
@@ -209,7 +214,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AuthenticationRequestParameters authenticationRequestParameters)
         {
             bool isMsaPassthrough = IsMsaPassthrough(authenticationRequestParameters);
-            var accountPicker = new AccountPicker(
+            var accountPicker = _accountPickerFactory.Create(
                 _parentHandle,
                 _logger,
                 _synchronizationContext,
@@ -228,11 +233,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     throw new MsalClientException(MsalError.AuthenticationCanceledError, "WAM Account Picker did not return an account.");
                 }
 
-                wamPlugin = (accountProvider.Authority == "consumers" && !isMsaPassthrough) ?
-                    _msaPlugin : _aadPlugin;
+                // WAM returns the tenant here, not the full authority
+                bool isConsumerTenant = string.Equals(accountProvider.Authority, "consumers", StringComparison.OrdinalIgnoreCase);
+                wamPlugin = (isConsumerTenant && !isMsaPassthrough) ? _msaPlugin : _aadPlugin;
 
+#if WINDOWS_APP
                 // UWP requires being on the UI thread
                 await _synchronizationContext;
+#endif
 
                 webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                      accountProvider,
@@ -253,7 +261,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     "Could not get the account provider. See inner exception for details", ex);
             }
 
-            WebTokenRequestResult wamResult;
+            IWebTokenRequestResultWrapper wamResult;
             try
             {
                 wamResult = await _wamProxy.RequestTokenForWindowAsync(_parentHandle, webTokenRequest).ConfigureAwait(false);
@@ -359,7 +367,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 AddCommonParamsToRequest(authenticationRequestParameters, webTokenRequest);
 
-                WebTokenRequestResult wamResult = 
+                var wamResult = 
                     await _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).ConfigureAwait(false);
 
                 return CreateMsalTokenResponse(wamResult, wamPlugin, isInteractive: false);
@@ -489,7 +497,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         }
 
         private MsalTokenResponse CreateMsalTokenResponse(
-            WebTokenRequestResult wamResponse,
+            IWebTokenRequestResultWrapper wamResponse,
             IWamPlugin wamPlugin,
             bool isInteractive)
         {
@@ -511,12 +519,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 case WebTokenRequestStatus.UserInteractionRequired:
                     errorCode =
-                        wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError.ErrorCode, isInteractive);
-                    internalErrorCode = wamResponse.ResponseError.ErrorCode.ToString(CultureInfo.InvariantCulture);
+                        wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
+                    internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
                     errorMessage = WamErrorPrefix +
                         $"Wam plugin {wamPlugin.GetType()}" +
                         $" error code: {internalErrorCode}" +
-                        $" error: " + wamResponse.ResponseError.ErrorMessage;
+                        $" error: " + wamResponse.ResponseError?.ErrorMessage;
                     break;
                 case WebTokenRequestStatus.UserCancel:
                     errorCode = MsalError.AuthenticationCanceledError;
@@ -524,9 +532,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     break;
                 case WebTokenRequestStatus.ProviderError:
                     errorCode =
-                        wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError.ErrorCode, isInteractive);
-                    errorMessage = WamErrorPrefix + wamPlugin.GetType() + wamResponse.ResponseError.ErrorMessage;
-                    internalErrorCode = wamResponse.ResponseError.ErrorCode.ToString(CultureInfo.InvariantCulture);
+                        wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
+                    errorMessage = WamErrorPrefix + wamPlugin.GetType() + wamResponse.ResponseError?.ErrorMessage;
+                    internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
                     break;
                 default:
                     errorCode = MsalError.UnknownBrokerError;
@@ -560,17 +568,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         value = "home";
                     }
 
-                    webTokenRequest.AppProperties.Add(key, value);
+                    webTokenRequest.Properties.Add(key, value);
                 }
             }
         }
 
-        private bool IsMsaRequest(Authority authority, string homeTenantId, bool msaPassthrough)
+        internal /* for test only */ bool IsMsaRequest(Authority authority, string homeTenantId, bool msaPassthrough)
         {
             if (authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
             {
                 throw new MsalClientException(
-                    "wam_no_b2c",
+                    MsalError.WamNoB2C,
                     "WAM broker is not supported in conjunction with a B2C authority");
             }
 

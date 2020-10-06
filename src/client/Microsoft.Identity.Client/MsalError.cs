@@ -914,5 +914,15 @@ namespace Microsoft.Identity.Client
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
 
 #endif
+
+        /// <summary>
+        /// When calling AcquireTokenInteractive with the WAM broker, the call must be made from the UI thread.
+        /// </summary>
+        public const string WamUiThread = "wam_ui_thread_only";
+
+        /// <summary>
+        /// The Windows broker (WAM) is not supported in conjunction with B2C authorities
+        /// </summary>
+        public const string WamNoB2C = "wam_no_b2c";
     }
 }
