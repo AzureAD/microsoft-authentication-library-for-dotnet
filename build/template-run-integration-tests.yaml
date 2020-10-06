@@ -9,6 +9,8 @@ steps:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\net4*\Microsoft.Identity.Test.Integration.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
+    codeCoverageEnabled: true
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET Core)'
@@ -16,3 +18,5 @@ steps:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\netcore*\Microsoft.Identity.Test.Integration.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
+    codeCoverageEnabled: true
