@@ -2,16 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
