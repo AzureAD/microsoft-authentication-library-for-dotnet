@@ -8,6 +8,7 @@ steps:
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
+    Solution: 'LibsAndSamples.sln'
 
 - task: DownloadSecureFile@1
   displayName: 'Download Xamarin Ui Test Tools'

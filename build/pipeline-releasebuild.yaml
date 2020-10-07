@@ -20,9 +20,7 @@ pool:
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
-  Solution: 'Libs.sln'
-
-
+  
 steps:
 
 # For some reason the signing task ask for dotnet core 2
@@ -43,7 +41,7 @@ steps:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
-    Solution: $(Solution)
+    Solution: 'Libs.sln'
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml

@@ -18,6 +18,7 @@ steps:
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
+    Solution: 'LibsAndSamples.sln'
 
 # Run Unit Tests
 - template: template-run-unit-tests.yaml
