@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         }
                         catch (OperationCanceledException ex)
                         {
-                            _logger.Error("An error occured when trying to communicate with account manager: " + ex.Message);
+                            _logger.Error("An error occurred when trying to communicate with the account manager: " + ex.Message);
                         }
                         catch (Exception ex)
                         {
