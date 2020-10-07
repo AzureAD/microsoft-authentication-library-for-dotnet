@@ -4,6 +4,12 @@ parameters:
   BuildConfiguration: 'debug'
   
 steps:
+
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 3.x'
+  inputs:
+    version: 3.x
+
 # Bootstrap the build
 - template: template-bootstrap-build.yaml
 
