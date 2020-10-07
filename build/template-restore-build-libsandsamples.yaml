@@ -5,21 +5,22 @@ parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'debug'
   MsalClientSemVer: '4.0.0-devopsbuild'
+  Solution: 'LibsAndSamples.sln'
 
 steps:
 - task: VSBuild@1
-  displayName: 'NuGet restore LibsAndSamples.sln'
+  displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
-    solution: LibsAndSamples.sln
+    solution: ${{ parameters.Solution }}
     vsVersion: '15.0'
     msbuildArgs: '/t:restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
 - task: VSBuild@1
-  displayName: 'Build solution LibsAndSamples.sln'
+  displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
-    solution: LibsAndSamples.sln
+    solution: ${{ parameters.Solution }}
     vsVersion: '15.0'
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}

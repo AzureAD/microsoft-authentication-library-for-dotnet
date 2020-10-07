@@ -13,7 +13,7 @@ steps:
 # Bootstrap the build
 - template: template-bootstrap-build.yaml
 
-# Nuget Restore and Build LibsAndSamples.sln
+# Nuget Restore and Build 
 - template: template-restore-build-libsandsamples.yaml
   parameters:
     BuildPlatform: '$(BuildPlatform)'

@@ -20,6 +20,8 @@ pool:
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
+  Solution: 'Libs.sln'
+
 
 steps:
 
@@ -35,12 +37,13 @@ steps:
 # Bootstrap the build
 - template: template-bootstrap-build.yaml
 
-# Nuget Restore and Build LibsAndSamples.sln
+# Nuget Restore and Build 
 - template: template-restore-build-libsandsamples.yaml
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
+    Solution: $(Solution)
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml
