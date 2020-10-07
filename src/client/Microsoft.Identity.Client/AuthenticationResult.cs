@@ -112,6 +112,9 @@ namespace Microsoft.Identity.Client
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
         }
 
+        //Default constructor for testing
+        internal AuthenticationResult() { }
+
         /// <summary>
         /// Access Token that can be used as a bearer token to access protected web APIs
         /// </summary>
