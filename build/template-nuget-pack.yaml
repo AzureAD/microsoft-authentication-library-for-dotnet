@@ -8,6 +8,6 @@ steps:
 - task: VSBuild@1
   displayName: 'Pack ${{ parameters.ProjectPath }}'
   inputs:
-    solution: ${{ parameters.ProjectPath }}    
+    solution: ${{ parameters.ProjectPath }}
     msbuildArgs: '/t:pack /p:nobuild=${{parameters.NoBuild}} /p:IncludeSymbols=true'
     configuration: ${{ parameters.BuildConfiguration }}
