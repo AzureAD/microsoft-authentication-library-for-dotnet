@@ -287,6 +287,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.IsTrue(actualAccount.Count() == 1);
         }
 
+        [TestMethod]
         public void SilentAuthStrategyFallbackTest()
         {
             using (var harness = CreateTestHarness())
