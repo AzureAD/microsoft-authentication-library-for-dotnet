@@ -20,13 +20,14 @@ pool:
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
-
+  
 steps:
 
+# For some reason the signing task ask for dotnet core 2
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 2.2.402'
+  displayName: 'Use .Net Core sdk 2.x'
   inputs:
-    version: 2.2.402
+    version: 2.x
 
 # Run pre-build code analysis (policheck, credscan, etc)
 - template: template-prebuild-code-analysis.yaml
@@ -34,12 +35,13 @@ steps:
 # Bootstrap the build
 - template: template-bootstrap-build.yaml
 
-# Nuget Restore and Build LibsAndSamples.sln
+# Nuget Restore and Build 
 - template: template-restore-build-libsandsamples.yaml
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
+    Solution: 'Libs.sln'
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml

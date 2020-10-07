@@ -118,7 +118,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-build-and-prep-automation.yaml = build\template-build-and-prep-automation.yaml
 		build\template-build-ios-automation.yaml = build\template-build-ios-automation.yaml
 		build\template-ci-and-pr.yaml = build\template-ci-and-pr.yaml
-		build\template-install-dotnet-core.yaml = build\template-install-dotnet-core.yaml
 		build\template-install-keyvault-secrets.yaml = build\template-install-keyvault-secrets.yaml
 		build\template-install-nuget.yaml = build\template-install-nuget.yaml
 		build\template-ios-appcenter-tests.yaml = build\template-ios-appcenter-tests.yaml
