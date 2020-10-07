@@ -23,6 +23,12 @@ variables:
 
 steps:
 
+# For some reason the signing task ask for dotnet core 2
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 2.x'
+  inputs:
+    version: 2.x
+
 # Run pre-build code analysis (policheck, credscan, etc)
 - template: template-prebuild-code-analysis.yaml
 

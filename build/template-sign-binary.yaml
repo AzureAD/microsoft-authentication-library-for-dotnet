@@ -6,6 +6,9 @@ parameters:
   Pattern: ''
 
 steps:
+
+
+
 - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
   displayName: 'Sign Binary: ${{ parameters.Pattern }}'
   inputs:
