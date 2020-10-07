@@ -9,6 +9,8 @@ steps:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\net4*\Microsoft.Identity.Test.Integration.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
+    rerunFailedTests: true
+    rerunMaxAttempts: '3'
     runInParallel: true
     codeCoverageEnabled: true
 
@@ -18,5 +20,7 @@ steps:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\netcore*\Microsoft.Identity.Test.Integration.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
+    rerunFailedTests: true
+    rerunMaxAttempts: '3'
     runInParallel: true
     codeCoverageEnabled: true
