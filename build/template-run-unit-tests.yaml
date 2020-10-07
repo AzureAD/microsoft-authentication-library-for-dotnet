@@ -6,6 +6,8 @@ parameters:
 
 steps:
 
+- template: template-install-keyvault-secrets.yaml
+
 - task: VSTest@2
   displayName: 'Run unit tests (.NET FX)'
   inputs:
