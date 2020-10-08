@@ -757,7 +757,7 @@ namespace Microsoft.Identity.Client
         public const string ExperimentalFeature = "experimental_feature";
 
         /// <summary>
-        /// <para>What happens?</para>A broker application is required, but one could not be found.
+        /// <para>What happens?</para>A broker application is required, but one could not be found or communicated with.
         /// <para>Mitigation</para>Install a broker application, such as Authenticator, from the application store
         /// </summary>
         public const string BrokerApplicationRequired = "broker_application_required";
