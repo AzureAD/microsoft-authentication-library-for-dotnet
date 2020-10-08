@@ -25,6 +25,7 @@ using Microsoft.Identity.Client.Http;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http;
+using Microsoft.Identity.Client.AuthScheme;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -287,9 +288,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.IsTrue(actualAccount.Count() == 1);
         }
 
+        [TestMethod]
         public void SilentAuthStrategyFallbackTest()
         {
-            using (var harness = CreateTestHarness())
+            using (var harness = CreateBrokerHelper())
             {
                 //SilentRequest should always get an exception from the local client strategy and use the broker strategy instead when the right error codes
                 //are thrown.
@@ -304,46 +306,64 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 platformProxy.CanBrokerSupportSilentAuth().Returns(true);
                 platformProxy.CreateBroker(null).Returns(mockBroker);
 
+                harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
                 
                 var mockClientStrategy = Substitute.For<ISilentAuthRequestStrategy>();
                 var mockBrokerStrategy = Substitute.For<ISilentAuthRequestStrategy>();
-                var mockBrokerAuthenticationResult = Substitute.For<AuthenticationResult>();
+                var mockBrokerAuthenticationResult = new AuthenticationResult();
 
-                var invlidGrantException = new MsalException(MsalError.InvalidGrantError);
-                var NoAccountException = new MsalException(MsalError.NoAccountForLoginHint);
-                var NoTokensException = new MsalException(MsalError.NoTokensFoundError);
-
-                var response = new MsalTokenResponse
-                {
-                    IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                    AccessToken = "access-token",
-                    ClientInfo = MockHelpers.CreateClientInfo(),
-                    ExpiresIn = 3599,
-                    CorrelationId = "correlation-id",
-                    RefreshToken = "refresh-token",
-                    Scope = TestConstants.s_scope.AsSingleString(),
-                    TokenType = "Bearer"
-                };
+                var invlidGrantException = new MsalClientException(MsalError.InvalidGrantError);
+                var NoAccountException = new MsalClientException(MsalError.NoAccountForLoginHint);
+                var NoTokensException = new MsalClientException(MsalError.NoTokensFoundError);
 
                 mockBrokerStrategy.ExecuteAsync(new CancellationToken()).Returns(mockBrokerAuthenticationResult);
                 mockClientStrategy.ExecuteAsync(new CancellationToken()).Throws(invlidGrantException);
 
                 //Execute silent request with invalid grant
                 var silentRequest = new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters, mockClientStrategy, mockBrokerStrategy);
-                var result = silentRequest.ExecuteTestAsync(new CancellationToken());
+                var result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
                 Assert.AreEqual(result, mockBrokerAuthenticationResult);
 
                 //Execute silent request with no accounts exception
+                mockClientStrategy = Substitute.For<ISilentAuthRequestStrategy>();
                 mockClientStrategy.ExecuteAsync(new CancellationToken()).Throws(NoAccountException);
                 silentRequest = new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters, mockClientStrategy, mockBrokerStrategy);
-                result = silentRequest.ExecuteTestAsync(new CancellationToken());
+                result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
                 Assert.AreEqual(result, mockBrokerAuthenticationResult);
 
                 //Execute silent request with no tokens exception
+                mockClientStrategy = Substitute.For<ISilentAuthRequestStrategy>();
                 mockClientStrategy.ExecuteAsync(new CancellationToken()).Throws(NoTokensException);
                 silentRequest = new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters, mockClientStrategy, mockBrokerStrategy);
-                result = silentRequest.ExecuteTestAsync(new CancellationToken());
+                result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
                 Assert.AreEqual(result, mockBrokerAuthenticationResult);
+            }
+        }
+
+        [TestMethod]
+        public void NoTokenFoundThrowsUIRequiredTest()
+        {
+            using (var harness = CreateBrokerHelper())
+            {
+
+                var response = new MsalTokenResponse
+                {
+                    Scope = TestConstants.s_scope.AsSingleString(),
+                    TokenType = "Bearer",
+                    Error = BrokerResponseConst.NoTokenFound
+                };
+
+                try
+                {
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(response);
+                }
+                catch(MsalUiRequiredException ex)
+                {
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.NoTokenFound);
+                    return;
+                }
+
+                Assert.Fail("Wrong Exception thrown.");
             }
         }
 

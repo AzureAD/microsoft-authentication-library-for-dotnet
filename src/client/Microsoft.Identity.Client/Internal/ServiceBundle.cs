@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal
         public IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
 
         /// <inheritdoc />
-        public IPlatformProxy PlatformProxy { get; }
+        public IPlatformProxy PlatformProxy { get; private set; }
 
         /// <inheritdoc />
         public IApplicationConfiguration Config { get; }
@@ -98,6 +98,11 @@ namespace Microsoft.Identity.Client.Internal
         public static ServiceBundle Create(ApplicationConfiguration config)
         {
             return new ServiceBundle(config);
+        }
+
+        public void SetPlatformProxyForTest(IPlatformProxy platformProxy)
+        {
+            PlatformProxy = platformProxy;
         }
     }
 }

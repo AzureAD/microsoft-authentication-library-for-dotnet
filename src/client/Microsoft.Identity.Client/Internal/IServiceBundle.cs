@@ -29,5 +29,9 @@ namespace Microsoft.Identity.Client.Internal
         ITelemetryClient Mats { get; } // experimental / deprecated? 
         IMatsTelemetryManager MatsTelemetryManager { get; } // experimental / deprecated?         
         #endregion
+
+        #region Testing
+        void SetPlatformProxyForTest(IPlatformProxy platformProxy);
+        #endregion Testing
     }
 }
