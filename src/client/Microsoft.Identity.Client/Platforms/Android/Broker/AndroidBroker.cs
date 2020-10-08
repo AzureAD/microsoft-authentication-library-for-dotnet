@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private void HandleBrokerOperationError(Exception ex)
         {
-            _logger.Error(ex.Message + MsalErrorMessage.AndroidBrokerCannotBeInvoked);
+            _logger.Error(ex.Message);
             if (ex is MsalException)
                 throw ex;
             else

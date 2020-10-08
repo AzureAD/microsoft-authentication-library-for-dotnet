@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
+using OperationCanceledException = Android.Accounts.OperationCanceledException;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -91,10 +92,23 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     _logger.Info("Android account manager didn't return any results for interactive broker request.");
                 }
 
-                Bundle bundleResult = (Bundle)await result.GetResultAsync(
-                     AccountManagerTimeoutSeconds,
-                     TimeUnit.Seconds)
-                     .ConfigureAwait(false);
+                Bundle bundleResult = null;
+
+                try
+                {
+                    bundleResult = (Bundle)await result.GetResultAsync(
+                         AccountManagerTimeoutSeconds,
+                         TimeUnit.Seconds)
+                         .ConfigureAwait(false);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    _logger.Error("An error occured when trying to communicate with account manager: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
+                }
 
                 intent = (Intent)bundleResult?.GetParcelable(AccountManager.KeyIntent);
 
@@ -138,10 +152,23 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (result != null)
             {
-                Bundle bundleResult = (Bundle)await result.GetResultAsync(
-                     AccountManagerTimeoutSeconds,
-                     TimeUnit.Seconds)
-                     .ConfigureAwait(false);
+                Bundle bundleResult = null;
+
+                try
+                {
+                    bundleResult = (Bundle)await result.GetResultAsync(
+                         AccountManagerTimeoutSeconds,
+                         TimeUnit.Seconds)
+                         .ConfigureAwait(false);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    _logger.Error("An error occurred when trying to communicate with the account manager: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
+                }
 
                 string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
 
@@ -305,10 +332,19 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                     if (result != null)
                     {
-                        Bundle bundleResult = (Bundle)await result.GetResultAsync(
-                            AccountManagerTimeoutSeconds,
-                            TimeUnit.Seconds)
-                            .ConfigureAwait(false);
+                        Bundle bundleResult = null;
+                        
+                        try
+                        {
+                            bundleResult = (Bundle)await result.GetResultAsync(
+                                AccountManagerTimeoutSeconds,
+                                TimeUnit.Seconds)
+                                .ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException ex)
+                        {
+                            _logger.Error("An error occurred when trying to communicate with the account manager: " + ex.Message);
+                        }
 
                         var bpKey = bundleResult?.GetString(BrokerConstants.NegotiatedBPVersionKey);
 
@@ -338,12 +374,17 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         throw new MsalClientException(errorCode, errorDescription);
                     }
 
-                    throw new MsalClientException("Could not communicate with broker via account manager");
+                    throw new MsalClientException("Could not communicate with broker via account manager. Please ensure power optimization settings are turned off.");
                 }
-                catch
+                catch (Exception ex)
                 {
                     _logger.Error("Error when trying to initiate communication with the broker.");
-                    throw;
+                    if (ex is MsalException)
+                    {
+                        throw;
+                    }
+
+                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked, ex);
                 }
             }
         }
