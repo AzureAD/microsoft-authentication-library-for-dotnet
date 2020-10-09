@@ -921,8 +921,20 @@ namespace Microsoft.Identity.Client
         public const string WamUiThread = "wam_ui_thread_only";
 
         /// <summary>
-        /// The Windows broker (WAM) is not supported in conjunction with B2C authorities
+        /// The Windows broker (WAM) is only supported in conjunction  with "work and school" accounts 
+        /// and with Microsoft accounts.
         /// </summary>
         public const string WamNoB2C = "wam_no_b2c";
+
+        /// <summary>
+        /// WAM service exception that can occur when calling AcquireTokenInteractive
+        /// </summary>
+        public const string WamInteractiveError = "wam_interactive_error";
+
+        /// <summary>
+        /// WAM service exception that can occur when calling AcquireTokenInteractive and the account picker 
+        /// pops up
+        /// </summary>
+        public const string WamPickerError = "wam_interactive_picker_error";
     }
 }

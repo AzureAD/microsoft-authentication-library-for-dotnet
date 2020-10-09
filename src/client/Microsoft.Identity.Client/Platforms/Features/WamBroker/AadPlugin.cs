@@ -29,9 +29,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID)
         {
-            var webAccounProvider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations").ConfigureAwait(false);
+            var webAccountProvider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations").ConfigureAwait(false);
 
-            var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccounProvider, clientID).ConfigureAwait(false);
+            var webAccounts = await _wamProxy.FindAllWebAccountsAsync(webAccountProvider, clientID).ConfigureAwait(false);
 
             var msalAccounts = webAccounts
                 .Select(webAcc => ConvertToMsalAccountOrNull(webAcc))
@@ -45,8 +45,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         private Account ConvertToMsalAccountOrNull(WebAccount webAccount)
         {
-            string username = webAccount.UserName;
-
             if (!webAccount.Properties.TryGetValue("Authority", out string authority))
             {
                 _logger.WarningPii(
@@ -61,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             if (homeAccountId != null)
             {
-                var msalAccount = new Account(homeAccountId, username, environment);
+                var msalAccount = new Account(homeAccountId, webAccount?.UserName, environment);
                 return msalAccount;
             }
 

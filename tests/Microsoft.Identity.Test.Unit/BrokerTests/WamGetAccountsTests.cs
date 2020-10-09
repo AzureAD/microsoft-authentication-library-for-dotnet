@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -27,13 +29,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable().Returns(true);
-                
+
                 var msalTokenResponse = CreateMsalTokenResponseFromWam("wam1");
                 mockBroker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(msalTokenResponse));
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
                     .WithBroker(true)
-                    .WithHttpManager(httpManager)                    
+                    .WithHttpManager(httpManager)
                     .BuildConcrete();
 
                 pca.ServiceBundle.PlatformProxy.SetBrokerForTest(mockBroker);
@@ -48,6 +51,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual("wam1", wamAccountIds[TestConstants.ClientId]);
 
                 var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId2)
+                    .WithExperimentalFeatures(true)
                     .WithBroker(true)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
@@ -75,11 +79,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // 2 apps must share the token cache, like FOCI apps, for this test to be interesting
                 var pca1 = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
                     .WithBroker(true)
                     .WithHttpManager(httpManager)
-                    .BuildConcrete();                
+                    .BuildConcrete();
 
                 var pca2 = PublicClientApplicationBuilder.Create(TestConstants.ClientId2)
+                    .WithExperimentalFeatures(true)
                     .WithBroker(true)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
@@ -134,6 +140,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     Task.FromResult(brokerAccounts));
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
                     .WithBroker(true)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
@@ -151,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual(1, wamAccountIds.Count);
                 Assert.AreEqual("wam_acc_id", wamAccountIds[TestConstants.ClientId]);
             }
-        }   
+        }
 
         private static MsalTokenResponse CreateMsalTokenResponseFromWam(string wamAccountId)
         {
@@ -164,9 +171,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 CorrelationId = "correlation-id",
                 RefreshToken = null, // brokers don't return RT
                 Scope = TestConstants.s_scope.AsSingleString(),
-                TokenType = "Bearer", 
+                TokenType = "Bearer",
                 WamAccountId = wamAccountId,
             };
         }
     }
+
+ 
 }
