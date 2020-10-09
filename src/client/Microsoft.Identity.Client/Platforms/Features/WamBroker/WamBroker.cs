@@ -464,16 +464,32 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return false;
             }
 #endif
-            // Win 10 RS3 
-            return ApiInformation.IsMethodPresent(
-                "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
-                "FindAllAccountsAsync");
+            return true;
         }
 
-        public Task RemoveAccountAsync(string clientID, IAccount account)
+        public async Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account)
         {
-            _logger.Verbose("WAM accounts are not removable.");
-            return Task.CompletedTask;
+            string homeTenantId = account?.HomeAccountId?.TenantId;
+            if (!string.IsNullOrEmpty(homeTenantId))
+            {
+                bool isMsaAccount = IsConsumerTenantId(homeTenantId);
+                IWamPlugin wamPlugin = isMsaAccount ? _msaPlugin : _aadPlugin;
+                WebAccountProvider provider;
+                if (isMsaAccount)
+                {
+                    provider = await _webAccountProviderFactory.GetAccountProviderAsync("consumers").ConfigureAwait(false);
+                }
+                else
+                {
+                    provider = await _webAccountProviderFactory.GetAccountProviderAsync("organizations")
+                        .ConfigureAwait(false);
+                }
+
+                var webAccount = await FindWamAccountForMsalAccountAsync(provider, wamPlugin, account, null, appConfig.ClientId)
+                    .ConfigureAwait(false);
+                _logger.Info("Found a webAccount? " + (webAccount != null));
+                await webAccount.SignOutAsync();
+            }
         }
 
         private bool IsHomeTidMSA(string homeTenantId)

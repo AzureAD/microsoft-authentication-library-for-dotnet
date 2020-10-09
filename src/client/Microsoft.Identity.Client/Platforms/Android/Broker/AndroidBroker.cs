@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public async Task RemoveAccountAsync(string clientID, IAccount account)
+        public async Task RemoveAccountAsync(IApplicationConfiguration applicationConfiguration, IAccount account)
         {
             using (_logger.LogMethodDuration())
             {
@@ -293,7 +293,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 try
                 {
                     await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
-                    _brokerHelper.RemoveBrokerAccountInAccountManager(clientID, account);
+                    _brokerHelper.RemoveBrokerAccountInAccountManager(applicationConfiguration.ClientId, account);
                 }
                 catch (Exception ex)
                 {
