@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -14,7 +15,6 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Nito.AsyncEx;
 using NSubstitute;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
@@ -51,10 +51,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestInitialize]
         public void Init()
         {
-            AsyncContext.Run(() =>
-            {
-                _synchronizationContext = SynchronizationContext.Current;
-            });
+            _synchronizationContext = new DedicatedThreadSynchronisationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
 
@@ -370,15 +367,22 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestMethod]
         public async Task ATI_RequiresSyncContext_Async()
         {
+            var wamBroker = new WamBroker(
+            new CoreUIParent(), // no sync context here
+                _logger,
+                _aadPlugin,
+                _msaPlugin,
+                _wamProxy,
+                _webAccountProviderFactory,
+                _accountPickerFactory);
             using (var harness = CreateTestHarness())
             {
                 var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant); // AAD
                 var atiParams = new AcquireTokenInteractiveParameters();
 
-
                 // Act
                 var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                    () => _wamBroker.AcquireTokenInteractiveAsync(requestParams, atiParams)).ConfigureAwait(false);
+                    () => wamBroker.AcquireTokenInteractiveAsync(requestParams, atiParams)).ConfigureAwait(false);
 
                 // Assert
                 Assert.AreEqual(MsalError.WamUiThread, ex.ErrorCode);
@@ -426,7 +430,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var webTokenResponse = new WebTokenResponse();
                 webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
 
-                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest, webAccount).
                     Returns(Task.FromResult(webTokenResponseWrapper));
                 _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse).Returns(_msalTokenResponse);
 
@@ -616,6 +620,79 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
+    }
+
+    // A simple SynchronizationContext that encapsulates it's own dedicated task queue and processing
+    // thread for servicing Send() & Post() calls.  
+    // Based upon http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx but uses it's own thread
+    // rather than running on the thread that it's instanciated on
+    public sealed class DedicatedThreadSynchronisationContext : SynchronizationContext, IDisposable
+    {
+        public DedicatedThreadSynchronisationContext()
+        {
+            m_thread = new Thread(ThreadWorkerDelegate);
+            m_thread.Start(this);
+        }
+
+        public void Dispose()
+        {
+            m_queue.CompleteAdding();
+        }
+
+        /// <summary>Dispatches an asynchronous message to the synchronization context.</summary>
+        /// <param name="d">The System.Threading.SendOrPostCallback delegate to call.</param>
+        /// <param name="state">The object passed to the delegate.</param>
+        public override void Post(SendOrPostCallback d, object state)
+        {
+            if (d == null)
+                throw new ArgumentNullException("d");
+            m_queue.Add(new KeyValuePair<SendOrPostCallback, object>(d, state));
+        }
+
+        /// <summary> As 
+        public override void Send(SendOrPostCallback d, object state)
+        {
+            using (var handledEvent = new ManualResetEvent(false))
+            {
+                Post(SendOrPostCallback_BlockingWrapper, Tuple.Create(d, state, handledEvent));
+                handledEvent.WaitOne();
+            }
+        }
+
+        public int WorkerThreadId { get { return m_thread.ManagedThreadId; } }
+        //=========================================================================================
+
+        private static void SendOrPostCallback_BlockingWrapper(object state)
+        {
+            var innerCallback = (state as Tuple<SendOrPostCallback, object, ManualResetEvent>);
+            try
+            {
+                innerCallback.Item1(innerCallback.Item2);
+            }
+            finally
+            {
+                innerCallback.Item3.Set();
+            }
+        }
+
+        /// <summary>The queue of work items.</summary>
+        private readonly BlockingCollection<KeyValuePair<SendOrPostCallback, object>> m_queue =
+            new BlockingCollection<KeyValuePair<SendOrPostCallback, object>>();
+
+        private readonly Thread m_thread = null;
+
+        /// <summary>Runs an loop to process all queued work items.</summary>
+        private void ThreadWorkerDelegate(object obj)
+        {
+            SynchronizationContext.SetSynchronizationContext(obj as SynchronizationContext);
+
+            try
+            {
+                foreach (var workItem in m_queue.GetConsumingEnumerable())
+                    workItem.Key(workItem.Value);
+            }
+            catch (ObjectDisposedException) { }
+        }
     }
 }
 

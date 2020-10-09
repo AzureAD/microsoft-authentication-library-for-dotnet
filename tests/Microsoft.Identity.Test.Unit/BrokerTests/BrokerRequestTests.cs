@@ -261,6 +261,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
                 .WithBroker(true)
                 .WithPlatformProxy(platformProxy)
                 .Build();
@@ -286,6 +287,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             platformProxy.CreateBroker(null).Returns(mockBroker);
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
                 .WithBroker(true)
                 .WithPlatformProxy(platformProxy)
                 .Build();

@@ -130,10 +130,20 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-            Config.IsBrokerEnabled = enableBroker;
+#if DESKTOP || NET_CORE || WINDOWS_APP
+            if (!Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithBroker)));
+            }
+#endif
 
+            Config.IsBrokerEnabled = enableBroker;
             return this;
         }
+
+
 #endif // !NET_CORE_BUILDTIME && !MAC_BUILDTIME
 
 #if WINDOWS_APP

@@ -164,7 +164,9 @@ namespace Microsoft.Identity.Client
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                var brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
+                var brokerAccounts =
+                    (await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false))
+                    ?? Enumerable.Empty<IAccount>();
 
                 if (!string.IsNullOrEmpty(homeAccountIdFilter))
                 {
@@ -183,7 +185,7 @@ namespace Microsoft.Identity.Client
 
         private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts)
         {
-            ServiceBundle.DefaultLogger.Verbose($"Filtering broker accounts by env. Before fitering: " + brokerAccounts.Count());
+            ServiceBundle.DefaultLogger.Verbose($"Filtering broker accounts by env. Before filtering: " + brokerAccounts.Count());
 
             ISet<string> allEnvs = new HashSet<string>(
                 brokerAccounts.Select(aci => aci.Environment),

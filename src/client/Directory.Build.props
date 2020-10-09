@@ -148,10 +148,11 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-        <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />    
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />    
     <Compile Include="$(PathToMsalSources)\Platforms\Features\NetStdCore\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
-
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />

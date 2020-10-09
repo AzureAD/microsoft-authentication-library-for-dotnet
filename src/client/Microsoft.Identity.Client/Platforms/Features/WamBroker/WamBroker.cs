@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IntPtr _parentHandle;
         private readonly SynchronizationContext _synchronizationContext;
         private const string WamErrorPrefix = "WAM Error ";
+        private const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
 
 
         public WamBroker(
@@ -88,7 +89,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 throw new MsalClientException(
                     MsalError.WamUiThread,
-                    "AcquireTokenInteractive must be called from the UI thread when using WAM.");
+                    "AcquireTokenInteractive with broker must be called from the UI thread when using WAM. " +
+                    "Note that console applications are not currently supported in conjuction with WAM." + ErrorMessageSuffix);
             }
 
             bool forceLoginPrompt = IsForceLoginPrompt(acquireTokenInteractiveParameters.Prompt);
@@ -152,7 +154,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             throw new MsalClientException(
                 "wam_prompt_not_supported",
-                $"The broker does not support the prompt {prompt.PromptValue}. You can specify Prompt.ForceLogin or Prompt.SelectAccount to force authentication, or do not specify any value for the default broker behavior (recommended).");
+                $"The broker does not support the prompt {prompt.PromptValue}. You can specify Prompt.ForceLogin or Prompt.SelectAccount to force authentication, or do not specify any value for the default broker behavior (recommended). " + ErrorMessageSuffix);
         }
 
         private async Task<IWebTokenRequestResultWrapper> AcquireInteractiveWithoutPickerAsync(
@@ -189,7 +191,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             catch (Exception ex)
             {
                 _logger.ErrorPii(ex);
-                throw new MsalServiceException("wam_interactive_error", "See inner exception for details", ex);
+                throw new MsalServiceException(
+                    MsalError.WamInteractiveError,
+                    "AcquireTokenInteractive without picker failed. See inner exception for details. ", ex);
             }
         }
 
@@ -257,8 +261,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 _logger.ErrorPii(ex);
                 throw new MsalServiceException(
-                    "wam_interactive_picker_error",
-                    "Could not get the account provider. See inner exception for details", ex);
+                    MsalError.WamPickerError,
+                    "Could not get the account provider - account picker. See inner exception for details", ex);
             }
 
             IWebTokenRequestResultWrapper wamResult;
@@ -270,8 +274,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 _logger.ErrorPii(ex);
                 throw new MsalServiceException(
-                    "wam_interactive_picker_error",
-                    "Could not get the result. See inner exception for details", ex);
+                    MsalError.WamPickerError,
+                    "Could not get the result - account picker. See inner exception for details", ex);
             }
 
             return CreateMsalTokenResponse(wamResult, wamPlugin, isInteractive: true);
@@ -464,7 +468,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return false;
             }
 #endif
-            return true;
+            // WAM is present on Win 10 only
+            return ApiInformation.IsMethodPresent(
+                   "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
+                   "FindAllAccountsAsync");
         }
 
         public async Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account)
@@ -595,7 +602,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             {
                 throw new MsalClientException(
                     MsalError.WamNoB2C,
-                    "WAM broker is not supported in conjunction with a B2C authority");
+                    "The Windows broker (WAM) is only supported in conjunction with work and school and with Microsoft accounts.");
             }
 
             if (authority.AuthorityInfo.AuthorityType == AuthorityType.Adfs)

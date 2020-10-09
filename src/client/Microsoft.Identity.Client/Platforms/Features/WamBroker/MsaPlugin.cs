@@ -182,7 +182,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string msaTokens = webTokenResponse.Token;
             if (string.IsNullOrEmpty(msaTokens))
             {
-                throw new MsalServiceException(MsaErrorCode, "Internal error - bad token format, msaTokens was unexpectedly empty");
+                throw new MsalServiceException(
+                    MsaErrorCode, 
+                    "Internal error - bad token format, msaTokens was unexpectedly empty");
             }
 
             string accessToken = null, idToken = null, clientInfo = null, tokenType = null, scopes = null, correlationId = null;

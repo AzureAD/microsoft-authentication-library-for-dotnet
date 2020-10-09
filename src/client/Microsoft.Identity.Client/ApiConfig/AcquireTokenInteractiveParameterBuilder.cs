@@ -338,7 +338,6 @@ namespace Microsoft.Identity.Client
         protected override void Validate()
         {
             base.Validate();
-            // this.PublicClientApplicationExecutor.ServiceBundle.Config.IsBrokerEnabled
 #if ANDROID
             if (Parameters.UiParent.Activity == null)
             {
