@@ -439,6 +439,21 @@ namespace NetDesktopWinForms
 
             await(task as Task).ConfigureAwait(false);
         }
+
+        private async void remoteAcc_click(object sender, EventArgs e)
+        {
+            if (cbxAccount.SelectedIndex == 0)
+            {
+                throw new InvalidOperationException("[TEST APP FAILURE] Please select an account");
+            }
+
+            var pca = CreatePca();
+            var acc = (cbxAccount.SelectedItem as AccountModel).Account;
+
+            await pca.RemoveAsync(acc).ConfigureAwait(false);
+
+            Log("Removed account " + acc.Username);
+        }
     }
 
     public class ClientEntry

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -72,13 +73,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _wamProxy,
                 _webAccountProviderFactory,
                 _accountPickerFactory);
-        }
-
-        [TestMethod]
-        public async Task WAM_RemoveAccount_DoesNothing_Async()
-        {
-            await _wamBroker.RemoveAccountAsync(TestConstants.ClientId, new Account("a.b", "user", "login.linux.net"))
-                .ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -493,6 +487,41 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert 
                 Assert.AreSame(_msalTokenResponse, result);
+            }
+        }
+
+        [TestMethod]
+        public async Task RemoveAADAccountAsync()
+        {
+            string aadHomeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityConsumerTidTenant); // MSA
+                requestParams.Account = new Account(
+                                    aadHomeAccId, // matching in on home acc id
+                                    "doesnt_matter@contoso.com", // matching is not on UPN
+                                    null); // account does not have wam_id, might be coming directly from WAM
+
+                var webAccount = new WebAccount(wamAccountProvider, "user@contoso.com", WebAccountState.Connected);
+                IReadOnlyList<WebAccount> webAccounts = new List<WebAccount>() { webAccount };
+          
+
+                _wamProxy.FindAllWebAccountsAsync(wamAccountProvider, TestConstants.ClientId).Returns(Task.FromResult(webAccounts));
+
+                // WAM can give MSAL the home account ID of a Wam account, which MSAL matches to a WAM account
+                _aadPlugin.GetHomeAccountIdOrNull(webAccount).Returns(aadHomeAccId);
+
+                
+                var atsParams = new AcquireTokenSilentParameters();
+                _webAccountProviderFactory.GetAccountProviderAsync("organizations").ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+
+                // Act Assert
+                await AssertException.TaskThrowsAsync<FileNotFoundException>( // Since WebAccount is a real object, it throws this exception
+                    () => _wamBroker.RemoveAccountAsync(harness.ServiceBundle.Config, requestParams.Account))
+                    .ConfigureAwait(false);
+
             }
         }
 

@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         #region Silent Flow Methods
         Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri);
 
-        Task RemoveAccountAsync(string clientID, IAccount account);
+        Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account);
         #endregion Silent Flow Methods
     }
 }

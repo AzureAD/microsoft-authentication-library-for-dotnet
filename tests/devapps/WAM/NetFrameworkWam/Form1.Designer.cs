@@ -52,23 +52,26 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.cbxMsaPt = new System.Windows.Forms.CheckBox();
             this.btnExpire = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // resultTbx
             // 
-            this.resultTbx.Location = new System.Drawing.Point(12, 191);
+            this.resultTbx.Location = new System.Drawing.Point(24, 367);
+            this.resultTbx.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.resultTbx.Multiline = true;
             this.resultTbx.Name = "resultTbx";
             this.resultTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.resultTbx.Size = new System.Drawing.Size(615, 381);
+            this.resultTbx.Size = new System.Drawing.Size(1226, 729);
             this.resultTbx.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 16);
+            this.label1.Location = new System.Drawing.Point(18, 31);
+            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(48, 13);
+            this.label1.Size = new System.Drawing.Size(97, 25);
             this.label1.TabIndex = 2;
             this.label1.Text = "Authority";
             // 
@@ -83,18 +86,20 @@
             "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
             "https://login.windows-ppe.net/organizations",
             "https://login.windows-ppe.net/72f988bf-86f1-41af-91ab-2d7cd011db47"});
-            this.authorityCbx.Location = new System.Drawing.Point(63, 13);
+            this.authorityCbx.Location = new System.Drawing.Point(126, 25);
+            this.authorityCbx.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.authorityCbx.Name = "authorityCbx";
-            this.authorityCbx.Size = new System.Drawing.Size(220, 21);
+            this.authorityCbx.Size = new System.Drawing.Size(436, 33);
             this.authorityCbx.TabIndex = 3;
             this.authorityCbx.Text = "https://login.microsoftonline.com/common";
             // 
             // clientIdCbx
             // 
             this.clientIdCbx.FormattingEnabled = true;
-            this.clientIdCbx.Location = new System.Drawing.Point(356, 13);
+            this.clientIdCbx.Location = new System.Drawing.Point(712, 25);
+            this.clientIdCbx.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.clientIdCbx.Name = "clientIdCbx";
-            this.clientIdCbx.Size = new System.Drawing.Size(252, 21);
+            this.clientIdCbx.Size = new System.Drawing.Size(500, 33);
             this.clientIdCbx.TabIndex = 4;
             this.clientIdCbx.Text = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
             this.clientIdCbx.SelectedIndexChanged += new System.EventHandler(this.clientIdCbx_SelectedIndexChanged);
@@ -102,26 +107,29 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(289, 16);
+            this.label2.Location = new System.Drawing.Point(578, 31);
+            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(42, 13);
+            this.label2.Size = new System.Drawing.Size(84, 25);
             this.label2.TabIndex = 5;
             this.label2.Text = "ClientId";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 74);
+            this.label3.Location = new System.Drawing.Point(18, 142);
+            this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(58, 13);
+            this.label3.Size = new System.Drawing.Size(115, 25);
             this.label3.TabIndex = 7;
             this.label3.Text = "Login Hint ";
             // 
             // loginHintTxt
             // 
-            this.loginHintTxt.Location = new System.Drawing.Point(63, 71);
+            this.loginHintTxt.Location = new System.Drawing.Point(126, 137);
+            this.loginHintTxt.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.loginHintTxt.Name = "loginHintTxt";
-            this.loginHintTxt.Size = new System.Drawing.Size(220, 20);
+            this.loginHintTxt.Size = new System.Drawing.Size(436, 31);
             this.loginHintTxt.TabIndex = 8;
             // 
             // promptCbx
@@ -134,16 +142,18 @@
             "no_prompt",
             "consent",
             "never"});
-            this.promptCbx.Location = new System.Drawing.Point(487, 97);
+            this.promptCbx.Location = new System.Drawing.Point(974, 187);
+            this.promptCbx.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.promptCbx.Name = "promptCbx";
-            this.promptCbx.Size = new System.Drawing.Size(121, 21);
+            this.promptCbx.Size = new System.Drawing.Size(238, 33);
             this.promptCbx.TabIndex = 10;
             // 
             // atsBtn
             // 
-            this.atsBtn.Location = new System.Drawing.Point(14, 147);
+            this.atsBtn.Location = new System.Drawing.Point(28, 283);
+            this.atsBtn.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.atsBtn.Name = "atsBtn";
-            this.atsBtn.Size = new System.Drawing.Size(75, 23);
+            this.atsBtn.Size = new System.Drawing.Size(150, 44);
             this.atsBtn.TabIndex = 11;
             this.atsBtn.Text = "ATS";
             this.atsBtn.UseVisualStyleBackColor = true;
@@ -151,9 +161,10 @@
             // 
             // atiBtn
             // 
-            this.atiBtn.Location = new System.Drawing.Point(95, 147);
+            this.atiBtn.Location = new System.Drawing.Point(190, 283);
+            this.atiBtn.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.atiBtn.Name = "atiBtn";
-            this.atiBtn.Size = new System.Drawing.Size(75, 23);
+            this.atiBtn.Size = new System.Drawing.Size(150, 44);
             this.atiBtn.TabIndex = 12;
             this.atiBtn.Text = "ATI";
             this.atiBtn.UseVisualStyleBackColor = true;
@@ -161,9 +172,10 @@
             // 
             // atsAtiBtn
             // 
-            this.atsAtiBtn.Location = new System.Drawing.Point(176, 147);
+            this.atsAtiBtn.Location = new System.Drawing.Point(352, 283);
+            this.atsAtiBtn.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.atsAtiBtn.Name = "atsAtiBtn";
-            this.atsAtiBtn.Size = new System.Drawing.Size(75, 23);
+            this.atsAtiBtn.Size = new System.Drawing.Size(150, 44);
             this.atsAtiBtn.TabIndex = 13;
             this.atsAtiBtn.Text = "ATS + ATI";
             this.atsAtiBtn.UseVisualStyleBackColor = true;
@@ -174,18 +186,20 @@
             this.useBrokerChk.AutoSize = true;
             this.useBrokerChk.Checked = true;
             this.useBrokerChk.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.useBrokerChk.Location = new System.Drawing.Point(12, 101);
+            this.useBrokerChk.Location = new System.Drawing.Point(24, 194);
+            this.useBrokerChk.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.useBrokerChk.Name = "useBrokerChk";
-            this.useBrokerChk.Size = new System.Drawing.Size(75, 17);
+            this.useBrokerChk.Size = new System.Drawing.Size(127, 29);
             this.useBrokerChk.TabIndex = 14;
             this.useBrokerChk.Text = "Use WAM";
             this.useBrokerChk.UseVisualStyleBackColor = true;
             // 
             // accBtn
             // 
-            this.accBtn.Location = new System.Drawing.Point(257, 147);
+            this.accBtn.Location = new System.Drawing.Point(592, 283);
+            this.accBtn.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.accBtn.Name = "accBtn";
-            this.accBtn.Size = new System.Drawing.Size(115, 23);
+            this.accBtn.Size = new System.Drawing.Size(161, 44);
             this.accBtn.TabIndex = 15;
             this.accBtn.Text = "Get Accounts";
             this.accBtn.UseVisualStyleBackColor = true;
@@ -193,9 +207,10 @@
             // 
             // clearBtn
             // 
-            this.clearBtn.Location = new System.Drawing.Point(552, 578);
+            this.clearBtn.Location = new System.Drawing.Point(1104, 1112);
+            this.clearBtn.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.clearBtn.Name = "clearBtn";
-            this.clearBtn.Size = new System.Drawing.Size(75, 23);
+            this.clearBtn.Size = new System.Drawing.Size(150, 44);
             this.clearBtn.TabIndex = 16;
             this.clearBtn.Text = "Clear Log";
             this.clearBtn.UseVisualStyleBackColor = true;
@@ -203,9 +218,10 @@
             // 
             // btnClearCache
             // 
-            this.btnClearCache.Location = new System.Drawing.Point(512, 162);
+            this.btnClearCache.Location = new System.Drawing.Point(1024, 312);
+            this.btnClearCache.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.btnClearCache.Name = "btnClearCache";
-            this.btnClearCache.Size = new System.Drawing.Size(115, 23);
+            this.btnClearCache.Size = new System.Drawing.Size(230, 44);
             this.btnClearCache.TabIndex = 17;
             this.btnClearCache.Text = "Clear MSAL Cache";
             this.btnClearCache.UseVisualStyleBackColor = true;
@@ -218,72 +234,91 @@
             "User.Read",
             "User.Read User.Read.All",
             "https://management.core.windows.net//.default"});
-            this.cbxScopes.Location = new System.Drawing.Point(63, 37);
+            this.cbxScopes.Location = new System.Drawing.Point(126, 71);
+            this.cbxScopes.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.cbxScopes.Name = "cbxScopes";
-            this.cbxScopes.Size = new System.Drawing.Size(545, 21);
+            this.cbxScopes.Size = new System.Drawing.Size(1086, 33);
             this.cbxScopes.TabIndex = 18;
             this.cbxScopes.Text = "User.Read";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 40);
+            this.label5.Location = new System.Drawing.Point(18, 77);
+            this.label5.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(43, 13);
+            this.label5.Size = new System.Drawing.Size(84, 25);
             this.label5.TabIndex = 19;
             this.label5.Text = "Scopes";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(441, 100);
+            this.label4.Location = new System.Drawing.Point(882, 192);
+            this.label4.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(40, 13);
+            this.label4.Size = new System.Drawing.Size(80, 25);
             this.label4.TabIndex = 9;
             this.label4.Text = "Prompt";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(289, 73);
+            this.label6.Location = new System.Drawing.Point(578, 140);
+            this.label6.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(61, 13);
+            this.label6.Size = new System.Drawing.Size(119, 25);
             this.label6.TabIndex = 21;
             this.label6.Text = "Or Account";
             // 
             // cbxAccount
             // 
             this.cbxAccount.FormattingEnabled = true;
-            this.cbxAccount.Location = new System.Drawing.Point(356, 70);
+            this.cbxAccount.Location = new System.Drawing.Point(712, 135);
+            this.cbxAccount.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.cbxAccount.Name = "cbxAccount";
-            this.cbxAccount.Size = new System.Drawing.Size(252, 21);
+            this.cbxAccount.Size = new System.Drawing.Size(500, 33);
             this.cbxAccount.TabIndex = 22;
             // 
             // cbxMsaPt
             // 
             this.cbxMsaPt.AutoSize = true;
-            this.cbxMsaPt.Location = new System.Drawing.Point(95, 101);
+            this.cbxMsaPt.Location = new System.Drawing.Point(190, 194);
+            this.cbxMsaPt.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.cbxMsaPt.Name = "cbxMsaPt";
-            this.cbxMsaPt.Size = new System.Drawing.Size(111, 17);
+            this.cbxMsaPt.Size = new System.Drawing.Size(205, 29);
             this.cbxMsaPt.TabIndex = 23;
             this.cbxMsaPt.Text = "MSA-Passthrough";
             this.cbxMsaPt.UseVisualStyleBackColor = true;
             // 
             // btnExpire
             // 
-            this.btnExpire.Location = new System.Drawing.Point(512, 133);
+            this.btnExpire.Location = new System.Drawing.Point(1024, 256);
+            this.btnExpire.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.btnExpire.Name = "btnExpire";
-            this.btnExpire.Size = new System.Drawing.Size(115, 23);
+            this.btnExpire.Size = new System.Drawing.Size(230, 44);
             this.btnExpire.TabIndex = 24;
             this.btnExpire.Text = "Expire ATs";
             this.btnExpire.UseVisualStyleBackColor = true;
             this.btnExpire.Click += new System.EventHandler(this.btnExpire_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(765, 283);
+            this.button1.Margin = new System.Windows.Forms.Padding(6);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(178, 44);
+            this.button1.TabIndex = 25;
+            this.button1.Text = "Remove Acc";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.remoteAcc_click);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(639, 613);
+            this.ClientSize = new System.Drawing.Size(1278, 1179);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnExpire);
             this.Controls.Add(this.cbxMsaPt);
             this.Controls.Add(this.cbxAccount);
@@ -306,7 +341,7 @@
             this.Controls.Add(this.authorityCbx);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.resultTbx);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -339,6 +374,7 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.CheckBox cbxMsaPt;
         private System.Windows.Forms.Button btnExpire;
+        private System.Windows.Forms.Button button1;
     }
 }
 

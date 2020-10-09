@@ -241,7 +241,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
 
-                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.RemoveAccountAsync(TestConstants.ClientId, new Account("test", "test", "test"))).ConfigureAwait(false);
+                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.RemoveAccountAsync(
+                    harness.ServiceBundle.Config, new Account("test", "test", "test"))).ConfigureAwait(false);
             }
         }
 
