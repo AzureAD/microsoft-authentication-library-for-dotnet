@@ -249,8 +249,7 @@ namespace Microsoft.Identity.Client.Cache
                         environmentAliases.Contains(new Uri(p.Key.Authority).Host));
 
                 bool filtered = false;
-
-                // if upn is provided then use it to filter
+                
                 if (!string.IsNullOrEmpty(account?.Username))
                 {
                     listToProcess =
@@ -259,8 +258,7 @@ namespace Microsoft.Identity.Client.Cache
                     
                     filtered = true;
                 }
-
-                // if uniqueId is provided then use it to filter
+                
                 if (!string.IsNullOrEmpty(account?.HomeAccountId?.ObjectId))
                 {
                     listToProcess =
