@@ -101,27 +101,28 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Act - query Adal Entries For Msal with valid Upn as a filter
             var rt =
-                CacheFallbackOperations.GetAdalEntryForMsal(
+                CacheFallbackOperations.GetRefreshToken(
                     _logger,
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
                         TestConstants.SovereignNetworkEnvironment },
                     TestConstants.ClientId,
-                    "User1", null);
+                    new Account(null, "User1", null));
+                     
 
             Assert.AreEqual("uid1.tenantId1", rt.HomeAccountId);
 
             // Act - query Adal Entries For Msal with invalid Upn as a filter
             rt =
-                CacheFallbackOperations.GetAdalEntryForMsal(
+                CacheFallbackOperations.GetRefreshToken(
                     _logger,
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
                         TestConstants.SovereignNetworkEnvironment },
                     TestConstants.ClientId,
-                    "UserX", null);
+                    new Account(null, "UserX", null));
 
             Assert.IsNull(rt, "Expected to find no items");
         }
@@ -134,27 +135,47 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Act - query Adal Entries For Msal with valid UniqueId as a filter
             var rt =
-                CacheFallbackOperations.GetAdalEntryForMsal(
+                CacheFallbackOperations.GetRefreshToken(
                     _logger,
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
                         TestConstants.SovereignNetworkEnvironment },
                     TestConstants.ClientId,
-                    null, "Uid2");
+                    new Account("uid2.tenant", null, null));
 
             Assert.AreEqual("uid2.tenantId2", rt.HomeAccountId);
 
             // Act - query Adal Entries For Msal with invalid UniqueId as a filter
             rt =
-                CacheFallbackOperations.GetAdalEntryForMsal(
+                CacheFallbackOperations.GetRefreshToken(
                     _logger,
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
                         TestConstants.SovereignNetworkEnvironment },
                     TestConstants.ClientId,
-                    null, "uidX");
+                    new Account("udiX.tenant", null, null));
+
+            Assert.IsNull(rt, "Expected to find no items");
+        }
+
+        [TestMethod]
+        public void GetAllAdalEntriesForMsal_NoFilter()
+        {
+            // Arrange
+            PopulateLegacyCache(_legacyCachePersistence);
+
+            // Act - query Adal Entries For Msal with valid Upn and UniqueId as a filter
+            var rt =
+                CacheFallbackOperations.GetRefreshToken(
+                    _logger,
+                    _legacyCachePersistence,
+                    new[] {
+                        TestConstants.ProductionPrefNetworkEnvironment,
+                        TestConstants.SovereignNetworkEnvironment },
+                    TestConstants.ClientId,
+                    new Account(null, null, null)); // too litle info here, do not return RT
 
             Assert.IsNull(rt, "Expected to find no items");
         }
@@ -167,40 +188,40 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Act - query Adal Entries For Msal with valid Upn and UniqueId as a filter
             var rt =
-                CacheFallbackOperations.GetAdalEntryForMsal(
+                CacheFallbackOperations.GetRefreshToken(
                     _logger,
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
                         TestConstants.SovereignNetworkEnvironment },
                     TestConstants.ClientId,
-                    "User1", "Uid1");
+                    new Account("uid1.utid", "User1", null));
 
             Assert.AreEqual("uid1.tenantId1", rt.HomeAccountId);
 
             // Act - query Adal Entries For Msal with invalid Upn and valid UniqueId as a filter
             rt  =
-                CacheFallbackOperations.GetAdalEntryForMsal(
+                CacheFallbackOperations.GetRefreshToken(
                     _logger,
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
                         TestConstants.SovereignNetworkEnvironment },
                     TestConstants.ClientId,
-                    "UserX", "uid1");
+                    new Account("uid1.utid", "UserX", null));
 
             Assert.IsNull(rt, "Expected to find no items");
 
             // Act - query Adal Entries For Msal with valid Upn and invalid UniqueId as a filter
             rt =
-                CacheFallbackOperations.GetAdalEntryForMsal(
+                CacheFallbackOperations.GetRefreshToken(
                     _logger,
                     _legacyCachePersistence,
                     new[] {
                         TestConstants.ProductionPrefNetworkEnvironment,
                         TestConstants.SovereignNetworkEnvironment },
                     TestConstants.ClientId,
-                    "User1", "uidX");
+                    new Account("uidX.utid", "User1", null));
 
             Assert.IsNull(rt, "Expected to find no items");
         }
@@ -214,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                           TestConstants.ClientId,
                           TestConstants.ProductionPrefNetworkEnvironment,
                           "uid",
-                          "tenantId",
+                          "tenantId1",
                           "user1");
 
             PopulateLegacyWithRtAndId(
@@ -222,20 +243,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TestConstants.ClientId,
                 TestConstants.ProductionPrefNetworkEnvironment,
                 "uid",
-                "tenantId",
+                "tenantId2",
                 "user2");
 
             // Act
-            var rt = CacheFallbackOperations.GetAdalEntryForMsal(
+            var rt = CacheFallbackOperations.GetRefreshToken(
                 _logger,
                 _legacyCachePersistence,
                 new[] { TestConstants.ProductionPrefNetworkEnvironment },
                 TestConstants.ClientId,
-                null,
-                "uid");
+                new Account("uid.b", null, null));
 
             // Assert
-            Assert.IsNull(rt, "Null should be returned.");
+            Assert.IsNotNull(rt, "One of the tokens should be returned");
         }
 
         [TestMethod]
