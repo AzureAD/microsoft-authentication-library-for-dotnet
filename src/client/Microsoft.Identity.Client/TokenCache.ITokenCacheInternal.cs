@@ -555,20 +555,18 @@ namespace Microsoft.Identity.Client
 
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
 
-            string upn = string.IsNullOrWhiteSpace(requestParams.LoginHint)
-                ? requestParams.Account?.Username
-                : requestParams.LoginHint;
+          
 
             // ADAL legacy cache does not store FRTs
             if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
             {
-                return CacheFallbackOperations.GetAdalEntryForMsal(
+              
+                return CacheFallbackOperations.GetRefreshToken(
                     Logger,
                     LegacyCachePersistence,
                     aliases,
-                    requestParams.ClientId,
-                    upn,
-                    requestParams.Account.HomeAccountId?.ObjectId);
+                    requestParams.ClientId,                    
+                    requestParams.Account);
             }
 
             return null;

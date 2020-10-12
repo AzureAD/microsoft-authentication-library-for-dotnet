@@ -231,105 +231,79 @@ namespace Microsoft.Identity.Client.Cache
             }
         }
 
-        private static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(
-            ICoreLogger logger,
-            ILegacyCachePersistence legacyCachePersistence,
-            IEnumerable<string> environmentAliases,
-            string clientId,
-            string upn,
-            string uniqueId)
+        public static MsalRefreshTokenCacheItem GetRefreshToken(
+           ICoreLogger logger,
+           ILegacyCachePersistence legacyCachePersistence,
+           IEnumerable<string> environmentAliases,
+           string clientId,
+           IAccount account)
         {
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                     AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
-                // filter by client id and environment first
-                // TODO - authority check needs to be updated for alias check
-                List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
+
+                IEnumerable<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
                     dictionary.Where(p =>
                         p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
-                        environmentAliases.Contains(new Uri(p.Key.Authority).Host)).ToList();
+                        environmentAliases.Contains(new Uri(p.Key.Authority).Host));
+
+                bool filtered = false;
 
                 // if upn is provided then use it to filter
-                if (!string.IsNullOrEmpty(upn))
+                if (!string.IsNullOrEmpty(account?.Username))
                 {
-                    List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> upnEntries =
-                        listToProcess.Where(p => upn.Equals(p.Key.DisplayableId, StringComparison.OrdinalIgnoreCase)).ToList();
-
-                    listToProcess = upnEntries;
+                    listToProcess =
+                        listToProcess.Where(p => account.Username.Equals(
+                            p.Key.DisplayableId, StringComparison.OrdinalIgnoreCase));                        
+                    
+                    filtered = true;
                 }
 
                 // if uniqueId is provided then use it to filter
-                if (!string.IsNullOrEmpty(uniqueId))
+                if (!string.IsNullOrEmpty(account?.HomeAccountId?.ObjectId))
                 {
-                    List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> uniqueIdEntries =
-                        listToProcess.Where(p => uniqueId.Equals(p.Key.UniqueId, StringComparison.OrdinalIgnoreCase)).ToList();
+                    listToProcess =
+                        listToProcess.Where(p => account.HomeAccountId.ObjectId.Equals(
+                            p.Key.UniqueId, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                    listToProcess = uniqueIdEntries;
+                    filtered = true;
                 }
 
-                List<MsalRefreshTokenCacheItem> list = new List<MsalRefreshTokenCacheItem>();
-                foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in listToProcess)
+                // We should filter at leasts by one criteria to ensure we adequate RT
+                if (!filtered)
                 {
-                    string homeAccountId = null;
-                    if (!string.IsNullOrEmpty(pair.Value.RawClientInfo))
-                    {
-                        homeAccountId = ClientInfo.CreateFromJson(pair.Value.RawClientInfo).ToAccountIdentifier();
-                    }
+                    logger.Warning("Could not filter ADAL entries by either UPN or unique ID, skipping.");
+                    return null;
+                }
 
-                    list.Add(new MsalRefreshTokenCacheItem(
-                      new Uri(pair.Key.Authority).Host,
-                      pair.Key.ClientId,
-                      pair.Value.RefreshToken,
-                      pair.Value.RawClientInfo,
+                return listToProcess.Select(adalEntry => new MsalRefreshTokenCacheItem(
+                      new Uri(adalEntry.Key.Authority).Host,
+                      adalEntry.Key.ClientId,
+                      adalEntry.Value.RefreshToken,
+                      adalEntry.Value.RawClientInfo,
                       familyId: null,
-                      homeAccountId: homeAccountId));
-                }
-
-                return list;
+                      homeAccountId: GetHomeAccountId(adalEntry.Value)))
+                .FirstOrDefault();
             }
             catch (Exception ex)
             {
                 logger.WarningPiiWithPrefix(ex, "An error occurred while searching for refresh tokens in ADAL format in the cache for MSAL. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
 
-                return new List<MsalRefreshTokenCacheItem>();
-            }
-        }
-
-        public static MsalRefreshTokenCacheItem GetAdalEntryForMsal(
-            ICoreLogger logger,
-            ILegacyCachePersistence legacyCachePersistence,
-            IEnumerable<string> environmentAliases,
-            string clientId,
-            string upn,
-            string uniqueId)
-        {
-            IEnumerable<MsalRefreshTokenCacheItem> adalRts = GetAllAdalEntriesForMsal(
-                logger,
-                legacyCachePersistence,
-                environmentAliases,
-                clientId,
-                upn,
-                uniqueId);
-
-            IEnumerable<IGrouping<string, MsalRefreshTokenCacheItem>> rtGroupsByEnv = adalRts.GroupBy(rt => rt.Environment.ToLowerInvariant());
-
-            // if we have more than 1 RT per env, there is smth wrong with the ADAL cache
-            if (rtGroupsByEnv.Any(g => g.Count() > 1))
-            {
-                //Due to the fact that there is a problem with the ADAL cache that causes this exception, The ADAL cache will be removed when 
-                //this exception is triggered so that users can sign in interactivly and repopulate the cache.
-                IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
-                    AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
-
-                adalCache.Clear();
-                logger.Error(MsalErrorMessage.InvalidAdalCacheMultipleRTs);
-                legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(logger, adalCache));
                 return null;
             }
-
-            return adalRts.FirstOrDefault();
         }
+
+        private static string GetHomeAccountId(AdalResultWrapper adalResultWrapper)
+        {
+            if (!string.IsNullOrEmpty(adalResultWrapper.RawClientInfo))
+            {
+                return ClientInfo.CreateFromJson(adalResultWrapper.RawClientInfo).ToAccountIdentifier();
+            }
+
+            return null;
+        }
+
     }
 }
