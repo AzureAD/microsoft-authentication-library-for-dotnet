@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Client.Cache
                     filtered = true;
                 }
 
-                // We should filter at leasts by one criteria to ensure we adequate RT
+                // We should filter at leasts by one criteria to ensure we retrun adequate RT
                 if (!filtered)
                 {
                     logger.Warning("Could not filter ADAL entries by either UPN or unique ID, skipping.");
