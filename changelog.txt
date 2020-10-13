@@ -1,3 +1,16 @@
+4.20
+============
+New Features: 
+**MSAL now expose the configured certificate on Confidential Client Application** This helps manage multiple instances of Confidential Client Application.
+**Experimental WAM intergration on Windows for .NET classic, .NET core and UWP** See https://aka.ms/msal-net-wam 
+
+Bug Fixes: 
+**Fix AcquireTokenByIntegratedWindowsAuthentication on .NET core** Reverted the HTTP client used on .NET core as it was not possible to use default authentication which is needed for WS-trust. See issue [#1988](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1988)
+**MSAL correctly returns errors when using Android broker** - see issue [#2062](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2062)
+**Fix 2 problems with returning the status codes and exceptions when using Android broker** .See issues [#2062](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2062) and [#2078](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2078)
+**Throw a better error when some Facebook accounts cause MSAL to throw a state mismatch exception** See issue [1872](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1872) for details
+**MSAL now  migrates the ADAL cache for multi-tenant scenarios** See issue [#2090](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2090)
+
 4.19
 ============
 New Features:
