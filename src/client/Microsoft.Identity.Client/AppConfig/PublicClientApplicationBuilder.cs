@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client
         /// </item>
         /// <item>
         /// <term>For system browser on .NET Core</term>
-        /// <term><c>https://localhost</c></term>
+        /// <term><c>http://localhost</c></term>
         /// </item>
         /// </list>
         /// NOTE:There will be an update to the default rediect uri in the future to accomodate for system browsers on the 
