@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
@@ -139,10 +137,10 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return true;
         }
 
-        public override IBroker CreateBroker(CoreUIParent uiParent)
-        {
-            return new WamBroker(uiParent, Logger);
-        }
+        //public override IBroker CreateBroker(CoreUIParent uiParent)
+        //{
+        //    return new WamBroker(uiParent, Logger);
+        //}
 
         /// <inheritdoc />
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
