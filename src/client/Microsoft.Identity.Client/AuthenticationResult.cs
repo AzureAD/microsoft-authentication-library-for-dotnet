@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
@@ -37,7 +38,7 @@ namespace Microsoft.Identity.Client
         /// <param name="correlationId">The correlation id of the authentication request</param>
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
-        public AuthenticationResult(
+        public AuthenticationResult( // for backwards compat with 4.17+
             string accessToken,
             bool isExtendedLifeTimeToken,
             string uniqueId,
@@ -65,6 +66,53 @@ namespace Microsoft.Identity.Client
             AuthenticationResultMetadata = authenticationResultMetadata;
         }
 
+        /// <summary>
+        /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
+        /// App developers should <b>never</b> new-up <see cref="AuthenticationResult"/> in product code.
+        /// </summary>
+        /// <param name="accessToken">Access Token that can be used as a bearer token to access protected web APIs</param>
+        /// <param name="account">Account information</param>
+        /// <param name="expiresOn">Expiry date-time for the access token</param>
+        /// <param name="extendedExpiresOn">See <see cref="ExtendedExpiresOn"/></param>
+        /// <param name="idToken">ID token</param>
+        /// <param name="isExtendedLifeTimeToken">See <see cref="IsExtendedLifeTimeToken"/></param>
+        /// <param name="scopes">Granted scope values as returned by the service</param>
+        /// <param name="tenantId">Identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
+        /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
+        /// <param name="correlationId">The correlation id of the authentication request</param>
+        /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
+        /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public AuthenticationResult( // for backwards compatibility with 4.16 and lower
+          string accessToken,
+          bool isExtendedLifeTimeToken,
+          string uniqueId,
+          DateTimeOffset expiresOn,
+          DateTimeOffset extendedExpiresOn,
+          string tenantId,
+          IAccount account,
+          string idToken,
+          IEnumerable<string> scopes,
+          Guid correlationId,
+          AuthenticationResultMetadata authenticationResultMetadata,
+          string tokenType = "Bearer") : 
+            this(
+                accessToken, 
+                isExtendedLifeTimeToken, 
+                uniqueId, 
+                expiresOn, 
+                extendedExpiresOn, 
+                tenantId, 
+                account, 
+                idToken, 
+                scopes, 
+                correlationId, 
+                tokenType, 
+                authenticationResultMetadata)
+        {
+
+        }
+
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem,
@@ -84,8 +132,8 @@ namespace Microsoft.Identity.Client
                 string username = null;
                 if (msalIdTokenCacheItem != null)
                 {
-                    username = msalIdTokenCacheItem.IsAdfs ? 
-                        msalIdTokenCacheItem?.IdToken.Upn : 
+                    username = msalIdTokenCacheItem.IsAdfs ?
+                        msalIdTokenCacheItem?.IdToken.Upn :
                         msalIdTokenCacheItem?.IdToken?.PreferredUsername;
                 }
 
@@ -95,7 +143,7 @@ namespace Microsoft.Identity.Client
                     environment);
             }
 
-            if (msalAccessTokenCacheItem!= null)
+            if (msalAccessTokenCacheItem != null)
             {
                 AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;

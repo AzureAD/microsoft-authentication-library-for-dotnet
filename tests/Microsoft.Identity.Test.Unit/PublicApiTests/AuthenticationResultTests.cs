@@ -53,10 +53,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [Description(
+            "In MSAL 4.17 we made a mistake and added AuthenticationResultMetadata with no default value before tokenType param. " +
+            "To fix this breaking change, we added 2 constructors - " +
+            "one for backwards compat with 4.17+ and one for 4.16 and below")]
         public void AuthenticationResult_PublicApi()
         {
-            // This ctor is public, so if it **needs** to change, this constitues a breaking change
-            var ar = new AuthenticationResult(
+            // old constructor, before 4.16
+            var ar1 = new AuthenticationResult(
                 "at",
                 false,
                 "uid",
@@ -64,10 +68,47 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 DateTime.UtcNow,
                 "tid",
                 new Account("aid", "user", "env"),
-                "idt", new[] { "scope" }, Guid.NewGuid());
+                "idt", 
+                new[] { "scope" }, 
+                Guid.NewGuid());
 
-            Assert.IsNull(ar.AuthenticationResultMetadata);
-            Assert.AreEqual("Bearer", ar.TokenType);
+            Assert.IsNull(ar1.AuthenticationResultMetadata);
+            Assert.AreEqual("Bearer", ar1.TokenType);
+
+            // old constructor, before 4.16
+            var ar2 = new AuthenticationResult(
+              "at",
+              false,
+              "uid",
+              DateTime.UtcNow,
+              DateTime.UtcNow,
+              "tid",
+              new Account("aid", "user", "env"),
+              "idt",
+              new[] { "scope" },
+              Guid.NewGuid(), 
+              "ProofOfBear");
+
+            Assert.IsNull(ar1.AuthenticationResultMetadata);
+            Assert.AreEqual("ProofOfBear", ar1.TokenType);
+
+            // new ctor, after 4.17
+            var ar3 = new AuthenticationResult(
+             "at",
+             false,
+             "uid",
+             DateTime.UtcNow,
+             DateTime.UtcNow,
+             "tid",
+             new Account("aid", "user", "env"),
+             "idt",
+             new[] { "scope" },
+             Guid.NewGuid(),
+             new AuthenticationResultMetadata(TokenSource.Broker));
+
+            Assert.AreEqual(TokenSource.Broker, ar3.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual("Bearer", ar1.TokenType);
+
         }
     }
 }
