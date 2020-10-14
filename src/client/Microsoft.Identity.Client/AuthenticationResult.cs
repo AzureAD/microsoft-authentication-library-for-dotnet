@@ -48,8 +48,8 @@ namespace Microsoft.Identity.Client
             string idToken,
             IEnumerable<string> scopes,
             Guid correlationId,
-            AuthenticationResultMetadata authenticationResultMetadata = null,
-            string tokenType = "Bearer")
+            string tokenType = "Bearer",
+            AuthenticationResultMetadata authenticationResultMetadata = null)
         {
             AccessToken = accessToken;
             IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
