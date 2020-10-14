@@ -201,12 +201,10 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             return PoPProviderFactory.GetOrCreateProvider();
         }
-
-        //public override IBroker CreateBroker(CoreUIParent uiParent)
-        //{
-        //    return base.OverloadBrokerForTest 
-        //        ?? new Features.WamBroker.WamBroker(uiParent, Logger);
-        //}
+        public override IBroker CreateBroker(CoreUIParent uiParent)
+        {
+            return base.OverloadBrokerForTest ?? new Features.WamBroker.WamBroker(uiParent, Logger);
+        }
 
         public override bool CanBrokerSupportSilentAuth()
         {
