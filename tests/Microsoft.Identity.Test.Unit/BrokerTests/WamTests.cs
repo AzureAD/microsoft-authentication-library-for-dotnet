@@ -577,7 +577,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Assert.IsFalse(WamBroker.IsForceLoginPrompt(Prompt.NoPrompt));
             Assert.IsTrue(WamBroker.IsForceLoginPrompt(Prompt.SelectAccount));
             Assert.IsTrue(WamBroker.IsForceLoginPrompt(Prompt.ForceLogin));
-            Assert.IsTrue(WamBroker.IsForceLoginPrompt(Prompt.Consent));
+
+            AssertException.Throws<MsalClientException>(() => WamBroker.IsForceLoginPrompt(Prompt.Consent));
+#if DESKTOP
+            AssertException.Throws<MsalClientException>(() => WamBroker.IsForceLoginPrompt(Prompt.Never));
+#endif
         }
 
         private async Task RunPluginSelectionTestAsync(string inputAuthority, bool expectMsaPlugin)
