@@ -1,3 +1,8 @@
+4.20.1
+============
+Bug Fixes: 
+** Fixes the incompatibility of MSAL.NET 4.20 with .NET 5.0 by temporarely removing the WAM experimental support (for the moment, please use 4.20 if you are interested in WAM). For details see [#2095](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2095) 
+
 4.20
 ============
 New Features: 
