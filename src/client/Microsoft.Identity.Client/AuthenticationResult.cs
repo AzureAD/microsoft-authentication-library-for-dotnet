@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
             string idToken,
             IEnumerable<string> scopes,
             Guid correlationId,
-            AuthenticationResultMetadata authenticationResultMetadata,
+            AuthenticationResultMetadata authenticationResultMetadata = null,
             string tokenType = "Bearer")
         {
             AccessToken = accessToken;

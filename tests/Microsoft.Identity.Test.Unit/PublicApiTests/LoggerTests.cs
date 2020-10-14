@@ -251,5 +251,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         }
 
+        [TestMethod]
+        [Description("LogCallback is public API. If its signature needs to change, it is a breaking change.")]
+        public void PublicApi()
+        {
+            LogCallback callback = (lvl, msg, isPii) =>
+            {
+                Assert.IsTrue(lvl is LogLevel);
+                Assert.IsTrue(msg is string);
+                Assert.IsTrue(isPii is bool);
+            };
+        }
     }
 }

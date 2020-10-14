@@ -51,5 +51,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.AreEqual("SomeTokenType at", ar.CreateAuthorizationHeader());
         }
+
+        [TestMethod]
+        public void AuthenticationResult_PublicApi()
+        {
+            // This ctor is public, so if it **needs** to change, this constitues a breaking change
+            var ar = new AuthenticationResult(
+                "at",
+                false,
+                "uid",
+                DateTime.UtcNow,
+                DateTime.UtcNow,
+                "tid",
+                new Account("aid", "user", "env"),
+                "idt", new[] { "scope" }, Guid.NewGuid());
+
+            Assert.IsNull(ar.AuthenticationResultMetadata);
+            Assert.AreEqual("Bearer", ar.TokenType);
+        }
     }
 }

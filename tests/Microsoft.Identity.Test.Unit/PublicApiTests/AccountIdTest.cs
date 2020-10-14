@@ -26,5 +26,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Act Assert
             Assert.AreEqual(accountId1, accountId2);
         }
+
+        [TestMethod]
+        [Description("These constructors are public. If they need to change, this is a breaking change!")]
+        public void AccountIdPublicApi()
+        {
+           new AccountId("a.b", "a", "b");
+           new AccountId("adfs");
+        }
     }
 }
