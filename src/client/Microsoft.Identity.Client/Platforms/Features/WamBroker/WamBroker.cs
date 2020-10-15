@@ -472,7 +472,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             // WAM is present on Win 10 only
             return ApiInformation.IsMethodPresent(
                    "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
-                   "FindAllAccountsAsync");
+                   "GetTokenSilentlyAsync");
         }
 
         public async Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account)
