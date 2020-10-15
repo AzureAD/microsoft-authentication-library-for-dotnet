@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
         /// <param name="correlationId">The correlation id of the authentication request</param>
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
-        public AuthenticationResult( // for backwards compat with 4.16 and lower
+        public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
             string uniqueId,
@@ -82,8 +82,9 @@ namespace Microsoft.Identity.Client
         /// <param name="correlationId">The correlation id of the authentication request</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
+        /// <remarks>For backwards compatibility with MSAL 4.17-4.20 </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public AuthenticationResult( // for backwards compatibility with 4.17-4.20
+        public AuthenticationResult(
           string accessToken,
           bool isExtendedLifeTimeToken,
           string uniqueId,
@@ -95,19 +96,19 @@ namespace Microsoft.Identity.Client
           IEnumerable<string> scopes,
           Guid correlationId,
           AuthenticationResultMetadata authenticationResultMetadata,
-          string tokenType = "Bearer") : 
+          string tokenType = "Bearer") :
             this(
-                accessToken, 
-                isExtendedLifeTimeToken, 
-                uniqueId, 
-                expiresOn, 
-                extendedExpiresOn, 
-                tenantId, 
-                account, 
-                idToken, 
-                scopes, 
-                correlationId, 
-                tokenType, 
+                accessToken,
+                isExtendedLifeTimeToken,
+                uniqueId,
+                expiresOn,
+                extendedExpiresOn,
+                tenantId,
+                account,
+                idToken,
+                scopes,
+                correlationId,
+                tokenType,
                 authenticationResultMetadata)
         {
 

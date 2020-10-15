@@ -89,8 +89,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
               Guid.NewGuid(), 
               "ProofOfBear");
 
-            Assert.IsNull(ar1.AuthenticationResultMetadata);
-            Assert.AreEqual("ProofOfBear", ar1.TokenType);
+            Assert.IsNull(ar2.AuthenticationResultMetadata);
+            Assert.AreEqual("ProofOfBear", ar2.TokenType);
 
             // new ctor, after 4.17
             var ar3 = new AuthenticationResult(
