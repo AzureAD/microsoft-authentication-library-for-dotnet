@@ -26,7 +26,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             InitializeSigningKey();
         }
 
-        public RSAParameters PublicKeyInfo { get; private set; }
+        public string CannonicalPublicKeyJwk { get; private set; }
+
 
         private void InitializeSigningKey()
         {
@@ -36,12 +37,23 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             _signingKey = RSA.Create();
             _signingKey.KeySize = RsaKeySize;
 #endif
-            PublicKeyInfo = _signingKey.ExportParameters(false);
+            RSAParameters publicKeyInfo = _signingKey.ExportParameters(false);
+
+            CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyInfo);
         }
 
         public byte[] Sign(byte[] payload)
         {
             return Sign(_signingKey, payload);
+        }
+
+        /// <summary>
+        /// Creates the cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
+        /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint
+        /// </summary>
+        private static string ComputeCannonicalJwk(RSAParameters rsaPublicKey)
+        {
+            return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
 
         public static byte[] Sign(RSA RsaKey, byte[] payload)

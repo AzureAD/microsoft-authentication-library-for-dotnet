@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Security.Cryptography;
+
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     // TODO: we can expose this interface to users for a simple but low-level extensibility mechanism.
@@ -22,9 +24,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     public interface IPoPCryptoProvider
     {
         /// <summary>
-        /// 
+        /// The cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
         /// </summary>
-        RSAParameters PublicKeyInfo { get; private set; }
+        string CannonicalPublicKeyJwk { get; }
 
         /// <summary>
         /// Signs the byte array using the private key

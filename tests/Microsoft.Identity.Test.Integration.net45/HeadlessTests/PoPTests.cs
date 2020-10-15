@@ -7,10 +7,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -231,6 +234,48 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 request1).ConfigureAwait(false);
         }
 
+        [TestMethod]
+        public async Task PopTestWithConfigObjectAsync()
+        {
+            HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+
+            var confidentialClientAuthority = PublicCloudTestAuthority;
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
+                .WithExperimentalFeatures()
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithTestLogging()
+                .Build();
+
+            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
+            popConfig.PopHttpMethod = HttpMethod.Get;
+
+            await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPosession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
+            await VerifyPoPTokenAsync(
+                PublicCloudConfidentialClientID,
+                request1).ConfigureAwait(false);
+        }
+
+        private static X509Certificate2 GetCertificate()
+        {
+            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(TestConstants.AutomationTestThumbprint);
+            if (cert == null)
+            {
+                throw new InvalidOperationException(
+                    "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
+            }
+
+            return cert;
+        }
+
         private class NoAccessHttpClientFactory : IMsalHttpClientFactory
         {
             private const string Message = "Not expecting to make HTTP requests.";
@@ -298,4 +343,4 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
     }
 #endif
-}
+        }

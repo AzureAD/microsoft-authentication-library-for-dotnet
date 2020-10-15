@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             _httpMethod = httpMethod;
             _popCryptoProvider = popCryptoProvider ?? throw new ArgumentNullException(nameof(popCryptoProvider));
 
-            var keyThumbprint = ComputeRsaThumbprint(computeCannonicalJwk(computeCannonicalJwk(_popCryptoProvider.RsaPublicKey)));
+            var keyThumbprint = ComputeRsaThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 { JsonWebTokenConstants.ReservedHeaderParameters.Type, PoPRequestParameters.PoPTokenType}
             };
 
-            JToken popAssertion = JToken.Parse(computeCannonicalJwk(_popCryptoProvider.RsaPublicKey));
+            JToken popAssertion = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
 
             var payload = new JObject(
                 new JProperty(PoPClaimTypes.At, msalAccessTokenCacheItem.Secret),
@@ -88,11 +88,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             //    popToken);
 
             return popToken;
-        }
-
-        private static string computeCannonicalJwk(RSAParameters rsaPublicKey)
-        {
-            return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
 
         private static string CreateNonce()

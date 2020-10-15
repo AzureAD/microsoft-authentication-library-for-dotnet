@@ -459,7 +459,7 @@ namespace Microsoft.Identity.Client
             CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
 
 #if DESKTOP || NET_CORE
-            if (CommonParameters.UsingProofOfPossesion)
+            if (CommonParameters.UsingProofOfPossesion && CommonParameters.PopAuthenticationConfiguration != null)
             {
                 IPoPCryptoProvider defaultCryptoProvider = CommonParameters.PopAuthenticationConfiguration.PopCryptoProvider != null ? 
                     CommonParameters.PopAuthenticationConfiguration.PopCryptoProvider : ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
