@@ -64,7 +64,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Specifies which scopes to request
+        /// Specifies which scopes to request. This method is used when your application needs
+        /// to request the user for additional scopes. This is the case when it reacts to an
+        /// <see cref="MsalUiRequiredException"/> where the <see cref="MsalServiceException.Claims"/>
+        /// member is not null or empty. For details see https://aka.ms/msal-net-claim-challenge
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>The builder to chain the .With methods</returns>
