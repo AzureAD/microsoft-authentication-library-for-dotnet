@@ -71,6 +71,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>
+        /// See also:
+        /// <see>https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent</see> to learn
+        /// more about scopes, permissions and consent, and
+        /// <see>https://docs.microsoft.com/azure/active-directory/develop/msal-v1-app-scopes</see> to learn how
+        /// to create scopes for legacy applications which used to expose OAuth2 permissions.
+        /// </remarks>
         protected T WithScopes(IEnumerable<string> scopes)
         {
             CommonParameters.Scopes = scopes;
