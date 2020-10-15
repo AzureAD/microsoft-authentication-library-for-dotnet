@@ -1,3 +1,9 @@
+4.21.0
+============
+
+Bug fixes: 
+** Add new constructors for AuthenticationResult for backwards compatibility purposes **. This fixes an API breaking change introduced in MSAL 4.17 where a new param was added to the AuthenticationResult constructor without a default value and swapping the last two parameters. This fix ensures compatibility both with MSAL 4.16.x and before, and with MSAL 4.17 until 4.20.1
+
 4.20.1
 ============
 Bug Fixes: 
