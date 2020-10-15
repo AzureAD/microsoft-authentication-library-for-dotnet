@@ -65,19 +65,14 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies which scopes to request. This method is used when your application needs
-        /// to request the user for additional scopes. This is the case when it reacts to an
-        /// <see cref="MsalUiRequiredException"/> where the <see cref="MsalServiceException.Claims"/>
-        /// member is not null or empty. For details see https://aka.ms/msal-net-claim-challenge
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        /// <remarks>
-        /// See also:
+        /// to specify the scopes needed to call a protected API. See
         /// <see>https://docs.microsoft.com/azure/active-directory/develop/v2-permissions-and-consent</see> to learn
         /// more about scopes, permissions and consent, and
         /// <see>https://docs.microsoft.com/azure/active-directory/develop/msal-v1-app-scopes</see> to learn how
         /// to create scopes for legacy applications which used to expose OAuth2 permissions.
-        /// </remarks>
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>The builder to chain the .With methods</returns>
         protected T WithScopes(IEnumerable<string> scopes)
         {
             CommonParameters.Scopes = scopes;
@@ -100,8 +95,9 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Sets claims in the query. Use when the AAD admin has enabled conditional access. Acquiring the token normally will result in a
-        /// <see cref="MsalServiceException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
+        /// <see cref="MsalUiRequiredException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
         /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details
+        /// as well as https://aka.ms/msal-net-claim-challenge.
         /// </summary>
         /// <param name="claims">A string with one or multiple claims.</param>
         /// <returns>The builder to chain .With methods</returns>
