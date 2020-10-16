@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.net47
         }
 
         [TestMethod]
-        public async Task PopTestWithRSA_ECDAsync()
+        public async Task PopTestWithRSAAsync()
         {
             var confidentialClientAuthority = PublicCloudTestAuthority;
 
@@ -79,34 +79,46 @@ namespace Microsoft.Identity.Test.Integration.net47
                 .Build();
 
             //RSA provider
-            var popConfig1 = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-            popConfig1.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
-            popConfig1.PopHttpMethod = HttpMethod.Get;
+            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
+            popConfig.PopHttpMethod = HttpMethod.Get;
 
             await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPosession(popConfig1)
+                .WithProofOfPosession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("PoP", popConfig1.PopAuthenticationRequestHeader.Scheme);
+            Assert.AreEqual("PoP", popConfig.PopAuthenticationRequestHeader.Scheme);
             await VerifyPoPTokenAsync(
                 PublicCloudConfidentialClientID,
-                popConfig1).ConfigureAwait(false);
+                popConfig).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task PopTestWithECDAsync()
+        {
+            var confidentialClientAuthority = PublicCloudTestAuthority;
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .Build();
 
             //ECD Provider
-            var popConfig2 = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-            popConfig2.PopCryptoProvider = new ECDCertificatePopCryptoProvider();
-            popConfig2.PopHttpMethod = HttpMethod.Post;
+            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.PopCryptoProvider = new ECDCertificatePopCryptoProvider();
+            popConfig.PopHttpMethod = HttpMethod.Post;
 
             await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPosession(popConfig2)
+                .WithProofOfPosession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("PoP", popConfig2.PopAuthenticationRequestHeader.Scheme);
+            Assert.AreEqual("PoP", popConfig.PopAuthenticationRequestHeader.Scheme);
             await VerifyPoPTokenAsync(
                 PublicCloudConfidentialClientID,
-                popConfig2).ConfigureAwait(false);
+                popConfig).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -133,35 +145,6 @@ namespace Microsoft.Identity.Test.Integration.net47
             response = await httpClient.SendAsync(request).ConfigureAwait(false);
 
             Assert.IsTrue(response.IsSuccessStatusCode);
-        }
-
-
-        private static Dictionary<string, string> GetTestSliceParams()
-        {
-            return new Dictionary<string, string>()
-            {
-                { "dc", "prod-wst-test1" },
-            };
-        }
-
-
-        private string _inMemoryCache = "{}";
-        private void ConfigureInMemoryCache(IPublicClientApplication pca)
-        {
-            pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
-            {
-                byte[] bytes = Encoding.UTF8.GetBytes(_inMemoryCache);
-                notificationArgs.TokenCache.DeserializeMsalV3(bytes);
-            });
-
-            pca.UserTokenCache.SetAfterAccess(notificationArgs =>
-            {
-                if (notificationArgs.HasStateChanged)
-                {
-                    byte[] bytes = notificationArgs.TokenCache.SerializeMsalV3();
-                    _inMemoryCache = Encoding.UTF8.GetString(bytes);
-                }
-            });
         }
 
         private static X509Certificate2 GetCertificate()

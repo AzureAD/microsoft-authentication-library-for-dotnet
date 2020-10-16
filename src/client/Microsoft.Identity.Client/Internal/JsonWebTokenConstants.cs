@@ -11,6 +11,7 @@ namespace Microsoft.Identity.Client.Internal
         internal class Algorithms
         {
             public const string RsaSha256 = "RS256";
+            public const string EdcSha256 = "ES256";
             public const string None = "none";
         }
 

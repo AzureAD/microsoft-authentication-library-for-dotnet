@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             var header = new JObject
             {
-                { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, JsonWebTokenConstants.Algorithms.RsaSha256 },
+                { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, JsonWebTokenConstants.Algorithms.EdcSha256 },
                 { JsonWebTokenConstants.ReservedHeaderParameters.KeyId, KeyId },
                 { JsonWebTokenConstants.ReservedHeaderParameters.Type, PoPRequestParameters.PoPTokenType}
             };

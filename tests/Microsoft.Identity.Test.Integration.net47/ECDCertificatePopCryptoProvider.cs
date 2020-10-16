@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Security.Cryptography;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.IdentityModel.Tokens;
@@ -24,7 +27,8 @@ namespace Microsoft.Identity.Test.Integration.net47
 
         private void InitializeSigningKey()
         {
-            _signingKey = ECDsa.Create();
+            ECCurve eCCurve = ECCurve.CreateFromFriendlyName(ECCurve.NamedCurves.nistP256.Oid.FriendlyName);
+            _signingKey = ECDsa.Create(eCCurve);
 
             ECParameters publicKeyInfo = _signingKey.ExportParameters(false);
 
@@ -69,7 +73,7 @@ namespace Microsoft.Identity.Test.Integration.net47
             public const string P256 = "P-256";
             public const string P384 = "P-384";
             public const string P512 = "P-512";
-            public const string P521 = "P-521"; // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
+            public const string P521 = "P-521";
 #pragma warning restore 1591
         }
     }
