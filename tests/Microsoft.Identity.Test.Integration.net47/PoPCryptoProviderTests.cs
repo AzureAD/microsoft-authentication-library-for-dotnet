@@ -68,57 +68,52 @@ namespace Microsoft.Identity.Test.Integration.net47
         }
 
         [TestMethod]
-        public async Task PopTestWithRSAAsync()
+        public async Task PopTestWithRSA_ECDAsync()
         {
-            HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-
             var confidentialClientAuthority = PublicCloudTestAuthority;
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
-                .WithExperimentalFeatures()
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientSecret(s_publicCloudCcaSecret)
                 .Build();
 
             //RSA provider
-            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-            popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
-            popConfig.PopHttpMethod = HttpMethod.Get;
+            var popConfig1 = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig1.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
+            popConfig1.PopHttpMethod = HttpMethod.Get;
 
             await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPosession(popConfig)
+                .WithProofOfPosession(popConfig1)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", popConfig1.PopAuthenticationRequestHeader.Scheme);
             await VerifyPoPTokenAsync(
                 PublicCloudConfidentialClientID,
-                request1).ConfigureAwait(false);
+                popConfig1).ConfigureAwait(false);
 
             //ECD Provider
-            popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-            popConfig.PopCryptoProvider = new ECDCertificatePopCryptoProvider();
-            popConfig.PopHttpMethod = HttpMethod.Get;
+            var popConfig2 = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig2.PopCryptoProvider = new ECDCertificatePopCryptoProvider();
+            popConfig2.PopHttpMethod = HttpMethod.Post;
 
             await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPosession(popConfig)
+                .WithProofOfPosession(popConfig2)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
+            Assert.AreEqual("PoP", popConfig2.PopAuthenticationRequestHeader.Scheme);
             await VerifyPoPTokenAsync(
                 PublicCloudConfidentialClientID,
-                request1).ConfigureAwait(false);
+                popConfig2).ConfigureAwait(false);
         }
-
-
 
         /// <summary>
         /// This calls a special endpoint that validates any POP token against a configurable HTTP request.
         /// The HTTP request is configured through headers.
         /// </summary>
-        private async Task VerifyPoPTokenAsync(string clientId, HttpRequestMessage initialRequest)
+        private async Task VerifyPoPTokenAsync(string clientId, PopAuthenticationConfiguration popConfig)
         {
             var httpClient = new HttpClient();
             HttpResponseMessage response;
@@ -127,13 +122,13 @@ namespace Microsoft.Identity.Test.Integration.net47
             request.Headers.Add("Secret", _popValidationEndpointSecret);
             request.Headers.Add("Authority", "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/");
             request.Headers.Add("ClientId", clientId);
-            request.Headers.Authorization = initialRequest.Headers.Authorization;
+            request.Headers.Authorization = popConfig.PopAuthenticationRequestHeader;
 
             // the URI the POP token is bound to
-            request.Headers.Add("ShrUri", initialRequest.RequestUri.ToString());
+            request.Headers.Add("ShrUri", popConfig.RequestUri.ToString());
 
             // the method the POP token in bound to
-            request.Headers.Add("ShrMethod", initialRequest.Method.ToString());
+            request.Headers.Add("ShrMethod", popConfig.PopHttpMethod.ToString());
 
             response = await httpClient.SendAsync(request).ConfigureAwait(false);
 
