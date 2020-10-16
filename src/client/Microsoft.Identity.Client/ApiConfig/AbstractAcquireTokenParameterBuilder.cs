@@ -369,60 +369,6 @@ namespace Microsoft.Identity.Client
         ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
         ///  See https://aka.ms/msal-net-pop
         /// </summary>
-        /// <param name="httpRequestMessage">An HTTP request to the protected resource which requires a PoP token. The PoP token will be cryptographically bound to the request.</param>
-        /// <remarks>
-        /// <list type="bullet">
-        /// <item> An Authentication header is automatically added to the request</item>
-        /// <item> The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters). </item>
-        /// <item>MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</item>
-        /// </list>
-        /// </remarks>
-        public T WithProofOfPosession(HttpRequestMessage httpRequestMessage)
-        {
-            var defaultCryptoProvider = ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
-            return WithProofOfPosession(httpRequestMessage, defaultCryptoProvider);
-        }
-
-        /// <summary>
-        ///  Modifies the token acquisition request so that the acquired token is a Proof of Possession token (PoP), rather than a Bearer token. 
-        ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
-        ///  See https://aka.ms/msal-net-pop
-        /// </summary>
-        /// <param name="httpRequestMessage">An HTTP request to the protected resource which requires a PoP token. The PoP token will be cryptographically bound to the request.</param>
-        /// <param name="popCryptoProvider">A provider that can handle the asymmetric key operations needed by POP, that encapsulates a pair of 
-        /// public and private keys and some typical crypto operations.</param>
-        /// <remarks>
-        /// <list type="bullet">
-        /// <item> An Authentication header is automatically added to the request</item>
-        /// <item> The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters). </item>
-        /// <item>MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</item>
-        /// </list>
-        /// </remarks>
-        internal T WithProofOfPosession(HttpRequestMessage httpRequestMessage, IPoPCryptoProvider popCryptoProvider)
-        {
-            if (httpRequestMessage is null)
-            {
-                throw new ArgumentNullException(nameof(httpRequestMessage));
-            }
-
-            if (popCryptoProvider == null)
-            {
-                throw new ArgumentNullException(nameof(popCryptoProvider));
-            }
-
-            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPoPScheme);
-            CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(httpRequestMessage.RequestUri, 
-                                                                                httpRequestMessage.Method, 
-                                                                                popCryptoProvider);
-
-            return (T)this;
-        }
-
-        /// <summary>
-        ///  Modifies the token acquisition request so that the acquired token is a Proof of Possession token (PoP), rather than a Bearer token. 
-        ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
-        ///  See https://aka.ms/msal-net-pop
-        /// </summary>
         /// <param name="popAuthenticationConfiguration"> </param>
         /// <remarks>
         /// <list type="bullet">
@@ -461,13 +407,13 @@ namespace Microsoft.Identity.Client
 #if DESKTOP || NET_CORE
             if (CommonParameters.UsingProofOfPossesion && CommonParameters.PopAuthenticationConfiguration != null)
             {
-                IPoPCryptoProvider defaultCryptoProvider = CommonParameters.PopAuthenticationConfiguration.PopCryptoProvider != null ? 
-                    CommonParameters.PopAuthenticationConfiguration.PopCryptoProvider : ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
+                if (CommonParameters.PopAuthenticationConfiguration.PopCryptoProvider == null)
+                {
+                    CommonParameters.PopAuthenticationConfiguration.PopCryptoProvider = ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
+                }
 
                 CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPoPScheme);
-                CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration.RequestUri,
-                                                                                    CommonParameters.PopAuthenticationConfiguration.PopHttpMethod,
-                                                                                    defaultCryptoProvider);
+                CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration);
             }
 #endif
         }

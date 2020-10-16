@@ -19,6 +19,7 @@ using Microsoft.Identity.Client.Utils;
 using System.Threading.Tasks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Unit.PoP
 {
@@ -36,9 +37,15 @@ namespace Microsoft.Identity.Test.Unit.PoP
             HttpMethod method = HttpMethod.Post;
             HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
             var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
+            PopAuthenticationConfiguration config = null;
 
-            AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(null, popCryptoProvider));
-            AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(httpRequest, null));
+            AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config));
+
+            config = new PopAuthenticationConfiguration(uri);
+            config.PopCryptoProvider = null;
+            
+            AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config));
+            AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationConfiguration(null));
         }
 
         [TestMethod]
@@ -46,17 +53,18 @@ namespace Microsoft.Identity.Test.Unit.PoP
         {
             // Arrange
             Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
-            HttpMethod method = HttpMethod.Post;
-            HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
+            PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(uri);
+            popConfig.PopHttpMethod = HttpMethod.Post;
 
             var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
             popCryptoProvider.CannonicalPublicKeyJwk.Returns(JWK);
+            popConfig.PopCryptoProvider = popCryptoProvider;
             const string AtSecret = "secret";
             MsalAccessTokenCacheItem msalAccessTokenCacheItem = TokenCacheHelper.CreateAccessTokenItem();
             msalAccessTokenCacheItem.Secret = AtSecret;
 
             // Act
-            PoPAuthenticationScheme authenticationScheme = new PoPAuthenticationScheme(httpRequest, popCryptoProvider);
+            PoPAuthenticationScheme authenticationScheme = new PoPAuthenticationScheme(popConfig);
             var tokenParams = authenticationScheme.GetTokenRequestParams();
             var popTokenString = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
             JwtSecurityToken decodedPopToken = new JwtSecurityToken(popTokenString);
@@ -94,7 +102,8 @@ namespace Microsoft.Identity.Test.Unit.PoP
             using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+                PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+                popConfig.PopHttpMethod = HttpMethod.Get;
 
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)
@@ -119,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 var provider = PoPProviderFactory.GetOrCreateProvider(testClock);
 
                 await app.AcquireTokenInteractive(TestConstants.s_scope)
-                    .WithProofOfPosession(request1, provider)
+                    .WithProofOfPosession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -136,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenInteractive(TestConstants.s_scope)
-                    .WithProofOfPosession(request1, provider)
+                    .WithProofOfPosession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -153,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenInteractive(TestConstants.s_scope)
-                    .WithProofOfPosession(request1, provider)
+                    .WithProofOfPosession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 

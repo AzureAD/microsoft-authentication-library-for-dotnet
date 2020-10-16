@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
@@ -19,10 +20,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     internal class PoPAuthenticationScheme : IAuthenticationScheme
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-        private readonly Uri _requestUri;
-        private readonly HttpMethod _httpMethod;
-        private readonly IPoPCryptoProvider _popCryptoProvider;
+        private readonly PopAuthenticationConfiguration _popAuthenticationConfiguration;
 
         /// <summary>
         /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -31,13 +29,20 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public PoPAuthenticationScheme(Uri requestUri, HttpMethod httpMethod, IPoPCryptoProvider popCryptoProvider)
+        public PoPAuthenticationScheme(PopAuthenticationConfiguration popAuthenticationConfiguration)
         {
-            _requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-            _httpMethod = httpMethod;
-            _popCryptoProvider = popCryptoProvider ?? throw new ArgumentNullException(nameof(popCryptoProvider));
+            if (popAuthenticationConfiguration == null)
+            {
+                throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
+            }
+            if (popAuthenticationConfiguration.PopCryptoProvider == null)
+            { 
+                throw new ArgumentNullException(nameof(popAuthenticationConfiguration.PopCryptoProvider));
+            }
 
-            var keyThumbprint = ComputeRsaThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
+            _popAuthenticationConfiguration = popAuthenticationConfiguration;
+
+            var keyThumbprint = ComputeRsaThumbprint(popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
@@ -68,14 +73,14 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 { JsonWebTokenConstants.ReservedHeaderParameters.Type, PoPRequestParameters.PoPTokenType}
             };
 
-            JToken popAssertion = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
+            JToken popAssertion = JToken.Parse(_popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
 
             var payload = new JObject(
                 new JProperty(PoPClaimTypes.At, msalAccessTokenCacheItem.Secret),
                 new JProperty(PoPClaimTypes.Ts, (long)(DateTime.UtcNow - s_jwtBaselineTime).TotalSeconds ),
-                new JProperty(PoPClaimTypes.HttpMethod, _httpMethod.ToString()),
-                new JProperty(PoPClaimTypes.Host, _requestUri.Host),
-                new JProperty(PoPClaimTypes.Path, _requestUri.AbsolutePath),
+                new JProperty(PoPClaimTypes.HttpMethod, _popAuthenticationConfiguration.PopHttpMethod.ToString()),
+                new JProperty(PoPClaimTypes.Host, _popAuthenticationConfiguration.RequestUri.Host),
+                new JProperty(PoPClaimTypes.Path, _popAuthenticationConfiguration.RequestUri.AbsolutePath),
                 new JProperty(PoPClaimTypes.Nonce, CreateNonce()),
                 new JProperty(PoPClaimTypes.Cnf, new JObject(
                     new JProperty(PoPClaimTypes.JWK, popAssertion))));
@@ -83,9 +88,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             string popToken =  CreateJWS(payload.ToString(Json.Formatting.None), header.ToString(Json.Formatting.None));
 
             // For POP, we can also update the HttpRequest with the authentication header
-            //_httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(
-            //    AuthorizationHeaderPrefix,
-            //    popToken);
+            _popAuthenticationConfiguration.SetPopHttpRequestHeaders(new AuthenticationHeaderValue(
+                AuthorizationHeaderPrefix,
+                popToken));
 
             return popToken;
         }
@@ -135,7 +140,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             string headerAndPayload = sb.ToString();
 
             sb.Append(".");
-            sb.Append(Base64UrlHelpers.Encode(_popCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
+            sb.Append(Base64UrlHelpers.Encode(_popAuthenticationConfiguration.PopCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
 
             return sb.ToString();
         }
