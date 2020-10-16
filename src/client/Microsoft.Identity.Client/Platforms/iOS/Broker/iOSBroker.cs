@@ -383,6 +383,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             throw new NotImplementedException();
         }
 
+        public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

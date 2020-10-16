@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
-    internal class SilentClientAuthStretegy : ISilentAuthRequestStrategy
+    internal class CacheSilentStrategy : ISilentAuthRequestStrategy
     {
         private AuthenticationRequestParameters AuthenticationRequestParameters { get; }
         private ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         private const string TheOnlyFamilyId = "1";
         private readonly SilentRequest _silentRequest;
 
-        public SilentClientAuthStretegy(
+        public CacheSilentStrategy(
             SilentRequest request,
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -33,17 +33,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             _silentParameters = silentParameters;
             ServiceBundle = serviceBundle;
             _silentRequest = request;
-        }
-
-        public async Task PreRunAsync()
-        {
-            IAccount account = await GetAccountFromParamsOrLoginHintAsync(_silentParameters).ConfigureAwait(false);
-            AuthenticationRequestParameters.Account = account;
-
-            AuthenticationRequestParameters.Authority = Authority.CreateAuthorityForRequest(
-                ServiceBundle.Config.AuthorityInfo,
-                AuthenticationRequestParameters.AuthorityOverride,
-                account.HomeAccountId?.TenantId);
         }
 
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -256,46 +245,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             return dict;
         }
 
-        private async Task<IAccount> GetSingleAccountForLoginHintAsync(string loginHint)
-        {
-            var accounts = await CacheManager.GetAccountsAsync()
-                .ConfigureAwait(false);
-
-            accounts = accounts
-                .Where(a => !string.IsNullOrWhiteSpace(a.Username) &&
-                       a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (!accounts.Any())
-            {
-                throw new MsalUiRequiredException(
-                    MsalError.NoAccountForLoginHint,
-                    MsalErrorMessage.NoAccountForLoginHint,
-                    null,
-                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
-            }
-
-            if (accounts.Count() > 1)
-            {
-                throw new MsalUiRequiredException(
-                    MsalError.MultipleAccountsForLoginHint,
-                    MsalErrorMessage.MultipleAccountsForLoginHint,
-                    null,
-                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
-
-            }
-
-            return accounts.First();
-        }
-
-        private async Task<IAccount> GetAccountFromParamsOrLoginHintAsync(AcquireTokenSilentParameters silentParameters)
-        {
-            if (silentParameters.Account != null)
-            {
-                return silentParameters.Account;
-            }
-
-            return await GetSingleAccountForLoginHintAsync(silentParameters.LoginHint).ConfigureAwait(false);
-        }
+       
     }
 }

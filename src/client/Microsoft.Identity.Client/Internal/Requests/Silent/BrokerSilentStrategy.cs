@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -11,7 +12,8 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class SilentBrokerAuthStrategy : ISilentAuthRequestStrategy
+    internal class BrokerSilentStrategy
+        : ISilentAuthRequestStrategy
     {
         internal AuthenticationRequestParameters _authenticationRequestParameters;
         protected IServiceBundle _serviceBundle;
@@ -20,7 +22,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal IBroker Broker { get; }
         private readonly ICoreLogger _logger;
 
-        public SilentBrokerAuthStrategy(
+        public BrokerSilentStrategy(
             SilentRequest request,
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -31,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _silentParameters = silentParameters;
             _serviceBundle = serviceBundle;
             _silentRequest = request;
-            Broker = broker;
+            Broker = broker ?? throw new ArgumentNullException(nameof(broker));
             _logger = authenticationRequestParameters.RequestContext.Logger;
         }
 
@@ -41,25 +43,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
         }
 
-        public async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
+        private async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
-            if (Broker != null && !Broker.IsBrokerInstalledAndInvokable())
-            {
-                throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.AndroidBrokerCannotBeInvoked);
-            }
-
             _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
-            MsalTokenResponse msalTokenResponse =
-              await Broker.AcquireTokenSilentAsync(
-                  _authenticationRequestParameters, 
-                  _silentParameters).ConfigureAwait(false);
+            MsalTokenResponse msalTokenResponse;
+            if (_authenticationRequestParameters.Account != null)
+            {
+                msalTokenResponse = await Broker.AcquireTokenSilentAsync(
+                      _authenticationRequestParameters,
+                      _silentParameters).ConfigureAwait(false);
+            }
+            else
+            {
+                msalTokenResponse = await Broker.AcquireTokenSilentDefaultUserAsync(
+                     _authenticationRequestParameters,
+                     _silentParameters).ConfigureAwait(false);
+            }
 
             ValidateResponseFromBroker(msalTokenResponse);
             return msalTokenResponse;
         }
 
-        internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
+        internal /* internal for test */ void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
         {
             _logger.Info(LogMessages.CheckMsalTokenResponseReturnedFromBroker);
             if (msalTokenResponse.AccessToken != null)
@@ -89,10 +95,5 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
             throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
         }
-
-        public Task PreRunAsync()
-        {
-            return Task.Delay(0);
-        }      
     }
 }

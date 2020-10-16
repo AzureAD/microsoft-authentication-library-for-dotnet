@@ -45,5 +45,10 @@ namespace Microsoft.Identity.Client.Internal.Broker
         {
             throw new NotImplementedException();
         }
+
+        public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

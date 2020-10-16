@@ -22,9 +22,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public async Task<IWebTokenRequestResultWrapper> GetTokenSilentlyAsync(WebAccount webAccount, WebTokenRequest webTokenRequest)
         {
-            using (_logger.LogBlockDuration("WAM:AcquireSilentlyAsync:"))
+            using (_logger.LogBlockDuration("WAM:GetTokenSilentlyAsync:webAccount"))
             {
                 var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest, webAccount);
+                return new WebTokenRequestResultWrapper(wamResult);
+            }
+        }
+
+        public async Task<IWebTokenRequestResultWrapper> GetTokenSilentlyForDefaultAccountAsync(WebTokenRequest webTokenRequest)
+        {
+            using (_logger.LogBlockDuration("WAM:GetTokenSilentlyAsync:"))
+            {
+                var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest);
                 return new WebTokenRequestResultWrapper(wamResult);
             }
         }
@@ -98,5 +107,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return findResult.Accounts;
             }
         }
+
+    
     }
 }

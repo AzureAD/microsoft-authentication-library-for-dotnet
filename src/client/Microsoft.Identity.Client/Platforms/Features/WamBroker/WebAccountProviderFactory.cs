@@ -19,6 +19,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return provider;
         }
 
+        public async Task<WebAccountProvider> GetDefaultProviderAsync()
+        {
+            var provider = await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.windows.local");
+            return provider;
+        }
+
         public async Task<bool> IsDefaultAccountMsaAsync()
         {
             // provider for the "default" account

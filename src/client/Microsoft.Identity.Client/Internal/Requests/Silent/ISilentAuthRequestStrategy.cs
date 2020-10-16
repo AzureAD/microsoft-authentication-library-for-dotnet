@@ -3,13 +3,12 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
     internal interface ISilentAuthRequestStrategy
     {
-        Task PreRunAsync();
-
         Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
     }
 }
