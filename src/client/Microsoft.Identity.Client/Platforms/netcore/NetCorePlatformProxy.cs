@@ -195,23 +195,10 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return Task.FromResult(0);
         }
 
-        public override bool UseEmbeddedWebViewDefault => false;
-
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
             return PoPProviderFactory.GetOrCreateProvider();
         }
-        public override IBroker CreateBroker(CoreUIParent uiParent)
-        {
-            return base.OverloadBrokerForTest ?? new Features.WamBroker.WamBroker(uiParent, Logger);
-        }
-
-        public override bool CanBrokerSupportSilentAuth()
-        {
-            return true;
-        }
-
-        public override bool BrokerSupportsWamAccounts => true;
 
         /// <summary>
         ///  Is this a windows platform
