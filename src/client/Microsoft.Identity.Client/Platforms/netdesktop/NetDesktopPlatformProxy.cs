@@ -318,5 +318,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             return new NetDesktopHttpClientFactory();
         }
+
+        public override bool BrokerSupportsWamAccounts => true;
     }
 }
