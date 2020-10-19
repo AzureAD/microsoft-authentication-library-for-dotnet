@@ -48,9 +48,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task RegionalAuthHappyPathAsync()
+        public async Task RegionalAuthGetSuccessfulResponseAsync()
         {
-            var cca = createApp();
+            var cca = CreateApp();
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
             var result = await cca.AcquireTokenForClient(s_keyvaultScope)
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task RegionalAuthRegionUndiscoveredAsync()
         {
-            var cca = createApp();
+            var cca = CreateApp();
             Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
 
             try
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        private IConfidentialClientApplication createApp()
+        private IConfidentialClientApplication CreateApp()
         {
             var claims = GetClaims();
 

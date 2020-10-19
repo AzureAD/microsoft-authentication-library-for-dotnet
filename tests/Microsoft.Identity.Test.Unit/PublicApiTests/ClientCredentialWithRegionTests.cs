@@ -64,11 +64,11 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Test for regional auth with successful instance discovery.")]
-        public async Task happyPathAsync()
+        public async Task FetchRegionFromLocalImdsCallAsync()
         {
             SetupMocks(_httpManager);
 
-            var app = createApp();
+            var app = CreateApp();
 
             _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
@@ -83,13 +83,13 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Test when region is received from environment variable")]
-        public async Task fetchRegionFromEnvironmentAsync()
+        public async Task FetchRegionFromEnvironmentAsync()
         {
             try
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", "uscentral");
 
-                var app = createApp();
+                var app = CreateApp();
 
                 _httpManager.AddMockHandler(CreateTokenResponseHttpHandler(true));
 
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             _httpManager.AddRegionDiscoveryMockHandlerNotFound();
 
-            var app = createApp();
+            var app = CreateApp();
                 
             try
             {
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private IConfidentialClientApplication createApp()
+        private IConfidentialClientApplication CreateApp()
         {
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
