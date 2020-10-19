@@ -92,6 +92,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task RegionalAuthRegionUndiscoveredAsync()
         {
+            TestCommon.ResetInternalStaticCaches();
             var cca = CreateApp();
             Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
 

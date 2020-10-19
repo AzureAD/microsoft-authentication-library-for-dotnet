@@ -11,7 +11,7 @@ steps:
     searchFolder: '$(System.DefaultWorkingDirectory)'
     rerunFailedTests: true
     rerunMaxAttempts: '3'
-    runInParallel: true
+    runInParallel: false
     codeCoverageEnabled: true
 
 - task: VSTest@2
@@ -22,5 +22,5 @@ steps:
     searchFolder: '$(System.DefaultWorkingDirectory)'
     rerunFailedTests: true
     rerunMaxAttempts: '3'
-    runInParallel: true
+    runInParallel: false
     codeCoverageEnabled: true
