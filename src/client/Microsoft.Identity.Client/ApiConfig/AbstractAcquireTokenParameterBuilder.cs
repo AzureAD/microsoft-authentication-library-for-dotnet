@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Client
         ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
         ///  See https://aka.ms/msal-net-pop
         /// </summary>
-        /// <param name="popAuthenticationConfiguration"> </param>
+        /// <param name="popAuthenticationConfiguration">Configuration properties used to construct a proof of possesion request.</param>
         /// <remarks>
         /// <list type="bullet">
         /// <item> An Authentication header is automatically added to the request</item>
@@ -379,13 +379,11 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public T WithProofOfPosession(PopAuthenticationConfiguration popAuthenticationConfiguration)
         {
-            if (popAuthenticationConfiguration is null)
-            {
-                throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
-            }
+            CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            CommonParameters.UsingProofOfPossesion = true;
-            CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration;
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPoPScheme);
+            CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+
             return (T)this;
         }
 #endif
@@ -403,19 +401,6 @@ namespace Microsoft.Identity.Client
             CommonParameters.ApiId = CalculateApiEventId();
             CommonParameters.ApiTelemId = ApiTelemetryId;
             CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
-
-#if DESKTOP || NET_CORE
-            if (CommonParameters.UsingProofOfPossesion && CommonParameters.PopAuthenticationConfiguration != null)
-            {
-                if (CommonParameters.PopAuthenticationConfiguration.PopCryptoProvider == null)
-                {
-                    CommonParameters.PopAuthenticationConfiguration.PopCryptoProvider = ServiceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
-                }
-
-                CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPoPScheme);
-                CommonParameters.AuthenticationScheme = new PoPAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration);
-            }
-#endif
         }
     }
 }

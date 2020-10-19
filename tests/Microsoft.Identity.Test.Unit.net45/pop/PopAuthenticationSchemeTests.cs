@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
             // Arrange
             Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
             PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(uri);
-            popConfig.PopHttpMethod = HttpMethod.Post;
+            popConfig.HttpMethod = HttpMethod.Post;
 
             var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
             popCryptoProvider.CannonicalPublicKeyJwk.Returns(JWK);
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-                popConfig.PopHttpMethod = HttpMethod.Get;
+                popConfig.HttpMethod = HttpMethod.Get;
 
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)

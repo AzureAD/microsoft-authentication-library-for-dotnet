@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
@@ -21,6 +22,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private readonly PopAuthenticationConfiguration _popAuthenticationConfiguration;
+        private readonly IPoPCryptoProvider _popCryptoProvider;
 
         /// <summary>
         /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -29,20 +31,13 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public PoPAuthenticationScheme(PopAuthenticationConfiguration popAuthenticationConfiguration)
+        public PoPAuthenticationScheme(PopAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
         {
-            if (popAuthenticationConfiguration == null)
-            {
-                throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
-            }
-            if (popAuthenticationConfiguration.PopCryptoProvider == null)
-            { 
-                throw new ArgumentNullException(nameof(popAuthenticationConfiguration.PopCryptoProvider));
-            }
+            _popAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            _popAuthenticationConfiguration = popAuthenticationConfiguration;
+            _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
 
-            var keyThumbprint = ComputeRsaThumbprint(popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
+            var keyThumbprint = ComputeThumbprint(_popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
@@ -68,17 +63,17 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             var header = new JObject
             {
-                { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, JsonWebTokenConstants.Algorithms.EdcSha256 },
+                { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, GetHeaderAlgorithm() },
                 { JsonWebTokenConstants.ReservedHeaderParameters.KeyId, KeyId },
                 { JsonWebTokenConstants.ReservedHeaderParameters.Type, PoPRequestParameters.PoPTokenType}
             };
 
-            JToken popAssertion = JToken.Parse(_popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
+            JToken popAssertion = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
 
             var payload = new JObject(
                 new JProperty(PoPClaimTypes.At, msalAccessTokenCacheItem.Secret),
                 new JProperty(PoPClaimTypes.Ts, (long)(DateTime.UtcNow - s_jwtBaselineTime).TotalSeconds ),
-                new JProperty(PoPClaimTypes.HttpMethod, _popAuthenticationConfiguration.PopHttpMethod.ToString()),
+                new JProperty(PoPClaimTypes.HttpMethod, _popAuthenticationConfiguration.HttpMethod?.ToString()),
                 new JProperty(PoPClaimTypes.Host, _popAuthenticationConfiguration.RequestUri.Host),
                 new JProperty(PoPClaimTypes.Path, _popAuthenticationConfiguration.RequestUri.AbsolutePath),
                 new JProperty(PoPClaimTypes.Nonce, CreateNonce()),
@@ -95,6 +90,19 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             return popToken;
         }
 
+        private string GetHeaderAlgorithm()
+        {
+            var JWK = JObject.Parse(_popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
+
+            //Need to update header to signal EC key is being used
+            if (JWK[JsonWebKeyParameterNames.Kty].ToString() == JsonWebKeyParameterNames.EC)
+            {
+                return JsonWebTokenConstants.Algorithms.EdcSha256;
+            }
+
+            return JsonWebTokenConstants.Algorithms.RsaSha256;
+        }
+
         private static string CreateNonce()
         {
             // Guid with no hyphens
@@ -104,7 +112,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             return Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
 #endif
         }
-
 
         private string ComputeReqCnf()
         {
@@ -118,7 +125,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// strict, AAD support for PoP requires that we use the base64 encoded JWK thumbprint, as described by 
         /// https://tools.ietf.org/html/rfc7638
         /// </summary>
-        private static byte[] ComputeRsaThumbprint(string cannonicalJwk)
+        private static byte[] ComputeThumbprint(string cannonicalJwk)
         {
             // Cannot be easily generalized in UAP and NetStandard 1.3
             using (SHA256 hash = SHA256.Create())
@@ -140,7 +147,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             string headerAndPayload = sb.ToString();
 
             sb.Append(".");
-            sb.Append(Base64UrlHelpers.Encode(_popAuthenticationConfiguration.PopCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
+            sb.Append(Base64UrlHelpers.Encode(_popCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
 
             return sb.ToString();
         }

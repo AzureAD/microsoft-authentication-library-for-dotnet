@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Integration.net45;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -93,7 +94,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Arrange
             PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-            popConfig.PopHttpMethod = HttpMethod.Get;
+            popConfig.HttpMethod = HttpMethod.Get;
 
             var user = labResponse.User;
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
@@ -152,9 +153,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task AcquireAndAcquireSilent_MultipleKeys_Async(LabResponse labResponse)
         {
             var popConfig1 = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-            popConfig1.PopHttpMethod = HttpMethod.Get;
+            popConfig1.HttpMethod = HttpMethod.Get;
             var popConfig2 = new PopAuthenticationConfiguration(new Uri("https://www.bing.com/path3/path4?queryParam5=c&queryParam6=d"));
-            popConfig2.PopHttpMethod = HttpMethod.Post;
+            popConfig2.HttpMethod = HttpMethod.Post;
 
             var user = labResponse.User;
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
@@ -214,7 +215,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task RunTestWithClientSecretAsync(string clientID, string authority, string secret)
         {
             var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-            popConfig.PopHttpMethod = HttpMethod.Get;
+            popConfig.HttpMethod = HttpMethod.Get;
 
             var confidentialClientAuthority = authority;
 
@@ -252,7 +253,62 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
-            popConfig.PopHttpMethod = HttpMethod.Get;
+            popConfig.HttpMethod = HttpMethod.Get;
+
+            await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPosession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("PoP", popConfig.PopAuthenticationRequestHeader.Scheme);
+            await VerifyPoPTokenAsync(
+                PublicCloudConfidentialClientID,
+                popConfig).ConfigureAwait(false);
+        }
+
+
+        [TestMethod]
+        public async Task PopTestWithRSAAsync()
+        {
+            var confidentialClientAuthority = PublicCloudTestAuthority;
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .Build();
+
+            //RSA provider
+            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
+            popConfig.HttpMethod = HttpMethod.Get;
+
+            await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPosession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("PoP", popConfig.PopAuthenticationRequestHeader.Scheme);
+            await VerifyPoPTokenAsync(
+                PublicCloudConfidentialClientID,
+                popConfig).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task PopTestWithECDAsync()
+        {
+            var confidentialClientAuthority = PublicCloudTestAuthority;
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .Build();
+
+            //ECD Provider
+            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.PopCryptoProvider = new ECDCertificatePopCryptoProvider();
+            popConfig.HttpMethod = HttpMethod.Post;
 
             await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
                 .WithProofOfPosession(popConfig)
@@ -307,7 +363,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             request.Headers.Add("ShrUri", popConfig.RequestUri.ToString());
 
             // the method the POP token in bound to
-            request.Headers.Add("ShrMethod", popConfig.PopHttpMethod.ToString());
+            request.Headers.Add("ShrMethod", popConfig.HttpMethod.ToString());
 
             response = await httpClient.SendAsync(request).ConfigureAwait(false);
 

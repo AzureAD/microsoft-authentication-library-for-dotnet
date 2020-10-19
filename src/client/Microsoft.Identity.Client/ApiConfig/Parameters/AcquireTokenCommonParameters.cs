@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
-        public bool UsingProofOfPossesion { get; set; }
         public PopAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
 
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();

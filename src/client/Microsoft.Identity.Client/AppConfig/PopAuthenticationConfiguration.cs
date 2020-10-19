@@ -9,23 +9,25 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
-    /// Configuration properties used to construct a Proof of possesion request
+    /// Configuration properties used to construct a proof of possesion request.
     /// </summary>
     public class PopAuthenticationConfiguration
     {
         /// <summary>
         /// An HTTP uri to the protected resource which requires a PoP token. The PoP token will be cryptographically bound to the request.
         /// </summary>
-        public Uri RequestUri { get; set; }
+        public Uri RequestUri { get; }
 
         /// <summary>
-        /// The HttP method to be bound to the request
+        /// The HTTP method ("GET", "POST" etc.) method that will be bound to the token. Leave null and the POP token will not be bound to the method.
         /// </summary>
-        public HttpMethod PopHttpMethod { get; set; }
+        public HttpMethod HttpMethod { get; set; }
 
         /// <summary>
-        /// A provider that can handle the asymmetric key operations needed by POP, that encapsulates a pair of public and private keys
-        /// and some typical crypto operations
+        ///An extensibility point that allows developers to define their own key management. 
+        ///Leave null and MSAL will use a default implementation, which generates an RSA key pair in memory and refreshes it every 8 hours.
+        ///Important note: developers wanting to change the key (e.g. rotate the key) should create a new instance of this object,
+        ///as MSAL will keep a thumbprint of keys in memory
         /// </summary>
         public IPoPCryptoProvider PopCryptoProvider { get; set; }
 
@@ -40,12 +42,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="requestUri"></param>
         public PopAuthenticationConfiguration(Uri requestUri)
         {
-            if (requestUri == null || string.IsNullOrEmpty(requestUri.AbsoluteUri))
-            {
-                throw new ArgumentNullException(nameof(requestUri));
-            }
-
-            RequestUri = requestUri;
+            RequestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
         }
 
         internal void SetPopHttpRequestHeaders(AuthenticationHeaderValue header)

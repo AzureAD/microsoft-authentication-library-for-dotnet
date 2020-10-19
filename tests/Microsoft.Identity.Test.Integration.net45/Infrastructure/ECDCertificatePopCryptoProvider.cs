@@ -4,10 +4,9 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.Identity.Client.AuthScheme.PoP;
-using Microsoft.IdentityModel.Tokens;
-using JsonWebKeyParameterNames = Microsoft.IdentityModel.Tokens.JsonWebKeyParameterNames;
+using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Test.Integration.net47
+namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
 {
     public class ECDCertificatePopCryptoProvider : IPoPCryptoProvider
     {
@@ -41,9 +40,9 @@ namespace Microsoft.Identity.Test.Integration.net47
         /// </summary>
         private static string ComputeCannonicalJwk(ECParameters ecdPublicKey)
         {
-            string x = ecdPublicKey.Q.X != null ? Base64UrlEncoder.Encode(ecdPublicKey.Q.X) : null;
-            string y = ecdPublicKey.Q.Y != null ? Base64UrlEncoder.Encode(ecdPublicKey.Q.Y) : null;
-            return $@"{{""{JsonWebKeyParameterNames.Crv}"":""{GetCrvParameterValue(ecdPublicKey.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{"EC"}"",""{JsonWebKeyParameterNames.X}"":""{x}"",""{JsonWebKeyParameterNames.Y}"":""{y}""}}";
+            string x = ecdPublicKey.Q.X != null ? Base64UrlHelpers.Encode(ecdPublicKey.Q.X) : null;
+            string y = ecdPublicKey.Q.Y != null ? Base64UrlHelpers.Encode(ecdPublicKey.Q.Y) : null;
+            return $@"{{""{JsonWebKeyParameterNames.Crv}"":""{GetCrvParameterValue(ecdPublicKey.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebKeyParameterNames.EC}"",""{JsonWebKeyParameterNames.X}"":""{x}"",""{JsonWebKeyParameterNames.Y}"":""{y}""}}";
         }
 
         public static byte[] Sign(ECDsa EcdKey, byte[] payload)
