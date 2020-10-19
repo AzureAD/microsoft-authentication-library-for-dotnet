@@ -2,7 +2,7 @@
 ============
 
 Bug fixes: 
-** Fix the URI for IMDS call to detect region **. This fixes the typo in URI for local IMDS call which is made to detect the region for regional auth.
+**Fix the URI for IMDS call to detect the region**. This fixes the typo in the URI for local IMDS call which is made to detect the region for regional auth.
 
 4.21.0
 ============
