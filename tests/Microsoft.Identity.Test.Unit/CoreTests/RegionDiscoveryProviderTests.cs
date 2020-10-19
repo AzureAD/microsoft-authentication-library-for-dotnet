@@ -130,8 +130,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                         ExpectedUrl = "http://169.254.169.254/metadata/instance/compute",
                         ExpectedRequestHeaders = new Dictionary<string, string>
                          {
-                            {"Metadata", "true"}
+                            { "Metadata", "true" }
                          },
+                        ExpectedQueryParams = new Dictionary<string, string>
+                        {
+                            { "api-version", "2020-06-01" }
+                        },
                         ResponseMessage = responseMessage
                     });
         }
