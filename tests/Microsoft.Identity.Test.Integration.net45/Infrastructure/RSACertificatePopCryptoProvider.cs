@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
 
         public string CannonicalPublicKeyJwk { get; private set; }
 
+        public string CryptographicAlgorithm { get => "RS256"; }
+
         private void InitializeSigningKey()
         {
             _signingKey = _cert.PrivateKey as RSACryptoServiceProvider;

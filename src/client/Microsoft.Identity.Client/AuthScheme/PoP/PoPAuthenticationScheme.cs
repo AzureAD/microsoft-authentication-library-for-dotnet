@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             var header = new JObject
             {
-                { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, GetHeaderAlgorithm() },
+                { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, _popAuthenticationConfiguration.PopCryptoProvider.CryptographicAlgorithm },
                 { JsonWebTokenConstants.ReservedHeaderParameters.KeyId, KeyId },
                 { JsonWebTokenConstants.ReservedHeaderParameters.Type, PoPRequestParameters.PoPTokenType}
             };
@@ -88,19 +88,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 popToken));
 
             return popToken;
-        }
-
-        private string GetHeaderAlgorithm()
-        {
-            var JWK = JObject.Parse(_popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
-
-            //Need to update header to signal EC key is being used
-            if (JWK[JsonWebKeyParameterNames.Kty].ToString() == JsonWebKeyParameterNames.EC)
-            {
-                return JsonWebTokenConstants.Algorithms.EdcSha256;
-            }
-
-            return JsonWebTokenConstants.Algorithms.RsaSha256;
         }
 
         private static string CreateNonce()

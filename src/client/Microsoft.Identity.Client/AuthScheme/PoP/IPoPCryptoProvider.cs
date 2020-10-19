@@ -29,6 +29,13 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         string CannonicalPublicKeyJwk { get; }
 
         /// <summary>
+        /// Algorithm used to sign proof of possesion request. 
+        /// See https://docs.microsoft.com/en-us/azure/key-vault/keys/about-keys#signverify for ECD
+        /// See https://docs.microsoft.com/en-us/azure/key-vault/keys/about-keys#signverify-1 for RSA
+        /// </summary>
+        string CryptographicAlgorithm { get; }
+
+        /// <summary>
         /// Signs the byte array using the private key
         /// </summary>
         byte[] Sign(byte[] data);

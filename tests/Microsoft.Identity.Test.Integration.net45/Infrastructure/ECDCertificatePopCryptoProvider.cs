@@ -23,6 +23,8 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
         private ECDsa _signingKey;
 
         public string CannonicalPublicKeyJwk { get; private set; }
+        
+        public string CryptographicAlgorithm { get => "ES256"; }
 
         private void InitializeSigningKey()
         {
