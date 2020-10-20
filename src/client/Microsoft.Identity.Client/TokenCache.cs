@@ -85,7 +85,10 @@ namespace Microsoft.Identity.Client
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
 #if iOS
+
+#pragma warning disable CS0618 // This method was mistakenly made public, so it was obsoleted to prevent use
             SetIosKeychainSecurityGroup(serviceBundle.Config.IosKeychainSecurityGroup);
+#pragma warning restore CS0618 
 #endif // iOS
 
             IsAppTokenCache = isApplicationTokenCache;
