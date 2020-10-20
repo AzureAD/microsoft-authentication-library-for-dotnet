@@ -1,5 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
-
+ 
+  
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);RUNTIME</DefineConstants>
   </PropertyGroup>
@@ -25,6 +26,14 @@
     <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Properties\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="C:\g\msal2\src\client\Xamarin\\Microsoft.Identity.Client.Xamarin\Properties\Microsoft.Identity.Client.rd.xml" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Xamarin.Ref\Microsoft.Identity.Client.Xamarin.Ref.csproj" />
   </ItemGroup>
 </Project>

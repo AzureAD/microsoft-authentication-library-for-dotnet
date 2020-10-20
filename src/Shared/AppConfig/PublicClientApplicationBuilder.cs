@@ -1,3 +1,5 @@
+#if MSAL_DESKTOP || MSAL_XAMARIN
+
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
@@ -13,7 +15,7 @@ using UIKit;
 using Android.App;
 #endif
 
-#if DESKTOP
+#if DESKTOP 
 using System.Windows.Forms;
 #endif
 
@@ -221,7 +223,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP
+#if DESKTOP && MSAL_DESKTOP
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -291,3 +293,5 @@ namespace Microsoft.Identity.Client
         }
     }
 }
+
+#endif 

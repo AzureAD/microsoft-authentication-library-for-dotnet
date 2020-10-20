@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
             {
                 WithParentActivityOrWindow(parentActivityOrWindowFunc());
             }
-#endif 
+#endif
 
             return this;
         }
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        #region WithParentActivityOrWindow
+#region WithParentActivityOrWindow
 
         /*
          * .WithParentActivityOrWindow is platform specific but we need a solution for
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-        #endregion
+#endregion
 
         /// <inheritdoc />
         protected override void Validate()
@@ -375,3 +375,4 @@ namespace Microsoft.Identity.Client
         }
     }
 }
+
