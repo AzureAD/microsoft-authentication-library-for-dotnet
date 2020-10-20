@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
+        /// Please use PublicClientApplicationBuilder.WithIosKeychainSecurityGroup instead
         /// </summary>
         /// <param name="securityGroup"></param>
         [Obsolete("This method was made public by mistake and will be removed at the next major version. Please use WithIosKeychainSecurityGroup method on the PublicClientApplicationBuilder object instead.")]
