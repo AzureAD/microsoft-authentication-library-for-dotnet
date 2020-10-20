@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using System.Threading;
 
 /**
- * This app should run on Azure VM to test the auto region detection. The app should detect the region and token would be obtained.
+ * 1. On an Azure VM, copy the code in a test app
+ * 2. Run the app and verify the token is obtained.
+ * 3. From the logs verify the token endpoint should contain the region. eg. centralus or eastus
  **/
 namespace TestApp
 {
