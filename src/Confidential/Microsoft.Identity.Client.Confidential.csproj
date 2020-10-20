@@ -61,10 +61,10 @@
           Exclude="$(PathToMsalSources)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" />-->
 
     <!--<Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />-->
-    <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*"/>
-    <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*"/>
-    <Compile Include="$(PathToMsalSources)\Platforms\netstandard\**\*"/>
+    <Compile Remove="$(PathToMsalSources)\Platforms\Features\**\*.cs" />
+    <Compile Remove="$(PathToMsalSources)\Platforms\netdesktop\EmbeddedWebUi\**\*.cs" /> <!-- TODO: move to features-->
+    <Compile Remove="$(PathToMsalSources)\Platforms\Android\**\*.*;$(PathToMsalSources)\Platforms\iOS\**\*.*;$(PathToMsalSources)\Platforms\Mac\**\*.*;$(PathToMsalSources)\Platforms\uap\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
+    
              
   </ItemGroup>
 

@@ -1,4 +1,6 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿#if iOS || Mac
+
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 
@@ -25,3 +27,4 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Apple
         public const string ChallengeHeaderValue = "1.0";
     }
 }
+#endif

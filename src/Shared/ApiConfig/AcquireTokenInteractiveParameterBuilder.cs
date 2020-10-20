@@ -1,4 +1,6 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿#if MSAL_DESKTOP || MSAL_XAMARIN
+
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -376,3 +378,4 @@ namespace Microsoft.Identity.Client
     }
 }
 
+#endif
