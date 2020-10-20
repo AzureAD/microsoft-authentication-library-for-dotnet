@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 
@@ -23,6 +24,11 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
         /// </remarks>
         ITokenCache AppTokenCache { get; }
+
+        /// <summary>
+        /// The certificate used to create this <see cref="ConfidentialClientApplication"/>, if any.
+        /// </summary>
+        X509Certificate2 Certificate { get; }
 
         /// <summary>
         /// [V3 API] Acquires a security token from the authority configured in the app using the authorization code

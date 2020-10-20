@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute.Routing.AutoValues;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -45,6 +47,68 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
           IEqualityComparer<TValue> valueComparer)
         {
             Assert.IsTrue(DictionariesAreEqual(dict1, dict2, valueComparer));
+        }
+
+        public static void InterfaceExposesObject(Type theObj, Type theInterface, string[] except = null)
+        {
+            Func<PropertyInfo, IEnumerable<MethodInfo>> propertyToMethodSelector = m =>
+            {
+                var ret = new List<MethodInfo>();
+                if (m.CanRead)
+                    ret.Add(m.GetMethod);
+                if (m.CanWrite)
+                    ret.Add(m.SetMethod);
+
+                return ret;
+            };
+
+            var objectMethods = theObj.GetMethods(
+              BindingFlags.Public |
+              BindingFlags.Instance |
+              BindingFlags.DeclaredOnly)
+                .Where(o => o.GetCustomAttribute<ObsoleteAttribute>() == null)
+                .Where(o => !o.IsSpecialName) // ignore properties
+                .Select(m => m.ToString()).ToList();
+
+            var objProps = theObj.GetProperties(
+              BindingFlags.Public |
+              BindingFlags.Instance |
+              BindingFlags.DeclaredOnly)
+                .Where(o => o.GetCustomAttribute<ObsoleteAttribute>() == null)
+                .SelectMany(propertyToMethodSelector)
+                .Select(m => m.ToString()).ToList();
+
+            var interfaceMethods = theInterface.GetMethods()
+                .Where(o => o.GetCustomAttribute<ObsoleteAttribute>() == null)
+                .Where(o => !o.IsSpecialName) // ignore properties
+                .Select(m => m.ToString())
+                .ToList();
+
+            var interfaceProps = theInterface.GetProperties()
+               .Where(o => o.GetCustomAttribute<ObsoleteAttribute>() == null)
+               .SelectMany(propertyToMethodSelector)
+               .Select(m => m.ToString()).ToList();
+
+            var missingMethods =
+                objectMethods
+                    .Except(interfaceMethods)
+                    .Except(except ?? new string[0]);
+
+            var missingProperties =
+              objProps
+                  .Except(interfaceProps)
+                  .Except(except ?? new string[0]);
+
+
+            Assert.IsTrue(missingMethods.Count() == 0,
+                "Expecting the object and the interface to have the same public methods." +
+                " Methods on the object not found on the interface are: " +
+                string.Join(" ", missingMethods));
+
+            Assert.IsTrue(missingMethods.Count() == 0,
+                "Expecting the object and the interface to have the same public properties." +
+                "Properties on the object not found on the interface are: " +
+                string.Join(" ", missingMethods));
         }
 
         public static void IsImmutable<T>()
