@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if NET_CORE || NETSTANDARD
+
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -72,3 +74,4 @@ namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
         }
     }
 }
+#endif

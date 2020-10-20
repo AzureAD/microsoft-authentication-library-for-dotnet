@@ -167,12 +167,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return new InMemoryTokenCacheAccessor(Logger);
         }
 
-        /// <inheritdoc />
-        protected override IWebUIFactory CreateWebUiFactory()
-        {
-            return new NetDesktopWebUIFactory();
-        }
-
+       
         /// <inheritdoc />
         protected override string InternalGetDeviceModel()
         {
@@ -322,14 +317,16 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return new NetDesktopHttpClientFactory();
         }
 
-//        public override IBroker CreateBroker(CoreUIParent uiParent)
-//        {
-//#if NET45
-//            throw new PlatformNotSupportedException("Windows Authentication Manager (WAM) integration is not available on the current platform - it is only available on .NET 4.6.1+, .NET Core 3.0+ (Windows only) and UWP");
-//#else // net461
-//            return base.OverloadBrokerForTest ?? new Features.WamBroker.WamBroker(uiParent, Logger);           
-//#endif
-//        }
+#if MSAL_DESKTOP
+
+        //        public override IBroker CreateBroker(CoreUIParent uiParent)
+        //        {
+        //#if NET45
+        //            throw new PlatformNotSupportedException("Windows Authentication Manager (WAM) integration is not available on the current platform - it is only available on .NET 4.6.1+, .NET Core 3.0+ (Windows only) and UWP");
+        //#else // net461
+        //            return base.OverloadBrokerForTest ?? new Features.WamBroker.WamBroker(uiParent, Logger);           
+        //#endif
+        //        }
 
         public override bool CanBrokerSupportSilentAuth()
         {
@@ -337,6 +334,13 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         public override bool BrokerSupportsWamAccounts => true;
+
+        /// <inheritdoc />
+        protected override IWebUIFactory CreateWebUiFactory()
+        {
+            return new NetDesktopWebUIFactory();
+        }
+#endif
     }
 }
 #endif

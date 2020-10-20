@@ -22,18 +22,14 @@
 
     <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>
     <!--<TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>-->
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetCore);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetCore);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);</TargetFrameworks>
     
     <!-- MSAL feature flags-->
     <DefineConstants>$(DefineConstants);MSAL_CONFIDENTIAL;</DefineConstants>
     <PathToMsalSources>$(MSBuildThisFileDirectory)\..\Shared</PathToMsalSources>
-    
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <!--<PathToMsalSources>$(MSBuildThisFileDirectory)\Shared\</PathToMsalSources>-->
-    <!--<EnableDefaultCompileItems>false</EnableDefaultCompileItems>-->
     <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
+
+  
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
@@ -58,43 +54,18 @@
   <Import Project="..\Shared\Shared.projitems" Label="Shared" />
   <ItemGroup>
 
-    <!--<None Include="$(PathToMsalSources)\**\*.cs;$(PathToMsalSources)\**\*.xml;$(PathToMsalSources)\**\*.axml"
-          Exclude="$(PathToMsalSources)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" />-->
-
-    <!--<Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />-->
+   <!-- TODO: find a better way to include / exclude big features?-->
     <Compile Remove="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
     <Compile Remove="$(PathToMsalSources)\Platforms\Android\**\*.*;$(PathToMsalSources)\Platforms\iOS\**\*.*;$(PathToMsalSources)\Platforms\Mac\**\*.*;$(PathToMsalSources)\Platforms\uap\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     
              
   </ItemGroup>
 
-  <!--<ItemGroup>
-    --><!-- This None is here so the conditionally included files show up in the Solution Explorer --><!--
-    <None Include="$(PathToMsalSources)\**\*.cs;$(PathToMsalSources)\**\*.xml;$(PathToMsalSources)\**\*.axml"
-          Exclude="$(PathToMsalSources)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" />
-    --><!-- Manually include the cs files --><!--
-    <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
-    <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
-
-  </ItemGroup>-->
-  
-  <!--<ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\NetStdCore\**\*.cs" />
-  </ItemGroup>-->
-
-  <!--<ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
-    <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\NetStdCore\**\*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
-  </ItemGroup>-->
+ 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
-    <!--<Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />-->
-
+ 
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <!--<Reference Include="System.Drawing" />-->
+    <Reference Include="System.Core" /> 
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Net.Http" />    
     <Reference Include="System.Xml.Linq" />
