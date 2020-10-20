@@ -93,7 +93,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     "Note that console applications are not currently supported in conjuction with WAM." + ErrorMessageSuffix);
             }
 
-            bool forceLoginPrompt = IsForceLoginPrompt(acquireTokenInteractiveParameters.Prompt);
 
             if (authenticationRequestParameters.Account != null ||
                 !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
@@ -126,7 +125,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 {
                     var wamResult = await AcquireInteractiveWithoutPickerAsync(
                         authenticationRequestParameters,
-                        forceLoginPrompt,
+                        acquireTokenInteractiveParameters.Prompt,
                         wamPlugin,
                         provider,
                         wamAccount)
@@ -142,35 +141,37 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         internal /* internal for test only */ static bool IsForceLoginPrompt(Prompt prompt)
         {
-            if (prompt == Prompt.NotSpecified || prompt == Prompt.NoPrompt)
-            {
-                return false;
-            }
-
-            if (prompt == Prompt.ForceLogin || prompt == Prompt.SelectAccount)
+            if (prompt == Prompt.ForceLogin || prompt == Prompt.SelectAccount || prompt == Prompt.Consent)
             {
                 return true;
             }
 
-            throw new MsalClientException(
-                "wam_prompt_not_supported",
-                $"The broker does not support the prompt {prompt.PromptValue}. You can specify Prompt.ForceLogin or Prompt.SelectAccount to force authentication, or do not specify any value for the default broker behavior (recommended). " + ErrorMessageSuffix);
+            return false;
         }
 
         private async Task<IWebTokenRequestResultWrapper> AcquireInteractiveWithoutPickerAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
-            bool forceLoginPrompt,
+            Prompt prompt,
             IWamPlugin wamPlugin,
             WebAccountProvider provider,
             WebAccount wamAccount)
         {
+            bool isForceLoginPrompt = IsForceLoginPrompt(prompt);
+
             WebTokenRequest webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                 provider,
                 authenticationRequestParameters,
-                isForceLoginPrompt: forceLoginPrompt,
+                isForceLoginPrompt: isForceLoginPrompt,
                 isInteractive: true,
                 isAccountInWam: true)
            .ConfigureAwait(false);
+
+            if (isForceLoginPrompt &&
+                ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 6))
+            {
+                // this feature works correctly since windows RS4, aka 1803 with the AAD plugin only!
+                webTokenRequest.Properties["prompt"] = prompt.PromptValue; 
+            }
 
             AddCommonParamsToRequest(authenticationRequestParameters, webTokenRequest);
 
@@ -471,7 +472,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             // WAM is present on Win 10 only
             return ApiInformation.IsMethodPresent(
                    "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
-                   "FindAllAccountsAsync");
+                   "GetTokenSilentlyAsync");
         }
 
         public async Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account)

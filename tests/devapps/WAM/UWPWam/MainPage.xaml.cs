@@ -58,6 +58,7 @@ namespace UWP_standalone
         {
             return PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
+                .WithExperimentalFeatures(true)
                 .WithBroker(chkUseBroker.IsChecked.Value)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();

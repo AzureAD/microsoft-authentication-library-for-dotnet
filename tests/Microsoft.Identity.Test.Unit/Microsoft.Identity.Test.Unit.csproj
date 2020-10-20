@@ -30,6 +30,8 @@
     <None Update="Resources\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Features\WamBroker\**" LinkBase="BrokerTests\wam_product_code"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net472' ">
