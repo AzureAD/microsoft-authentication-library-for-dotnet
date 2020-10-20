@@ -21,10 +21,11 @@
   <PropertyGroup Label="Frameworks">
 
     <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
+    <!--<TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>-->
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetCore);</TargetFrameworks>
     
     <!-- MSAL feature flags-->
-    <DefineConstants>$(DefineConstants);MSAL_CONFIDENTIAL_CLIENT;</DefineConstants>
+    <DefineConstants>$(DefineConstants);MSAL_CONFIDENTIAL;</DefineConstants>
     <PathToMsalSources>$(MSBuildThisFileDirectory)\..\Shared</PathToMsalSources>
     
   </PropertyGroup>
@@ -61,8 +62,7 @@
           Exclude="$(PathToMsalSources)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" />-->
 
     <!--<Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />-->
-    <Compile Remove="$(PathToMsalSources)\Platforms\Features\**\*.cs" />
-    <Compile Remove="$(PathToMsalSources)\Platforms\netdesktop\EmbeddedWebUi\**\*.cs" /> <!-- TODO: move to features-->
+    <Compile Remove="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
     <Compile Remove="$(PathToMsalSources)\Platforms\Android\**\*.*;$(PathToMsalSources)\Platforms\iOS\**\*.*;$(PathToMsalSources)\Platforms\Mac\**\*.*;$(PathToMsalSources)\Platforms\uap\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     
              

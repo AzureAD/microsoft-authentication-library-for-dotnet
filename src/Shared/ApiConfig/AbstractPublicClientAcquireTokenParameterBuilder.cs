@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if MSAL_DESKTOP || MSAL_XAMARIN
 
 using System;
 using System.Net;
@@ -40,3 +41,4 @@ namespace Microsoft.Identity.Client
         internal IPublicClientApplicationExecutor PublicClientApplicationExecutor { get; }
     }
 }
+#endif

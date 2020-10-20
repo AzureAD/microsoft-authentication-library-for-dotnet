@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if MSAL_DESKTOP || MSAL_XAMARIN
 
 namespace Microsoft.Identity.Client.Internal.Broker
 {
@@ -46,3 +47,4 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string NoTokenFound = "no_tokens_found";
     }
 }
+#endif

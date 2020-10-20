@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if DESKTOP 
+#if MSAL_DESKTOP || MSAL_XAMARIN
 
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
@@ -29,3 +31,5 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
     }
 }
+#endif
+#endif

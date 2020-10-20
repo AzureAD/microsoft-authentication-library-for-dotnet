@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if DESKTOP && MSAL_DESKTOP
 
 using System;
 
@@ -15,3 +16,4 @@ namespace Microsoft.Identity.Client.Platforms.net45
         public Exception TransferedException { get; private set; }
     }
 }
+#endif

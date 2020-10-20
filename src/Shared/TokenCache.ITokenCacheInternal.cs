@@ -675,6 +675,8 @@ namespace Microsoft.Identity.Client
                 adalUsersResult,
                 clientInfoToAccountMap);
 
+#if MSAL_DESKTOP
+
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
             if (requestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
             {
@@ -691,6 +693,7 @@ namespace Microsoft.Identity.Client
                     clientInfoToAccountMap[wamAccountCache.HomeAccountId] = wamAccount;
                 }
             }
+#endif
 
             IEnumerable<IAccount> accounts = UpdateWithAdalAccountsWithoutClientInfo(environment,
                 instanceMetadata.Aliases,

@@ -81,7 +81,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         IPlatformLogger PlatformLogger { get; }
 
-        IWebUIFactory GetWebUiFactory();
 
         IPoPCryptoProvider GetDefaultPoPCryptoProvider();
 
@@ -90,7 +89,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         string GetDeviceNetworkState();
         int GetMatsOsPlatformCode();
         string GetMatsOsPlatform();
-        void /* for test */ SetWebUiFactory(IWebUIFactory webUiFactory);
+
 
         IFeatureFlags GetFeatureFlags();
 
@@ -100,10 +99,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// Go to a Url using the OS default browser. 
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url);
+        IDeviceAuthManager CreateDeviceAuthManager();
 
+#if MSAL_XAMARIN || MSAL_DESKTOP
         IBroker CreateBroker(CoreUIParent uiParent);
 
-        IDeviceAuthManager CreateDeviceAuthManager();
+        IWebUIFactory GetWebUiFactory();
+
+        void /* for test */ SetWebUiFactory(IWebUIFactory webUiFactory);
 
         void /* for test */ SetBrokerForTest(IBroker broker);
 
@@ -113,12 +116,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         /// <returns></returns>
         bool CanBrokerSupportSilentAuth();
-
         /// <summary>
         /// WAM broker has a deeper integration into MSAL because MSAL needs to store 
         /// WAM account IDs in the token cache. 
         /// </summary>
         bool BrokerSupportsWamAccounts { get; }
+#endif
 
         IMsalHttpClientFactory CreateDefaultHttpClientFactory();
     }

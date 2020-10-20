@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if NET_CORE
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -80,3 +80,4 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         }
     }
 }
+#endif

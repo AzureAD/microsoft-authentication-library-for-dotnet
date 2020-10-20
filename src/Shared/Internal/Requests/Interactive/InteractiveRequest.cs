@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if MSAL_DESKTOP || MSAL_XAMARIN
 
 using System;
 using System.Threading;
@@ -33,11 +34,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly IServiceBundle _serviceBundle;
         private readonly ICoreLogger _logger;
 
-        #region For Test
+#region For Test
         private readonly IAuthCodeRequestComponent _authCodeRequestComponentOverride;
         private readonly ITokenRequestComponent _authCodeExchangeComponentOverride;
         private readonly ITokenRequestComponent _brokerInteractiveComponent;
-        #endregion
+#endregion
 
         public InteractiveRequest(
             AuthenticationRequestParameters requestParams,
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _logger = requestParams.RequestContext.Logger;
         }
 
-        #region RequestBase hooks
+#region RequestBase hooks
         protected override async Task<AuthenticationResult> ExecuteAsync(
             CancellationToken cancellationToken)
         {
@@ -78,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.LoginHint = _interactiveParameters.LoginHint;
             }
         }
-        #endregion
+#endregion
 
         private async Task<MsalTokenResponse> FetchTokensFromBrokerAsync(string brokerInstallUrl, CancellationToken cancellationToken)
         {
@@ -168,3 +169,4 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
     }
 }
+#endif

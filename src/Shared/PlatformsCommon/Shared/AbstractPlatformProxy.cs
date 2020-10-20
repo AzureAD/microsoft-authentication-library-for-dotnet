@@ -55,22 +55,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
-        protected IWebUIFactory OverloadWebUiFactory { get; set; }
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
 
         protected ICoreLogger Logger { get; }
 
-        /// <inheritdoc />
-        public IWebUIFactory GetWebUiFactory()
-        {
-            return OverloadWebUiFactory ?? CreateWebUiFactory();
-        }
-
-        /// <inheritdoc />
-        public void SetWebUiFactory(IWebUIFactory webUiFactory)
-        {
-            OverloadWebUiFactory = webUiFactory;
-        }
+      
 
         /// <inheritdoc />
         public string GetDeviceModel()
@@ -141,9 +130,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <inheritdoc />
         public IPlatformLogger PlatformLogger => _platformLogger.Value;
 
-        protected IBroker OverloadBrokerForTest { get; private set; }
-
-        protected abstract IWebUIFactory CreateWebUiFactory();
+     
         protected abstract IFeatureFlags CreateFeatureFlags();
 
 
@@ -178,20 +165,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             OverloadFeatureFlags = featureFlags;
         }
 
-        public void SetBrokerForTest(IBroker broker)
-        {
-            OverloadBrokerForTest = broker;
-        }
-
+       
         public virtual Task StartDefaultOsBrowserAsync(string url)
         {
             throw new NotImplementedException();
         }
 
-        public virtual IBroker CreateBroker(CoreUIParent uiParent)
-        {
-            return OverloadBrokerForTest ?? new NullBroker();
-        }
 
         public virtual bool CanBrokerSupportSilentAuth()
         {
@@ -214,5 +193,34 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return new SimpleHttpClientFactory();
         }
+
+#if MSAL_DESKTOP || MSAL_XAMARIN
+        public virtual IBroker CreateBroker(CoreUIParent uiParent)
+        {
+            return OverloadBrokerForTest ?? new NullBroker();
+        }
+        public void SetBrokerForTest(IBroker broker)
+        {
+            OverloadBrokerForTest = broker;
+        }
+
+        protected IBroker OverloadBrokerForTest { get; private set; }
+
+        protected abstract IWebUIFactory CreateWebUiFactory();
+
+        protected IWebUIFactory OverloadWebUiFactory { get; set; }
+
+        /// <inheritdoc />
+        public IWebUIFactory GetWebUiFactory()
+        {
+            return OverloadWebUiFactory ?? CreateWebUiFactory();
+        }
+
+        /// <inheritdoc />
+        public void SetWebUiFactory(IWebUIFactory webUiFactory)
+        {
+            OverloadWebUiFactory = webUiFactory;
+        }
+#endif
     }
 }

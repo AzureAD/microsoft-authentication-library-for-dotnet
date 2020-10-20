@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if NETSTANDARD && MSAL_DESKTOP
 
 using System;
 using Microsoft.Identity.Client.Internal;
@@ -18,3 +19,5 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
     }
 }
+
+#endif

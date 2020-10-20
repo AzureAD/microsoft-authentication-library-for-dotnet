@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if DESKTOP && MSAL_DESKTOP
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.Platforms.net45
@@ -178,3 +178,5 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
     }
 }
+
+#endif

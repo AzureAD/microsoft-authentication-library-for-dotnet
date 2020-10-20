@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
         internal AcquireTokenCommonParameters CommonParameters { get; } = new AcquireTokenCommonParameters();
 
         /// <summary>
-        /// Executes the Token request asynchronously, with a possibility of cancelling the
+        /// Executes the Token request asynchronously, with a possibility of canceling the
         /// asynchronous method.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token. See <see cref="CancellationToken"/> </param>

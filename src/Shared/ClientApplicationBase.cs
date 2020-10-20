@@ -19,9 +19,9 @@ namespace Microsoft.Identity.Client
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
     /// <Summary>
-    /// Abstract class containing common API methods and properties. Both <see cref="Microsoft.Identity.Client.PublicClientApplication"/> and 
-    /// <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>
-    /// extend this class. For details see https://aka.ms/msal-net-client-applications
+    /// Abstract class containing common API methods and properties. Both Microsoft.Identity.Client.PublicClientApplication and 
+    /// Microsoft.Identity.Client.ConfidentialClientApplication extend this class. 
+    /// For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
     public abstract partial class ClientApplicationBase : IClientApplicationBase
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
@@ -140,11 +140,13 @@ namespace Microsoft.Identity.Client
                 await UserTokenCacheInternal.RemoveAccountAsync(account, requestContext).ConfigureAwait(false);
             }
 
+#if MSAL_DESKTOP || MSAL_XAMARIN
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
                 await broker.RemoveAccountAsync((AppConfig as IApplicationConfiguration), account).ConfigureAwait(false);
             }
+#endif
         }
 
         private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter = null)
@@ -159,8 +161,11 @@ namespace Microsoft.Identity.Client
             return cacheAndBrokerAccounts;
         }
 
+
         private async Task<IEnumerable<IAccount>> GetAccountsFromBrokerAsync(string homeAccountIdFilter)
         {
+#if MSAL_DESKTOP || MSAL_XAMARIN
+
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
@@ -179,10 +184,10 @@ namespace Microsoft.Identity.Client
                 brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts).ConfigureAwait(false);
                 return brokerAccounts;
             }
+#endif
 
-            return Enumerable.Empty<IAccount>();
+            return await Task.FromResult(Enumerable.Empty<IAccount>()).ConfigureAwait(false);
         }
-
         private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts)
         {
             ServiceBundle.DefaultLogger.Verbose($"Filtering broker accounts by env. Before filtering: " + brokerAccounts.Count());
@@ -250,7 +255,7 @@ namespace Microsoft.Identity.Client
             return new RequestContext(ServiceBundle, correlationId);
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.

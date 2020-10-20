@@ -17,18 +17,13 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
-#if !DESKTOP && !NET_CORE
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
-
     /// <summary>
     /// Token cache storing access and refresh tokens for accounts
-    /// This class is used in the constructors of <see cref="PublicClientApplication"/> and <see cref="ConfidentialClientApplication"/>.
+    /// This class is used in the constructors of PublicClientApplication and ConfidentialClientApplication.
     /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
     /// token cache (in the case of applications using the client credential flows).
     /// </summary>
     public sealed partial class TokenCache : ITokenCacheInternal
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         private static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);

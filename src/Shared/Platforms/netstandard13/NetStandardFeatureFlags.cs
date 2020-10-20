@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if NETSTANDARD
 
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
@@ -13,3 +14,4 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         public bool IsFociEnabled => true;
     }
 }
+#endif

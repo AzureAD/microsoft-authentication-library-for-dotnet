@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if DESKTOP && MSAL_DESKTOP 
 
 using System;
 using System.Collections.Generic;
@@ -79,7 +80,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 this.host = host;
             }
 
-            #region ICustomQueryInterface Members
+#region ICustomQueryInterface Members
 
             public CustomQueryInterfaceResult GetInterface(ref Guid iid, out IntPtr ppv)
             {
@@ -93,7 +94,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 return CustomQueryInterfaceResult.NotHandled;
             }
 
-            #endregion
+#endregion
 
             public int EnableModeless(bool fEnable)
             {
@@ -243,3 +244,4 @@ namespace Microsoft.Identity.Client.Platforms.net45
     internal delegate void WebBrowserNavigateErrorEventHandler(object sender, WebBrowserNavigateErrorEventArgs e);
 #pragma warning restore 618
 }
+#endif

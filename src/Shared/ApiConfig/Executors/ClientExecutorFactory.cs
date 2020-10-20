@@ -10,6 +10,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return clientApplicationBase.ServiceBundle.Mats != null;
         }
 
+#if MSAL_DESKTOP || MSAL_XAMARIN
         public static IPublicClientApplicationExecutor CreatePublicClientExecutor(
             PublicClientApplication publicClientApplication)
         {
@@ -25,7 +26,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return executor;
         }
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+#endif
+
+#if MSAL_CONFIDENTIAL
         public static IConfidentialClientApplicationExecutor CreateConfidentialClientExecutor(
             ConfidentialClientApplication confidentialClientApplication)
         {
@@ -41,7 +44,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return executor;
         }
 #endif
-
         public static IClientApplicationBaseExecutor CreateClientApplicationBaseExecutor(
             ClientApplicationBase clientApplicationBase)
         {

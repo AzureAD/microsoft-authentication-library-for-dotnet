@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if DESKTOP 
+
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client.Platforms.net45.Http
@@ -37,3 +39,4 @@ namespace Microsoft.Identity.Client.Platforms.net45.Http
         public static bool operator !=(EndpointCacheKey left, EndpointCacheKey right) => !left.Equals(right);
     }
 }
+#endif

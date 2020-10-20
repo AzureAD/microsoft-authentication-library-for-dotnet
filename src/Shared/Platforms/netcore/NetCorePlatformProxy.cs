@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if NET_CORE
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -160,7 +160,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return new InMemoryTokenCacheAccessor(Logger);
         }
 
-        protected override IWebUIFactory CreateWebUiFactory() => new NetCoreWebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetCoreCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
@@ -241,5 +240,10 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             return Environment.OSVersion.Platform == PlatformID.Unix;
         }
+
+#if MSAL_DESKTOP || MSAL_XAMARIN
+        protected override IWebUIFactory CreateWebUiFactory() => new NetCoreWebUIFactory();
+#endif
     }
 }
+#endif

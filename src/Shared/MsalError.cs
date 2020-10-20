@@ -28,12 +28,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InteractionRequired = "interaction_required";
 
-#if !DESKTOP && !NET_CORE
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
         /// <summary>
         /// No token was found in the token cache.
-        /// <para>Mitigation:</para> If your application is a <see cref="IPublicClientApplication"/> call <c>AcquireTokenInteractive</c> so
+        /// <para>Mitigation:</para> If your application is a IPublicClientApplication call <c>AcquireTokenInteractive</c> so
         /// that the user of your application signs-in and accepts consent. If your application is a <see cref="T:ConfidentialClientApplication"/>.:
         /// <list type="bullet">
         /// <item>
@@ -45,14 +42,13 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// </summary>
         public const string NoTokensFoundError = "no_tokens_found";
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is
         /// passed as the <c>account</c> parameter. This can be because you have called AcquireTokenSilent with an <c>account</c> parameter
         /// set to <c>accounts.FirstOrDefault()</c> but <c>accounts</c> is empty.
         /// <para>Mitigation</para>
-        /// Pass a different account, or otherwise call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
+        /// Pass a different account, or otherwise call an interactive authentication method."/>
         /// </summary>
         public const string UserNullError = "user_null";
 
@@ -60,10 +56,9 @@ namespace Microsoft.Identity.Client
         /// This error code denotes that no account was found having the given login hint.
         /// <para>What happens?</para>
         /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, string)"/>
-        /// or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
         /// was called with a <c>loginHint</c> parameter which does not match any account in <see cref="IClientApplicationBase.GetAccountsAsync()"/>
         /// <para>Mitigation</para>
-        /// If you are certain about the loginHint, call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
+        /// If you are certain about the loginHint, use the .WithLoginHint() method"/>
         /// </summary>
         public const string NoAccountForLoginHint = "no_account_for_login_hint";
 

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if MSAL_DESKTOP
 
 using System;
 using System.Net;
@@ -18,3 +19,4 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         public string Message { get; }
     }
 }
+#endif

@@ -37,17 +37,21 @@ namespace Microsoft.Identity.Client.Internal
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
         }
 
+      
+#if MSAL_CONFIDENTIAL
+        public Uri GetAuthorizationUriWithoutPkce()
+        {
+            var result = CreateAuthorizationUri(false);
+            return result.Item1;
+        }
+#endif
+#if MSAL_DESKTOP || MSAL_XAMARIN
+
         public async Task<Tuple<string, string>> FetchAuthCodeAndPkceVerifierAsync(
             CancellationToken cancellationToken)
         {
             var webUi = CreateWebAuthenticationDialog();
             return await FetchAuthCodeAndPkceInternalAsync(webUi, cancellationToken).ConfigureAwait(false);
-        }
-
-        public Uri GetAuthorizationUriWithoutPkce()
-        {
-            var result = CreateAuthorizationUri(false);
-            return result.Item1;
         }
 
         private async Task<Tuple<string, string>> FetchAuthCodeAndPkceInternalAsync(
@@ -81,6 +85,92 @@ namespace Microsoft.Identity.Client.Internal
             }
 
         }
+
+         private IWebUI CreateWebAuthenticationDialog()
+        {
+            if (_interactiveParameters.CustomWebUi != null)
+            {
+                return new CustomWebUiHandler(_interactiveParameters.CustomWebUi);
+            }
+
+            CoreUIParent coreUiParent = _interactiveParameters.UiParent;
+
+            coreUiParent.UseEmbeddedWebview = GetUseEmbeddedWebview(
+                _interactiveParameters.UseEmbeddedWebView,
+                _serviceBundle.PlatformProxy.UseEmbeddedWebViewDefault);
+
+#if WINDOWS_APP || DESKTOP
+            // hidden web view can be used in both WinRT and desktop applications.
+            coreUiParent.UseHiddenBrowser = _interactiveParameters.Prompt.Equals(Prompt.Never);
+#if WINDOWS_APP
+            coreUiParent.UseCorporateNetwork = _serviceBundle.Config.UseCorporateNetwork;
+#endif
+#endif
+            return _serviceBundle.PlatformProxy.GetWebUiFactory()
+                .CreateAuthenticationDialog(coreUiParent, _requestParams.RequestContext);
+        }
+
+        private static bool GetUseEmbeddedWebview(WebViewPreference userPreference, bool defaultValue)
+        {
+            switch (userPreference)
+            {
+                case WebViewPreference.NotSpecified:
+                    return defaultValue;
+                case WebViewPreference.Embedded:
+                    return true;
+                case WebViewPreference.System:
+                    return false;
+                default:
+                    throw new NotImplementedException("Unknown option");
+            }
+        }
+
+        private void VerifyAuthorizationResult(AuthorizationResult authorizationResult, string originalState)
+        {
+            if (authorizationResult.Status == AuthorizationStatus.Success &&
+                originalState != null &&
+                !originalState.Equals(authorizationResult.State,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new MsalClientException(
+                    MsalError.StateMismatchError,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        MsalErrorMessage.StateMismatchErrorMessage,
+                        authorizationResult.State,
+                        originalState));
+            }
+
+            if (authorizationResult.Error == OAuth2Error.LoginRequired)
+            {
+                throw new MsalUiRequiredException(
+                    MsalError.NoPromptFailedError,
+                    MsalErrorMessage.NoPromptFailedErrorMessage,
+                    null,
+                    UiRequiredExceptionClassification.PromptNeverFailed);
+            }
+
+            if (authorizationResult.Status == AuthorizationStatus.UserCancel)
+            {
+                _requestParams.RequestContext.Logger.Info(LogMessages.UserCancelledAuthentication);
+                throw new MsalClientException(
+                    authorizationResult.Error,
+                    authorizationResult.ErrorDescription ?? "User canceled authentication.");
+            }
+
+            if (authorizationResult.Status != AuthorizationStatus.Success)
+            {
+                _requestParams.RequestContext.Logger.ErrorPii(
+                    LogMessages.AuthorizationResultWasNotSuccessful + authorizationResult.ErrorDescription ?? "Unknown error.",
+                    LogMessages.AuthorizationResultWasNotSuccessful);
+
+                throw new MsalServiceException(
+                    authorizationResult.Error,
+                    !string.IsNullOrEmpty(authorizationResult.ErrorDescription) ? authorizationResult.ErrorDescription : "Unknown error");
+            }
+        }
+
+#endif
 
         private Tuple<Uri, string, string> CreateAuthorizationUri(bool addPkceAndState = false)
         {
@@ -205,90 +295,6 @@ namespace Microsoft.Identity.Client.Internal
                 }
 
                 requestParameters[kvp.Key] = kvp.Value;
-            }
-        }
-
-        private void VerifyAuthorizationResult(AuthorizationResult authorizationResult, string originalState)
-        {
-            if (authorizationResult.Status == AuthorizationStatus.Success &&
-                originalState != null &&
-                !originalState.Equals(authorizationResult.State,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                throw new MsalClientException(
-                    MsalError.StateMismatchError,
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        MsalErrorMessage.StateMismatchErrorMessage,
-                        authorizationResult.State,
-                        originalState));
-            }
-
-            if (authorizationResult.Error == OAuth2Error.LoginRequired)
-            {
-                throw new MsalUiRequiredException(
-                    MsalError.NoPromptFailedError,
-                    MsalErrorMessage.NoPromptFailedErrorMessage,
-                    null,
-                    UiRequiredExceptionClassification.PromptNeverFailed);
-            }
-
-            if (authorizationResult.Status == AuthorizationStatus.UserCancel)
-            {
-                _requestParams.RequestContext.Logger.Info(LogMessages.UserCancelledAuthentication);
-                throw new MsalClientException(
-                    authorizationResult.Error,
-                    authorizationResult.ErrorDescription ?? "User canceled authentication.");
-            }
-
-            if (authorizationResult.Status != AuthorizationStatus.Success)
-            {
-                _requestParams.RequestContext.Logger.ErrorPii(
-                    LogMessages.AuthorizationResultWasNotSuccessful + authorizationResult.ErrorDescription ?? "Unknown error.",
-                    LogMessages.AuthorizationResultWasNotSuccessful);
-
-                throw new MsalServiceException(
-                    authorizationResult.Error,
-                    !string.IsNullOrEmpty(authorizationResult.ErrorDescription) ? authorizationResult.ErrorDescription : "Unknown error");
-            }
-        }
-
-        private IWebUI CreateWebAuthenticationDialog()
-        {
-            if (_interactiveParameters.CustomWebUi != null)
-            {
-                return new CustomWebUiHandler(_interactiveParameters.CustomWebUi);
-            }
-
-            CoreUIParent coreUiParent = _interactiveParameters.UiParent;
-
-            coreUiParent.UseEmbeddedWebview = GetUseEmbeddedWebview(
-                _interactiveParameters.UseEmbeddedWebView,
-                _serviceBundle.PlatformProxy.UseEmbeddedWebViewDefault);
-
-#if WINDOWS_APP || DESKTOP
-            // hidden web view can be used in both WinRT and desktop applications.
-            coreUiParent.UseHiddenBrowser = _interactiveParameters.Prompt.Equals(Prompt.Never);
-#if WINDOWS_APP
-            coreUiParent.UseCorporateNetwork = _serviceBundle.Config.UseCorporateNetwork;
-#endif
-#endif            
-            return _serviceBundle.PlatformProxy.GetWebUiFactory()
-                .CreateAuthenticationDialog(coreUiParent, _requestParams.RequestContext);
-        }
-
-        private static bool GetUseEmbeddedWebview(WebViewPreference userPreference, bool defaultValue)
-        {
-            switch (userPreference)
-            {
-                case WebViewPreference.NotSpecified:
-                    return defaultValue;
-                case WebViewPreference.Embedded:
-                    return true;
-                case WebViewPreference.System:
-                    return false;
-                default:
-                    throw new NotImplementedException("Unknown option");
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if NETSTANDARD
 
 using System;
 using System.Security.Cryptography;
@@ -72,3 +73,4 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
     }
 }
+#endif

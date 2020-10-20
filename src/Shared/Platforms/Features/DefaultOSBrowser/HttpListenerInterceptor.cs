@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if MSAL_DESKTOP
 using System;
 using System.Net;
 using System.Threading;
@@ -14,11 +14,11 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
     {
         private ICoreLogger _logger;
 
-        #region Test Hooks 
+#region Test Hooks 
         public Action TestBeforeTopLevelCall { get; set; }
         public Action TestBeforeStart { get; set; }
         public Action TestBeforeGetContext { get; set; }
-        #endregion
+#endregion
 
         public HttpListenerInterceptor(ICoreLogger logger)
         {
@@ -117,3 +117,4 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
         }
     }
 }
+#endif

@@ -1,6 +1,6 @@
-﻿#if MSAL_DESKTOP || MSAL_XAMARIN
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if NET_CORE && MSAL_DESKTOP
 
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;

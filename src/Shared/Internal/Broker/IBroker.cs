@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if MSAL_DESKTOP || MSAL_XAMARIN
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -28,10 +29,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
         void HandleInstallUrl(string appLink);
 
         //These methods are only available to brokers that have the BrokerSupportsSilentFlow flag enabled
-        #region Silent Flow Methods
+#region Silent Flow Methods
         Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri);
 
         Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account);
-        #endregion Silent Flow Methods
+#endregion Silent Flow Methods
     }
 }
+#endif

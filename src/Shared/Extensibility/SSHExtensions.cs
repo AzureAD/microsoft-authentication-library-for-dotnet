@@ -1,4 +1,5 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿#if MSAL_DESKTOP
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.AuthScheme.SSHCertificates;
@@ -55,3 +56,4 @@ namespace Microsoft.Identity.Client.SSHCertificates
         }
     }
 }
+#endif

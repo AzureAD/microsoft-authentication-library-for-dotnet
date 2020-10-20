@@ -106,6 +106,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public HttpResponse HttpResponse { get; set; }
 
+#if MSAL_XAMARIN
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {
             if  (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
@@ -181,5 +182,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
             return msalTokenResponse;
         }
+#endif
     }    
 }

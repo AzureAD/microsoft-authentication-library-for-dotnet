@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
     public sealed partial class ConfidentialClientApplication
         : ClientApplicationBase,
             IConfidentialClientApplication,
-            IConfidentialClientApplicationWithCertificate,
+            //IConfidentialClientApplicationWithCertificate, //TODO: MigrationAid
             IByRefreshToken
     {
         internal ConfidentialClientApplication(ApplicationConfiguration configuration)

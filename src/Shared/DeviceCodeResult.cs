@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if MSAL_DESKTOP
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -81,3 +81,4 @@ namespace Microsoft.Identity.Client
         public IReadOnlyCollection<string> Scopes { get; }
     }
 }
+#endif
