@@ -7,11 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 
+/**
+ * This app should run on Azure VM to test the auto region detection. The app should detect the region and token would be obtained.
+ **/
 namespace TestApp
 {
     class Program
     {
-        static string clientId = "<Lab_PublicCloudConfidentialClientID>"; 
+        static string clientId = "<Lab_PublicCloudConfidentialClientID>";
 #pragma warning disable UseAsyncSuffix // Use Async suffix
         static async Task Main(string[] args)
 #pragma warning restore UseAsyncSuffix // Use Async suffix
@@ -20,7 +23,8 @@ namespace TestApp
             {
                 ["allowestsrnonmsi"] = "true"
             };
-            string secret = "Lab_Secret";
+
+            string secret = "Lab_Secret"; //Lab secret from TestConstants.MsalCCAKeyVaultUri
 
             //Uncomment below line to test in dev env.
             //Environment.SetEnvironmentVariable("REGION_NAME", "centralus");
