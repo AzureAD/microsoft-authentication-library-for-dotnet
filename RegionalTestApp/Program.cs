@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Threading;
 
 /**
- * 1. On an Azure VM, copy the code in a test app
+ * 1. On an Azure VM, copy the code in a console app
  * 2. Run the app and verify the token is obtained.
  * 3. From the logs verify the token endpoint should contain the region. eg. centralus or eastus
  **/
