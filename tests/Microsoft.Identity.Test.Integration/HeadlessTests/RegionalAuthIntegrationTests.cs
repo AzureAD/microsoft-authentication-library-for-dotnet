@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-                Assert.Fail();
+                Assert.Fail("This request should fail as Experiment feature is not set to true.");
             }
             catch (MsalClientException e)
             {
@@ -104,7 +104,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-                Assert.Fail();
+                // If this is triggered that means the region was either discovered or not cleared from the cache.
+                Assert.Fail("The region should not get discovered.");
             }
             catch (MsalClientException e)
             {
