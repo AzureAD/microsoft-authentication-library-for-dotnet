@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private async Task<IAccount> GetAccountFromParamsOrLoginHintAsync(IAccount account, string loginHint)
         {
-            if (account != null && account?.HomeAccountId != null)
+            if (account != null)
             {
                 return account;
             }
