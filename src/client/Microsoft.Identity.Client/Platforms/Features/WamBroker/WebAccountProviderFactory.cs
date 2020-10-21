@@ -31,6 +31,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             var provider = await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.windows.local");
             return provider != null && string.Equals(Constants.ConsumerTenant, provider.Authority);
         }
-
     }
 }

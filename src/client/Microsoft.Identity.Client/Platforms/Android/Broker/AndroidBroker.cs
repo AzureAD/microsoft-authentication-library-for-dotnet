@@ -313,7 +313,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         }
 
         /// <summary>
-        /// Android Broker does not support loggin in the "default" user
+        /// Android Broker does not support logging in a "default" user.
         /// </summary>
         public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {

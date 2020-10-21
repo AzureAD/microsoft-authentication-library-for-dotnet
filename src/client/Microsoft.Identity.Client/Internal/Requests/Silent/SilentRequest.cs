@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
                 if (!isBrokerConfigured)
                 {
-                    _logger.Verbose("No account passed to AcquireTokenSilent and no broker configured.  ");
+                    _logger.Verbose("No account passed to AcquireTokenSilent");
                     throw new MsalUiRequiredException(
                        MsalError.UserNullError,
                        MsalErrorMessage.MsalUiRequiredMessage,
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                 }
 
-                _logger.Verbose("No account passed to AcquireTokenSilent. Some brokers may be able to log in user with a default account...");
+                _logger.Verbose("No account passed to AcquireTokenSilent. Only the Windows broker (WAM) may be able to log in user with a default account...");
                 return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
             }
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 _logger.Verbose("Token cache could not satisfy silent request");
 
-                if (isBrokerConfigured && IsTryWithBrokerError(ex.ErrorCode))
+                if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
                 {
                     _logger.Info("Attempting to use broker instead");
                     return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
         }
 
-        private static bool IsTryWithBrokerError(string errorCode)
+        private static bool ShouldTryWithBrokerError(string errorCode)
         {
             return
                 string.Equals(errorCode, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase) ||
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                            a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
-                if (accounts.Count() == 0)
+                if (accounts.Count == 0)
                 {
                     throw new MsalUiRequiredException(
                                 MsalError.NoAccountForLoginHint,
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                                 UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                 }
 
-                if (accounts.Count() > 1)
+                if (accounts.Count > 1)
                 {
                     throw new MsalUiRequiredException(
                         MsalError.MultipleAccountsForLoginHint,
