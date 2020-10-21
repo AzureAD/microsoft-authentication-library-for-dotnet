@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual bool CanBrokerSupportSilentAuth()
         {
-            return false;
+            return true;
         }
 
         public virtual bool BrokerSupportsWamAccounts => false;

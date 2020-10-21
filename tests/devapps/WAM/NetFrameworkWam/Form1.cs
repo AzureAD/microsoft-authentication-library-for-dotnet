@@ -65,6 +65,7 @@ namespace NetDesktopWinForms
             var pca = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
+                .WithExperimentalFeatures(true)
                 .WithBroker(this.useBrokerChk.Checked)
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
@@ -240,8 +241,14 @@ namespace NetDesktopWinForms
 
             AuthenticationResult result = null;
 
-            var builder = pca.AcquireTokenInteractive(GetScopes())
-                .WithPrompt(GetPrompt());
+            var builder = pca.AcquireTokenInteractive(GetScopes());
+                
+
+            Prompt? prompt = GetPrompt();
+            if (prompt.HasValue)
+            {
+                builder = builder.WithPrompt(prompt.Value);
+            }
 
             if (!string.IsNullOrEmpty(loginHint))
             {
@@ -292,37 +299,36 @@ namespace NetDesktopWinForms
             return msa;
         }
 
-        private Prompt GetPrompt()
+        private Prompt? GetPrompt()
         {
-            return Prompt.SelectAccount; // TODO... WAM only works has "default" and "Force" prompts...
-            //string prompt = null;
-            //promptCbx.Invoke((MethodInvoker)delegate
-            //{
-            //    prompt = promptCbx.Text;
-            //});
 
-            //if (string.IsNullOrEmpty(prompt))
-            //    return Prompt.SelectAccount;
+            string prompt = null;
+            promptCbx.Invoke((MethodInvoker)delegate
+            {
+                prompt = promptCbx.Text;
+            });
+
+            if (string.IsNullOrEmpty(prompt))
+                return null;
+
+            switch (prompt)
+            {
+
+                case "select_account":
+                    return Prompt.SelectAccount;
+                case "force_login":
+                    return Prompt.ForceLogin;
+                case "no_prompt":
+                    return Prompt.NoPrompt;
+                case "consent":
+                    return Prompt.Consent;
+                case "never":
+                    return Prompt.Never;
 
 
-            //switch (prompt)
-            //{
-
-            //    case "select_account":
-            //        return Prompt.SelectAccount;
-            //    case "force_login":
-            //        return Prompt.ForceLogin;
-            //    case "no_prompt":
-            //        return Prompt.NoPrompt;
-            //    case "consent":
-            //        return Prompt.Consent;
-            //    case "never":
-            //        return Prompt.Never;
-
-
-            //    default:
-            //        throw new NotImplementedException();
-            //}
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         private async void getAccountsBtn_Click(object sender, EventArgs e)
