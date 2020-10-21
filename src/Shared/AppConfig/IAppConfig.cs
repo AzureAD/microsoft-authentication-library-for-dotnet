@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         IEnumerable<string> ClientCapabilities { get; }
 
-
+#if MSAL_CONFIDENTIAL
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
         /// </summary>
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         X509Certificate2 ClientCredentialCertificate { get; }
 #endif
-
+#endif
         /// <summary>
         /// </summary>
         Func<object> ParentActivityOrWindowFunc { get; }

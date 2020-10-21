@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if WINDOWS_APP
 
 using System;
 using System.Runtime.InteropServices;
@@ -64,3 +65,4 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
     }
 }
+#endif

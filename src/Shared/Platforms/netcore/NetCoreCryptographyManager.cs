@@ -66,11 +66,11 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            if (certificate.PublicKey.Key.KeySize < ClientCredentialWrapper.MinKeySizeInBits)
+            if (certificate.PublicKey.Key.KeySize < 2048) 
             {
                 throw new ArgumentOutOfRangeException(nameof(certificate),
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
-                        ClientCredentialWrapper.MinKeySizeInBits));
+                        2048));
             }
 
             using (var key = certificate.GetRSAPrivateKey())

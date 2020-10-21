@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if MSAL_CONFIDENTIAL
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -183,3 +185,4 @@ namespace Microsoft.Identity.Client.Internal
     }
 #endif
 }
+#endif

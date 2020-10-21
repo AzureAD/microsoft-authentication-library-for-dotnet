@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if WINDOWS_APP
 
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -95,3 +96,4 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
     }
 }
+#endif

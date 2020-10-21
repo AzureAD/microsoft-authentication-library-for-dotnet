@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client
 
         public IEnumerable<string> ClientCapabilities { get; set; }
 
-
+#if MSAL_CONFIDENTIAL
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
         public ClientCredentialWrapper ClientCredential { get; internal set; }
@@ -81,8 +81,9 @@ namespace Microsoft.Identity.Client
         internal int ConfidentialClientCredentialCount;
 
 #endif
+#endif
 
-        #region Authority
+#region Authority
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }
         public Uri CustomInstanceDiscoveryMetadataUri { get; set; }
@@ -107,6 +108,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal bool ValidateAuthority { get; set; }
 
-        #endregion
+#endregion
     }
 }

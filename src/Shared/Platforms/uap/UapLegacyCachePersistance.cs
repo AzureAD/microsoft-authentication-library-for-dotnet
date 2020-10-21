@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if WINDOWS_APP
 
 using System;
 using Windows.Foundation.Collections;
@@ -116,3 +117,4 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
     }
 }
+#endif

@@ -125,14 +125,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
+#if MSAL_CONFIDENTIAL
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
         public ClientCredentialWrapper ClientCredential { get; set; }
 #endif
+#endif
+
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
-        
+
         public string LoginHint
         {
             get
@@ -157,7 +160,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             get
             {
-#if ANDROID || iOS || WINDOWS_APP || MAC
+#if !MSAL_CONFIDENTIAL
                 return false;
 #else
                 return ClientCredential != null;
@@ -184,7 +187,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Authority - " + AuthorityInfo?.CanonicalAuthority);
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
+#if MSAL_CONFIDENTIAL
             builder.AppendLine("SendX5C - " + SendX5C);
+#endif
             builder.AppendLine("LoginHint - " + LoginHint);
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
             builder.AppendLine("HomeAccountId - " + HomeAccountId);
@@ -201,7 +206,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
+#if MSAL_CONFIDENTIAL
             builder.AppendLine("SendX5C - " + SendX5C);
+#endif
             builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
             builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
