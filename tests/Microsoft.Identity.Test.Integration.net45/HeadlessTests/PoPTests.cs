@@ -274,6 +274,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
+                .WithExperimentalFeatures()
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientSecret(s_publicCloudCcaSecret)
                 .Build();
@@ -301,6 +302,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
+                .WithExperimentalFeatures()
                 .WithAuthority(new Uri(confidentialClientAuthority), true)
                 .WithClientSecret(s_publicCloudCcaSecret)
                 .Build();

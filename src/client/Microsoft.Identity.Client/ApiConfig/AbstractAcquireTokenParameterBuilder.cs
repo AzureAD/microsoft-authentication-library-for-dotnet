@@ -374,11 +374,19 @@ namespace Microsoft.Identity.Client
         /// <list type="bullet">
         /// <item> An Authentication header is automatically added to the request</item>
         /// <item> The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters). </item>
-        /// <item>MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</item>
+        /// <item> MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</item>
+        /// <item>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</item>
         /// </list>
         /// </remarks>
         public T WithProofOfPosession(PopAuthenticationConfiguration popAuthenticationConfiguration)
         {
+            if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithProofOfPosession)));
+            }
+
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithPoPScheme);

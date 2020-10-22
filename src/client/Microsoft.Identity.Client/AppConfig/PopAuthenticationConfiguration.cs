@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
+#if DESKTOP || NET_CORE
     /// <summary>
     /// Configuration properties used to construct a proof of possesion request.
     /// </summary>
@@ -50,4 +51,5 @@ namespace Microsoft.Identity.Client.AppConfig
             PopAuthenticationRequestHeader = header;
         }
     }
+#endif
 }
