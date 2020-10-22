@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.PoP
 {
@@ -33,67 +34,74 @@ namespace Microsoft.Identity.Test.Unit.PoP
         [TestMethod]
         public void NullArgsTest()
         {
-            Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
-            HttpMethod method = HttpMethod.Post;
-            HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
-            var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
-            PopAuthenticationConfiguration config = null;
+            using (var harness = CreateTestHarness())
+            {
+                Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
+                HttpMethod method = HttpMethod.Post;
+                HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
+                var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
+                PopAuthenticationConfiguration config = null;
 
-            AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config));
+                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config, harness.ServiceBundle));
 
-            config = new PopAuthenticationConfiguration(uri);
-            config.PopCryptoProvider = null;
-            
-            AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config));
-            AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationConfiguration(null));
+                config = new PopAuthenticationConfiguration(uri);
+                config.PopCryptoProvider = new InMemoryCryptoProvider();
+
+                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config, null));
+                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationConfiguration(null));
+            }
         }
 
         [TestMethod]
         public void ValidatePopRequestAndToken()
         {
-            // Arrange
-            Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
-            PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(uri);
-            popConfig.HttpMethod = HttpMethod.Post;
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
+                PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(uri);
+                popConfig.HttpMethod = HttpMethod.Post;
 
-            var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
-            popCryptoProvider.CannonicalPublicKeyJwk.Returns(JWK);
-            popConfig.PopCryptoProvider = popCryptoProvider;
-            const string AtSecret = "secret";
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem = TokenCacheHelper.CreateAccessTokenItem();
-            msalAccessTokenCacheItem.Secret = AtSecret;
+                var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
+                var serviceBundle = Substitute.For<IServiceBundle>();
+                popCryptoProvider.CannonicalPublicKeyJwk.Returns(JWK);
+                popConfig.PopCryptoProvider = popCryptoProvider;
+                const string AtSecret = "secret";
+                MsalAccessTokenCacheItem msalAccessTokenCacheItem = TokenCacheHelper.CreateAccessTokenItem();
+                msalAccessTokenCacheItem.Secret = AtSecret;
 
-            // Act
-            PoPAuthenticationScheme authenticationScheme = new PoPAuthenticationScheme(popConfig);
-            var tokenParams = authenticationScheme.GetTokenRequestParams();
-            var popTokenString = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
-            JwtSecurityToken decodedPopToken = new JwtSecurityToken(popTokenString);
+                // Act
+                PoPAuthenticationScheme authenticationScheme = new PoPAuthenticationScheme(popConfig, harness.ServiceBundle);
+                var tokenParams = authenticationScheme.GetTokenRequestParams();
+                var popTokenString = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
+                JwtSecurityToken decodedPopToken = new JwtSecurityToken(popTokenString);
 
-            // Assert
-            Assert.AreEqual("PoP", authenticationScheme.AuthorizationHeaderPrefix);
-            Assert.AreEqual(JWT, authenticationScheme.KeyId);
-            Assert.AreEqual(2, tokenParams.Count);
-            Assert.AreEqual("pop", tokenParams["token_type"]);
+                // Assert
+                Assert.AreEqual("PoP", authenticationScheme.AuthorizationHeaderPrefix);
+                Assert.AreEqual(JWT, authenticationScheme.KeyId);
+                Assert.AreEqual(2, tokenParams.Count);
+                Assert.AreEqual("pop", tokenParams["token_type"]);
 
-            // This is the base64 URL encoding of the JWK containing only the KeyId
-            Assert.AreEqual("eyJraWQiOiJOemJMc1hoOHVEQ2NkLTZNTndYRjRXXzdub1dYRlpBZkhreFpzUkdDOVhzIn0", tokenParams["req_cnf"]);
-            Assert.AreEqual("RS256", decodedPopToken.Header.Alg);
-            Assert.AreEqual(JWT, decodedPopToken.Header.Kid);
-            Assert.AreEqual("pop", decodedPopToken.Header.Typ);
-            Assert.AreEqual("RS256", decodedPopToken.SignatureAlgorithm);
+                // This is the base64 URL encoding of the JWK containing only the KeyId
+                Assert.AreEqual("eyJraWQiOiJOemJMc1hoOHVEQ2NkLTZNTndYRjRXXzdub1dYRlpBZkhreFpzUkdDOVhzIn0", tokenParams["req_cnf"]);
+                Assert.AreEqual("RS256", decodedPopToken.Header.Alg);
+                Assert.AreEqual(JWT, decodedPopToken.Header.Kid);
+                Assert.AreEqual("pop", decodedPopToken.Header.Typ);
+                Assert.AreEqual("RS256", decodedPopToken.SignatureAlgorithm);
 
-            AssertSimpleClaim(decodedPopToken, "at", AtSecret);
-            AssertSimpleClaim(decodedPopToken, "m", HttpMethod.Post.ToString());
-            AssertSimpleClaim(decodedPopToken, "u", "www.contoso.com");
-            AssertSimpleClaim(decodedPopToken, "p", "/path1/path2");
+                AssertSimpleClaim(decodedPopToken, "at", AtSecret);
+                AssertSimpleClaim(decodedPopToken, "m", HttpMethod.Post.ToString());
+                AssertSimpleClaim(decodedPopToken, "u", "www.contoso.com");
+                AssertSimpleClaim(decodedPopToken, "p", "/path1/path2");
 
-            string nonce = AssertSimpleClaim(decodedPopToken, "nonce");
-            Assert.IsFalse(string.IsNullOrEmpty(nonce));
-            string jwk = AssertSimpleClaim(decodedPopToken, "cnf");
-            var jwkFromPopAssertion = JToken.Parse(jwk);
+                string nonce = AssertSimpleClaim(decodedPopToken, "nonce");
+                Assert.IsFalse(string.IsNullOrEmpty(nonce));
+                string jwk = AssertSimpleClaim(decodedPopToken, "cnf");
+                var jwkFromPopAssertion = JToken.Parse(jwk);
 
-            var initialJwk = JToken.Parse(JWK);
-            Assert.IsTrue(jwkFromPopAssertion["jwk"].DeepEquals(initialJwk));
+                var initialJwk = JToken.Parse(JWK);
+                Assert.IsTrue(jwkFromPopAssertion["jwk"].DeepEquals(initialJwk));
+            }
         }
 
         [TestMethod]

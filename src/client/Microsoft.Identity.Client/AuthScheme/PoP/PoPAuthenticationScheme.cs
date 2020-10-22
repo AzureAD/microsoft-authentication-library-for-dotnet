@@ -18,6 +18,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
+#if DESKTOP || NET_CORE
     internal class PoPAuthenticationScheme : IAuthenticationScheme
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -33,6 +34,11 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// </remarks>
         public PoPAuthenticationScheme(PopAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
         {
+            if (serviceBundle == null)
+            {
+                throw new ArgumentNullException(nameof(serviceBundle));
+            }
+
             _popAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
             _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
@@ -139,4 +145,5 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             return sb.ToString();
         }
     }
+#endif
 }

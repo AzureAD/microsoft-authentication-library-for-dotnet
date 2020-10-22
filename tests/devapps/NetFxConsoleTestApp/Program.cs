@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.SSHCertificates;
 using Microsoft.Identity.Client.Utils;
 
@@ -274,9 +275,10 @@ namespace NetFx
 
                             if (s_usePoP)
                             {
+                                var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) {HttpMethod = s_popMethod };
                                 silentBuilder = silentBuilder
                                     .WithExtraQueryParameters(GetTestSliceParams())
-                                    .WithProofOfPosession(new HttpRequestMessage(s_popMethod, PoPUri));
+                                    .WithProofOfPosession(popConfig);
                             }
 
 
@@ -308,9 +310,11 @@ namespace NetFx
                                     var silentBuilder = pca.AcquireTokenSilent(s_scopes, acc);
                                     if (s_usePoP)
                                     {
+                                        var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
+
                                         silentBuilder = silentBuilder
                                             .WithExtraQueryParameters(GetTestSliceParams())
-                                            .WithProofOfPosession(new HttpRequestMessage(s_popMethod, PoPUri));
+                                            .WithProofOfPosession(popConfig);
                                     }
                                     return silentBuilder.ExecuteAsync();
                                 })
@@ -452,9 +456,10 @@ namespace NetFx
         {
             if (s_usePoP)
             {
+                var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
                 builder = builder
                     .WithExtraQueryParameters(GetTestSliceParams())
-                    .WithProofOfPosession(new HttpRequestMessage(s_popMethod, new Uri(PoPUri)));
+                    .WithProofOfPosession(popConfig);
             }
 
             return builder as T;
