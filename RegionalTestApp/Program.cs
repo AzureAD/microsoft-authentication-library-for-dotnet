@@ -88,7 +88,7 @@ namespace TestApp
             string[] scopes = new string[] { $"{clientId}/.default", };
 
             var cca = ConfidentialClientApplicationBuilder.Create(clientId)
-                .WithAuthority("https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47")
+                .WithAuthority("https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47")
                 .WithCertificate(certificate)
                 .WithExperimentalFeatures(true)
                 .WithLogging(Log, LogLevel.Info, true)
