@@ -432,7 +432,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(app.Authority, false)
                     .ExecuteAsync()).ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.UserNullError, exception.ErrorCode);
+                Assert.AreEqual(MsalError.NoTokensFoundError, exception.ErrorCode);
                 Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, exception.Classification);
             }
         }

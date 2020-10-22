@@ -11,7 +11,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
@@ -51,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             try
             {
-                if (AuthenticationRequestParameters.Account?.HomeAccountId != null)
+                if (AuthenticationRequestParameters.Account != null)
                 {
                     _logger.Verbose("Attempting to acquire token using using local cache...");
                     return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
