@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
                 var serviceBundle = Substitute.For<IServiceBundle>();
                 popCryptoProvider.CannonicalPublicKeyJwk.Returns(JWK);
+                popCryptoProvider.CryptographicAlgorithm.Returns("RS256");
                 popConfig.PopCryptoProvider = popCryptoProvider;
                 const string AtSecret = "secret";
                 MsalAccessTokenCacheItem msalAccessTokenCacheItem = TokenCacheHelper.CreateAccessTokenItem();
@@ -112,12 +113,12 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
                 popConfig.HttpMethod = HttpMethod.Get;
+                popConfig.PopCryptoProvider = new InMemoryCryptoProvider();
 
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)
                                 .WithExperimentalFeatures()
                                 .BuildConcrete();
-
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
