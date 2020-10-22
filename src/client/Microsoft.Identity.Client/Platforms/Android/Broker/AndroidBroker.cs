@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
 
             using (_logger.LogBlockDuration("waiting for broker response"))
-            {                
+            {
                 await s_readyForResponse.WaitAsync().ConfigureAwait(false);
                 return s_androidBrokerTokenResponse;
             }
@@ -92,7 +92,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-
             BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
                 authenticationRequestParameters, acquireTokenSilentParameters);
 
@@ -108,7 +107,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 HandleBrokerOperationError(ex);
                 throw;
             }
-        }      
+        }
 
         private async Task AcquireTokenInteractiveViaBrokerAsync(BrokerRequest brokerRequest)
         {
@@ -289,7 +288,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     _logger.Warning("Android broker is either not installed or not reachable so no accounts will be removed.");
                     return;
                 }
-           
+
                 try
                 {
                     await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
@@ -311,6 +310,18 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 throw ex;
             else
                 throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
+        }
+
+        /// <summary>
+        /// Android Broker does not support logging in a "default" user.
+        /// </summary>
+        public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
+        {
+            throw new MsalUiRequiredException(
+                       MsalError.UserNullError,
+                       MsalErrorMessage.MsalUiRequiredMessage,
+                       null,
+                       UiRequiredExceptionClassification.AcquireTokenSilentFailed);
         }
     }
 }
