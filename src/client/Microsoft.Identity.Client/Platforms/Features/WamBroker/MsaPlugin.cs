@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal class MsaPlugin : IWamPlugin
     {
-        private const string MsaErrorCode = "wam_msa_internal_error";
+        private const string MsaErrorCode = "wam_msa_error";
         private readonly IWamProxy _wamProxy;
         private readonly IWebAccountProviderFactory _webAccountProviderFactory;
         private readonly ICoreLogger _logger;
@@ -165,7 +165,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public string MapTokenRequestError(WebTokenRequestStatus status, uint errorCode, bool isInteractive)
         {
-
             if (status != WebTokenRequestStatus.UserInteractionRequired)
             {
                 return MsaErrorCode;
