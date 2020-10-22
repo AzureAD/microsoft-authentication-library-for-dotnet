@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -142,30 +143,31 @@ namespace Microsoft.Identity.Client
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                await broker.RemoveAccountAsync(AppConfig.ClientId, account).ConfigureAwait(false);
+                await broker.RemoveAccountAsync((AppConfig as IApplicationConfiguration), account).ConfigureAwait(false);
             }
         }
 
         private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter = null)
         {
             var accountsFromCache = await GetAccountsFromCacheAsync(apiId, homeAccountIdFilter).ConfigureAwait(false);
-            IEnumerable<IAccount> cacheAndBrokerAccounts =
-                await MergeWithBrokerAccountsAsync(accountsFromCache, homeAccountIdFilter).ConfigureAwait(false);
+            var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter).ConfigureAwait(false);
 
+            ServiceBundle.DefaultLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromCache.Count()} broker accounts");
+            IEnumerable<IAccount> cacheAndBrokerAccounts = MergeAccounts(accountsFromCache, accountsFromBroker);
+
+            ServiceBundle.DefaultLogger.Verbose($"Returning {cacheAndBrokerAccounts.Count()} accounts");
             return cacheAndBrokerAccounts;
         }
 
-        private async Task<IEnumerable<IAccount>> MergeWithBrokerAccountsAsync(
-            IEnumerable<IAccount> accountsFromCache, 
-            string homeAccountIdFilter = null)
+        private async Task<IEnumerable<IAccount>> GetAccountsFromBrokerAsync(string homeAccountIdFilter)
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                List<IAccount> allAccounts = new List<IAccount>(accountsFromCache);
-                //Broker is available so accounts will be merged using home account ID with local accounts taking priority
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
-                var brokerAccounts = await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false);
-                
+                var brokerAccounts =
+                    (await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false))
+                    ?? Enumerable.Empty<IAccount>();
+
                 if (!string.IsNullOrEmpty(homeAccountIdFilter))
                 {
                     brokerAccounts = brokerAccounts.Where(
@@ -174,18 +176,49 @@ namespace Microsoft.Identity.Client
                             StringComparison.OrdinalIgnoreCase));
                 }
 
-                foreach (IAccount account in brokerAccounts)
-                {
-                    if (!accountsFromCache.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
-                    {
-                        allAccounts.Add(account);
-                    }
-                }
-
-                return allAccounts;
+                brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts).ConfigureAwait(false);
+                return brokerAccounts;
             }
 
-            return accountsFromCache;
+            return Enumerable.Empty<IAccount>();
+        }
+
+        private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts)
+        {
+            ServiceBundle.DefaultLogger.Verbose($"Filtering broker accounts by env. Before filtering: " + brokerAccounts.Count());
+
+            ISet<string> allEnvs = new HashSet<string>(
+                brokerAccounts.Select(aci => aci.Environment),
+                StringComparer.OrdinalIgnoreCase);
+
+            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                Authority,
+                allEnvs,
+                CreateRequestContext(Guid.NewGuid())).ConfigureAwait(false);
+
+
+            brokerAccounts = brokerAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+
+            ServiceBundle.DefaultLogger.Verbose($"After filtering: " + brokerAccounts.Count());
+
+            return brokerAccounts;
+        }
+
+        private IEnumerable<IAccount> MergeAccounts(
+            IEnumerable<IAccount> cacheAccounts,
+            IEnumerable<IAccount> brokerAccounts)
+        {
+            List<IAccount> allAccounts = new List<IAccount>(cacheAccounts);
+
+            foreach (IAccount account in brokerAccounts)
+            {
+                if (!cacheAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId)))
+                {
+                    allAccounts.Add(account);
+                }
+            }
+
+            return allAccounts;
         }
 
         private async Task<IEnumerable<IAccount>> GetAccountsFromCacheAsync(

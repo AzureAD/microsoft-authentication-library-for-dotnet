@@ -42,24 +42,23 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public AuthenticationRequestParameters CreateAuthenticationRequestParameters(
-            string authority,
-            IEnumerable<string> scopes,
-            ITokenCacheInternal tokenCache,
+            string authority,            
+            IEnumerable<string> scopes = null,
+            ITokenCacheInternal tokenCache = null,
             IAccount account = null,
             IDictionary<string, string> extraQueryParameters = null,
             string claims = null,
-            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.None)
-        {
-            if (tokenCache == null)
-            {
-                throw new ArgumentNullException(nameof(tokenCache));
-            }
+            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.None, 
+            bool validateAuthority = false)
+        {            
+            scopes = scopes ?? TestConstants.s_scope;
+            tokenCache = tokenCache ?? new TokenCache(ServiceBundle, false);
 
             var commonParameters = new AcquireTokenCommonParameters
             {
                 Scopes = scopes ?? TestConstants.s_scope,
                 ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>(),
-                Claims = claims, 
+                Claims = claims,
                 ApiId = apiId
             };
 
@@ -70,7 +69,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 new RequestContext(ServiceBundle, Guid.NewGuid()))
             {
                 Account = account,
-                Authority = Authority.CreateAuthority(authority)
+                Authority = Authority.CreateAuthority(authority, validateAuthority)
             };
         }
     }

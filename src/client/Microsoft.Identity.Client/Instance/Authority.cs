@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.Instance
 {
     /// <remarks>
     /// Must be kept immutable
     /// </remarks>
+    [DebuggerDisplay("{AuthorityInfo.CanonicalAuthority}")]
     internal abstract class Authority
     {
         protected Authority(AuthorityInfo authorityInfo)

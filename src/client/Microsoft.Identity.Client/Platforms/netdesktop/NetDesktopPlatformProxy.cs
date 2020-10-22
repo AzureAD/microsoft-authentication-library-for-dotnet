@@ -21,7 +21,7 @@ using Microsoft.Win32;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.net45.Http;
-using Microsoft.Identity.Client.PlatformsCommon;
+using Microsoft.Identity.Client.Platforms.Features.Windows;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -139,12 +139,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
 
             return Environment.GetEnvironmentVariable(variable);
-        }
-
-        /// <inheritdoc />
-        public override string GetBrokerOrRedirectUri(Uri redirectUri)
-        {
-            return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
@@ -324,5 +318,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             return new NetDesktopHttpClientFactory();
         }
+
+        public override bool BrokerSupportsWamAccounts => true;
     }
 }

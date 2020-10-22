@@ -95,12 +95,12 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonProperty(PropertyName = TokenResponseClaim.FamilyId)]
         public string FamilyId { get; set; }
 
+        public string WamAccountId { get; set; }
+
         public DateTimeOffset AccessTokenExpiresOn { get; private set; }
         public DateTimeOffset AccessTokenExtendedExpiresOn { get; private set; }
 
         public DateTimeOffset? AccessTokenRefreshOn { get; private set; }
-
-        public string Authority { get; private set; }
 
         public TokenSource TokenSource { get; set; }
 
@@ -119,9 +119,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
             var response = new MsalTokenResponse
             {
-                Authority = responseDictionary.ContainsKey(BrokerResponseConst.Authority)
-                    ? AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.Authority]))
-                    : null,
                 AccessToken = responseDictionary[BrokerResponseConst.AccessToken],
                 RefreshToken = responseDictionary.ContainsKey(BrokerResponseConst.RefreshToken)
                     ? responseDictionary[BrokerResponseConst.RefreshToken]
@@ -131,7 +128,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 CorrelationId = responseDictionary[BrokerResponseConst.CorrelationId],
                 Scope = responseDictionary[BrokerResponseConst.Scope],
                 ExpiresIn = responseDictionary.TryGetValue(BrokerResponseConst.ExpiresOn, out string expiresOn) ?
-                                GetExpiresIn(expiresOn) :
+                                CoreHelpers.GetDurationFromNowInSeconds(expiresOn) :
                                 0,
                 ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
                     ? responseDictionary[BrokerResponseConst.ClientInfo]
@@ -171,30 +168,18 @@ namespace Microsoft.Identity.Client.OAuth2
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
-                Authority = authResult[BrokerResponseConst.Authority].ToString(),
                 AccessToken = authResult[BrokerResponseConst.AccessToken].ToString(),
                 IdToken = authResult[BrokerResponseConst.IdToken].ToString(),
                 CorrelationId = correlationId, // Android response does not expose Correlation ID
                 Scope = authResult[BrokerResponseConst.AndroidScopes].ToString(), // sadly for iOS this is "scope" and for Android "scopes"
-                ExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExpiresOn].ToString()),
-                ExtendedExpiresIn = GetExpiresIn(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
+                ExpiresIn = CoreHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExpiresOn].ToString()),
+                ExtendedExpiresIn = CoreHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
                 ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
                 TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
                 TokenSource = TokenSource.Broker
             };
 
             return msalTokenResponse;
-        }
-
-        private static long GetExpiresIn(string expiresOn)
-        {
-            if (string.IsNullOrEmpty(expiresOn))
-            {
-                return 0;
-            }
-
-            long expiresOnUnixTimestamp = long.Parse(expiresOn, CultureInfo.InvariantCulture);
-            return expiresOnUnixTimestamp - CoreHelpers.CurrDateTimeInUnixTimestamp();
         }
     }    
 }

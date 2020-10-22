@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security;
 using System.Security.Cryptography;
 using System.Threading;
@@ -38,7 +37,7 @@ namespace NetFx
     },  
   }";
         // This app has http://localhost redirect uri registered
-        private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
+        private static readonly string s_clientIdForPublicApp = "c0186a6c-0bfc-4d83-9543-c2295b676f3b";
 
         private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
         private const string PoPUri = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
@@ -46,6 +45,7 @@ namespace NetFx
         private static readonly HttpMethod s_popMethod = HttpMethod.Get;
 
         private static bool s_usePoP = false;
+        private static bool s_useBroker = true;
 
         // These are not really secret as they do not protect anything, but validaton tools will complain
         // if we have secrets in the code. 
@@ -64,7 +64,7 @@ namespace NetFx
             Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET");
 
         private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private static readonly IEnumerable<string> s_scopes = new[] { "" };
+        private static readonly IEnumerable<string> s_scopes = new[] { "User.Read",  };
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -100,6 +100,9 @@ namespace NetFx
                 .WithClientSecret(s_confidentialClientSecret)
                 .Build();
 
+            //cca.AcquireTokenOnBehalfOf(null, null).WithAuthority
+            
+
             BindCache(cca.UserTokenCache, UserCacheFile);
             BindCache(cca.AppTokenCache, UserCacheFile);
 
@@ -107,13 +110,19 @@ namespace NetFx
         }
         private static IPublicClientApplication CreatePca()
         {
-            IPublicClientApplication pca = PublicClientApplicationBuilder
+            var builder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
                             //.WithClientCapabilities(new[] { "llt" })
-                            .WithRedirectUri("http://localhost") // required for DefaultOsBrowser
-                            .Build();
+                            .WithRedirectUri("http://localhost"); // required for DefaultOsBrowser
+
+            if (s_useBroker)
+            {
+                builder = builder.WithBroker(true);
+            }
+
+            var pca = builder.Build();
 
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
@@ -143,11 +152,14 @@ namespace NetFx
         private static async Task RunConsoleAppLogicAsync(
             IPublicClientApplication pca)
         {
+
+
             while (true)
             {
                 Console.Clear();
 
                 Console.WriteLine("Authority: " + GetAuthority());
+                Console.WriteLine("Use WAM: " + s_useBroker);
                 await DisplayAccountsAsync(pca).ConfigureAwait(false);
 
                 // display menu
@@ -156,12 +168,15 @@ namespace NetFx
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
                         4. Acquire Token Interactive                         
+                        $. Acquire Token Interactive with login hint
                         5. Acquire Token Silently
                         6. Acquire Token Silently - multiple requests in parallel
                         7. Acquire SSH Cert Interactive
                         8. Client Credentials 
                         9. Get Account with ID
+                        a. Acquire Token Silently with MSA passthrough workaround
                         p. Toggle POP (currently {(s_usePoP ? "ON" : "OFF")}) 
+                        b. Toggle broker
                         c. Clear cache
                         r. Rotate Tenant ID
                         e. Expire all ATs
@@ -182,8 +197,9 @@ namespace NetFx
 
                             iwaBuilder = ConfigurePoP(iwaBuilder);
 
-                            authTask = iwaBuilder.ExecuteAsync();
-                            await FetchTokenAndCallApiAsync(pca, authTask).ConfigureAwait(false);
+                            var result = await iwaBuilder.ExecuteAsync().ConfigureAwait(false);
+
+                            await CallApiAsync(pca, result).ConfigureAwait(false);
 
                             break;
                         case '2': // acquire token u/p
@@ -193,7 +209,9 @@ namespace NetFx
                             var upBuilder = pca.AcquireTokenByUsernamePassword(s_scopes, username, password);
                             upBuilder = ConfigurePoP(upBuilder);
 
-                            await FetchTokenAndCallApiAsync(pca, upBuilder.ExecuteAsync()).ConfigureAwait(false);
+                            result = await upBuilder.ExecuteAsync().ConfigureAwait(false);
+
+                            await CallApiAsync(pca, result).ConfigureAwait(false);
 
                             break;
                         case '3':
@@ -206,28 +224,54 @@ namespace NetFx
                                 });
 
                             deviceCodeBuilder = ConfigurePoP(deviceCodeBuilder);
-
-                            await FetchTokenAndCallApiAsync(pca, deviceCodeBuilder.ExecuteAsync()).ConfigureAwait(false);
+                            result = await deviceCodeBuilder.ExecuteAsync().ConfigureAwait(false);
+                            await CallApiAsync(pca, result).ConfigureAwait(false);
 
                             break;
                         case '4':
-
-                            var interactiveBuilder = pca.AcquireTokenInteractive(s_scopes);
-                            //interactiveBuilder = interactiveBuilder.WithClaims(Claims);
+                            
+                            var interactiveBuilder = pca.AcquireTokenInteractive(s_scopes);                            
                             interactiveBuilder = ConfigurePoP(interactiveBuilder);
+                                                       
+                            //interactiveBuilder = interactiveBuilder.WithAccount(account2);
 
-                            await FetchTokenAndCallApiAsync(pca, interactiveBuilder.ExecuteAsync()).ConfigureAwait(false);
+                            result = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
+                            await CallApiAsync(pca, result).ConfigureAwait(false);
 
                             break;
+                        case '$':
 
-                        case '5': // acquire token silent
+                            IAccount account4 = pca.GetAccountsAsync().Result.FirstOrDefault();
+                            var interactiveBuilder2 = pca.AcquireTokenInteractive(s_scopes);
+                            interactiveBuilder = ConfigurePoP(interactiveBuilder2);
+
+                            interactiveBuilder = interactiveBuilder.WithLoginHint(account4.Username);
+
+                            result = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
+                            await CallApiAsync(pca, result).ConfigureAwait(false);
+
+                            break;
+                        case '5':
+                            IAccount account3 = pca.GetAccountsAsync().Result.FirstOrDefault();
+                            if (account3 == null)
+                            {
+                                Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
+                            }
+                            AcquireTokenSilentParameterBuilder silentBuilder2 = pca.AcquireTokenSilent(s_scopes, account3);
+                            result = await silentBuilder2.ExecuteAsync().ConfigureAwait(false);
+                            await CallApiAsync(pca, result).ConfigureAwait(false);
+                            break;
+
+                        case 'a': // acquire token silent with MSA-passthrough
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
+
                             if (account == null)
                             {
                                 Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
                             }
 
                             AcquireTokenSilentParameterBuilder silentBuilder = pca.AcquireTokenSilent(s_scopes, account);
+
                             if (s_usePoP)
                             {
                                 silentBuilder = silentBuilder
@@ -235,7 +279,24 @@ namespace NetFx
                                     .WithProofOfPosession(new HttpRequestMessage(s_popMethod, PoPUri));
                             }
 
-                            await FetchTokenAndCallApiAsync(pca, silentBuilder.ExecuteAsync()).ConfigureAwait(false);
+
+                            // this is the same in all clouds
+                            const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
+
+                            // these are per cloud
+                            string publicCloudEnv = "https://login.microsoftonline.com/";
+                            string msaTenantIdPublicCloud = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
+
+                            if (account != null && account.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
+                            {
+                                var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
+
+                                silentBuilder = silentBuilder.WithAuthority(msaAuthority);
+                            }
+
+
+                            result = await silentBuilder.ExecuteAsync().ConfigureAwait(false);
+                            await CallApiAsync(pca, result).ConfigureAwait(false);
 
                             break;
 
@@ -255,9 +316,9 @@ namespace NetFx
                                 })
                                 .ToArray();
 
-                            AuthenticationResult[] result = await Task.WhenAll(tasks).ConfigureAwait(false);
+                            AuthenticationResult[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-                            foreach (var ar in result)
+                            foreach (var ar in results)
                             {
                                 Console.BackgroundColor = ConsoleColor.DarkGreen;
                                 Console.WriteLine($"Got a token for {ar.Account.Username} ");
@@ -274,7 +335,7 @@ namespace NetFx
                             string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
 
                             CancellationTokenSource cts = new CancellationTokenSource();
-                            authTask = pca.AcquireTokenInteractive(s_scopes)
+                            result = await pca.AcquireTokenInteractive(s_scopes)
                                 .WithUseEmbeddedWebView(false)
                                 .WithExtraQueryParameters(new Dictionary<string, string>() {
                                     { "dc", "prod-wst-test1"},
@@ -287,9 +348,10 @@ namespace NetFx
                                     HtmlMessageSuccess = "All good, close the browser!",
                                     OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
                                 })
-                                .ExecuteAsync(cts.Token);
+                                .ExecuteAsync(cts.Token)
+                                .ConfigureAwait(false);
 
-                            await FetchTokenAndCallApiAsync(pca, authTask).ConfigureAwait(false);
+                            Console.WriteLine("SSH cert: " + result.AccessToken);
 
                             break;
                         case '8':
@@ -317,6 +379,12 @@ namespace NetFx
                         case 'p': // toggle pop
                             s_usePoP = !s_usePoP;
                             break;
+                        case 'b':
+                            s_useBroker = !s_useBroker;
+                            pca = CreatePca();
+                            RunConsoleAppLogicAsync(pca).Wait();
+
+                            break;
 
                         case 'c':
                             var accounts2 = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -329,7 +397,7 @@ namespace NetFx
                         case 'r': // rotate tid
 
                             s_currentAuthority = (s_currentAuthority + 1) % s_authorities.Length;
-                            pca = CreatePca();                            
+                            pca = CreatePca();
                             RunConsoleAppLogicAsync(pca).Wait();
                             break;
 
@@ -347,13 +415,13 @@ namespace NetFx
                                 tokenCacheInternal.Accessor.SaveAccessToken(accessItem);
                             }
 
-                            TokenCacheNotificationArgs args = 
+                            TokenCacheNotificationArgs args =
                                 new TokenCacheNotificationArgs(
-                                pca.UserTokenCache as ITokenCacheInternal, 
-                                s_clientIdForPublicApp, 
-                                null, 
-                                true, 
-                                false, 
+                                pca.UserTokenCache as ITokenCacheInternal,
+                                s_clientIdForPublicApp,
+                                null,
+                                true,
+                                false,
                                 true);
 
                             await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -392,15 +460,13 @@ namespace NetFx
             return builder as T;
         }
 
-        private static async Task FetchTokenAndCallApiAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
+        private static async Task CallApiAsync(IPublicClientApplication pca, AuthenticationResult authResult)
         {
-            await authTask.ConfigureAwait(false);
-
             Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("Token is {0}", authTask.Result.AccessToken);
+            Console.WriteLine("Token is {0}", authResult.AccessToken);
             Console.ResetColor();
 
-            string authHeader = authTask.Result.CreateAuthorizationHeader();
+            string authHeader = authResult.CreateAuthorizationHeader();
 
             if (s_usePoP)
             {
@@ -556,5 +622,5 @@ namespace NetFx
                 { "dc", "prod-wst-test1" },
             };
         }
-    }   
+    }
 }

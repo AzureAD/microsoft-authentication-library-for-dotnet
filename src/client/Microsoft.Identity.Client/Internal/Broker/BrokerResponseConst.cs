@@ -41,5 +41,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string iOSBrokerUserCancellationErrorCode = "-50005";
 
         public const string TokenType = "token_type";
+
+        //Error codes returned from broker
+        public const string NoTokenFound = "no_tokens_found";
     }
 }

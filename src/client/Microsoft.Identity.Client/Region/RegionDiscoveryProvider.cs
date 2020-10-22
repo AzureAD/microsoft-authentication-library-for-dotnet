@@ -19,7 +19,10 @@ namespace Microsoft.Identity.Client.Region
     internal sealed class RegionDiscoveryProvider : IRegionDiscoveryProvider
     {
         private const string RegionName = "REGION_NAME";
-        private readonly Uri _ImdsUri;
+
+        // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
+        private readonly Uri _ImdsUri = new Uri("http://169.254.169.254/metadata/instance/compute?api-version=2020-06-01");
+
         private IDictionary<string, string> Headers;
         private readonly IHttpManager _httpManager;
         private static INetworkCacheMetadataProvider _networkCacheMetadataProvider;
@@ -27,9 +30,6 @@ namespace Microsoft.Identity.Client.Region
         public RegionDiscoveryProvider(IHttpManager httpManager, INetworkCacheMetadataProvider networkCacheMetadataProvider = null)
         {
             _httpManager = httpManager;
-
-            // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
-            _ImdsUri = new Uri("http://169.254.169.254/metadata/instance/compute/api-version=2020-06-01");
 
             Headers = new Dictionary<string, string>();
             Headers.Add("Metadata", "true");

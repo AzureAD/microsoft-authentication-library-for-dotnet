@@ -16,6 +16,7 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
+using System.Net;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -223,9 +224,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         }
 
                         var httpResponse = new HttpResponse();
-                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody];
-                        httpResponse.Headers = errorResult[BrokerResponseConst.BrokerHttpHeaders];
-                        httpResponse.StatusCode = errorResult[BrokerResponseConst.BrokerHttpStatusCode];
+                        //TODO: figure out how to get status code properly deserialized from JObject
+                        httpResponse.Body = errorResult[BrokerResponseConst.BrokerHttpBody]?.ToString();
 
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        public async Task RemoveAccountAsync(string clientID, IAccount account)
+        public async Task RemoveAccountAsync(IApplicationConfiguration applicationConfiguration, IAccount account)
         {
             using (_logger.LogMethodDuration())
             {
@@ -293,7 +293,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 try
                 {
                     await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
-                    _brokerHelper.RemoveBrokerAccountInAccountManager(clientID, account);
+                    _brokerHelper.RemoveBrokerAccountInAccountManager(applicationConfiguration.ClientId, account);
                 }
                 catch (Exception ex)
                 {
@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private void HandleBrokerOperationError(Exception ex)
         {
-            _logger.Error(ex.Message + MsalErrorMessage.AndroidBrokerCannotBeInvoked);
+            _logger.Error(ex.Message);
             if (ex is MsalException)
                 throw ex;
             else

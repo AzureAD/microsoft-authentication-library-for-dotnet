@@ -31,21 +31,40 @@ namespace Microsoft.Identity.Client
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>The user will be signed-in interactively if needed,
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.
-        ///
         /// You can also pass optional parameters by calling:
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithPrompt(Prompt)"/> to specify the user experience
-        /// when signing-in, <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to specify
-        /// if you want to use the embedded web browser or the system default browser,
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/> to configure
-        /// the user experience when using the Default browser,
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
-        /// to prevent the select account dialog from appearing in the case you want to sign-in a specific account,
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
-        /// user pre-consent to additional scopes (which won't be returned in the access token),
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
+        /// <list type="table">
+        /// <item>
+        /// <term><see cref="AcquireTokenInteractiveParameterBuilder.WithPrompt(Prompt)"/> </term>
+        /// <description>to specify the user experience
+        /// when signing-in</description>
+        /// </item>
+        /// <item>
+        /// <term><see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/></term>
+        /// <description>to specify
+        /// if you want to use the embedded web browser or the system default browser</description>
+        /// </item>
+        /// <item>
+        /// <term><see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/></term>
+        /// <description>to configure
+        /// the user experience when using the Default browser</description>
+        /// </item>
+        /// <item>
+        /// <term><see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/></term>
+        /// <description>to prevent the select account dialog from appearing in the case you want to sign-in a specific accounts</description>
+        /// </item>
+        /// <item>
+        /// <term><see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/></term>
+        /// <description>if you want to let the
+        /// user pre-consent to additional scopes (which won't be returned in the access token)</description>
+        /// </item>
+        /// <item>
+        /// <term><see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/></term>
+        /// <description>to pass
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction.
+        /// of the known authorities added to the application construction</description>
+        /// </item>
+        /// </list>
         /// </remarks>
         AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(IEnumerable<string> scopes);
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved

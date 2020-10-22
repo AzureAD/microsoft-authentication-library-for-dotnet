@@ -5,7 +5,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Platforms.Shared.NetStdCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -38,12 +37,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return Task.FromResult(false);
-        }
-
-        /// <inheritdoc />
-        public override string GetBrokerOrRedirectUri(Uri redirectUri)
-        {
-            return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
@@ -162,7 +155,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 
         public override Task StartDefaultOsBrowserAsync(string url)
         {
-            PlatformProxyShared.StartDefaultOsBrowser(url);
+            Microsoft.Identity.Client.Platforms.Shared.NetStdCore.PlatformProxyShared.StartDefaultOsBrowser(url);
             return Task.FromResult(0);
         }
 

@@ -121,9 +121,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <inheritdoc />
-        public abstract string GetBrokerOrRedirectUri(Uri redirectUri);
-
-        /// <inheritdoc />
         public abstract string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false);
 
         /// <inheritdoc />
@@ -149,7 +146,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected abstract IWebUIFactory CreateWebUiFactory();
         protected abstract IFeatureFlags CreateFeatureFlags();
 
-        
+
 
         protected abstract string InternalGetDeviceModel();
         protected abstract string InternalGetOperatingSystem();
@@ -198,9 +195,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual bool CanBrokerSupportSilentAuth()
         {
-            return false;
+            return true;
         }
-        
+
+        public virtual bool BrokerSupportsWamAccounts => false;
+
         public virtual IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
             throw new NotImplementedException();

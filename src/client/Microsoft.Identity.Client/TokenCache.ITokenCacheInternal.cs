@@ -97,13 +97,16 @@ namespace Microsoft.Identity.Client
                     IsAdfs = isAdfsAuthority
                 };
 
+                Dictionary<string, string> wamAccountIds = GetWamAccountIds(requestParams, response);
+
                 msalAccountCacheItem = new MsalAccountCacheItem(
                              instanceDiscoveryMetadata.PreferredCache,
                              response.ClientInfo,
                              homeAccountId,
                              idToken,
                              preferredUsername,
-                             tenantId);
+                             tenantId,
+                             wamAccountIds);
             }
 
             #endregion
@@ -153,6 +156,7 @@ namespace Microsoft.Identity.Client
                     {
                         requestParams.RequestContext.Logger.Info("Saving Id Token and Account in cache ...");
                         _accessor.SaveIdToken(msalIdTokenCacheItem);
+                        MergeWamAccountIds(msalAccountCacheItem);
                         _accessor.SaveAccount(msalAccountCacheItem);
                     }
 
@@ -206,6 +210,28 @@ namespace Microsoft.Identity.Client
             {
                 _semaphoreSlim.Release();
             }
+        }
+
+        private void MergeWamAccountIds(MsalAccountCacheItem msalAccountCacheItem)
+        {
+            var existingAccount = _accessor.GetAllAccounts()
+                .SingleOrDefault(
+                    acc => string.Equals(
+                        acc.GetKey().ToString(),
+                        msalAccountCacheItem.GetKey().ToString(),
+                        StringComparison.OrdinalIgnoreCase));
+            var existingWamAccountIds = existingAccount?.WamAccountIds;
+            msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
+        }
+
+        private static Dictionary<string, string> GetWamAccountIds(AuthenticationRequestParameters requestParams, MsalTokenResponse response)
+        {
+            if (!string.IsNullOrEmpty(response.WamAccountId))
+            {
+                return new Dictionary<string, string>() { { requestParams.ClientId, response.WamAccountId } };
+            }
+
+            return new Dictionary<string, string>();
         }
 
         private static string GetHomeAccountId(AuthenticationRequestParameters requestParams, MsalTokenResponse response, IdToken idToken)
@@ -529,20 +555,18 @@ namespace Microsoft.Identity.Client
 
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
 
-            string upn = string.IsNullOrWhiteSpace(requestParams.LoginHint)
-                ? requestParams.Account?.Username
-                : requestParams.LoginHint;
+          
 
             // ADAL legacy cache does not store FRTs
             if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
             {
-                return CacheFallbackOperations.GetAdalEntryForMsal(
+              
+                return CacheFallbackOperations.GetRefreshToken(
                     Logger,
                     LegacyCachePersistence,
                     aliases,
-                    requestParams.ClientId,
-                    upn,
-                    requestParams.Account.HomeAccountId?.ObjectId);
+                    requestParams.ClientId,                    
+                    requestParams.Account);
             }
 
             return null;
@@ -645,8 +669,30 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            IEnumerable<IAccount> accounts = UpdateWithAdalAccounts(
+            UpdateMapWithAdalAccountsWithClientInfo(
                 environment,
+                instanceMetadata.Aliases,
+                adalUsersResult,
+                clientInfoToAccountMap);
+
+            // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
+            if (requestParameters.IsBrokerConfigured && ServiceBundle.PlatformProxy.BrokerSupportsWamAccounts)
+            {
+                foreach (MsalAccountCacheItem wamAccountCache in accountCacheItems.Where(
+                    acc => acc.WamAccountIds != null &&
+                    acc.WamAccountIds.ContainsKey(requestParameters.ClientId)))
+                {
+                    var wamAccount = new Account(
+                        wamAccountCache.HomeAccountId, 
+                        wamAccountCache.PreferredUsername, 
+                        environment, 
+                        wamAccountCache.WamAccountIds);
+
+                    clientInfoToAccountMap[wamAccountCache.HomeAccountId] = wamAccount;
+                }
+            }
+
+            IEnumerable<IAccount> accounts = UpdateWithAdalAccountsWithoutClientInfo(environment,
                 instanceMetadata.Aliases,
                 adalUsersResult,
                 clientInfoToAccountMap);

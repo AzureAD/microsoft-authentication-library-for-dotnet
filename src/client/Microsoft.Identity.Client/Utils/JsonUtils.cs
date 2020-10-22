@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Utils
@@ -27,6 +30,21 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             return string.Empty;
+        }
+
+        public static IDictionary<string, string> ExtractInnerJsonAsDictionary(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out JToken val))
+            {
+                IDictionary<string, JToken> valueAsDict = (JObject)val;
+                Dictionary<string, string> dictionary =
+                    valueAsDict.ToDictionary(pair => pair.Key, pair => (string)pair.Value);
+
+                json.Remove(key);
+                return dictionary;
+            }
+
+            return null;
         }
 
         public static T ExtractExistingOrDefault<T>(JObject json, string key)

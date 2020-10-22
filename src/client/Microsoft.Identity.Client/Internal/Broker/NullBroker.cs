@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.Internal.Broker
 {
     /// <summary>
-    /// For platforms that do not support a broker (net desktop, net core, UWP, netstandard)
+    /// For platforms that do not support a broker
     /// </summary>
     internal class NullBroker : IBroker
     {
@@ -20,11 +20,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
         {
             return false;
         }      
-
-        public Task RemoveAccountAsync(string clientID, IAccount account)
-        {
-            throw new NotImplementedException(MsalErrorMessage.BrokerNotSupportedOnThisPlatform);
-        }
 
         public Task<MsalTokenResponse> AcquireTokenInteractiveAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
@@ -42,6 +37,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
         }
 
         public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account)
         {
             throw new NotImplementedException();
         }

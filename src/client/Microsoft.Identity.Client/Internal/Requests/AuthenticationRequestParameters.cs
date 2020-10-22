@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _commonParameters = commonParameters;
 
             Authority = Authority.CreateAuthorityForRequest(serviceBundle.Config.AuthorityInfo, commonParameters.AuthorityOverride);
+            UserConfiguredAuthority = Authority;
 
             ClientId = serviceBundle.Config.ClientId;
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
@@ -40,7 +41,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IsBrokerConfigured = serviceBundle.Config.IsBrokerEnabled;
 
             // Set application wide query parameters.
-            ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? new Dictionary<string, string>();
+            ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? 
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             // Copy in call-specific query parameters.
             if (commonParameters.ExtraQueryParameters != null)
@@ -68,9 +70,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public ApiEvent.ApiIds ApiId => _commonParameters.ApiId;
 
         public RequestContext RequestContext { get; }
+
+        /// <summary>
+        /// Authority used by MSAL for most operations. After the /token call, the tenant ID is 
+        /// always known and TenantUpdatedCanonicalAuthority is created and used.
+        /// In Silent flows, the Authority cannot be unknown ("common" or "organizations") and 
+        /// a tenanted authority will always be used (if the tenant cannot be determined, IAccount.HomeTenantId is used).
+        /// </summary>
         public Authority Authority { get; set; }
+
+        /// <summary>
+        /// Original authority configured by the user
+        /// </summary>
+        public Authority UserConfiguredAuthority { get; set; }
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
+
+        /// <summary>
+        /// After the /token request MSAL knows the exact tenant id and this gets populated
+        /// </summary>
         public Authority TenantUpdatedCanonicalAuthority { get; set; }
         public ICacheSessionManager CacheSessionManager { get; }
         public HashSet<string> Scope { get; }
@@ -83,7 +101,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
        
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
-        public string ClaimsAndClientCapabilities { get; private set; }    
+        public string ClaimsAndClientCapabilities { get; private set; }
+
+        public Guid CorrelationId => _commonParameters.CorrelationId;
 
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
@@ -168,6 +188,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("LoginHint - " + LoginHint);
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
             builder.AppendLine("HomeAccountId - " + HomeAccountId);
+            builder.AppendLine("CorrelationId - " + CorrelationId);
 
             string messageWithPii = builder.ToString();
 
@@ -184,7 +205,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
             builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
-
+            builder.AppendLine("CorrelationId - " + CorrelationId);
 
             logger.InfoPii(messageWithPii, builder.ToString());
         }

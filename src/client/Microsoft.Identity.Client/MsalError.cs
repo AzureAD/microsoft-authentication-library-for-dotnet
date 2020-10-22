@@ -757,10 +757,16 @@ namespace Microsoft.Identity.Client
         public const string ExperimentalFeature = "experimental_feature";
 
         /// <summary>
-        /// <para>What happens?</para>A broker application is required, but one could not be found.
+        /// <para>What happens?</para>A broker application is required, but one could not be found or communicated with.
         /// <para>Mitigation</para>Install a broker application, such as Authenticator, from the application store
         /// </summary>
         public const string BrokerApplicationRequired = "broker_application_required";
+
+        /// <summary>
+        /// <para>What happens?</para>You are trying to authenticate with the broker but MSAL is unable to read the response from the broker.
+        /// <para>Mitigation</para>The currently installed broker may not support MSAL.Xamarin, you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater). see https://aka.ms/Brokered-Authentication-for-Android"
+        /// </summary>
+        public const string FailedToGetBrokerResponse = "failed_to_get_broker_response";
 
         /// <summary>
         /// <para>What happens?</para>You have configured a claims request, but the claims string is not in JSON format
@@ -908,5 +914,27 @@ namespace Microsoft.Identity.Client
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
 
 #endif
+
+        /// <summary>
+        /// When calling AcquireTokenInteractive with the WAM broker, the call must be made from the UI thread.
+        /// </summary>
+        public const string WamUiThread = "wam_ui_thread_only";
+
+        /// <summary>
+        /// The Windows broker (WAM) is only supported in conjunction  with "work and school" accounts 
+        /// and with Microsoft accounts.
+        /// </summary>
+        public const string WamNoB2C = "wam_no_b2c";
+
+        /// <summary>
+        /// WAM service exception that can occur when calling AcquireTokenInteractive
+        /// </summary>
+        public const string WamInteractiveError = "wam_interactive_error";
+
+        /// <summary>
+        /// WAM service exception that can occur when calling AcquireTokenInteractive and the account picker 
+        /// pops up
+        /// </summary>
+        public const string WamPickerError = "wam_interactive_picker_error";
     }
 }

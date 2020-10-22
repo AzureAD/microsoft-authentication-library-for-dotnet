@@ -73,6 +73,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _logger.Info(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 
+                if (msalTokenResponse.Error == BrokerResponseConst.NoTokenFound)
+                {
+                    throw new MsalUiRequiredException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription);
+                }
+
                 throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse.Error,
                                                      MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription,
                                                      string.IsNullOrEmpty(msalTokenResponse.SubError) ?

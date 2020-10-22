@@ -1,13 +1,35 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
+    /// <summary>
+    /// Example account json:
+    /// 
+    ///   "authority_type":"MSSTS",
+    ///   "client_info":"",
+    ///   "environment":"login.windows.net",
+    ///   "family_name":"",
+    ///   "given_name":"Some Name",
+    ///   "home_account_id":"69c374a4-1df6-46f8-b83a-a2fcd8823ee2.49f548d0-12b7-4169-a390-bb5304d24462",
+    ///   "local_account_id":"69c374a4-1df6-46f8-b83a-a2fcd8823ee2",
+    ///   "middle_name":"",
+    ///   "name":"Some Name",
+    ///   "realm":"49f548d0-12b7-4169-a390-bb5304d24462",
+    ///   "username":"subzero@bogavrilltd.onmicrosoft.com",
+    ///   "wam_account_ids":"{\"00000000480FA373\":\"ob7b8h79td9gs6hfqoh2r37m\",\"4b0db8c2-9f26-4417-8bde-3f0e3656f8e0\":\"ob7b8h79td9gs6hfqoh2r37m\"}"
+    ///
+    /// </summary>
+    [DebuggerDisplay("{PreferredUsername} {base.Environment}")]
     internal class MsalAccountCacheItem : MsalCacheItemBase
     {
         internal MsalAccountCacheItem()
@@ -21,7 +43,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string homeAccountId,
             IdToken idToken,
             string preferredUsername,
-            string tenantId)
+            string tenantId,
+            IDictionary<string, string> wamAccountIds)
             : this()
         {
             Init(
@@ -33,7 +56,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 preferredUsername,
                 tenantId,
                 idToken?.GivenName,
-                idToken?.FamilyName);
+                idToken?.FamilyName, 
+                wamAccountIds);
         }
 
         internal /* for test */ MsalAccountCacheItem(
@@ -45,7 +69,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredUsername,
             string tenantId,
             string givenName,
-            string familyName)
+            string familyName, 
+            IDictionary<string, string> wamAccountIds)
             : this()
         {
             Init(
@@ -57,7 +82,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 preferredUsername,
                 tenantId,
                 givenName,
-                familyName);
+                familyName,
+                wamAccountIds);
         }
 
         internal string TenantId { get; set; }
@@ -68,6 +94,14 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string LocalAccountId { get; set; }
         internal string AuthorityType { get; set; }
 
+        /// <summary>
+        /// WAM special implementation: MSA accounts (and also AAD accounts on UWP) cannot be discovered through WAM
+        /// however the broker offers an interactive experience for the user to login, even with an MSA account.
+        /// After an interactive login, MSAL must be able to silently login the MSA user. To do this, MSAL must save the 
+        /// account ID in its token cache. Accounts with associated WAM account ID can be used in silent WAM flows.
+        /// </summary>
+        internal IDictionary<string, string> WamAccountIds { get; set; }
+
         private void Init(
             string environment,
             string localAccountId,
@@ -77,7 +111,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredUsername,
             string tenantId,
             string givenName,
-            string familyName)
+            string familyName, 
+            IDictionary<string, string> wamAccountIds)
         {
             Environment = environment;
             PreferredUsername = preferredUsername;
@@ -88,6 +123,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             GivenName = givenName;
             FamilyName = familyName;
             HomeAccountId = homeAccountId;
+            WamAccountIds = wamAccountIds;
         }
 
         internal MsalAccountCacheKey GetKey()
@@ -116,6 +152,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 LocalAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.LocalAccountId),
                 AuthorityType = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.AuthorityType),
                 TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
+                WamAccountIds = JsonUtils.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.WamAccountIds)
             };
 
             item.PopulateFieldsFromJObject(j);
@@ -134,6 +171,10 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.LocalAccountId, LocalAccountId);
             SetItemIfValueNotNull(json, StorageJsonKeys.AuthorityType, AuthorityType);
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
+            if (WamAccountIds != null && WamAccountIds.Any())
+            {
+                json[StorageJsonKeys.WamAccountIds] = JObject.FromObject(WamAccountIds);                
+            }
 
             return json;
         }

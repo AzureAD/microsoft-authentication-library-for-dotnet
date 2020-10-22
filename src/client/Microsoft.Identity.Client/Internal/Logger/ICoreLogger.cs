@@ -35,6 +35,6 @@ namespace Microsoft.Identity.Client.Core
         /// </summary>
         bool IsLoggingEnabled(LogLevel logLevel);
         DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose);
-        DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null);
+        DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null);
     }
 }

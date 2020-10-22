@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
@@ -130,11 +132,16 @@ namespace Microsoft.Identity.Client.Platforms.uap
             var deviceInformation = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
             return deviceInformation.SystemProductName;
         }
+        public override bool BrokerSupportsWamAccounts => true;
 
-        /// <inheritdoc />
-        public override string GetBrokerOrRedirectUri(Uri redirectUri)
+        public override bool CanBrokerSupportSilentAuth()
         {
-            return redirectUri.OriginalString;
+            return true;
+        }
+
+        public override IBroker CreateBroker(CoreUIParent uiParent)
+        {
+            return new WamBroker(uiParent, Logger);
         }
 
         /// <inheritdoc />

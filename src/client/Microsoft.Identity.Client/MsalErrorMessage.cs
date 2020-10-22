@@ -97,6 +97,8 @@ namespace Microsoft.Identity.Client
             +
             "2. An error occurred during a silent web authentication that prevented the http authentication flow from completing in a short enough time frame";
 
+        public const string StateMismatchErrorMessage = "Returned state({0}) from authorize endpoint is not the same as the one sent({1}). See https://aka.ms/msal-statemismatcherror for more details.";
+
         public const string UserRealmDiscoveryFailed = "User realm discovery failed";
 
         public const string WsTrustEndpointNotFoundInMetadataDocument =
@@ -311,7 +313,7 @@ namespace Microsoft.Identity.Client
         }
 
         public const string NoAndroidBrokerAccountFound = "Android account manager could not find an account that matched the provided account information.";
-        public const string AndroidBrokerCannotBeInvoked = " - In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater). see https://aka.ms/Brokered-Authentication-for-Android";
+        public const string AndroidBrokerCannotBeInvoked = "The current version of the broker may not support MSAL.Xamarin or power optimization is turned on. In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater). see https://aka.ms/Brokered-Authentication-for-Android";
         public const string CustomMetadataInstanceOrUri = "You have configured your own instance metadata using both an Uri and a string. Only one is supported. " +
             "See https://aka.ms/msal-net-custom-instance-metadata for more details.";
 

@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/api-version=2020-06-01",
+                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute",
                         ExpectedRequestHeaders = new Dictionary<string, string>
                          {
                             {"Metadata", "true"}

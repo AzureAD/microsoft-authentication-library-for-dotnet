@@ -5,11 +5,42 @@ parameters:
   BuildConfiguration: 'debug'
 
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Run unit tests'
+
+- template: template-install-keyvault-secrets.yaml
+
+- task: VSTest@2
+  displayName: 'Run unit tests (.NET FX)'
   inputs:
-    command: test
-    projects: |
-     tests/Microsoft.Identity.Test.Unit.*/*.csproj
-     tests/CacheCompat/CommonCache.Test.Unit/*.csproj
-    arguments: '-c ${{ parameters.BuildConfiguration }} --no-build --no-restore --collect "Code coverage"'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
+    codeCoverageEnabled: true
+
+- task: VSTest@2
+  displayName: 'Run unit tests (.NET CORE)'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\netcore*\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
+    codeCoverageEnabled: true
+
+# install python and run cache tests
+- task: stevedower.python.PythonScript.PythonScript@1
+  displayName: 'Update PIP'
+  inputs:
+    arguments: '-m pip install --upgrade pip'
+
+- task: stevedower.python.PythonScript.PythonScript@1
+  displayName: 'Install MSAL.Python PIP'
+  inputs:
+    arguments: '-m pip install msal'
+
+- task: VSTest@2
+  displayName: 'Run cache compat tests'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    codeCoverageEnabled: true

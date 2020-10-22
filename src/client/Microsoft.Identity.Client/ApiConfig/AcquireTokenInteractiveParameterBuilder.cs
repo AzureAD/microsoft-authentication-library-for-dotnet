@@ -338,7 +338,6 @@ namespace Microsoft.Identity.Client
         protected override void Validate()
         {
             base.Validate();
-
 #if ANDROID
             if (Parameters.UiParent.Activity == null)
             {

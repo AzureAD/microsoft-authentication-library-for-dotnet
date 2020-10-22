@@ -5,8 +5,8 @@
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
-    
-    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
+   
+    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45> 
     <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
@@ -16,11 +16,11 @@
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkMac)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
-  </PropertyGroup>  
+  </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.15.0-localbuild</MsalClientSemVer>
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MsalClientSemVer)</Version>
 
@@ -49,7 +49,8 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <DisableExtraReferences>true</DisableExtraReferences> <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
+    <DisableExtraReferences>true</DisableExtraReferences>
+    <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -60,7 +61,7 @@
     <PathToMsalSources>$(MSBuildThisFileDirectory)\Microsoft.Identity.Client</PathToMsalSources>
     <!-- Need to include / exclude / remove cs files manually so that they are present in both assemblies -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <NoWarn>$(NoWarn);CS8002</NoWarn>
+    <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
@@ -127,7 +128,8 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\NetStdCore\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\NetStdCore\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
 
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -141,17 +143,24 @@
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
     <!-- 4.3.0 has CVE-2019-0657 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />    
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\NetStdCore\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />    
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\NetStdCore\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
+    
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
+    <!--<Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />-->
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
 
     <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.cs" SubType="Component" />
@@ -169,9 +178,11 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
 
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
@@ -185,11 +196,11 @@
     <PackageReference Include="System.ServiceModel.Http" Version="4.5.3" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.5.3" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.5.3" />
-    
+
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\Apple\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\Apple\**\*.cs" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -206,8 +217,8 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkMac)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\Mac\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\Apple\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Shared\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\Apple\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Reference Include="System" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

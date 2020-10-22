@@ -4,14 +4,21 @@ parameters:
   BuildConfiguration: 'debug'
   
 steps:
+
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 3.x'
+  inputs:
+    version: 3.x
+
 # Bootstrap the build
 - template: template-bootstrap-build.yaml
 
-# Nuget Restore and Build LibsAndSamples.sln
+# Nuget Restore and Build 
 - template: template-restore-build-libsandsamples.yaml
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
+    Solution: 'LibsAndSamples.sln'
 
 # Run Unit Tests
 - template: template-run-unit-tests.yaml

@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithExtraQueryParameters(IDictionary<string, string> extraQueryParameters)
         {
-            Config.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
+            Config.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             return (T)this;
         }
 
@@ -441,10 +441,10 @@ namespace Microsoft.Identity.Client
             CreateAuthorityInfoFromEnums();
 
             //Adfs does not require client id to be in the form of a Guid
-            if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
-            {
-                throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
-            }
+            //if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
+            //{
+            //    throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
+            //}
 
             if (Config.CustomInstanceDiscoveryMetadata != null && Config.CustomInstanceDiscoveryMetadataUri != null)
             {

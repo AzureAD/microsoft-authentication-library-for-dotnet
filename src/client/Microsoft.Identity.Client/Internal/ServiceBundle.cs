@@ -64,6 +64,10 @@ namespace Microsoft.Identity.Client.Internal
             DeviceAuthManager = PlatformProxy.CreateDeviceAuthManager();
         }
 
+        /// <summary>
+        /// This logger does not contain a correlation ID and should be used only when the correlation ID is not available
+        /// i.e. before a request exists
+        /// </summary>
         public ICoreLogger DefaultLogger { get; }
 
         /// <inheritdoc />
@@ -81,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal
         public IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
 
         /// <inheritdoc />
-        public IPlatformProxy PlatformProxy { get; }
+        public IPlatformProxy PlatformProxy { get; private set; }
 
         /// <inheritdoc />
         public IApplicationConfiguration Config { get; }
@@ -98,6 +102,11 @@ namespace Microsoft.Identity.Client.Internal
         public static ServiceBundle Create(ApplicationConfiguration config)
         {
             return new ServiceBundle(config);
+        }
+
+        public void SetPlatformProxyForTest(IPlatformProxy platformProxy)
+        {
+            PlatformProxy = platformProxy;
         }
     }
 }

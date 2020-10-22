@@ -2,12 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -79,6 +82,27 @@ namespace Microsoft.Identity.Test.Common
         public static IServiceBundle CreateDefaultAdfsServiceBundle()
         {
             return CreateServiceBundleWithCustomHttpManager(null, authority: TestConstants.OnPremiseAuthority);
+        }
+
+        public static AuthenticationRequestParameters CreateAuthenticationRequestParameters(
+            IServiceBundle serviceBundle,
+            Authority authority = null,
+            HashSet<string> scopes = null,
+            RequestContext requestContext = null)
+        {
+            var commonParameters = new AcquireTokenCommonParameters
+            {
+                Scopes = scopes ?? TestConstants.s_scope,
+            };
+
+            return new AuthenticationRequestParameters(
+                serviceBundle,
+                new TokenCache(serviceBundle, false),
+                commonParameters,
+                requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid()))
+            {
+                Authority = authority ?? Authority.CreateAuthority(TestConstants.AuthorityTestTenant)
+            };
         }
     }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Identity.Client.Core;
@@ -238,9 +239,10 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return new DurationLogHelper(this, measuredBlockName, logLevel);
         }
 
-        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null)
+        public DurationLogHelper LogMethodDuration(LogLevel logLevel = LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
-            return LogBlockDuration(methodName, logLevel);
+            string fileName = !string.IsNullOrEmpty(filePath) ? Path.GetFileNameWithoutExtension(filePath) : "";
+            return LogBlockDuration(fileName + ":" + methodName, logLevel);
         }
 
         public bool IsLoggingEnabled(LogLevel logLevel)

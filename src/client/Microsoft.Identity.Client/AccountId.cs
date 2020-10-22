@@ -26,12 +26,12 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// For Azure AD, a string representation for a Guid which is the Object ID of the user owning the account in the tenant
         /// </summary>
-        public string ObjectId { get;  }
+        public string ObjectId { get; }
 
         /// <summary>
         /// For Azure AD, a string representation for a Guid, which is the ID of the tenant where the account resides.
         /// </summary>
-        public string TenantId { get;  }
+        public string TenantId { get; }
 
         /// <summary>
         /// Constructor of an AccountId
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="adfsIdentifier">Unique identifier for the account if authority is ADFS</param>
         public AccountId(string adfsIdentifier)
-            :this(adfsIdentifier, adfsIdentifier, null)
+            : this(adfsIdentifier, adfsIdentifier, null)
         { }
 
 
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
             }
             string[] elements = str.Split('.');
 
-            if(elements.Length == 1)
+            if (elements.Length == 1)
             {
                 return new AccountId(str); //Account id is from Adfs; no . in the string
             }
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client
         [Conditional("DEBUG")]
         private void ValidateId()
         {
-            string expectedId = TenantId==null ? ObjectId : ObjectId + "." + TenantId;
+            string expectedId = TenantId == null ? ObjectId : ObjectId + "." + TenantId;
             if (!string.Equals(expectedId, Identifier, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(

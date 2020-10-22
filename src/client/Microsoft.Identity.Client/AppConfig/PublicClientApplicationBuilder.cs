@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client
         /// </item>
         /// <item>
         /// <term>For system browser on .NET Core</term>
-        /// <term><c>https://localhost</c></term>
+        /// <term><c>http://localhost</c></term>
         /// </item>
         /// </list>
         /// NOTE:There will be an update to the default rediect uri in the future to accomodate for system browsers on the 
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client
 
 #endif //!ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
 
-#if !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
+#if !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
         /// On Android and iOS, brokers enable Single-Sign-On, device identification,
         /// and application identification verification. To enable one of these features,
@@ -130,11 +130,21 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-            Config.IsBrokerEnabled = enableBroker;
+#if DESKTOP || NET_CORE || WINDOWS_APP 
+            if (!Config.ExperimentalFeaturesEnabled)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithBroker)));
+            }
+#endif
 
+            Config.IsBrokerEnabled = enableBroker;
             return this;
         }
-#endif //!WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
+
+
+#endif // !NET_CORE_BUILDTIME && !MAC_BUILDTIME
 
 #if WINDOWS_APP
         /// <summary>
@@ -276,7 +286,7 @@ namespace Microsoft.Identity.Client
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
-            }
+            }          
         }
     }
 }
