@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         private readonly RequestContext _requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
 
         [TestMethod]
-        public async Task HttpListenerCompletes()
+        public async Task HttpListenerCompletesAsync()
         {
 
             HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
