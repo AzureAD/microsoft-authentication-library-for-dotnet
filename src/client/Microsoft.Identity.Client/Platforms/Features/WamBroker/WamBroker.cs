@@ -587,7 +587,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 case WebTokenRequestStatus.ProviderError:
                     errorCode =
                         wamPlugin.MapTokenRequestError(wamResponse.ResponseStatus, wamResponse.ResponseError?.ErrorCode ?? 0, isInteractive);
-                    errorMessage = WamErrorPrefix + wamPlugin.GetType() + wamResponse.ResponseError?.ErrorMessage;
+                    errorMessage = 
+                        WamErrorPrefix + 
+                        " " + 
+                        wamPlugin.GetType() +
+                        "Possible cause: invalid redirect uri - please see https://aka.ms/msal-net-wam for details about the redirect uri. Details: " +
+                        wamResponse.ResponseError?.ErrorMessage ;
                     internalErrorCode = (wamResponse.ResponseError?.ErrorCode ?? 0).ToString(CultureInfo.InvariantCulture);
                     break;
                 default:
