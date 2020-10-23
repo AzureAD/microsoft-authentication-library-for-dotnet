@@ -89,30 +89,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [TestMethod]
-        public async Task RegionalAuthRegionUndiscoveredAsync()
-        {
-            TestCommon.ResetInternalStaticCaches();
-            var cca = CreateApp();
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
-
-            try
-            {
-                await cca.AcquireTokenForClient(s_keyvaultScope)
-                .WithAzureRegion(true)
-                .WithExtraQueryParameters(_dict)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-                // If this is triggered that means the region was either discovered or not cleared from the cache.
-                Assert.Fail("The region should not get discovered.");
-            }
-            catch (MsalClientException e)
-            {
-                Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
-            }
-        }
-
         private IConfidentialClientApplication CreateApp()
         {
             var claims = GetClaims();

@@ -40,11 +40,11 @@ namespace TestApp
             X509Certificate2 certificate = ReadCertificate("97D8C9DB3C84874D0363DCA540778461B2291780");
 
             Console.WriteLine("=== Acquire token regional ===");
-            await AcquireTokenAsync(true, certificate).ConfigureAwait(false);
+            await AcquireTokenAsync(certificate).ConfigureAwait(false);
             Console.WriteLine();
 
             Console.WriteLine("=== Acquire token global ===");
-            await AcquireTokenAsync(false, certificate).ConfigureAwait(false);
+            await AcquireTokenAsync(certificate, false).ConfigureAwait(false);
 
         }
 
@@ -83,7 +83,7 @@ namespace TestApp
             return cert;
         }
 
-        private static async Task AcquireTokenAsync(bool withAzureRegion, X509Certificate2 certificate)
+        private static async Task AcquireTokenAsync(X509Certificate2 certificate, bool withAzureRegion = true)
         {
             string[] scopes = new string[] { $"{clientId}/.default", };
 
