@@ -81,34 +81,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-                Assert.Fail();
+                Assert.Fail("This request should fail as Experiment feature is not set to true.");
             }
             catch (MsalClientException e)
             {
                 Assert.AreEqual(MsalError.ExperimentalFeature, e.ErrorCode);
-            }
-        }
-
-        [TestMethod]
-        public async Task RegionalAuthRegionUndiscoveredAsync()
-        {
-            TestCommon.ResetInternalStaticCaches();
-            var cca = CreateApp();
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
-
-            try
-            {
-                await cca.AcquireTokenForClient(s_keyvaultScope)
-                .WithAzureRegion(true)
-                .WithExtraQueryParameters(_dict)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-                Assert.Fail();
-            }
-            catch (MsalClientException e)
-            {
-                Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
             }
         }
 
