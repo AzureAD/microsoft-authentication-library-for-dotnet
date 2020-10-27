@@ -129,26 +129,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("Bearer", result.TokenType);
             Assert.AreEqual(
                 2,
-                (pca as ConfidentialClientApplication).UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-
-            // Arrange - block HTTP requests to make sure AcquireTokenSilent does not refresh the RT
-            pca = ConfidentialClientApplicationBuilder
-                           .Create(clientId)
-                           .WithExperimentalFeatures()
-                           .WithTestLogging()
-                           .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
-                           .Build();
-            ConfigureInMemoryCache(pca);
-
-            var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
-            result = await pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync().ConfigureAwait(false);
-            Assert.AreEqual("Bearer", result.TokenType);
-
-            result = await pca.AcquireTokenSilent(s_scopes, account)
-                .WithProofOfPosession(popConfig)
-                .ExecuteAsync().ConfigureAwait(false);
-            Assert.AreEqual("pop", result.TokenType);
-
+                (pca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
         }
 
         private async Task AcquireAndAcquireSilent_MultipleKeys_Async(LabResponse labResponse)
