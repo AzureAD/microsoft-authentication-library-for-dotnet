@@ -18,12 +18,11 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-#if DESKTOP || NET_CORE
+#if !ANDROID && !iOS
     internal class PoPAuthenticationScheme : IAuthenticationScheme
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private readonly PopAuthenticationConfiguration _popAuthenticationConfiguration;
-        private readonly IPoPCryptoProvider _popCryptoProvider;
 
         /// <summary>
         /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -41,7 +40,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
             _popAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
+            _popAuthenticationConfiguration.PopCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
 
             var keyThumbprint = ComputeThumbprint(_popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
@@ -74,7 +73,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 { JsonWebTokenConstants.ReservedHeaderParameters.Type, PoPRequestParameters.PoPTokenType}
             };
 
-            JToken popAssertion = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
+            JToken popAssertion = JToken.Parse(_popAuthenticationConfiguration.PopCryptoProvider.CannonicalPublicKeyJwk);
 
             var payload = new JObject(
                 new JProperty(PoPClaimTypes.At, msalAccessTokenCacheItem.Secret),
@@ -140,7 +139,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             string headerAndPayload = sb.ToString();
 
             sb.Append(".");
-            sb.Append(Base64UrlHelpers.Encode(_popCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
+            sb.Append(Base64UrlHelpers.Encode(_popAuthenticationConfiguration.PopCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
 
             return sb.ToString();
         }

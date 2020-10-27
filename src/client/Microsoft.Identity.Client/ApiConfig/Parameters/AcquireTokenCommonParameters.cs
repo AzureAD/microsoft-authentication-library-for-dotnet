@@ -26,10 +26,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
-#if DESKTOP || NET_CORE
+        public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
+#if !ANDROID && !iOS
         public PopAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
 #endif
-        public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
 
         public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
         {

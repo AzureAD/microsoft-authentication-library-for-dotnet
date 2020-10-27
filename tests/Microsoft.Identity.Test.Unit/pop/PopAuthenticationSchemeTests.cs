@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 popConfig.HttpMethod = HttpMethod.Get;
                 popConfig.PopCryptoProvider = new InMemoryCryptoProvider();
 
-                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)
                                 .WithExperimentalFeatures()
                                 .BuildConcrete();
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 testClock.TestTime = DateTime.UtcNow;
                 var provider = PoPProviderFactory.GetOrCreateProvider(testClock);
 
-                await app.AcquireTokenInteractive(TestConstants.s_scope)
+                await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPosession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                     MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
-                await app.AcquireTokenInteractive(TestConstants.s_scope)
+                await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPosession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                     MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetPopTokenResponse()));
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
-                await app.AcquireTokenInteractive(TestConstants.s_scope)
+                await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPosession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
