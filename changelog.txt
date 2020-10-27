@@ -1,3 +1,9 @@
+4.22.0
+============
+
+New features: 
+**Enable WAM integration for UWP apps** experimentally. To provide feedback, please open an issue. For details see https://aka.ms/msal-net-wam
+
 4.21.1
 ============
 
