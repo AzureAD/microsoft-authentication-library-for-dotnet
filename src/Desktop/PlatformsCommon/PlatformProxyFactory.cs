@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 #elif WINDOWS_APP
             return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(finalLogger);
 #elif NETSTANDARD1_3
-            return new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy(finalLogger);
+            return new Microsoft.Identity.Client.Platforms.netstandard13.NetstandardPublicClientPlatformProxy(finalLogger);
 #elif DESKTOP
             return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPublicClientPlatformProxy(finalLogger);
 #else

@@ -5,12 +5,10 @@
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
-    <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
+    
+    <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworks);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);</TargetFrameworks>
 
-    <TargetFrameworks>$(TargetFrameworkNetCore);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);</TargetFrameworks>
-    <!--<TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>-->
-    <!--<TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);</TargetFrameworks>-->  
-        
   </PropertyGroup>
 
   <PropertyGroup>    
@@ -33,6 +31,11 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+  </ItemGroup>
+
+
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
   </ItemGroup>
