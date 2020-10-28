@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,9 @@ namespace CommonCache.Test.MsalV2
             /// <inheritdoc />
             protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
+                Debugger.Launch();
+                Debugger.Break();
+
                 string resource = TestInputData.MsGraph;
                 string[] scopes = new[]
                 {
@@ -40,7 +44,6 @@ namespace CommonCache.Test.MsalV2
                        {
                            Console.WriteLine("{0}: {1}", level, message);
                        })
-                       .WithTelemetry(new TraceTelemetryConfig())
                        .Build();
 
                     FileBasedTokenCacheHelper.ConfigureUserCache(

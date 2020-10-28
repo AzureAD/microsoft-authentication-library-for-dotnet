@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// does not support silent auth and gives the RT back to MSAL.
         /// </summary>
         /// <returns></returns>
-        bool CanBrokerSupportSilentAuth();
+        bool CanBrokerSupportSilentAuth(); 
 
         /// <summary>
         /// WAM broker has a deeper integration into MSAL because MSAL needs to store 

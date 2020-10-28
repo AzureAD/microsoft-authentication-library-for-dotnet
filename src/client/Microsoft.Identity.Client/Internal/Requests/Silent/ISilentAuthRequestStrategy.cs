@@ -8,8 +8,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
     internal interface ISilentAuthRequestStrategy
     {
-        Task PreRunAsync();
-
         Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
     }
 }
