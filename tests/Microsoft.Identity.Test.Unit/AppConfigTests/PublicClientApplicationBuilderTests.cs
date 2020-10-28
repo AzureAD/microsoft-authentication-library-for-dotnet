@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNull(pca.AppConfig.HttpClientFactory);
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(pca.AppConfig.LoggingCallback);
-            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
+            Assert.AreEqual(CCAPlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
             Assert.IsNull(pca.AppConfig.TenantId);
             Assert.IsNull(pca.AppConfig.TelemetryConfig);
             Assert.IsNull(pca.AppConfig.ParentActivityOrWindowFunc);
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                     .WithRedirectUri(null)
                                                     .Build();
 
-            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
+            Assert.AreEqual(CCAPlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
         }
 
         [TestMethod]
@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                     .WithRedirectUri(string.Empty)
                                                     .Build();
 
-            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
+            Assert.AreEqual(CCAPlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
         }
 
         [TestMethod]
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                     .WithRedirectUri("    ")
                                                     .Build();
 
-            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
+            Assert.AreEqual(CCAPlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(TestConstants.ClientId), pca.AppConfig.RedirectUri);
         }
 
         [TestMethod]

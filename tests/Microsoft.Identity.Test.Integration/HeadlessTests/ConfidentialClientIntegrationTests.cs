@@ -17,6 +17,7 @@ using System.Web;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -388,11 +389,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static string GetSignedClientAssertionUsingMsalInternal(string clientId, IDictionary<string, string> claims)
         {
-#if NET_CORE
-            var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
-#else
-            var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
-#endif
+            var manager = PcaPlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
+
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
             return jwtToken.Sign(clientCredential, false);
@@ -588,13 +586,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(new Uri(oboHost + authResult.TenantId), true)
                 .WithClientSecret(secret)
                 .WithTestLogging()
-                .Build();
+                .BuildConcrete();
 
             var userCacheRecorder = confidentialApp.UserTokenCache.RecordAccess();
 
             UserAssertion userAssertion = new UserAssertion(authResult.AccessToken);
 
-            string atHash = userAssertion.AssertionHash;
+            string atHash = userAssertion.GetAssertionHash(confidentialApp.ServiceBundle.PlatformProxy.CryptographyManager);
 
             authResult = await confidentialApp.AcquireTokenOnBehalfOf(s_scopes, userAssertion)
                 .ExecuteAsync(CancellationToken.None)

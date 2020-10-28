@@ -21,8 +21,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxyFactoryDoesNotCacheTheProxy()
         {
             // Act
-            var proxy1 = PlatformProxyFactory.CreatePlatformProxy(null);
-            var proxy2 = PlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy1 = CCAPlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy2 = CCAPlatformProxyFactory.CreatePlatformProxy(null);
 
             // Assert
             Assert.IsFalse(proxy1 == proxy2);
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxyFactoryReturnsInstances()
         {
             // Arrange
-            var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy = CCAPlatformProxyFactory.CreatePlatformProxy(null);
 
             // Act and Assert
             Assert.AreNotSame(
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxy_HttpClient()
         {
             // Arrange
-            var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy = CCAPlatformProxyFactory.CreatePlatformProxy(null);
             var factory1 = proxy.CreateDefaultHttpClientFactory();
             var factory2 = proxy.CreateDefaultHttpClientFactory();
 
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxy_HttpClient_NetCore()
         {
             // Arrange
-            var factory = PlatformProxyFactory.CreatePlatformProxy(null)
+            var factory = CCAPlatformProxyFactory.CreatePlatformProxy(null)
                 .CreateDefaultHttpClientFactory();
 
             // Act
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxy_HttpClient_NetDesktop()
         {
             // Arrange
-            var factory = PlatformProxyFactory.CreatePlatformProxy(null)
+            var factory = CCAPlatformProxyFactory.CreatePlatformProxy(null)
                 .CreateDefaultHttpClientFactory();          
 
             // Assert
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 ServicePointManager.DefaultConnectionLimit = newConnLimit;
 
                 // Act
-                var factory = PlatformProxyFactory.CreatePlatformProxy(null)
+                var factory = CCAPlatformProxyFactory.CreatePlatformProxy(null)
                     .CreateDefaultHttpClientFactory();
                 _ = factory.GetHttpClient();
 
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 // Arrange
                 Environment.SetEnvironmentVariable("proxy_foo", "bar");
 
-                var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
+                var proxy = CCAPlatformProxyFactory.CreatePlatformProxy(null);
 
                 // Act
                 string actualValue = proxy.GetEnvironmentVariable("proxy_foo");
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             AssertException.Throws<ArgumentNullException>(
                 () =>
-                PlatformProxyFactory.CreatePlatformProxy(null).GetEnvironmentVariable(""));
+                CCAPlatformProxyFactory.CreatePlatformProxy(null).GetEnvironmentVariable(""));
         }
 
 

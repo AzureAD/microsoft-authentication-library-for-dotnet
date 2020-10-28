@@ -282,7 +282,7 @@ namespace Microsoft.Identity.Client
 
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
-                Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
+                Config.RedirectUri = PcaPlatformProxyFactory.CreatePlatformProxy(null)
                                                          .GetDefaultRedirectUri(Config.ClientId, Config.UseRecommendedDefaultRedirectUri);
             }
 

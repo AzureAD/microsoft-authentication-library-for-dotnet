@@ -10,6 +10,9 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Confidential\Microsoft.Identity.Client.Confidential.csproj" />
+    <ProjectReference Include="..\..\src\Desktop\Microsoft.Identity.Client.Desktop.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
     <PackageReference Include="NSubstitute" Version="4.2.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />

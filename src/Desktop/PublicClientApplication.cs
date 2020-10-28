@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
             : base(configuration, 
                   Internal.ServiceBundle.Create(
                       configuration,
-                      PlatformProxyFactory.CreatePlatformProxy(null)))
+                      PcaPlatformProxyFactory.CreatePlatformProxy(null)))
         {
         }
 

@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         {
             string exceptionString = exception.ToString();
 
-            string msalProductName = PlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
+            string msalProductName = CCAPlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
             string msalVersion = MsalIdHelper.GetMsalVersion();
 
             Assert.IsTrue(exceptionString.Contains(msalProductName), "Exception should contain the msalProductName");

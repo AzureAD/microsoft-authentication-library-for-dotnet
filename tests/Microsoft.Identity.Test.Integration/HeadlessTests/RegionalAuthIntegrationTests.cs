@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -160,11 +161,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static string GetSignedClientAssertionUsingMsalInternal(string clientId, IDictionary<string, string> claims)
         {
-#if NET_CORE
-            var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
-#else
-            var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
-#endif
+            var manager = PcaPlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
+
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var clientCredential = ClientCredentialWrapper.CreateWithCertificate(GetCertificate(), claims);
             return jwtToken.Sign(clientCredential, false);

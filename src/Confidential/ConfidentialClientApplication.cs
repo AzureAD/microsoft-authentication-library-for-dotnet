@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
                   configuration, 
                   Internal.ServiceBundle.Create(
                       configuration, 
-                      PlatformProxyFactory.CreatePlatformProxy(null)))
+                      CcaPlatformProxyFactory.CreatePlatformProxy(null)))
         {            
             AppTokenCacheInternal = new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;

@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Common
             return result;
         }
 
-        public static IServiceBundle CreateServiceBundleWithCustomHttpManager(
+        public static IServiceBundle CreateServiceBundleWithCustomHttpManager(            
             IHttpManager httpManager,
             TelemetryCallback telemetryCallback = null,
             LogCallback logCallback = null,
@@ -57,13 +57,13 @@ namespace Microsoft.Identity.Test.Common
             string clientId = TestConstants.ClientId,
             bool clearCaches = true,
             bool validateAuthority = true)
-        {
-            
+        {            
+            var proxy = PcaPlatformProxyFactory.CreatePlatformProxy(null);
             var appConfig = new ApplicationConfiguration()
             {
                 ClientId = clientId,
                 HttpManager = httpManager,
-                RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(clientId),
+                RedirectUri = proxy.GetDefaultRedirectUri(clientId),
                 TelemetryCallback = telemetryCallback,
                 LoggingCallback = logCallback,
                 LogLevel = LogLevel.Verbose,
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Common
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
                 AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, validateAuthority)
             };            
-            return new ServiceBundle(appConfig, clearCaches);
+            return new ServiceBundle(appConfig, proxy, clearCaches);
         }
 
         public static IServiceBundle CreateDefaultServiceBundle()
