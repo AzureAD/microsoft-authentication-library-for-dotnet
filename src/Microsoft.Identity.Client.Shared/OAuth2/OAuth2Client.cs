@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Json;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -35,9 +36,9 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
 
-        public OAuth2Client(ICoreLogger logger, IHttpManager httpManager, IMatsTelemetryManager telemetryManager)
+        public OAuth2Client(IPlatformProxy platformProxy, IHttpManager httpManager, IMatsTelemetryManager telemetryManager)
         {
-            _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
+            _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(platformProxy));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
         }
 

@@ -159,16 +159,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AA0C5FAF-F8B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Confidential", "src\Confidential\Microsoft.Identity.Client.Confidential.csproj", "{52BC59F6-BDE8-4A86-926D-AA402A020C2D}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "src\Shared\Shared.shproj", "{7FA0FED2-F408-4F61-B01F-9E6D71031247}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Desktop", "src\Desktop\Microsoft.Identity.Client.Desktop.csproj", "{8B9B4321-BD83-46C2-8255-11204C75445B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Shared", "src\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj", "{10165A2E-05FA-479E-ACBB-D967EFDF3272}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\Shared\Shared.projitems*{7fa0fed2-f408-4f61-b01f-9e6d71031247}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|ARM = Debug|ARM
@@ -1378,7 +1373,6 @@ Global
 		{339E0B2B-4408-4947-B134-E8C5AAB11286} = {5FAAD966-36B8-4C19-A5FA-5410DD53063D}
 		{2AF48872-DD47-4DA1-A153-DF4DA13882C2} = {5FAAD966-36B8-4C19-A5FA-5410DD53063D}
 		{52BC59F6-BDE8-4A86-926D-AA402A020C2D} = {AA0C5FAF-F8B9-4979-AA8E-33D0616D3744}
-		{7FA0FED2-F408-4F61-B01F-9E6D71031247} = {AA0C5FAF-F8B9-4979-AA8E-33D0616D3744}
 		{8B9B4321-BD83-46C2-8255-11204C75445B} = {AA0C5FAF-F8B9-4979-AA8E-33D0616D3744}
 		{10165A2E-05FA-479E-ACBB-D967EFDF3272} = {AA0C5FAF-F8B9-4979-AA8E-33D0616D3744}
 	EndGlobalSection

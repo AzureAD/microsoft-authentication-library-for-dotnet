@@ -2,10 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -16,12 +14,11 @@ namespace Microsoft.Identity.Client
     /// for another downsteam API in the name of the user whose credentials are held by this <c>UserAssertion</c>
     /// See https://aka.ms/msal-net-on-behalf-of
     /// </summary>
-#if DESKTOP || NET_CORE || NETSTANDARD1_3
-    /// <seealso cref="IConfidentialClientApplication.AcquireTokenOnBehalfOf(System.Collections.Generic.IEnumerable{string}, UserAssertion)"/>
-#endif
     public sealed class UserAssertion
 #pragma warning restore CS1587 // XML comment is not placed on a valid language element
     {
+        private string _assertionHash = null;
+
         /// <summary>
         /// Constructor from a JWT assertion. For other assertion types (SAML), use the other constructor <see cref="UserAssertion.UserAssertion(string, string)"/>
         /// </summary>
@@ -53,24 +50,28 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(assertionType));
             }
 
-            var crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
-
             AssertionType = assertionType;
             Assertion = assertion;
-            AssertionHash =
-                crypto.CreateBase64UrlEncodedSha256Hash(Assertion);
         }
 
         /// <summary>
         /// Gets the assertion.
         /// </summary>
-        public string Assertion { get; private set; }
+        public string Assertion { get; }
 
         /// <summary>
         /// Gets the assertion type.
         /// </summary>
-        public string AssertionType { get; private set; }
+        public string AssertionType { get; }
 
-        internal string AssertionHash { get; set; }
+
+        internal string GetAssertionHash(ICryptographyManager crypto)
+        {
+            _assertionHash = 
+                _assertionHash ?? 
+                crypto.CreateBase64UrlEncodedSha256Hash(Assertion);
+
+            return _assertionHash;
+        }
     }
 }

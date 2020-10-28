@@ -28,7 +28,8 @@ namespace Microsoft.Identity.Client.WsTrust
         /// <inheritdoc/>
         public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext)
         {
-            IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
+            IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(
+                requestContext.ServiceBundle.PlatformProxy);
 
             var uri = new UriBuilder(federationMetadataUrl);
             HttpResponse httpResponse = await _httpManager.SendGetAsync(uri.Uri, msalIdParams, requestContext.Logger).ConfigureAwait(false);
@@ -119,7 +120,8 @@ namespace Microsoft.Identity.Client.WsTrust
         {
             requestContext.Logger.Info("Sending request to userrealm endpoint.");
 
-            IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
+            IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(
+                requestContext.ServiceBundle.PlatformProxy);
 
             var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
             

@@ -31,7 +31,10 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 return null;
             }
 
-            string deviceNetworkState = platformProxy.GetDeviceNetworkState();
+            // TODO: split - need this?
+            //string deviceNetworkState = platformProxy.GetDeviceNetworkState();
+            string deviceNetworkState = "";
+
             int osPlatformCode = platformProxy.GetMatsOsPlatformCode();
 
             bool enableAggregation = true;

@@ -16,10 +16,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
     /// </summary>
     internal interface IPlatformProxy
     {
-        bool IsSystemWebViewAvailable { get; }
-
-        bool UseEmbeddedWebViewDefault { get; }
-
         /// <summary>
         /// Gets the device model. On some TFMs this is not returned for security reasonons.
         /// </summary>
@@ -31,20 +27,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         string GetOperatingSystem();
 
         string GetProcessorArchitecture();
-
-        /// <summary>
-        /// Gets the upn of the user currently logged into the OS
-        /// </summary>
-        /// <returns></returns>
-        Task<string> GetUserPrincipalNameAsync();
-
-        /// <summary>
-        /// Returns true if the current OS logged in user is AD or AAD joined.
-        /// </summary>
-        /// <returns></returns>
-        bool IsDomainJoined();
-
-        Task<bool> IsUserLocalAsync(RequestContext requestContext);
 
         /// <summary>
         /// Returns the name of the calling assembly
@@ -81,33 +63,22 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         IPlatformLogger PlatformLogger { get; }
 
-
         IPoPCryptoProvider GetDefaultPoPCryptoProvider();
 
         // MATS related data
         string GetDevicePlatformTelemetryId();
-        string GetDeviceNetworkState();
         int GetMatsOsPlatformCode();
         string GetMatsOsPlatform();
-
 
         IFeatureFlags GetFeatureFlags();
 
         void /* for test */ SetFeatureFlags(IFeatureFlags featureFlags);
-
-        /// <summary>
-        /// Go to a Url using the OS default browser. 
-        /// </summary>
-        Task StartDefaultOsBrowserAsync(string url);
+        
         IDeviceAuthManager CreateDeviceAuthManager();
 
-#if MSAL_XAMARIN || MSAL_DESKTOP
-        IBroker CreateBroker(CoreUIParent uiParent);
+        IMsalHttpClientFactory CreateDefaultHttpClientFactory();
 
-        IWebUIFactory GetWebUiFactory();
-
-        void /* for test */ SetWebUiFactory(IWebUIFactory webUiFactory);
-
+        #region Broker
         void /* for test */ SetBrokerForTest(IBroker broker);
 
         /// <summary>
@@ -116,13 +87,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         /// <returns></returns>
         bool CanBrokerSupportSilentAuth();
+
         /// <summary>
         /// WAM broker has a deeper integration into MSAL because MSAL needs to store 
         /// WAM account IDs in the token cache. 
         /// </summary>
         bool BrokerSupportsWamAccounts { get; }
-#endif
 
-        IMsalHttpClientFactory CreateDefaultHttpClientFactory();
+        IBroker CreateBroker(CoreUIParent uiParent);
+
+        #endregion
     }
+
 }

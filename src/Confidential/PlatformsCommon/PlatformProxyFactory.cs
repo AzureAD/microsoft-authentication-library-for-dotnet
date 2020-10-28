@@ -5,9 +5,11 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using System;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 {
+
     /// <summary>
     ///     Returns the platform / os specific implementation of a PlatformProxy.
     /// </summary>
@@ -18,6 +20,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// </summary>
         public static IPlatformProxy CreatePlatformProxy(ICoreLogger logger)
         {
+            // TODO: split - can we inject a real logger here?
             var finalLogger = logger ?? MsalLogger.NullLogger;
 
 #if NET_CORE

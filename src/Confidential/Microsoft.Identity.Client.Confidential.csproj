@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
 
   <PropertyGroup Label="Target Frameworks"> 
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
@@ -13,11 +12,14 @@
     
     <!-- MSAL feature flags-->
     <DefineConstants>$(DefineConstants);MSAL_CONFIDENTIAL;</DefineConstants>
-    <PathToMsalSources>$(MSBuildThisFileDirectory)\..\Shared</PathToMsalSources>
     <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
   </PropertyGroup>
 
-  <Import Project="../flags.props"/>
+  <Import Project="../flags.props" />
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)\..\Desktop\Shared\**\*.cs" LinkBase="Shared" />
+  </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Reference Include="System" />
@@ -29,6 +31,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="C:\g\msal2\src\Confidential\..\Desktop\Shared\Platforms\netstandard13\NetDesktopFeatureFlags.cs" />
   </ItemGroup>
 
  

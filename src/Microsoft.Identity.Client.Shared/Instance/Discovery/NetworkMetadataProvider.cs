@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           Uri authority,
           RequestContext requestContext)
         {
-            var client = new OAuth2Client(requestContext.Logger, _httpManager, _telemetryManager);
+            var client = new OAuth2Client(requestContext.ServiceBundle.PlatformProxy, _httpManager, _telemetryManager);
 
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority));

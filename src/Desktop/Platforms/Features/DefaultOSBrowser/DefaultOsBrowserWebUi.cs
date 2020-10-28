@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if MSAL_DESKTOP 
+#if DESKTOP || NET_CORE
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
@@ -137,7 +138,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             Uri redirectUri,
             CancellationToken cancellationToken)
         {
-            Func<Uri, Task> defaultBrowserAction = (Uri u) => _platformProxy.StartDefaultOsBrowserAsync(u.AbsoluteUri);
+            Func<Uri, Task> defaultBrowserAction = (Uri u) => 
+                ((IPublicClientPlatformProxy)_platformProxy).StartDefaultOsBrowserAsync(u.AbsoluteUri);
             Func<Uri, Task> openBrowserAction = _webViewOptions?.OpenBrowserAsync ?? defaultBrowserAction;
 
             cancellationToken.ThrowIfCancellationRequested();

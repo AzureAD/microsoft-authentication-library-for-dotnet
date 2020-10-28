@@ -11,8 +11,6 @@ namespace Microsoft.Identity.Client
     /// Base class for options objects with string values loadable from a configuration file
     /// (for instance a JSON file, as in an asp.net configuration scenario)
     /// See https://aka.ms/msal-net-application-configuration
-    /// See also derived classes <see cref="PublicClientApplicationOptions"/>
-    /// and <see cref="ConfidentialClientApplicationOptions"/>
     /// </summary>
     public abstract class ApplicationOptions
     {

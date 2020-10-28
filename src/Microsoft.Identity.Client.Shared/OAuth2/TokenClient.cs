@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.OAuth2
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
 
             _oAuth2Client = new OAuth2Client(
-               _serviceBundle.DefaultLogger,
+               _serviceBundle.PlatformProxy,
                _serviceBundle.HttpManager,
                _serviceBundle.MatsTelemetryManager);
         }
@@ -113,8 +113,6 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.ClientId);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
 
-#if CONFIDENTIAL_CLINET
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE
             if (_requestParams.ClientCredential != null)
             {
                 Dictionary<string, string> ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
@@ -130,8 +128,6 @@ namespace Microsoft.Identity.Client.OAuth2
                     _oAuth2Client.AddBodyParameter(entry.Key, entry.Value);
                 }
             }
-#endif
-#endif
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.ClaimsAndClientCapabilities);
 

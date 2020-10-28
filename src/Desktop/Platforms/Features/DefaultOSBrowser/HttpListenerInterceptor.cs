@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if MSAL_DESKTOP
+
+#if DESKTOP || NET_CORE
 using System;
 using System.Net;
 using System.Threading;

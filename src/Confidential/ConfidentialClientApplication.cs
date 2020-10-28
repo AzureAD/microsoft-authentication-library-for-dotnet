@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client
 {
@@ -35,13 +36,16 @@ namespace Microsoft.Identity.Client
     public sealed partial class ConfidentialClientApplication
         : ClientApplicationBase,
             IConfidentialClientApplication,
-            //IConfidentialClientApplicationWithCertificate, //TODO: MigrationAid
+            //IConfidentialClientApplicationWithCertificate, //TODO split: MigrationAid
             IByRefreshToken
     {
         internal ConfidentialClientApplication(ApplicationConfiguration configuration)
-            : base(configuration)
-        {
-            GuardMobileFrameworks();
+            : base(
+                  configuration, 
+                  Internal.ServiceBundle.Create(
+                      configuration, 
+                      PlatformProxyFactory.CreatePlatformProxy(null)))
+        {            
             AppTokenCacheInternal = new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;
         }
@@ -67,7 +71,7 @@ namespace Microsoft.Identity.Client
             string authorizationCode)
         {
             return AcquireTokenByAuthorizationCodeParameterBuilder.Create(
-                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                CreateConfidentialClientExecutor(this),
                 scopes,
                 authorizationCode);
         }
@@ -89,7 +93,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes)
         {
             return AcquireTokenForClientParameterBuilder.Create(
-                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                CreateConfidentialClientExecutor(this),
                 scopes);
         }
 
@@ -112,7 +116,7 @@ namespace Microsoft.Identity.Client
             UserAssertion userAssertion)
         {
             return AcquireTokenOnBehalfOfParameterBuilder.Create(
-                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                CreateConfidentialClientExecutor(this),
                 scopes,
                 userAssertion);
         }
@@ -135,7 +139,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes)
         {
             return GetAuthorizationRequestUrlParameterBuilder.Create(
-                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                CreateConfidentialClientExecutor(this),
                 scopes);
         }
 
@@ -144,9 +148,24 @@ namespace Microsoft.Identity.Client
             string refreshToken)
         {
             return AcquireTokenByRefreshTokenParameterBuilder.Create(
-                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                CreateClientApplicationBaseExecutor(this),
                 scopes,
                 refreshToken);
+        }
+
+        private static IClientApplicationBaseExecutor CreateClientApplicationBaseExecutor(
+            ClientApplicationBase clientApplicationBase)
+        {
+            IClientApplicationBaseExecutor executor = new ClientApplicationBaseExecutor(
+                clientApplicationBase.ServiceBundle,
+                clientApplicationBase);
+
+            if (IsMatsEnabled(clientApplicationBase))
+            {
+                executor = new TelemetryClientApplicationBaseExecutor(executor, clientApplicationBase.ServiceBundle.Mats);
+            }
+
+            return executor;
         }
 
         internal ClientCredentialWrapper ClientCredential => ServiceBundle.Config.ClientCredential;

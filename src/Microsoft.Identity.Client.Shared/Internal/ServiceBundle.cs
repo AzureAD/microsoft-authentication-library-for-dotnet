@@ -8,11 +8,9 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.OAuth2.Throttling;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
-using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -20,11 +18,14 @@ namespace Microsoft.Identity.Client.Internal
     {
         internal ServiceBundle(
             ApplicationConfiguration config,
+            IPlatformProxy platformProxy,
             bool shouldClearCaches = false)
         {
             Config = config;
+            PlatformProxy = config.PlatformProxy ?? platformProxy;
 
             DefaultLogger = new MsalLogger(
+                PlatformProxy,
                 Guid.Empty,
                 config.ClientName,
                 config.ClientVersion,
@@ -33,7 +34,6 @@ namespace Microsoft.Identity.Client.Internal
                 config.IsDefaultPlatformLoggingEnabled,
                 config.LoggingCallback);
 
-            PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(
                 config.HttpClientFactory ?? 
                 PlatformProxy.CreateDefaultHttpClientFactory());
@@ -58,7 +58,6 @@ namespace Microsoft.Identity.Client.Internal
                 config.CustomInstanceDiscoveryMetadata,
                 config.CustomInstanceDiscoveryMetadataUri);
 
-            WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
             DeviceAuthManager = PlatformProxy.CreateDeviceAuthManager();
@@ -79,9 +78,6 @@ namespace Microsoft.Identity.Client.Internal
         public IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
 
         /// <inheritdoc />
-        public IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
-
-        /// <inheritdoc />
         public IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
 
         /// <inheritdoc />
@@ -99,9 +95,9 @@ namespace Microsoft.Identity.Client.Internal
 
         public IThrottlingProvider ThrottlingManager { get; }
 
-        public static ServiceBundle Create(ApplicationConfiguration config)
+        public static ServiceBundle Create(ApplicationConfiguration config, IPlatformProxy proxy)
         {
-            return new ServiceBundle(config);
+            return new ServiceBundle(config, proxy);
         }
 
         public void SetPlatformProxyForTest(IPlatformProxy platformProxy)

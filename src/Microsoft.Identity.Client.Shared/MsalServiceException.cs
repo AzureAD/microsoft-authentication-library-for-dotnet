@@ -142,24 +142,20 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public int StatusCode { get; internal set; } = 0;
 
-#if !DESKTOP
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
         /// <summary>
         /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to
         /// provide additional claims, such as doing two factor authentication. The are two cases:
         /// <list type="bullent">
         /// <item><description>
-        /// If your application is a <see cref="IPublicClientApplication"/>, you should just call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
-        /// and add the <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims(string)"/> modifier.
+        /// If your application is a IPublicClientApplication, you should just call IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})
+        /// and add the AbstractAcquireTokenParameterBuilder{T}.WithClaims(string) modifier.
         /// </description></item>
-        /// <item>><description>If your application is a <see cref="IConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize
+        /// <item>><description>If your application is a ConfidentialClientApplication (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize
         /// exception with a message containing the claims</description></item>
         /// </list>
         /// For more details see https://aka.ms/msal-net-claim-challenge
         /// </summary>
         public string Claims { get; internal set; }
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// Raw response body received from the server.

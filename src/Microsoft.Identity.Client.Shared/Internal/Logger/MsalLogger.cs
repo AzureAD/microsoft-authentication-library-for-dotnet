@@ -7,20 +7,19 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class MsalLogger : ICoreLogger
     {
-        private readonly IPlatformLogger _platformLogger;
         private readonly LogCallback _loggingCallback;
         private readonly LogLevel _minLogLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
         private static readonly Lazy<ICoreLogger> s_nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
 
         internal MsalLogger(
+            IPlatformProxy platformProxy,
             Guid correlationId,
             string clientName,
             string clientVersion,
@@ -29,13 +28,13 @@ namespace Microsoft.Identity.Client.Internal.Logger
             bool isDefaultPlatformLoggingEnabled,
             LogCallback loggingCallback)
         {
+            _platformProxy = platformProxy;
             _correlationId = correlationId;
             PiiLoggingEnabled = enablePiiLogging;
             _loggingCallback = loggingCallback;
             _minLogLevel = logLevel;
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
-
-            _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
+            
             ClientName = clientName ?? string.Empty;
             ClientVersion = clientVersion ?? string.Empty;
 
@@ -57,9 +56,11 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public static ICoreLogger Create(
             Guid correlationId,
             IApplicationConfiguration config,
+            IPlatformProxy platformProxy,
             bool isDefaultPlatformLoggingEnabled = false)
         {
             return new MsalLogger(
+                platformProxy,
                 correlationId,
                 config?.ClientName ?? string.Empty,
                 config?.ClientVersion ?? string.Empty,
@@ -71,6 +72,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static ICoreLogger NullLogger => s_nullLogger.Value;
 
+        private readonly IPlatformProxy _platformProxy;
         private readonly Guid _correlationId;
 
         public bool PiiLoggingEnabled { get; }
@@ -159,7 +161,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     ? string.Empty
                     : " - " + _correlationId;
 
-                var msalIdParameters = MsalIdHelper.GetMsalIdParameters(this);
+                var msalIdParameters = MsalIdHelper.GetMsalIdParameters(_platformProxy);
                 string os = "N/A";
                 if (msalIdParameters.TryGetValue(MsalIdParameter.OS, out string osValue))
                 {
@@ -175,23 +177,24 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     isLoggingPii ? "(True)" : "(False)",
                     MsalIdHelper.GetMsalVersion(),
                     msalIdParameters[MsalIdParameter.Product],
-                    os, DateTime.UtcNow, correlationId, ClientInformation, messageToLog);
+                    os,                     
+                    DateTime.UtcNow, correlationId, ClientInformation, messageToLog);
 
                 if (_isDefaultPlatformLoggingEnabled)
                 {
                     switch (logLevel)
                     {
                         case LogLevel.Error:
-                            _platformLogger.Error(log);
+                            _platformProxy.PlatformLogger.Error(log);
                             break;
                         case LogLevel.Warning:
-                            _platformLogger.Warning(log);
+                            _platformProxy.PlatformLogger.Warning(log);
                             break;
                         case LogLevel.Info:
-                            _platformLogger.Information(log);
+                            _platformProxy.PlatformLogger.Information(log);
                             break;
                         case LogLevel.Verbose:
-                            _platformLogger.Verbose(log);
+                            _platformProxy.PlatformLogger.Verbose(log);
                             break;
                     }
                 }

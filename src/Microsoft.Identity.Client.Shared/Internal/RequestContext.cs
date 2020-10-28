@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Internal
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId)
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
-            Logger = MsalLogger.Create(correlationId, ServiceBundle.Config);
+            Logger = MsalLogger.Create(correlationId, ServiceBundle.Config, ServiceBundle.PlatformProxy);
             CorrelationId = correlationId;
         }
 

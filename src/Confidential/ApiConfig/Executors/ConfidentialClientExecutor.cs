@@ -1,19 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if MSAL_CONFIDENTIAL
 
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Desktop.Internal.Requests;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     internal class ConfidentialClientExecutor : AbstractExecutor, IConfidentialClientApplicationExecutor
     {
         private readonly ConfidentialClientApplication _confidentialClientApplication;
@@ -88,7 +86,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _confidentialClientApplication.UserTokenCacheInternal);
 
             requestParams.SendX5C = onBehalfOfParameters.SendX5C;
-            requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
+            requestParams.UserAssertionHash =                 
+                onBehalfOfParameters.UserAssertion.GetAssertionHash(requestContext.ServiceBundle.PlatformProxy.CryptographyManager);
 
             var handler = new OnBehalfOfRequest(
                 ServiceBundle,
@@ -101,7 +100,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         public async Task<Uri> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
             GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
-            CancellationToken cancellationToken) // TODO: propagate cancellation token
+            CancellationToken cancellationToken)
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId);
 
@@ -119,13 +118,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             }
                         
             await AuthorityEndpoints.UpdateAuthorityEndpointsAsync(requestParameters).ConfigureAwait(false);
-            var handler = new AuthCodeRequestComponent(
+            var result = AuthorizationUriBuilder.CreateAuthorizationUri(
+                authorizationRequestUrlParameters.ToInteractiveParameters(),
                 requestParameters,
-                authorizationRequestUrlParameters.ToInteractiveParameters());
+                addPkceAndState: false);
 
-            return handler.GetAuthorizationUriWithoutPkce();
+            return result.Item1;
         }
     }
-#endif
 }
-#endif

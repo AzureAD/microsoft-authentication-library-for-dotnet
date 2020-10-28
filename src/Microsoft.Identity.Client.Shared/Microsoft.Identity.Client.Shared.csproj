@@ -9,7 +9,7 @@
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     
 
-    <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop45)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop45);</TargetFrameworks>
     <!--<TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>-->
     <!--<TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);</TargetFrameworks>-->
 

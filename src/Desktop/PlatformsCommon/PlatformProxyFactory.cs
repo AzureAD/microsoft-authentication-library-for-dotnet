@@ -16,12 +16,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// <summary>
         ///     Gets the platform proxy, which can be used to perform platform specific operations
         /// </summary>
-        public static IPlatformProxy CreatePlatformProxy(ICoreLogger logger)
+        public static IPublicClientPlatformProxy CreatePlatformProxy(ICoreLogger logger)
         {
             var finalLogger = logger ?? MsalLogger.NullLogger;
 
 #if NET_CORE
-            return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);
+            return new Desktop.Platforms.netcore.NetCorePublicClientPlatformProxy(finalLogger);
 #elif ANDROID
             return new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy(finalLogger);
 #elif iOS
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 #elif NETSTANDARD1_3
             return new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy(finalLogger);
 #elif DESKTOP
-            return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy(finalLogger);
+            return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPublicClientPlatformProxy(finalLogger);
 #else
             throw new PlatformNotSupportedException();
 #endif

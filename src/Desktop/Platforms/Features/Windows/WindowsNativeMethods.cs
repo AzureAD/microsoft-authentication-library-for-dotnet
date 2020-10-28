@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if DESKTOP || NET_CORE || NETSTANDARD
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -85,3 +85,4 @@ namespace Microsoft.Identity.Client.Platforms.Features.Windows
         }       
     }
 }
+#endif 

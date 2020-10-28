@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if WINDOWS_APP
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -35,3 +36,4 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         public void GetResult() { }
     }
 }
+#endif

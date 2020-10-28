@@ -37,7 +37,7 @@ namespace NetFx
     },  
   }";
         // This app has http://localhost redirect uri registered
-        private static readonly string s_clientIdForPublicApp = "c0186a6c-0bfc-4d83-9543-c2295b676f3b";
+        private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
 
         private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
         private const string PoPUri = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
@@ -119,7 +119,7 @@ namespace NetFx
 
             if (s_useBroker)
             {
-                builder = builder.WithBroker(true);
+                builder = builder.WithExperimentalFeatures(true).WithBroker(true);
             }
 
             var pca = builder.Build();

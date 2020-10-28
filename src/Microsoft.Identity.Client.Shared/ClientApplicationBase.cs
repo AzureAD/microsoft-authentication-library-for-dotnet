@@ -59,9 +59,9 @@ namespace Microsoft.Identity.Client
 
         internal ITokenCacheInternal UserTokenCacheInternal { get; }
 
-        internal ClientApplicationBase(ApplicationConfiguration config)
+        internal ClientApplicationBase(ApplicationConfiguration config, IServiceBundle serviceBundle)
         {
-            ServiceBundle = Internal.ServiceBundle.Create(config);
+            ServiceBundle = serviceBundle;
 
             if (config.UserTokenLegacyCachePersistenceForTest != null)
             {

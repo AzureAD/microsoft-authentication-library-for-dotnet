@@ -20,18 +20,16 @@ namespace Microsoft.Identity.Client
 
         InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; }
 
-#if MSAL_CONFIDENTIAL
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+
         /// <summary>
         /// </summary>
         ClientCredentialWrapper ClientCredential { get; }
-#endif
 
         /// <summary>
         /// Callback used for sending telemetry about MSAL.NET out of your app. It was set by a call
         /// to <see cref="AbstractApplicationBuilder{T}.WithTelemetry(TelemetryCallback)"/>
         /// </summary>
         TelemetryCallback TelemetryCallback { get; }
-#endif
+
     }
 }

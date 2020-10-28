@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
                         homeAccountId,
                         requestParams.AuthenticationScheme.KeyId)
                     {
-                        UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
+                        UserAssertionHash = requestParams.UserAssertionHash,
                         IsAdfs = isAdfsAuthority
                     };
             }
@@ -351,11 +351,11 @@ namespace Microsoft.Identity.Client
             string requestTenantId = requestParams.Authority.TenantId;
             bool filterByTenantId = true;
 
-            if (requestParams.UserAssertion != null) // OBO
+            if (requestParams.UserAssertionHash != null) // OBO
             {
                 tokenCacheItems = tokenCacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase),
+                                item.UserAssertionHash.Equals(requestParams.UserAssertionHash, StringComparison.OrdinalIgnoreCase),
                                 requestParams.RequestContext.Logger,
                                 "Filtering by user assertion id");
 

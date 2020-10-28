@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client
 {
@@ -27,7 +28,10 @@ namespace Microsoft.Identity.Client
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
     {
         internal PublicClientApplication(ApplicationConfiguration configuration)
-            : base(configuration)
+            : base(configuration, 
+                  Internal.ServiceBundle.Create(
+                      configuration,
+                      PlatformProxyFactory.CreatePlatformProxy(null)))
         {
         }
 
@@ -36,7 +40,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool IsSystemWebViewAvailable
         {
-            get => ServiceBundle.PlatformProxy.IsSystemWebViewAvailable;
+            get => ((IPublicClientPlatformProxy)ServiceBundle.PlatformProxy).IsSystemWebViewAvailable;
         }
 
         /// <summary>
@@ -68,7 +72,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes)
         {
             return AcquireTokenInteractiveParameterBuilder
-                .Create(ClientExecutorFactory.CreatePublicClientExecutor(this), scopes)
+                .Create(CreatePublicClientExecutor(this), scopes)
                 .WithParentActivityOrWindowFunc(ServiceBundle.Config.ParentActivityOrWindowFunc);
         }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
@@ -100,7 +104,7 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
             return AcquireTokenWithDeviceCodeParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                CreatePublicClientExecutor(this),
                 scopes,
                 deviceCodeResultCallback);
         }
@@ -139,7 +143,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes)
         {
             return AcquireTokenByIntegratedWindowsAuthParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                CreatePublicClientExecutor(this),
                 scopes);
         }
 
@@ -164,7 +168,7 @@ namespace Microsoft.Identity.Client
             SecureString password)
         {
             return AcquireTokenByUsernamePasswordParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                CreatePublicClientExecutor(this),
                 scopes,
                 username,
                 password);

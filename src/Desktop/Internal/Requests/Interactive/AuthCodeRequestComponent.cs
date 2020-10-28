@@ -8,10 +8,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Desktop.Internal.Requests;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
@@ -62,7 +64,12 @@ namespace Microsoft.Identity.Client.Internal
 
             _requestParams.RedirectUri = webUi.UpdateRedirectUri(_requestParams.RedirectUri);
 
-            Tuple<Uri, string, string> authorizationTuple = CreateAuthorizationUri(true);
+            Tuple<Uri, string, string> authorizationTuple = 
+                AuthorizationUriBuilder.CreateAuthorizationUri(
+                    _interactiveParameters,
+                    _requestParams, 
+                    addPkceAndState: true);
+                
             Uri authorizationUri = authorizationTuple.Item1;
             string state = authorizationTuple.Item2;
             string codeVerifier = authorizationTuple.Item3;
@@ -88,6 +95,7 @@ namespace Microsoft.Identity.Client.Internal
 
          private IWebUI CreateWebAuthenticationDialog()
         {
+            var pcaProxy = ((IPublicClientPlatformProxy)_serviceBundle.PlatformProxy);
             if (_interactiveParameters.CustomWebUi != null)
             {
                 return new CustomWebUiHandler(_interactiveParameters.CustomWebUi);
@@ -97,7 +105,7 @@ namespace Microsoft.Identity.Client.Internal
 
             coreUiParent.UseEmbeddedWebview = GetUseEmbeddedWebview(
                 _interactiveParameters.UseEmbeddedWebView,
-                _serviceBundle.PlatformProxy.UseEmbeddedWebViewDefault);
+                pcaProxy.UseEmbeddedWebViewDefault);
 
 #if WINDOWS_APP || DESKTOP
             // hidden web view can be used in both WinRT and desktop applications.
@@ -106,7 +114,7 @@ namespace Microsoft.Identity.Client.Internal
             coreUiParent.UseCorporateNetwork = _serviceBundle.Config.UseCorporateNetwork;
 #endif
 #endif
-            return _serviceBundle.PlatformProxy.GetWebUiFactory()
+            return pcaProxy.GetWebUiFactory()
                 .CreateAuthenticationDialog(coreUiParent, _requestParams.RequestContext);
         }
 
@@ -172,131 +180,9 @@ namespace Microsoft.Identity.Client.Internal
 
 #endif
 
-        private Tuple<Uri, string, string> CreateAuthorizationUri(bool addPkceAndState = false)
-        {
-            IDictionary<string, string> requestParameters = CreateAuthorizationRequestParameters();
-            string codeVerifier = null;
-            string state = null;
 
-            if (addPkceAndState)
-            {
-                codeVerifier = _serviceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
-                string codeVerifierHash = _serviceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(codeVerifier);
 
-                requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifierHash;
-                requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
-
-                state = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
-                requestParameters[OAuth2Parameter.State] = state;
-            }
-
-            // Add uid/utid values to QP if user object was passed in.
-            if (_interactiveParameters.Account != null)
-            {
-                if (!string.IsNullOrEmpty(_interactiveParameters.Account.Username))
-                {
-                    requestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.Account.Username;
-                }
-
-                if (_interactiveParameters.Account?.HomeAccountId?.ObjectId != null)
-                {
-                    requestParameters[OAuth2Parameter.LoginReq] =
-                        _interactiveParameters.Account.HomeAccountId.ObjectId;
-                }
-
-                if (!string.IsNullOrEmpty(_interactiveParameters.Account?.HomeAccountId?.TenantId))
-                {
-                    requestParameters[OAuth2Parameter.DomainReq] =
-                        _interactiveParameters.Account.HomeAccountId.TenantId;
-                }
-            }
-
-            CheckForDuplicateQueryParameters(_requestParams.ExtraQueryParameters, requestParameters);
-
-            string qp = requestParameters.ToQueryParameter();
-            var builder = new UriBuilder(new Uri(_requestParams.Endpoints.AuthorizationEndpoint));
-            builder.AppendQueryParameters(qp);
-
-            return new Tuple<Uri, string, string>(builder.Uri, state, codeVerifier);
-        }
-
-        private Dictionary<string, string> CreateAuthorizationRequestParameters(Uri redirectUriOverride = null)
-        {
-            var extraScopesToConsent = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (!_interactiveParameters.ExtraScopesToConsent.IsNullOrEmpty())
-            {
-                extraScopesToConsent = ScopeHelper.CreateScopeSet(_interactiveParameters.ExtraScopesToConsent);
-            }
-
-            if (extraScopesToConsent.Contains(_requestParams.ClientId))
-            {
-                throw new ArgumentException("API does not accept client id as a user-provided scope");
-            }
-
-            var unionScope = ScopeHelper.GetMsalScopes(
-                new HashSet<string>(_requestParams.Scope.Concat(extraScopesToConsent)));
-
-            var authorizationRequestParameters = new Dictionary<string, string>
-            {
-                [OAuth2Parameter.Scope] = unionScope.AsSingleString(),
-                [OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code,
-
-                [OAuth2Parameter.ClientId] = _requestParams.ClientId,
-                [OAuth2Parameter.RedirectUri] = redirectUriOverride?.OriginalString ?? _requestParams.RedirectUri.OriginalString
-            };
-
-            if (!string.IsNullOrWhiteSpace(_requestParams.ClaimsAndClientCapabilities))
-            {
-                authorizationRequestParameters[OAuth2Parameter.Claims] = _requestParams.ClaimsAndClientCapabilities;
-            }
-
-            if (!string.IsNullOrWhiteSpace(_interactiveParameters.LoginHint))
-            {
-                authorizationRequestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.LoginHint;
-            }
-
-            if (_requestParams.RequestContext.CorrelationId != Guid.Empty)
-            {
-                authorizationRequestParameters[OAuth2Parameter.CorrelationId] =
-                    _requestParams.RequestContext.CorrelationId.ToString();
-            }
-
-            foreach (KeyValuePair<string, string> kvp in MsalIdHelper.GetMsalIdParameters(_requestParams.RequestContext.Logger))
-            {
-                authorizationRequestParameters[kvp.Key] = kvp.Value;
-            }
-
-            if (_interactiveParameters.Prompt == Prompt.NotSpecified)
-            {
-                authorizationRequestParameters[OAuth2Parameter.Prompt] = Prompt.SelectAccount.PromptValue;
-            }
-            else if (_interactiveParameters.Prompt.PromptValue != Prompt.NoPrompt.PromptValue)
-            {
-                authorizationRequestParameters[OAuth2Parameter.Prompt] = _interactiveParameters.Prompt.PromptValue;
-            }
-
-            return authorizationRequestParameters;
-        }
-
-        private static void CheckForDuplicateQueryParameters(
-            IDictionary<string, string> queryParamsDictionary,
-            IDictionary<string, string> requestParameters)
-        {
-            foreach (KeyValuePair<string, string> kvp in queryParamsDictionary)
-            {
-                if (requestParameters.ContainsKey(kvp.Key))
-                {
-                    throw new MsalClientException(
-                        MsalError.DuplicateQueryParameterError,
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            MsalErrorMessage.DuplicateQueryParameterTemplate,
-                            kvp.Key));
-                }
-
-                requestParameters[kvp.Key] = kvp.Value;
-            }
-        }
+       
 
     }
 }

@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
-                key = requestParameters.UserAssertion.AssertionHash;
+                key = requestParameters.UserAssertionHash;
                 return true;
             }
 

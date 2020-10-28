@@ -14,8 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.Desktop.csproj" />
+    <ProjectReference Include="..\..\..\src\Confidential\Microsoft.Identity.Client.Confidential.csproj" />
+    <ProjectReference Include="..\..\..\src\Desktop\Microsoft.Identity.Client.Desktop.csproj" />
   </ItemGroup>
+
 
   <!-- Set this env variable locally to enable Telemetry on developer applications-->
 </Project>

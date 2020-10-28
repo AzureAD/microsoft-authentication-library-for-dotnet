@@ -14,10 +14,6 @@ namespace Microsoft.Identity.Client
     /// </summary>
     /// <param name="level">Log level of the log message to process</param>
     /// <param name="message">Pre-formatted log message</param>
-    /// <param name="containsPii">Indicates if the log message contains Organizational Identifiable Information (OII)
-    /// or Personally Identifiable Information (PII) nor not.
-    /// If <see cref="Logger.PiiLoggingEnabled"/> is set to <c>false</c> then this value is always false.
-    /// Otherwise it will be <c>true</c> when the message contains PII.</param>
-    /// <seealso cref="Logger"/>
+    /// <param name="containsPii">Indicates if the log message contains Organizational Identifiable Information (OII)    or Personally Identifiable Information (PII) nor not.</param>
     public delegate void LogCallback(LogLevel level, string message, bool containsPii);
 }

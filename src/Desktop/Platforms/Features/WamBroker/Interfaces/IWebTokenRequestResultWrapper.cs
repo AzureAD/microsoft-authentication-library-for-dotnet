@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+#if WINDOWS_APP
+using System.Collections.Generic;
 using Windows.Security.Authentication.Web.Core;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
@@ -10,3 +13,4 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         WebTokenRequestStatus ResponseStatus { get; }
     }
 }
+#endif

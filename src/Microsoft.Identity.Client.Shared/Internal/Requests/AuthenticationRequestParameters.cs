@@ -123,15 +123,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
 
+        // TODO: split - how to split this?!
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
-#if MSAL_CONFIDENTIAL
-
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
         public ClientCredentialWrapper ClientCredential { get; set; }
-#endif
-#endif
 
         // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
         public bool SendX5C { get; set; }
@@ -167,9 +162,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #endif
             }
         }
-        public UserAssertion UserAssertion { get; set; }
 
-#endregion
+
+        #endregion
+        public string UserAssertionHash { get; set; } // for OBO
+
 
         public void LogParameters()
         {

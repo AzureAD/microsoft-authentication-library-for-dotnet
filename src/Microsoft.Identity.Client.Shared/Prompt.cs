@@ -5,7 +5,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     ///     Structure containing static members that you can use to specify how the interactive overrides
-    ///     of AcquireTokenAsync in <see cref="IPublicClientApplication" /> should prompt the user.
+    ///     of AcquireTokenAsync in IPublicClientApplication should prompt the user.
     /// </summary>
     public struct Prompt
     {
