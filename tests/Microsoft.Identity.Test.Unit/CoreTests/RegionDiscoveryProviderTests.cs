@@ -121,8 +121,15 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
         }
 
-        private void AddMockedResponse(HttpResponseMessage responseMessage)
+        private void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true)
         {
+            var queryParams = new Dictionary<string, string>();
+
+            if (expectedParams)
+            {
+                queryParams.Add("api-version", apiVersion);
+            }
+
             _httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -132,10 +139,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                          {
                             { "Metadata", "true" }
                          },
-                        ExpectedQueryParams = new Dictionary<string, string>
-                        {
-                            { "api-version", "2020-06-01" }
-                        },
+                        ExpectedQueryParams = queryParams,
                         ResponseMessage = responseMessage
                     });
         }
