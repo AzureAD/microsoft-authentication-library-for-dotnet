@@ -1,0 +1,47 @@
+﻿<Project Sdk="MSBuild.Sdk.Extras">
+
+  <PropertyGroup Label="Target Frameworks"> 
+    
+    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard> 
+    <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
+    <!-- <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac> -->
+    <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
+    <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
+    
+    <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworks);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);</TargetFrameworks>
+
+  </PropertyGroup>
+
+  <PropertyGroup>    
+    <DefineConstants>$(DefineConstants);MSAL_DESKTOP;</DefineConstants>
+    <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
+  </PropertyGroup>
+
+  <Import Project="../flags.props" />
+
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
+    <Reference Include="System" />
+    <Reference Include="System.Core" /> 
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Net.Http" />    
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
+  </ItemGroup>
+  
+  
+</Project>
+

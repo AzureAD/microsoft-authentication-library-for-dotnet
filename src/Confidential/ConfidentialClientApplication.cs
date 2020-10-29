@@ -1,27 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if MSAL_CONFIDENTIAL
-
 using Microsoft.Identity.Client.Internal.Requests;
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.TelemetryCore;
-using System.Threading;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
     /// <summary>
     /// Class to be used for confidential client applications (Web Apps, Web APIs, and daemon applications).
@@ -225,8 +214,4 @@ namespace Microsoft.Identity.Client
             return clientApplicationBase.ServiceBundle.Mats != null;
         }
     }
-
-#endif
 }
-
-#endif

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if MSAL_DESKTOP || MSAL_XAMARIN
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -135,4 +134,3 @@ namespace Microsoft.Identity.Client.Internal.Broker
         }
     }
 }
-#endif

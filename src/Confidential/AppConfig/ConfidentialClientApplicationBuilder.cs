@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if MSAL_CONFIDENTIAL
-
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -11,8 +9,6 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     /// </summary>
     public class ConfidentialClientApplicationBuilder : AbstractApplicationBuilder<ConfidentialClientApplicationBuilder>
@@ -178,6 +174,4 @@ namespace Microsoft.Identity.Client
             return new ConfidentialClientApplication(BuildConfiguration());
         }
     }
-#endif
 }
-#endif

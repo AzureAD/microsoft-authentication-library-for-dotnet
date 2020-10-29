@@ -10,12 +10,6 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal interface IAuthCodeRequestComponent
     {
-#if MSAL_DESKTOP || MSAL_XAMARIN
         Task<Tuple<string, string>> FetchAuthCodeAndPkceVerifierAsync(CancellationToken cancellationToken);
-#endif
-
-#if MSAL_CONFIDENTIAL
-        Uri GetAuthorizationUriWithoutPkce();
-#endif
     }
 }

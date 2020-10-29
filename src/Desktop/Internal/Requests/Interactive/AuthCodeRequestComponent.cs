@@ -39,15 +39,6 @@ namespace Microsoft.Identity.Client.Internal
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
         }
 
-      
-#if MSAL_CONFIDENTIAL
-        public Uri GetAuthorizationUriWithoutPkce()
-        {
-            var result = CreateAuthorizationUri(false);
-            return result.Item1;
-        }
-#endif
-#if MSAL_DESKTOP || MSAL_XAMARIN
 
         public async Task<Tuple<string, string>> FetchAuthCodeAndPkceVerifierAsync(
             CancellationToken cancellationToken)
@@ -177,12 +168,5 @@ namespace Microsoft.Identity.Client.Internal
                     !string.IsNullOrEmpty(authorizationResult.ErrorDescription) ? authorizationResult.ErrorDescription : "Unknown error");
             }
         }
-
-#endif
-
-
-
-       
-
     }
 }

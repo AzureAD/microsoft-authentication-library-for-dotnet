@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if MSAL_DESKTOP || MSAL_XAMARIN
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -169,4 +167,3 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
     }
 }
-#endif

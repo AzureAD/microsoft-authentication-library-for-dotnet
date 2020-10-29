@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if MSAL_DESKTOP || MSAL_XAMARIN
-
 namespace Microsoft.Identity.Client.Internal.Broker
 {
     internal class BrokerParameter
@@ -45,4 +43,3 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired = "msauth://";
     }
 }
-#endif

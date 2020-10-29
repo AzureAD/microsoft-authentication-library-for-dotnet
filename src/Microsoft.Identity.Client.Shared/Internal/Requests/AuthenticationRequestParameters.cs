@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IServiceBundle serviceBundle,
             ITokenCacheInternal tokenCache,
             AcquireTokenCommonParameters commonParameters,
-            RequestContext requestContext, 
+            RequestContext requestContext,
             string homeAccountId = null)
         {
             _serviceBundle = serviceBundle;
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IsBrokerConfigured = serviceBundle.Config.IsBrokerEnabled;
 
             // Set application wide query parameters.
-            ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? 
+            ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ??
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             // Copy in call-specific query parameters.
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string ClientId { get; }
 
         public Uri RedirectUri { get; set; }
-       
+
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
         public string ClaimsAndClientCapabilities { get; private set; }
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
         public IAccount Account { get; set; }
 
-        public string HomeAccountId { get;}
+        public string HomeAccountId { get; }
 
 
         public bool IsClientCredentialRequest => ApiId == ApiEvent.ApiIds.AcquireTokenForClient;
@@ -155,11 +155,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             get
             {
-#if !MSAL_CONFIDENTIAL
-                return false;
-#else
                 return ClientCredential != null;
-#endif
             }
         }
 
@@ -184,9 +180,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Authority - " + AuthorityInfo?.CanonicalAuthority);
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
-#if MSAL_CONFIDENTIAL
             builder.AppendLine("SendX5C - " + SendX5C);
-#endif
             builder.AppendLine("LoginHint - " + LoginHint);
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
             builder.AppendLine("HomeAccountId - " + HomeAccountId);
@@ -203,9 +197,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
             builder.AppendLine("ApiId - " + ApiId);
             builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
-#if MSAL_CONFIDENTIAL
             builder.AppendLine("SendX5C - " + SendX5C);
-#endif
             builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("IsBrokerConfigured - " + IsBrokerConfigured);
             builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));

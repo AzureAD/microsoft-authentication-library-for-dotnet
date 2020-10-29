@@ -29,13 +29,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             _silentParameters = silentParameters;
 
             _brokerStrategyLazy = new Lazy<ISilentAuthRequestStrategy>(() => brokerStrategyOverride
-#if MSAL_DESKTOP || MSAL_XAMARIN
               ??  new SilentBrokerAuthStrategy(this,
                     serviceBundle,
                     authenticationRequestParameters,
                     silentParameters,
                     serviceBundle.PlatformProxy.CreateBroker(null))
-#endif
             );
             _clientStrategy = clientStrategyOverride ?? new SilentClientAuthStretegy(this, serviceBundle, authenticationRequestParameters, silentParameters);
 
@@ -56,7 +54,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
             catch (MsalException ex)
             {
-#if MSAL_DESKTOP || MSAL_XAMARIN
                 if (ex is MsalUiRequiredException || ex is MsalClientException)
                 {
                     var errorCode = ex.ErrorCode;
@@ -71,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                         return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
-#endif
+
                 _logger.Verbose("Failed to obtain a token using the token cache - " + ex.ErrorCode);
                 throw;
             }

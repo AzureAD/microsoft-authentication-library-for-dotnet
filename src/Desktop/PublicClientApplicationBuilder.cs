@@ -1,5 +1,3 @@
-#if MSAL_DESKTOP || MSAL_XAMARIN
-
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
@@ -223,7 +221,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP && MSAL_DESKTOP
+#if DESKTOP 
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -293,5 +291,3 @@ namespace Microsoft.Identity.Client
         }
     }
 }
-
-#endif 

@@ -23,9 +23,6 @@ namespace Microsoft.Identity.Client.UI
         {
         }
 
-#if MSAL_DESKTOP || MSAL_XAMARIN
-
-
         internal bool UseEmbeddedWebview { get; set; }
         internal SynchronizationContext SynchronizationContext { get; set; }
 
@@ -152,7 +149,5 @@ namespace Microsoft.Identity.Client.UI
             OwnerWindow = ownerWindow;
         }
 #endif
-#endif
-
     }
 }

@@ -1,15 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if MSAL_DESKTOP || MSAL_XAMARIN
-
-using System;
-using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.AuthScheme.PoP;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
@@ -41,4 +34,3 @@ namespace Microsoft.Identity.Client
         internal IPublicClientApplicationExecutor PublicClientApplicationExecutor { get; }
     }
 }
-#endif

@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Configuration properties used to build a public or confidential client application
     /// </summary>
-    public interface IAppConfig
+    public interface IAppConfig //TODO: split - how to deal with this?!
     {
         /// <summary>
         /// Client ID (also known as App ID) of the application as registered in the
@@ -103,8 +103,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         IEnumerable<string> ClientCapabilities { get; }
 
-#if MSAL_CONFIDENTIAL
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+
         /// <summary>
         /// </summary>
         string ClientSecret { get; }
@@ -112,8 +111,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// </summary>
         X509Certificate2 ClientCredentialCertificate { get; }
-#endif
-#endif
+
         /// <summary>
         /// </summary>
         Func<object> ParentActivityOrWindowFunc { get; }
