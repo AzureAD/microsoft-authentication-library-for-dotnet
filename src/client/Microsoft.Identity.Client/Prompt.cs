@@ -46,10 +46,13 @@ namespace Microsoft.Identity.Client
 /// </summary>
         public static readonly Prompt Never = new Prompt("attempt_none");
 #endif
-
+#if ANDROID
+        // for when the developer doesn't specify a prompt. Must be NONE on andorid for broker.
+        internal static readonly Prompt NotSpecified = new Prompt("NONE");
+#else
         // for when the developer doesn't specify a prompt
         internal static readonly Prompt NotSpecified = new Prompt("not_specified");
-
+#endif
         internal string PromptValue { get; }
 
         private Prompt(string promptValue)
