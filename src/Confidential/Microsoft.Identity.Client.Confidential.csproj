@@ -15,7 +15,7 @@
   <Import Project="../flags.props" />
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)\..\Desktop\Shared\**\*.cs" LinkBase="Shared" />
+    <Compile Include="$(MSBuildThisFileDirectory)\..\Desktop\Shared\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" LinkBase="Shared" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
@@ -28,10 +28,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="C:\g\msal2\src\Confidential\..\Desktop\Shared\Platforms\netstandard13\NetDesktopFeatureFlags.cs" />
   </ItemGroup>
 
  

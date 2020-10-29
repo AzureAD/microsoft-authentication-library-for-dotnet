@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.Identity.Client.Core;
 
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
@@ -39,6 +40,26 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             UiParent.SystemWebViewOptions?.LogParameters(logger);
 
             logger.Info(builder.ToString());
+        }
+
+        public BrokerAcquireTokenInteractiveParameters ToBrokerInteractiveParams()
+        {
+            return new BrokerAcquireTokenInteractiveParameters()
+            {
+                Prompt = Prompt,
+                LoginHint = LoginHint
+            };
+        }
+
+        public GetAuthorizationRequestUrlParameters ToAuthorizationRequestParams()
+        {
+            return new GetAuthorizationRequestUrlParameters()
+            {
+                Prompt = Prompt.PromptValue,
+                LoginHint = LoginHint,
+                ExtraScopesToConsent = ExtraScopesToConsent,
+                Account = Account
+            };
         }
     }
 }

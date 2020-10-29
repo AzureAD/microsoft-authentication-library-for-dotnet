@@ -17,7 +17,6 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.netcore
 {
@@ -135,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             // TODO(mats): need to detect operating system and switch on it to determine proper enum
             return MatsConverter.AsInt(OsPlatform.Win32);
         }
-        protected override IFeatureFlags CreateFeatureFlags() => new NetCoreFeatureFlags();       
+        protected override IFeatureFlags CreateFeatureFlags() => new NetCoreFeatureFlags();
 
         public override bool BrokerSupportsWamAccounts => true;
 

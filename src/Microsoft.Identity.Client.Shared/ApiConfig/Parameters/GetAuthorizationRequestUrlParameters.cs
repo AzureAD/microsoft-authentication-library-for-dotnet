@@ -14,21 +14,20 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IEnumerable<string> ExtraScopesToConsent { get; set; }
         public string LoginHint { get; set; }
 
-        public AcquireTokenInteractiveParameters ToInteractiveParameters()
-        {
-            return new AcquireTokenInteractiveParameters
-            {
-                Account = Account,
-                ExtraScopesToConsent = ExtraScopesToConsent,
-                LoginHint = LoginHint,
-                Prompt = Prompt.SelectAccount,
-                UseEmbeddedWebView = WebViewPreference.NotSpecified
-            };
-        }
+        public string Prompt { get; set; } 
 
+       
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)
         {
+            logger.Info("=== GetAuthorizationRequestUrlParameters Parameters ===");
+            logger.Info("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
+            logger.InfoPii(
+                "Account provided: " + ((Account != null) ? Account.ToString() : "false"),
+                "Account provided: " + (Account != null));
+            logger.Info("Prompt: " + Prompt);
+            logger.Info("RedirectUri: " + RedirectUri);
+            logger.Info("ExtraScopesToConsent: " + string.Join(" ", ExtraScopesToConsent));
         }
     }
 }

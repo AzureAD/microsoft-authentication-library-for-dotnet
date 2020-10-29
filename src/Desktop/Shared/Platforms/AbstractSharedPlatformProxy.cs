@@ -8,7 +8,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
@@ -178,7 +177,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             OverloadBrokerForTest = broker;
         }
 
-        public virtual IBroker CreateBroker(CoreUIParent uiParent)
+        public IBroker CreateBroker()
         {
             return OverloadBrokerForTest ?? new NullBroker();
         }

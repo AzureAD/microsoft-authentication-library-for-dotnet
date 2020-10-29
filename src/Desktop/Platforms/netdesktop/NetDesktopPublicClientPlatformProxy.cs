@@ -24,6 +24,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.net45.Http;
 using Microsoft.Identity.Client.Platforms.Features.Windows;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -341,6 +342,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
         public void SetWebUiFactory(IWebUIFactory webUiFactory)
         {
             OverloadWebUiFactory = webUiFactory;
+        }
+
+        public virtual IBroker CreateBroker(CoreUIParent uiParent)
+        {
+            return OverloadBrokerForTest ?? new NullBroker();
         }
     }
 }

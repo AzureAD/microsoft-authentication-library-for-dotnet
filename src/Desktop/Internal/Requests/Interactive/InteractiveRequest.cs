@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
@@ -81,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> FetchTokensFromBrokerAsync(string brokerInstallUrl, CancellationToken cancellationToken)
         {
-            IBroker broker = _serviceBundle.PlatformProxy.CreateBroker(
+            IBroker broker = ((IPublicClientPlatformProxy)_serviceBundle.PlatformProxy).CreateBroker(
                 _interactiveParameters.UiParent);
 
             ITokenRequestComponent brokerInteractiveRequest =

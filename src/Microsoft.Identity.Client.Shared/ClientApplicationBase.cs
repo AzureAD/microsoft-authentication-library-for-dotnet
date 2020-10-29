@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client
 
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                var broker = ServiceBundle.PlatformProxy.CreateBroker();                
                 await broker.RemoveAccountAsync((AppConfig as IApplicationConfiguration), account).ConfigureAwait(false);
             }
         }
@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(null);
+                var broker = ServiceBundle.PlatformProxy.CreateBroker();
                 var brokerAccounts =
                     (await broker.GetAccountsAsync(AppConfig.ClientId, AppConfig.RedirectUri).ConfigureAwait(false))
                     ?? Enumerable.Empty<IAccount>();

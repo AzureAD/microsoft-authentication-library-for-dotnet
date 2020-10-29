@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     serviceBundle,
                     authenticationRequestParameters,
                     silentParameters,
-                    serviceBundle.PlatformProxy.CreateBroker(null))
+                    serviceBundle.PlatformProxy.CreateBroker())
             );
             _clientStrategy = clientStrategyOverride ?? new SilentClientAuthStretegy(this, serviceBundle, authenticationRequestParameters, silentParameters);
 

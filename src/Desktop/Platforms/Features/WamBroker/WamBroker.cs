@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// </summary>
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
+            BrokerAcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             if (_synchronizationContext == null)
             {

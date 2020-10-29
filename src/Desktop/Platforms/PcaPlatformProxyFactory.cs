@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
             return new Platforms.Mac.MacPlatformProxy(finalLogger);
 #elif WINDOWS_APP
             return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(finalLogger);
-#elif NETSTANDARD1_3
+#elif NETSTANDARD
             return new Microsoft.Identity.Client.Platforms.netstandard13.NetstandardPublicClientPlatformProxy(finalLogger);
 #elif DESKTOP
             return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPublicClientPlatformProxy(finalLogger);

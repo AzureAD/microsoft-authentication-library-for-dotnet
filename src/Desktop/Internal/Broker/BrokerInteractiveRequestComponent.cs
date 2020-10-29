@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             var tokenResponse = await Broker.AcquireTokenInteractiveAsync(
                 _authenticationRequestParameters, 
-                _interactiveParameters)
+                _interactiveParameters.ToBrokerInteractiveParams())
                 .ConfigureAwait(false);
 
             ValidateResponseFromBroker(tokenResponse);

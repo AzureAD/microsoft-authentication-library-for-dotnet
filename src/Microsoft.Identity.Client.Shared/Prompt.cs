@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static readonly Prompt NoPrompt = new Prompt("no_prompt");
 
-#if DESKTOP || WINDOWS_APP
+#if DESKTOP 
 /// <summary>
 /// Only available on .NET platform. AcquireToken will send <c>prompt=attempt_none</c> to
 /// Azure AD's authorize endpoint and the library will use a hidden webview (and its cookies) to authenticate the user.

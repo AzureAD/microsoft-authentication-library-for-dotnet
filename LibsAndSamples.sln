@@ -34,6 +34,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.LabInfrastructure", "tests\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572-BBD7-424E-81D5-E59E6884EB3A}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.build.props = src\Directory.build.props
+		src\flags.props = src\flags.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Common", "tests\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj", "{18559D36-C735-4933-AA86-398C8222D4F6}"
 EndProject
@@ -80,12 +84,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "microsoft.identity.client", "microsoft.identity.client", "{4667ADF0-37FA-4306-BD2A-F55D6360143E}"
-	ProjectSection(SolutionItems) = preProject
-		src\client\Directory.Build.props = src\client\Directory.Build.props
-		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetFxConsoleApp", "tests\devapps\NetFxConsoleTestApp\NetFxConsoleApp.csproj", "{2EBB7FFE-47E0-46F8-A4D6-79A4CF44729C}"
@@ -162,6 +160,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Desktop", "src\Desktop\Microsoft.Identity.Client.Desktop.csproj", "{8B9B4321-BD83-46C2-8255-11204C75445B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Shared", "src\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj", "{10165A2E-05FA-479E-ACBB-D967EFDF3272}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Mobile", "src\Mobile\Microsoft.Identity.Client.Mobile.csproj", "{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1319,6 +1319,34 @@ Global
 		{10165A2E-05FA-479E-ACBB-D967EFDF3272}.Release|x64.Build.0 = Release|Any CPU
 		{10165A2E-05FA-479E-ACBB-D967EFDF3272}.Release|x86.ActiveCfg = Release|Any CPU
 		{10165A2E-05FA-479E-ACBB-D967EFDF3272}.Release|x86.Build.0 = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|ARM.Build.0 = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|x64.Build.0 = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Debug|x86.Build.0 = Debug|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|Any CPU.Build.0 = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|ARM.ActiveCfg = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|ARM.Build.0 = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|ARM64.Build.0 = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|iPhone.Build.0 = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|x64.ActiveCfg = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|x64.Build.0 = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|x86.ActiveCfg = Release|Any CPU
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1351,7 +1379,6 @@ Global
 		{24D2AF71-A01E-4450-8C3F-B9923A81134B} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{959A47D9-07E7-4BF3-A0F7-6D9CD42A2C46} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{C44AADC0-1E9B-427F-AC02-642BDF8D936B} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
-		{4667ADF0-37FA-4306-BD2A-F55D6360143E} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
 		{2EBB7FFE-47E0-46F8-A4D6-79A4CF44729C} = {384BA371-F17F-4A70-9423-D54F71BB3FCB}
 		{384BA371-F17F-4A70-9423-D54F71BB3FCB} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
 		{DFE52FB6-1B8E-4854-AA9B-854101A5B9BA} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
@@ -1375,6 +1402,7 @@ Global
 		{52BC59F6-BDE8-4A86-926D-AA402A020C2D} = {AA0C5FAF-F8B9-4979-AA8E-33D0616D3744}
 		{8B9B4321-BD83-46C2-8255-11204C75445B} = {AA0C5FAF-F8B9-4979-AA8E-33D0616D3744}
 		{10165A2E-05FA-479E-ACBB-D967EFDF3272} = {AA0C5FAF-F8B9-4979-AA8E-33D0616D3744}
+		{943BF1EF-EB51-4C83-9FBC-5D2D186CA127} = {AA0C5FAF-F8B9-4979-AA8E-33D0616D3744}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}

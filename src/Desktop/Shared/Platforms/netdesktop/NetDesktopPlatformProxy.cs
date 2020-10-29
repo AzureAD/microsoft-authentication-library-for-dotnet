@@ -12,16 +12,15 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Win32;
-using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.net45.Http;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore.Internal;
+using Microsoft.Win32;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -68,7 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             return new InMemoryTokenCacheAccessor(Logger);
         }
-      
+
         /// <inheritdoc />
         protected override string InternalGetDeviceModel()
         {
@@ -99,7 +98,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         protected override string InternalGetProcessorArchitecture()
         {
             // TODO split - PCA only. Is it really needed?!
-            return string.Empty; 
+            return string.Empty;
             //return IsWindows ? WindowsNativeMethods.GetProcessorArchitecture() : null;
         }
 

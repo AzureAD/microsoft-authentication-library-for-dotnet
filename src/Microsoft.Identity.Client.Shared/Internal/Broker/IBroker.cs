@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         
         Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenInteractiveParameters acquireTokenInteractiveParameters);
+            BrokerAcquireTokenInteractiveParameters acquireTokenInteractiveParameters);
 
         Task<MsalTokenResponse> AcquireTokenSilentAsync(
             AuthenticationRequestParameters authenticationRequestParameters,

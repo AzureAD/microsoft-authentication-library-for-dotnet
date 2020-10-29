@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal
 
             Tuple<Uri, string, string> authorizationTuple = 
                 AuthorizationUriBuilder.CreateAuthorizationUri(
-                    _interactiveParameters,
+                    _interactiveParameters.ToAuthorizationRequestParams(),
                     _requestParams, 
                     addPkceAndState: true);
                 
@@ -98,12 +98,12 @@ namespace Microsoft.Identity.Client.Internal
                 _interactiveParameters.UseEmbeddedWebView,
                 pcaProxy.UseEmbeddedWebViewDefault);
 
-#if WINDOWS_APP || DESKTOP
+#if DESKTOP
             // hidden web view can be used in both WinRT and desktop applications.
             coreUiParent.UseHiddenBrowser = _interactiveParameters.Prompt.Equals(Prompt.Never);
+#endif
 #if WINDOWS_APP
             coreUiParent.UseCorporateNetwork = _serviceBundle.Config.UseCorporateNetwork;
-#endif
 #endif
             return pcaProxy.GetWebUiFactory()
                 .CreateAuthenticationDialog(coreUiParent, _requestParams.RequestContext);

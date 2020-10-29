@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Desktop.Internal.Requests
         /// </summary>
         /// <returns>(uri, state, pkce code verifier)</returns>
         public static Tuple<Uri, string, string> CreateAuthorizationUri(
-            AcquireTokenInteractiveParameters interactiveParameters,
+            GetAuthorizationRequestUrlParameters interactiveParameters,
             AuthenticationRequestParameters requestParameters,
             bool addPkceAndState)
         {
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Desktop.Internal.Requests
         }
 
         private static Dictionary<string, string> CreateAuthorizationRequestParameters(
-            AcquireTokenInteractiveParameters interactiveParameters,
+            GetAuthorizationRequestUrlParameters interactiveParameters,
             AuthenticationRequestParameters requestParams)
         {
             var extraScopesToConsent = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -122,13 +122,13 @@ namespace Microsoft.Identity.Client.Desktop.Internal.Requests
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }
 
-            if (interactiveParameters.Prompt == Prompt.NotSpecified)
+            if (interactiveParameters.Prompt == Prompt.NotSpecified.PromptValue)
             {
                 authorizationRequestParameters[OAuth2Parameter.Prompt] = Prompt.SelectAccount.PromptValue;
             }
-            else if (interactiveParameters.Prompt.PromptValue != Prompt.NoPrompt.PromptValue)
+            else if (interactiveParameters.Prompt != Prompt.NoPrompt.PromptValue)
             {
-                authorizationRequestParameters[OAuth2Parameter.Prompt] = interactiveParameters.Prompt.PromptValue;
+                authorizationRequestParameters[OAuth2Parameter.Prompt] = interactiveParameters.Prompt;
             }
 
             return authorizationRequestParameters;

@@ -818,7 +818,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string CryptoNet45 = "crypto_net45";
 
-#if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not be enabled for the application.
         /// From MSAL 2.x and ADAL 4.x, the keychain for the publisher needs to be accessed in order to provide
@@ -874,18 +873,17 @@ namespace Microsoft.Identity.Client
         /// Capture and inspect the logs to see why the fetch operation failed.
         /// </summary>
         public const string BrokerKeyFetchFailed = "ios_broker_key_fetch_failed";
-#endif
 
-#if ANDROID
+
         /// <summary>
         /// Xamarin.Android specific. This error indicates that a system browser was not installed on the user's device, and authentication
         /// using system browser could not be attempted because there was no available Android activity to handle the intent.
         /// <para>Mitigation</para>If you want to use the System web browser (for instance to get SSO with the browser), notify the end
         /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. For a list of supported browsers with
         /// custom tab support, please see https://aka.ms/msal-net-system-browsers.
-        /// Otherwise you can use <see cref="UIParent.IsSystemWebviewAvailable"/> to check if a browser with custom tabs is available on the device
+        /// Otherwise you can use UIParent.IsSystemWebviewAvailable to check if a browser with custom tabs is available on the device
         /// and require the library to use the embedded web view if there is no such browser available by setting the boolean to <c>true</c> in the following
-        /// constructor: <see cref="UIParent.UIParent(Android.App.Activity, bool)"/>
+        /// constructor: UIParent(Android.App.Activity, bool)
         /// <para>For more details</para> See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
         public const string AndroidActivityNotFound = "android_activity_not_found";
@@ -902,8 +900,6 @@ namespace Microsoft.Identity.Client
         /// the AndroidManifest.xml file, and https://aka.ms/msal-net-android-specificities
         /// </summary>
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
-
-#endif
 
         /// <summary>
         /// When calling AcquireTokenInteractive with the WAM broker, the call must be made from the UI thread.

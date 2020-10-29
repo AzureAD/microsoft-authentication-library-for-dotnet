@@ -1,13 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 {
@@ -79,7 +75,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         IMsalHttpClientFactory CreateDefaultHttpClientFactory();
 
         #region Broker
-        void /* for test */ SetBrokerForTest(IBroker broker);
+        
+
+        IBroker CreateBroker();
 
         /// <summary>
         /// Most brokers take care of both silent auth and interactive auth, however some (iOS) 
@@ -94,7 +92,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         bool BrokerSupportsWamAccounts { get; }
 
-        IBroker CreateBroker(CoreUIParent uiParent);
 
         #endregion
     }

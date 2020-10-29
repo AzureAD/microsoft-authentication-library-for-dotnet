@@ -116,18 +116,19 @@ namespace Microsoft.Identity.Client
         /// </summary>
         Func<object> ParentActivityOrWindowFunc { get; }
 
-#if WINDOWS_APP
+// TODO: split - move AppConfig at higher level?
+//#if WINDOWS_APP || UAP10_0
         /// <summary>
         /// Flag to enable authentication with the user currently logged-in in Windows.
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
         /// </summary>
         bool UseCorporateNetwork { get; }
-#endif // WINDOWS_APP
+//#endif // WINDOWS_APP
 
-#if iOS
+//#if iOS
         /// <summary>
         /// </summary>
         string IosKeychainSecurityGroup { get; }
-#endif // iOS
+//#endif // iOS
     }
 }

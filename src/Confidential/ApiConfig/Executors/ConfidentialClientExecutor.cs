@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                         
             await AuthorityEndpoints.UpdateAuthorityEndpointsAsync(requestParameters).ConfigureAwait(false);
             var result = AuthorizationUriBuilder.CreateAuthorizationUri(
-                authorizationRequestUrlParameters.ToInteractiveParameters(),
+                authorizationRequestUrlParameters,
                 requestParameters,
                 addPkceAndState: false);
 

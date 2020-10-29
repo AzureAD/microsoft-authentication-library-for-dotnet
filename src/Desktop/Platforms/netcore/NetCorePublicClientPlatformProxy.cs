@@ -1,4 +1,5 @@
 ﻿#if NET_CORE
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -144,6 +145,11 @@ namespace Microsoft.Identity.Client.Desktop.Platforms.netcore
         public bool IsSystemWebViewAvailable => true;
 
         public bool UseEmbeddedWebViewDefault => false;
+
+        public virtual IBroker CreateBroker(CoreUIParent uiParent)
+        {
+            return OverloadBrokerForTest ?? new NullBroker();
+        }
     }
 }
 #endif

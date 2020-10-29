@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
@@ -60,6 +61,11 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         public bool UseEmbeddedWebViewDefault => false;
 
         public bool IsSystemWebViewAvailable => false;
+
+        public virtual IBroker CreateBroker(CoreUIParent uiParent)
+        {
+            return OverloadBrokerForTest ?? new NullBroker();
+        }
     }
 
     internal class WebUIFactory : IWebUIFactory

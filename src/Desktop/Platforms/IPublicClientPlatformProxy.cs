@@ -31,5 +31,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url);
 
+        // TODO: split - IBroker must not be in shared at all. (BIG task)
+        void /* for test */ SetBrokerForTest(IBroker broker);
+
+        
+        IBroker CreateBroker(CoreUIParent parent);
+
     }
 }

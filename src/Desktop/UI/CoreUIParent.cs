@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Client.UI
 {
     internal class CoreUIParent
     {
-
         public CoreUIParent()
         {
         }
