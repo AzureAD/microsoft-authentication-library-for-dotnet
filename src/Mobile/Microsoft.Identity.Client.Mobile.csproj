@@ -4,6 +4,7 @@
     
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard> 
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
+    <!-- TODO: split -->
     <!-- <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac> -->
     <!--<TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>-->
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
