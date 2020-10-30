@@ -37,6 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572
 	ProjectSection(SolutionItems) = preProject
 		src\Directory.build.props = src\Directory.build.props
 		src\flags.props = src\flags.props
+		src\package.props = src\package.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Common", "tests\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj", "{18559D36-C735-4933-AA86-398C8222D4F6}"

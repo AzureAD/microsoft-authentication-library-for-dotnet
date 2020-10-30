@@ -12,6 +12,7 @@
     <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
   </PropertyGroup>
 
+  <Import Project="../package.props"/>
   <Import Project="../flags.props" />
 
   <ItemGroup>
