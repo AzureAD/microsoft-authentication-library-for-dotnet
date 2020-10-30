@@ -87,11 +87,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
             string popToken =  CreateJWS(payload.ToString(Json.Formatting.None), header.ToString(Json.Formatting.None));
 
-            // For POP, we can also update the HttpRequest with the authentication header
-            _popAuthenticationConfiguration.SetPopHttpRequestHeaders(new AuthenticationHeaderValue(
-                AuthorizationHeaderPrefix,
-                popToken));
-
             return popToken;
         }
 

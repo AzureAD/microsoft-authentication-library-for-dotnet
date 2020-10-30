@@ -118,6 +118,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)
                                 .WithExperimentalFeatures()
+                                .WithClientSecret("some-secret")
                                 .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(

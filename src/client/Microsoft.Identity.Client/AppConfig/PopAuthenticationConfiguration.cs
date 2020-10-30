@@ -33,22 +33,12 @@ namespace Microsoft.Identity.Client.AppConfig
         public IPoPCryptoProvider PopCryptoProvider { get; set; }
 
         /// <summary>
-        /// This will be populated with the POP authentication header.
-        /// </summary>
-        public AuthenticationHeaderValue PopAuthenticationRequestHeader {get; private set;}
-
-        /// <summary>
         /// Constructs the configuration properties used to construct a proof of possesion request
         /// </summary>
         /// <param name="requestUri"></param>
         public PopAuthenticationConfiguration(Uri requestUri)
         {
             RequestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-        }
-
-        internal void SetPopHttpRequestHeaders(AuthenticationHeaderValue header)
-        {
-            PopAuthenticationRequestHeader = header;
         }
     }
 #endif
