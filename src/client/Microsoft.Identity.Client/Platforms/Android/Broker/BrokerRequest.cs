@@ -65,15 +65,15 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             BrokerRequest br = FromAuthenticationParameters(authenticationRequestParameters);
-            var prompt = acquireTokenInteractiveParameters.Prompt.PromptValue;
+            var prompt = acquireTokenInteractiveParameters.Prompt;
 
-            if (prompt == Client.Prompt.NoPrompt.PromptValue || prompt == Client.Prompt.NotSpecified.PromptValue)
+            if (prompt == Client.Prompt.NoPrompt || prompt == Client.Prompt.NotSpecified)
             {
                 br.Prompt = "NONE";
             }
             else
             {
-                br.Prompt = prompt.ToUpperInvariant();
+                br.Prompt = prompt.PromptValue.ToUpperInvariant();
             }
 
             br.UserName = acquireTokenInteractiveParameters.LoginHint;
