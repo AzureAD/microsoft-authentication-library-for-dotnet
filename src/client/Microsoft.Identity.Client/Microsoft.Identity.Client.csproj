@@ -27,7 +27,4 @@
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Region\LocalImdsErrorResponse.cs" />
-  </ItemGroup>
 </Project>

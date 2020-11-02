@@ -16,6 +16,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 {
     [TestClass]
     [DeploymentItem("Resources\\local-imds-response.json")]
+    [DeploymentItem("Resources\\local-imds-error-response.json")]
     public class RegionDiscoveryProviderTests : TestBase
     {
         private MockHttpAndServiceBundle _harness;
@@ -121,6 +122,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
         }
 
+        [TestMethod]
+        public async Task UpdateApiversionWhenCurrentVersionExpiresForImdsAsync()
+        {
+            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.BadRequest));
+            AddMockedResponse(MockHelpers.CreateFailureMessage(System.Net.HttpStatusCode.BadRequest, File.ReadAllText(
+                        ResourceHelper.GetTestResourceRelativePath("local-imds-error-response.json"))), expectedParams: false);
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
+                        ResourceHelper.GetTestResourceRelativePath("local-imds-response.json"))), apiVersion: "2020-10-01");
+
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+            InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            Assert.IsNotNull(regionalMetadata);
+            Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
+        }
+
         private void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true)
         {
             var queryParams = new Dictionary<string, string>();
@@ -128,20 +145,34 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             if (expectedParams)
             {
                 queryParams.Add("api-version", apiVersion);
-            }
 
-            _httpManager.AddMockHandler(
+                _httpManager.AddMockHandler(
+                   new MockHttpMessageHandler
+                   {
+                       ExpectedMethod = HttpMethod.Get,
+                       ExpectedUrl = "http://169.254.169.254/metadata/instance/compute",
+                       ExpectedRequestHeaders = new Dictionary<string, string>
+                        {
+                            { "Metadata", "true" }
+                        },
+                       ExpectedQueryParams = queryParams,
+                       ResponseMessage = responseMessage
+                   });
+            } 
+            else
+            {
+                _httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
                         ExpectedUrl = "http://169.254.169.254/metadata/instance/compute",
                         ExpectedRequestHeaders = new Dictionary<string, string>
-                         {
+                            {
                             { "Metadata", "true" }
-                         },
-                        ExpectedQueryParams = queryParams,
+                            },
                         ResponseMessage = responseMessage
                     });
+            }
         }
     }
 }

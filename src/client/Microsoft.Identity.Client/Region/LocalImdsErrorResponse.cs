@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Region
         public string Error { get; set; }
 
         [JsonProperty(PropertyName = "newest-versions")]
-        public List<string> NewestVersion { get; set; }
+        public List<string> NewestVersions { get; set; }
     }
 }
 
