@@ -13,14 +13,7 @@
     <serviceable>true</serviceable>
 
     <dependencies>
-      <group targetFramework="Xamarin.iOS10.0">
-        <dependency id="Microsoft.Identity.Client.Mobile" version="5.0.0-internal" />
-        <dependency id="Microsoft.Identity.Client.Shared" version="5.0.0-internal" />
-      </group>
-      <group targetFramework="MonoAndroid10.0">
-        <dependency id="Microsoft.Identity.Client.Mobile" version="5.0.0-internal" />
-        <dependency id="Microsoft.Identity.Client.Shared" version="5.0.0-internal" />
-      </group>
+      
     
       <group targetFramework="uap10.0">
         <dependency id="Microsoft.Identity.Client.Mobile" version="5.0.0-internal" />
@@ -39,10 +32,9 @@
         <dependency id="Microsoft.Identity.Client.Shared" version="5.0.0-internal" />
       </group>
 
-      <group targetFramework="netstandard1.3">
-        <dependency id="Microsoft.Identity.Client.Mobile" version="5.0.0-internal" />
-        <dependency id="Microsoft.Identity.Client.Shared" version="5.0.0-internal" />
-      </group>
+     
     </dependencies>
+  
   </metadata>
+    
 </package>

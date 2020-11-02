@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Target Frameworks"> 
-    <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
-    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
-    <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
-    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
+    <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461><!-- can get rid of this?!-->
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+    <!--<TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>-->
+    <!--<TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>-->
 
     <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworks);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);</TargetFrameworks>

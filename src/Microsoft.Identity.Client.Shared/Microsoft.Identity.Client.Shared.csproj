@@ -3,11 +3,9 @@
   <PropertyGroup Label="Target Frameworks"> 
     
     <!-- Shared tfm = itersection of PCA and CCA tfms in order to share platform specific code -->
-    <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
     <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
-    <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
-    
+
 
     <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop45);</TargetFrameworks>
     <!--<TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>-->
@@ -21,6 +19,7 @@
   
   </PropertyGroup>
 
+  <Import Project="../package.props"/>
   <Import Project="../flags.props" />
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">

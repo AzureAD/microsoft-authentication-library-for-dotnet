@@ -21,6 +21,7 @@
   </PropertyGroup>
 
   <Import Project="../flags.props" />
+  <Import Project="../package.props" />
 
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)\..\Desktop\**\*.cs" 

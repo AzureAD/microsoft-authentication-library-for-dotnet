@@ -56,15 +56,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Desktop", "Desktop", "{108628E1-FE38-4AA6-BD3A-43F4EA67CB3C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xamarin", "Xamarin", "{A81C8CEA-47C9-4F47-A730-66C58B16ACEF}"
-	ProjectSection(SolutionItems) = preProject
-		src\client\Xamarin\Directory.Build.props = src\client\Xamarin\Directory.Build.props
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Confidential", "src\Confidential\Microsoft.Identity.Client.Confidential.csproj", "{96248C0A-AF8D-481B-AF5E-EFB4CFA0B8A7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Desktop", "src\Desktop\Microsoft.Identity.Client.Desktop.csproj", "{60CE6B9E-DB00-4D68-9140-1B415C4EC3C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Mobile", "src\Mobile\Microsoft.Identity.Client.Mobile.csproj", "{0D7486B1-3B0D-486A-A30C-605B780983BE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Shared", "src\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj", "{821E0E4B-4B6F-41AD-A7A1-44B639E5AA13}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,6 +83,10 @@ Global
 		{0D7486B1-3B0D-486A-A30C-605B780983BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D7486B1-3B0D-486A-A30C-605B780983BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D7486B1-3B0D-486A-A30C-605B780983BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{821E0E4B-4B6F-41AD-A7A1-44B639E5AA13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{821E0E4B-4B6F-41AD-A7A1-44B639E5AA13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{821E0E4B-4B6F-41AD-A7A1-44B639E5AA13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{821E0E4B-4B6F-41AD-A7A1-44B639E5AA13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
