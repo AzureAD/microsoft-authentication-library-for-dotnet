@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -72,12 +75,12 @@ namespace Microsoft.Identity.Client.Region
                     { "Metadata", "true" }
                 };
                 
-                HttpResponse response = await _httpManager.SendGetAsync(buildImdsUri(DefaultApiVersion), headers, logger).ConfigureAwait(false);
+                HttpResponse response = await _httpManager.SendGetAsync(BuildImdsUri(DefaultApiVersion), headers, logger).ConfigureAwait(false);
 
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
                     string apiVersion = await GetImdsUriApiVersionAsync(logger, headers).ConfigureAwait(false);
-                    response = await _httpManager.SendGetAsync(buildImdsUri(apiVersion), headers, logger).ConfigureAwait(false);
+                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger).ConfigureAwait(false);
                 }
 
                 if (response.StatusCode != HttpStatusCode.OK)
@@ -113,8 +116,11 @@ namespace Microsoft.Identity.Client.Region
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 LocalImdsErrorResponse errorResponse = JsonHelper.DeserializeFromJson<LocalImdsErrorResponse>(response.Body);
+                logger.Info("[Region discovery] Updated the version for IMDS endpoint to: " + errorResponse.NewestVersions[0]);
                 return errorResponse.NewestVersions[0];
             }
+
+            logger.Info("[Region Discovery] Failed to get the updated version for IMDS endpoint.");
 
             throw MsalServiceExceptionFactory.FromGeneralHttpResponse(
             MsalError.RegionDiscoveryFailed,
@@ -122,7 +128,7 @@ namespace Microsoft.Identity.Client.Region
             response);
         }
 
-        private Uri buildImdsUri(string apiVersion)
+        private Uri BuildImdsUri(string apiVersion)
         {
             UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
             uriBuilder.AppendQueryParameters($"api-version={apiVersion}");
