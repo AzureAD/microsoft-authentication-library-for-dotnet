@@ -77,10 +77,11 @@ namespace Microsoft.Identity.Client.Region
                 
                 HttpResponse response = await _httpManager.SendGetAsync(BuildImdsUri(DefaultApiVersion), headers, logger).ConfigureAwait(false);
 
+                // A bad request occurs when the version in the IMDS call is no longer supported.
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
-                    string apiVersion = await GetImdsUriApiVersionAsync(logger, headers).ConfigureAwait(false);
-                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger).ConfigureAwait(false);
+                    string apiVersion = await GetImdsUriApiVersionAsync(logger, headers).ConfigureAwait(false); // Get the latest version
+                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger).ConfigureAwait(false); // Call again with updated version
                 }
 
                 if (response.StatusCode != HttpStatusCode.OK)
@@ -113,6 +114,7 @@ namespace Microsoft.Identity.Client.Region
 
             HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger).ConfigureAwait(false);
 
+            // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 LocalImdsErrorResponse errorResponse = JsonHelper.DeserializeFromJson<LocalImdsErrorResponse>(response.Body);
