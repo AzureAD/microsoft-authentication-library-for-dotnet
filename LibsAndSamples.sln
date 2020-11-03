@@ -156,13 +156,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetDesktopWpfWAM", "tests\d
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AA0C5FAF-F8B9-4979-AA8E-33D0616D3744}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Confidential", "src\Confidential\Microsoft.Identity.Client.Confidential.csproj", "{52BC59F6-BDE8-4A86-926D-AA402A020C2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.ConfidentialClient", "src\Confidential\Microsoft.Identity.Client.ConfidentialClient.csproj", "{52BC59F6-BDE8-4A86-926D-AA402A020C2D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Desktop", "src\Desktop\Microsoft.Identity.Client.Desktop.csproj", "{8B9B4321-BD83-46C2-8255-11204C75445B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.PublicClient.NoXamarin", "src\Desktop\Microsoft.Identity.Client.PublicClient.NoXamarin.csproj", "{8B9B4321-BD83-46C2-8255-11204C75445B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Shared", "src\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj", "{10165A2E-05FA-479E-ACBB-D967EFDF3272}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Mobile", "src\Mobile\Microsoft.Identity.Client.Mobile.csproj", "{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.PublicClient", "src\Mobile\Microsoft.Identity.Client.PublicClient.csproj", "{943BF1EF-EB51-4C83-9FBC-5D2D186CA127}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,25 +1,24 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSBuild.Sdk.Extras">
 
+  
   <PropertyGroup Label="Target Frameworks"> 
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
+    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
-    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
+    
     
     <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworks);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);</TargetFrameworks>
 
+    <UseWindowsForms>true</UseWindowsForms>
+    <NoWarn>$(NoWarn);NU5131;</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup>    
-    <DefineConstants>$(DefineConstants);MSAL_DESKTOP;</DefineConstants>
-    <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
-  </PropertyGroup>
-
-  <Import Project="../package.props"/>
+  <!--<Import Project="../package.props" />-->
   <Import Project="../flags.props" />
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Reference Include="System" />
     <Reference Include="System.Core" /> 
     <Reference Include="System.IdentityModel" />
@@ -36,11 +35,9 @@
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
 
-
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
   </ItemGroup>
-  
   
 </Project>
 
