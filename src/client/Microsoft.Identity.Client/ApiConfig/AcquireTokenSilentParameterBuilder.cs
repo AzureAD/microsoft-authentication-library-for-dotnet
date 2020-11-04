@@ -149,30 +149,5 @@ namespace Microsoft.Identity.Client
 #endif
 
 #endif
-
-        /// <summary>
-        /// 
-        /// </summary>
-        protected override void Validate()
-        {
-            base.Validate();
-            if (Parameters.Account == null && string.IsNullOrWhiteSpace(Parameters.LoginHint))
-            {
-                throw new MsalUiRequiredException(
-                    MsalError.UserNullError,
-                    MsalErrorMessage.MsalUiRequiredMessage,
-                    null,
-                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
-            }
-
-            if (Parameters.Account?.HomeAccountId == null && string.IsNullOrEmpty(Parameters.Account?.Username) && string.IsNullOrWhiteSpace(Parameters.LoginHint))
-            {
-                throw new MsalUiRequiredException(
-                    MsalError.UserNullError,
-                    MsalErrorMessage.MsalUiRequiredMessage,
-                    null,
-                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
-            }
-        }
     }
 }

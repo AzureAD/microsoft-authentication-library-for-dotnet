@@ -11,6 +11,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal interface IWamProxy
     {
         Task<IWebTokenRequestResultWrapper> GetTokenSilentlyAsync(WebAccount webAccount, WebTokenRequest webTokenRequest);
+        Task<IWebTokenRequestResultWrapper> GetTokenSilentlyForDefaultAccountAsync(WebTokenRequest webTokenRequest);
         Task<IReadOnlyList<WebAccount>> FindAllWebAccountsAsync(WebAccountProvider provider, string clientID);
         Task<IWebTokenRequestResultWrapper> RequestTokenForWindowAsync(
             IntPtr _parentHandle, 

@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 var (requestParams, webTokenResponseWrapper) = SetupSilentCall(harness);
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.UserCancel);
-               
+
                 // Act
                 var result = await _wamBroker.AcquireTokenSilentAsync(requestParams, new AcquireTokenSilentParameters()).ConfigureAwait(false);
 
@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 isInteractive: false)
                 .Returns(Task.FromResult(webTokenRequest));
 
-           
+
 
             _wamProxy.GetTokenSilentlyAsync(webAccount, webTokenRequest).
                 Returns(Task.FromResult(webTokenResponseWrapper));
@@ -365,6 +365,50 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public async Task ATS_DefaultAccount_Async()
+        {
+            string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
+
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant); // AAD authority, no account
+                var webTokenRequest = new WebTokenRequest(wamAccountProvider);
+                var atsParams = new AcquireTokenSilentParameters();
+                _webAccountProviderFactory.GetAccountProviderAsync(null).ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _aadPlugin.CreateWebTokenRequestAsync(
+                   wamAccountProvider,
+                   requestParams,
+                   isForceLoginPrompt: false,
+                   isAccountInWam: false,
+                   isInteractive: false)
+                   .Returns(Task.FromResult(webTokenRequest));
+
+                _wamProxy.GetTokenSilentlyForDefaultAccountAsync(webTokenRequest).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+
+                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse).Returns(_msalTokenResponse);
+
+                // Act
+                var result = await _wamBroker.AcquireTokenSilentDefaultUserAsync(requestParams, atsParams).ConfigureAwait(false);
+
+                // Assert 
+                Assert.AreSame(_msalTokenResponse, result);
+                await _aadPlugin.Received(1).CreateWebTokenRequestAsync(wamAccountProvider,
+                   requestParams,
+                   isForceLoginPrompt: false,
+                   isAccountInWam: false,
+                   isInteractive: false).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
         public async Task ATI_RequiresSyncContext_Async()
         {
             var wamBroker = new WamBroker(
@@ -436,7 +480,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Act
                 var result = await _wamBroker.AcquireTokenInteractiveAsync(
-                    requestParams, 
+                    requestParams,
                     new AcquireTokenInteractiveParameters()).ConfigureAwait(false);
 
                 // Assert 
@@ -510,14 +554,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var webAccount = new WebAccount(wamAccountProvider, "user@contoso.com", WebAccountState.Connected);
                 IReadOnlyList<WebAccount> webAccounts = new List<WebAccount>() { webAccount };
-          
+
 
                 _wamProxy.FindAllWebAccountsAsync(wamAccountProvider, TestConstants.ClientId).Returns(Task.FromResult(webAccounts));
 
                 // WAM can give MSAL the home account ID of a Wam account, which MSAL matches to a WAM account
                 _aadPlugin.GetHomeAccountIdOrNull(webAccount).Returns(aadHomeAccId);
 
-                
+
                 var atsParams = new AcquireTokenSilentParameters();
                 _webAccountProviderFactory.GetAccountProviderAsync("organizations").ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
 
@@ -525,48 +569,65 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 await AssertException.TaskThrowsAsync<FileNotFoundException>( // Since WebAccount is a real object, it throws this exception
                     () => _wamBroker.RemoveAccountAsync(harness.ServiceBundle.Config, requestParams.Account))
                     .ConfigureAwait(false);
-
             }
+        }
+
+        [TestMethod]
+        public void TestDefaultAccountPluginSelection()
+        {
+            _webAccountProviderFactory.IsDefaultAccountMsaAsync().Returns(true);
+            Assert.IsTrue(
+              _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.AuthorityCommonTenant), null, false).Result,
+              "Common authority with no account - use Windows default account");
+            _webAccountProviderFactory.Received(1).IsDefaultAccountMsaAsync();
+
+            _webAccountProviderFactory.IsDefaultAccountMsaAsync().Returns(false);
+            Assert.IsFalse(
+             _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.AuthorityCommonTenant), null, false).Result,
+             "Common authority with no account - use Windows default account");
+            _webAccountProviderFactory.Received(2).IsDefaultAccountMsaAsync();
+
         }
 
         [TestMethod]
         public void TestPluginSelection()
         {
-
             var ex = AssertException.Throws<MsalClientException>(
-                () => _wamBroker.IsMsaRequest(Authority.CreateAuthority(TestConstants.B2CAuthority), null, false));
+                () => _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.B2CAuthority), null, false).GetAwaiter().GetResult());
             Assert.AreEqual(MsalError.WamNoB2C, ex.ErrorCode);
 
             Assert.IsFalse(
-                _wamBroker.IsMsaRequest(Authority.CreateAuthority(TestConstants.ADFSAuthority), null, false),
+                _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.ADFSAuthority), null, false).Result,
                 "ADFS authorities should be handled by AAD plugin");
 
             Assert.IsTrue(
-                _wamBroker.IsMsaRequest(Authority.CreateAuthority(TestConstants.AuthorityCommonTenant), TestConstants.MsaTenantId, false),
+                _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.AuthorityCommonTenant), TestConstants.MsaTenantId, false).Result,
                 "Common authority - look at account tenant ID to determine plugin");
 
             Assert.IsFalse(
-                _wamBroker.IsMsaRequest(Authority.CreateAuthority(TestConstants.AuthorityCommonTenant), TestConstants.TenantId, false),
+                _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.AuthorityCommonTenant), TestConstants.TenantId, false).Result,
                 "Common authority - look at account tenant ID to determine plugin");
 
+
+
             Assert.IsFalse(
-               _wamBroker.IsMsaRequest(Authority.CreateAuthority(TestConstants.AuthorityOrganizationsTenant), TestConstants.TenantId, false),
+               _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.AuthorityOrganizationsTenant), TestConstants.TenantId, false).Result,
                "Organizations authority - AAD plugin unless MSA-pt");
 
             Assert.IsFalse(
-               _wamBroker.IsMsaRequest(Authority.CreateAuthority(TestConstants.AuthorityOrganizationsTenant), TestConstants.TenantId, true),
+               _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.AuthorityOrganizationsTenant), TestConstants.TenantId, true).Result,
                "Organizations authority with MSA-pt - based on home account id");
 
             Assert.IsTrue(
-               _wamBroker.IsMsaRequest(Authority.CreateAuthority(TestConstants.AuthorityOrganizationsTenant), TestConstants.MsaTenantId, true),
+               _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.AuthorityOrganizationsTenant), TestConstants.MsaTenantId, true).Result,
                "Organizations authority with MSA-pt - based on home account id");
 
             Assert.IsTrue(
-                _wamBroker.IsMsaRequest(Authority.CreateAuthority(TestConstants.AuthorityConsumersTenant), TestConstants.TenantId, false),
+                _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.AuthorityConsumersTenant), TestConstants.TenantId, false).Result,
                 "Consumer authority - msa plugin");
 
             Assert.IsFalse(
-               _wamBroker.IsMsaRequest(Authority.CreateAuthority(TestConstants.AuthorityGuidTenant), TestConstants.TenantId, true),
+               _wamBroker.IsMsaRequestAsync(Authority.CreateAuthority(TestConstants.AuthorityGuidTenant), TestConstants.TenantId, true).Result,
                "Tenanted authorities - AAD plugin");
         }
 

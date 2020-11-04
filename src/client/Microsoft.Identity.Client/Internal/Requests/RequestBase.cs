@@ -95,11 +95,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
-        internal virtual Task PreRunAsync()
-        {
-            return Task.FromResult(0);
-        }
-
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
@@ -111,7 +106,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     try
                     {
-                        await PreRunAsync().ConfigureAwait(false);
                         AuthenticationRequestParameters.LogParameters();
                         LogRequestStarted(AuthenticationRequestParameters);
 
