@@ -36,6 +36,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public const string X5u = "x5u";
         public const string X = "x";
         public const string Y = "y";
+
+        public const string EC = "EC";
     }
 
     /// <summary>
