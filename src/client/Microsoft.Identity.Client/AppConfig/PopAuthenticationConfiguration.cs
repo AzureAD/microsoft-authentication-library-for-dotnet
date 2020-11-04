@@ -25,10 +25,10 @@ namespace Microsoft.Identity.Client.AppConfig
         public HttpMethod HttpMethod { get; set; }
 
         /// <summary>
-        ///An extensibility point that allows developers to define their own key management. 
-        ///Leave null and MSAL will use a default implementation, which generates an RSA key pair in memory and refreshes it every 8 hours.
-        ///Important note: developers wanting to change the key (e.g. rotate the key) should create a new instance of this object,
-        ///as MSAL will keep a thumbprint of keys in memory
+        /// An extensibility point that allows developers to define their own key management. 
+        /// Leave <c>null</c> and MSAL will use a default implementation, which generates an RSA key pair in memory and refreshes it every 8 hours.
+        /// Important note: if you want to change the key (e.g. rotate the key), you should create a new instance of this object,
+        /// as MSAL.NET will keep a thumbprint of keys in memory
         /// </summary>
         public IPoPCryptoProvider PopCryptoProvider { get; set; }
 
