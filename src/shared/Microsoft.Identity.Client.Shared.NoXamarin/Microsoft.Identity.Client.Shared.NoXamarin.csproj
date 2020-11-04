@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Target Frameworks"> 
+    
+    <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
+    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
+    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
+    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+
+    <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworks);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);</TargetFrameworks>
+
+    <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
+  </PropertyGroup>
+
+  <Import Project="../../flags.props" />
+  <Import Project="shared.noxamarin.references.props"/>
+ 
+ 
+
+</Project>
+

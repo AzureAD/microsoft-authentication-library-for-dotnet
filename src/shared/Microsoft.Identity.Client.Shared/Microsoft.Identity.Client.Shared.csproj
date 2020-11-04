@@ -1,0 +1,52 @@
+﻿<Project Sdk="MSBuild.Sdk.Extras">
+
+  <PropertyGroup Label="Target Frameworks"> 
+    
+    <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
+    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
+    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
+    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+
+    <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
+    <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
+    <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
+    <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
+    <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
+
+    <TargetFrameworks>
+      $(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10)
+    </TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+      $(TargetFrameworks);$(TargetFrameworkUap);$(TargetFrameworkNetCore)
+    </TargetFrameworks>
+
+    <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
+  </PropertyGroup>
+
+  <Import Project="../../package.props" />
+  <Import Project="../../flags.props" />
+
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
+    <XamarinAndroidSupportSkipVerifyVersions>true</XamarinAndroidSupportSkipVerifyVersions>
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->
+    <Title>Microsoft Authentication Library for .NET</Title>
+    <Description>
+      This package contains the binaries of the Microsoft Authentication Library for .NET (MSAL.NET).
+      MSAL.NET makes it easy to obtain tokens from the Microsoft identity platform for developers (formally Azure AD v2.0) signing-in users with work &amp; school accounts, Microsoft personal accounts and social identities Azure AD B2C. These tokens again access to Microsoft Cloud API and any other API secured by the Microsoft identity platform. This version supports adding authentication functionality to your .NET based client on Windows desktop (.NET 4.5+), UWP, .NET Core, Xamarin iOS and Xamarin Android.
+    </Description>
+    <PackageTags>Microsoft Authentication Library MSA MSAL B2C Azure Active Directory AAD Identity Authentication .NET Windows Store Xamarin iOS Android</PackageTags>
+    <Product>Microsoft Authentication Library</Product>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DisableExtraReferences>true</DisableExtraReferences>
+    <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\**\*.cs" 
+             Exclude="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\obj\**\*;" />
+  </ItemGroup>
+
+  <Import Project="../shared.noxamarin.references.props"/>
+
+</Project>
+
