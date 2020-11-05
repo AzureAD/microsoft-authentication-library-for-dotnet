@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using System.ComponentModel;
 
 #if iOS
 using UIKit;
@@ -69,13 +70,10 @@ namespace Microsoft.Identity.Client
 
         internal AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindowFunc(Func<object> parentActivityOrWindowFunc)
         {
-#if RUNTIME || NETSTANDARD_BUILDTIME
-
             if (parentActivityOrWindowFunc != null)
             {
                 WithParentActivityOrWindow(parentActivityOrWindowFunc());
             }
-#endif
 
             return this;
         }
@@ -183,7 +181,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#region WithParentActivityOrWindow
+        #region WithParentActivityOrWindow
 
         /*
          * .WithParentActivityOrWindow is platform specific but we need a solution for
@@ -192,7 +190,7 @@ namespace Microsoft.Identity.Client
          * since Activity, ViewController etc. do not exist in NetStandard.
          */
 
-#if RUNTIME || NETSTANDARD_BUILDTIME
+
         /// <summary>
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
@@ -200,11 +198,15 @@ namespace Microsoft.Identity.Client
         /// <remarks>Mandatory only on Android. Can also be set via the PublicClientApplcation builder.</remarks>
         /// <param name="parent">The parent as an object, so that it can be used from shared NetStandard assemblies</param>
         /// <returns>The builder to chain the .With methods</returns>
+
+#if !NETSTANDARD // hide the general purpose "object" method on platforms where a better defined type can be passed (e.g. Activity)
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
         public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(object parent)
         {
             return WithParentObject(parent);
         }
-#endif
+
 
         private AcquireTokenInteractiveParameterBuilder WithParentObject(object parent)
         {

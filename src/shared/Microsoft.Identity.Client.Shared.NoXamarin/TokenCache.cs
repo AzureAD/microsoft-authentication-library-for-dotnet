@@ -99,11 +99,13 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public void SetIosKeychainSecurityGroup(string securityGroup)
         {
+#if iOS
             _accessor.SetiOSKeychainSecurityGroup(securityGroup);
 
             // TODO: split - set ios keychain security group 
-            //(LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence)
-            //    .SetKeychainSecurityGroup(securityGroup);
+            (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence)
+                .SetKeychainSecurityGroup(securityGroup);
+#endif
         }
 
         private void UpdateAppMetadata(string clientId, string environment, string familyId)

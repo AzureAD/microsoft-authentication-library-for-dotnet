@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using System.ComponentModel;
 
 #if iOS
 using UIKit;
@@ -13,7 +14,7 @@ using UIKit;
 using Android.App;
 #endif
 
-#if DESKTOP 
+#if DESKTOP
 using System.Windows.Forms;
 #endif
 
@@ -98,7 +99,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#if !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
         /// You can specify a Keychain Access Group to use for persisting the token cache across multiple applications.
         /// This enables you to share the token cache between several applications having the same keychain access group.
@@ -108,6 +108,9 @@ namespace Microsoft.Identity.Client
         /// <param name="keychainSecurityGroup"></param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
+#if !iOS && !NETSTANDARD
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
         public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
         {
 #if iOS
@@ -116,21 +119,23 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#endif //!ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
-
-#if !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
-        
         /// <summary>
-        /// On Android and iOS, brokers enable Single-Sign-On, device identification,
+        /// On Android and iOS and UWP, brokers enable Single-Sign-On, device identification,
         /// and application identification verification. To enable one of these features,
-        /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-brokers 
-        /// for more information on platform specific settings required to enable the broker.
+        /// you need to set the WithBroker() parameters to true.
+        /// 
+        /// For the Windows broker, please see https://aka.ms/msal-net-wam
         /// </summary>
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
+#if !MOBILE_PLATFORM && !WINDOWS_APP && !NETSTNADARD // broker is only available on Xamarin and UWP (WAM)
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif        
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
+
+
 #if DESKTOP || NET_CORE || WINDOWS_APP
             if (!Config.ExperimentalFeaturesEnabled)
             {
@@ -144,8 +149,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-
-#endif // !NET_CORE_BUILDTIME && !MAC_BUILDTIME
 
 #if WINDOWS_APP
         /// <summary>
@@ -161,7 +164,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if RUNTIME || NETSTANDARD_BUILDTIME
+#region Parent Func
         /// <summary>
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
@@ -172,11 +175,14 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <param name="parentActivityOrWindowFunc">The parent as an object, so that it can be used from shared NetStandard assemblies</param>
         /// <returns>The builder to chain the .With methods</returns>
+        /// 
+#if !NETSTANDARD // hide this method as we prefer developers to use the strongly typed overloads (e.g. Func<Activity>)
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
         public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<object> parentActivityOrWindowFunc)
         {
             return WithParentFunc(parentActivityOrWindowFunc);
         }
-#endif
 
         private PublicClientApplicationBuilder WithParentFunc(Func<object> parentFunc)
         {
@@ -221,7 +227,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP 
+#if DESKTOP
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -256,7 +262,7 @@ namespace Microsoft.Identity.Client
             return WithParentFunc(() => (object)windowFunc());
         }
 #endif
-
+#endregion
         /// <summary>
         /// </summary>
         /// <returns></returns>

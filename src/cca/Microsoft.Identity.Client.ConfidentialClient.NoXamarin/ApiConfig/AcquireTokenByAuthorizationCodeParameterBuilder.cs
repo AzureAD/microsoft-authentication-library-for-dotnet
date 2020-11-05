@@ -11,8 +11,6 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     /// Builder for AcquireTokenByAuthorizationCode
     /// </summary>
@@ -85,5 +83,4 @@ namespace Microsoft.Identity.Client
             return this;
         }
     }
-#endif
 }

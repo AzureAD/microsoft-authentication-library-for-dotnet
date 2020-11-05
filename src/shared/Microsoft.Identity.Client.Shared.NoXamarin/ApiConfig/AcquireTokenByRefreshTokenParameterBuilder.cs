@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,7 +55,6 @@ namespace Microsoft.Identity.Client
             return ApiEvent.ApiIds.AcquireTokenByRefreshToken;
         }
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide on mobile platforms
 
         /// <summary>
         /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
@@ -67,12 +67,19 @@ namespace Microsoft.Identity.Client
         /// <param name="withSendX5C"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>.
         /// The default is <c>false</c></param>
         /// <returns>The builder to chain the .With methods</returns>
+        /// 
+#if !CONFIDENTIAL_CLIENT_PLATFORM
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
         public AcquireTokenByRefreshTokenParameterBuilder WithSendX5C(bool withSendX5C)
         {
+#if !CONFIDENTIAL_CLIENT_PLATFORM
+            throw new PlatformNotSupportedException("SendX5C mechanism is only available in conjuction with a certificate, on platforms that support confidential client.");
+#else
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
             Parameters.SendX5C = withSendX5C;
             return this;
-        }
 #endif
+        }
     }
 }

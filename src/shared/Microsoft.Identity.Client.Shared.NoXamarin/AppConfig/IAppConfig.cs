@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
@@ -10,7 +11,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Configuration properties used to build a public or confidential client application
     /// </summary>
-    public interface IAppConfig //TODO: split - how to deal with this?!
+    public interface IAppConfig 
     {
         /// <summary>
         /// Client ID (also known as App ID) of the application as registered in the
@@ -104,10 +105,16 @@ namespace Microsoft.Identity.Client
         IEnumerable<string> ClientCapabilities { get; }
 
 
+#if !CONFIDENTIAL_CLIENT_PLATFORM // hide on Xamarin and UWP where we don't expose Confidential Client 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
         /// <summary>
         /// </summary>
         string ClientSecret { get; }
 
+#if !CONFIDENTIAL_CLIENT_PLATFORM // hide on Xamarin and UWP where we don't expose Confidential Client
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
         /// <summary>
         /// </summary>
         X509Certificate2 ClientCredentialCertificate { get; }
@@ -116,19 +123,19 @@ namespace Microsoft.Identity.Client
         /// </summary>
         Func<object> ParentActivityOrWindowFunc { get; }
 
-// TODO: split - move AppConfig at higher level?
-//#if WINDOWS_APP || UAP10_0
+
+#if WINDOWS_APP 
         /// <summary>
         /// Flag to enable authentication with the user currently logged-in in Windows.
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
         /// </summary>
         bool UseCorporateNetwork { get; }
-//#endif // WINDOWS_APP
+#endif // WINDOWS_APP
 
-//#if iOS
+#if iOS
         /// <summary>
         /// </summary>
         string IosKeychainSecurityGroup { get; }
-//#endif // iOS
+#endif // iOS
     }
 }

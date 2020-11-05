@@ -10,8 +10,6 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     /// Builder for AcquireTokenOnBehalfOf (OBO flow)
     /// See https://aka.ms/msal-net-on-behalf-of
@@ -76,5 +74,4 @@ namespace Microsoft.Identity.Client
             return ApiEvent.ApiIds.AcquireTokenOnBehalfOf;
         }
     }
-#endif
 }

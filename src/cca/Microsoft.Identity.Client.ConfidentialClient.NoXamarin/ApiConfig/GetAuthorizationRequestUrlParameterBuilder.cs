@@ -11,8 +11,6 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     ///     NOTE:  a few of the methods in AbstractAcquireTokenParameterBuilder (e.g. account) don't make sense here.
     ///     Do we want to create a further base that contains ALL of the common methods, and then have another one including
@@ -121,5 +119,4 @@ namespace Microsoft.Identity.Client
             return ApiEvent.ApiIds.GetAuthorizationRequestUrl;
         }
     }
-#endif
 }
