@@ -105,18 +105,19 @@ namespace Microsoft.Identity.Client
         IEnumerable<string> ClientCapabilities { get; }
 
 
+
+        /// <summary>
+        /// </summary>
 #if !CONFIDENTIAL_CLIENT_PLATFORM // hide on Xamarin and UWP where we don't expose Confidential Client 
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
-        /// <summary>
-        /// </summary>
         string ClientSecret { get; }
 
+        /// <summary>
+        /// </summary>
 #if !CONFIDENTIAL_CLIENT_PLATFORM // hide on Xamarin and UWP where we don't expose Confidential Client
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
-        /// <summary>
-        /// </summary>
         X509Certificate2 ClientCredentialCertificate { get; }
 
         /// <summary>

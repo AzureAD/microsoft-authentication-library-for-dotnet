@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <inheritdoc />
-        public abstract ILegacyCachePersistence CreateLegacyCachePersistence();
+        public abstract ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null);
 
         /// <inheritdoc />
         public abstract ITokenCacheAccessor CreateTokenCacheAccessor();
@@ -181,5 +181,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return OverloadBrokerForTest ?? new NullBroker();
         }
+
+      
     }
 }

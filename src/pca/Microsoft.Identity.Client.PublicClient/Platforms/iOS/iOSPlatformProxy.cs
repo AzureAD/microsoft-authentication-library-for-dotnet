@@ -102,9 +102,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return UIDevice.CurrentDevice?.IdentifierForVendor?.AsString();
         }
 
-        public override ILegacyCachePersistence CreateLegacyCachePersistence()
+        public override ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null)
         {
-            return new iOSLegacyCachePersistence(Logger);
+            return new iOSLegacyCachePersistence(Logger, iosKeychainSecurityGroup);
         }
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor()

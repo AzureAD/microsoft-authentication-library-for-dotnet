@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <Import Project="../../flags.props" />
-  <Import Project="shared.noxamarin.references.props"/>
+  <Import Project="shared.references.props"/>
  
  
 

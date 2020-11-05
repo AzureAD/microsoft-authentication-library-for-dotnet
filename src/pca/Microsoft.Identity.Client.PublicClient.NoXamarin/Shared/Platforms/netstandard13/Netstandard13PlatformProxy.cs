@@ -22,8 +22,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         {
         }
 
-   
-
         /// <inheritdoc />
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
@@ -40,8 +38,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         {
             return "MSAL.CoreCLR";
         }
-
-  
 
         public override string GetEnvironmentVariable(string variable)
         {
@@ -95,7 +91,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             return null;
         }
 
-        public override ILegacyCachePersistence CreateLegacyCachePersistence()
+        public override ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null)
         {
             return new InMemoryLegacyCachePersistance();
         }

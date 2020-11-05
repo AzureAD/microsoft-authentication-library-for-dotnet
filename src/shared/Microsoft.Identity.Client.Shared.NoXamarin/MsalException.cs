@@ -109,8 +109,6 @@ namespace Microsoft.Identity.Client
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            // TODO: split - how to get the product name here?
-            //string msalProductName = PlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
             string msalVersion = MsalIdHelper.GetMsalVersion();
 
             string innerExceptionContents = InnerException == null 
@@ -119,9 +117,7 @@ namespace Microsoft.Identity.Client
 
             return string.Format(
                 CultureInfo.InvariantCulture, 
-                "{0}.{1}.{2}: \n\tErrorCode: {3}\n{4}{5}", 
-                //msalProductName , 
-                "",
+                "{0}.{1}: \n\tErrorCode: {2}\n{3}{4}", 
                 msalVersion, 
                 GetType().Name,
                 ErrorCode, 

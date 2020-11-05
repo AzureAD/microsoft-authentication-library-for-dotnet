@@ -17,7 +17,7 @@
       $(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10)
     </TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-      $(TargetFrameworks);$(TargetFrameworkUap);$(TargetFrameworkNetCore)
+      $(TargetFrameworks);$(TargetFrameworkUap);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetDesktop45);
     </TargetFrameworks>
 
     <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
@@ -25,9 +25,9 @@
 
   <Import Project="../../package.props" />
   <Import Project="../../flags.props" />
+  <Import Project="../Microsoft.Identity.Client.Shared.NoXamarin/shared.references.props"/>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
-    <XamarinAndroidSupportSkipVerifyVersions>true</XamarinAndroidSupportSkipVerifyVersions>
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Title>Microsoft Authentication Library for .NET</Title>
     <Description>
@@ -37,16 +37,14 @@
     <PackageTags>Microsoft Authentication Library MSA MSAL B2C Azure Active Directory AAD Identity Authentication .NET Windows Store Xamarin iOS Android</PackageTags>
     <Product>Microsoft Authentication Library</Product>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <DisableExtraReferences>true</DisableExtraReferences>
-    <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\**\*.cs" 
+    <Compile Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\**\*.cs;" 
              Exclude="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\obj\**\*;" />
+    <None Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\shared.references.props"/>
   </ItemGroup>
 
-  <Import Project="../shared.noxamarin.references.props"/>
 
 </Project>
 

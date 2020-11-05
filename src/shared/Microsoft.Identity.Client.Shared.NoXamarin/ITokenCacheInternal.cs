@@ -59,8 +59,6 @@ namespace Microsoft.Identity.Client
         /// <returns>null if unkown, true or false if app metadata has details</returns>
         Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId);     
 
-        void SetIosKeychainSecurityGroup(string securityGroup);
-
 
         #region Cache notifications
         Task OnAfterAccessAsync(TokenCacheNotificationArgs args);

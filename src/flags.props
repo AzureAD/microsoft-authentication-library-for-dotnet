@@ -39,6 +39,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="$(TargetFramework.StartsWith('MonoAndroid')) Or '$(TargetFramework)' == '$(TargetFrameworkIos)' ">
     <DefineConstants>$(DefineConstants);MOBILE_PLATFORM</DefineConstants>
+    <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
+    <DisableExtraReferences>true</DisableExtraReferences>
+    <XamarinAndroidSupportSkipVerifyVersions>true</XamarinAndroidSupportSkipVerifyVersions>
+
   </PropertyGroup>
 
 </Project>

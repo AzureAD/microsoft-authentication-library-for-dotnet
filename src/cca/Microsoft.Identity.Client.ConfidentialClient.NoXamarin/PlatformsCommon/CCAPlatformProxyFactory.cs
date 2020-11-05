@@ -20,7 +20,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// </summary>
         public static IPlatformProxy CreatePlatformProxy(ICoreLogger logger)
         {
-            // TODO: split - can we inject a real logger here?
             var finalLogger = logger ?? MsalLogger.NullLogger;
 
 #if NET_CORE

@@ -102,6 +102,6 @@ namespace Microsoft.Identity.Client.Internal
         public static string GetMsalVersion()
         {
             return s_msalVersion.Value;
-        }
+        }        
     }
 }

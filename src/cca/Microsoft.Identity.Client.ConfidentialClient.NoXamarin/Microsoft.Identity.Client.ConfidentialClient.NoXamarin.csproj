@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <Import Project="../../flags.props" />
-  <Import Project="cca.noxamarin.references.props" />
+  <Import Project="cca.references.props" />
 
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)\..\..\pca\Microsoft.Identity.Client.PublicClient.NoXamarin\Shared\**\*.cs" LinkBase="PCA_Shared" />

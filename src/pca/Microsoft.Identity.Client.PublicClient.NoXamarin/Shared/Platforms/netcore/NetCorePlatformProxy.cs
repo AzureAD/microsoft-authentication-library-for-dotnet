@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return Environment.MachineName;
         }
 
-        public override ILegacyCachePersistence CreateLegacyCachePersistence()
+        public override ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null)
         {
             return new InMemoryLegacyCachePersistance();
         }

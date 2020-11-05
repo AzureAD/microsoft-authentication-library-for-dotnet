@@ -19,19 +19,15 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private string _keychainGroup;
         private readonly ICoreLogger _logger;
 
-        public iOSLegacyCachePersistence(ICoreLogger logger)
+        public iOSLegacyCachePersistence(ICoreLogger logger, string iosKeychainSecurityGroup)
         {
             _logger = logger;
+            _keychainGroup = iosKeychainSecurityGroup ?? GetBundleId();
         }
 
         private string GetBundleId()
         {
             return NSBundle.MainBundle.BundleIdentifier;
-        }
-
-        public void SetKeychainSecurityGroup(string keychainSecurityGroup)
-        {
-            _keychainGroup = keychainSecurityGroup ?? GetBundleId();
         }
 
         byte[] ILegacyCachePersistence.LoadCache()

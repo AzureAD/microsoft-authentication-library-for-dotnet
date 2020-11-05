@@ -188,7 +188,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return new EasClientDeviceInformation()?.Id.ToString();
         }
 
-        public override ILegacyCachePersistence CreateLegacyCachePersistence() => new UapLegacyCachePersistence(Logger, CryptographyManager);
+        public override ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null) 
+            => new UapLegacyCachePersistence(Logger, CryptographyManager);
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor(Logger);
 

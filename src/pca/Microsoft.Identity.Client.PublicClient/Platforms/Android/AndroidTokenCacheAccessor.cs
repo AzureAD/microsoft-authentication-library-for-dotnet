@@ -188,7 +188,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             throw new NotImplementedException();
         }
+
         #endregion
+
+        public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            // nop
+        }
     }
 }
 #endif

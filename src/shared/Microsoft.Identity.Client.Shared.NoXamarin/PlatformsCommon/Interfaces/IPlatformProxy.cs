@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         string GetProductName();
 
-        ILegacyCachePersistence CreateLegacyCachePersistence();
+        ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null);
 
         ITokenCacheAccessor CreateTokenCacheAccessor();
 

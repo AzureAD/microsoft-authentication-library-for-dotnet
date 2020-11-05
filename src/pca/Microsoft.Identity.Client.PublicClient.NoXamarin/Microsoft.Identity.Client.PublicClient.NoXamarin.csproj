@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <Import Project="../../flags.props" />
-  <Import Project="pca.noxamarin.references.props"/>
+  <Import Project="pca.references.props"/>
  
 
   <ItemGroup>

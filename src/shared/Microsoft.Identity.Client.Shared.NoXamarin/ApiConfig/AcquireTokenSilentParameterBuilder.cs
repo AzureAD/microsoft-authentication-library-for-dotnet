@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client
         /// The default is <c>false</c></param>
         /// <returns>The builder to chain the .With methods</returns>
 #if !CONFIDENTIAL_CLIENT_PLATFORM
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif        
         public AcquireTokenSilentParameterBuilder WithSendX5C(bool withSendX5C)
         {
