@@ -1,30 +1,31 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.AuthScheme.PoP
+namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
 {
-
-    /// <summary>
-    /// The default implementation will store a key in memory    
-    /// </summary>
-    internal class InMemoryCryptoProvider : IPoPCryptoProvider
+    public class RSACertificatePopCryptoProvider : IPoPCryptoProvider
     {
-        internal /* internal for test only */ const int RsaKeySize = 2048;
 
-#if NET45
-        private RSACryptoServiceProvider _signingKey;
-#else
-        private RSA _signingKey;
-#endif
-
-        public InMemoryCryptoProvider()
+        public byte[] Sign(byte[] payload)
         {
+            return Sign(_signingKey, payload);
+        }
+
+        public RSACertificatePopCryptoProvider(X509Certificate2 cert)
+        {
+            _cert = cert;
             InitializeSigningKey();
         }
+
+        private X509Certificate2 _cert;
+        private RSACryptoServiceProvider _signingKey;
 
         public string CannonicalPublicKeyJwk { get; private set; }
 
@@ -32,20 +33,11 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         private void InitializeSigningKey()
         {
-#if NET45
-            _signingKey = new RSACryptoServiceProvider(RsaKeySize);
-#else
-            _signingKey = RSA.Create();
-            _signingKey.KeySize = RsaKeySize;
-#endif
+            _signingKey = _cert.PrivateKey as RSACryptoServiceProvider;
+
             RSAParameters publicKeyInfo = _signingKey.ExportParameters(false);
 
             CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyInfo);
-        }
-
-        public byte[] Sign(byte[] payload)
-        {
-            return Sign(_signingKey, payload);
         }
 
         /// <summary>
@@ -59,11 +51,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public static byte[] Sign(RSA RsaKey, byte[] payload)
         {
-#if NET45
             return ((RSACryptoServiceProvider)RsaKey).SignData(payload, CryptoConfig.MapNameToOID("SHA256"));
-#else
-            return RsaKey.SignData(payload, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-#endif
         }
+
     }
 }

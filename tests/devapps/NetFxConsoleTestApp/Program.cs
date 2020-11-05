@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.SSHCertificates;
 using Microsoft.Identity.Client.Utils;
 
@@ -195,7 +196,6 @@ namespace NetFx
                                 pca.AcquireTokenByIntegratedWindowsAuth(s_scopes)
                                 .WithUsername(s_username);
 
-                            iwaBuilder = ConfigurePoP(iwaBuilder);
 
                             var result = await iwaBuilder.ExecuteAsync().ConfigureAwait(false);
 
@@ -207,7 +207,6 @@ namespace NetFx
                             string username = Console.ReadLine();
                             SecureString password = GetPasswordFromConsole();
                             var upBuilder = pca.AcquireTokenByUsernamePassword(s_scopes, username, password);
-                            upBuilder = ConfigurePoP(upBuilder);
 
                             result = await upBuilder.ExecuteAsync().ConfigureAwait(false);
 
@@ -223,7 +222,6 @@ namespace NetFx
                                     return Task.FromResult(0);
                                 });
 
-                            deviceCodeBuilder = ConfigurePoP(deviceCodeBuilder);
                             result = await deviceCodeBuilder.ExecuteAsync().ConfigureAwait(false);
                             await CallApiAsync(pca, result).ConfigureAwait(false);
 
@@ -231,7 +229,6 @@ namespace NetFx
                         case '4':
                             
                             var interactiveBuilder = pca.AcquireTokenInteractive(s_scopes);                            
-                            interactiveBuilder = ConfigurePoP(interactiveBuilder);
                                                        
                             //interactiveBuilder = interactiveBuilder.WithAccount(account2);
 
@@ -243,11 +240,10 @@ namespace NetFx
 
                             IAccount account4 = pca.GetAccountsAsync().Result.FirstOrDefault();
                             var interactiveBuilder2 = pca.AcquireTokenInteractive(s_scopes);
-                            interactiveBuilder = ConfigurePoP(interactiveBuilder2);
 
-                            interactiveBuilder = interactiveBuilder.WithLoginHint(account4.Username);
+                            interactiveBuilder2 = interactiveBuilder2.WithLoginHint(account4.Username);
 
-                            result = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
+                            result = await interactiveBuilder2.ExecuteAsync().ConfigureAwait(false);
                             await CallApiAsync(pca, result).ConfigureAwait(false);
 
                             break;
@@ -274,9 +270,10 @@ namespace NetFx
 
                             if (s_usePoP)
                             {
+                                var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) {HttpMethod = s_popMethod };
                                 silentBuilder = silentBuilder
                                     .WithExtraQueryParameters(GetTestSliceParams())
-                                    .WithProofOfPosession(new HttpRequestMessage(s_popMethod, PoPUri));
+                                    .WithProofOfPosession(popConfig);
                             }
 
 
@@ -308,9 +305,11 @@ namespace NetFx
                                     var silentBuilder = pca.AcquireTokenSilent(s_scopes, acc);
                                     if (s_usePoP)
                                     {
+                                        var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
+
                                         silentBuilder = silentBuilder
                                             .WithExtraQueryParameters(GetTestSliceParams())
-                                            .WithProofOfPosession(new HttpRequestMessage(s_popMethod, PoPUri));
+                                            .WithProofOfPosession(popConfig);
                                     }
                                     return silentBuilder.ExecuteAsync();
                                 })
@@ -375,9 +374,6 @@ namespace NetFx
                             break;
                         case '9':
                             var accres = await pca.GetAccountAsync("some_id").ConfigureAwait(false);
-                            break;
-                        case 'p': // toggle pop
-                            s_usePoP = !s_usePoP;
                             break;
                         case 'b':
                             s_useBroker = !s_useBroker;
@@ -447,18 +443,19 @@ namespace NetFx
         }
 
 
-        private static T ConfigurePoP<T>(AbstractPublicClientAcquireTokenParameterBuilder<T> builder)
-            where T : AbstractPublicClientAcquireTokenParameterBuilder<T>
-        {
-            if (s_usePoP)
-            {
-                builder = builder
-                    .WithExtraQueryParameters(GetTestSliceParams())
-                    .WithProofOfPosession(new HttpRequestMessage(s_popMethod, new Uri(PoPUri)));
-            }
+        //private static T ConfigurePoP<T>(AbstractPublicClientAcquireTokenParameterBuilder<T> builder)
+        //    where T : AbstractPublicClientAcquireTokenParameterBuilder<T>
+        //{
+        //    if (s_usePoP)
+        //    {
+        //        var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
+        //        builder = builder
+        //            .WithExtraQueryParameters(GetTestSliceParams())
+        //            .WithProofOfPosession(popConfig);
+        //    }
 
-            return builder as T;
-        }
+        //    return builder as T;
+        //}
 
         private static async Task CallApiAsync(IPublicClientApplication pca, AuthenticationResult authResult)
         {

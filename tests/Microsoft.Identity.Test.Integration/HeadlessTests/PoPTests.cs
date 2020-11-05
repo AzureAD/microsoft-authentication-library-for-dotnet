@@ -1,18 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Integration.net45;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -65,7 +71,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [TestMethod]
+        //[TestMethod]
+
         public async Task PoP_AcquireAndAcquireSilent_MultipleKeys_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -76,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task PoP_BearerAndPoP_CanCoexist_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            await BearerAndPoP_CanCoexist_Async(labResponse).ConfigureAwait(false);
+            await BearerAndPoP_CanCoexist_Async().ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -85,20 +92,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunTestWithClientSecretAsync(PublicCloudConfidentialClientID, PublicCloudTestAuthority, s_publicCloudCcaSecret).ConfigureAwait(false);
         }
 
-        private async Task BearerAndPoP_CanCoexist_Async(LabResponse labResponse)
+        private async Task BearerAndPoP_CanCoexist_Async()
         {
-            // Arrange 
-            HttpRequestMessage request = new HttpRequestMessage(
-                HttpMethod.Get,
-                new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            // Arrange
+            PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.HttpMethod = HttpMethod.Get;
 
-            var user = labResponse.User;
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
-            string clientId = labResponse.App.AppId;
+            //SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
+            string clientId = PublicCloudConfidentialClientID;
 
-            var pca = PublicClientApplicationBuilder
-                .Create(clientId)
+            var pca = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
                 .WithExperimentalFeatures()
+                .WithClientSecret(s_publicCloudCcaSecret)
                 .WithTestLogging()
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
             ConfigureInMemoryCache(pca);
@@ -106,109 +112,93 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Act - acquire both a PoP and a Bearer token
             Trace.WriteLine("Getting a PoP token");
             AuthenticationResult result = await pca
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .AcquireTokenForClient(s_keyvaultScope)
                 .WithExtraQueryParameters(GetTestSliceParams())
-                .WithProofOfPosession(request)
+                .WithProofOfPosession(popConfig)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("PoP", request.Headers.Authorization.Scheme);
             Assert.AreEqual("pop", result.TokenType);
-            await VerifyPoPTokenAsync(clientId, request).ConfigureAwait(false);
+            await VerifyPoPTokenAsync(clientId, popConfig, result).ConfigureAwait(false);
 
             Trace.WriteLine("Getting a Bearer token");
             result = await pca
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .AcquireTokenForClient(s_keyvaultScope)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             Assert.AreEqual("Bearer", result.TokenType);
             Assert.AreEqual(
                 2,
-                (pca as PublicClientApplication).UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-
-            // Arrange - block HTTP requests to make sure AcquireTokenSilent does not refresh the RT
-            pca = PublicClientApplicationBuilder
-                           .Create(clientId)
-                           .WithExperimentalFeatures()
-                           .WithTestLogging()
-                           .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
-                           .Build();
-            ConfigureInMemoryCache(pca);
-
-            var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
-            result = await pca.AcquireTokenSilent(s_scopes, account).ExecuteAsync().ConfigureAwait(false);
-            Assert.AreEqual("Bearer", result.TokenType);
-
-            result = await pca.AcquireTokenSilent(s_scopes, account)
-                .WithProofOfPosession(request)
-                .ExecuteAsync().ConfigureAwait(false);
-            Assert.AreEqual("pop", result.TokenType);
-
+                (pca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
         }
 
         private async Task AcquireAndAcquireSilent_MultipleKeys_Async(LabResponse labResponse)
         {
-            HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
-            HttpRequestMessage request2 = new HttpRequestMessage(HttpMethod.Post, new Uri("https://www.bing.com/path3/path4?queryParam5=c&queryParam6=d"));
+            var popConfig1 = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig1.HttpMethod = HttpMethod.Get;
+            var popConfig2 = new PopAuthenticationConfiguration(new Uri("https://www.bing.com/path3/path4?queryParam5=c&queryParam6=d"));
+            popConfig2.HttpMethod = HttpMethod.Post;
 
             var user = labResponse.User;
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
-            string clientId = labResponse.App.AppId;
 
-            var pca = PublicClientApplicationBuilder.Create(clientId)
+            var pca = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
                 .WithExperimentalFeatures()
                 .WithTestLogging()
-                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs).Build();
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithClientSecret(s_publicCloudCcaSecret).Build();
             ConfigureInMemoryCache(pca);
 
-            await pca
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+            var result = await pca
+                .AcquireTokenForClient(s_keyvaultScope)
                 .WithExtraQueryParameters(GetTestSliceParams())
-                .WithProofOfPosession(request1)
+                .WithProofOfPosession(popConfig1)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
+            Assert.AreEqual("pop", result.TokenType);
             await VerifyPoPTokenAsync(
-                 clientId,
-                 request1).ConfigureAwait(false);
+                 PublicCloudConfidentialClientID,
+                 popConfig1, result).ConfigureAwait(false);
 
             // recreate the pca to ensure that the silent call is served from the cache, i.e. the key remains stable
-            pca = PublicClientApplicationBuilder
-                .Create(clientId)
+            pca = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
                 .WithExperimentalFeatures()
+                .WithClientSecret(s_publicCloudCcaSecret)
                 .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                 .Build();
             ConfigureInMemoryCache(pca);
 
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-            await pca
-                .AcquireTokenSilent(s_scopes, accounts.Single())
-                .WithProofOfPosession(request1)
+            result = await pca
+                .AcquireTokenSilent(s_keyvaultScope, accounts.Single())
+                .WithProofOfPosession(popConfig1)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
+            Assert.AreEqual("pop", result.TokenType);
             await VerifyPoPTokenAsync(
-                clientId,
-                request1).ConfigureAwait(false);
+                PublicCloudConfidentialClientID,
+                popConfig1, result).ConfigureAwait(false);
 
             // Call some other Uri - the same pop assertion can be reused, i.e. no need to call Evo
-            await pca
-              .AcquireTokenSilent(s_scopes, accounts.Single())
-              .WithProofOfPosession(request2)
+            result = await pca
+              .AcquireTokenSilent(s_keyvaultScope, accounts.Single())
+              .WithProofOfPosession(popConfig2)
               .ExecuteAsync()
               .ConfigureAwait(false);
 
-            Assert.AreEqual("PoP", request2.Headers.Authorization.Scheme);
+            Assert.AreEqual("pop", result.TokenType);
             await VerifyPoPTokenAsync(
-                clientId,
-                request2).ConfigureAwait(false);
+                PublicCloudConfidentialClientID,
+                popConfig2, result).ConfigureAwait(false);
         }
 
         public async Task RunTestWithClientSecretAsync(string clientID, string authority, string secret)
         {
-            HttpRequestMessage request1 = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.HttpMethod = HttpMethod.Get;
 
             var confidentialClientAuthority = authority;
 
@@ -220,15 +210,112 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPosession(request1)
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPosession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("PoP", request1.Headers.Authorization.Scheme);
+            Assert.AreEqual("pop", result.TokenType);
             await VerifyPoPTokenAsync(
                 clientID,
-                request1).ConfigureAwait(false);
+                popConfig, result).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task PopTestWithConfigObjectAsync()
+        {
+            var confidentialClientAuthority = PublicCloudTestAuthority;
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
+                .WithExperimentalFeatures()
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithTestLogging()
+                .Build();
+
+            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
+            popConfig.HttpMethod = HttpMethod.Get;
+
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPosession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("pop", result.TokenType);
+            await VerifyPoPTokenAsync(
+                PublicCloudConfidentialClientID,
+                popConfig, result).ConfigureAwait(false);
+        }
+
+
+        [TestMethod]
+        public async Task PopTestWithRSAAsync()
+        {
+            var confidentialClientAuthority = PublicCloudTestAuthority;
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
+                .WithExperimentalFeatures()
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .Build();
+
+            //RSA provider
+            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
+            popConfig.HttpMethod = HttpMethod.Get;
+
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPosession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("pop", result.TokenType);
+            await VerifyPoPTokenAsync(
+                PublicCloudConfidentialClientID,
+                popConfig, result).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task PopTestWithECDAsync()
+        {
+            var confidentialClientAuthority = PublicCloudTestAuthority;
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
+                .WithExperimentalFeatures()
+                .WithAuthority(new Uri(confidentialClientAuthority), true)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .Build();
+
+            //ECD Provider
+            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            popConfig.PopCryptoProvider = new ECDCertificatePopCryptoProvider();
+            popConfig.HttpMethod = HttpMethod.Post;
+
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPosession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("pop", result.TokenType);
+            await VerifyPoPTokenAsync(
+                PublicCloudConfidentialClientID,
+                popConfig, result).ConfigureAwait(false);
+        }
+
+        private static X509Certificate2 GetCertificate()
+        {
+            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(TestConstants.AutomationTestThumbprint);
+            if (cert == null)
+            {
+                throw new InvalidOperationException(
+                    "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
+            }
+
+            return cert;
         }
 
         private class NoAccessHttpClientFactory : IMsalHttpClientFactory
@@ -246,22 +333,24 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// This calls a special endpoint that validates any POP token against a configurable HTTP request.
         /// The HTTP request is configured through headers.
         /// </summary>
-        private async Task VerifyPoPTokenAsync(string clientId, HttpRequestMessage initialRequest)
+        private async Task VerifyPoPTokenAsync(string clientId, PopAuthenticationConfiguration popConfig, AuthenticationResult result)
         {
             var httpClient = new HttpClient();
             HttpResponseMessage response;
             var request = new HttpRequestMessage(HttpMethod.Post, PoPValidatorEndpoint);
 
+            var authHeader = new AuthenticationHeaderValue(result.TokenType, result.AccessToken);
+
             request.Headers.Add("Secret", _popValidationEndpointSecret);
             request.Headers.Add("Authority", "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/");
             request.Headers.Add("ClientId", clientId);
-            request.Headers.Authorization = initialRequest.Headers.Authorization;
+            request.Headers.Authorization = authHeader;
 
             // the URI the POP token is bound to
-            request.Headers.Add("ShrUri", initialRequest.RequestUri.ToString());
+            request.Headers.Add("ShrUri", popConfig.RequestUri.ToString());
 
             // the method the POP token in bound to
-            request.Headers.Add("ShrMethod", initialRequest.Method.ToString());
+            request.Headers.Add("ShrMethod", popConfig.HttpMethod.ToString());
 
             response = await httpClient.SendAsync(request).ConfigureAwait(false);
 
@@ -279,15 +368,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
 
         private string _inMemoryCache = "{}";
-        private void ConfigureInMemoryCache(IPublicClientApplication pca)
+        private void ConfigureInMemoryCache(IConfidentialClientApplication pca)
         {
-            pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
+            pca.AppTokenCache.SetBeforeAccess(notificationArgs =>
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(_inMemoryCache);
                 notificationArgs.TokenCache.DeserializeMsalV3(bytes);
             });
 
-            pca.UserTokenCache.SetAfterAccess(notificationArgs =>
+            pca.AppTokenCache.SetAfterAccess(notificationArgs =>
             {
                 if (notificationArgs.HasStateChanged)
                 {
@@ -298,4 +387,4 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
     }
 #endif
-}
+        }
