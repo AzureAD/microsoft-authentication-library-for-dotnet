@@ -443,7 +443,7 @@ namespace Microsoft.Identity.Client
         public const string HttpStatusCodeNotOk = "http_status_not_200";
 
         /// <summary>
-        /// Error code used when the <see cref="Extensibility.ICustomWebUi"/> has returned an uri, but it is invalid - it is either null or has no code.
+        /// Error code used when the ICustomWebUi has returned an uri, but it is invalid - it is either null or has no code.
         /// Consider throwing an exception if you are unable to intercept the uri containing the code.
         /// </summary>
         public const string CustomWebUiReturnedInvalidUri = "custom_webui_returned_invalid_uri";

@@ -14,9 +14,7 @@
   </PropertyGroup>
 
   <Import Project="../../flags.props" />
-  <Import Project="shared.references.props"/>
+  <Import Project="shared.references.props" />
  
- 
-
 </Project>
 
