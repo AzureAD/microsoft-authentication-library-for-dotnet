@@ -1,4 +1,7 @@
 <Project>
+  <PropertyGroup>
+    <LangVersion>8.0</LangVersion>    
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>

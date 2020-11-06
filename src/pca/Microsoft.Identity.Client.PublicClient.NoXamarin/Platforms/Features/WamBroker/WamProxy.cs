@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     return Enumerable.Empty<WebAccount>().ToList();
                 }
 
-                _logger.Info($"[WAM Proxy] FindAllWebAccountsAsync returning {findResult.Accounts.Count()} WAM accounts");
+                _logger.Info($"[WAM Proxy] FindAllWebAccountsAsync returning {findResult.Accounts.Count} WAM accounts");
                 return findResult.Accounts;
             }
         }

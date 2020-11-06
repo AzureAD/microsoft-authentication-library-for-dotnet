@@ -34,7 +34,7 @@ using Microsoft.Identity.Json.Converters;
 using Microsoft.Identity.Json.Serialization;
 using Microsoft.Identity.Json.Utilities;
 using System.Runtime.Serialization;
-using ErrorEventArgs = Newtonsoft.Json.Serialization.ErrorEventArgs;
+using ErrorEventArgs = Microsoft.Identity.Json.Serialization.ErrorEventArgs;
 
 namespace Microsoft.Identity.Json
 {

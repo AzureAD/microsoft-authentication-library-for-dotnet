@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Internal
 
 #if DESKTOP
             // hidden web view can be used in both WinRT and desktop applications.
-            coreUiParent.UseHiddenBrowser = _interactiveParameters.Prompt.Equals(Prompt.Never);
+            coreUiParent.UseHiddenBrowser = false;
 #endif
 #if WINDOWS_APP
             coreUiParent.UseCorporateNetwork = _serviceBundle.Config.UseCorporateNetwork;

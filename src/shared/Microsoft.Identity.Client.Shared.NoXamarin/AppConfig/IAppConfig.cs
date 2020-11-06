@@ -105,19 +105,15 @@ namespace Microsoft.Identity.Client
         IEnumerable<string> ClientCapabilities { get; }
 
 
-
         /// <summary>
+        /// A secret that is configured both in your app and in the app registration. A secret or a certificate is required for Confidential Client apps.
+        /// Not recommended for production - please use <see cref="ClientCredentialCertificate"/>
         /// </summary>
-#if !CONFIDENTIAL_CLIENT_PLATFORM // hide on Xamarin and UWP where we don't expose Confidential Client 
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
         string ClientSecret { get; }
 
         /// <summary>
+        /// For Confidential Client applications only, 
         /// </summary>
-#if !CONFIDENTIAL_CLIENT_PLATFORM // hide on Xamarin and UWP where we don't expose Confidential Client
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
         X509Certificate2 ClientCredentialCertificate { get; }
 
         /// <summary>
@@ -125,18 +121,19 @@ namespace Microsoft.Identity.Client
         Func<object> ParentActivityOrWindowFunc { get; }
 
 
-#if WINDOWS_APP 
         /// <summary>
-        /// Flag to enable authentication with the user currently logged-in in Windows.
-        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// This setting is only relevant on Windows Universal Platform. 
+        /// Allows the WAB component which handles user interaction when the broker is not used, to use the corporate network.         
+        /// Also affects Integrated Windows Authentication. 
+        /// For more details see: https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-uwp-consideration
         /// </summary>
         bool UseCorporateNetwork { get; }
-#endif // WINDOWS_APP
 
-#if iOS
         /// <summary>
+        /// This setting is only relevant for Xamarin.iOS applications. 
+        /// Configures the keychain security group used to store tokens in the keychain. 
+        /// For details see: https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-xamarin-ios-considerations
         /// </summary>
         string IosKeychainSecurityGroup { get; }
-#endif // iOS
     }
 }

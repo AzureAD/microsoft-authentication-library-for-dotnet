@@ -80,7 +80,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9
 		changelog.txt = changelog.txt
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
-		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetFxConsoleApp", "tests\devapps\NetFxConsoleTestApp\NetFxConsoleApp.csproj", "{2EBB7FFE-47E0-46F8-A4D6-79A4CF44729C}"
@@ -160,7 +159,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{FDB49AC1-96C7-4EAF-B428-8E17A3CD04E7}"
 	ProjectSection(SolutionItems) = preProject
-		src\Directory.build.props = src\Directory.build.props
 		src\flags.props = src\flags.props
 		src\package.props = src\package.props
 	EndProjectSection

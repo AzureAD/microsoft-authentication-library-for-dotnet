@@ -19,6 +19,8 @@
       $(TargetFrameworks);$(TargetFrameworkUap);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetDesktop45);
     </TargetFrameworks>-->
 
+    <!-- TODO: re-enable code analysis at least for SDL rules-->
+    
     <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
   </PropertyGroup>
 
@@ -36,6 +38,9 @@
     <PackageTags>Microsoft Authentication Library MSA MSAL B2C Azure Active Directory AAD Identity Authentication .NET Windows Store Xamarin iOS Android</PackageTags>
     <Product>Microsoft Authentication Library</Product>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <PropertyGroup>
   </PropertyGroup>
 
   <ItemGroup>
