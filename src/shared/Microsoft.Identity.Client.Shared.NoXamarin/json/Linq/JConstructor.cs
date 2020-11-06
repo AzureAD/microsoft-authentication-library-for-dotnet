@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Represents a JSON constructor.
     /// </summary>
-    internal partial class JConstructor : JContainer
+    public partial class JConstructor : JContainer
     {
         private string _name;
         private readonly List<JToken> _values = new List<JToken>();
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal override bool DeepEquals(JToken node)
         {
-            return node is JConstructor c && _name == c.Name && ContentsEqual(c);
+            return (node is JConstructor c && _name == c.Name && ContentsEqual(c));
         }
 
         internal override JToken CloneToken()

@@ -127,8 +127,8 @@ namespace Microsoft.Identity.Json.Utilities
 
             // if no matching method then attempt to find with nonpublic flag
             // this is required because in WinApps some methods are private but always using NonPublic breaks medium trust
-            // https://github.com/JamesNK/Microsoft.Identity.Json/pull/649
-            // https://github.com/JamesNK/Microsoft.Identity.Json/issues/821
+            // https://github.com/JamesNK/Newtonsoft.Json/pull/649
+            // https://github.com/JamesNK/Newtonsoft.Json/issues/821
             if (methodInfo == null && (bindingFlags & BindingFlags.NonPublic) != BindingFlags.NonPublic)
             {
                 methodInfo = type.GetMethod(methodName, bindingFlags | BindingFlags.NonPublic);

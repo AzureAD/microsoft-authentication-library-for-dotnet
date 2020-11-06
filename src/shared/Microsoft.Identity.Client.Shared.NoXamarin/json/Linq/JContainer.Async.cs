@@ -33,7 +33,7 @@ using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json.Linq
 {
-    internal abstract partial class JContainer
+    public abstract partial class JContainer
     {
         internal async Task ReadTokenFromAsync(JsonReader reader, JsonLoadSettings options, CancellationToken cancellationToken = default)
         {
@@ -148,21 +148,15 @@ namespace Microsoft.Identity.Json.Linq
                         parent.Add(v);
                         break;
                     case JsonToken.PropertyName:
-                        string propertyName = reader.Value.ToString();
-                        JProperty property = new JProperty(propertyName);
-                        property.SetLineInfo(lineInfo, settings);
-                        JObject parentObject = (JObject)parent;
-                        // handle multiple properties with the same name in JSON
-                        JProperty existingPropertyWithName = parentObject.Property(propertyName, StringComparison.OrdinalIgnoreCase);
-                        if (existingPropertyWithName == null)
+                        JProperty property = ReadProperty(reader, settings, lineInfo, parent);
+                        if (property != null)
                         {
-                            parent.Add(property);
+                            parent = property;
                         }
                         else
                         {
-                            existingPropertyWithName.Replace(property);
+                            await reader.SkipAsync().ConfigureAwait(false);
                         }
-                        parent = property;
                         break;
                     default:
                         throw new InvalidOperationException("The JsonReader should not be on a token of type {0}.".FormatWith(CultureInfo.InvariantCulture, reader.TokenType));

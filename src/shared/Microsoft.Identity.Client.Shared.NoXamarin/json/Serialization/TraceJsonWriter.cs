@@ -46,15 +46,13 @@ namespace Microsoft.Identity.Json.Serialization
             // prefix the message in the stringwriter to avoid concat with a potentially large JSON string
             _sw.Write("Serialized JSON: " + Environment.NewLine);
 
-            _textWriter = new JsonTextWriter(_sw)
-            {
-                Formatting = Formatting.Indented,
-                Culture = innerWriter.Culture,
-                DateFormatHandling = innerWriter.DateFormatHandling,
-                DateFormatString = innerWriter.DateFormatString,
-                DateTimeZoneHandling = innerWriter.DateTimeZoneHandling,
-                FloatFormatHandling = innerWriter.FloatFormatHandling
-            };
+            _textWriter = new JsonTextWriter(_sw);
+            _textWriter.Formatting = Formatting.Indented;
+            _textWriter.Culture = innerWriter.Culture;
+            _textWriter.DateFormatHandling = innerWriter.DateFormatHandling;
+            _textWriter.DateFormatString = innerWriter.DateFormatString;
+            _textWriter.DateTimeZoneHandling = innerWriter.DateTimeZoneHandling;
+            _textWriter.FloatFormatHandling = innerWriter.FloatFormatHandling;
         }
 
         public string GetSerializedJsonMessage()

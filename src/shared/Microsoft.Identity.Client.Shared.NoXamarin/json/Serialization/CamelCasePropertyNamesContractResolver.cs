@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Resolves member mappings for a type, camel casing property names.
     /// </summary>
-    internal class CamelCasePropertyNamesContractResolver : DefaultContractResolver
+    public class CamelCasePropertyNamesContractResolver : DefaultContractResolver
     {
         private static readonly object TypeContractCacheLock = new object();
         private static readonly DefaultJsonNameTable NameTable = new DefaultJsonNameTable();

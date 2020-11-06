@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Provides information surrounding an error.
     /// </summary>
-    internal class ErrorContext
+    public class ErrorContext
     {
         internal ErrorContext(object originalObject, object member, string path, Exception error)
         {

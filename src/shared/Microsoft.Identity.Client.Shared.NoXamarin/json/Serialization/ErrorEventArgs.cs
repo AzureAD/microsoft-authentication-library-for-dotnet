@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Provides data for the Error event.
     /// </summary>
-    internal class ErrorEventArgs : EventArgs
+    public class ErrorEventArgs : EventArgs
     {
         /// <summary>
         /// Gets the current object the error event is being raised against.

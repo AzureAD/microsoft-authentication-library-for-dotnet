@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Json.Converters
     /// Creates a custom object.
     /// </summary>
     /// <typeparam name="T">The object type to convert.</typeparam>
-    internal abstract class CustomCreationConverter<T> : JsonConverter
+    public abstract class CustomCreationConverter<T> : JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.

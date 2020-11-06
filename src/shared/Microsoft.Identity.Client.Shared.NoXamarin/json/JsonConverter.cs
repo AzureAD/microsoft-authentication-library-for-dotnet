@@ -26,14 +26,13 @@
 using System;
 using Microsoft.Identity.Json.Utilities;
 using System.Globalization;
-using System.Reflection;
 
 namespace Microsoft.Identity.Json
 {
     /// <summary>
     /// Converts an object to and from JSON.
     /// </summary>
-    internal abstract class JsonConverter
+    public abstract class JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.
@@ -79,7 +78,7 @@ namespace Microsoft.Identity.Json
     /// Converts an object to and from JSON.
     /// </summary>
     /// <typeparam name="T">The object type to convert.</typeparam>
-    internal abstract class JsonConverter<T> : JsonConverter
+    public abstract class JsonConverter<T> : JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.

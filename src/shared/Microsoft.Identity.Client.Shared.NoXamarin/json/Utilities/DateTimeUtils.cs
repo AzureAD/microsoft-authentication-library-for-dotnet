@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         internal static long ConvertDateTimeToJavaScriptTicks(DateTime dateTime, bool convertToUtc)
         {
-            long ticks = convertToUtc ? ToUniversalTicks(dateTime) : dateTime.Ticks;
+            long ticks = (convertToUtc) ? ToUniversalTicks(dateTime) : dateTime.Ticks;
 
             return UniversialTicksToJavaScriptTicks(ticks);
         }
@@ -516,7 +516,7 @@ namespace Microsoft.Identity.Json.Utilities
                 index = text.Length - 2;
             }
 
-            return ConvertUtils.Int64TryParse(text.Chars, 6 + text.StartIndex, index - 6, out ticks) == ParseResult.Success;
+            return (ConvertUtils.Int64TryParse(text.Chars, 6 + text.StartIndex, index - 6, out ticks) == ParseResult.Success);
         }
 
         private static bool TryParseDateTimeMicrosoft(StringReference text, DateTimeZoneHandling dateTimeZoneHandling, out DateTime dt)
@@ -589,7 +589,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         private static bool TryReadOffset(StringReference offsetText, int startIndex, out TimeSpan offset)
         {
-            bool negative = offsetText[startIndex] == '-';
+            bool negative = (offsetText[startIndex] == '-');
 
             if (ConvertUtils.Int32TryParse(offsetText.Chars, startIndex + 1, 2, out int hours) != ParseResult.Success)
             {
@@ -798,7 +798,7 @@ namespace Microsoft.Identity.Json.Utilities
                 y1 = 3;
             }
 
-            year = (y400 * 400) + (y100 * 100) + (y4 * 4) + y1 + 1;
+            year = y400 * 400 + y100 * 100 + y4 * 4 + y1 + 1;
 
             // n = day number within year
             n -= y1 * DaysPerYear;
@@ -809,7 +809,7 @@ namespace Microsoft.Identity.Json.Utilities
             int[] days = leapYear ? DaysToMonth366 : DaysToMonth365;
             // All months have less than 32 days, so n >> 5 is a good conservative
             // estimate for the month
-            int m = n >> (5 + 1);
+            int m = n >> 5 + 1;
             // m = 1-based month number
             while (n >= days[m])
             {

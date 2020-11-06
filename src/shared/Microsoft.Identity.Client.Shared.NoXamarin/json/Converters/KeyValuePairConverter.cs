@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts a <see cref="KeyValuePair{TKey,TValue}"/> to and from JSON.
     /// </summary>
-    internal class KeyValuePairConverter : JsonConverter
+    public class KeyValuePairConverter : JsonConverter
     {
         private const string KeyName = "Key";
         private const string ValueName = "Value";
@@ -138,13 +138,13 @@ namespace Microsoft.Identity.Json.Converters
         /// </returns>
         public override bool CanConvert(Type objectType)
         {
-            Type t = ReflectionUtils.IsNullableType(objectType)
+            Type t = (ReflectionUtils.IsNullableType(objectType))
                 ? Nullable.GetUnderlyingType(objectType)
                 : objectType;
 
             if (t.IsValueType() && t.IsGenericType())
             {
-                return t.GetGenericTypeDefinition() == typeof(KeyValuePair<,>);
+                return (t.GetGenericTypeDefinition() == typeof(KeyValuePair<,>));
             }
 
             return false;

@@ -49,9 +49,9 @@ namespace Microsoft.Identity.Json.Linq
     /// Represents a JSON object.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
+    ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
     /// </example>
-    internal partial class JObject : JContainer, IDictionary<string, JToken>, INotifyPropertyChanged
+    public partial class JObject : JContainer, IDictionary<string, JToken>, INotifyPropertyChanged
 #if HAVE_COMPONENT_MODEL
         , ICustomTypeDescriptor
 #endif
@@ -352,13 +352,13 @@ namespace Microsoft.Identity.Json.Linq
             {
                 ValidationUtils.ArgumentNotNull(propertyName, nameof(propertyName));
 
-                JProperty property = Property(propertyName, StringComparison.OrdinalIgnoreCase);
+                JProperty property = Property(propertyName, StringComparison.Ordinal);
 
                 return property?.Value;
             }
             set
             {
-                JProperty property = Property(propertyName, StringComparison.OrdinalIgnoreCase);
+                JProperty property = Property(propertyName, StringComparison.Ordinal);
                 if (property != null)
                 {
                     property.Value = value;
@@ -427,13 +427,13 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JObject"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <returns>A <see cref="JObject"/> populated from the string that contains JSON.</returns>
         /// <exception cref="JsonReaderException">
         ///     <paramref name="json"/> is not valid JSON.
         /// </exception>
         /// <example>
-        ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
+        ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
         /// </example>
         public new static JObject Parse(string json)
         {
@@ -443,7 +443,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JObject"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <param name="settings">The <see cref="JsonLoadSettings"/> used to load the JSON.
         /// If this is <c>null</c>, default load settings will be used.</param>
         /// <returns>A <see cref="JObject"/> populated from the string that contains JSON.</returns>
@@ -451,7 +451,7 @@ namespace Microsoft.Identity.Json.Linq
         ///     <paramref name="json"/> is not valid JSON.
         /// </exception>
         /// <example>
-        ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
+        ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
         /// </example>
         public new static JObject Parse(string json, JsonLoadSettings settings)
         {
@@ -514,23 +514,23 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Gets the <see cref="Microsoft.Identity.Json.Linq.JToken"/> with the specified property name.
+        /// Gets the <see cref="Newtonsoft.Json.Linq.JToken"/> with the specified property name.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
-        /// <returns>The <see cref="Microsoft.Identity.Json.Linq.JToken"/> with the specified property name.</returns>
+        /// <returns>The <see cref="Newtonsoft.Json.Linq.JToken"/> with the specified property name.</returns>
         public JToken GetValue(string propertyName)
         {
             return GetValue(propertyName, StringComparison.Ordinal);
         }
 
         /// <summary>
-        /// Gets the <see cref="Microsoft.Identity.Json.Linq.JToken"/> with the specified property name.
+        /// Gets the <see cref="Newtonsoft.Json.Linq.JToken"/> with the specified property name.
         /// The exact property name will be searched for first and if no matching property is found then
         /// the <see cref="StringComparison"/> will be used to match a property.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="comparison">One of the enumeration values that specifies how the strings will be compared.</param>
-        /// <returns>The <see cref="Microsoft.Identity.Json.Linq.JToken"/> with the specified property name.</returns>
+        /// <returns>The <see cref="Newtonsoft.Json.Linq.JToken"/> with the specified property name.</returns>
         public JToken GetValue(string propertyName, StringComparison comparison)
         {
             if (propertyName == null)
@@ -545,7 +545,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Tries to get the <see cref="Microsoft.Identity.Json.Linq.JToken"/> with the specified property name.
+        /// Tries to get the <see cref="Newtonsoft.Json.Linq.JToken"/> with the specified property name.
         /// The exact property name will be searched for first and if no matching property is found then
         /// the <see cref="StringComparison"/> will be used to match a property.
         /// </summary>
@@ -556,7 +556,7 @@ namespace Microsoft.Identity.Json.Linq
         public bool TryGetValue(string propertyName, StringComparison comparison, out JToken value)
         {
             value = GetValue(propertyName, comparison);
-            return value != null;
+            return (value != null);
         }
 
         #region IDictionary<string,JToken> Members
@@ -591,7 +591,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <returns><c>true</c> if item was successfully removed; otherwise, <c>false</c>.</returns>
         public bool Remove(string propertyName)
         {
-            JProperty property = Property(propertyName, StringComparison.OrdinalIgnoreCase);
+            JProperty property = Property(propertyName, StringComparison.Ordinal);
             if (property == null)
             {
                 return false;
@@ -602,14 +602,14 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Tries to get the <see cref="Microsoft.Identity.Json.Linq.JToken"/> with the specified property name.
+        /// Tries to get the <see cref="Newtonsoft.Json.Linq.JToken"/> with the specified property name.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if a value was successfully retrieved; otherwise, <c>false</c>.</returns>
         public bool TryGetValue(string propertyName, out JToken value)
         {
-            JProperty property = Property(propertyName, StringComparison.OrdinalIgnoreCase);
+            JProperty property = Property(propertyName, StringComparison.Ordinal);
             if (property == null)
             {
                 value = null;
@@ -637,13 +637,13 @@ namespace Microsoft.Identity.Json.Linq
 
         bool ICollection<KeyValuePair<string, JToken>>.Contains(KeyValuePair<string, JToken> item)
         {
-            JProperty property = Property(item.Key, StringComparison.OrdinalIgnoreCase);
+            JProperty property = Property(item.Key, StringComparison.Ordinal);
             if (property == null)
             {
                 return false;
             }
 
-            return property.Value == item.Value;
+            return (property.Value == item.Value);
         }
 
         void ICollection<KeyValuePair<string, JToken>>.CopyTo(KeyValuePair<string, JToken>[] array, int arrayIndex)
@@ -805,7 +805,7 @@ namespace Microsoft.Identity.Json.Linq
 
 #endif
 
-#if HAVE_DYNAMIC
+#if HAVE_DYNAMIC                            
         /// <summary>
         /// Returns the <see cref="DynamicMetaObject"/> responsible for binding operations performed on this object.
         /// </summary>

@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Json
     /// <summary>
     /// Specifies the settings on a <see cref="JsonSerializer"/> object.
     /// </summary>
-    internal class JsonSerializerSettings
+    public class JsonSerializerSettings
     {
         internal const ReferenceLoopHandling DefaultReferenceLoopHandling = ReferenceLoopHandling.Error;
         internal const MissingMemberHandling DefaultMissingMemberHandling = MissingMemberHandling.Ignore;
@@ -261,29 +261,29 @@ namespace Microsoft.Identity.Json
         /// <value>The trace writer.</value>
         public ITraceWriter TraceWriter { get; set; }
 
-        ///// <summary>
-        ///// Gets or sets the <see cref="SerializationBinder"/> used by the serializer when resolving type names.
-        ///// </summary>
-        ///// <value>The binder.</value>
-        //[Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
-        //public SerializationBinder Binder
-        //{
-        //    get
-        //    {
-        //        if (SerializationBinder == null)
-        //        {
-        //            return null;
-        //        }
+        /// <summary>
+        /// Gets or sets the <see cref="SerializationBinder"/> used by the serializer when resolving type names.
+        /// </summary>
+        /// <value>The binder.</value>
+        [Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
+        public SerializationBinder Binder
+        {
+            get
+            {
+                if (SerializationBinder == null)
+                {
+                    return null;
+                }
 
-        //        if (SerializationBinder is SerializationBinderAdapter adapter)
-        //        {
-        //            return adapter.SerializationBinder;
-        //        }
+                if (SerializationBinder is SerializationBinderAdapter adapter)
+                {
+                    return adapter.SerializationBinder;
+                }
 
-        //        throw new InvalidOperationException("Cannot get SerializationBinder because an ISerializationBinder was previously set.");
-        //    }
-        //    set => SerializationBinder = value == null ? null : new SerializationBinderAdapter(value);
-        //}
+                throw new InvalidOperationException("Cannot get SerializationBinder because an ISerializationBinder was previously set.");
+            }
+            set => SerializationBinder = value == null ? null : new SerializationBinderAdapter(value);
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="ISerializationBinder"/> used by the serializer when resolving type names.
@@ -383,8 +383,8 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Gets or sets how special floating point numbers, e.g. <see cref="double.NaN"/>,
-        /// <see cref="double.PositiveInfinity"/> and <see cref="double.NegativeInfinity"/>,
+        /// Gets or sets how special floating point numbers, e.g. <see cref="Double.NaN"/>,
+        /// <see cref="Double.PositiveInfinity"/> and <see cref="Double.NegativeInfinity"/>,
         /// are written as JSON.
         /// The default value is <see cref="Json.FloatFormatHandling.String" />.
         /// </summary>

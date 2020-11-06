@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Contains the LINQ to JSON extension methods.
     /// </summary>
-    internal static class Extensions
+    public static class Extensions
     {
         /// <summary>
         /// Returns a collection of tokens that contains the ancestors of every token in the source collection.

@@ -3,7 +3,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Specifies how JSON arrays are merged together.
     /// </summary>
-    internal enum MergeArrayHandling
+    public enum MergeArrayHandling
     {
         /// <summary>Concatenate arrays.</summary>
         Concat = 0,

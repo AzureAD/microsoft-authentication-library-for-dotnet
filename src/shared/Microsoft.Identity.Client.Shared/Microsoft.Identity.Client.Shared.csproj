@@ -39,7 +39,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\**\*.cs;" Exclude="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\obj\**\*;" />
+    <Compile Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\**\*.cs;" Exclude="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\obj\**\*;" />    
     <None Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\shared.references.props" />
   </ItemGroup>
 

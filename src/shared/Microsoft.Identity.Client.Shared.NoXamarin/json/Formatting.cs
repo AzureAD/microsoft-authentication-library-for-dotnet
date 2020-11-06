@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Json
     /// <summary>
     /// Specifies formatting options for the <see cref="JsonTextWriter"/>.
     /// </summary>
-    internal enum Formatting
+    public enum Formatting
     {
         /// <summary>
         /// No special formatting is applied. This is the default.

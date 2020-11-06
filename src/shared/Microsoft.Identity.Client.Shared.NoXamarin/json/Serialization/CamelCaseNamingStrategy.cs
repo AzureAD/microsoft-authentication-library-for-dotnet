@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// A camel case naming strategy.
     /// </summary>
-    internal class CamelCaseNamingStrategy : NamingStrategy
+    public class CamelCaseNamingStrategy : NamingStrategy
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CamelCaseNamingStrategy"/> class.

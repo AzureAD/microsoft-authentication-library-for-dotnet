@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Represents a trace writer that writes to the application's <see cref="TraceListener"/> instances.
     /// </summary>
-    internal class DiagnosticsTraceWriter : ITraceWriter
+    public class DiagnosticsTraceWriter : ITraceWriter
     {
         /// <summary>
         /// Gets the <see cref="TraceLevel"/> that will be used to filter the trace messages passed to the writer.
@@ -59,12 +59,12 @@ namespace Microsoft.Identity.Json.Serialization
                 {
                     lock (listener)
                     {
-                        listener.TraceEvent(eventCache, "Microsoft.Identity.Json", traceEventType, 0, message);
+                        listener.TraceEvent(eventCache, "Newtonsoft.Json", traceEventType, 0, message);
                     }
                 }
                 else
                 {
-                    listener.TraceEvent(eventCache, "Microsoft.Identity.Json", traceEventType, 0, message);
+                    listener.TraceEvent(eventCache, "Newtonsoft.Json", traceEventType, 0, message);
                 }
 
                 if (DiagnosticsTrace.AutoFlush)

@@ -33,7 +33,7 @@ using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json.Linq
 {
-    internal abstract partial class JToken
+    public abstract partial class JToken
     {
         /// <summary>
         /// Writes this token to a <see cref="JsonWriter"/> asynchronously.
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
         /// <returns>
         /// A <see cref="Task{TResult}"/> that represents the asynchronous creation. The
-        /// <see cref="Task{TResult}.Result"/> property returns a <see cref="JToken"/> that contains
+        /// <see cref="Task{TResult}.Result"/> property returns a <see cref="JToken"/> that contains 
         /// the token and its descendant tokens
         /// that were read from the reader. The runtime type of the token is determined
         /// by the token type of the first token encountered in the reader.
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
         /// <returns>
         /// A <see cref="Task{TResult}"/> that represents the asynchronous creation. The
-        /// <see cref="Task{TResult}.Result"/> property returns a <see cref="JToken"/> that contains
+        /// <see cref="Task{TResult}.Result"/> property returns a <see cref="JToken"/> that contains 
         /// the token and its descendant tokens
         /// that were read from the reader. The runtime type of the token is determined
         /// by the token type of the first token encountered in the reader.

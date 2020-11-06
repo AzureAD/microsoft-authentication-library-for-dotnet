@@ -36,9 +36,9 @@ namespace Microsoft.Identity.Json.Linq
     /// Represents a JSON array.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
+    ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
     /// </example>
-    internal partial class JArray : JContainer, IList<JToken>
+    public partial class JArray : JContainer, IList<JToken>
     {
         private readonly List<JToken> _values = new List<JToken>();
 
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal override bool DeepEquals(JToken node)
         {
-            return node is JArray t && ContentsEqual(t);
+            return (node is JArray t && ContentsEqual(t));
         }
 
         internal override JToken CloneToken()
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Loads an <see cref="JArray"/> from a <see cref="JsonReader"/>.
+        /// Loads an <see cref="JArray"/> from a <see cref="JsonReader"/>. 
         /// </summary>
         /// <param name="reader">A <see cref="JsonReader"/> that will be read for the content of the <see cref="JArray"/>.</param>
         /// <returns>A <see cref="JArray"/> that contains the JSON that was read from the specified <see cref="JsonReader"/>.</returns>
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Loads an <see cref="JArray"/> from a <see cref="JsonReader"/>.
+        /// Loads an <see cref="JArray"/> from a <see cref="JsonReader"/>. 
         /// </summary>
         /// <param name="reader">A <see cref="JsonReader"/> that will be read for the content of the <see cref="JArray"/>.</param>
         /// <param name="settings">The <see cref="JsonLoadSettings"/> used to load the JSON.
@@ -143,10 +143,10 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JArray"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <returns>A <see cref="JArray"/> populated from the string that contains JSON.</returns>
         /// <example>
-        ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
+        ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
         /// </example>
         public new static JArray Parse(string json)
         {
@@ -156,12 +156,12 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JArray"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <param name="settings">The <see cref="JsonLoadSettings"/> used to load the JSON.
         /// If this is <c>null</c>, default load settings will be used.</param>
         /// <returns>A <see cref="JArray"/> populated from the string that contains JSON.</returns>
         /// <example>
-        ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
+        ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
         /// </example>
         public new static JArray Parse(string json, JsonLoadSettings settings)
         {
@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Microsoft.Identity.Json.Linq.JToken"/> at the specified index.
+        /// Gets or sets the <see cref="Newtonsoft.Json.Linq.JToken"/> at the specified index.
         /// </summary>
         /// <value></value>
         public JToken this[int index]

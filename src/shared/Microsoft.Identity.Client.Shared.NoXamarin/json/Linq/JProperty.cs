@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Represents a JSON property.
     /// </summary>
-    internal partial class JProperty : JContainer
+    public partial class JProperty : JContainer
     {
         #region JPropertyList
         private class JPropertyList : IList<JToken>
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Json.Linq
 
             public bool Contains(JToken item)
             {
-                return _token == item;
+                return (_token == item);
             }
 
             public void CopyTo(JToken[] array, int arrayIndex)
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal override bool ContainsItem(JToken item)
         {
-            return Value == item;
+            return (Value == item);
         }
 
         internal override void MergeItem(object content, JsonMergeSettings settings)
@@ -263,7 +263,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal override bool DeepEquals(JToken node)
         {
-            return node is JProperty t && _name == t.Name && ContentsEqual(t);
+            return (node is JProperty t && _name == t.Name && ContentsEqual(t));
         }
 
         internal override JToken CloneToken()

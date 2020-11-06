@@ -54,9 +54,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return CreateGet<T>(fieldInfo);
             }
 
-#pragma warning disable CA2201 // Do not raise reserved exception types
             throw new Exception("Could not create getter for {0}.".FormatWith(CultureInfo.InvariantCulture, memberInfo));
-#pragma warning restore CA2201 // Do not raise reserved exception types
         }
 
         public Action<T, object> CreateSet<T>(MemberInfo memberInfo)
@@ -71,9 +69,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return CreateSet<T>(fieldInfo);
             }
 
-#pragma warning disable CA2201 // Do not raise reserved exception types
             throw new Exception("Could not create setter for {0}.".FormatWith(CultureInfo.InvariantCulture, memberInfo));
-#pragma warning restore CA2201 // Do not raise reserved exception types
         }
 
         public abstract MethodCall<T, object> CreateMethodCall<T>(MethodBase method);

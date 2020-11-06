@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts a <see cref="DateTime"/> to and from the ISO 8601 date format (e.g. <c>"2008-04-12T12:53Z"</c>).
     /// </summary>
-    internal class IsoDateTimeConverter : DateTimeConverterBase
+    public class IsoDateTimeConverter : DateTimeConverterBase
     {
         private const string DefaultDateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK";
 
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Json.Converters
         public string DateTimeFormat
         {
             get => _dateTimeFormat ?? string.Empty;
-            set => _dateTimeFormat = string.IsNullOrEmpty(value) ? null : value;
+            set => _dateTimeFormat = (string.IsNullOrEmpty(value)) ? null : value;
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Json.Converters
             }
 
 #if HAVE_DATE_TIME_OFFSET
-            Type t = nullable
+            Type t = (nullable)
                 ? Nullable.GetUnderlyingType(objectType)
                 : objectType;
 #endif

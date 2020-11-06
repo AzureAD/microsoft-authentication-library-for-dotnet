@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Json.Schema
     [Serializable]
 #endif
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal class JsonSchemaException : JsonException
+    public class JsonSchemaException : JsonException
     {
         /// <summary>
         /// Gets the line number indicating where the error occurred.

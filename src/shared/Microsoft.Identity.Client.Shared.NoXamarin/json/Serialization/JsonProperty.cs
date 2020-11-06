@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Maps a JSON property to a .NET member or constructor parameter.
     /// </summary>
-    internal class JsonProperty
+    public class JsonProperty
     {
         internal Required? _required;
         internal bool _hasExplicitDefaultValue;
@@ -202,6 +202,11 @@ namespace Microsoft.Identity.Json.Serialization
         }
 
         /// <summary>
+        /// Gets a value indicating whether <see cref="Required"/> has a value specified.
+        /// </summary>
+        public bool IsRequiredSpecified => _required != null;
+
+        /// <summary>
         /// Gets or sets a value indicating whether this property preserves object references.
         /// </summary>
         /// <value>
@@ -264,10 +269,10 @@ namespace Microsoft.Identity.Json.Serialization
         public Action<object, object> SetIsSpecified { get; set; }
 
         /// <summary>
-        /// Returns a <see cref="string"/> that represents this instance.
+        /// Returns a <see cref="String"/> that represents this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="string"/> that represents this instance.
+        /// A <see cref="String"/> that represents this instance.
         /// </returns>
         public override string ToString()
         {

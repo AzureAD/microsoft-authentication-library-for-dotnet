@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Json.Schema
             {
                 string reference = schema.DeferredReference;
 
-                bool locationReference = reference.StartsWith("#", StringComparison.Ordinal);
+                bool locationReference = (reference.StartsWith("#", StringComparison.Ordinal));
                 if (locationReference)
                 {
                     reference = UnescapeReference(reference);
@@ -212,10 +212,8 @@ namespace Microsoft.Identity.Json.Schema
 
             if (schemaObject.TryGetValue(JsonTypeReflector.RefPropertyName, out JToken referenceToken))
             {
-                JsonSchema deferredSchema = new JsonSchema
-                {
-                    DeferredReference = (string)referenceToken
-                };
+                JsonSchema deferredSchema = new JsonSchema();
+                deferredSchema.DeferredReference = (string)referenceToken;
 
                 return deferredSchema;
             }

@@ -36,7 +36,7 @@ using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json
 {
-    internal abstract partial class JsonWriter
+    public abstract partial class JsonWriter
     {
         internal Task AutoCompleteAsync(JsonToken tokenBeingWritten, CancellationToken cancellationToken)
         {
@@ -666,7 +666,7 @@ namespace Microsoft.Identity.Json
         /// <param name="token">The <see cref="JsonToken"/> to write.</param>
         /// <param name="value">
         /// The value to write.
-        /// A value is only required for tokens that have an associated value, e.g. the <see cref="string"/> property name for <see cref="JsonToken.PropertyName"/>.
+        /// A value is only required for tokens that have an associated value, e.g. the <see cref="String"/> property name for <see cref="JsonToken.PropertyName"/>.
         /// <c>null</c> can be passed to the method for tokens that don't have a value, e.g. <see cref="JsonToken.StartObject"/>.
         /// </param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
@@ -1309,7 +1309,7 @@ namespace Microsoft.Identity.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(sbyte value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1329,7 +1329,7 @@ namespace Microsoft.Identity.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(sbyte? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1444,7 +1444,7 @@ namespace Microsoft.Identity.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(uint value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1464,7 +1464,7 @@ namespace Microsoft.Identity.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(uint? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1484,7 +1484,7 @@ namespace Microsoft.Identity.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(ulong value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1504,7 +1504,7 @@ namespace Microsoft.Identity.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(ulong? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1543,7 +1543,7 @@ namespace Microsoft.Identity.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(ushort value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1563,7 +1563,7 @@ namespace Microsoft.Identity.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(ushort? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1781,7 +1781,7 @@ namespace Microsoft.Identity.Json
                         }
 #endif
 
-                        // write an unknown null value, fix https://github.com/JamesNK/Microsoft.Identity.Json/issues/1460
+                        // write an unknown null value, fix https://github.com/JamesNK/Newtonsoft.Json/issues/1460
                         if (value == null)
                         {
                             return writer.WriteNullAsync(cancellationToken);

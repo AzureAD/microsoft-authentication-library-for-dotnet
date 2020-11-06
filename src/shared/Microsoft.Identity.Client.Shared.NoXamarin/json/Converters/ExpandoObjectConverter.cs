@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts an <see cref="ExpandoObject"/> to and from JSON.
     /// </summary>
-    internal class ExpandoObjectConverter : JsonConverter
+    public class ExpandoObjectConverter : JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Json.Converters
         /// </returns>
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(ExpandoObject);
+            return (objectType == typeof(ExpandoObject));
         }
 
         /// <summary>

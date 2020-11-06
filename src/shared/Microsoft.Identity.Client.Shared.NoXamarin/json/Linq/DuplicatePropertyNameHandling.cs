@@ -26,18 +26,21 @@
 namespace Microsoft.Identity.Json.Linq
 {
     /// <summary>
-    /// Specifies how line information is handled when loading JSON.
+    /// Specifies how duplicate property names are handled when loading JSON.
     /// </summary>
-    public enum LineInfoHandling
+    public enum DuplicatePropertyNameHandling
     {
         /// <summary>
-        /// Ignore line information.
+        /// Replace the existing value when there is a duplicate property. The value of the last property in the JSON object will be used.
         /// </summary>
-        Ignore = 0,
-
+        Replace = 0,
         /// <summary>
-        /// Load line information.
+        /// Ignore the new value when there is a duplicate property. The value of the first property in the JSON object will be used.
         /// </summary>
-        Load = 1
+        Ignore = 1,
+        /// <summary>
+        /// Throw a <see cref="JsonReaderException"/> when a duplicate property is encountered.
+        /// </summary>
+        Error = 2
     }
 }

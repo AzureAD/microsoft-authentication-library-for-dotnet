@@ -32,7 +32,7 @@ using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json.Linq
 {
-    internal partial class JProperty
+    public partial class JProperty
     {
         /// <summary>
         /// Writes this token to a <see cref="JsonWriter"/> asynchronously.
@@ -59,9 +59,7 @@ namespace Microsoft.Identity.Json.Linq
             await WriteValueAsync(writer, cancellationToken, converters).ConfigureAwait(false);
         }
 
-#pragma warning disable CA1068 // CancellationToken parameters must come last
         private Task WriteValueAsync(JsonWriter writer, CancellationToken cancellationToken, JsonConverter[] converters)
-#pragma warning restore CA1068 // CancellationToken parameters must come last
         {
             JToken value = Value;
             return value != null

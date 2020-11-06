@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Provides methods to get and set values.
     /// </summary>
-    internal interface IValueProvider
+    public interface IValueProvider
     {
         /// <summary>
         /// Sets the value.

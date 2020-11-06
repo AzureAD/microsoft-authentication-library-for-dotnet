@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Json
 #if HAVE_BINARY_EXCEPTION_SERIALIZATION
     [Serializable]
 #endif
-    internal class JsonWriterException : JsonException
+    public class JsonWriterException : JsonException
     {
         /// <summary>
         /// Gets the path to the JSON where the error occurred.

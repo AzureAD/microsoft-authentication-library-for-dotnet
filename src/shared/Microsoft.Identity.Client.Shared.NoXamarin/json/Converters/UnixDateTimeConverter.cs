@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts a <see cref="DateTime"/> to and from Unix epoch time
     /// </summary>
-    internal class UnixDateTimeConverter : DateTimeConverterBase
+    public class UnixDateTimeConverter : DateTimeConverterBase
     {
         internal static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Json.Converters
                 DateTime d = UnixEpoch.AddSeconds(seconds);
 
 #if HAVE_DATE_TIME_OFFSET
-                Type t = nullable
+                Type t = (nullable)
                     ? Nullable.GetUnderlyingType(objectType)
                     : objectType;
                 if (t == typeof(DateTimeOffset))

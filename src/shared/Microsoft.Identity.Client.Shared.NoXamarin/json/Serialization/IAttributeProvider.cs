@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Provides methods to get attributes.
     /// </summary>
-    internal interface IAttributeProvider
+    public interface IAttributeProvider
     {
         /// <summary>
         /// Returns a collection of all of the attributes, or an empty collection if there are no attributes.

@@ -33,7 +33,7 @@ using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json
 {
-    internal abstract partial class JsonReader
+    public abstract partial class JsonReader
     {
         /// <summary>
         /// Asynchronously reads the next JSON token from the source.

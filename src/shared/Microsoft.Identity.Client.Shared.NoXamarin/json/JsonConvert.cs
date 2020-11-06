@@ -47,9 +47,9 @@ namespace Microsoft.Identity.Json
     /// Provides methods for converting between .NET types and JSON types.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\SerializationTests.cs" region="SerializeObject" title="Serializing and Deserializing JSON with JsonConvert" />
+    ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\SerializationTests.cs" region="SerializeObject" title="Serializing and Deserializing JSON with JsonConvert" />
     /// </example>
-    internal static class JsonConvert
+    public static class JsonConvert
     {
         /// <summary>
         /// Gets or sets a function that creates default <see cref="JsonSerializerSettings"/>.
@@ -155,20 +155,20 @@ namespace Microsoft.Identity.Json
 #endif
 
         /// <summary>
-        /// Converts the <see cref="bool"/> to its JSON string representation.
+        /// Converts the <see cref="Boolean"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="bool"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Boolean"/>.</returns>
         public static string ToString(bool value)
         {
-            return value ? True : False;
+            return (value) ? True : False;
         }
 
         /// <summary>
-        /// Converts the <see cref="char"/> to its JSON string representation.
+        /// Converts the <see cref="Char"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="char"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Char"/>.</returns>
         public static string ToString(char value)
         {
             return ToString(char.ToString(value));
@@ -185,52 +185,52 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Converts the <see cref="int"/> to its JSON string representation.
+        /// Converts the <see cref="Int32"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="int"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Int32"/>.</returns>
         public static string ToString(int value)
         {
             return value.ToString(null, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
-        /// Converts the <see cref="short"/> to its JSON string representation.
+        /// Converts the <see cref="Int16"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="short"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Int16"/>.</returns>
         public static string ToString(short value)
         {
             return value.ToString(null, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
-        /// Converts the <see cref="ushort"/> to its JSON string representation.
+        /// Converts the <see cref="UInt16"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="ushort"/>.</returns>
-        // [ClsCompliant(false)]
+        /// <returns>A JSON string representation of the <see cref="UInt16"/>.</returns>
+        [CLSCompliant(false)]
         public static string ToString(ushort value)
         {
             return value.ToString(null, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
-        /// Converts the <see cref="uint"/> to its JSON string representation.
+        /// Converts the <see cref="UInt32"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="uint"/>.</returns>
-        // [ClsCompliant(false)]
+        /// <returns>A JSON string representation of the <see cref="UInt32"/>.</returns>
+        [CLSCompliant(false)]
         public static string ToString(uint value)
         {
             return value.ToString(null, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
-        /// Converts the <see cref="long"/>  to its JSON string representation.
+        /// Converts the <see cref="Int64"/>  to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="long"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Int64"/>.</returns>
         public static string ToString(long value)
         {
             return value.ToString(null, CultureInfo.InvariantCulture);
@@ -244,21 +244,21 @@ namespace Microsoft.Identity.Json
 #endif
 
         /// <summary>
-        /// Converts the <see cref="ulong"/> to its JSON string representation.
+        /// Converts the <see cref="UInt64"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="ulong"/>.</returns>
-        // [ClsCompliant(false)]
+        /// <returns>A JSON string representation of the <see cref="UInt64"/>.</returns>
+        [CLSCompliant(false)]
         public static string ToString(ulong value)
         {
             return value.ToString(null, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
-        /// Converts the <see cref="float"/> to its JSON string representation.
+        /// Converts the <see cref="Single"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="float"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Single"/>.</returns>
         public static string ToString(float value)
         {
             return EnsureDecimalPlace(value, value.ToString("R", CultureInfo.InvariantCulture));
@@ -285,10 +285,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Converts the <see cref="double"/> to its JSON string representation.
+        /// Converts the <see cref="Double"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="double"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Double"/>.</returns>
         public static string ToString(double value)
         {
             return EnsureDecimalPlace(value, value.ToString("R", CultureInfo.InvariantCulture));
@@ -301,7 +301,7 @@ namespace Microsoft.Identity.Json
 
         private static string EnsureDecimalPlace(double value, string text)
         {
-            if (double.IsNaN(value) || double.IsInfinity(value) || text.IndexOf(".", StringComparison.OrdinalIgnoreCase) != -1 || text.IndexOf("E", StringComparison.OrdinalIgnoreCase) != -1 || text.IndexOf("e", StringComparison.OrdinalIgnoreCase) != -1)
+            if (double.IsNaN(value) || double.IsInfinity(value) || text.IndexOf('.') != -1 || text.IndexOf('E') != -1 || text.IndexOf('e') != -1)
             {
                 return text;
             }
@@ -320,31 +320,31 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Converts the <see cref="byte"/> to its JSON string representation.
+        /// Converts the <see cref="Byte"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="byte"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Byte"/>.</returns>
         public static string ToString(byte value)
         {
             return value.ToString(null, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
-        /// Converts the <see cref="sbyte"/> to its JSON string representation.
+        /// Converts the <see cref="SByte"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="sbyte"/>.</returns>
-        // [ClsCompliant(false)]
+        /// <returns>A JSON string representation of the <see cref="SByte"/>.</returns>
+        [CLSCompliant(false)]
         public static string ToString(sbyte value)
         {
             return value.ToString(null, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
-        /// Converts the <see cref="decimal"/> to its JSON string representation.
+        /// Converts the <see cref="Decimal"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="sbyte"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Decimal"/>.</returns>
         public static string ToString(decimal value)
         {
             return EnsureDecimalPlace(value.ToString(null, CultureInfo.InvariantCulture));
@@ -368,10 +368,8 @@ namespace Microsoft.Identity.Json
             text = value.ToString("D", CultureInfo.InvariantCulture);
             qc = quoteChar.ToString(CultureInfo.InvariantCulture);
 #else
-#pragma warning disable CA1305 // Specify IFormatProvider
             text = value.ToString("D");
             qc = quoteChar.ToString();
-#pragma warning restore CA1305 // Specify IFormatProvider
 #endif
 
             return qc + text + qc;
@@ -413,33 +411,33 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Converts the <see cref="string"/> to its JSON string representation.
+        /// Converts the <see cref="String"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="string"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="String"/>.</returns>
         public static string ToString(string value)
         {
             return ToString(value, '"');
         }
 
         /// <summary>
-        /// Converts the <see cref="string"/> to its JSON string representation.
+        /// Converts the <see cref="String"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         /// <param name="delimiter">The string delimiter character.</param>
-        /// <returns>A JSON string representation of the <see cref="string"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="String"/>.</returns>
         public static string ToString(string value, char delimiter)
         {
             return ToString(value, delimiter, StringEscapeHandling.Default);
         }
 
         /// <summary>
-        /// Converts the <see cref="string"/> to its JSON string representation.
+        /// Converts the <see cref="String"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         /// <param name="delimiter">The string delimiter character.</param>
         /// <param name="stringEscapeHandling">The string escape handling.</param>
-        /// <returns>A JSON string representation of the <see cref="string"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="String"/>.</returns>
         public static string ToString(string value, char delimiter, StringEscapeHandling stringEscapeHandling)
         {
             if (delimiter != '"' && delimiter != '\'')
@@ -451,10 +449,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Converts the <see cref="object"/> to its JSON string representation.
+        /// Converts the <see cref="Object"/> to its JSON string representation.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        /// <returns>A JSON string representation of the <see cref="object"/>.</returns>
+        /// <returns>A JSON string representation of the <see cref="Object"/>.</returns>
         public static string ToString(object value)
         {
             if (value == null)
@@ -972,12 +970,10 @@ namespace Microsoft.Identity.Json
         /// <returns>The deserialized <see cref="XmlNode"/>.</returns>
         public static XmlDocument DeserializeXmlNode(string value, string deserializeRootElementName, bool writeArrayAttribute, bool encodeSpecialCharacters)
         {
-            XmlNodeConverter converter = new XmlNodeConverter
-            {
-                DeserializeRootElementName = deserializeRootElementName,
-                WriteArrayAttribute = writeArrayAttribute,
-                EncodeSpecialCharacters = encodeSpecialCharacters
-            };
+            XmlNodeConverter converter = new XmlNodeConverter();
+            converter.DeserializeRootElementName = deserializeRootElementName;
+            converter.WriteArrayAttribute = writeArrayAttribute;
+            converter.EncodeSpecialCharacters = encodeSpecialCharacters;
 
             return (XmlDocument)DeserializeObject(value, typeof(XmlDocument), converter);
         }
@@ -1075,12 +1071,10 @@ namespace Microsoft.Identity.Json
         /// <returns>The deserialized <see cref="XNode"/>.</returns>
         public static XDocument DeserializeXNode(string value, string deserializeRootElementName, bool writeArrayAttribute, bool encodeSpecialCharacters)
         {
-            XmlNodeConverter converter = new XmlNodeConverter
-            {
-                DeserializeRootElementName = deserializeRootElementName,
-                WriteArrayAttribute = writeArrayAttribute,
-                EncodeSpecialCharacters = encodeSpecialCharacters
-            };
+            XmlNodeConverter converter = new XmlNodeConverter();
+            converter.DeserializeRootElementName = deserializeRootElementName;
+            converter.WriteArrayAttribute = writeArrayAttribute;
+            converter.EncodeSpecialCharacters = encodeSpecialCharacters;
 
             return (XDocument)DeserializeObject(value, typeof(XDocument), converter);
         }

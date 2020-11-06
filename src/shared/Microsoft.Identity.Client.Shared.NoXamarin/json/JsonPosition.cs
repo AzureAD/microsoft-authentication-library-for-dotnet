@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Json
 
                         if (writer == null)
                         {
-                            writer = new StringWriter(sb, CultureInfo.InvariantCulture);
+                            writer = new StringWriter(sb);
                         }
 
                         JavaScriptUtils.WriteEscapedJavaScriptString(writer, propertyName, '\'', false, JavaScriptUtils.SingleQuoteCharEscapeFlags, StringEscapeHandling.Default, null, ref buffer);
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Json
 
         internal static bool TypeHasIndex(JsonContainerType type)
         {
-            return type == JsonContainerType.Array || type == JsonContainerType.Constructor;
+            return (type == JsonContainerType.Array || type == JsonContainerType.Constructor);
         }
 
         internal static string BuildPath(List<JsonPosition> positions, JsonPosition? currentPosition)

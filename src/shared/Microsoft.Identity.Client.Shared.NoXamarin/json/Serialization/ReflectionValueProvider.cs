@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Get and set values for a <see cref="MemberInfo"/> using reflection.
     /// </summary>
-    internal class ReflectionValueProvider : IValueProvider
+    public class ReflectionValueProvider : IValueProvider
     {
         private readonly MemberInfo _memberInfo;
 

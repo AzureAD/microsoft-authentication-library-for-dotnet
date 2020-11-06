@@ -36,9 +36,7 @@ using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json.Linq
 {
-#pragma warning disable CA1036 // Should define operators since implements IComparable
-    internal partial class JValue
-#pragma warning restore CA1036 // Should define operators since implements IComparable
+    public partial class JValue
     {
         /// <summary>
         /// Writes this token to a <see cref="JsonWriter"/> asynchronously.

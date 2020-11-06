@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Json
     /// Instructs the <see cref="JsonSerializer"/> to use the specified <see cref="JsonConverter"/> when serializing the member or class.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Parameter, AllowMultiple = false)]
-    internal sealed class JsonConverterAttribute : Attribute
+    public sealed class JsonConverterAttribute : Attribute
     {
         private readonly Type _converterType;
 
@@ -55,7 +55,12 @@ namespace Microsoft.Identity.Json
         /// <param name="converterType">Type of the <see cref="JsonConverter"/>.</param>
         public JsonConverterAttribute(Type converterType)
         {
-            _converterType = converterType ?? throw new ArgumentNullException(nameof(converterType));
+            if (converterType == null)
+            {
+                throw new ArgumentNullException(nameof(converterType));
+            }
+
+            _converterType = converterType;
         }
 
         /// <summary>

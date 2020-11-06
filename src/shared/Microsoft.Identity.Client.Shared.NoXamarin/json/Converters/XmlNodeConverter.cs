@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 // Copyright (c) 2007 James Newton-King
 //
 // Permission is hereby granted, free of charge, to any person
@@ -23,7 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-#if HAVE_XML_DOCUMENT || HAVE_XLINQ
+#if (HAVE_XML_DOCUMENT || HAVE_XLINQ)
 
 #if HAVE_BIG_INTEGER
 using System.Numerics;
@@ -107,20 +107,16 @@ namespace Microsoft.Identity.Json.Converters
 
         public IXmlNode CreateAttribute(string name, string value)
         {
-            XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(name))
-            {
-                Value = value
-            };
+            XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(name));
+            attribute.Value = value;
 
             return attribute;
         }
 
         public IXmlNode CreateAttribute(string qualifiedName, string namespaceUri, string value)
         {
-            XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(qualifiedName, namespaceUri))
-            {
-                Value = value
-            };
+            XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(qualifiedName, namespaceUri));
+            attribute.Value = value;
 
             return attribute;
         }
@@ -942,7 +938,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts XML to and from JSON.
     /// </summary>
-    internal class XmlNodeConverter : JsonConverter
+    public class XmlNodeConverter : JsonConverter
     {
         internal static readonly List<IXmlNode> EmptyChildNodes = new List<IXmlNode>();
 
@@ -1520,7 +1516,7 @@ namespace Microsoft.Identity.Json.Converters
                     throw JsonSerializationException.Create(reader, "XmlNodeConverter only supports deserializing XmlDocument, XmlElement or XmlNode.");
                 }
 
-                XmlDocument d = new XmlDocument();                
+                XmlDocument d = new XmlDocument();
 #if HAVE_XML_DOCUMENT_TYPE
                 // prevent http request when resolving any DTD references
                 d.XmlResolver = null;

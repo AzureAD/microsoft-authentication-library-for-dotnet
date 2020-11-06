@@ -36,13 +36,19 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Contract details for a <see cref="System.Type"/> used by the <see cref="JsonSerializer"/>.
     /// </summary>
-    internal class JsonObjectContract : JsonContainerContract
+    public class JsonObjectContract : JsonContainerContract
     {
         /// <summary>
         /// Gets or sets the object member serialization.
         /// </summary>
         /// <value>The member object serialization.</value>
         public MemberSerialization MemberSerialization { get; set; }
+
+        /// <summary>
+        /// Gets or sets the missing member handling used when deserializing this object.
+        /// </summary>
+        /// <value>The missing member handling.</value>
+        public MissingMemberHandling? MissingMemberHandling { get; set; }
 
         /// <summary>
         /// Gets or sets a value that indicates whether the object's properties are required.
@@ -116,7 +122,7 @@ namespace Microsoft.Identity.Json.Serialization
             set
             {
                 _extensionDataValueType = value;
-                ExtensionDataIsJToken = value != null && typeof(JToken).IsAssignableFrom(value);
+                ExtensionDataIsJToken = (value != null && typeof(JToken).IsAssignableFrom(value));
             }
         }
 

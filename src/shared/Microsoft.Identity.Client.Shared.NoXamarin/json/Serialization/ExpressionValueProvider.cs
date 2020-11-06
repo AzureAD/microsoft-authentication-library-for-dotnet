@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Get and set values for a <see cref="MemberInfo"/> using dynamic methods.
     /// </summary>
-    internal class ExpressionValueProvider : IValueProvider
+    public class ExpressionValueProvider : IValueProvider
     {
         private readonly MemberInfo _memberInfo;
         private Func<object, object> _getter;

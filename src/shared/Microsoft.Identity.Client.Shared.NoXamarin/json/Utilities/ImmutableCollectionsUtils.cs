@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Json.Utilities
     /// <summary>
     /// Helper class for serializing immutable collections.
     /// Note that this is used by all builds, even those that don't support immutable collections, in case the DLL is GACed
-    /// https://github.com/JamesNK/Microsoft.Identity.Json/issues/652
+    /// https://github.com/JamesNK/Newtonsoft.Json/issues/652
     /// </summary>
     internal static class ImmutableCollectionsUtils
     {

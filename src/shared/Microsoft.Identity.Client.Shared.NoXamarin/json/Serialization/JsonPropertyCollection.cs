@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// A collection of <see cref="JsonProperty"/> objects.
     /// </summary>
-    internal class JsonPropertyCollection : KeyedCollection<string, JsonProperty>
+    public class JsonPropertyCollection : KeyedCollection<string, JsonProperty>
     {
         private readonly Type _type;
         private readonly List<JsonProperty> _list;
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Json.Serialization
                             // current property is hidden by the existing so don't add it
                             return;
                         }
-
+                        
                         if (_type.ImplementInterface(existingProperty.DeclaringType) && _type.ImplementInterface(property.DeclaringType))
                         {
                             // current property was already defined on another interface
@@ -140,9 +140,7 @@ namespace Microsoft.Identity.Json.Serialization
             return property;
         }
 
-#pragma warning disable CS0108 // Member hides inherited member; missing new keyword
         private bool TryGetValue(string key, out JsonProperty item)
-#pragma warning restore CS0108 // Member hides inherited member; missing new keyword
         {
             if (Dictionary == null)
             {

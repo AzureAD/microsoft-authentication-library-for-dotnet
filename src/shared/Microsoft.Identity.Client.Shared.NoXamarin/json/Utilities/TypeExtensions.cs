@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Json.Utilities
             return type.GetTypeInfo().IsSubclassOf(c);
         }
 
-#if !DOTNET && !NET_CORE
+#if !DOTNET
         public static bool IsAssignableFrom(this Type type, Type c)
         {
             return type.GetTypeInfo().IsAssignableFrom(c.GetTypeInfo());
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Json.Utilities
 #endif
         }
 
-#if PORTABLE40 || DOTNET || PORTABLE
+#if (PORTABLE40 || DOTNET || PORTABLE)
         public static PropertyInfo GetProperty(this Type type, string name, BindingFlags bindingFlags, object placeholder1, Type propertyType, IList<Type> indexParameters, object placeholder2)
         {
             IEnumerable<PropertyInfo> propertyInfos = type.GetProperties(bindingFlags);
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         public static IEnumerable<MemberInfo> GetMember(this Type type, string name, MemberTypes memberType, BindingFlags bindingFlags)
         {
-#if PORTABLE && !NET_CORE && !WINDOWS_APP
+#if PORTABLE
             return type.GetMemberInternal(name, memberType, bindingFlags);
 #else
             return type.GetMember(name, bindingFlags).Where(m =>
@@ -259,21 +259,21 @@ namespace Microsoft.Identity.Json.Utilities
         }
 #endif
 
-#if DOTNET || PORTABLE
+#if (DOTNET || PORTABLE)
         public static MethodInfo GetBaseDefinition(this MethodInfo method)
         {
             return method.GetRuntimeBaseDefinition();
         }
 #endif
 
-#if DOTNET || PORTABLE
+#if (DOTNET || PORTABLE)
         public static bool IsDefined(this Type type, Type attributeType, bool inherit)
         {
             return type.GetTypeInfo().CustomAttributes.Any(a => a.AttributeType == attributeType);
         }
 
 #if !DOTNET
-
+        
         public static MethodInfo GetMethod(this Type type, string name)
         {
             return type.GetMethod(name, DefaultFlags);
@@ -308,7 +308,7 @@ namespace Microsoft.Identity.Json.Utilities
         {
             return type.GetTypeInfo().DeclaredConstructors.Where(c => TestAccessibility(c, bindingFlags));
         }
-
+        
         public static ConstructorInfo GetConstructor(this Type type, IList<Type> parameterTypes)
         {
             return type.GetConstructor(DefaultFlags, null, parameterTypes, null);
@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Json.Utilities
         {
             return MethodBinder.SelectMethod(type.GetConstructors(bindingFlags), parameterTypes);
         }
-
+        
         public static MemberInfo[] GetMember(this Type type, string member)
         {
             return type.GetMemberInternal(member, null, DefaultFlags);
@@ -350,7 +350,7 @@ namespace Microsoft.Identity.Json.Utilities
             {
                 return null;
             }
-
+            
             return field;
         }
 
@@ -450,7 +450,7 @@ namespace Microsoft.Identity.Json.Utilities
             {
                 return null;
             }
-
+            
             return property;
         }
 
@@ -566,7 +566,7 @@ namespace Microsoft.Identity.Json.Utilities
             return type.GetTypeInfo().IsValueType;
 #endif
         }
-
+        
         public static bool IsPrimitive(this Type type)
         {
 #if HAVE_FULL_REFLECTION

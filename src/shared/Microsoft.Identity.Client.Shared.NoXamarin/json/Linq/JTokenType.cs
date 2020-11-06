@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Specifies the type of token.
     /// </summary>
-    internal enum JTokenType
+    public enum JTokenType
     {
         /// <summary>
         /// No token type has been set.

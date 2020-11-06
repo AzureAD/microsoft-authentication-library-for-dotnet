@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Represents a token that can contain other tokens.
     /// </summary>
-    internal abstract partial class JContainer : JToken, IList<JToken>
+    public abstract partial class JContainer : JToken, IList<JToken>
 #if HAVE_COMPONENT_MODEL
         , ITypedList, IBindingList
 #endif
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Json.Linq
         protected abstract IList<JToken> ChildrenTokens { get; }
 
         private object _syncRoot;
-#if HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED
+#if (HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED)
         private bool _busy;
 #endif
 
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal void CheckReentrancy()
         {
-#if HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED
+#if (HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED)
             if (_busy)
             {
                 throw new InvalidOperationException("Cannot change {0} during a collection change event.".FormatWith(CultureInfo.InvariantCulture, GetType()));
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal bool IsMultiContent(object content)
         {
-            return content is IEnumerable && !(content is string) && !(content is JToken) && !(content is byte[]);
+            return (content is IEnumerable && !(content is string) && !(content is JToken) && !(content is byte[]));
         }
 
         internal JToken EnsureParentToken(JToken item, bool skipParentCheck)
@@ -564,7 +564,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal virtual bool ContainsItem(JToken item)
         {
-            return IndexOfItem(item) != -1;
+            return (IndexOfItem(item) != -1);
         }
 
         internal virtual void CopyItemsTo(Array array, int arrayIndex)
@@ -837,26 +837,54 @@ namespace Microsoft.Identity.Json.Linq
                         parent.Add(v);
                         break;
                     case JsonToken.PropertyName:
-                        string propertyName = r.Value.ToString();
-                        JProperty property = new JProperty(propertyName);
-                        property.SetLineInfo(lineInfo, settings);
-                        JObject parentObject = (JObject)parent;
-                        // handle multiple properties with the same name in JSON
-                        JProperty existingPropertyWithName = parentObject.Property(propertyName, StringComparison.OrdinalIgnoreCase);
-                        if (existingPropertyWithName == null)
+                        JProperty property = ReadProperty(r, settings, lineInfo, parent);
+                        if (property != null)
                         {
-                            parent.Add(property);
+                            parent = property;
                         }
                         else
                         {
-                            existingPropertyWithName.Replace(property);
+                            r.Skip();
                         }
-                        parent = property;
                         break;
                     default:
                         throw new InvalidOperationException("The JsonReader should not be on a token of type {0}.".FormatWith(CultureInfo.InvariantCulture, r.TokenType));
                 }
             } while (r.Read());
+        }
+
+        private static JProperty ReadProperty(JsonReader r, JsonLoadSettings settings, IJsonLineInfo lineInfo, JContainer parent)
+        {
+            DuplicatePropertyNameHandling duplicatePropertyNameHandling = settings?.DuplicatePropertyNameHandling ?? DuplicatePropertyNameHandling.Replace;
+
+            JObject parentObject = (JObject)parent;
+            string propertyName = r.Value.ToString();
+            JProperty existingPropertyWithName = parentObject.Property(propertyName, StringComparison.Ordinal);
+            if (existingPropertyWithName != null)
+            {
+                if (duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Ignore)
+                {
+                    return null;
+                }
+                else if (duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Error)
+                {
+                    throw JsonReaderException.Create(r, "Property with the name '{0}' already exists in the current JSON object.".FormatWith(CultureInfo.InvariantCulture, propertyName));
+                }
+            }
+
+            JProperty property = new JProperty(propertyName);
+            property.SetLineInfo(lineInfo, settings);
+            // handle multiple properties with the same name in JSON
+            if (existingPropertyWithName == null)
+            {
+                parent.Add(property);
+            }
+            else
+            {
+                existingPropertyWithName.Replace(property);
+            }
+
+            return property;
         }
 
         internal int ContentsHashCode()

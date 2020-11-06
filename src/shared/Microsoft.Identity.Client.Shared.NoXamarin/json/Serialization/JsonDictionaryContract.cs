@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Contract details for a <see cref="System.Type"/> used by the <see cref="JsonSerializer"/>.
     /// </summary>
-    internal class JsonDictionaryContract : JsonContainerContract
+    public class JsonDictionaryContract : JsonContainerContract
     {
         /// <summary>
         /// Gets or sets the dictionary key resolver.
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Json.Serialization
         /// <value><c>true</c> if the creator has a parameter with the dictionary values; otherwise, <c>false</c>.</value>
         public bool HasParameterizedCreator { get; set; }
 
-        internal bool HasParameterizedCreatorInternal => HasParameterizedCreator || _parameterizedCreator != null || _parameterizedConstructor != null;
+        internal bool HasParameterizedCreatorInternal => (HasParameterizedCreator || _parameterizedCreator != null || _parameterizedConstructor != null);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonDictionaryContract"/> class.
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Json.Serialization
                 {
                     // ConcurrentDictionary<,> + IDictionary setter + null value = error
                     // wrap to use generic setter
-                    // https://github.com/JamesNK/Microsoft.Identity.Json/issues/1582
+                    // https://github.com/JamesNK/Newtonsoft.Json/issues/1582
                     Type typeDefinition = underlyingType.GetGenericTypeDefinition();
                     if (typeDefinition.FullName == JsonTypeReflector.ConcurrentDictionaryTypeName)
                     {
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Json.Serialization
             DictionaryKeyType = keyType;
             DictionaryValueType = valueType;
 
-#if NET20 || NET35
+#if (NET20 || NET35)
             if (DictionaryValueType != null && ReflectionUtils.IsNullableType(DictionaryValueType))
             {
                 // bug in .NET 2.0 & 3.5 that Dictionary<TKey, Nullable<TValue>> throws an error when adding null via IDictionary[key] = object

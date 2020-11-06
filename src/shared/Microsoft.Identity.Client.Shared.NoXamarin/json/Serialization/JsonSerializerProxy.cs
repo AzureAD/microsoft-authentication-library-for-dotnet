@@ -137,12 +137,12 @@ namespace Microsoft.Identity.Json.Serialization
             set => _serializer.ConstructorHandling = value;
         }
 
-        //[Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
-        //public override SerializationBinder Binder
-        //{
-        //    get => _serializer.Binder;
-        //    set => _serializer.Binder = value;
-        //}
+        [Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
+        public override SerializationBinder Binder
+        {
+            get => _serializer.Binder;
+            set => _serializer.Binder = value;
+        }
 
         public override ISerializationBinder SerializationBinder
         {

@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Json.Utilities
         {
             if (collection != null)
             {
-                return collection.Count == 0;
+                return (collection.Count == 0);
             }
             return true;
         }
@@ -252,7 +252,7 @@ namespace Microsoft.Identity.Json.Utilities
         }
 
 #if HAVE_FAST_REVERSE
-        // faster reverse in .NET Framework with value types - https://github.com/JamesNK/Microsoft.Identity.Json/issues/1430
+        // faster reverse in .NET Framework with value types - https://github.com/JamesNK/Newtonsoft.Json/issues/1430
         public static void FastReverse<T>(this List<T> list)
         {
             int i = 0;
@@ -316,9 +316,7 @@ namespace Microsoft.Identity.Json.Utilities
             int currentValuesLength = list.Count;
             if (currentValuesLength != dimensionLength)
             {
-#pragma warning disable CA2201 // Do not raise reserved exception types
                 throw new Exception("Cannot deserialize non-cubical array as multidimensional array.");
-#pragma warning restore CA2201 // Do not raise reserved exception types
             }
 
             int[] newIndices = new int[dimension + 1];
@@ -385,7 +383,9 @@ namespace Microsoft.Identity.Json.Utilities
             // Defensively guard against a version of Linq where Enumerable.Empty<T> doesn't
             // return an array, but throw in debug versions so a better strategy can be
             // used if that ever happens.
+#pragma warning disable CA1825 // Avoid zero-length array allocations.
             return array ?? new T[0];
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         }
     }
 }

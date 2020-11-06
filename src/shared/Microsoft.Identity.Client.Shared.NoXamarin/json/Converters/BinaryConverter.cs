@@ -28,8 +28,6 @@ using System;
 using System.Globalization;
 using Microsoft.Identity.Json.Utilities;
 using System.Collections.Generic;
-using System.Reflection;
-
 #if HAVE_ADO_NET
 using System.Data.SqlTypes;
 #endif
@@ -39,7 +37,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts a binary value to and from a base 64 string value.
     /// </summary>
-    internal class BinaryConverter : JsonConverter
+    public class BinaryConverter : JsonConverter
     {
 #if HAVE_LINQ
         private const string BinaryTypeName = "System.Data.Linq.Binary";
@@ -133,7 +131,7 @@ namespace Microsoft.Identity.Json.Converters
                 throw JsonSerializationException.Create(reader, "Unexpected token parsing binary. Expected String or StartArray, got {0}.".FormatWith(CultureInfo.InvariantCulture, reader.TokenType));
             }
 
-            Type t = ReflectionUtils.IsNullableType(objectType)
+            Type t = (ReflectionUtils.IsNullableType(objectType))
                 ? Nullable.GetUnderlyingType(objectType)
                 : objectType;
 

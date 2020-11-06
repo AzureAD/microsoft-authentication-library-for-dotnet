@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Represents a reader that provides fast, non-cached, forward-only access to serialized JSON data.
     /// </summary>
-    internal class JTokenReader : JsonReader, IJsonLineInfo
+    public class JTokenReader : JsonReader, IJsonLineInfo
     {
         private readonly JToken _root;
         private string _initialPath;
@@ -54,8 +54,12 @@ namespace Microsoft.Identity.Json.Linq
             _root = token;
         }
 
-        // this is used by json.net schema
-        internal JTokenReader(JToken token, string initialPath)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JTokenReader"/> class.
+        /// </summary>
+        /// <param name="token">The token to read from.</param>
+        /// <param name="initialPath">The initial path of the token. It is prepended to the returned <see cref="Path"/>.</param>
+        public JTokenReader(JToken token, string initialPath)
             : this(token)
         {
             _initialPath = initialPath;
@@ -99,7 +103,7 @@ namespace Microsoft.Identity.Json.Linq
             }
 
             JToken next = t.Next;
-            if (next == null || next == t || t == t.Parent.Last)
+            if ((next == null || next == t) || t == t.Parent.Last)
             {
                 if (t.Parent == null)
                 {
@@ -256,7 +260,7 @@ namespace Microsoft.Identity.Json.Linq
             }
 
             IJsonLineInfo info = _current;
-            return info != null && info.HasLineInfo();
+            return (info != null && info.HasLineInfo());
         }
 
         int IJsonLineInfo.LineNumber
@@ -298,7 +302,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Gets the path of the current JSON token.
+        /// Gets the path of the current JSON token. 
         /// </summary>
         public override string Path
         {

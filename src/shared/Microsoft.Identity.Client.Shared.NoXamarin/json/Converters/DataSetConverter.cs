@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts a <see cref="DataSet"/> to and from JSON.
     /// </summary>
-    internal class DataSetConverter : JsonConverter
+    public class DataSetConverter : JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Json.Converters
             while (reader.TokenType == JsonToken.PropertyName)
             {
                 DataTable dt = ds.Tables[(string)reader.Value];
-                bool exists = dt != null;
+                bool exists = (dt != null);
 
                 dt = (DataTable)converter.ReadJson(reader, typeof(DataTable), dt, serializer);
 

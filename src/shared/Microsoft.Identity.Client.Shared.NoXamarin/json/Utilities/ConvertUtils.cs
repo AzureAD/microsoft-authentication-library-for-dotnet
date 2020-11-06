@@ -368,9 +368,7 @@ namespace Microsoft.Identity.Json.Utilities
                 case ConvertResult.Success:
                     return value;
                 case ConvertResult.CannotConvertNull:
-#pragma warning disable CA2201 // Do not raise reserved exception types
                     throw new Exception("Can not convert null {0} into non-nullable {1}.".FormatWith(CultureInfo.InvariantCulture, initialValue.GetType(), targetType));
-#pragma warning restore CA2201 // Do not raise reserved exception types
                 case ConvertResult.NotInstantiableType:
                     throw new ArgumentException("Target type {0} is not a value type or a non-abstract class.".FormatWith(CultureInfo.InvariantCulture, targetType), nameof(targetType));
                 case ConvertResult.NoValidConversion:
@@ -664,7 +662,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return ParseResult.Invalid;
             }
 
-            bool isNegative = chars[start] == '-';
+            bool isNegative = (chars[start] == '-');
 
             if (isNegative)
             {
@@ -758,7 +756,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return ParseResult.Invalid;
             }
 
-            bool isNegative = chars[start] == '-';
+            bool isNegative = (chars[start] == '-');
 
             if (isNegative)
             {
@@ -1283,7 +1281,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return ParseResult.Invalid;
             }
 
-            bool isNegative = chars[start] == '-';
+            bool isNegative = (chars[start] == '-');
             if (isNegative)
             {
                 // text just a negative sign
@@ -1412,7 +1410,7 @@ namespace Microsoft.Identity.Json.Utilities
                             }
                         }
 
-                        if (mantissaDigits < 29 && (mantissaDigits != 28 || !(storeOnly28Digits ?? (storeOnly28Digits = hi19 > decimalMaxValueHi19 || (hi19 == decimalMaxValueHi19 && (lo10 > decimalMaxValueLo9 || (lo10 == decimalMaxValueLo9 && c > decimalMaxValueLo1)))).GetValueOrDefault())))
+                        if (mantissaDigits < 29 && (mantissaDigits != 28 || !(storeOnly28Digits ?? (storeOnly28Digits = (hi19 > decimalMaxValueHi19 || (hi19 == decimalMaxValueHi19 && (lo10 > decimalMaxValueLo9 || (lo10 == decimalMaxValueLo9 && c > decimalMaxValueLo1))))).GetValueOrDefault())))
                         {
                             if (mantissaDigits < 19)
                             {
@@ -1439,7 +1437,7 @@ namespace Microsoft.Identity.Json.Utilities
             exponent += exponentFromMantissa;
 
             // correct the decimal point
-            exponent -= numDecimalEnd - numDecimalStart;
+            exponent -= (numDecimalEnd - numDecimalStart);
 
             if (mantissaDigits <= 19)
             {
@@ -1493,7 +1491,7 @@ namespace Microsoft.Identity.Json.Utilities
                     }
                     if (exponent >= -28)
                     {
-                        value *= new decimal(1, 0, 0, false, (byte)-exponent);
+                        value *= new decimal(1, 0, 0, false, (byte)(-exponent));
                     }
                     else
                     {

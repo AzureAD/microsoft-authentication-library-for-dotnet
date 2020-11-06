@@ -2,16 +2,16 @@
   <PropertyGroup>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 
-    <LangVersion>7.2</LangVersion>
-    <SignAssembly>true</SignAssembly>
+    <LangVersion>8.0</LangVersion>
+    <!--<SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/../build/MSAL.snk</AssemblyOriginatorKeyFile>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsPackable>false</IsPackable>
 
-    <!-- We use SemVer 2.0, and this removes the warning when building nuget packages that 2.0 semver is not compatible with semver 1.0 tools. -->
-    <NoWarn>NU5105</NoWarn>
+    --><!-- We use SemVer 2.0, and this removes the warning when building nuget packages that 2.0 semver is not compatible with semver 1.0 tools. --><!--
+    <NoWarn>NU5105</NoWarn>-->
 
   </PropertyGroup>
 

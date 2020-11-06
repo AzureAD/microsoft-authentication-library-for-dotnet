@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Json.Linq
 {
-    internal partial class JRaw
+    public partial class JRaw
     {
         /// <summary>
         /// Asynchronously creates an instance of <see cref="JRaw"/> with the content of the reader's current token.

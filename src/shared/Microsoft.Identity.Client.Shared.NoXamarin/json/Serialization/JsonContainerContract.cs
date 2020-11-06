@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Contract details for a <see cref="System.Type"/> used by the <see cref="JsonSerializer"/>.
     /// </summary>
-    internal class JsonContainerContract : JsonContract
+    public class JsonContainerContract : JsonContract
     {
         private JsonContract _itemContract;
         private JsonContract _finalItemContract;
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Json.Serialization
                 _itemContract = value;
                 if (_itemContract != null)
                 {
-                    _finalItemContract = _itemContract.UnderlyingType.IsSealed() ? _itemContract : null;
+                    _finalItemContract = (_itemContract.UnderlyingType.IsSealed()) ? _itemContract : null;
                 }
                 else
                 {

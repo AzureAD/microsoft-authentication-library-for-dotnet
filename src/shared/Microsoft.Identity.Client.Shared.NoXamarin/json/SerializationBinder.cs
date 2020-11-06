@@ -1,5 +1,5 @@
 ﻿
-#if DOTNET || PORTABLE40 || PORTABLE || NET_CORE
+#if (DOTNET || PORTABLE40 || PORTABLE)
 using System;
 using System.Reflection;
 
@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Json
     /// Allows users to control class loading and mandate what class to load.
     /// </summary>
     [Obsolete("SerializationBinder is obsolete. Use ISerializationBinder instead.")]
-    internal abstract class SerializationBinder
+    public abstract class SerializationBinder
     {
         /// <summary>
         /// When overridden in a derived class, controls the binding of a serialized object to a type.

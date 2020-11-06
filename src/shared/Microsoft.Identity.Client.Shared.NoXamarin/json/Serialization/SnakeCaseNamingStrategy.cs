@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// A snake case naming strategy.
     /// </summary>
-    internal class SnakeCaseNamingStrategy : NamingStrategy
+    public class SnakeCaseNamingStrategy : NamingStrategy
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SnakeCaseNamingStrategy"/> class.

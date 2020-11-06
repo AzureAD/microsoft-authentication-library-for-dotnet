@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Represents a trace writer.
     /// </summary>
-    internal interface ITraceWriter
+    public interface ITraceWriter
     {
         /// <summary>
         /// Gets the <see cref="TraceLevel"/> that will be used to filter the trace messages passed to the writer.

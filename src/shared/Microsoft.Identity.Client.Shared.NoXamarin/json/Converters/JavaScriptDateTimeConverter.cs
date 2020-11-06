@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts a <see cref="DateTime"/> to and from a JavaScript <c>Date</c> constructor (e.g. <c>new Date(52231943)</c>).
     /// </summary>
-    internal class JavaScriptDateTimeConverter : DateTimeConverterBase
+    public class JavaScriptDateTimeConverter : DateTimeConverterBase
     {
         /// <summary>
         /// Writes the JSON representation of the object.
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Json.Converters
             }
 
 #if HAVE_DATE_TIME_OFFSET
-            Type t = ReflectionUtils.IsNullableType(objectType)
+            Type t = (ReflectionUtils.IsNullableType(objectType))
                 ? Nullable.GetUnderlyingType(objectType)
                 : objectType;
             if (t == typeof(DateTimeOffset))

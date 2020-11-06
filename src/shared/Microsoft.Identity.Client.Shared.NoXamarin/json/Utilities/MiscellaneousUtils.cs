@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Json.Utilities
         {
             int colonPosition = qualifiedName.IndexOf(':');
 
-            if (colonPosition == -1 || colonPosition == 0 || (qualifiedName.Length - 1) == colonPosition)
+            if ((colonPosition == -1 || colonPosition == 0) || (qualifiedName.Length - 1) == colonPosition)
             {
                 prefix = null;
                 localName = qualifiedName;
