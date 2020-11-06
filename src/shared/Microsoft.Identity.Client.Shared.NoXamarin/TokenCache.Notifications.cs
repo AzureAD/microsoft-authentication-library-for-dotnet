@@ -53,9 +53,6 @@ namespace Microsoft.Identity.Client
 
         async Task ITokenCacheInternal.OnBeforeWriteAsync(TokenCacheNotificationArgs args)
         {
-#pragma warning disable CS0618 // Type or member is obsolete, but preserve old behavior until it is deleted
-            HasStateChanged = true;
-#pragma warning restore CS0618 // Type or member is obsolete
             args.HasStateChanged = true;
             BeforeWrite?.Invoke(args);
 
@@ -72,9 +69,7 @@ namespace Microsoft.Identity.Client
         /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
         /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>
-        /// <remarks>In the case where the delegate is used to deserialize the cache, it might
-        /// want to call <see cref="Deserialize(byte[])"/></remarks>
+        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>      
 #if MOBILE_PLATFORM // no custom cache on mobile
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
@@ -89,10 +84,7 @@ namespace Microsoft.Identity.Client
         /// delegate to serialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
         /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
-        /// member of the cache is <c>true</c></param>
-        /// <remarks>In the case where the delegate is used to serialize the cache entierely (not just a row), it might
-        /// want to call <see cref="Serialize()"/></remarks>
+        /// <param name="afterAccess">Delegate set in order to handle the cache serialization </param>
 #if MOBILE_PLATFORM // no custom cache on mobile
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
@@ -124,9 +116,6 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
         /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>
-        /// <remarks>In the case where the delegate is used to deserialize the cache, it might
-        /// want to call <see cref="Deserialize(byte[])"/></remarks>
-
 #if MOBILE_PLATFORM // no custom cache on mobile
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
@@ -141,10 +130,7 @@ namespace Microsoft.Identity.Client
         /// delegate to serialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
         /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
-        /// member of the cache is <c>true</c></param>
-        /// <remarks>In the case where the delegate is used to serialize the cache entierely (not just a row), it might
-        /// want to call <see cref="Serialize()"/></remarks>
+        /// <param name="afterAccess">Delegate set in order to handle the cache serialization </param>
 #if MOBILE_PLATFORM // no custom cache on mobile
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif        

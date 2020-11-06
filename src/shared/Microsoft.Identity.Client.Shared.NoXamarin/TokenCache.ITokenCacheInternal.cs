@@ -128,10 +128,6 @@ namespace Microsoft.Identity.Client
                     hasTokens: (this as ITokenCacheInternal).HasTokensNoLocks(),
                     suggestedCacheKey: suggestedWebCacheKey);
 
-#pragma warning disable CS0618 // Type or member is obsolete
-                HasStateChanged = true;
-#pragma warning restore CS0618 // Type or member is obsolete
-
                 try
                 {
                     await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -199,9 +195,6 @@ namespace Microsoft.Identity.Client
                      suggestedCacheKey: suggestedWebCacheKey);
 
                     await (this as ITokenCacheInternal).OnAfterAccessAsync(args2).ConfigureAwait(false);
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
                 }
 
                 return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
@@ -555,17 +548,17 @@ namespace Microsoft.Identity.Client
 
             requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
 
-          
+
 
             // ADAL legacy cache does not store FRTs
             if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
             {
-              
+
                 return CacheFallbackOperations.GetRefreshToken(
                     Logger,
                     LegacyCachePersistence,
                     aliases,
-                    requestParams.ClientId,                    
+                    requestParams.ClientId,
                     requestParams.Account);
             }
 
@@ -683,9 +676,9 @@ namespace Microsoft.Identity.Client
                     acc.WamAccountIds.ContainsKey(requestParameters.ClientId)))
                 {
                     var wamAccount = new Account(
-                        wamAccountCache.HomeAccountId, 
-                        wamAccountCache.PreferredUsername, 
-                        environment, 
+                        wamAccountCache.HomeAccountId,
+                        wamAccountCache.PreferredUsername,
+                        environment,
                         wamAccountCache.WamAccountIds);
 
                     clientInfoToAccountMap[wamAccountCache.HomeAccountId] = wamAccount;
@@ -769,45 +762,38 @@ namespace Microsoft.Identity.Client
             {
                 requestContext.Logger.Info("Removing user from cache..");
 
+
+                var args = new TokenCacheNotificationArgs(
+                    this,
+                    ClientId,
+                    account,
+                    true,
+                    (this as ITokenCacheInternal).IsApplicationCache,
+                    (this as ITokenCacheInternal).HasTokensNoLocks(),
+                    account.HomeAccountId.Identifier);
+
                 try
                 {
-                    var args = new TokenCacheNotificationArgs(
-                        this,
-                        ClientId,
-                        account,
-                        true,
-                        (this as ITokenCacheInternal).IsApplicationCache,
-                        (this as ITokenCacheInternal).HasTokensNoLocks(),
-                        account.HomeAccountId.Identifier);
+                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
+                    await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
 
-                    try
-                    {
-                        await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
-                        await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
-
-                        ((ITokenCacheInternal)this).RemoveMsalAccountWithNoLocks(account, requestContext);
-                        RemoveAdalUser(account);
-                    }
-                    finally
-                    {
-                        var afterAccessArgs = new TokenCacheNotificationArgs(
-                           this,
-                           ClientId,
-                           account,
-                           true,
-                           (this as ITokenCacheInternal).IsApplicationCache,
-                           hasTokens: (this as ITokenCacheInternal).HasTokensNoLocks(),
-                           account.HomeAccountId.Identifier);
-
-                        await (this as ITokenCacheInternal).OnAfterAccessAsync(afterAccessArgs).ConfigureAwait(false);
-                    }
+                    ((ITokenCacheInternal)this).RemoveMsalAccountWithNoLocks(account, requestContext);
+                    RemoveAdalUser(account);
                 }
                 finally
                 {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
+                    var afterAccessArgs = new TokenCacheNotificationArgs(
+                       this,
+                       ClientId,
+                       account,
+                       true,
+                       (this as ITokenCacheInternal).IsApplicationCache,
+                       hasTokens: (this as ITokenCacheInternal).HasTokensNoLocks(),
+                       account.HomeAccountId.Identifier);
+
+                    await (this as ITokenCacheInternal).OnAfterAccessAsync(afterAccessArgs).ConfigureAwait(false);
                 }
+
             }
             finally
             {

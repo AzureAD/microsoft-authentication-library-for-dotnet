@@ -1,31 +1,30 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Target Frameworks"> 
     
-    <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
-    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
-    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
-    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+    <!--<TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>-->
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+    <!--<TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>-->
 
-    <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
+    <!--<TargetFrameworkUap>uap10.0</TargetFrameworkUap>
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
-    <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
-
-    <TargetFrameworks>
+    <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>-->
+    <TargetFramework>$(TargetFrameworkNetStandard)</TargetFramework>
+    <!--<TargetFrameworks>
       $(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10)
     </TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">
       $(TargetFrameworks);$(TargetFrameworkUap);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetDesktop45);
-    </TargetFrameworks>
+    </TargetFrameworks>-->
 
     <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
   </PropertyGroup>
 
   <Import Project="../../package.props" />
   <Import Project="../../flags.props" />
-  <Import Project="../Microsoft.Identity.Client.Shared.NoXamarin/shared.references.props"/>
+  <Import Project="../Microsoft.Identity.Client.Shared.NoXamarin/shared.references.props" />
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
@@ -40,9 +39,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\**\*.cs;" 
-             Exclude="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\obj\**\*;" />
-    <None Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\shared.references.props"/>
+    <Compile Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\**\*.cs;" Exclude="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\obj\**\*;" />
+    <None Include="$(MSBuildThisFileDirectory)\..\Microsoft.Identity.Client.Shared.NoXamarin\shared.references.props" />
   </ItemGroup>
 
 

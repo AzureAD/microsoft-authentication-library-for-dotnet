@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Client
         private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
         private readonly IFeatureFlags _featureFlags;
         private readonly ITokenCacheAccessor _accessor;
-        private volatile bool _hasStateChanged;
 
         private ICoreLogger Logger => ServiceBundle.DefaultLogger;
 

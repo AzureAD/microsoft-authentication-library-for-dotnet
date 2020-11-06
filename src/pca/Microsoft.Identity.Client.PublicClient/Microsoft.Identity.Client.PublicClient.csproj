@@ -3,14 +3,12 @@
   <PropertyGroup Label="Target Frameworks">
 
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
-    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
-    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
 
-    <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
+    <TargetFrameworkUap>uap10.0.16299</TargetFrameworkUap>
 
-    <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>    
-    <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
+    <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>        
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
 
@@ -18,7 +16,7 @@
       $(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10)
     </TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-      $(TargetFrameworks);$(TargetFrameworkUap);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461)
+      $(TargetFrameworks);$(TargetFrameworkUap);$(TargetFrameworkNetDesktop461)
     </TargetFrameworks>
 
     <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
