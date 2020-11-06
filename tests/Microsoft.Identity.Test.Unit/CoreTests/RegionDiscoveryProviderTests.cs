@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
                 Assert.Fail("Exception should be thrown.");
             }
-            catch (MsalClientException e)
+            catch (MsalServiceException e)
             {
                 Assert.IsNotNull(e);
                 Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
