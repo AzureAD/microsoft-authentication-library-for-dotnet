@@ -51,9 +51,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <inheritdoc />
-        public abstract string GetEnvironmentVariable(string variable);
-
-        /// <inheritdoc />
         public string GetOperatingSystem()
         {
             return _operatingSystem.Value;

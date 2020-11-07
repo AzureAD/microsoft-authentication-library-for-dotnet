@@ -43,11 +43,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
         }
 
-        public override string GetEnvironmentVariable(string variable)
-        {
-            return null;
-        }
-
         protected override string InternalGetProcessorArchitecture()
         {
             if (global::Android.OS.Build.VERSION.SdkInt < global::Android.OS.BuildVersionCodes.Lollipop)

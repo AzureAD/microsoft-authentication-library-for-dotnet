@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if DESKTOP || NET_CORE
+#if DESKTOP || NET_CORE || NETSTANDARD
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
+namespace Microsoft.Identity.Client.Platforms.netstandardcore.Desktop.OsBrowser
 {
     /// <summary>
     /// An abstraction over objects that are able to listen to localhost url (e.g. http://localhost:1234)

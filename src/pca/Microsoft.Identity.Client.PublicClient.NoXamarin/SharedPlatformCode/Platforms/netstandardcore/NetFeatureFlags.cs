@@ -3,9 +3,9 @@
 
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.Platforms.netcore
+namespace Microsoft.Identity.Client.Platforms.netstandardcore
 {
-    internal class NetCoreFeatureFlags : IFeatureFlags
+    internal class NetFeatureFlags : IFeatureFlags
     {
         public bool IsFociEnabled => true;
     }

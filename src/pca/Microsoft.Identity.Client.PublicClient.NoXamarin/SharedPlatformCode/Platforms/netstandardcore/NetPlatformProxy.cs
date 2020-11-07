@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if NET_CORE
+#if NET_CORE || NETSTANDARD
 
 using System;
 using System.ComponentModel;
@@ -18,26 +18,16 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 
-namespace Microsoft.Identity.Client.Platforms.netcore
+namespace Microsoft.Identity.Client.Platforms.netstandardcore
 {
     /// <summary>
     /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
-    internal class NetCorePlatformProxy : AbstractSharedPlatformProxy
+    internal class NetPlatformProxy : AbstractSharedPlatformProxy
     {
-        public NetCorePlatformProxy(ICoreLogger logger)
+        public NetPlatformProxy(ICoreLogger logger)
             : base(logger)
         {
-        }
-
-        public override string GetEnvironmentVariable(string variable)
-        {
-            if (string.IsNullOrWhiteSpace(variable))
-            {
-                throw new ArgumentNullException(nameof(variable));
-            }
-
-            return Environment.GetEnvironmentVariable(variable);
         }
 
         protected override string InternalGetProcessorArchitecture()
@@ -68,7 +58,11 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         protected override string InternalGetProductName()
         {
+#if NET_CORE
             return "MSAL.NetCore";
+#elif NETSTANDARD
+            return "MSAL.CoreCLR";
+#endif
         }
 
         /// <summary>
@@ -108,7 +102,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return new InMemoryTokenCacheAccessor(Logger);
         }
 
-        protected override ICryptographyManager InternalGetCryptographyManager() => new NetCoreCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
         public override string GetDeviceNetworkState()
@@ -134,7 +127,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             // TODO(mats): need to detect operating system and switch on it to determine proper enum
             return MatsConverter.AsInt(OsPlatform.Win32);
         }
-        protected override IFeatureFlags CreateFeatureFlags() => new NetCoreFeatureFlags();
 
         public override bool BrokerSupportsWamAccounts => true;
 
@@ -168,6 +160,16 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         public static bool IsLinuxPlatform()
         {
             return Environment.OSVersion.Platform == PlatformID.Unix;
+        }
+
+        protected override IFeatureFlags CreateFeatureFlags()
+        {
+            return new NetFeatureFlags();
+        }
+
+        protected override ICryptographyManager InternalGetCryptographyManager()
+        {
+            return new NetCryptographyManager();
         }
     }
 }

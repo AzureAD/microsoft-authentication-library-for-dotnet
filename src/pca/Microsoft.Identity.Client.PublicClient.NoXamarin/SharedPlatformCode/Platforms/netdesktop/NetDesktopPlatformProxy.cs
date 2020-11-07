@@ -35,16 +35,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
         }
 
-        public override string GetEnvironmentVariable(string variable)
-        {
-            if (string.IsNullOrWhiteSpace(variable))
-            {
-                throw new ArgumentNullException(nameof(variable));
-            }
-
-            return Environment.GetEnvironmentVariable(variable);
-        }
-
         /// <inheritdoc />
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {

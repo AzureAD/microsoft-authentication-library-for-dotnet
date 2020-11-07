@@ -3,7 +3,7 @@
 
 #if DESKTOP
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.Platforms.netstandardcore.Desktop.OsBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 

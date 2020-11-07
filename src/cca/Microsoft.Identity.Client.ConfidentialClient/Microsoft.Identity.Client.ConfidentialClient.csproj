@@ -21,7 +21,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)\..\..\pca\Microsoft.Identity.Client.PublicClient.NoXamarin\Shared\**\*.cs" LinkBase="PCA_Shared" />
+    <Compile Include="$(MSBuildThisFileDirectory)\..\..\pca\Microsoft.Identity.Client.PublicClient.NoXamarin\SharedPlatformCode\**\*.cs" LinkBase="SharedPlatformCode" />
     <ProjectReference Include="..\..\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
   </ItemGroup>
 

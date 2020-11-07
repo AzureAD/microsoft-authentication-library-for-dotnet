@@ -7,7 +7,6 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client
 {
@@ -25,7 +24,6 @@ namespace Microsoft.Identity.Client
     public sealed partial class ConfidentialClientApplication
         : ClientApplicationBase,
             IConfidentialClientApplication,
-            //IConfidentialClientApplicationWithCertificate, //TODO split: MigrationAid
             IByRefreshToken
     {
         internal ConfidentialClientApplication(ApplicationConfiguration configuration)

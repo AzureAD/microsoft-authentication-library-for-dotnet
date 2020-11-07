@@ -1,20 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
-    <IsPackable>false</IsPackable>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+
   </PropertyGroup>
-
   <ItemGroup>
-    <None Remove="data.txt" />
-    <EmbeddedResource Include="data.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Confidential\Microsoft.Identity.Client.Confidential.csproj" />
-    <ProjectReference Include="..\..\src\Desktop\Microsoft.Identity.Client.Desktop.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
-    <ProjectReference Include="..\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\cca\Microsoft.Identity.Client.ConfidentialClient\Microsoft.Identity.Client.ConfidentialClient.csproj" />
+    <ProjectReference Include="..\..\src\pca\Microsoft.Identity.Client.PublicClient.NoXamarin\Microsoft.Identity.Client.PublicClient.NoXamarin.csproj" />
+    <ProjectReference Include="..\..\src\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
@@ -29,17 +23,11 @@
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-    <!--<PackageReference Include="StrongNamer">
+    <PackageReference Include="StrongNamer">
       <Version>0.2.5</Version>
-    </PackageReference>-->
-
+    </PackageReference>
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
-    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net472' ">
-    <DefineConstants>$(DefineConstants);DESKTOP;NET_FX</DefineConstants>
-  </PropertyGroup>
-  
+
+
 </Project>

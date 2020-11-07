@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Identity.Test.Common</AssemblyName>
   </PropertyGroup>
@@ -15,9 +15,9 @@
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Confidential\Microsoft.Identity.Client.Confidential.csproj" />
-    <ProjectReference Include="..\..\src\Desktop\Microsoft.Identity.Client.Desktop.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
+    <ProjectReference Include="..\..\src\cca\Microsoft.Identity.Client.ConfidentialClient\Microsoft.Identity.Client.ConfidentialClient.csproj" />
+    <ProjectReference Include="..\..\src\pca\Microsoft.Identity.Client.PublicClient.NoXamarin\Microsoft.Identity.Client.PublicClient.NoXamarin.csproj" />
+    <ProjectReference Include="..\..\src\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" />

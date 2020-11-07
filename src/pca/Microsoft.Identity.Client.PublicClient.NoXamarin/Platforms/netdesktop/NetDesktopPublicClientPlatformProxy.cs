@@ -93,57 +93,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return sb.ToString();
         }
 
-        //public Task<bool> IsUserLocalAsync(RequestContext requestContext)
-        //{
-        //    var current = WindowsIdentity.GetCurrent();
-        //    if (current != null)
-        //    {
-        //        string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
-        //        return Task.FromResult(
-        //            prefix.Equals(Environment.MachineName.ToUpperInvariant(), StringComparison.OrdinalIgnoreCase));
-        //    }
-
-        //    return Task.FromResult(false);
-        //}
-
-        //public bool IsDomainJoined()
-        //{
-        //    if (!IsWindows)
-        //    {
-        //        return false;
-        //    }
-
-        //    bool returnValue = false;
-        //    try
-        //    {
-        //        int result = WindowsNativeMethods.NetGetJoinInformation(null, out var pDomain, out var status);
-        //        if (pDomain != IntPtr.Zero)
-        //        {
-        //            WindowsNativeMethods.NetApiBufferFree(pDomain);
-        //        }
-
-        //        returnValue = result == WindowsNativeMethods.ErrorSuccess &&
-        //                      status == WindowsNativeMethods.NetJoinStatus.NetSetupDomainName;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Logger.WarningPii(ex);
-        //        // ignore the exception as the result is already set to false;
-        //    }
-
-        //    return returnValue;
-        //}
-
-        public override string GetEnvironmentVariable(string variable)
-        {
-            if (string.IsNullOrWhiteSpace(variable))
-            {
-                throw new ArgumentNullException(nameof(variable));
-            }
-
-            return Environment.GetEnvironmentVariable(variable);
-        }
-
         /// <inheritdoc />
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {

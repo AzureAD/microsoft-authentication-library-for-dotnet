@@ -9,10 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Desktop.Platforms.netcore;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.Platforms.netcore;
+using Microsoft.Identity.Client.Platforms.netstandardcore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -87,7 +85,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Use a real platform proxy but block StartDefaultOsBrowserAsync as we do not want an actual
             // browser to pop-up during tests
-            var platformProxy = Substitute.ForPartsOf<NetCorePublicClientPlatformProxy>(new NullLogger());
+            var platformProxy = Substitute.ForPartsOf<NetPublicClientPlatformProxy>(new NullLogger());
             platformProxy.WhenForAnyArgs(x => x.StartDefaultOsBrowserAsync(default)).DoNotCallBase();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder

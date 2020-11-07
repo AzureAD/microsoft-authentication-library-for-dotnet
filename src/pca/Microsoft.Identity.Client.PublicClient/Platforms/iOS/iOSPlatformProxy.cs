@@ -44,11 +44,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
 
        
-        public override string GetEnvironmentVariable(string variable)
-        {
-            return null;
-        }
-
         protected override  string InternalGetProcessorArchitecture()
         {
             return null;

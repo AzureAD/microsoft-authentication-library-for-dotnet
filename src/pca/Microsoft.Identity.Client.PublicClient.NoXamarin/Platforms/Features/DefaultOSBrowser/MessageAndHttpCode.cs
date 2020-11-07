@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if DESKTOP || NET_CORE
+#if DESKTOP || NET_CORE || NETSTANDARD
 using System;
 using System.Net;
 
-namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
+namespace Microsoft.Identity.Client.Platforms.netstandardcore.Desktop.OsBrowser
 {
     internal class MessageAndHttpCode
     {

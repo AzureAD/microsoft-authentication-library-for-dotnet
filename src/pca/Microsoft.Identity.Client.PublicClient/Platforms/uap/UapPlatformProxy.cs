@@ -100,23 +100,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 MsalErrorMessage.UapCannotFindDomainUser);
         }
 
-        //public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
-        //{
-        //    IReadOnlyList<User> users = await User.FindAllAsync();
-        //    return users.Any(u => u.Type == UserType.LocalUser || u.Type == UserType.LocalGuest);
-        //}
-
-        //public override bool IsDomainJoined()
-        //{
-        //    return NetworkInformation.GetHostNames().Any(entry => entry.Type == HostNameType.DomainName);
-        //}
-
-        public override string GetEnvironmentVariable(string variable)
-        {
-            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            return localSettings.Values.ContainsKey(variable) ? localSettings.Values[variable].ToString() : null;
-        }
-
         protected override string InternalGetProcessorArchitecture()
         {
             return WindowsNativeMethods.GetProcessorArchitecture();

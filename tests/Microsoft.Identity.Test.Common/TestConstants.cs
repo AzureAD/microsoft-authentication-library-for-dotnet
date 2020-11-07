@@ -321,7 +321,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
    }";
     }
 
-    internal static class Adfs2019LabConstants
+    public static class Adfs2019LabConstants
     {
         public const string Authority = "https://fs.msidlab8.com/adfs";
         public const string AppId = "TestAppIdentifier";

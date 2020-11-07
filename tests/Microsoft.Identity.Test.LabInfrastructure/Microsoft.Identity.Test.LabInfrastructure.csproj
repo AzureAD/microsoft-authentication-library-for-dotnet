@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Confidential\Microsoft.Identity.Client.Confidential.csproj" />
-    <ProjectReference Include="..\..\src\Desktop\Microsoft.Identity.Client.Desktop.csproj" />
+    <ProjectReference Include="..\..\src\cca\Microsoft.Identity.Client.ConfidentialClient\Microsoft.Identity.Client.ConfidentialClient.csproj" />
+    <ProjectReference Include="..\..\src\pca\Microsoft.Identity.Client.PublicClient.NoXamarin\Microsoft.Identity.Client.PublicClient.NoXamarin.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
   </ItemGroup>
 

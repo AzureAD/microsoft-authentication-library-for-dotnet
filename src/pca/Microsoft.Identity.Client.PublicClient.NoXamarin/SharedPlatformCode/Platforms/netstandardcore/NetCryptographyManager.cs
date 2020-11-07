@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if NETSTANDARD
+#if NET_CORE || NETSTANDARD
+
 using System;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -9,9 +11,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Platforms.netstandard13
+namespace Microsoft.Identity.Client.Platforms.netstandardcore
 {
-    internal class NetStandard13CryptographyManager : ICryptographyManager
+    internal class NetCryptographyManager : ICryptographyManager
     {
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
@@ -65,6 +67,13 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
+            if (certificate.PublicKey.Key.KeySize < ClientCredentialWrapper.MinKeySizeInBits)
+            {
+                throw new ArgumentOutOfRangeException(nameof(certificate),
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
+                        ClientCredentialWrapper.MinKeySizeInBits));
+            }
+
             using (var key = certificate.GetRSAPrivateKey())
             {
                 return key.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);

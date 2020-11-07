@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if DESKTOP || NET_CORE
+#if DESKTOP || NET_CORE || NETSTANDARD
 using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.Platforms.netstandardcore.Desktop.OsBrowser;
 
-namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
+namespace Microsoft.Identity.Client.Platforms.netstandardcore.DefaultOSBrowser
 {
     internal class HttpListenerInterceptor : IUriInterceptor
     {

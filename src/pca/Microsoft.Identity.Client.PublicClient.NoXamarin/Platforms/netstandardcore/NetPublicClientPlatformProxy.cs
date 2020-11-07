@@ -1,26 +1,25 @@
-﻿#if NET_CORE
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+#if NET_CORE || NETSTANDARD
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Features.Windows;
-using Microsoft.Identity.Client.Platforms.netcore;
-using Microsoft.Identity.Client.Platforms.Shared.NetStdCore;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Desktop.Platforms.netcore
+namespace Microsoft.Identity.Client.Platforms.netstandardcore
 {
-    class NetCorePublicClientPlatformProxy : NetCorePlatformProxy, IPublicClientPlatformProxy
+    class NetPublicClientPlatformProxy : NetPlatformProxy, IPublicClientPlatformProxy
     {
-        public NetCorePublicClientPlatformProxy(ICoreLogger logger)
+        public NetPublicClientPlatformProxy(ICoreLogger logger)
             : base(logger)
         {
         }
@@ -66,17 +65,7 @@ namespace Microsoft.Identity.Client.Desktop.Platforms.netcore
                 "For more details see https://aka.ms/msal-net-iwa");
         }    
 
-        public override string GetEnvironmentVariable(string variable)
-        {
-            if (string.IsNullOrWhiteSpace(variable))
-            {
-                throw new ArgumentNullException(nameof(variable));
-            }
-
-            return Environment.GetEnvironmentVariable(variable);
-        }
-
-        public IWebUIFactory CreateWebUiFactory() => new NetCoreWebUIFactory();
+        public IWebUIFactory CreateWebUiFactory() => new NetWebUIFactory();
 
 
         public override Task StartDefaultOsBrowserAsync(string url)

@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Desktop.Internal.Requests
+namespace Microsoft.Identity.Client.PublicClient.Internal.Requests
 {
     internal class AuthorizationUriBuilder
     {

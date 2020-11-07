@@ -18,8 +18,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// <returns>device model or null</returns>
         string GetDeviceModel();
 
-        string GetEnvironmentVariable(string variable);
-
         string GetOperatingSystem();
 
         string GetProcessorArchitecture();

@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if DESKTOP || NET_CORE
+#if DESKTOP || NET_CORE || NETSTANDARD
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -11,12 +11,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
+using Microsoft.Identity.Client.Platforms.netstandardcore.DefaultOSBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
+namespace Microsoft.Identity.Client.Platforms.netstandardcore.Desktop.OsBrowser
 {
     internal class DefaultOsBrowserWebUi : IWebUI
     {
