@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     _logger.Info("[WamProxy] FindAllAccountsAsync method does not exist (it was introduced in Win 10 RS3). " +
                         "Returning 0 broker accounts. ");
                     return Enumerable.Empty<WebAccount>().ToList();
-                }
+                }                
 
                 FindAllAccountsResult findResult = await WebAuthenticationCoreManager.FindAllAccountsAsync(provider, clientID);
 

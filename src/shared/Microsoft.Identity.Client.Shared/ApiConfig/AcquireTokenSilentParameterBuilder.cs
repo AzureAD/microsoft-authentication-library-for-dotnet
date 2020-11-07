@@ -104,10 +104,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="withSendX5C"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>.
         /// The default is <c>false</c></param>
-        /// <returns>The builder to chain the .With methods</returns>
-#if !CONFIDENTIAL_CLIENT_PLATFORM
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-#endif        
+        /// <returns>The builder to chain the .With methods</returns>   
         public AcquireTokenSilentParameterBuilder WithSendX5C(bool withSendX5C)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);

@@ -1,25 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup Label="Target Frameworks"> 
+  
+  <PropertyGroup Label="Target Frameworks">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
-    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
-    <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
-    <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
-    
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>    
     
     <TargetFrameworks>$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworks);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworks);$(TargetFrameworkNetDesktop461);</TargetFrameworks>
 
     <UseWindowsForms>true</UseWindowsForms>
     <NoWarn>$(NoWarn);NU5131;</NoWarn>
+
+    <!-- This assembly is not part of the product and should not be packaged-->
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <Import Project="../../flags.props" />
-  <Import Project="pca.references.props"/>
- 
-
+  <Import Project="pca.references.props" />
   <ItemGroup>
-    <ProjectReference Include="..\..\shared\Microsoft.Identity.Client.Shared.NoXamarin\Microsoft.Identity.Client.Shared.NoXamarin.csproj" />
+    <ProjectReference Include="..\..\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
   </ItemGroup>
   
 </Project>
