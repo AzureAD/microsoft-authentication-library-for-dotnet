@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Represents a JSON property.
     /// </summary>
-    public partial class JProperty : JContainer
+    internal partial class JProperty : JContainer
     {
         #region JPropertyList
         private class JPropertyList : IList<JToken>

@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Json
     /// Allows users to control class loading and mandate what class to load.
     /// </summary>
     [Obsolete("SerializationBinder is obsolete. Use ISerializationBinder instead.")]
-    public abstract class SerializationBinder
+    internal abstract class SerializationBinder
     {
         /// <summary>
         /// When overridden in a derived class, controls the binding of a serialized object to a type.

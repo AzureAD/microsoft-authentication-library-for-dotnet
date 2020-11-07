@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Represents a JSON constructor.
     /// </summary>
-    public partial class JConstructor : JContainer
+    internal partial class JConstructor : JContainer
     {
         private string _name;
         private readonly List<JToken> _values = new List<JToken>();

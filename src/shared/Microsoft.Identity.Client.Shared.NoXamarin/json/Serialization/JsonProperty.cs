@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Maps a JSON property to a .NET member or constructor parameter.
     /// </summary>
-    public class JsonProperty
+    internal class JsonProperty
     {
         internal Required? _required;
         internal bool _hasExplicitDefaultValue;

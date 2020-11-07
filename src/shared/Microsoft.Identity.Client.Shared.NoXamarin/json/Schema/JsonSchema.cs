@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Json.Schema
     /// </note>
     /// </summary>
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    public class JsonSchema
+    internal class JsonSchema
     {
         /// <summary>
         /// Gets or sets the id.

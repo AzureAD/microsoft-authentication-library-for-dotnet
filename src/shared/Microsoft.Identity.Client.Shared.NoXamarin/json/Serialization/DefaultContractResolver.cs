@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Used by <see cref="JsonSerializer"/> to resolve a <see cref="JsonContract"/> for a given <see cref="System.Type"/>.
     /// </summary>
-    public class DefaultContractResolver : IContractResolver
+    internal class DefaultContractResolver : IContractResolver
     {
         private static readonly IContractResolver _instance = new DefaultContractResolver();
 

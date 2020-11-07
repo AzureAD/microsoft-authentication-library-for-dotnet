@@ -5,7 +5,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Specifies the settings used when loading JSON.
     /// </summary>
-    public class JsonLoadSettings
+    internal class JsonLoadSettings
     {
         private CommentHandling _commentHandling;
         private LineInfoHandling _lineInfoHandling;

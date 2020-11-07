@@ -36,7 +36,7 @@ using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json
 {
-    public abstract partial class JsonWriter
+    internal abstract partial class JsonWriter
     {
         internal Task AutoCompleteAsync(JsonToken tokenBeingWritten, CancellationToken cancellationToken)
         {

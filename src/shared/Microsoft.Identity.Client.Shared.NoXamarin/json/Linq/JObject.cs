@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <example>
     ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
     /// </example>
-    public partial class JObject : JContainer, IDictionary<string, JToken>, INotifyPropertyChanged
+    internal partial class JObject : JContainer, IDictionary<string, JToken>, INotifyPropertyChanged
 #if HAVE_COMPONENT_MODEL
         , ICustomTypeDescriptor
 #endif

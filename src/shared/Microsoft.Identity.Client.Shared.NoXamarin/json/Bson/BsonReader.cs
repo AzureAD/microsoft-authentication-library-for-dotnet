@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Json.Bson
     /// Represents a reader that provides fast, non-cached, forward-only access to serialized BSON data.
     /// </summary>
     [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Newtonsoft.Json.Bson for more details.")]
-    public class BsonReader : JsonReader
+    internal class BsonReader : JsonReader
     {
         private const int MaxCharBytesSize = 128;
         private static readonly byte[] SeqRange1 = new byte[] { 0, 127 }; // range of 1-byte sequence

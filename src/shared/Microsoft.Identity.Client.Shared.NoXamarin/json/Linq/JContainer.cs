@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Json.Linq
     /// <summary>
     /// Represents a token that can contain other tokens.
     /// </summary>
-    public abstract partial class JContainer : JToken, IList<JToken>
+    internal abstract partial class JContainer : JToken, IList<JToken>
 #if HAVE_COMPONENT_MODEL
         , ITypedList, IBindingList
 #endif

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Contract details for a <see cref="System.Type"/> used by the <see cref="JsonSerializer"/>.
     /// </summary>
-    public class JsonArrayContract : JsonContainerContract
+    internal class JsonArrayContract : JsonContainerContract
     {
         /// <summary>
         /// Gets the <see cref="System.Type"/> of the collection items.

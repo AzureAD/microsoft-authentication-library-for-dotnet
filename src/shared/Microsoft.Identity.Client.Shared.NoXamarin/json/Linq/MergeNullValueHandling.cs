@@ -6,7 +6,7 @@ namespace Microsoft.Identity.Json.Linq
     /// Specifies how null value properties are merged.
     /// </summary>
     [Flags]
-    public enum MergeNullValueHandling
+    internal enum MergeNullValueHandling
     {
         /// <summary>
         /// The content's null value properties will be ignored during merging.

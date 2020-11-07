@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// A base class for resolving how property names and dictionary keys are serialized.
     /// </summary>
-    public abstract class NamingStrategy
+    internal abstract class NamingStrategy
     {
         /// <summary>
         /// A flag indicating whether dictionary keys should be processed.

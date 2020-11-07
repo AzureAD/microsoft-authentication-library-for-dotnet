@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// </summary>
     /// <param name="o">The object that raised the callback event.</param>
     /// <param name="context">The streaming context.</param>
-    public delegate void SerializationCallback(object o, StreamingContext context);
+    internal delegate void SerializationCallback(object o, StreamingContext context);
 
     /// <summary>
     /// Handles <see cref="JsonSerializer"/> serialization error callback events.
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <param name="o">The object that raised the callback event.</param>
     /// <param name="context">The streaming context.</param>
     /// <param name="errorContext">The error context.</param>
-    public delegate void SerializationErrorCallback(object o, StreamingContext context, ErrorContext errorContext);
+    internal delegate void SerializationErrorCallback(object o, StreamingContext context, ErrorContext errorContext);
 
     /// <summary>
     /// Sets extension data for an object during deserialization.
@@ -67,18 +67,18 @@ namespace Microsoft.Identity.Json.Serialization
     /// <param name="o">The object to set extension data on.</param>
     /// <param name="key">The extension data key.</param>
     /// <param name="value">The extension data value.</param>
-    public delegate void ExtensionDataSetter(object o, string key, object value);
+    internal delegate void ExtensionDataSetter(object o, string key, object value);
 
     /// <summary>
     /// Gets extension data for an object during serialization.
     /// </summary>
     /// <param name="o">The object to set extension data on.</param>
-    public delegate IEnumerable<KeyValuePair<object, object>> ExtensionDataGetter(object o);
+    internal delegate IEnumerable<KeyValuePair<object, object>> ExtensionDataGetter(object o);
 
     /// <summary>
     /// Contract details for a <see cref="System.Type"/> used by the <see cref="JsonSerializer"/>.
     /// </summary>
-    public abstract class JsonContract
+    internal abstract class JsonContract
     {
         internal bool IsNullable;
         internal bool IsConvertable;

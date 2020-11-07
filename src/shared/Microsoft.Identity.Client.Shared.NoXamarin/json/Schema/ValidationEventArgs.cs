@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Json.Schema
     /// </note>
     /// </summary>
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    public class ValidationEventArgs : EventArgs
+    internal class ValidationEventArgs : EventArgs
     {
         private readonly JsonSchemaException _ex;
 

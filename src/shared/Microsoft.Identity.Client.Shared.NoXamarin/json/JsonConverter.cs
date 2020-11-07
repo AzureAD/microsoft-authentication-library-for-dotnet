@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Json
     /// <summary>
     /// Converts an object to and from JSON.
     /// </summary>
-    public abstract class JsonConverter
+    internal abstract class JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Json
     /// Converts an object to and from JSON.
     /// </summary>
     /// <typeparam name="T">The object type to convert.</typeparam>
-    public abstract class JsonConverter<T> : JsonConverter
+    internal abstract class JsonConverter<T> : JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.

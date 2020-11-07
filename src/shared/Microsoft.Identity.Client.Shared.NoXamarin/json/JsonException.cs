@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Json
 #if HAVE_BINARY_EXCEPTION_SERIALIZATION
     [Serializable]
 #endif
-    public class JsonException : Exception
+    internal class JsonException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonException"/> class.

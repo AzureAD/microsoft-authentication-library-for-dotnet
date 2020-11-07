@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Json.Serialization
     /// <summary>
     /// Contract details for a <see cref="Type"/> used by the <see cref="JsonSerializer"/>.
     /// </summary>
-    public class JsonPrimitiveContract : JsonContract
+    internal class JsonPrimitiveContract : JsonContract
     {
         internal PrimitiveTypeCode TypeCode { get; set; }
 

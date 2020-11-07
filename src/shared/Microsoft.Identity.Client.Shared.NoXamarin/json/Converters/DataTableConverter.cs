@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Json.Converters
     /// <summary>
     /// Converts a <see cref="DataTable"/> to and from JSON.
     /// </summary>
-    public class DataTableConverter : JsonConverter
+    internal class DataTableConverter : JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.
