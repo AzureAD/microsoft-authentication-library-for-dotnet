@@ -76,6 +76,7 @@ namespace Microsoft.Identity.Client
         /// <param name="withSendX5C"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>.
         /// The default is <c>false</c></param>
         /// <returns>The builder to chain the .With methods</returns>
+        //TODO: split - this method must go exclusively to CCA
         public AcquireTokenByAuthorizationCodeParameterBuilder WithSendX5C(bool withSendX5C)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
