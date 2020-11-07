@@ -27,9 +27,9 @@
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-    <!--<PackageReference Include="StrongNamer">
+    <PackageReference Include="StrongNamer">
       <Version>0.2.5</Version>
-    </PackageReference>-->
+    </PackageReference>
 
   </ItemGroup>
 
