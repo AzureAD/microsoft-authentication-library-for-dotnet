@@ -14,20 +14,20 @@
    <dependencies>
       <group targetFramework=".NETFramework4.6.1">        
         <dependency id="Microsoft.Identity.Client.ConfidentialClient" version="5.0.0-internal" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.Identity.Client.PublicClientClient" version="5.0.0-internal" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Identity.Client.PublicClient" version="5.0.0-internal" exclude="Build,Analyzers" />
       </group>
       <group targetFramework="MonoAndroid9.0">
-         <dependency id="Microsoft.Identity.Client.PublicClientClient" version="5.0.0-internal" exclude="Build,Analyzers" />
+         <dependency id="Microsoft.Identity.Client.PublicClient" version="5.0.0-internal" exclude="Build,Analyzers" />
         <dependency id="System.Security.SecureString" version="4.3.0" exclude="Build,Analyzers" />
         <dependency id="Xamarin.Android.Support.CustomTabs" version="28.0.0.3" exclude="Build,Analyzers" />
       </group>
       <group targetFramework="MonoAndroid10.0">
-         <dependency id="Microsoft.Identity.Client.PublicClientClient" version="5.0.0-internal" exclude="Build,Analyzers" />
+         <dependency id="Microsoft.Identity.Client.PublicClient" version="5.0.0-internal" exclude="Build,Analyzers" />
         <dependency id="System.Security.SecureString" version="4.3.0" exclude="Build,Analyzers" />
         <dependency id="Xamarin.AndroidX.Browser" version="1.0.0" exclude="Build,Analyzers" />
       </group>
       <group targetFramework="Xamarin.iOS1.0">
-         <dependency id="Microsoft.Identity.Client.PublicClientClient" version="5.0.0-internal" exclude="Build,Analyzers" />
+         <dependency id="Microsoft.Identity.Client.PublicClient" version="5.0.0-internal" exclude="Build,Analyzers" />
         <dependency id="Microsoft.CSharp" version="4.5.0" exclude="Build,Analyzers" />
         <dependency id="System.ComponentModel.TypeConverter" version="4.3.0" exclude="Build,Analyzers" />
         <dependency id="System.Runtime.Serialization.Formatters" version="4.3.0" exclude="Build,Analyzers" />
@@ -36,11 +36,11 @@
         <dependency id="System.Xml.XmlDocument" version="4.3.0" exclude="Build,Analyzers" />
       </group>
       <group targetFramework=".NETCoreApp3.1">
-        <dependency id="Microsoft.Identity.Client.PublicClientClient" version="5.0.0-internal" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Identity.Client.PublicClient" version="5.0.0-internal" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Identity.Client.ConfidentialClient" version="5.0.0-internal" exclude="Build,Analyzers" />
       </group>
       <group targetFramework=".NETStandard2.0">
-        <dependency id="Microsoft.Identity.Client.PublicClientClient" version="5.0.0-internal" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Identity.Client.PublicClient" version="5.0.0-internal" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Identity.Client.ConfidentialClient" version="5.0.0-internal" exclude="Build,Analyzers" />
         <dependency id="Microsoft.CSharp" version="4.5.0" exclude="Build,Analyzers" />
         <dependency id="System.ComponentModel.TypeConverter" version="4.3.0" exclude="Build,Analyzers" />
