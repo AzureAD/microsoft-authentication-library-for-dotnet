@@ -19,12 +19,12 @@ namespace Microsoft.Identity.Client.PublicClient.Internal.Requests
         /// </summary>
         /// <returns>(uri, state, pkce code verifier)</returns>
         public static Tuple<Uri, string, string> CreateAuthorizationUri(
-            GetAuthorizationRequestUrlParameters interactiveParameters,
+            GetAuthorizationRequestUrlParameters getAuthUriParams,
             AuthenticationRequestParameters requestParameters,
             bool addPkceAndState)
         {
             IDictionary<string, string> requestParamsMap = 
-                CreateAuthorizationRequestParameters(interactiveParameters, requestParameters);
+                CreateAuthorizationRequestParameters(getAuthUriParams, requestParameters);
 
             var crypto = requestParameters.RequestContext.ServiceBundle.PlatformProxy.CryptographyManager;
 
@@ -44,23 +44,23 @@ namespace Microsoft.Identity.Client.PublicClient.Internal.Requests
             }
 
             // Add uid/utid values to QP if user object was passed in.
-            if (interactiveParameters.Account != null)
+            if (getAuthUriParams.Account != null)
             {
-                if (!string.IsNullOrEmpty(interactiveParameters.Account.Username))
+                if (!string.IsNullOrEmpty(getAuthUriParams.Account.Username))
                 {
-                    requestParamsMap[OAuth2Parameter.LoginHint] = interactiveParameters.Account.Username;
+                    requestParamsMap[OAuth2Parameter.LoginHint] = getAuthUriParams.Account.Username;
                 }
 
-                if (interactiveParameters.Account?.HomeAccountId?.ObjectId != null)
+                if (getAuthUriParams.Account?.HomeAccountId?.ObjectId != null)
                 {
                     requestParamsMap[OAuth2Parameter.LoginReq] =
-                        interactiveParameters.Account.HomeAccountId.ObjectId;
+                        getAuthUriParams.Account.HomeAccountId.ObjectId;
                 }
 
-                if (!string.IsNullOrEmpty(interactiveParameters.Account?.HomeAccountId?.TenantId))
+                if (!string.IsNullOrEmpty(getAuthUriParams.Account?.HomeAccountId?.TenantId))
                 {
                     requestParamsMap[OAuth2Parameter.DomainReq] =
-                        interactiveParameters.Account.HomeAccountId.TenantId;
+                        getAuthUriParams.Account.HomeAccountId.TenantId;
                 }
             }
 
@@ -74,13 +74,13 @@ namespace Microsoft.Identity.Client.PublicClient.Internal.Requests
         }
 
         private static Dictionary<string, string> CreateAuthorizationRequestParameters(
-            GetAuthorizationRequestUrlParameters interactiveParameters,
+            GetAuthorizationRequestUrlParameters getAuthParams,
             AuthenticationRequestParameters requestParams)
         {
             var extraScopesToConsent = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (!interactiveParameters.ExtraScopesToConsent.IsNullOrEmpty())
+            if (!getAuthParams.ExtraScopesToConsent.IsNullOrEmpty())
             {
-                extraScopesToConsent = ScopeHelper.CreateScopeSet(interactiveParameters.ExtraScopesToConsent);
+                extraScopesToConsent = ScopeHelper.CreateScopeSet(getAuthParams.ExtraScopesToConsent);
             }
 
             if (extraScopesToConsent.Contains(requestParams.ClientId))
@@ -105,9 +105,9 @@ namespace Microsoft.Identity.Client.PublicClient.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.Claims] = requestParams.ClaimsAndClientCapabilities;
             }
 
-            if (!string.IsNullOrWhiteSpace(interactiveParameters.LoginHint))
+            if (!string.IsNullOrWhiteSpace(getAuthParams.LoginHint))
             {
-                authorizationRequestParameters[OAuth2Parameter.LoginHint] = interactiveParameters.LoginHint;
+                authorizationRequestParameters[OAuth2Parameter.LoginHint] = getAuthParams.LoginHint;
             }
 
             if (requestParams.RequestContext.CorrelationId != Guid.Empty)
@@ -122,13 +122,13 @@ namespace Microsoft.Identity.Client.PublicClient.Internal.Requests
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }
 
-            if (interactiveParameters.Prompt == Prompt.NotSpecified.PromptValue)
+            if (getAuthParams.Prompt == Prompt.NotSpecified.PromptValue || string.IsNullOrEmpty(getAuthParams.Prompt))
             {
                 authorizationRequestParameters[OAuth2Parameter.Prompt] = Prompt.SelectAccount.PromptValue;
             }
-            else if (interactiveParameters.Prompt != Prompt.NoPrompt.PromptValue)
+            else if (getAuthParams.Prompt != Prompt.NoPrompt.PromptValue)
             {
-                authorizationRequestParameters[OAuth2Parameter.Prompt] = interactiveParameters.Prompt;
+                authorizationRequestParameters[OAuth2Parameter.Prompt] = getAuthParams.Prompt;
             }
 
             return authorizationRequestParameters;
