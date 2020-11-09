@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);DESKTOP;NET_FX</DefineConstants>
   </PropertyGroup>
@@ -23,9 +23,9 @@
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-    <!--<PackageReference Include="StrongNamer">
+    <PackageReference Include="StrongNamer">
       <Version>0.2.5</Version>
-    </PackageReference>-->
+    </PackageReference>
 
   </ItemGroup>
 
