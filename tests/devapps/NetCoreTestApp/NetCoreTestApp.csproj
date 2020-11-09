@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.Desktop.csproj" />
+    <ProjectReference Include="..\..\..\src\cca\Microsoft.Identity.Client.ConfidentialClient\Microsoft.Identity.Client.ConfidentialClient.csproj" />
+    <ProjectReference Include="..\..\..\src\pca\Microsoft.Identity.Client.PublicClient.NoXamarin\Microsoft.Identity.Client.PublicClient.NoXamarin.csproj" />
+    <ProjectReference Include="..\..\..\src\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj" />
   </ItemGroup>
 </Project>

@@ -10,7 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Win32.SafeHandles;
 using Microsoft.Identity.Client.Platforms.net45.Native;

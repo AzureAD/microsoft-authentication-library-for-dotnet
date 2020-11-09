@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if WINDOWS_APP
+#if UWP
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             IntPtr _parentHandle,
             WebTokenRequest webTokenRequest)
         {
-#if WINDOWS_APP
+#if UWP
             WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(webTokenRequest);
 #else
 
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
            WebTokenRequest webTokenRequest,
            WebAccount wamAccount)
         {
-#if WINDOWS_APP
+#if UWP
             WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(
                 webTokenRequest, 
                 wamAccount);

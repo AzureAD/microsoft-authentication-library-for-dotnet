@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client

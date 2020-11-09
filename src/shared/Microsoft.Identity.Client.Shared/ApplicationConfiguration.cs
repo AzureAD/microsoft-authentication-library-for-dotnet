@@ -9,7 +9,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client
 {

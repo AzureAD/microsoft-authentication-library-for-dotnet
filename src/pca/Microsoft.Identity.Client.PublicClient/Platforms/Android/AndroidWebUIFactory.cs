@@ -5,7 +5,7 @@
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Android

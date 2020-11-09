@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Client.Http
                 }
             }
 
-#if WINDOWS_APP
+#if UWP
             // WORKAROUND
             // On UWP there is a bug in the Http stack that causes an exception to be thrown when moving around a stream.
             // https://stackoverflow.com/questions/31774058/postasync-throwing-irandomaccessstream-error-when-targeting-windows-10-uwp

@@ -5,7 +5,7 @@ using System;
 using System.Net.Http;
 using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Shared
+namespace Microsoft.Identity.Client.Internal.Shared
 {
     /// <summary>
     /// A simple implementation of the HttpClient factory that uses a managed HttpClientHandler

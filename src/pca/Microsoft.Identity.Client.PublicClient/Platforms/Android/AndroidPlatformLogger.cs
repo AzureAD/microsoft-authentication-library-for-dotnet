@@ -4,7 +4,7 @@
 
 using Android.Util;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {

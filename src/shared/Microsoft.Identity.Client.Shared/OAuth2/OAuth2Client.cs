@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Json;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client.OAuth2
 {

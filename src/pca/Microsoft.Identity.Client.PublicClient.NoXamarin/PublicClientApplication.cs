@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Internal.Factories;
 
 namespace Microsoft.Identity.Client
 {

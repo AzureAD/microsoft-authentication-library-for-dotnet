@@ -3,11 +3,11 @@
 
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.UI;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Factories
+namespace Microsoft.Identity.Client.Internal.Factories
 {
     internal interface IPublicClientPlatformProxy : IPlatformProxy
     {

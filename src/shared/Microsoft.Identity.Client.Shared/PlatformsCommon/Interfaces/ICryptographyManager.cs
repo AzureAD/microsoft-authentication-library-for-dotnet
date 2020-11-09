@@ -3,7 +3,7 @@
 
 using System.Security.Cryptography.X509Certificates;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
+namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     internal interface ICryptographyManager
     {

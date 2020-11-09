@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if WINDOWS_APP
+#if UWP
 
 using System;
 using System.Collections.Generic;
@@ -11,9 +11,9 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Internal.Factories;
+using Microsoft.Identity.Client.Internal.Interfaces;
+using Microsoft.Identity.Client.Internal.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.UI;
 using Windows.ApplicationModel;
@@ -23,6 +23,7 @@ using Windows.Security.Authentication.Web;
 using Windows.Security.ExchangeActiveSyncProvisioning;
 using Windows.Storage;
 using Windows.System;
+using Microsoft.Identity.Client.Shared.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -35,6 +36,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
             : base(logger)
         {
         }
+
+        public override RuntimePlatform RuntimePlatform => RuntimePlatform.UWP;
 
         /// <summary>
         /// Get the user logged in to Windows or throws

@@ -7,9 +7,10 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
+using Microsoft.Identity.Client.Shared.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Shared
+namespace Microsoft.Identity.Client.Internal.Shared
 {
     internal abstract class AbstractSharedPlatformProxy : IPlatformProxy
     {
@@ -121,6 +122,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected abstract string InternalGetProductName();
         protected abstract ICryptographyManager InternalGetCryptographyManager();
         protected abstract IPlatformLogger InternalGetPlatformLogger();
+
+        public abstract RuntimePlatform RuntimePlatform { get; }
 
         public virtual ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
         {

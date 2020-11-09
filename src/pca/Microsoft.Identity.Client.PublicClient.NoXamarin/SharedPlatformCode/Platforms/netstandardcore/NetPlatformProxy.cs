@@ -14,8 +14,9 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Internal.Interfaces;
+using Microsoft.Identity.Client.Internal.Shared;
+using Microsoft.Identity.Client.Shared.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.netstandardcore
@@ -119,6 +120,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandardcore
         }
 
         public override bool BrokerSupportsWamAccounts => true;
+
+        public override RuntimePlatform RuntimePlatform => RuntimePlatform.NetCore;
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {

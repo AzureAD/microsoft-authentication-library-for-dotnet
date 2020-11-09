@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore;
 

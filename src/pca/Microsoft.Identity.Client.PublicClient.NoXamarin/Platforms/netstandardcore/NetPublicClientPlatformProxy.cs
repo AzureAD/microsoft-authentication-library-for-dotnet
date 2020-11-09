@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Features.Windows;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Internal.Factories;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.netstandardcore

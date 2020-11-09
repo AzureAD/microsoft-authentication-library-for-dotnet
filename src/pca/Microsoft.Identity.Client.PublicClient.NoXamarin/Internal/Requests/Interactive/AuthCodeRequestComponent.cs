@@ -13,7 +13,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Internal.Factories;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Internal
             // hidden web view can be used in both WinRT and desktop applications.
             coreUiParent.UseHiddenBrowser = false;
 #endif
-#if WINDOWS_APP
+#if UWP
             coreUiParent.UseCorporateNetwork = _serviceBundle.Config.UseCorporateNetwork;
 #endif
             return pcaProxy.GetWebUiFactory()

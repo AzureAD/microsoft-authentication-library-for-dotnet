@@ -3,7 +3,7 @@
 #if iOS
 
 using System;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {

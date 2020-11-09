@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
+namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     internal interface IDeviceAuthManager
     {

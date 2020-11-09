@@ -4,14 +4,17 @@
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Shared.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
+namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     /// <summary>
     /// Common operations for extracting platform / operating system specifics
     /// </summary>
     internal interface IPlatformProxy
     {
+        RuntimePlatform RuntimePlatform { get; }
+
         /// <summary>
         /// Gets the device model. On some TFMs this is not returned for security reasonons.
         /// </summary>

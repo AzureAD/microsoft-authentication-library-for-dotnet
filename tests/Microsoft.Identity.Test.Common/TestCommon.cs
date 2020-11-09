@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2.Throttling;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Unit;
 using NSubstitute;
@@ -58,7 +57,7 @@ namespace Microsoft.Identity.Test.Common
             bool clearCaches = true,
             bool validateAuthority = true)
         {            
-            var proxy = PcaPlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy = Microsoft.Identity.Client.Internal.Factories.PcaPlatformProxyFactory.CreatePlatformProxy(null);
             var appConfig = new ApplicationConfiguration()
             {
                 ClientId = clientId,

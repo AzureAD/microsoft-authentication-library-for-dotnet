@@ -7,7 +7,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {

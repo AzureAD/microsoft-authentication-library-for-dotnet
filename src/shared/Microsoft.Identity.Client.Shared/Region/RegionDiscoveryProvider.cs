@@ -9,7 +9,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Internal.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;

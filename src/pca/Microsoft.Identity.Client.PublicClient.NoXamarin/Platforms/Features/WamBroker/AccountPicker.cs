@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if WINDOWS_APP
+#if UWP
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AccountsSettingsPane retaccountPane = null;
             try
             {
-#if WINDOWS_APP
+#if UWP
                 retaccountPane = AccountsSettingsPane.GetForCurrentView();
                 retaccountPane.AccountCommandsRequested += Authenticator_AccountCommandsRequested;
                 await AccountsSettingsPane.ShowAddAccountAsync();

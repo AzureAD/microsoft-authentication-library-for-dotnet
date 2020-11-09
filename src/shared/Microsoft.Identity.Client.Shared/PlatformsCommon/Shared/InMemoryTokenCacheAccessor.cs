@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Shared
+namespace Microsoft.Identity.Client.Internal.Shared
 {
     /// <summary>
     /// Keeps the token cache dictionaries in memory. Token Cache extensions

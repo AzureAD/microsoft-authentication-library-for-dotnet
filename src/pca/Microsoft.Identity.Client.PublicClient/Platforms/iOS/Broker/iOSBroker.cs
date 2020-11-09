@@ -14,7 +14,7 @@ using CoreFoundation;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using System.Globalization;
 using Security;
 using Microsoft.Identity.Client.Internal.Requests;

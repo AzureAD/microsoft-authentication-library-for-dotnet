@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Shared
+namespace Microsoft.Identity.Client.Internal.Shared
 {
     internal class NullLegacyCachePersistence : ILegacyCachePersistence
     {

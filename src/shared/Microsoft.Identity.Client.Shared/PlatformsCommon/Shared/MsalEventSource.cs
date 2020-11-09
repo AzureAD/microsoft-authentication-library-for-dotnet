@@ -3,7 +3,7 @@
 
 using System.Diagnostics.Tracing;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Shared
+namespace Microsoft.Identity.Client.Internal.Shared
 {
     [EventSource(Name = "Microsoft.Identity.Client")]
     internal class MsalEventSource : EventSource

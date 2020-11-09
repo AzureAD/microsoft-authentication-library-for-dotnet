@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 
 namespace Microsoft.Identity.Client.TelemetryCore

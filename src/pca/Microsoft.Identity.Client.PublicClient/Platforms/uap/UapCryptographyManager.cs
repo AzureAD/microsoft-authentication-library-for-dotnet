@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if WINDOWS_APP
+#if UWP
 
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -11,7 +11,7 @@ using Windows.Security.Cryptography.Core;
 using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.uap

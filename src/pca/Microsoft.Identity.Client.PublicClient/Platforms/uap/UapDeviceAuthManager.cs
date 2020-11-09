@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if WINDOWS_APP
+#if UWP
 
 using System;
 using System.Collections.Generic;
@@ -13,8 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Certificates;

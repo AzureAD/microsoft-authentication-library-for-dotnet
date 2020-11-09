@@ -8,10 +8,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Internal.Shared;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.PlatformsCommon
+namespace Microsoft.Identity.Client.Internal
 {
     internal class DeviceAuthHelper
     {

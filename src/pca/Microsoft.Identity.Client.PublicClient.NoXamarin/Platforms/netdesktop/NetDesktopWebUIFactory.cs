@@ -4,7 +4,7 @@
 #if DESKTOP
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.netstandardcore.Desktop.OsBrowser;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45

@@ -127,12 +127,12 @@ namespace Microsoft.Identity.Client.UI
         public Activity CallerActivity { get; set; }
 #endif
 
-#if DESKTOP || WINDOWS_APP
+#if DESKTOP || UWP
         //hidden webview can be used in both WinRT and desktop applications.
         internal bool UseHiddenBrowser { get; set; }
 #endif
 
-#if WINDOWS_APP
+#if UWP
         internal bool UseCorporateNetwork { get; set; }
 #endif
 

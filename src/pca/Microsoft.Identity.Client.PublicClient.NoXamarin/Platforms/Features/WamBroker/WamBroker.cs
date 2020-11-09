@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if WINDOWS_APP
+#if UWP
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             try
             {
-#if WINDOWS_APP
+#if UWP
                 // UWP requires being on the UI thread
                 await _synchronizationContext;
 #endif
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isConsumerTenant = string.Equals(accountProvider.Authority, "consumers", StringComparison.OrdinalIgnoreCase);
                 wamPlugin = (isConsumerTenant && !isMsaPassthrough) ? _msaPlugin : _aadPlugin;
 
-#if WINDOWS_APP
+#if UWP
                 // UWP requires being on the UI thread
                 await _synchronizationContext;
 #endif
@@ -284,7 +284,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         private IntPtr GetParentWindow(CoreUIParent uiParent)
         {
-#if WINDOWS_APP
+#if UWP
             // On UWP there is no need for a window handle
             return IntPtr.Zero;
 #elif DESKTOP

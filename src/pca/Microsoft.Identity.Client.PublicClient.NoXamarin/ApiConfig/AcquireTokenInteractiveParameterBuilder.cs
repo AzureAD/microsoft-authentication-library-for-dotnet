@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
                     "Please use WithUseEmbeddedWebView(false) or leave the default. " +
                     "See https://aka.ms/msal-net-os-browser for details about the system webview.");
             }
-#elif WINDOWS_APP
+#elif UWP
             if (!useEmbeddedWebView)
             {
                 throw new MsalClientException(

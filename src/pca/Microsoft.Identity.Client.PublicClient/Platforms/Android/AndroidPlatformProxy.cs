@@ -13,14 +13,15 @@ using Android.Content.PM;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Internal.Interfaces;
+using Microsoft.Identity.Client.Internal.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Android.Broker;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Internal.Factories;
+using Microsoft.Identity.Client.Shared.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -42,6 +43,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public AndroidPlatformProxy(ICoreLogger logger) : base(logger)
         {
         }
+
+        public override RuntimePlatform RuntimePlatform => RuntimePlatform.Android;
 
         protected override string InternalGetProcessorArchitecture()
         {

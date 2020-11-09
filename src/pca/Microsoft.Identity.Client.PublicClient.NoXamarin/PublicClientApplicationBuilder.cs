@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Internal.Factories;
 using System.ComponentModel;
 
 #if iOS
@@ -129,14 +129,14 @@ namespace Microsoft.Identity.Client
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
-#if !MOBILE_PLATFORM && !WINDOWS_APP && !NETSTNADARD // broker is only available on Xamarin and UWP (WAM)
+#if !MOBILE_PLATFORM && !UWP && !NETSTNADARD // broker is only available on Xamarin and UWP (WAM)
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif        
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
 
 
-#if DESKTOP || NET_CORE || WINDOWS_APP
+#if DESKTOP || NET_CORE || UWP
             if (!Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client
         }
 
 
-#if WINDOWS_APP
+#if UWP
         /// <summary>
         /// Flag to enable authentication with the user currently logged-in in Windows.
         /// </summary>

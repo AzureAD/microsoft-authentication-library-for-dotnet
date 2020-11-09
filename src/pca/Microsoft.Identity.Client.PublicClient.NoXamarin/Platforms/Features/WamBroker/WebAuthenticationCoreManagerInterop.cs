@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if WINDOWS_APP
+#if UWP
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -11,7 +11,7 @@ using Windows.UI.ApplicationSettings;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
-#if !WINDOWS_APP
+#if !UWP
     internal static class WebAuthenticationCoreManagerInterop
     {
         public static IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr hWnd, WebTokenRequest request)

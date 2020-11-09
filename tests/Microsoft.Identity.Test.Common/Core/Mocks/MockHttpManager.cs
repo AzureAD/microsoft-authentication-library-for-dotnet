@@ -10,7 +10,7 @@ using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Internal.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks

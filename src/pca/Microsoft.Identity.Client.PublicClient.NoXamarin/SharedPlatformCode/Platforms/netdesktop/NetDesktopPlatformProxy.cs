@@ -17,10 +17,11 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.net45.Http;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Internal.Interfaces;
+using Microsoft.Identity.Client.Internal.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Win32;
+using Microsoft.Identity.Client.Shared.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
@@ -34,6 +35,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
             : base(logger)
         {
         }
+
+        public override RuntimePlatform RuntimePlatform => RuntimePlatform.NetFx;
+
 
         /// <inheritdoc />
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)

@@ -5,7 +5,7 @@ using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {

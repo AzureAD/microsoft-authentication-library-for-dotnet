@@ -7,7 +7,7 @@ using System.Security;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Internal.Factories;
 
 namespace Microsoft.Identity.Client.WsTrust
 {

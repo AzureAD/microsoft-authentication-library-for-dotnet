@@ -3,7 +3,7 @@
 
 using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
+namespace Microsoft.Identity.Client.Internal.Interfaces
 {
     /// <summary>
     /// Provides a high level token cache serialization solution that is similar to the one offered to MSAL customers.

@@ -4,7 +4,7 @@
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Factories
+namespace Microsoft.Identity.Client.Internal.Factories
 {
     /// <summary>
     ///     Returns the platform / os specific implementation of a PlatformProxy.
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
             return new Microsoft.Identity.Client.Platforms.iOS.iOSPlatformProxy(finalLogger);
 #elif MAC
             return new Platforms.Mac.MacPlatformProxy(finalLogger);
-#elif WINDOWS_APP
+#elif UWP
             return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(finalLogger);
 #elif NETSTANDARD
             return new Platforms.netstandardcore.NetPublicClientPlatformProxy(finalLogger);

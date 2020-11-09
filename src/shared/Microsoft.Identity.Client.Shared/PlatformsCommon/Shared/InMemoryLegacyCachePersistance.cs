@@ -3,7 +3,7 @@
 
 using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Client.PlatformsCommon.Shared
+namespace Microsoft.Identity.Client.Internal.Shared
 {
     internal class InMemoryLegacyCachePersistance : ILegacyCachePersistence
     {
