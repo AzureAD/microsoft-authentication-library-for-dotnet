@@ -129,8 +129,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandardcore
             OverloadWebUiFactory = webUiFactory;
         }
 
-
-
         public bool IsSystemWebViewAvailable => true;
 
         public bool UseEmbeddedWebViewDefault => false;

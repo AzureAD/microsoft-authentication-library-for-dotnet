@@ -174,8 +174,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
         public override ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null) 
             => new UapLegacyCachePersistence(Logger, CryptographyManager);
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor(Logger);
-
         public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage() => new UapTokenCacheBlobStorage(CryptographyManager, Logger);
 
         protected IWebUIFactory CreateWebUiFactory() => new WebUIFactory();

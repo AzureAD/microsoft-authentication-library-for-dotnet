@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null);
 
-        ITokenCacheAccessor CreateTokenCacheAccessor();
+        ITokenCacheAccessor CreateTokenCacheAccessor(string iosKeychainSecurityGroup = null);
 
         ITokenCacheBlobStorage CreateTokenCacheBlobStorage();
 

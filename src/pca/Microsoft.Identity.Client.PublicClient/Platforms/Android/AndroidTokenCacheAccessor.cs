@@ -190,11 +190,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         #endregion
-
-        public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
-        {
-            // nop
-        }
+      
     }
 }
 #endif

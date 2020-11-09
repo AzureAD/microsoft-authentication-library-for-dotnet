@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client
         internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache)
         {
             var proxy = serviceBundle?.PlatformProxy;
-            _accessor = proxy.CreateTokenCacheAccessor();
+            _accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.IosKeychainSecurityGroup);
             _featureFlags = proxy.GetFeatureFlags();
             _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
 
@@ -76,17 +76,7 @@ namespace Microsoft.Identity.Client
                 AsyncBeforeWrite = null;
             }
 
-            
-
-#if iOS
-#pragma warning disable CS0618 
-            SetIosKeychainSecurityGroup(serviceBundle.Config.IosKeychainSecurityGroup);
-#pragma warning restore CS0618
-
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence(serviceBundle.Config.IosKeychainSecurityGroup);
-#else
-            LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
-#endif            
 
             IsAppTokenCache = isApplicationTokenCache;
 
@@ -101,17 +91,6 @@ namespace Microsoft.Identity.Client
             : this(serviceBundle, isApplicationTokenCache)
         {
             LegacyCachePersistence = legacyCachePersistenceForTest;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="securityGroup"></param>
-        [Obsolete("Please use PublicClientApplication.WithIosKeychainSecurityGroup instead.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public void SetIosKeychainSecurityGroup(string securityGroup)
-        {
-            _accessor.SetiOSKeychainSecurityGroup(securityGroup);    
         }
 
         private void UpdateAppMetadata(string clientId, string environment, string familyId)

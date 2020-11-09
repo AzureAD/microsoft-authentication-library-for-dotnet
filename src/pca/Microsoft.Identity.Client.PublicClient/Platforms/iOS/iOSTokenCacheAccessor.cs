@@ -10,7 +10,6 @@ using Foundation;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
-using Microsoft.Identity.Client.Internal;
 using Security;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
@@ -26,18 +25,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private const string TeamIdKey = "DotNetTeamIDHint";
         private const string DefaultKeychainAccessGroup = "com.microsoft.adalcache";
 
-        private string _keychainGroup;
-        private readonly RequestContext _requestContext;
+        private readonly string _keychainGroup;
 
-        public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
+        public iOSTokenCacheAccessor(string iosKeychainSecurityGroup = null)
         {
-            if (string.IsNullOrEmpty(keychainSecurityGroup))
+            if (string.IsNullOrEmpty(iosKeychainSecurityGroup))
             {
                 _keychainGroup = GetTeamId() + '.' + DefaultKeychainAccessGroup;
             }
             else
             {
-                _keychainGroup = GetTeamId() + '.' + keychainSecurityGroup;
+                _keychainGroup = GetTeamId() + '.' + iosKeychainSecurityGroup;
             }
         }
 
@@ -68,15 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 MsalErrorMessage.CannotAccessPublisherKeyChain);
         }
 
-        public iOSTokenCacheAccessor()
-        {
-            SetiOSKeychainSecurityGroup(null);
-        }
-
-        public iOSTokenCacheAccessor(RequestContext requestContext) : this()
-        {
-            _requestContext = requestContext;
-        }
+      
 
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {

@@ -47,8 +47,6 @@ namespace Microsoft.Identity.Client.Cache
 
         IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata();
 
-        void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);
-
         void Clear();
     }
 }

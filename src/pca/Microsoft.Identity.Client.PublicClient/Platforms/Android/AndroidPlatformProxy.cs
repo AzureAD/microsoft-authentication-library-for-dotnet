@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         /// <inheritdoc />
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
+        public override ITokenCacheAccessor CreateTokenCacheAccessor(string iosKeychainSecurityGroup = null)
         {
             return new AndroidTokenCacheAccessor();
         }

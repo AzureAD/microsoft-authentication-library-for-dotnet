@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _confidentialClientApplication.UserTokenCacheInternal);
 
             requestParameters.Account = authorizationRequestUrlParameters.Account;
-            requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;
+            requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;            
 
             if (!string.IsNullOrWhiteSpace(authorizationRequestUrlParameters.RedirectUri))
             {

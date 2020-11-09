@@ -213,11 +213,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
         #endregion
 
-        public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
-        {
-            // nop
-        }
-
         public void Clear()
         {
             _accessTokenCacheDictionary.Clear();

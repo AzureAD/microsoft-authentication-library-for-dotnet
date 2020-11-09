@@ -201,11 +201,7 @@ namespace Microsoft.Identity.Client.Internal
                     return;
                 }
 
-#if DESKTOP
-                X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
-#else
                 X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
-#endif
             }
 
             /// <summary>

@@ -105,18 +105,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
-        public override ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null)
-        {
-            return new InMemoryLegacyCachePersistance();
-        }
-
-        /// <inheritdoc />
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
-        {
-            return new InMemoryTokenCacheAccessor(Logger);
-        }
-
-        /// <inheritdoc />
         protected IWebUIFactory CreateWebUiFactory()
         {
             return new NetDesktopWebUIFactory();

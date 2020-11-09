@@ -91,11 +91,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return _productName.Value;
         }
 
-        /// <inheritdoc />
-        public abstract ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null);
+        public virtual ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null)
+        {
+            return new InMemoryLegacyCachePersistance();
+        }
 
-        /// <inheritdoc />
-        public abstract ITokenCacheAccessor CreateTokenCacheAccessor();
+        public virtual ITokenCacheAccessor CreateTokenCacheAccessor(string iosKeychainSecurityGroup = null)
+        {
+            return new InMemoryTokenCacheAccessor(Logger);
+        }
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager => _cryptographyManager.Value;

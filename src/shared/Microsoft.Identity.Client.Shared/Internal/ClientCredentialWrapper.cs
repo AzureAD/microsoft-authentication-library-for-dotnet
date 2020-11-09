@@ -84,20 +84,6 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         #endregion TestBuilders
-        private void CheckCertificateKeySize(X509Certificate2 cert)
-        {
-            //Currently, the min key size is enforced on desktop (net 45) as 2048 as it is the current industry standard.
-            //This is not enforced on netCore unfortunalty and adding this enforcement may break customers on netCore.
-            //NetCore can only enforce a min key size of 512 since it is enforced by the portal already.
-#if DESKTOP
-            if (cert.PublicKey.Key.KeySize < MinKeySizeInBits)
-            {
-                throw new ArgumentOutOfRangeException(nameof(cert),
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
-                        MinKeySizeInBits));
-            }
-#endif
-        }
 
         private void ValidateCredentialParameters(ApplicationConfiguration config)
         {

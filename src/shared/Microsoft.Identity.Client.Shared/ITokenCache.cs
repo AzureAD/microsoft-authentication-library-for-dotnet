@@ -34,9 +34,6 @@ namespace Microsoft.Identity.Client
         /// <remarks>When the delegate is used to deserialize the cache, it might
         /// want to call <see cref="ITokenCacheSerializer.DeserializeMsalV3(byte[], bool)"/></remarks>
         /// 
-#if !MOBILE_PLATFORM // no custom cache on mobile
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
         void SetBeforeAccess(TokenCacheCallback beforeAccess);
 
         /// <summary>
@@ -50,9 +47,6 @@ namespace Microsoft.Identity.Client
         /// <remarks>In the case where the delegate is used to serialize the cache entirely (not just a row), it might
         /// want to call <see cref="ITokenCacheSerializer.SerializeMsalV3()"/></remarks>
         /// 
-#if !MOBILE_PLATFORM // no custom cache on mobile
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
         void SetAfterAccess(TokenCacheCallback afterAccess);
 
         /// <summary>
@@ -63,9 +57,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
         /// 
-#if !MOBILE_PLATFORM // no custom cache on mobile
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
         void SetBeforeWrite(TokenCacheCallback beforeWrite);
 
         /// <summary>
@@ -78,9 +69,6 @@ namespace Microsoft.Identity.Client
         /// <remarks>In the case where the delegate is used to deserialize the cache, it might
         /// want to call <see cref="ITokenCacheSerializer.DeserializeMsalV3(byte[], bool)"/></remarks>
         /// 
-#if !MOBILE_PLATFORM // no custom cache on mobile
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
         void SetBeforeAccessAsync(Func<TokenCacheNotificationArgs, Task> beforeAccess);
 
         /// <summary>
@@ -94,9 +82,6 @@ namespace Microsoft.Identity.Client
         /// <remarks>In the case where the delegate is used to serialize the cache entirely (not just a row), it might
         /// want to call <see cref="ITokenCacheSerializer.SerializeMsalV3()"/></remarks>
         /// 
-#if !MOBILE_PLATFORM // no custom cache on mobile
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
         void SetAfterAccessAsync(Func<TokenCacheNotificationArgs, Task> afterAccess);
 
         /// <summary>
@@ -105,11 +90,7 @@ namespace Microsoft.Identity.Client
         /// registered with <see cref="SetAfterAccess(TokenCacheCallback)"/>
         /// This provides the same functionality as SetBeforeWrite but it provides for an async/task-based callback.
         /// </summary>
-        /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
-#if !MOBILE_PLATFORM // no custom cache on mobile
-        [EditorBrowsable(EditorBrowsableState.Never)]
-#endif        
+        /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>  
         void SetBeforeWriteAsync(Func<TokenCacheNotificationArgs, Task> beforeWrite);
-
     }
 }

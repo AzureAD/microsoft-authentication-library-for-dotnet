@@ -102,9 +102,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new iOSLegacyCachePersistence(Logger, iosKeychainSecurityGroup);
         }
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
+        public override ITokenCacheAccessor CreateTokenCacheAccessor(string iosKeychainSecurityGroup = null)
         {
-            return new iOSTokenCacheAccessor();
+            return new iOSTokenCacheAccessor(iosKeychainSecurityGroup);
         }
 
         /// <inheritdoc />

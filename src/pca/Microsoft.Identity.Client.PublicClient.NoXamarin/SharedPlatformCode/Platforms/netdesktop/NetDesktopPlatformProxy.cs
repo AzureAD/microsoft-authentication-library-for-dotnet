@@ -47,18 +47,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
-        public override ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null)
-        {
-            return new InMemoryLegacyCachePersistance();
-        }
-
-        /// <inheritdoc />
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
-        {
-            return new InMemoryTokenCacheAccessor(Logger);
-        }
-
-        /// <inheritdoc />
         protected override string InternalGetDeviceModel()
         {
             // Since MSAL .NET may be used on servers, for security reasons, we do not emit device type.

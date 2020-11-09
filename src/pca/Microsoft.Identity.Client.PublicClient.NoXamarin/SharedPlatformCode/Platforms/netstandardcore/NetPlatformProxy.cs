@@ -92,16 +92,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandardcore
             return Environment.MachineName;
         }
 
-        public override ILegacyCachePersistence CreateLegacyCachePersistence(string iosKeychainSecurityGroup = null)
-        {
-            return new InMemoryLegacyCachePersistance();
-        }
-
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
-        {
-            return new InMemoryTokenCacheAccessor(Logger);
-        }
-
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
         public override string GetDeviceNetworkState()

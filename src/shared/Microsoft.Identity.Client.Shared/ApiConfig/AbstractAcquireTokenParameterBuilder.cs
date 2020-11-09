@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-#if DESKTOP || NET_CORE
+
         /// <summary>
         ///  Modifies the token acquisition request so that the acquired token is a Proof of Possession token (PoP), rather than a Bearer token. 
         ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
@@ -415,7 +415,6 @@ namespace Microsoft.Identity.Client
 
             return this as T;
         }
-#endif
 
         /// <summary>
         /// Validates the parameters of the AcquireToken operation.
