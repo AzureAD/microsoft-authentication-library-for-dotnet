@@ -19,7 +19,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 {
     [TestClass]
     [DeploymentItem("Resources\\local-imds-response.json")]
+    [DeploymentItem("Resources\\local-imds-response-without-region.json")]
     [DeploymentItem("Resources\\local-imds-error-response.json")]
+    [DeploymentItem("Resources\\local-imds-error-response-versions-missing.json")]
     public class RegionDiscoveryProviderTests : TestBase
     {
         private MockHttpAndServiceBundle _harness;
