@@ -2,15 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.Factories;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -39,10 +36,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             {
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
-                OAuth2Client client = new OAuth2Client(harness.ServiceBundle.DefaultLogger, harness.HttpManager, new TelemetryManager(
-                    harness.ServiceBundle.Config,
-                    harness.ServiceBundle.PlatformProxy,
-                    null));
+                OAuth2Client client = new OAuth2Client(
+                    PcaPlatformProxyFactory.CreatePlatformProxy(null),
+                    harness.HttpManager, 
+                    new TelemetryManager(
+                        harness.ServiceBundle.Config,
+                        harness.ServiceBundle.PlatformProxy,
+                        null));
 
                 Task<MsalTokenResponse> task = client.GetTokenAsync(
                     new Uri(TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token"),

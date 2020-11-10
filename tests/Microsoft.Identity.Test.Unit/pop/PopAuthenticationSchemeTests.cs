@@ -14,7 +14,6 @@ using NSubstitute;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Client;
 using System.Threading;
-using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.Utils;
 using System.Threading.Tasks;
 using Microsoft.Identity.Test.Common.Mocks;

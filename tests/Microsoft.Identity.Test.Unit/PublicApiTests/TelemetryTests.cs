@@ -8,17 +8,17 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Internal;
 using System.Linq;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {

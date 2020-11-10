@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -10,22 +9,18 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using NSubstitute.ExceptionExtensions;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.Http;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http;
-using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Internal.Interfaces;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -177,7 +172,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var harness = CreateTestHarness())
             {
-                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
 
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(
                     () => broker.GetAccountsAsync(TestConstants.ClientId, TestConstants.RedirectUri))
@@ -190,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var harness = CreateTestHarness())
             {
-                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
 
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.RemoveAccountAsync(
                     harness.ServiceBundle.Config, new Account("test", "test", "test"))).ConfigureAwait(false);
@@ -208,7 +203,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
-            platformProxy.CreateBroker(null).Returns(mockBroker);
+            platformProxy.CreateBroker().Returns(mockBroker);
 
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -235,7 +230,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
-            platformProxy.CreateBroker(null).Returns(mockBroker);
+            platformProxy.CreateBroker().Returns(mockBroker);
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
@@ -266,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(true);
-                platformProxy.CreateBroker(null).Returns(mockBroker);
+                platformProxy.CreateBroker().Returns(mockBroker);
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
                 
@@ -372,7 +367,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
             _acquireTokenSilentParameters = new AcquireTokenSilentParameters();
 
-            IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+            IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker();
             _brokerInteractiveRequest =
                 new BrokerInteractiveRequestComponent(
                     _parameters,

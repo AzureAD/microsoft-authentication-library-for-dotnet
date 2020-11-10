@@ -2,14 +2,9 @@
 // Licensed under the MIT License.
 #if DESKTOP
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.net45;
-using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.Platforms.netstandardcore.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

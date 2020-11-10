@@ -8,9 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
-using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
-using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Platforms.netstandardcore.DefaultOSBrowser;
+using Microsoft.Identity.Client.Platforms.netstandardcore.Desktop.OsBrowser;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -72,7 +71,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public async Task Cancellation_BeforeStart_Async()
         {
-
             HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
                 Substitute.For<ICoreLogger>());
             CancellationTokenSource cts = new CancellationTokenSource();
@@ -92,7 +90,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public async Task Cancellation_BeforeGetContext_Async()
         {
-
             HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
                 Substitute.For<ICoreLogger>());
             CancellationTokenSource cts = new CancellationTokenSource();

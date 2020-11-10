@@ -38,12 +38,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static readonly Prompt NoPrompt = new Prompt("no_prompt");
 
-        ///// <summary>
-        ///// Only available on .NET platform. AcquireToken will send <c>prompt=attempt_none</c> to
-        ///// Azure AD's authorize endpoint and the library will use a hidden webview (and its cookies) to authenticate the user.
-        ///// This can fail, and in that case a <see cref="MsalUiRequiredException"/> will be thrown.
-        ///// </summary>
-        //public static readonly Prompt Never = new Prompt("attempt_none");
+        /// <summary>
+        /// Only available on .NET platform. AcquireToken will send <c>prompt=attempt_none</c> to
+        /// Azure AD's authorize endpoint and the library will use a hidden webview (and its cookies) to authenticate the user.
+        /// This can fail, and in that case a <see cref="MsalUiRequiredException"/> will be thrown.
+        /// </summary>
+        public static readonly Prompt Never = new Prompt("attempt_none");
 
 
         // for when the developer doesn't specify a prompt
