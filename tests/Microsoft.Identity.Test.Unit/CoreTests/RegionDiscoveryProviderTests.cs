@@ -106,6 +106,28 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
+        public async Task ResponseMissingRegionFromLocalImdsAsync()
+        {
+
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
+                        ResourceHelper.GetTestResourceRelativePath("local-imds-response-without-region.json"))));
+
+            try
+            {
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+                Assert.Fail("Exception should be thrown.");
+            }
+            catch (MsalServiceException e)
+            {
+                Assert.IsNotNull(e);
+                Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.RegionDiscoveryFailed, e.Message);
+            }
+        }
+
+        [TestMethod]
         public async Task ErrorResponseFromLocalImdsAsync()
         {
             AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound)); 
@@ -153,6 +175,28 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
                 Assert.Fail("The call should fail with MsalServiceException as the updated version for imds was not returned.");
+            }
+            catch (MsalServiceException e)
+            {
+                Assert.IsNotNull(e);
+                Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.RegionDiscoveryFailed, e.Message);
+            }
+        }
+
+        [TestMethod]
+        public async Task UpdateApiversionFailsWithNoNewestVersionsAsync()
+        {
+            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.BadRequest));
+            AddMockedResponse(MockHelpers.CreateFailureMessage(System.Net.HttpStatusCode.BadRequest, File.ReadAllText(
+                        ResourceHelper.GetTestResourceRelativePath("local-imds-error-response-versions-missing.json"))), expectedParams: false);
+
+            try
+            {
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+                Assert.Fail("The call should fail with MsalServiceException as the newest versions were missing in the response.");
             }
             catch (MsalServiceException e)
             {

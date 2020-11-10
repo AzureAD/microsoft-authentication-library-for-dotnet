@@ -84,20 +84,23 @@ namespace Microsoft.Identity.Client.Region
                     response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger).ConfigureAwait(false); // Call again with updated version
                 }
 
-                if (response.StatusCode != HttpStatusCode.OK || response.Body.IsNullOrEmpty())
+                if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                 {
-                    logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
+                    LocalImdsResponse localImdsResponse = JsonHelper.DeserializeFromJson<LocalImdsResponse>(response.Body);
 
-                    throw MsalServiceExceptionFactory.FromImdsResponse(
-                    MsalError.RegionDiscoveryFailed,
-                    MsalErrorMessage.RegionDiscoveryFailed,
-                    response);
+                    if (localImdsResponse != null && !localImdsResponse.location.IsNullOrEmpty())
+                    {
+                        logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
+                        return localImdsResponse.location;
+                    }
                 }
+                    
+                logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
 
-                LocalImdsResponse localImdsResponse = JsonHelper.DeserializeFromJson<LocalImdsResponse>(response.Body);
-
-                logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
-                return localImdsResponse.location;
+                throw MsalServiceExceptionFactory.FromImdsResponse(
+                MsalError.RegionDiscoveryFailed,
+                MsalErrorMessage.RegionDiscoveryFailed,
+                response);
             }
             catch (MsalServiceException)
             {
