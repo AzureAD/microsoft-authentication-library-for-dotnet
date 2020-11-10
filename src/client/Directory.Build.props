@@ -239,6 +239,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+    <ProjectReference Include="..\..\bindings\Microsoft.Identity.Client.Xamarin.Android\Microsoft.Identity.Client.Xamarin.Android.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid9)' ">
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="28.0.0.3" />
