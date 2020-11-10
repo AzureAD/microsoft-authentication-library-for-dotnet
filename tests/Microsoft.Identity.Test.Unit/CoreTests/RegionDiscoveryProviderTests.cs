@@ -141,6 +141,27 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
         }
 
+        [TestMethod]
+        public async Task UpdateApiversionFailsWithEmptyResponseBodyAsync()
+        {
+            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.BadRequest));
+            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.BadRequest), expectedParams: false);
+
+            try
+            {
+                IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
+                InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+                Assert.Fail("The call should fail with MsalServiceException as the updated version for imds was not returned.");
+            }
+            catch (MsalServiceException e)
+            {
+                Assert.IsNotNull(e);
+                Assert.AreEqual(MsalError.RegionDiscoveryFailed, e.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.RegionDiscoveryFailed, e.Message);
+            }
+        }
+
         private void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true)
         {
             var queryParams = new Dictionary<string, string>();

@@ -93,18 +93,13 @@ namespace Microsoft.Identity.Client
             return ex;
         }
 
-        internal static MsalServiceException FromGeneralHttpResponse(
+        internal static MsalServiceException FromImdsResponse(
           string errorCode,
           string errorMessage,
           HttpResponse httpResponse,
           Exception innerException = null)
         {
-            MsalServiceException ex = null;
-
-            if (ex == null)
-            {
-                ex = new MsalServiceException(errorCode, errorMessage, innerException);
-            }
+            MsalServiceException ex = new MsalServiceException(errorCode, errorMessage, innerException);
 
             ex.ResponseBody = httpResponse?.Body;
             ex.StatusCode = httpResponse != null ? (int)httpResponse.StatusCode : 0;

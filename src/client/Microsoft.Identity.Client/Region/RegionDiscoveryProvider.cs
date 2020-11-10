@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Region
         {
             if (!Environment.GetEnvironmentVariable(RegionName).IsNullOrEmpty())
             {
-                logger.Info($"[Region discovery] Region: {Environment.GetEnvironmentVariable(RegionName)}");
+                logger.Info($"[Region discovery] Region found in environment variable: {Environment.GetEnvironmentVariable(RegionName)}");
                 return Environment.GetEnvironmentVariable(RegionName);
             }
 
@@ -84,9 +84,11 @@ namespace Microsoft.Identity.Client.Region
                     response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger).ConfigureAwait(false); // Call again with updated version
                 }
 
-                if (response.StatusCode != HttpStatusCode.OK)
+                if (response.StatusCode != HttpStatusCode.OK || response.Body.IsNullOrEmpty())
                 {
-                    throw MsalServiceExceptionFactory.FromGeneralHttpResponse(
+                    logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
+
+                    throw MsalServiceExceptionFactory.FromImdsResponse(
                     MsalError.RegionDiscoveryFailed,
                     MsalErrorMessage.RegionDiscoveryFailed,
                     response);
@@ -118,13 +120,19 @@ namespace Microsoft.Identity.Client.Region
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 LocalImdsErrorResponse errorResponse = JsonHelper.DeserializeFromJson<LocalImdsErrorResponse>(response.Body);
-                logger.Info("[Region discovery] Updated the version for IMDS endpoint to: " + errorResponse.NewestVersions[0]);
-                return errorResponse.NewestVersions[0];
+
+                if (errorResponse != null && !errorResponse.NewestVersions.IsNullOrEmpty())
+                {
+                    logger.Info("[Region discovery] Updated the version for IMDS endpoint to: " + errorResponse.NewestVersions[0]);
+                    return errorResponse.NewestVersions[0];
+                }
+
+                logger.Info("[Region Discovery] The response is empty or does not contain the newest versions.");
             }
 
-            logger.Info("[Region Discovery] Failed to get the updated version for IMDS endpoint.");
+            logger.Info($"[Region Discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}");
 
-            throw MsalServiceExceptionFactory.FromGeneralHttpResponse(
+            throw MsalServiceExceptionFactory.FromImdsResponse(
             MsalError.RegionDiscoveryFailed,
             MsalErrorMessage.RegionDiscoveryFailed,
             response);
