@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Internal.Factories;
+using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,13 +24,13 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (new PerformanceValidator(200, "GetPlatformProxy"))
             {
-                CCAPlatformProxyFactory.CreatePlatformProxy(null);
+                PcaPlatformProxyFactory.CreatePlatformProxy(null);
             }
         }
 
         private void ValidateMethodPerformance(long maxMilliseconds, string name, Action<IPlatformProxy> action)
         {
-            var platformProxy = CCAPlatformProxyFactory.CreatePlatformProxy(null);
+            var platformProxy = PcaPlatformProxyFactory.CreatePlatformProxy(null);
 
             // Call it once to pre-load it.  We're not worried about the time it takes to call it
             // the first time, we're worried about subsequent calls.

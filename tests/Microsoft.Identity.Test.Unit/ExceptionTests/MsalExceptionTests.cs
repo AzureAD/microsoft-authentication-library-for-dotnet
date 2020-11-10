@@ -8,10 +8,8 @@ using System.Net.Http.Headers;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Factories;
 using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -122,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         {
             string exceptionString = exception.ToString();
 
-            string msalProductName = CCAPlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
+            string msalProductName = PcaPlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
             string msalVersion = MsalIdHelper.GetMsalVersion();
 
             Assert.IsTrue(exceptionString.Contains(msalProductName), "Exception should contain the msalProductName");

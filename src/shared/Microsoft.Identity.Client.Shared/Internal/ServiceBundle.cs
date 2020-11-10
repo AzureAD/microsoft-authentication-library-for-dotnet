@@ -95,7 +95,9 @@ namespace Microsoft.Identity.Client.Internal
 
         public IThrottlingProvider ThrottlingManager { get; }
 
-        public static ServiceBundle Create(ApplicationConfiguration config, IPlatformProxy proxy)
+        public static ServiceBundle Create(
+            ApplicationConfiguration config,
+            IPlatformProxy proxy = null)
         {
             return new ServiceBundle(config, proxy);
         }

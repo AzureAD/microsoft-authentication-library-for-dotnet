@@ -51,9 +51,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
-      <Project>{60117a9b-4bb8-472e-bfff-52cbf67ca95a}</Project>
-      <Name>Microsoft.Identity.Client</Name>
+    <ProjectReference Include="..\..\..\src\pca\Microsoft.Identity.Client.PublicClient.NoXamarin\Microsoft.Identity.Client.PublicClient.NoXamarin.csproj">
+      <Project>{393b4f31-5d45-422b-bbce-e3e1b6b22fe8}</Project>
+      <Name>Microsoft.Identity.Client.PublicClient.NoXamarin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\shared\Microsoft.Identity.Client.Shared\Microsoft.Identity.Client.Shared.csproj">
+      <Project>{26a1a0f5-414d-4f97-aa3c-dcfd2a74606e}</Project>
+      <Name>Microsoft.Identity.Client.Shared</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

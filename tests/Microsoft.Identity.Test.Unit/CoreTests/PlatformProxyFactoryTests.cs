@@ -2,15 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 using System.Net;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Internal.Factories;
+using Microsoft.Identity.Client.Internal.Shared;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
 {
@@ -21,8 +19,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxyFactoryDoesNotCacheTheProxy()
         {
             // Act
-            var proxy1 = CCAPlatformProxyFactory.CreatePlatformProxy(null);
-            var proxy2 = CCAPlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy1 = PcaPlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy2 = PcaPlatformProxyFactory.CreatePlatformProxy(null);
 
             // Assert
             Assert.IsFalse(proxy1 == proxy2);
@@ -32,7 +30,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxyFactoryReturnsInstances()
         {
             // Arrange
-            var proxy = CCAPlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy = PcaPlatformProxyFactory.CreatePlatformProxy(null);
 
             // Act and Assert
             Assert.AreNotSame(
@@ -46,15 +44,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreSame(
                 proxy.CryptographyManager,
                 proxy.CryptographyManager);
-
         }
-
 
         [TestMethod]
         public void PlatformProxy_HttpClient()
         {
             // Arrange
-            var proxy = CCAPlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy = PcaPlatformProxyFactory.CreatePlatformProxy(null);
             var factory1 = proxy.CreateDefaultHttpClientFactory();
             var factory2 = proxy.CreateDefaultHttpClientFactory();
 
@@ -81,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxy_HttpClient_NetCore()
         {
             // Arrange
-            var factory = CCAPlatformProxyFactory.CreatePlatformProxy(null)
+            var factory = PcaPlatformProxyFactory.CreatePlatformProxy(null)
                 .CreateDefaultHttpClientFactory();
 
             // Act
@@ -91,8 +87,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             // Assert
             Assert.IsTrue(factory is SimpleHttpClientFactory);
             Assert.AreSame(client1, client2, "On NetDesktop and NetCore, the HttpClient should be static");
-
-
         }
 #endif
 #if DESKTOP
@@ -100,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxy_HttpClient_NetDesktop()
         {
             // Arrange
-            var factory = CCAPlatformProxyFactory.CreatePlatformProxy(null)
+            var factory = PcaPlatformProxyFactory.CreatePlatformProxy(null)
                 .CreateDefaultHttpClientFactory();          
 
             // Assert
@@ -125,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 ServicePointManager.DefaultConnectionLimit = newConnLimit;
 
                 // Act
-                var factory = CCAPlatformProxyFactory.CreatePlatformProxy(null)
+                var factory = PcaPlatformProxyFactory.CreatePlatformProxy(null)
                     .CreateDefaultHttpClientFactory();
                 _ = factory.GetHttpClient();
 
@@ -139,7 +133,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 ServicePointManager.DnsRefreshTimeout = originalDnsTimeout;
                 ServicePointManager.DefaultConnectionLimit = originalConnLimit;
             }
-
         }
 
         [TestMethod]
@@ -150,11 +143,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 // Arrange
                 Environment.SetEnvironmentVariable("proxy_foo", "bar");
 
-                var proxy = CCAPlatformProxyFactory.CreatePlatformProxy(null);
-
                 // Act
-                string actualValue = proxy.GetEnvironmentVariable("proxy_foo");
-                string actualEmptyValue = proxy.GetEnvironmentVariable("no_such_env_var_exists");
+                string actualValue = Environment.GetEnvironmentVariable("proxy_foo");
+                string actualEmptyValue = Environment.GetEnvironmentVariable("no_such_env_var_exists");
 
 
                 // Assert
@@ -170,12 +161,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public void GetEnvThrowsArgNullEx()
         {
-
             AssertException.Throws<ArgumentNullException>(
                 () =>
-                CCAPlatformProxyFactory.CreatePlatformProxy(null).GetEnvironmentVariable(""));
+                Environment.GetEnvironmentVariable(""));
         }
-
-
     }
 }

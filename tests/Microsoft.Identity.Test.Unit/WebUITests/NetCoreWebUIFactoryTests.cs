@@ -2,10 +2,8 @@
 // Licensed under the MIT License.
 #if NET_CORE
 using System;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
-using Microsoft.Identity.Client.Platforms.Shared.NetStdCore;
+using Microsoft.Identity.Client.Platforms.netstandardcore.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

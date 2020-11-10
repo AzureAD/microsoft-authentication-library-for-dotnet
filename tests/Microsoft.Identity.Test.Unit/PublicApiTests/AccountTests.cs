@@ -10,8 +10,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
@@ -84,8 +82,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             cacheAccessRecorder.AssertAccessCounts(1, 0);
         }
 
-
-
         // Bug https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1030
         [TestMethod]
         [DeploymentItem(@"Resources\MultiCloudTokenCache.json")]
@@ -95,7 +91,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 // Arrange
                 // no discovery made because all environments are known
-
                 const string TokenCacheFile = "MultiCloudTokenCache.json";
                 var pcaGlobal = InitPcaFromCacheFile(AzureCloudInstance.AzurePublic, httpManager, TokenCacheFile);
                 var pcaDe = InitPcaFromCacheFile(AzureCloudInstance.AzureGermany, httpManager, TokenCacheFile);
