@@ -1,0 +1,3 @@
+{
+    "error": "Bad request. api-version was not specified in the request. For more information refer to aka.ms/azureimds"
+}

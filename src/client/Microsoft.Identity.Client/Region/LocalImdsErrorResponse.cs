@@ -12,13 +12,13 @@ namespace Microsoft.Identity.Client.Region
 {
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal sealed class LocalImdsResponse
+    internal sealed class LocalImdsErrorResponse
     {
-        [JsonProperty(PropertyName = "azEnvironment")]
-        public string azEnvironment { get; set; }
+        [JsonProperty(PropertyName = "error")]
+        public string Error { get; set; }
 
-        [JsonProperty(PropertyName = "location")]
-        public string location { get; set; }
+        [JsonProperty(PropertyName = "newest-versions")]
+        public List<string> NewestVersions { get; set; }
     }
 }
 

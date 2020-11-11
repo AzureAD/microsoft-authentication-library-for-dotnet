@@ -93,6 +93,21 @@ namespace Microsoft.Identity.Client
             return ex;
         }
 
+        internal static MsalServiceException FromImdsResponse(
+          string errorCode,
+          string errorMessage,
+          HttpResponse httpResponse,
+          Exception innerException = null)
+        {
+            MsalServiceException ex = new MsalServiceException(errorCode, errorMessage, innerException);
+
+            ex.ResponseBody = httpResponse?.Body;
+            ex.StatusCode = httpResponse != null ? (int)httpResponse.StatusCode : 0;
+            ex.Headers = httpResponse?.Headers;
+
+            return ex;
+        }
+
         private static bool IsInteractionRequired(string errorCode)
         {
             return string.Equals(errorCode, MsalError.InteractionRequired, StringComparison.OrdinalIgnoreCase);
