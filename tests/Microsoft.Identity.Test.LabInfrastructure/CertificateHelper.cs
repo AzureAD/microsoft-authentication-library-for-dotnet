@@ -10,22 +10,20 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     {
         /// <summary>
         /// Try and locate a certificate matching the given <paramref name="thumbprint"/> by searching in
-        /// the <see cref="StoreName.My"/> store name for all available <see cref="StoreLocation"/>s.
-        /// </summary>
+        /// the <see cref="StoreName.My"/> store name for <see cref="StoreLocation.LocalMachine"/> and <see cref="StoreLocation.CurrentUser"/>
+        /// in that order.</summary>
         /// <param name="thumbprint">Thumbprint of certificate to locate</param>
         /// <returns><see cref="X509Certificate2"/> with <paramref name="thumbprint"/>, or null if no matching certificate was found</returns>
         public static X509Certificate2 FindCertificateByThumbprint(string thumbprint)
         {
-            foreach (StoreLocation storeLocation in Enum.GetValues(typeof(StoreLocation)))
+            var certificate = FindCertificateByThumbprint(thumbprint, StoreLocation.LocalMachine, StoreName.My);
+            if (certificate != null)
             {
-                var certificate = FindCertificateByThumbprint(thumbprint, storeLocation, StoreName.My);
-                if (certificate != null)
-                {
-                    return certificate;
-                }
+                return certificate;
             }
 
-            return null;
+            return FindCertificateByThumbprint(thumbprint, StoreLocation.CurrentUser, StoreName.My);
+
         }
 
         /// <summary>
