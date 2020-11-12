@@ -16,12 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "microsoft.identity.client", "microsoft.identity.client", "{4667ADF0-37FA-4306-BD2A-F55D6360143E}"
-	ProjectSection(SolutionItems) = preProject
-		src\client\Directory.Build.props = src\client\Directory.Build.props
-		global.json = global.json
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{EA983957-DC2F-4D9E-A2E3-79ADEB5CEB26}"
 	ProjectSection(SolutionItems) = preProject
 		build\pipeline-ci.yaml = build\pipeline-ci.yaml
@@ -103,7 +97,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C44AADC0-1E9B-427F-AC02-642BDF8D936B} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
-		{4667ADF0-37FA-4306-BD2A-F55D6360143E} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
 		{EA983957-DC2F-4D9E-A2E3-79ADEB5CEB26} = {E19B0572-BBD7-424E-81D5-E59E6884EB3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
