@@ -12,6 +12,7 @@
 
   <!--<remove-node path="/api/package[@name='com.microsoft.identity.client.internal']/class[@name='MsalUtils']" />-->
 
+<!--
   <attr path="/api/package[@name='com.microsoft.identity.client.internal']/
         class[@name='MsalUtils']/
         method[@name='appendQueryParameterToUrl' and count(parameter)=2 and 
@@ -23,5 +24,25 @@
         method[@name='appendQueryParameterToUrl' and count(parameter)=2 and 
         parameter[1][@type='java.lang.String']]/
         parameter[1]" name="managedtype">System.Uri</attr>
-  
+-->
+
+  <attr path="/api/package[@name='com.microsoft.identity.client']/class[@name='AcquireTokenParameters.Builder']/method[@name='self' and count(parameter)=0]"
+        name="managedReturn"
+  >Java.Lang.Object</attr>
+  <attr path="/api/package[@name='com.microsoft.identity.client']/class[@name='AcquireTokenSilentParameters.Builder']/method[@name='self' and count(parameter)=0]"
+        name="managedReturn"
+  >Java.Lang.Object</attr>
+  <attr path="/api/package[@name='com.microsoft.identity.client']/class[@name='AcquireTokenParameters.Builder']/method[@name='build' and count(parameter)=0]"
+        name="managedReturn"
+  >Com.Microsoft.Identity.Client.TokenParameters</attr>
+  <attr path="/api/package[@name='com.microsoft.identity.client']/class[@name='AcquireTokenSilentParameters.Builder']/method[@name='build' and count(parameter)=0]"
+        name="managedReturn"
+  >Com.Microsoft.Identity.Client.TokenParameters</attr>
+  <!--path="/api/package[@name='com.microsoft.identity.client']/class[@name='Logger']-->
+  <add-node path="/api/package[@name='com.microsoft.identity.client']/class[@name='PublicClientApplication']">
+    <class abstract="false" deprecated="not deprecated" final="false" name="PublicClientApplication" static="true" visibility="public" extends="java.lang.Object">
+      <!--<constructor deprecated="not deprecated" final="false" name="AuthListener.AuthRequest" static="false" type="org.alljoyn.bus.AuthListener.AuthRequest" visibility="public" />
+      <field name="p0" type="org.alljoyn.bus.AuthListener.Credentials" />-->
+    </class>
+  </add-node>
 </metadata>

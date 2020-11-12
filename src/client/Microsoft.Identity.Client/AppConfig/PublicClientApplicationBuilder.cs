@@ -11,6 +11,7 @@ using UIKit;
 
 #if ANDROID
 using Android.App;
+using Com.Microsoft.Identity.Client;
 #endif
 
 #if DESKTOP
@@ -56,6 +57,10 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder Create(string clientId)
         {
+#if ANDROID
+            //Com.Microsoft.Identity.Client.PublicClientApplication
+#endif
+
             var config = new ApplicationConfiguration();
             return new PublicClientApplicationBuilder(config).WithClientId(clientId);
         }

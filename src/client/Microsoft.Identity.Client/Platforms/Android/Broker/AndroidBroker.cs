@@ -16,7 +16,6 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
-using System.Net;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
