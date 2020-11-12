@@ -11,35 +11,15 @@ steps:
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    vsVersion: '15.0'
     msbuildArgs: '/t:restore'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
-- task: VSBuild@1
-  displayName: 'NuGet restore ref'
-  inputs:
-    solution: 'src\client\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj'
-    vsVersion: '15.0'
-    msbuildArgs: '/t:restore'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
-
-    steps:
-- task: VSBuild@1
-  displayName: 'NuGet restore ${{ parameters.Solution }}'
-  inputs:
-    solution: ${{ parameters.Solution }}
-    vsVersion: '15.0'
-    msbuildArgs: '/t:restore'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    vsVersion: '15.0'
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
