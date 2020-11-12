@@ -25,10 +25,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return executor;
         }
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
         public static IConfidentialClientApplicationExecutor CreateConfidentialClientExecutor(
             ConfidentialClientApplication confidentialClientApplication)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
             IConfidentialClientApplicationExecutor executor = new ConfidentialClientExecutor(
                 confidentialClientApplication.ServiceBundle,
                 confidentialClientApplication);
@@ -40,7 +44,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             return executor;
         }
-#endif
 
         public static IClientApplicationBaseExecutor CreateClientApplicationBaseExecutor(
             ClientApplicationBase clientApplicationBase)

@@ -8,12 +8,22 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
-#if !ANDROID && !iOS
+
     /// <summary>
     /// Configuration properties used to construct a proof of possesion request.
     /// </summary>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+#endif
     public class PopAuthenticationConfiguration
     {
+        /// <summary>
+        /// </summary>
+        public PopAuthenticationConfiguration()
+        {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+        }
+
         /// <summary>
         /// An HTTP uri to the protected resource which requires a PoP token. The PoP token will be cryptographically bound to the request.
         /// </summary>
@@ -41,5 +51,4 @@ namespace Microsoft.Identity.Client.AppConfig
             RequestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
         }
     }
-#endif
 }

@@ -95,8 +95,6 @@ namespace Microsoft.Identity.Client
 
         internal override ApiTelemetryId ApiTelemetryId => ApiTelemetryId.AcquireTokenSilent;
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
         /// <summary>
         /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
         /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
@@ -108,6 +106,9 @@ namespace Microsoft.Identity.Client
         /// <param name="withSendX5C"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>.
         /// The default is <c>false</c></param>
         /// <returns>The builder to chain the .With methods</returns>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
         public AcquireTokenSilentParameterBuilder WithSendX5C(bool withSendX5C)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSendX5C);
@@ -115,7 +116,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#if !ANDROID && !iOS
         /// <summary>
         ///  Modifies the token acquisition request so that the acquired token is a Proof of Possession token (PoP), rather than a Bearer token. 
         ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
@@ -130,8 +130,13 @@ namespace Microsoft.Identity.Client
         /// <item>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</item>
         /// </list>
         /// </remarks>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
         public AcquireTokenSilentParameterBuilder WithProofOfPosession(PopAuthenticationConfiguration popAuthenticationConfiguration)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
             if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
@@ -146,8 +151,6 @@ namespace Microsoft.Identity.Client
 
             return this;
         }
-#endif
 
-#endif
     }
 }

@@ -9,16 +9,18 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     /// </summary>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
     public class ConfidentialClientApplicationBuilder : AbstractApplicationBuilder<ConfidentialClientApplicationBuilder>
     {
         /// <inheritdoc />
         internal ConfidentialClientApplicationBuilder(ApplicationConfiguration configuration)
             : base(configuration)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
         }
 
         /// <summary>
@@ -28,9 +30,14 @@ namespace Microsoft.Identity.Client
         /// <param name="options">Confidential client applications configuration options</param>
         /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a confidential client application instance</returns>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
         public static ConfidentialClientApplicationBuilder CreateWithApplicationOptions(
             ConfidentialClientApplicationOptions options)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
             var config = new ApplicationConfiguration();
             var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
 
@@ -49,8 +56,13 @@ namespace Microsoft.Identity.Client
         /// application registration portal (https://aka.ms/msal-net-register-app)/.</param>
         /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a confidential client application instance</returns>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
         public static ConfidentialClientApplicationBuilder Create(string clientId)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
             var config = new ApplicationConfiguration();
             return new ConfidentialClientApplicationBuilder(config).WithClientId(clientId);
         }
@@ -176,5 +188,4 @@ namespace Microsoft.Identity.Client
             return new ConfidentialClientApplication(BuildConfiguration());
         }
     }
-#endif
 }

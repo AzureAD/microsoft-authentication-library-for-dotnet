@@ -27,9 +27,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public AuthorityInfo AuthorityOverride { get; set; }
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
-#if !ANDROID && !iOS
+
         public PopAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
-#endif
+
 
         public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
         {

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,12 +13,13 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     /// Base class for confidential client application token request builders
     /// </summary>
     /// <typeparam name="T"></typeparam>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+    [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
     public abstract class AbstractConfidentialClientAcquireTokenParameterBuilder<T>
         : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
@@ -25,6 +27,7 @@ namespace Microsoft.Identity.Client
         internal AbstractConfidentialClientAcquireTokenParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor.ServiceBundle)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
             ConfidentialClientApplicationExecutor = confidentialClientApplicationExecutor;
         }
 
@@ -33,13 +36,13 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
             ValidateAndCalculateApiId();
             return ExecuteInternalAsync(cancellationToken);
         }
 
         internal IConfidentialClientApplicationExecutor ConfidentialClientApplicationExecutor { get; }
 
-#if !ANDROID && !iOS
         /// <summary>
         ///  Modifies the token acquisition request so that the acquired token is a Proof of Possession token (PoP), rather than a Bearer token. 
         ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
@@ -70,7 +73,5 @@ namespace Microsoft.Identity.Client
 
             return this as T;
         }
-#endif
     }
-#endif
 }

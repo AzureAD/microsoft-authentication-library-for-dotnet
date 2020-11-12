@@ -20,13 +20,19 @@ namespace Microsoft.Identity.Client
     /// It can however respond with a 200 OK message or a 302 Redirect, which can be configured here.
     /// For more details see https://aka.ms/msal-net-os-browser
     /// </summary>
-#if NET_CORE || NETSTANDARD || DESKTOP || RUNTIME
-    public
-#else
-    internal
+#if !(NET_CORE || NETSTANDARD || DESKTOP)
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-    class SystemWebViewOptions
+    public class SystemWebViewOptions
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SystemWebViewOptions()
+        {
+            ValidatePlatformAvailability();
+        }
+
         /// <summary>
         /// When the user finishes authenticating, MSAL will respond with a 200 OK message,
         /// which the browser will show to the user. 
@@ -71,6 +77,15 @@ namespace Microsoft.Identity.Client
                "BrowserRedirectSuccess? " + (BrowserRedirectSuccess != null));
             logger.InfoPii("BrowserRedirectError " + BrowserRedirectError,
                "BrowserRedirectError? " + (BrowserRedirectError != null));
+        }
+
+        internal static void ValidatePlatformAvailability()
+        {
+#if !(NET_CORE || NETSTANDARD || DESKTOP)
+            throw new PlatformNotSupportedException(
+                "WithSystemWebViewOptions API is only supported on .NET Classic and .NET Core. " +
+                "No options are available on other platforms.");
+#endif
         }
 
 #if NET_CORE || DESKTOP || NETSTANDARD
