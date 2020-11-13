@@ -78,6 +78,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiCloudTestApp", "tests\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9B-427F-AC02-642BDF8D936B}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		changelog.txt = changelog.txt
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
@@ -152,11 +153,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.NetFx", "tests\Microsoft.Identity.Test.Integration.netfx\Microsoft.Identity.Test.Integration.NetFx.csproj", "{743BEA88-1903-4AF0-A791-705774F4B99D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.NetCore", "tests\Microsoft.Identity.Test.Integration.netcore\Microsoft.Identity.Test.Integration.NetCore.csproj", "{7494E7A2-955E-44F4-823D-0601CFD2C966}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{08C0A03E-4580-4DCF-B5DB-332E39704B91}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RegionalTestApp", "tests\devapps\RegionalTestApp\RegionalTestApp.csproj", "{C0EAF1E1-CDF0-48E7-BE2B-22797A49291B}"
 EndProject

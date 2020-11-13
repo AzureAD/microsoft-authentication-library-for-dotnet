@@ -15,7 +15,6 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
-
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
@@ -34,7 +33,3 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: DeviceAuth'
 
-- task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-  displayName: 'Component Detection'
-  inputs:
-    failOnAlert: true

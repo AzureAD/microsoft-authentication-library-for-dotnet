@@ -18,9 +18,9 @@ namespace XForms
 
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
-        public static string s_redirectUriOnAndroid = Constants.DefaultRedirectUri;
+        public static string s_redirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
 
-        public static string s_redirectUriOnIos = Constants.DefaultRedirectUri;
+        public static string s_redirectUriOnIos = "urn:ietf:wg:oauth:2.0:oob";
 
         public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
 
