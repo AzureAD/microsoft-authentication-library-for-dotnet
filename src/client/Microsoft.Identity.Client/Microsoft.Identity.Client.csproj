@@ -1,5 +1,4 @@
 ﻿<Project  Sdk="MSBuild.Sdk.Extras">
-  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\..\'))" />
   <PropertyGroup>
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
