@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -17,6 +18,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.PlatformsCommon;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.net45;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -26,8 +28,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
-    // Currently PoP is supported only on .Net Classic
-#if DESKTOP || NET_CORE
+
     // Note: these tests require permission to a KeyVault Microsoft account;
     // Please ignore them if you are not a Microsoft FTE, they will run as part of the CI build
     [TestClass]
@@ -386,5 +387,46 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             });
         }
     }
-#endif
+
+    public class RSACertificatePopCryptoProvider : IPoPCryptoProvider
+    {
+        private readonly X509Certificate2 _cert;
+
+       
+        public RSACertificatePopCryptoProvider(X509Certificate2 cert)
+        {
+            _cert = cert ?? throw new ArgumentNullException(nameof(cert));
+
+            RSA provider = _cert.GetRSAPublicKey();
+            RSAParameters publicKeyParams = provider.ExportParameters(false);
+            CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyParams);
         }
+
+        public byte[] Sign(byte[] payload)
+        {
+            using (RSA key = _cert.GetRSAPrivateKey())
+            {
+                return key.SignData(
+                    payload,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+            }
+        }
+
+        public string CannonicalPublicKeyJwk { get; }
+
+        public string CryptographicAlgorithm { get => "RS256"; }
+
+
+        /// <summary>
+        /// Creates the cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
+        /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint
+        /// </summary>
+        private static string ComputeCannonicalJwk(RSAParameters rsaPublicKey)
+        {
+            return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
+        }
+
+
+    }
+}
