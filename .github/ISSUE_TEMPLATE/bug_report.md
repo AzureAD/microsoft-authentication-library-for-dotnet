@@ -7,9 +7,10 @@ assignees: ''
 
 ---
 
+**Logs and Network traces**
+Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
+
 **Which Version of MSAL are you using ?**
-Note that to get help, you need to run the latest version. Preview version are also ok. 
-For ADAL, please log issues to https://github.com/AzureAD/azure-activedirectory-library-for-dotnet
 <!-- E.g. MSAL 2.6.2, MSAL 3.0.0-preview -->
 
 **Platform**
@@ -21,11 +22,11 @@ For ADAL, please log issues to https://github.com/AzureAD/azure-activedirectory-
     * [ ] Integrated Windows Auth
     * [ ] Username Password
     * [ ] Device code flow (browserless)
-* Web App
+* Web App 
     * [ ] Authorization code
     * [ ] OBO
-* Web API
-    * [ ] OBO
+* Daemon App 
+    * [ ] Service to Service calls
 
 Other? - please describe;
 
@@ -52,4 +53,4 @@ A clear and concise description of what happens, e.g. exception is thrown, UI fr
 <!--- Only if you have suggestions on a fix for the bug -->
 
 **Additional context/ Logs / Screenshots**
-Add any other context about the problem here, such as logs and screebshots. Logging is described at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging
+Add any other context about the problem here, such as logs and screebshots. 
