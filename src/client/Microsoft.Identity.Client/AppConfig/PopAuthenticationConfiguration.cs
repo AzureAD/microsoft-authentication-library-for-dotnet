@@ -18,10 +18,13 @@ namespace Microsoft.Identity.Client.AppConfig
     public class PopAuthenticationConfiguration
     {
         /// <summary>
+        /// Constructs the configuration properties used to construct a proof of possesion request
         /// </summary>
-        public PopAuthenticationConfiguration()
+        /// <param name="requestUri"></param>
+        public PopAuthenticationConfiguration(Uri requestUri)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
+            RequestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
         }
 
         /// <summary>
@@ -41,14 +44,5 @@ namespace Microsoft.Identity.Client.AppConfig
         /// as MSAL.NET will keep a thumbprint of keys in memory
         /// </summary>
         public IPoPCryptoProvider PopCryptoProvider { get; set; }
-
-        /// <summary>
-        /// Constructs the configuration properties used to construct a proof of possesion request
-        /// </summary>
-        /// <param name="requestUri"></param>
-        public PopAuthenticationConfiguration(Uri requestUri)
-        {
-            RequestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-        }
     }
 }

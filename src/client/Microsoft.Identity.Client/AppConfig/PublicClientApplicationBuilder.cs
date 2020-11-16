@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
 #if !iOS
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] 
 #endif
         public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
         {
@@ -127,12 +127,19 @@ namespace Microsoft.Identity.Client
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
-#if SUPPORTS_BROKER
+#if !SUPPORTS_BROKER
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
 #endif
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-#if DESKTOP || NET_CORE || WINDOWS_APP
+            if (enableBroker)
+            {
+#if !SUPPORTS_BROKER
+                throw new PlatformNotSupportedException("A broker is not yet supported on this platform.");
+#endif
+            }
+
+#if WINDOWS_APP // WAM broker is still experimental
             if (!Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
