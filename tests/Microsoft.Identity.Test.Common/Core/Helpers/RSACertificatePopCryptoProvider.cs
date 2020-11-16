@@ -12,33 +12,33 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
 {
     public class RSACertificatePopCryptoProvider : IPoPCryptoProvider
     {
+        private readonly X509Certificate2 _cert;
 
         public byte[] Sign(byte[] payload)
         {
-            return Sign(_signingKey, payload);
+            using (RSA key = _cert.GetRSAPrivateKey())
+            {
+                return key.SignData(
+                    payload,
+                    HashAlgorithmName.SHA256, 
+                    RSASignaturePadding.Pkcs1);
+            }
         }
 
         public RSACertificatePopCryptoProvider(X509Certificate2 cert)
         {
-            _cert = cert;
-            InitializeSigningKey();
+            _cert = cert ?? throw new ArgumentNullException(nameof(cert));
+
+            RSACryptoServiceProvider provider = _cert.GetRSAPublicKey() as RSACryptoServiceProvider;
+            RSAParameters publicKeyInfo = provider.ExportParameters(false);
+            ComputeCannonicalJwk(publicKeyInfo);
         }
 
-        private X509Certificate2 _cert;
-        private RSACryptoServiceProvider _signingKey;
 
-        public string CannonicalPublicKeyJwk { get; private set; }
+        public string CannonicalPublicKeyJwk { get; }
 
         public string CryptographicAlgorithm { get => "RS256"; }
 
-        private void InitializeSigningKey()
-        {
-            _signingKey = _cert.PrivateKey as RSACryptoServiceProvider;
-
-            RSAParameters publicKeyInfo = _signingKey.ExportParameters(false);
-
-            CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyInfo);
-        }
 
         /// <summary>
         /// Creates the cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
@@ -49,10 +49,6 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
             return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
 
-        public static byte[] Sign(RSA RsaKey, byte[] payload)
-        {
-            return ((RSACryptoServiceProvider)RsaKey).SignData(payload, CryptoConfig.MapNameToOID("SHA256"));
-        }
 
     }
 }
