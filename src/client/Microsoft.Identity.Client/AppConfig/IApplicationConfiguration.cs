@@ -20,8 +20,6 @@ namespace Microsoft.Identity.Client
 
         InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; }
 
-
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
         /// </summary>
         ClientCredentialWrapper ClientCredential { get; }
@@ -31,6 +29,5 @@ namespace Microsoft.Identity.Client
         /// to <see cref="AbstractApplicationBuilder{T}.WithTelemetry(TelemetryCallback)"/>
         /// </summary>
         TelemetryCallback TelemetryCallback { get; }
-#endif
     }
 }

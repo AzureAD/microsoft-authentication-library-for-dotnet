@@ -11,11 +11,13 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
     /// <summary>
     /// Builder for AcquireTokenByAuthorizationCode
     /// </summary>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
     public sealed class AcquireTokenByAuthorizationCodeParameterBuilder :
         AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder>
     {
@@ -26,7 +28,7 @@ namespace Microsoft.Identity.Client
         internal AcquireTokenByAuthorizationCodeParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)
         {
-            // TODO: where do we pass the authorization code? 
+            ConfidentialClientApplication.GuardMobileFrameworks();
         }
 
         internal static AcquireTokenByAuthorizationCodeParameterBuilder Create(
@@ -34,6 +36,8 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes, 
             string authorizationCode)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
             return new AcquireTokenByAuthorizationCodeParameterBuilder(confidentialClientApplicationExecutor)
                    .WithScopes(scopes).WithAuthorizationCode(authorizationCode);
         }
@@ -85,5 +89,4 @@ namespace Microsoft.Identity.Client
             return this;
         }
     }
-#endif
 }

@@ -98,7 +98,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#if !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
         /// You can specify a Keychain Access Group to use for persisting the token cache across multiple applications.
         /// This enables you to share the token cache between several applications having the same keychain access group.
@@ -108,6 +107,9 @@ namespace Microsoft.Identity.Client
         /// <param name="keychainSecurityGroup"></param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
+#if !iOS
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] 
+#endif
         public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
         {
 #if iOS
@@ -116,9 +118,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#endif //!ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
-
-#if !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
         /// On Android and iOS, brokers enable Single-Sign-On, device identification,
         /// and application identification verification. To enable one of these features,
@@ -128,9 +127,19 @@ namespace Microsoft.Identity.Client
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
+#if !SUPPORTS_BROKER
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-#if DESKTOP || NET_CORE || WINDOWS_APP 
+            if (enableBroker)
+            {
+#if !SUPPORTS_BROKER
+                throw new PlatformNotSupportedException("A broker is not yet supported on this platform.");
+#endif
+            }
+
+#if WINDOWS_APP // WAM broker is still experimental
             if (!Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
@@ -142,9 +151,6 @@ namespace Microsoft.Identity.Client
             Config.IsBrokerEnabled = enableBroker;
             return this;
         }
-
-
-#endif // !NET_CORE_BUILDTIME && !MAC_BUILDTIME
 
 #if WINDOWS_APP
         /// <summary>
@@ -160,7 +166,6 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if RUNTIME || NETSTANDARD_BUILDTIME
         /// <summary>
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
@@ -171,11 +176,14 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <param name="parentActivityOrWindowFunc">The parent as an object, so that it can be used from shared NetStandard assemblies</param>
         /// <returns>The builder to chain the .With methods</returns>
+        /// 
+#if !NETSTANDARD
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] // hide everywhere but NetStandard
+#endif
         public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<object> parentActivityOrWindowFunc)
         {
             return WithParentFunc(parentActivityOrWindowFunc);
         }
-#endif
 
         private PublicClientApplicationBuilder WithParentFunc(Func<object> parentFunc)
         {

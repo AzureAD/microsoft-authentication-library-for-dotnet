@@ -9,7 +9,6 @@ namespace Microsoft.Identity.Client
 {
     public partial interface ITokenCache
     {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
         /// <summary>
         /// Functionality replaced by <see cref="ITokenCacheSerializer.SerializeMsalV3"/> and is accessible in TokenCacheNotificationArgs.
         /// </summary>
@@ -116,7 +115,6 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("This is expected to be removed in MSAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-4x-cache-breaking-change", false)]
         void DeserializeUnifiedAndAdalCache(CacheData cacheData);
-#endif
     }
 
     public sealed partial class TokenCache : ITokenCacheInternal
@@ -135,8 +133,6 @@ namespace Microsoft.Identity.Client
             get => _hasStateChanged;
             set => _hasStateChanged = value;
         }
-
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
 
         /// <summary>
         /// Serializes the entire token cache in both the ADAL V3 and unified cache formats.
@@ -298,7 +294,5 @@ namespace Microsoft.Identity.Client
         {
             throw new NotImplementedException("This is removed in MSAL.NET v4. Read more: https://aka.ms/msal-net-4x-cache-breaking-change");
         }
-
-#endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME
     }
 }

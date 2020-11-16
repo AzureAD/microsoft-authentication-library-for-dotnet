@@ -8,11 +8,12 @@ using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     /// Component to be used with confidential client applications like Web Apps/API.
     /// </summary>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
     public partial interface IConfidentialClientApplication : IClientApplicationBase
     {
         /// <Summary>
@@ -91,5 +92,4 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
     }
-#endif
 }

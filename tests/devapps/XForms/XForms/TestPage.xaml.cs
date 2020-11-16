@@ -18,7 +18,7 @@ namespace XForms
         private const string EmptyResult = "Result:";
         private const string SuccessfulResult = "Result: Success";
         private bool _isB2CTest = false;
-        public PublicClientApplication PublicClientApplication { get; set; }
+        private IPublicClientApplication _publicClientApplication;
 
         public TestPage()
         {
@@ -60,7 +60,7 @@ namespace XForms
 #endif
             Console.WriteLine("[TESTLOG] - Creating the PCA");
 
-            PublicClientApplication = builder.BuildConcrete();
+            _publicClientApplication = builder.Build();
 
             Console.WriteLine("[TESTLOG] - PCA created");
 
@@ -160,16 +160,16 @@ namespace XForms
             acquireResponseLabel.Text = "";
             acquireResponseTitleLabel.Text = EmptyResult;
 
-            if (PublicClientApplication != null)
+            if (_publicClientApplication != null)
             {
                 Console.WriteLine("[TESTLOG] - Clearing the accounts. Getting the accounts");
 
-                IEnumerable<IAccount> accounts = await PublicClientApplication.GetAccountsAsync().ConfigureAwait(true);
+                IEnumerable<IAccount> accounts = await _publicClientApplication.GetAccountsAsync().ConfigureAwait(true);
 
                 foreach (IAccount account in accounts)
                 {
                     Console.WriteLine($"[TESTLOG] - Clearing the account {account.Username}");
-                    await PublicClientApplication.RemoveAsync(account).ConfigureAwait(true);
+                    await _publicClientApplication.RemoveAsync(account).ConfigureAwait(true);
                 }
 
                 Console.WriteLine("[TESTLOG] - Accounts cleared");
@@ -193,7 +193,7 @@ namespace XForms
 
             try
             {
-                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
+                AcquireTokenInteractiveParameterBuilder request = _publicClientApplication.AcquireTokenInteractive(App.s_scopes)
                     .WithPrompt(prompt)
                     .WithParentActivityOrWindow(App.RootViewController)
                     .WithUseEmbeddedWebView(true);
@@ -222,9 +222,9 @@ namespace XForms
             {
                 Console.WriteLine("[TESTLOG] - start AcquireTokenSilentAsync");
 
-                Console.WriteLine($"[TESTLOG] - PublicClientApplication? {PublicClientApplication == null}");
+                Console.WriteLine($"[TESTLOG] - PublicClientApplication? {_publicClientApplication == null}");
 
-                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(new[] { "user.read"})
+                AcquireTokenInteractiveParameterBuilder request = _publicClientApplication.AcquireTokenInteractive(new[] { "user.read"})
                    .WithPrompt(Prompt.ForceLogin)
                    .WithUseEmbeddedWebView(true);
 
@@ -239,7 +239,7 @@ namespace XForms
 
                 Console.WriteLine("[TESTLOG] - after executing interactive request");
 
-                AcquireTokenSilentParameterBuilder builder = PublicClientApplication.AcquireTokenSilent(
+                AcquireTokenSilentParameterBuilder builder = _publicClientApplication.AcquireTokenSilent(
                     App.s_scopes,
                     result.Account.Username);
 
@@ -272,7 +272,7 @@ namespace XForms
         {
             try
             {
-                AcquireTokenInteractiveParameterBuilder request = PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
+                AcquireTokenInteractiveParameterBuilder request = _publicClientApplication.AcquireTokenInteractive(App.s_scopes)
                     .WithPrompt(Prompt.ForceLogin)
                     .WithParentActivityOrWindow(App.RootViewController)
                     .WithUseEmbeddedWebView(true);
@@ -286,7 +286,7 @@ namespace XForms
                 InitPublicClient();
 
                 AcquireTokenInteractiveParameterBuilder builder =
-                   PublicClientApplication.AcquireTokenInteractive(App.s_scopes)
+                   _publicClientApplication.AcquireTokenInteractive(App.s_scopes)
                         .WithPrompt(Prompt.NoPrompt)
                         .WithParentActivityOrWindow(App.RootViewController)
                         .WithUseEmbeddedWebView(true);

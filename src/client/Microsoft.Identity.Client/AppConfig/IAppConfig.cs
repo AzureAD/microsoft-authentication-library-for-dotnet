@@ -104,15 +104,19 @@ namespace Microsoft.Identity.Client
         IEnumerable<string> ClientCapabilities { get; }
 
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
         /// </summary>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
         string ClientSecret { get; }
 
         /// <summary>
         /// </summary>
-        X509Certificate2 ClientCredentialCertificate { get; }
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
 #endif
+        X509Certificate2 ClientCredentialCertificate { get; }
 
         /// <summary>
         /// </summary>

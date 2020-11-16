@@ -70,8 +70,6 @@ namespace Microsoft.Identity.Client
         public IEnumerable<string> ClientCapabilities { get; set; }
 
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
         public ClientCredentialWrapper ClientCredential { get; internal set; }
         public string ClientSecret { get; internal set; }
         public string SignedClientAssertion { get; internal set; }
@@ -79,8 +77,6 @@ namespace Microsoft.Identity.Client
         public IDictionary<string, string> ClaimsToSign { get; internal set; }
         public bool MergeWithDefaultClaims { get; internal set; }
         internal int ConfidentialClientCredentialCount;
-
-#endif
 
         #region Authority
 
