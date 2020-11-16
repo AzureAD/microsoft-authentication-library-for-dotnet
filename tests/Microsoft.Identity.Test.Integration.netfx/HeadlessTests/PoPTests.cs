@@ -399,7 +399,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             RSA provider = _cert.GetRSAPublicKey();
             RSAParameters publicKeyParams = provider.ExportParameters(false);
-            ComputeCannonicalJwk(publicKeyParams);
+            CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyParams);
         }
 
         public byte[] Sign(byte[] payload)
