@@ -132,12 +132,6 @@ namespace Microsoft.Identity.Client
 #endif
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-            if (enableBroker)
-            {
-#if !SUPPORTS_BROKER
-                throw new PlatformNotSupportedException("A broker is not yet supported on this platform.");
-#endif
-            }
 
 #if WINDOWS_APP // WAM broker is still experimental
             if (!Config.ExperimentalFeaturesEnabled)
