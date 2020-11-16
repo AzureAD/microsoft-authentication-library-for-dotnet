@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -21,18 +24,15 @@ namespace Microsoft.Identity.Client.Region
         private const string RegionName = "REGION_NAME";
 
         // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
-        private readonly Uri _ImdsUri = new Uri("http://169.254.169.254/metadata/instance/compute?api-version=2020-06-01");
+        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute";
+        private const string DefaultApiVersion = "2020-06-01";
 
-        private IDictionary<string, string> Headers;
         private readonly IHttpManager _httpManager;
-        private static INetworkCacheMetadataProvider _networkCacheMetadataProvider;
+        private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
 
         public RegionDiscoveryProvider(IHttpManager httpManager, INetworkCacheMetadataProvider networkCacheMetadataProvider = null)
         {
             _httpManager = httpManager;
-
-            Headers = new Dictionary<string, string>();
-            Headers.Add("Metadata", "true");
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
         }
 
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Region
             ICoreLogger logger = requestContext.Logger;
             string environment = authority.Host;
             InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
-            
+
             if (cachedEntry == null)
             {
                 Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext.Logger).ConfigureAwait(false);
@@ -49,7 +49,8 @@ namespace Microsoft.Identity.Client.Region
 
                 cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
                 logger.Verbose($"[Region Discovery] Created metadata for the regional environment {environment} ? {cachedEntry != null}");
-            } else
+            }
+            else
             {
                 logger.Verbose($"[Region Discovery] The network provider found an entry for {environment}");
             }
@@ -63,35 +64,88 @@ namespace Microsoft.Identity.Client.Region
         {
             if (!Environment.GetEnvironmentVariable(RegionName).IsNullOrEmpty())
             {
-                logger.Info($"[Region discovery] Region: {Environment.GetEnvironmentVariable(RegionName)}");
+                logger.Info($"[Region discovery] Region found in environment variable: {Environment.GetEnvironmentVariable(RegionName)}");
                 return Environment.GetEnvironmentVariable(RegionName);
             }
 
             try
             {
-                HttpResponse response = await _httpManager.SendGetAsync(_ImdsUri, Headers, logger).ConfigureAwait(false);
-
-                if (response.StatusCode != HttpStatusCode.OK)
+                var headers = new Dictionary<string, string>
                 {
-                    throw new MsalClientException(
-                        MsalError.RegionDiscoveryFailed,
-                        MsalErrorMessage.RegionDiscoveryFailed);
+                    { "Metadata", "true" }
+                };
+                
+                HttpResponse response = await _httpManager.SendGetAsync(BuildImdsUri(DefaultApiVersion), headers, logger).ConfigureAwait(false);
+
+                // A bad request occurs when the version in the IMDS call is no longer supported.
+                if (response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    string apiVersion = await GetImdsUriApiVersionAsync(logger, headers).ConfigureAwait(false); // Get the latest version
+                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger).ConfigureAwait(false); // Call again with updated version
                 }
 
-                LocalImdsResponse localImdsResponse = JsonHelper.DeserializeFromJson<LocalImdsResponse>(response.Body);
+                if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
+                {
+                    LocalImdsResponse localImdsResponse = JsonHelper.DeserializeFromJson<LocalImdsResponse>(response.Body);
 
-                logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
-                return localImdsResponse.location;
+                    if (localImdsResponse != null && !localImdsResponse.location.IsNullOrEmpty())
+                    {
+                        logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
+                        return localImdsResponse.location;
+                    }
+                }
+                    
+                logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
+
+                throw MsalServiceExceptionFactory.FromImdsResponse(
+                MsalError.RegionDiscoveryFailed,
+                MsalErrorMessage.RegionDiscoveryFailed,
+                response);
             }
-            catch (MsalClientException)
+            catch (MsalServiceException)
             {
                 throw;
             }
             catch (Exception e)
             {
                 logger.Info("[Region discovery] Call to local imds failed." + e.Message);
-                throw new MsalClientException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed);
+                throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed);
             }
+        }
+
+        private async Task<string> GetImdsUriApiVersionAsync(ICoreLogger logger, Dictionary<string, string> headers)
+        {
+            Uri imdsErrorUri = new Uri(ImdsEndpoint);
+
+            HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger).ConfigureAwait(false);
+
+            // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                LocalImdsErrorResponse errorResponse = JsonHelper.DeserializeFromJson<LocalImdsErrorResponse>(response.Body);
+
+                if (errorResponse != null && !errorResponse.NewestVersions.IsNullOrEmpty())
+                {
+                    logger.Info("[Region discovery] Updated the version for IMDS endpoint to: " + errorResponse.NewestVersions[0]);
+                    return errorResponse.NewestVersions[0];
+                }
+
+                logger.Info("[Region Discovery] The response is empty or does not contain the newest versions.");
+            }
+
+            logger.Info($"[Region Discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}");
+
+            throw MsalServiceExceptionFactory.FromImdsResponse(
+            MsalError.RegionDiscoveryFailed,
+            MsalErrorMessage.RegionDiscoveryFailed,
+            response);
+        }
+
+        private Uri BuildImdsUri(string apiVersion)
+        {
+            UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
+            uriBuilder.AppendQueryParameters($"api-version={apiVersion}");
+            return uriBuilder.Uri;
         }
 
         private static InstanceDiscoveryMetadataEntry CreateEntry(Uri orginalAuthority, Uri regionalizedAuthority)
@@ -120,12 +174,12 @@ namespace Microsoft.Identity.Client.Region
             if (KnownMetadataProvider.IsPublicEnvironment(canonicalAuthority.Host))
             {
                 builder.Host = $"{region}.login.microsoft.com";
-            } 
+            }
             else
             {
                 builder.Host = $"{region}.{builder.Host}";
             }
-            
+
             return builder.Uri;
         }
     }

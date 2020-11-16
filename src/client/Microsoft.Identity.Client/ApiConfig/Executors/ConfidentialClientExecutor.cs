@@ -11,8 +11,9 @@ using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
     internal class ConfidentialClientExecutor : AbstractExecutor, IConfidentialClientApplicationExecutor
     {
         private readonly ConfidentialClientApplication _confidentialClientApplication;
@@ -20,6 +21,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         public ConfidentialClientExecutor(IServiceBundle serviceBundle, ConfidentialClientApplication confidentialClientApplication)
             : base(serviceBundle, confidentialClientApplication)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
             _confidentialClientApplication = confidentialClientApplication;
         }
 
@@ -125,5 +128,4 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return handler.GetAuthorizationUriWithoutPkce();
         }
     }
-#endif
 }

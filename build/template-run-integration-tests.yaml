@@ -7,7 +7,7 @@ steps:
   displayName: 'Run integration tests (.NET FX)'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\net4*\Microsoft.Identity.Test.Integration.dll'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netfx\bin\**\net4*\Microsoft.Identity.Test.Integration.NetFx.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
     rerunFailedTests: true
     rerunMaxAttempts: '3'
@@ -18,7 +18,7 @@ steps:
   displayName: 'Run integration tests (.NET Core)'
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration\bin\**\netcore*\Microsoft.Identity.Test.Integration.dll'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\netcore*\Microsoft.Identity.Test.Integration.NetCore.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
     rerunFailedTests: true
     rerunMaxAttempts: '3'

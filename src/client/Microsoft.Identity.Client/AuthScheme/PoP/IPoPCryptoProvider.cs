@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Security.Cryptography;
+
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     // TODO: we can expose this interface to users for a simple but low-level extensibility mechanism.
@@ -19,12 +21,19 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     /// Ideally there should be a single public / private key pair associated with a machine, so implementers of this interface
     /// should consider exposing a singleton.
     /// </remarks>
-    internal interface IPoPCryptoProvider
+    public interface IPoPCryptoProvider
     {
         /// <summary>
         /// The cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
         /// </summary>
         string CannonicalPublicKeyJwk { get; }
+
+        /// <summary>
+        /// Algorithm used to sign proof of possesion request. 
+        /// See https://docs.microsoft.com/en-us/azure/key-vault/keys/about-keys#signverify for ECD
+        /// See https://docs.microsoft.com/en-us/azure/key-vault/keys/about-keys#signverify-1 for RSA
+        /// </summary>
+        string CryptographicAlgorithm { get; }
 
         /// <summary>
         /// Signs the byte array using the private key

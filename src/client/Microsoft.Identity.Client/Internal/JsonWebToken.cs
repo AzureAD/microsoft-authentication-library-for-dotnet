@@ -12,8 +12,6 @@ using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Internal
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     internal class JsonWebToken
     {
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
@@ -235,5 +233,4 @@ namespace Microsoft.Identity.Client.Internal
             public string X509CertificatePublicCertValue { get; set; }
         }
     }
-#endif
 }

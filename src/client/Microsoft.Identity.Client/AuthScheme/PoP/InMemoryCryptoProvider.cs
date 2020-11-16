@@ -23,12 +23,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public InMemoryCryptoProvider()
         {
-
             InitializeSigningKey();
         }
 
         public string CannonicalPublicKeyJwk { get; private set; }
 
+        public string CryptographicAlgorithm { get => "RS256"; }
 
         private void InitializeSigningKey()
         {

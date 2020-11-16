@@ -68,13 +68,10 @@ namespace Microsoft.Identity.Client
 
         internal AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindowFunc(Func<object> parentActivityOrWindowFunc)
         {
-#if RUNTIME || NETSTANDARD_BUILDTIME
-
             if (parentActivityOrWindowFunc != null)
             {
                 WithParentActivityOrWindow(parentActivityOrWindowFunc());
             }
-#endif 
 
             return this;
         }
@@ -114,21 +111,24 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        // Default browser WebUI is not available on mobile (Android, iOS, UWP), but allow it at runtime
+        // Remark: Default browser WebUI is not available on mobile (Android, iOS, UWP), but allow it at runtime
         // to avoid MissingMethodException
-#if NET_CORE || NETSTANDARD || DESKTOP || RUNTIME
         /// <summary>
         /// Specifies options for using the system OS browser handle interactive authentication.
         /// </summary>
         /// <param name="options">Data object with options</param>
         /// <returns>The builder to chain the .With methods</returns>
+#if !(NET_CORE || NETSTANDARD || DESKTOP)
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] // hide everywhere but NetStandard
+#endif
         public AcquireTokenInteractiveParameterBuilder WithSystemWebViewOptions(SystemWebViewOptions options)
         {
+            SystemWebViewOptions.ValidatePlatformAvailability();
+
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithSystemBrowserOptions);
             Parameters.UiParent.SystemWebViewOptions = options;
             return this;
         }
-#endif
 
         /// <summary>
         /// Sets the <paramref name="loginHint"/>, in order to avoid select account
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        #region WithParentActivityOrWindow
+#region WithParentActivityOrWindow
 
         /*
          * .WithParentActivityOrWindow is platform specific but we need a solution for
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client
          * since Activity, ViewController etc. do not exist in NetStandard.
          */
 
-#if RUNTIME || NETSTANDARD_BUILDTIME
+        
         /// <summary>
         ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
@@ -199,11 +199,15 @@ namespace Microsoft.Identity.Client
         /// <remarks>Mandatory only on Android. Can also be set via the PublicClientApplcation builder.</remarks>
         /// <param name="parent">The parent as an object, so that it can be used from shared NetStandard assemblies</param>
         /// <returns>The builder to chain the .With methods</returns>
+
+#if !NETSTANDARD
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] // hide everywhere but NetStandard
+#endif
         public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(object parent)
         {
             return WithParentObject(parent);
         }
-#endif
+
 
         private AcquireTokenInteractiveParameterBuilder WithParentObject(object parent)
         {
@@ -332,7 +336,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-        #endregion
+#endregion
 
         /// <inheritdoc />
         protected override void Validate()
