@@ -305,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public void SilentAuthStrategyFallbackTest()
+        public async Task SilentAuthStrategyFallbackTestAsync()
         {
             using (var harness = CreateBrokerHelper())
             {
@@ -326,38 +326,45 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 
                 var mockClientStrategy = Substitute.For<ISilentAuthRequestStrategy>();
                 var mockBrokerStrategy = Substitute.For<ISilentAuthRequestStrategy>();
-                var mockBrokerAuthenticationResult = new AuthenticationResult();
+                var brokerAuthenticationResult = new AuthenticationResult();
 
-                var invlidGrantException = new MsalClientException(MsalError.InvalidGrantError);
-                var NoAccountException = new MsalClientException(MsalError.NoAccountForLoginHint);
-                var NoTokensException = new MsalClientException(MsalError.NoTokensFoundError);
+                var invalidGrantException = new MsalClientException(MsalError.InvalidGrantError);
+                var noAccountException = new MsalClientException(MsalError.NoAccountForLoginHint);
+                var noTokensException = new MsalClientException(MsalError.NoTokensFoundError);
 
-                mockBrokerStrategy.ExecuteAsync(new CancellationToken()).Returns(mockBrokerAuthenticationResult);
-                mockClientStrategy.ExecuteAsync(new CancellationToken()).Throws(invlidGrantException);
+                mockBrokerStrategy.ExecuteAsync(default).Returns(brokerAuthenticationResult);
+                mockClientStrategy.ExecuteAsync(default).Throws(invalidGrantException);
+                _acquireTokenSilentParameters.Account = new Account("a.b", "user", "lmo");
 
                 //Execute silent request with invalid grant
-                var silentRequest = new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters, mockClientStrategy, mockBrokerStrategy);
-                var result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
-                Assert.AreEqual(result, mockBrokerAuthenticationResult);
+                var silentRequest = new SilentRequest(
+                    harness.ServiceBundle, 
+                    _parameters, 
+                    _acquireTokenSilentParameters, 
+                    mockClientStrategy,
+                    mockBrokerStrategy);
+
+                var result = await silentRequest.ExecuteTestAsync(default).ConfigureAwait(false);
+                Assert.AreEqual(result, brokerAuthenticationResult);
 
                 //Execute silent request with no accounts exception
                 mockClientStrategy = Substitute.For<ISilentAuthRequestStrategy>();
-                mockClientStrategy.ExecuteAsync(new CancellationToken()).Throws(NoAccountException);
+                mockClientStrategy.ExecuteAsync(new CancellationToken()).Throws(noAccountException);
                 silentRequest = new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters, mockClientStrategy, mockBrokerStrategy);
                 result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
-                Assert.AreEqual(result, mockBrokerAuthenticationResult);
+                Assert.AreEqual(result, brokerAuthenticationResult);
 
                 //Execute silent request with no tokens exception
                 mockClientStrategy = Substitute.For<ISilentAuthRequestStrategy>();
-                mockClientStrategy.ExecuteAsync(new CancellationToken()).Throws(NoTokensException);
+                mockClientStrategy.ExecuteAsync(new CancellationToken()).Throws(noTokensException);
                 silentRequest = new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters, mockClientStrategy, mockBrokerStrategy);
                 result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
-                Assert.AreEqual(result, mockBrokerAuthenticationResult);
+                Assert.AreEqual(result, brokerAuthenticationResult);
             }
         }
 
         [TestMethod]
-        public async Task NullAccount_CallsBrokerSilentAuth_Async()
+        public async Task SpecialAccount_CallsBrokerSilentAuth_Async()
         {
             using (var harness = CreateBrokerHelper())
             {
@@ -376,8 +383,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var ar = new AuthenticationResult();
 
                 mockBrokerStrategy.ExecuteAsync(new CancellationToken()).Returns(ar);
-
-                var silentRequest = new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters, mockClientStrategy, mockBrokerStrategy);
+                _acquireTokenSilentParameters.Account = PublicClientApplication.CurrentBrokerAccount;
+                var silentRequest = new SilentRequest(
+                    harness.ServiceBundle, 
+                    _parameters, 
+                    _acquireTokenSilentParameters, 
+                    mockClientStrategy, 
+                    mockBrokerStrategy);
                 
                 // Act
                 var result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
@@ -395,7 +407,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 IBroker broker = Substitute.For<IBroker>();
-                
+                _acquireTokenSilentParameters.Account = PublicClientApplication.CurrentBrokerAccount;
                 var brokerSilentAuthStrategy =
                     new BrokerSilentStrategy(
                         new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters),
@@ -403,7 +415,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         _parameters,
                         _acquireTokenSilentParameters,
                         broker);
-                _parameters.Account = null;
+                _parameters.Account = PublicClientApplication.CurrentBrokerAccount;
                 broker.AcquireTokenSilentDefaultUserAsync(_parameters, _acquireTokenSilentParameters)
                     .Returns(Task.FromResult(_msalTokenResponse));
 

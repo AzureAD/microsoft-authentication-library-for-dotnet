@@ -210,7 +210,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
         {
-            if (fromServer == null || AuthenticationRequestParameters?.Account?.HomeAccountId == null)
+            if (fromServer == null || 
+                AuthenticationRequestParameters?.Account?.HomeAccountId == null ||
+                PublicClientApplication.IsCurrentBrokerAccount(AuthenticationRequestParameters?.Account))
             {
                 return;
             }

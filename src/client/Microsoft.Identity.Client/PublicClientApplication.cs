@@ -29,6 +29,30 @@ namespace Microsoft.Identity.Client
         {
         }
 
+        private const string CurrentBrokerAccountDescriptor = "current_broker_account";
+        private static IAccount s_currentBrokerAccount = 
+            new Account(CurrentBrokerAccountDescriptor, null, null, null);
+
+        /// <summary>
+        /// A special account value that indicates that the current Operating System account should be used 
+        /// to login the user. Not all operating systems and authentication flows support this concept, in which 
+        /// case calling `AcquireTokenSilent` will throw an <see cref="MsalUiRequiredException"/>. 
+        /// 
+        /// Currently only the Windows broker is able to login the current Windows user, see https://aka.ms/msal-net-wam for details.
+        /// </summary>
+        public static IAccount CurrentBrokerAccount
+        {
+            get
+            {
+                return s_currentBrokerAccount;
+            }
+        }
+
+        internal static bool IsCurrentBrokerAccount(IAccount account)
+        {
+            return string.Equals(account?.HomeAccountId?.Identifier, CurrentBrokerAccountDescriptor, StringComparison.Ordinal);
+        }
+
         /// <summary>
         ///
         /// </summary>

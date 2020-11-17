@@ -56,6 +56,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string UserNullError = "user_null";
 
+
+        /// <summary>
+        /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when the 
+        /// <see cref="PublicClientApplication.CurrentBrokerAccount"/> user is passed as the <c>account</c> parameter. Only some brokers (WAM) can login the current user.
+        /// <para>Mitigation</para>
+        /// On Windows, use the broker .WithBroker(true) or use a different account, or otherwise call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
+        /// </summary>
+        public const string CurrentBrokerAccount = "current_broker_account";
+
         /// <summary>
         /// This error code denotes that no account was found having the given login hint.
         /// <para>What happens?</para>
