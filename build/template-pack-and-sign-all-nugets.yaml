@@ -11,8 +11,7 @@ steps:
   parameters:
     BuildConfiguration: ${{ parameters.BuildConfiguration }}
     ProjectRootPath: '$(Build.SourcesDirectory)\src\client'
-    AssemblyName: 'Microsoft.Identity.Client'
-    HasRefAssembly: 'true'
+    AssemblyName: 'Microsoft.Identity.Client'    
 
 # Copy all packages out to staging
 - task: CopyFiles@2

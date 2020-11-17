@@ -18,7 +18,6 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-#if !ANDROID && !iOS
     internal class PoPAuthenticationScheme : IAuthenticationScheme
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -139,5 +138,4 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             return sb.ToString();
         }
     }
-#endif
 }

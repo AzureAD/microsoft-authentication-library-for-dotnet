@@ -8,12 +8,25 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
-#if !ANDROID && !iOS
+
     /// <summary>
     /// Configuration properties used to construct a proof of possesion request.
     /// </summary>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+#endif
     public class PopAuthenticationConfiguration
     {
+        /// <summary>
+        /// Constructs the configuration properties used to construct a proof of possesion request
+        /// </summary>
+        /// <param name="requestUri"></param>
+        public PopAuthenticationConfiguration(Uri requestUri)
+        {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+            RequestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+        }
+
         /// <summary>
         /// An HTTP uri to the protected resource which requires a PoP token. The PoP token will be cryptographically bound to the request.
         /// </summary>
@@ -31,15 +44,5 @@ namespace Microsoft.Identity.Client.AppConfig
         /// as MSAL.NET will keep a thumbprint of keys in memory
         /// </summary>
         public IPoPCryptoProvider PopCryptoProvider { get; set; }
-
-        /// <summary>
-        /// Constructs the configuration properties used to construct a proof of possesion request
-        /// </summary>
-        /// <param name="requestUri"></param>
-        public PopAuthenticationConfiguration(Uri requestUri)
-        {
-            RequestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-        }
     }
-#endif
 }

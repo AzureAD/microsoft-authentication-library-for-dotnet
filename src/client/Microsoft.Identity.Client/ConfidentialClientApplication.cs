@@ -18,8 +18,6 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     /// Class to be used for confidential client applications (Web Apps, Web APIs, and daemon applications).
     /// </summary>
@@ -30,6 +28,9 @@ namespace Microsoft.Identity.Client
     /// A web app is the most common confidential client. The clientId is exposed through the web browser, but the secret is passed only in the back channel
     /// and never directly exposed. For details see https://aka.ms/msal-net-client-applications
     /// </remarks>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+#endif
     public sealed partial class ConfidentialClientApplication
         : ClientApplicationBase,
             IConfidentialClientApplication,
@@ -184,6 +185,4 @@ namespace Microsoft.Identity.Client
 #endif
         }
     }
-
-#endif
 }

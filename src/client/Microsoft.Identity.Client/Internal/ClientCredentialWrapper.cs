@@ -11,8 +11,6 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     /// Meant to be used in confidential client applications, an instance of <c>ClientCredential</c> is passed
     /// to the constructors of (<see cref="ConfidentialClientApplication"/>)
@@ -181,5 +179,4 @@ namespace Microsoft.Identity.Client.Internal
         ClientSecret,
         SignedClientAssertion
     }
-#endif
 }
