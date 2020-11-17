@@ -257,9 +257,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             LogCallback callback = (lvl, msg, isPii) =>
             {
+#pragma warning disable CS0183 // let it be for the test 
                 Assert.IsTrue(lvl is LogLevel);
                 Assert.IsTrue(msg is string);
                 Assert.IsTrue(isPii is bool);
+#pragma warning restore CS0183 //
             };
         }
     }

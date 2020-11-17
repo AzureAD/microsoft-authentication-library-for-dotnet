@@ -132,8 +132,7 @@ namespace Microsoft.Identity.Client
 #endif
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-
-#if WINDOWS_APP // WAM broker is still experimental
+#if DESKTOP || WINDOWS_APP
             if (!Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
