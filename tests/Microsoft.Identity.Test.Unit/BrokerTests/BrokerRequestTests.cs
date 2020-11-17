@@ -173,6 +173,55 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }       
 
         [TestMethod]
+        public void BrokerInteractiveRequestTest()
+        {
+            string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(TestConstants.AuthorityTestTenant));
+
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                var parameters = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityTestTenant,
+                    TestConstants.s_scope,
+                    new TokenCache(harness.ServiceBundle, false),
+                    null,
+                    TestConstants.ExtraQueryParameters);
+
+                // Act
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+                _brokerInteractiveRequest =
+                    new BrokerInteractiveRequestComponent(
+                        parameters,
+                        null,
+                        broker,
+                        "install_url");
+
+                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
+            }
+        }
+
+        [TestMethod]
+        public void BrokerSilentRequestTest()
+        {
+            string CanonicalizedAuthority = AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(TestConstants.AuthorityTestTenant));
+
+            using (var harness = CreateBrokerHelper())
+            {
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(null);
+                _brokerSilentAuthStrategy =
+                    new BrokerSilentStrategy(
+                        new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters),
+                        harness.ServiceBundle,
+                        _parameters,
+                        _acquireTokenSilentParameters,
+                        broker);
+
+                Assert.AreEqual(true, _brokerSilentAuthStrategy.Broker.IsBrokerInstalledAndInvokable());
+
+            }
+        }
+
+        [TestMethod]
         public void BrokerGetAccountsAsyncOnUnsupportedPlatformTest()
         {
             using (var harness = CreateTestHarness())
