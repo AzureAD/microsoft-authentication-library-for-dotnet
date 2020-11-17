@@ -5,13 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C9D3EF7E-2948-41A9-BAF8-9647A060F1D9}</ProjectGuid>
+    <ProjectGuid>{7A226C33-7D93-4556-9343-9BE208A62551}</ProjectGuid>
     <ProjectTypeGuids>{10368E6C-D01B-4462-8E8B-01FC667A7035};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TemplateGuid>{77efb91c-a7e9-4b0e-a7c5-31eeec3c6d46}</TemplateGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.Identity.Client.Xamarin.Android</RootNamespace>
-    <AssemblyName>Microsoft.Identity.Client.Xamarin.Android</AssemblyName>
+    <RootNamespace>Microsoft.Identity.Client.Xamarin.Android.Common</RootNamespace>
+    <AssemblyName>Microsoft.Identity.Client.Xamarin.Android.Common</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <Deterministic>True</Deterministic>
     <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
@@ -48,18 +48,12 @@
   <ItemGroup>
     <None Include="Jars\AboutJars.txt" />
     <None Include="Additions\AboutAdditions.txt" />
-    <LibraryProjectZip Include="Jars\msal-2.0.2.aar" />
+    <LibraryProjectZip Include="Jars\common-3.0.6.aar" />
   </ItemGroup>
   <ItemGroup>
     <TransformFile Include="Transforms\Metadata.xml" />
     <TransformFile Include="Transforms\EnumFields.xml" />
     <TransformFile Include="Transforms\EnumMethods.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Identity.Client.Xamarin.Android.Common\Microsoft.Identity.Client.Xamarin.Android.Common.csproj">
-      <Project>{7a226c33-7d93-4556-9343-9be208a62551}</Project>
-      <Name>Microsoft.Identity.Client.Xamarin.Android.Common</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.Bindings.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
