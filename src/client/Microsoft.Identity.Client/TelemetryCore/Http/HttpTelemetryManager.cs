@@ -74,9 +74,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
                 if (ev.ContainsKey(MsalTelemetryBlobEventNames.RegionDiscovered))
                 {
-                    //string region = ev[MsalTelemetryBlobEventNames.RegionDiscovered];
-                    //string regionSource = ev[MsalTelemetryBlobEventNames.RegionSource];
-
                     if (!firstFailure)
                         platformFields.Append(",");
 
