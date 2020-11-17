@@ -15,6 +15,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
+using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
@@ -23,6 +24,27 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
     {
         private MockHttpAndServiceBundle _harness;
         private ConfidentialClientApplication _app;
+
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            base.TestInitialize();
+
+            _harness = CreateTestHarness();
+            _app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(_harness.HttpManager)
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+        }
+
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            _harness?.Dispose();
+            base.TestCleanup();
+        }
 
         /// <summary>
         /// 1.  Acquire Token For Client with Region successfully
@@ -43,48 +65,39 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestMethod]
         public async Task TelemetryAcceptanceTestAsync()
         {
-            using (_harness = CreateTestHarness())
-            {
-                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-                _app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                           .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId)
-                                                           .WithClientSecret(TestConstants.ClientSecret)
-                                                           .WithHttpManager(_harness.HttpManager)
-                                                           .WithExperimentalFeatures(true)
-                                                           .BuildConcrete();
+            Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
+            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: false, isFirstRequest: true);
+            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
 
-                Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
-                var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: false);
-                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
+            Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
+            result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.AADUnavailableError).ConfigureAwait(false);
+            Guid step2CorrelationId = result.Correlationid;
 
-                Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
-                result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.AADUnavailableError).ConfigureAwait(false);
-                Guid step2CorrelationId = result.Correlationid;
+            // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, isFirstRequest: false);
+            AssertPreviousTelemetry(
+                result.HttpRequest,
+                expectedSilentCount: 0);
 
-                // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true);
-                AssertPreviousTelemetry(
-                    result.HttpRequest,
-                    expectedSilentCount: 0);
+            // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
+            _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
+                HttpStatusProvider.s_throttleDuration.Add(TimeSpan.FromSeconds(1)));
 
-                // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
-                _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
-                    HttpStatusProvider.s_throttleDuration.Add(TimeSpan.FromSeconds(1)));
+            Trace.WriteLine("Step 3. Acquire Token For Client -> Success");
+            result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
 
-                Trace.WriteLine("Step 3. Acquire Token For Client -> Success");
-                result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
-
-                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true);
-                AssertPreviousTelemetry(
-                    result.HttpRequest,
-                    expectedSilentCount: 0,
-                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenForClient },
-                    expectedCorrelationIds: new[] { step2CorrelationId },
-                    expectedErrors: new[] { "service_not_available" },
-                    expectedRegions: new[] { "centralus" });
-            }
+            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, isFirstRequest: false);
+            AssertPreviousTelemetry(
+                result.HttpRequest,
+                expectedSilentCount: 0,
+                expectedFailedApiIds: new[] { ApiIds.AcquireTokenForClient },
+                expectedCorrelationIds: new[] { step2CorrelationId },
+                expectedErrors: new[] { "service_not_available" },
+                expectedRegions: new[] { "centralus" },
+                expectedRegionSources: new[] { "cache" });
         }
 
         private enum AcquireTokenForClientOutcome
@@ -157,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             HttpRequestMessage requestMessage, 
             ApiIds apiId, 
             bool forceRefresh,
-            bool autoDetectRegion = false)
+            bool isFirstRequest)
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single();
@@ -173,9 +186,15 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.IsTrue(actualTelemetryParts[1].EndsWith(forceRefresh ? "1" : "0")); // force_refresh flag
 
-            if (autoDetectRegion)
+            Assert.AreEqual(TestConstants.Region, actualTelemetryParts[2].Split(',')[0]);
+
+            if (isFirstRequest)
             {
-                Assert.AreEqual(TestConstants.Region, actualTelemetryParts[2]);
+                Assert.IsTrue(actualTelemetryParts[2].EndsWith(RegionSource.EnvVariable));
+            }
+            else
+            {
+                Assert.IsTrue(actualTelemetryParts[2].EndsWith(RegionSource.Cache));
             }
         }
 
@@ -185,12 +204,14 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
            ApiIds[] expectedFailedApiIds = null,
            Guid[] expectedCorrelationIds = null,
            string[] expectedErrors = null,
-           string[] expectedRegions = null)
+           string[] expectedRegions = null,
+           string[] expectedRegionSources = null)
         {
             expectedFailedApiIds = expectedFailedApiIds ?? new ApiIds[0];
             expectedCorrelationIds = expectedCorrelationIds ?? new Guid[0];
             expectedErrors = expectedErrors ?? new string[0];
             expectedRegions = expectedRegions ?? new string[0];
+            expectedRegionSources = expectedRegionSources ?? new string[0];
 
             var actualHeader = ParseLastRequestHeader(requestMessage);   
             
@@ -212,9 +233,13 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             CollectionAssert.AreEqual(
                 expectedRegions,
                 actualHeader.Regions);
+
+            CollectionAssert.AreEqual(
+                expectedRegionSources,
+                actualHeader.RegionSources);
         }
 
-        private static (int SilentCount, string[] FailedApis, string[] CorrelationIds, string[] Errors, string[] Regions) ParseLastRequestHeader(HttpRequestMessage requestMessage)
+        private static (int SilentCount, string[] FailedApis, string[] CorrelationIds, string[] Errors, string[] Regions, string[] RegionSources) ParseLastRequestHeader(HttpRequestMessage requestMessage)
         {
             // schema_version | silent_succesful_count | failed_requests | errors | platform_fields
             // where a failed_request is "api_id, correlation_id"
@@ -245,10 +270,16 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             string[] regions = lastRequestParts[4]
                 .Split(',')
+                .Where((item, index) => index % 2 == 0)
+                .Where(it => !string.IsNullOrEmpty(it))
+                .ToArray();
+            string[] regionSources = lastRequestParts[4]
+                .Split(',')
+                .Where((item, index) => index % 2 != 0)
                 .Where(it => !string.IsNullOrEmpty(it))
                 .ToArray();
 
-            return (actualSuccessfullSilentCount, actualFailedApiIds, correlationIds, actualErrors, regions);
+            return (actualSuccessfullSilentCount, actualFailedApiIds, correlationIds, actualErrors, regions, regionSources);
         }
     }
 }

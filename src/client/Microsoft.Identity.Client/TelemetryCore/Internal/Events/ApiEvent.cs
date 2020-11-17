@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string LoginHintKey = EventNamePrefix + "login_hint";
         public const string IsAccessTokenCacheHitKey = EventNamePrefix + "at_cache_hit";
         public const string RegionDiscoveredKey = EventNamePrefix + "region_discovered";
+        public const string RegionSourceKey = EventNamePrefix + "region_source";
 
         public enum ApiIds
         {
@@ -157,6 +158,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         {
             get => this.ContainsKey(RegionDiscoveredKey) ? this[RegionDiscoveredKey] : null;
             set => this[RegionDiscoveredKey] = value;
+        }
+
+        public string RegionSource
+        {
+            get => this.ContainsKey(RegionSourceKey) ? this[RegionSourceKey] : null;
+            set => this[RegionSourceKey] = value;
         }
     }
 }

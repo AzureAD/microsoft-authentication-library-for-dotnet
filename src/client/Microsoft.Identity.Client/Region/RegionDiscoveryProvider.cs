@@ -5,16 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Region
@@ -44,7 +39,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (cachedEntry == null)
             {
-                Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext.Logger).ConfigureAwait(false);
+                Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
                 CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
 
                 cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
@@ -53,19 +48,26 @@ namespace Microsoft.Identity.Client.Region
             else
             {
                 logger.Verbose($"[Region Discovery] The network provider found an entry for {environment}");
+                LogTelemetryData(cachedEntry.PreferredNetwork.Split('.')[0], RegionSource.Cache, requestContext);
             }
-
-            requestContext.ApiEvent.RegionDiscovered = cachedEntry.PreferredNetwork.Split('.')[0];
+            
             return cachedEntry;
         }
 
 
-        private async Task<string> GetRegionAsync(ICoreLogger logger)
+        private async Task<string> GetRegionAsync(RequestContext requestContext)
         {
+            ICoreLogger logger = requestContext.Logger;
+            string region;
+
             if (!Environment.GetEnvironmentVariable(RegionName).IsNullOrEmpty())
             {
-                logger.Info($"[Region discovery] Region found in environment variable: {Environment.GetEnvironmentVariable(RegionName)}");
-                return Environment.GetEnvironmentVariable(RegionName);
+                region = Environment.GetEnvironmentVariable(RegionName);
+                logger.Info($"[Region discovery] Region found in environment variable: {region}");
+
+                LogTelemetryData(region, RegionSource.EnvVariable, requestContext);
+
+                return region;
             }
 
             try
@@ -91,6 +93,8 @@ namespace Microsoft.Identity.Client.Region
                     if (localImdsResponse != null && !localImdsResponse.location.IsNullOrEmpty())
                     {
                         logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
+                        LogTelemetryData(localImdsResponse.location, RegionSource.Imds, requestContext);
+
                         return localImdsResponse.location;
                     }
                 }
@@ -110,6 +114,16 @@ namespace Microsoft.Identity.Client.Region
             {
                 logger.Info("[Region discovery] Call to local imds failed." + e.Message);
                 throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed);
+            }
+        }
+
+        private void LogTelemetryData(string region, string regionSource, RequestContext requestContext)
+        {
+            requestContext.ApiEvent.RegionDiscovered = region;
+
+            if (requestContext.ApiEvent.RegionSource.IsNullOrEmpty())
+            {
+                requestContext.ApiEvent.RegionSource = regionSource;
             }
         }
 
@@ -166,9 +180,9 @@ namespace Microsoft.Identity.Client.Region
             }
         }
 
-        private async Task<Uri> BuildAuthorityWithRegionAsync(Uri canonicalAuthority, ICoreLogger logger)
+        private async Task<Uri> BuildAuthorityWithRegionAsync(Uri canonicalAuthority, RequestContext requestContext)
         {
-            string region = await GetRegionAsync(logger).ConfigureAwait(false);
+            string region = await GetRegionAsync(requestContext).ConfigureAwait(false);
             var builder = new UriBuilder(canonicalAuthority);
 
             if (KnownMetadataProvider.IsPublicEnvironment(canonicalAuthority.Host))

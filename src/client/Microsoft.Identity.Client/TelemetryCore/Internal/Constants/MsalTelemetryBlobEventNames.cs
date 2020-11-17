@@ -25,5 +25,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Constants
         public const string ApiErrorCodeConstStrKey = "msal.api_error_code";
         public const string ForceRefreshId = "api_with_force_refresh";
         public const string RegionDiscovered = "msal.region_discovered";
+        public const string RegionSource = "msal.region_source";
     }
 }
