@@ -6,9 +6,27 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-
+#if ANDROID
+using MsalAndroid = Com.Microsoft.Identity.Client;
+#endif
 namespace Microsoft.Identity.Client
 {
+
+#if ANDROID
+    //Com.Microsoft.Identity.Client.PublicClientApplication.Create(AppContxt, clientId, authority, redirectUri, )
+    internal class AppListner : global::Java.Lang.Object, MsalAndroid.IPublicClientApplicationApplicationCreatedListener
+    {
+        public MsalAndroid.IPublicClientApplication PublicClientApplication { get; set; }
+
+        public void OnCreated(MsalAndroid.IPublicClientApplication publicClientApplication)
+        {
+            PublicClientApplication = publicClientApplication;
+        }
+
+        //public void OnError(MsalAndroid.) { }
+    }
+#endif
+
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
     /// <summary>
     /// Class to be used to acquire tokens in desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
@@ -24,10 +42,34 @@ namespace Microsoft.Identity.Client
     /// </remarks>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
     {
+#if ANDROID
+        MsalAndroid.IPublicClientApplication BoundApplication;
+#endif
+
+
         internal PublicClientApplication(ApplicationConfiguration configuration)
             : base(configuration)
         {
+#if ANDROID
+            AppListner listner = new AppListner();
+
+            MsalAndroid.PublicClientApplication.Create(
+                Android.App.Application.Context, 
+                configuration.ClientId, 
+                configuration.AuthorityInfo.CanonicalAuthority, 
+                configuration.RedirectUri,
+                listner);
+
+            BoundApplication = listner.PublicClientApplication;
+
+            //BoundApplication.
+#endif
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public object AppContxt { get; set; }
 
         /// <summary>
         ///
@@ -69,6 +111,23 @@ namespace Microsoft.Identity.Client
                 .Create(ClientExecutorFactory.CreatePublicClientExecutor(this), scopes)
                 .WithParentActivityOrWindowFunc(ServiceBundle.Config.ParentActivityOrWindowFunc);
         }
+
+#if ANDROID
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <returns></returns>
+        [CLSCompliant(false)]
+        public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
+            IEnumerable<string> scopes,
+            bool WithAndroid = true)
+        {
+            return AcquireTokenInteractiveParameterBuilder
+                .Create(ClientExecutorFactory.CreatePublicClientExecutor(this, BoundApplication), scopes)
+                .WithParentActivityOrWindowFunc(ServiceBundle.Config.ParentActivityOrWindowFunc);
+        }
+#endif
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>

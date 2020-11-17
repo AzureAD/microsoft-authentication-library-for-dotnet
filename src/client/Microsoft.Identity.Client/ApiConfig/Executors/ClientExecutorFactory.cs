@@ -1,6 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if ANDROID
+using MsalAndroid = Com.Microsoft.Identity.Client;
+#endif
+
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
     internal static class ClientExecutorFactory
@@ -9,6 +13,25 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             return clientApplicationBase.ServiceBundle.Mats != null;
         }
+
+#if ANDROID
+                public static IPublicClientApplicationExecutor CreatePublicClientExecutor(
+            PublicClientApplication publicClientApplication,
+            MsalAndroid.IPublicClientApplication boundApplication = null)
+        {
+            IPublicClientApplicationExecutor executor = new PublicClientExecutor(
+                publicClientApplication.ServiceBundle,
+                publicClientApplication,
+                boundApplication);
+
+            if (IsMatsEnabled(publicClientApplication))
+            {
+                executor = new TelemetryPublicClientExecutor(executor, publicClientApplication.ServiceBundle.Mats);
+            }
+
+            return executor;
+        }
+#endif
 
         public static IPublicClientApplicationExecutor CreatePublicClientExecutor(
             PublicClientApplication publicClientApplication)
