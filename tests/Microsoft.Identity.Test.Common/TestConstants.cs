@@ -120,6 +120,7 @@ namespace Microsoft.Identity.Test.Unit
         public const TokenSubjectType TokenSubjectTypeUser = 0;
         public const string TestMessage = "test message";
         public const string LoginHint = "loginHint";
+        public const string LoginHintParam = "login_hint";
 
         public const string LocalAccountId = "test_local_account_id";
         public const string GivenName = "Joe";

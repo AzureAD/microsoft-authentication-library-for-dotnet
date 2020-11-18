@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 handler.ExpectedPostData = new Dictionary<string, string>()
                 {
                     // Bug 1403: Do not add reserved scopes profile, offline_access and openid to Confidential Client request
-                    { "scope", TestConstants.s_scope.AsSingleString() } 
+                    { "scope", TestConstants.s_scope.AsSingleString() }
                 };
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
@@ -638,8 +638,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }
                 catch (MsalException exc)
                 {
-                    Assert.AreEqual("duplicate_query_parameter", exc.ErrorCode);
-                    Assert.AreEqual("Duplicate query parameter 'login_hint' in extraQueryParameters", exc.Message);
+                    string expectedError = string.Format(CultureInfo.InvariantCulture,
+                        MsalErrorMessage.DuplicateQueryParameterTemplate,
+                        TestConstants.LoginHintParam);
+                    Assert.AreEqual(MsalError.DuplicateQueryParameterError, exc.ErrorCode);
+                    Assert.AreEqual(expectedError, exc.Message);
                 }
                 catch (Exception ex)
                 {
@@ -726,7 +729,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                // add mock response bigger than 1MB for Http Client
+                // add mock response bigger than 1MB for HTTP Client
                 httpManager.AddFailingRequest(new InvalidOperationException());
 
                 await AssertException.TaskThrowsAsync<InvalidOperationException>(
@@ -939,7 +942,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var requestUrlBuilder = app.GetAuthorizationRequestUrl(TestConstants.s_scope)
                                        .WithAccount(TestConstants.s_user)
-                                       .WithLoginHint("loginhint")
+                                       .WithLoginHint(TestConstants.LoginHint)
                                        .WithExtraScopesToConsent(TestConstants.s_scope)
                                        .WithRedirectUri(TestConstants.RedirectUri);
             PublicClientApplicationTests.CheckBuilderCommonMethods(requestUrlBuilder);

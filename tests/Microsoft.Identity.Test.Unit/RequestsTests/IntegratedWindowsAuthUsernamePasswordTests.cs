@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -404,7 +405,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check exception message
-                Assert.AreEqual("Parsing WS metadata exchange failed", result.Message);
+                Assert.AreEqual(MsalErrorMessage.ParsingMetadataDocumentFailed, result.Message);
                 Assert.AreEqual("parsing_ws_metadata_exchange_failed", result.ErrorCode);
 
                 // There should be no cached entries.
@@ -473,7 +474,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false)).ConfigureAwait(false);
 
                 // Check inner exception
-                Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.Message);
+                string expectedError = string.Format(CultureInfo.InvariantCulture,
+                    MsalErrorMessage.HttpRequestUnsuccessful,
+                    "404", "NotFound");
+                Assert.AreEqual(expectedError, result.Message);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
