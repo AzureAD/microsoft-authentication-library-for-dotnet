@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _androidContext = androidContext ?? throw new ArgumentNullException(nameof(androidContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _logger.Verbose("Getting the Android context for broker request");
+            _logger.Verbose("Getting the Android context for broker request. ");
             _androidAccountManager = AccountManager.Get(_androidContext);
         }
 
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                 if (result == null)
                 {
-                    _logger.Info("Android account manager didn't return any results for interactive broker request.");
+                    _logger.Info("Android account manager didn't return any results for interactive broker request. ");
                 }
 
                 Bundle bundleResult = null;
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 }
                 catch (OperationCanceledException ex)
                 {
-                    _logger.Error("An error occured when trying to communicate with account manager: " + ex.Message);
+                    _logger.Error("An error occurred when trying to communicate with account manager: " + ex.Message);
                 }
                 catch (Exception ex)
                 {
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 //Validate that the intent was created successfully.
                 if (intent != null)
                 {
-                    _logger.Info("Intent created from BundleResult is not null. Starting interactive broker request");
+                    _logger.Info("Intent created from BundleResult is not null. Starting interactive broker request. ");
                     // Need caller info UID for broker communication
                     intent.PutExtra(BrokerConstants.CallerInfoUID, Binder.CallingUid);
                 }
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
             catch
             {
-                _logger.Error("Error when trying to acquire intent for broker authentication.");
+                _logger.Error("Error when trying to acquire intent for broker authentication. ");
                 throw;
             }
 
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
 
                 bool success = bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success);
-                _logger.Info($"Android Broker Silent call result - success? {success}.");
+                _logger.Info($"Android Broker Silent call result - success? {success}. ");
 
                 if (!success)
                 {
@@ -186,12 +186,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 return responseJson;
             }
 
-            _logger.Info("Android Broker didn't return any results.");
+            _logger.Info("Android Broker didn't return any results. ");
             return null;
         }
 
         /// <summary>
-        /// This method is only used for Silent authnetication requests so that we can check to see if an account exists in the account manager before
+        /// This method is only used for Silent authentication requests so that we can check to see if an account exists in the account manager before
         /// sending the silent request to the broker. 
         /// </summary>
         public void CheckForBrokerAccountInfoInAccountManager(BrokerRequest brokerRequest, Activity callerActivity)
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (string.IsNullOrEmpty(accounts))
             {
-                _logger.Info("Android account manager didn't return any accounts.");
+                _logger.Info("Android account manager didn't return any accounts. ");
                 throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
             }
 
@@ -224,20 +224,20 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         // TODO: broker request should be immutable!
                         brokerRequest.HomeAccountId = accountDataHomeAccountID;
                         brokerRequest.LocalAccountId = accountDataLocalAccountID;
-                        _logger.Info("Found broker account in Android account manager using the provided login hint.");
+                        _logger.Info("Found broker account in Android account manager using the provided login hint. ");
                         return;
                     }
 
                     if (string.Equals(accountDataHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
                          string.Equals(accountDataLocalAccountID, localAccountId, StringComparison.Ordinal))
                     {
-                        _logger.Info("Found broker account in Android account manager Using the provided account.");
+                        _logger.Info("Found broker account in Android account manager Using the provided account. ");
                         return;
                     }
                 }
             }
 
-            _logger.Info("The requested account does not exist in the Android account manager.");
+            _logger.Info("The requested account does not exist in the Android account manager. ");
             throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
         }
 
@@ -268,7 +268,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (string.IsNullOrEmpty(accounts))
             {
-                _logger.Info("Android account manager didn't return any accounts.");
+                _logger.Info("Android account manager didn't return any accounts. ");
             }
 
             List<IAccount> brokerAccounts = new List<IAccount>();
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 }
             }
 
-            _logger.Info("Found " + brokerAccounts.Count + " accounts in the account manager.");
+            _logger.Info("Found " + brokerAccounts.Count + " accounts in the account manager. ");
 
             return brokerAccounts;
         }
@@ -310,7 +310,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 GetPreferredLooper(null));
         }
 
-        //Inorder for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.
+        //In order for broker to use the V2 endpoint during authentication, MSAL must initiate a handshake with broker to specify what endpoint should be used for the request.
         public async Task InitiateBrokerHandshakeAsync(Activity callerActivity)
         {
             using (_logger.LogMethodDuration())
@@ -367,18 +367,18 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         else
                         {
                             errorCode = BrokerConstants.BrokerUnknownErrorCode;
-                            errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned";
+                            errorDescription = "An error occurred during hand shake with the broker, no detailed error information was returned. ";
                         }
 
                         _logger.Error(errorDescription);
                         throw new MsalClientException(errorCode, errorDescription);
                     }
 
-                    throw new MsalClientException("Could not communicate with broker via account manager. Please ensure power optimization settings are turned off.");
+                    throw new MsalClientException("Could not communicate with broker via account manager. Please ensure power optimization settings are turned off. ");
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error("Error when trying to initiate communication with the broker.");
+                    _logger.Error("Error when trying to initiate communication with the broker. ");
                     if (ex is MsalException)
                     {
                         throw;
@@ -412,7 +412,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                 if (!string.Equals(computedRedirectUri, brokerRequest.RedirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
                 {
-                    string msg = string.Format(CultureInfo.CurrentCulture, "The broker redirect URI is incorrect, it should be {0}. Please visit https://aka.ms/Brokered-Authentication-for-Android for more details.", computedRedirectUri);
+                    string msg = string.Format(CultureInfo.CurrentCulture, "The broker redirect URI is incorrect, it should be {0}. Please visit https://aka.ms/Brokered-Authentication-for-Android for more details. ", computedRedirectUri);
                     _logger.Info(msg);
                     throw new MsalClientException(MsalError.CannotInvokeBroker, msg);
                 }
@@ -456,11 +456,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
             catch (PackageManager.NameNotFoundException)
             {
-                _logger.Info("Calling App's package does not exist in PackageManager");
+                _logger.Info("Calling App's package does not exist in PackageManager. ");
             }
             catch (NoSuchAlgorithmException)
             {
-                _logger.Info("Digest SHA algorithm does not exists");
+                _logger.Info("Digest SHA algorithm does not exists. ");
             }
 
             return null;
@@ -469,7 +469,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private Intent GetInteractiveBrokerIntent(BrokerRequest brokerRequest, Intent brokerIntent)
         {
             ValidateBrokerRedirectURI(brokerRequest);
-            brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(brokerRequest));
+            string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
+            _logger.InfoPii("GetInteractiveBrokerIntent: " + brokerRequestJson, "Enable PII to see the broker request. ");
+            brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, brokerRequestJson);
 
             return brokerIntent;
         }
@@ -478,15 +480,17 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             ValidateBrokerRedirectURI(brokerRequest);
             Bundle bundle = new Bundle();
-            bundle.PutString(BrokerConstants.BrokerRequestV2, JsonHelper.SerializeToJson(brokerRequest));
+            string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
+            _logger.InfoPii("CreateSilentBrokerBundle: " + brokerRequestJson, "Enable PII to see the silent broker request. ");
+            bundle.PutString(BrokerConstants.BrokerRequestV2, brokerRequestJson);
             bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
 
             return bundle;
         }
 
-
         private Bundle CreateBrokerAccountBundle(BrokerRequest brokerRequest)
         {
+            _logger.InfoPii("CreateBrokerAccountBundle: " + JsonHelper.SerializeToJson(brokerRequest), "Enable PII to see the broker account bundle request. ");
             Bundle bundle = new Bundle();
 
             bundle.PutString(BrokerConstants.AccountClientIdKey, brokerRequest.ClientId);
@@ -619,12 +623,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType, StringComparison.OrdinalIgnoreCase)
                         && VerifySignature(authenticator.PackageName))
                     {
-                        _logger.Verbose("Found the Authenticator on the device");
+                        _logger.Verbose("Found the Authenticator on the device. ");
                         return true;
                     }
                 }
 
-                _logger.Warning("No Authenticator found on the device.");
+                _logger.Warning("No Authenticator found on the device. ");
                 return false;
             }
         }
