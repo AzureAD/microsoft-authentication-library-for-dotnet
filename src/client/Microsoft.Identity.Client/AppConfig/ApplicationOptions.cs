@@ -56,10 +56,10 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens.
-        /// This redirect URI needs to be registered in the app registration. See https://aka.ms/msal-net-register-app) for
-        /// details on which redirect URI are defined by default by MSAL.NET for how to register them.
+        /// This redirect URI needs to be registered in the app registration. See https://aka.ms/msal-net-register-app for
+        /// details on which redirect URIs are defined by default by MSAL.NET and how to register them.
         /// Also use: <see cref="PublicClientApplicationBuilder.WithDefaultRedirectUri"/> which provides
-        /// good default for public client applications for all platforms.
+        /// a good default for public client applications for all platforms.
         ///
         /// For web apps and web APIs, the redirect URI is computed from the URL where the application is running
         /// (for instance, <c>baseUrl//signin-oidc</c> for ASP.NET Core web apps).
