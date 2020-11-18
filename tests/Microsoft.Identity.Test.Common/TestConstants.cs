@@ -149,7 +149,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
             }
         }
 
-        public const string Bearer = "bearer";
+        public const string Bearer = "Bearer";
 
         public static IDictionary<string, string> ExtraQueryParameters
         {

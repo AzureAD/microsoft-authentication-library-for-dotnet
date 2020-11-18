@@ -77,11 +77,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
             catch (Exception ex)
             {
-                _logger.ErrorPiiWithPrefix(ex, "Broker interactive invocation failed.");
+                _logger.ErrorPiiWithPrefix(ex, "Android broker interactive invocation failed. ");
                 HandleBrokerOperationError(ex);
             }
 
-            using (_logger.LogBlockDuration("waiting for broker response"))
+            using (_logger.LogBlockDuration("Waiting for Android broker response. "))
             {
                 await s_readyForResponse.WaitAsync().ConfigureAwait(false);
                 return s_androidBrokerTokenResponse;
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
             catch (Exception ex)
             {
-                _logger.ErrorPiiWithPrefix(ex, "Broker silent invocation failed.");
+                _logger.ErrorPiiWithPrefix(ex, "Android broker silent invocation failed. ");
                 HandleBrokerOperationError(ex);
                 throw;
             }
@@ -114,9 +114,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             using (_logger.LogMethodDuration())
             {
                 // onActivityResult will receive the response for this activity.
-                // Lauching this activity will switch to the broker app.
+                // Launching this activity will switch to the broker app.
 
-                _logger.Verbose("Starting Android Broker interactive authentication");
+                _logger.Verbose("Starting Android Broker interactive authentication. ");
                 Intent brokerIntent = await _brokerHelper
                     .GetIntentForInteractiveBrokerRequestAsync(brokerRequest, _parentActivity)
                     .ConfigureAwait(false);
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     }
                     catch (ActivityNotFoundException e)
                     {
-                        _logger.ErrorPiiWithPrefix(e, "Unable to get android activity during interactive broker request");
+                        _logger.ErrorPiiWithPrefix(e, "Unable to get Android activity during interactive broker request. ");
                         throw;
                     }
                 }
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             using (_logger.LogMethodDuration())
             {
-                _logger.Verbose("User is specified for silent token request. Starting silent broker request.");
+                _logger.Verbose("User is specified for silent token request. Starting silent Android broker request. ");
                 string silentResult = await _brokerHelper.GetBrokerAuthTokenSilentlyAsync(brokerRequest, _parentActivity).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(silentResult))
                 {
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 return new MsalTokenResponse
                 {
                     Error = MsalError.BrokerResponseReturnedError,
-                    ErrorDescription = "Unknown broker error. Failed to acquire token silently from the broker. " + MsalErrorMessage.AndroidBrokerCannotBeInvoked,
+                    ErrorDescription = "Unknown Android broker error. Failed to acquire token silently from the broker. " + MsalErrorMessage.AndroidBrokerCannotBeInvoked,
                 };
             }
         }
@@ -178,14 +178,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (data == null)
                 {
-                    unreliableLogger?.Info("Data is null, stopping.");
+                    unreliableLogger?.Info("Data is null, stopping. ");
                     return;
                 }
 
                 switch (resultCode)
                 {
                     case (int)BrokerResponseCode.ResponseReceived:
-                        unreliableLogger?.Info("Response received, decoding...");
+                        unreliableLogger?.Info("Response received, decoding... ");
 
                         s_androidBrokerTokenResponse =
                             MsalTokenResponse.CreateFromAndroidBrokerResponse(
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                                 s_correlationId);
                         break;
                     case (int)BrokerResponseCode.UserCancelled:
-                        unreliableLogger?.Info("Response received - user cancelled");
+                        unreliableLogger?.Info("Response received - user cancelled. ");
 
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         };
                         break;
                     case (int)BrokerResponseCode.BrowserCodeError:
-                        unreliableLogger?.Info("Response received - error ");
+                        unreliableLogger?.Info("Response received - error. ");
 
                         dynamic errorResult = JObject.Parse(data.GetStringExtra(BrokerConstants.BrokerResultV2));
                         string error = null;
@@ -213,13 +213,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             error = errorResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
                             errorDescription = errorResult[BrokerResponseConst.BrokerErrorMessage]?.ToString();
 
-                            unreliableLogger?.Error($"error: {error} errorDescription {errorDescription}");
+                            unreliableLogger?.Error($"error: {error} errorDescription {errorDescription}. ");
                         }
                         else
                         {
                             error = BrokerConstants.BrokerUnknownErrorCode;
-                            errorDescription = "Error Code received, but no error could be extracted";
-                            unreliableLogger?.Error("Error response received, but not error could be extracted");
+                            errorDescription = "Error Code received, but no error could be extracted. ";
+                            unreliableLogger?.Error("Error response received, but not error could be extracted. ");
                         }
 
                         var httpResponse = new HttpResponse();
@@ -236,11 +236,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         };
                         break;
                     default:
-                        unreliableLogger?.Error("Unkwown broker response");
+                        unreliableLogger?.Error("Unknown broker response. ");
                         s_androidBrokerTokenResponse = new MsalTokenResponse
                         {
                             Error = BrokerConstants.BrokerUnknownErrorCode,
-                            ErrorDescription = "Broker result not returned from android broker.",
+                            ErrorDescription = "Broker result not returned from android broker. ",
                             CorrelationId = s_correlationId
                         };
                         break;
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Warning("Android broker is either not installed or is not reachable so no accounts will be returned.");
+                    _logger.Warning("Android broker is either not installed or is not reachable so no accounts will be returned. ");
                     return new List<IAccount>();
                 }
 
@@ -272,7 +272,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error("Failed to get Android broker accounts from the broker.");
+                    _logger.Error("Failed to get Android broker accounts from the broker. ");
                     HandleBrokerOperationError(ex);
                     throw;
                 }
@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 if (!IsBrokerInstalledAndInvokable())
                 {
-                    _logger.Warning("Android broker is either not installed or not reachable so no accounts will be removed.");
+                    _logger.Warning("Android broker is either not installed or not reachable so no accounts will be removed. ");
                     return;
                 }
 
@@ -296,7 +296,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error("Failed to remove Android broker account from the broker.");
+                    _logger.Error("Failed to remove Android broker account from the broker. ");
                     HandleBrokerOperationError(ex);
                     throw;
                 }
@@ -315,7 +315,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         /// <summary>
         /// Android Broker does not support logging in a "default" user.
         /// </summary>
-        public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
+        public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             throw new MsalUiRequiredException(
                        MsalError.CurrentBrokerAccount,
