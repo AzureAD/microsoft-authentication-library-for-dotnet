@@ -380,11 +380,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 try
                 {
-                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.NoTokenFound));
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.AndroidNoTokenFound));
                 }
                 catch (MsalUiRequiredException ex)
                 {
-                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.NoTokenFound);
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidNoTokenFound);
                     return;
                 }
 
@@ -399,11 +399,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 try
                 {
-                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.NoAccountFound));
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.AndroidNoAccountFound));
                 }
                 catch (MsalUiRequiredException ex)
                 {
-                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.NoAccountFound);
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidNoAccountFound);
                     return;
                 }
 
@@ -418,11 +418,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 try
                 {
-                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.InvalidRefreshToken));
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.AndroidInvalidRefreshToken));
                 }
                 catch (MsalUiRequiredException ex)
                 {
-                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.InvalidRefreshToken);
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidInvalidRefreshToken);
                     return;
                 }
 

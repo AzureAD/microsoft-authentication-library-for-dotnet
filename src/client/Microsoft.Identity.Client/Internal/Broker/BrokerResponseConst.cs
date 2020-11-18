@@ -42,9 +42,9 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public const string TokenType = "token_type";
 
-        //Error codes returned from broker
-        public const string NoTokenFound = "no_tokens_found";
-        public const string NoAccountFound = "no_account_found";
-        public const string InvalidRefreshToken = "Broker refresh token is invalid";
+        //Error codes returned from Android broker
+        public const string AndroidNoTokenFound = "no_tokens_found";
+        public const string AndroidNoAccountFound = "no_account_found";
+        public const string AndroidInvalidRefreshToken = "Broker refresh token is invalid";
     }
 }

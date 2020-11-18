@@ -79,9 +79,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _logger.Info(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 
-                if (msalTokenResponse.Error == BrokerResponseConst.NoTokenFound ||
-                    msalTokenResponse.Error == BrokerResponseConst.NoAccountFound ||
-                    msalTokenResponse.Error == BrokerResponseConst.InvalidRefreshToken)
+                if (msalTokenResponse.Error == BrokerResponseConst.AndroidNoTokenFound ||
+                    msalTokenResponse.Error == BrokerResponseConst.AndroidNoAccountFound ||
+                    msalTokenResponse.Error == BrokerResponseConst.AndroidInvalidRefreshToken)
                 {
                     throw new MsalUiRequiredException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription);
                 }
