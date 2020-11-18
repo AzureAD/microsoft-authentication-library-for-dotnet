@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             throw new MsalUiRequiredException(
-                       MsalError.UserNullError,
+                       MsalError.CurrentBrokerAccount,
                        MsalErrorMessage.MsalUiRequiredMessage,
                        null,
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);

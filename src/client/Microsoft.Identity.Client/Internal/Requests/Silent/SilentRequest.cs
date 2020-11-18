@@ -50,13 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             try
             {
-                if (AuthenticationRequestParameters.Account != null)
-                {
-                    _logger.Verbose("Attempting to acquire token using using local cache...");
-                    return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-                }
-
-                if (!isBrokerConfigured)
+                if (AuthenticationRequestParameters.Account == null )
                 {
                     _logger.Verbose("No account passed to AcquireTokenSilent");
                     throw new MsalUiRequiredException(
@@ -66,7 +60,23 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                 }
 
-                _logger.Verbose("No account passed to AcquireTokenSilent. Only the Windows broker (WAM) may be able to log in user with a default account...");
+                if (!PublicClientApplication.IsCurrentBrokerAccount(AuthenticationRequestParameters.Account))
+                {
+                    _logger.Verbose("Attempting to acquire token using using local cache...");
+                    return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                if (!isBrokerConfigured) // IsCurrentBrokerAccount = true
+                {
+                    _logger.Verbose("No account passed to AcquireTokenSilent");
+                    throw new MsalUiRequiredException(
+                       MsalError.CurrentBrokerAccount,
+                       "Only some brokers (WAM) can log in the current account. ",
+                       null,
+                       UiRequiredExceptionClassification.AcquireTokenSilentFailed);
+                }
+
+                _logger.Verbose("IsCurrentBrokerAccount - Only the Windows broker (WAM) may be able to log in user with a default account...");
                 return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
             }
