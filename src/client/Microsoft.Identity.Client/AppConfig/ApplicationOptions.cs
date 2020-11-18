@@ -61,8 +61,8 @@ namespace Microsoft.Identity.Client
         /// Also use: <see cref="PublicClientApplicationBuilder.WithDefaultRedirectUri"/> which provides
         /// good default for public client applications for all platforms.
         ///
-        /// For Web Apps and Web APIs, the redirect URI is computed from the URL where the application is running
-        /// (for instance <c>baseUrl//signin-oidc</c> for ASP.NET Core web apps.
+        /// For web apps and web APIs, the redirect URI is computed from the URL where the application is running
+        /// (for instance, <c>baseUrl//signin-oidc</c> for ASP.NET Core web apps).
         ///
         /// For daemon applications (confidential client applications using only the Client Credential flow
         /// that is calling <c>AcquireTokenForClient</c>), no reply URI is needed.
