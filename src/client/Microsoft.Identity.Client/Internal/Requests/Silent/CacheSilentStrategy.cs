@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
             ThrowIfNoScopesOnB2C();
+            ThrowIfCurrentBrokerAccount();
 
             if (!_silentParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
@@ -86,6 +87,21 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
                 logger.Warning("Failed to refresh the RT and cannot use existing AT (expired or missing).");
                 throw;
+            }
+        }
+
+        private void ThrowIfCurrentBrokerAccount()
+        {
+            if (PublicClientApplication.IsCurrentBrokerAccount(AuthenticationRequestParameters.Account))
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose(
+                    "OperatingSystemAccount is only supported by some browsers");
+
+                throw new MsalUiRequiredException(
+                   MsalError.CurrentBrokerAccount,
+                   "Only some brokers (WAM) can log in the current OS account. ",
+                   null,
+                   UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
         }
 

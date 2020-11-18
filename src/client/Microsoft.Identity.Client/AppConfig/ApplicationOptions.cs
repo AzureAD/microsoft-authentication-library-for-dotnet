@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
         /// </description></item>
         /// </list>
         /// These default URIs could change in the future.
-        ///
+        ///  Also use: <see cref="PublicClientApplicationBuilder.WithDefaultRedirectUri"/> which provides
         /// For Web Apps and Web APIs, the redirect URI can be the URL of the application
         ///
         /// For daemon applications (confidential client applications using only the Client Credential flow
