@@ -3,10 +3,12 @@
 
 namespace Microsoft.Identity.Client.Region
 {
-    internal class RegionSource
+    // Enum to be used only for telemetry, to log the source of region discovery.
+    internal enum RegionSource
     {
-        public const string EnvVariable = "env";
-        public const string Imds = "imds";
-        public const string Cache = "cache";
+        None = 0,
+        EnvVariable = 1,
+        Imds = 2,
+        Cache = 3
     }
 }

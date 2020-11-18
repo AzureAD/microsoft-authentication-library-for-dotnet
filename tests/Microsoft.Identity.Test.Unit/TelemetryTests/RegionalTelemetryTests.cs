@@ -65,39 +65,47 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestMethod]
         public async Task TelemetryAcceptanceTestAsync()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            try
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-            Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
-            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
-            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: false, isFirstRequest: true);
-            AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
+                Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
+                var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: false, isFirstRequest: true);
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); // Previous_request = 2|0|||
 
-            Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
-            result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.AADUnavailableError).ConfigureAwait(false);
-            Guid step2CorrelationId = result.Correlationid;
+                Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
+                result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.AADUnavailableError).ConfigureAwait(false);
+                Guid step2CorrelationId = result.Correlationid;
 
-            // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
-            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, isFirstRequest: false);
-            AssertPreviousTelemetry(
-                result.HttpRequest,
-                expectedSilentCount: 0);
+                // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, isFirstRequest: false);
+                AssertPreviousTelemetry(
+                    result.HttpRequest,
+                    expectedSilentCount: 0);
 
-            // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
-            _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
-                HttpStatusProvider.s_throttleDuration.Add(TimeSpan.FromSeconds(1)));
+                // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
+                _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(
+                    HttpStatusProvider.s_throttleDuration.Add(TimeSpan.FromSeconds(1)));
 
-            Trace.WriteLine("Step 3. Acquire Token For Client -> Success");
-            result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
+                Trace.WriteLine("Step 3. Acquire Token For Client -> Success");
+                result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success, true).ConfigureAwait(false);
 
-            AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, isFirstRequest: false);
-            AssertPreviousTelemetry(
-                result.HttpRequest,
-                expectedSilentCount: 0,
-                expectedFailedApiIds: new[] { ApiIds.AcquireTokenForClient },
-                expectedCorrelationIds: new[] { step2CorrelationId },
-                expectedErrors: new[] { "service_not_available" },
-                expectedRegions: new[] { "centralus" },
-                expectedRegionSources: new[] { "cache" });
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient, forceRefresh: true, isFirstRequest: false);
+                AssertPreviousTelemetry(
+                    result.HttpRequest,
+                    expectedSilentCount: 0,
+                    expectedFailedApiIds: new[] { ApiIds.AcquireTokenForClient },
+                    expectedCorrelationIds: new[] { step2CorrelationId },
+                    expectedErrors: new[] { "service_not_available" },
+                    expectedRegions: new[] { "centralus" },
+                    expectedRegionSources: new[] { "3" });
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            }
+            
         }
 
         private enum AcquireTokenForClientOutcome
@@ -190,11 +198,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             if (isFirstRequest)
             {
-                Assert.IsTrue(actualTelemetryParts[2].EndsWith(RegionSource.EnvVariable));
+                Assert.IsTrue(actualTelemetryParts[2].EndsWith(((int)RegionSource.EnvVariable).ToString(CultureInfo.InvariantCulture)));
             }
             else
             {
-                Assert.IsTrue(actualTelemetryParts[2].EndsWith(RegionSource.Cache));
+                Assert.IsTrue(actualTelemetryParts[2].EndsWith(((int)RegionSource.Cache).ToString(CultureInfo.InvariantCulture)));
             }
         }
 

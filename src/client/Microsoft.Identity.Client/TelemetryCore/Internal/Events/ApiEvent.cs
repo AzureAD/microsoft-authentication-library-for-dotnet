@@ -6,6 +6,7 @@ using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -160,10 +161,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             set => this[RegionDiscoveredKey] = value;
         }
 
-        public string RegionSource
+        public int RegionSource
         {
-            get => this.ContainsKey(RegionSourceKey) ? this[RegionSourceKey] : null;
-            set => this[RegionSourceKey] = value;
+            get => this.ContainsKey(RegionSourceKey) ? 
+                (int)Enum.Parse(typeof(RegionSource), this[RegionSourceKey]) : 0;
+            set => this[RegionSourceKey] = (value).ToString(CultureInfo.InvariantCulture);
         }
     }
 }

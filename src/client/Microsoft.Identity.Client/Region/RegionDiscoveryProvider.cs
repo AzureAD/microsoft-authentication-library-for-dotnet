@@ -58,11 +58,10 @@ namespace Microsoft.Identity.Client.Region
         private async Task<string> GetRegionAsync(RequestContext requestContext)
         {
             ICoreLogger logger = requestContext.Logger;
-            string region;
+            string region = Environment.GetEnvironmentVariable(RegionName);
 
-            if (!Environment.GetEnvironmentVariable(RegionName).IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(region))
             {
-                region = Environment.GetEnvironmentVariable(RegionName);
                 logger.Info($"[Region discovery] Region found in environment variable: {region}");
 
                 LogTelemetryData(region, RegionSource.EnvVariable, requestContext);
@@ -117,13 +116,13 @@ namespace Microsoft.Identity.Client.Region
             }
         }
 
-        private void LogTelemetryData(string region, string regionSource, RequestContext requestContext)
+        private void LogTelemetryData(string region, RegionSource regionSource, RequestContext requestContext)
         {
             requestContext.ApiEvent.RegionDiscovered = region;
 
-            if (requestContext.ApiEvent.RegionSource.IsNullOrEmpty())
+            if (requestContext.ApiEvent.RegionSource == 0)
             {
-                requestContext.ApiEvent.RegionSource = regionSource;
+                requestContext.ApiEvent.RegionSource = (int) regionSource;
             }
         }
 
