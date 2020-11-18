@@ -378,26 +378,66 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var harness = CreateBrokerHelper())
             {
-
-                var response = new MsalTokenResponse
-                {
-                    Scope = TestConstants.s_scope.AsSingleString(),
-                    TokenType = "Bearer",
-                    Error = BrokerResponseConst.NoTokenFound
-                };
-
                 try
                 {
-                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(response);
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.NoTokenFound));
                 }
-                catch(MsalUiRequiredException ex)
+                catch (MsalUiRequiredException ex)
                 {
                     Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.NoTokenFound);
                     return;
                 }
 
-                Assert.Fail("Wrong Exception thrown.");
+                Assert.Fail("Wrong Exception thrown. ");
             }
+        }
+
+        [TestMethod]
+        public void NoAccountFoundThrowsUIRequiredTest()
+        {
+            using (var harness = CreateBrokerHelper())
+            {
+                try
+                {
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.NoAccountFound));
+                }
+                catch (MsalUiRequiredException ex)
+                {
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.NoAccountFound);
+                    return;
+                }
+
+                Assert.Fail("Wrong Exception thrown. ");
+            }
+        }
+
+        [TestMethod]
+        public void InvalidRefreshTokenUsedThrowsUIRequiredTest()
+        {
+            using (var harness = CreateBrokerHelper())
+            {
+                try
+                {
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.InvalidRefreshToken));
+                }
+                catch (MsalUiRequiredException ex)
+                {
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.InvalidRefreshToken);
+                    return;
+                }
+
+                Assert.Fail("Wrong Exception thrown. ");
+            }
+        }
+
+        private static MsalTokenResponse CreateErrorResponse(string errorCode)
+        {
+            return new MsalTokenResponse
+            {
+                Scope = TestConstants.s_scope.AsSingleString(),
+                TokenType = TestConstants.Bearer,
+                Error = errorCode
+            };
         }
 
         private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, Action<Exception> validationHandler)

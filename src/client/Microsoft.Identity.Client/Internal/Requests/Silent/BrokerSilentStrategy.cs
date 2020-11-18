@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _logger.Info(LogMessages.CheckMsalTokenResponseReturnedFromBroker);
             if (msalTokenResponse.AccessToken != null)
             {
-                _logger.Info("Success. Response contains an access token");
+                _logger.Info("Success. Response contains an access token. ");
                 return;
             }
 
@@ -79,7 +79,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _logger.Info(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 
-                if (msalTokenResponse.Error == BrokerResponseConst.NoTokenFound)
+                if (msalTokenResponse.Error == BrokerResponseConst.NoTokenFound ||
+                    msalTokenResponse.Error == BrokerResponseConst.NoAccountFound ||
+                    msalTokenResponse.Error == BrokerResponseConst.InvalidRefreshToken)
                 {
                     throw new MsalUiRequiredException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription);
                 }

@@ -44,5 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         //Error codes returned from broker
         public const string NoTokenFound = "no_tokens_found";
+        public const string NoAccountFound = "no_account_found";
+        public const string InvalidRefreshToken = "Broker refresh token is invalid";
     }
 }

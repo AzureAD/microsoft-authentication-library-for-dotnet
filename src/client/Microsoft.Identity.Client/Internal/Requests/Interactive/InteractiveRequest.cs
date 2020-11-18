@@ -96,6 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return await brokerInteractiveRequest.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
+
         private async Task<MsalTokenResponse> GetTokenResponseAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
