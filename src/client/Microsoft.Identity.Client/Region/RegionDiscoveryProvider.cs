@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (!string.IsNullOrEmpty(region))
             {
-                logger.Info($"[Region discovery] Region found in environment variable: {region}");
+                logger.Info($"[Region discovery] Region found in environment variable: {region}.");
 
                 LogTelemetryData(region, RegionSource.EnvVariable, requestContext);
 
