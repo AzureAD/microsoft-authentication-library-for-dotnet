@@ -56,22 +56,12 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens.
-        /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app).
-        /// In MSAL.NET, <c>IPublicClientApplication</c> defines the following default RedirectUri values:
-        /// <list type="bullet">
-        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications. This is for
-        /// legacy reason, but you shouldn't use this URL. Instead register <c>https://login.microsoftonline.com/common/oauth2/nativeclient</c> 
-        /// and use <see cref="PublicClientApplicationBuilder.WithDefaultRedirectUri"/> when you create your application.</description></item>
-        /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android without broker (as this will be used by the system web browser by default on these
-        /// platforms to call back the application)
-        /// </description></item>
-        /// <item><description>See https://github.com/Azure-Samples/active-directory-xamarin-native-v2/tree/master/2-With-broker for
-        /// redirect URIs with brokers, and https://aka.ms/msal-net-wam for WAM.
-        /// </description></item>
-        /// </list>
-        /// These default URIs could change in the future.
+        /// This redirect URI needs to be registered in the app registration. See https://aka.ms/msal-net-register-app) for
+        /// details on which redirect URI are defined by default by MSAL.NET for how to register them.
+        /// Also use: <see cref="PublicClientApplicationBuilder.WithDefaultRedirectUri"/> which provides
+        /// good default for public client applications for all platforms.
         ///
-        /// For Web Apps and Web APIs, the redirect URI can be the URL of the application
+        /// For Web Apps and Web APIs, the redirect URI is computed from the URL where the application is running.
         ///
         /// For daemon applications (confidential client applications using only the Client Credential flow
         /// that is calling <c>AcquireTokenForClient</c>), no reply URI is needed.
