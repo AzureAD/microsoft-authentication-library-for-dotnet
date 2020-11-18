@@ -50,16 +50,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task RegionalAuthGetSuccessfulResponseAsync()
         {
-            var cca = CreateApp();
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            try
+            {
+                var cca = CreateApp();
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
-            var result = await cca.AcquireTokenForClient(s_keyvaultScope)
-                .WithAzureRegion(true)
-                .WithExtraQueryParameters(_dict)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
+                var result = await cca.AcquireTokenForClient(s_keyvaultScope)
+                    .WithAzureRegion(true)
+                    .WithExtraQueryParameters(_dict)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
-            Assert.IsNotNull(result);
+                Assert.IsNotNull(result);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            }
         }
 
         [TestMethod]
@@ -71,10 +78,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(PublicCloudTestAuthority)
                 .WithTestLogging()
                 .Build();
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
 
             try
             {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+
                 await cca.AcquireTokenForClient(s_keyvaultScope)
                 .WithAzureRegion(true)
                 .WithExtraQueryParameters(_dict)
@@ -86,6 +94,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             catch (MsalClientException e)
             {
                 Assert.AreEqual(MsalError.ExperimentalFeature, e.ErrorCode);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             }
         }
 
