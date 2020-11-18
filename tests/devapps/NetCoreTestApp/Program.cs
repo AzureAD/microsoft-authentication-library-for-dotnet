@@ -186,7 +186,7 @@ namespace NetCoreTestApp
 
                                 var resultX = await cca.AcquireTokenForClient(
                                     new[] { "https://graph.microsoft.com/.default" })
-                                    .WithForceRefresh(true)
+                                    //.WithForceRefresh(true)
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
 
@@ -234,8 +234,12 @@ namespace NetCoreTestApp
         {
             IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
                 .Create(s_clientIdForConfidentialApp)
+                //.WithAuthority("https://login.microsoftonline.com/12354-12345-123-123-23")
+                //.WithAuthority("https://login.microsoftonline.com/common")
                 .WithClientSecret(s_confidentialClientSecret)
-                .Build();          
+                .Build();
+
+            //cca.AcquireTokenForClient(new[] "12345-123321-1111/default");
 
             return cca;
         }

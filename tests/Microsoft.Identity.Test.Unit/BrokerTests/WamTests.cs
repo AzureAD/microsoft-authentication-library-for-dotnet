@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DESKTOP
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -753,3 +754,4 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     }
 }
 
+#endif

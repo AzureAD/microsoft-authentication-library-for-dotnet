@@ -320,7 +320,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             throw new MsalUiRequiredException(
-                       MsalError.UserNullError,
+                       MsalError.CurrentBrokerAccount,
                        MsalErrorMessage.MsalUiRequiredMessage,
                        null,
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);

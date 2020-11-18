@@ -48,7 +48,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
             MsalTokenResponse msalTokenResponse;
-            if (_authenticationRequestParameters.Account != null)
+
+            if (!PublicClientApplication.IsCurrentBrokerAccount(_authenticationRequestParameters.Account))
             {
                 msalTokenResponse = await Broker.AcquireTokenSilentAsync(
                       _authenticationRequestParameters,
