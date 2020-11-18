@@ -59,9 +59,9 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when the 
-        /// <see cref="PublicClientApplication.CurrentBrokerAccount"/> user is passed as the <c>account</c> parameter. Only some brokers (WAM) can login the current user.
+        /// <see cref="PublicClientApplication.OperatingSystemAccount"/> user is passed as the <c>account</c> parameter. Only some brokers (WAM) can login the current user.
         /// <para>Mitigation</para>
-        /// On Windows, use the broker .WithBroker(true) or use a different account, or otherwise call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
+        /// On Windows, use the broker via .WithBroker(true), use a different account, or otherwise call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
         /// </summary>
         public const string CurrentBrokerAccount = "current_broker_account";
 

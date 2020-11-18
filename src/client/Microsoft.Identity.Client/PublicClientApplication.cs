@@ -34,13 +34,13 @@ namespace Microsoft.Identity.Client
             new Account(CurrentBrokerAccountDescriptor, null, null, null);
 
         /// <summary>
+        /// Currently only the Windows broker is able to login with the current user, see https://aka.ms/msal-net-wam for details.
+        /// 
         /// A special account value that indicates that the current Operating System account should be used 
         /// to login the user. Not all operating systems and authentication flows support this concept, in which 
         /// case calling `AcquireTokenSilent` will throw an <see cref="MsalUiRequiredException"/>. 
-        /// 
-        /// Currently only the Windows broker is able to login the current Windows user, see https://aka.ms/msal-net-wam for details.
         /// </summary>
-        public static IAccount CurrentBrokerAccount
+        public static IAccount OperatingSystemAccount
         {
             get
             {
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Interactive request to acquire a token for the specified scopes. The interactive window will be parented to the specified
-        /// window. The user will be required to select an account
+        /// window. The user will be required to select an account.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
@@ -71,6 +71,7 @@ namespace Microsoft.Identity.Client
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.
         ///
         /// You can also pass optional parameters by calling:
+        ///         
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithPrompt(Prompt)"/> to specify the user experience
         /// when signing-in, <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to specify
         /// if you want to use the embedded web browser or the system default browser,

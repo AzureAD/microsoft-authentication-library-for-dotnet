@@ -383,7 +383,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var ar = new AuthenticationResult();
 
                 mockBrokerStrategy.ExecuteAsync(new CancellationToken()).Returns(ar);
-                _acquireTokenSilentParameters.Account = PublicClientApplication.CurrentBrokerAccount;
+                _acquireTokenSilentParameters.Account = PublicClientApplication.OperatingSystemAccount;
                 var silentRequest = new SilentRequest(
                     harness.ServiceBundle, 
                     _parameters, 
@@ -407,7 +407,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 IBroker broker = Substitute.For<IBroker>();
-                _acquireTokenSilentParameters.Account = PublicClientApplication.CurrentBrokerAccount;
+                _acquireTokenSilentParameters.Account = PublicClientApplication.OperatingSystemAccount;
                 var brokerSilentAuthStrategy =
                     new BrokerSilentStrategy(
                         new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters),
@@ -415,7 +415,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         _parameters,
                         _acquireTokenSilentParameters,
                         broker);
-                _parameters.Account = PublicClientApplication.CurrentBrokerAccount;
+                _parameters.Account = PublicClientApplication.OperatingSystemAccount;
                 broker.AcquireTokenSilentDefaultUserAsync(_parameters, _acquireTokenSilentParameters)
                     .Returns(Task.FromResult(_msalTokenResponse));
 
