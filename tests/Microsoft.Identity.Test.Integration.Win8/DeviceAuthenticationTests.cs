@@ -57,6 +57,5 @@ namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
             Assert.IsTrue(!string.IsNullOrEmpty(AuthHeader));
             Assert.IsTrue(AuthHeader.Contains("PKeyAuth"));
         }
-
     }
 }

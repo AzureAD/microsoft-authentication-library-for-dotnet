@@ -1,5 +1,5 @@
 # template-run-device-auth-tests.yaml
-# Performs pkeyAuth device authenticaiton on a enrolled Windows 8 machine
+# Performs pkeyAuth device authentication on a enrolled Windows 8 machine
 
 steps:
 - task: DownloadBuildArtifacts@0
