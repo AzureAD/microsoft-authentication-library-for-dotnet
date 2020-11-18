@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
         private readonly IDictionary<string, string> _wamAccountIds;
 
         IDictionary<string, string> IAccountInternal.WamAccountIds => _wamAccountIds;
-
+        
 
         public override string ToString()
         {
