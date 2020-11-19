@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
         /// Acquires a security token from the authority configured in the app using the authorization code
         /// previously received from the STS.
         /// It uses the OAuth 2.0 authorization code flow (See https://aka.ms/msal-net-authorization-code).
-        /// It's usually used in web apps (for instance ASP.NET / ASP.NET Core Web apps) which sign-in users,
+        /// It's usually used in web apps (for instance ASP.NET / ASP.NET Core web apps) which sign-in users,
         /// and can request an authorization code.
         /// This method does not lookup the token cache, but stores the result in it, so it can be looked up
         /// using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
