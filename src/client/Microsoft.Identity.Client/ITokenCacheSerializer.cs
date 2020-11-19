@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// This interface will be available in TokenCacheNotifiactionArgs callback to enable serialization/deserialization of the cache.
+    /// This interface will be available in TokenCacheNotificationArgs callback to enable serialization/deserialization of the cache.
     /// </summary>
     /// <remarks>
     /// The methods in this class are not thread safe. It is expected that they will be called from the token cache callbacks, 
