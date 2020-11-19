@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (prompt == Client.Prompt.NoPrompt || prompt == Client.Prompt.NotSpecified)
             {
-                br.Prompt = "NONE";
+                br.Prompt = Client.Prompt.SelectAccount.PromptValue;
             }
             else
             {
