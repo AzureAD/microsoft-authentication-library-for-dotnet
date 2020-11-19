@@ -49,8 +49,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         }
 
         /// <summary>
-        /// Creates the cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
-        /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint
+        /// Creates the canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3.
+        /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint.
         /// </summary>
         private static string ComputeCannonicalJwk(RSAParameters rsaPublicKey)
         {

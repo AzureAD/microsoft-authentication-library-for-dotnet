@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             /// <summary>
-            /// x5t = base64 url encoded cert thumbprint 
+            /// x5t = base64 URL encoded cert thumbprint 
             /// </summary>
             /// <remarks>
             /// Mandatory for ADFS 2019

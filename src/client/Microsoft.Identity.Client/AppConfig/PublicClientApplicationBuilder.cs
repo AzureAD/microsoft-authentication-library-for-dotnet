@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// <term><c>http://localhost</c></term>
         /// </item>
         /// </list>
-        /// NOTE:There will be an update to the default rediect uri in the future to accomodate for system browsers on the 
+        /// NOTE:There will be an update to the default redirect URI in the future to accommodate for system browsers on the 
         /// .NET desktop and .NET Core platforms.
         /// </summary>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// You can specify a Keychain Access Group to use for persisting the token cache across multiple applications.
-        /// This enables you to share the token cache between several applications having the same keychain access group.
+        /// This enables you to share the token cache between several applications having the same Keychain access group.
         /// Sharing the token cache allows single sign-on between all of the applications that use the same Keychain access Group.
         /// See https://aka.ms/msal-net-ios-keychain-security-group for more information.
         /// </summary>
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
 #if !SUPPORTS_BROKER
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logged-in in Windows.
+        /// Flag to enable authentication with the user currently logged-in on Windows.
         /// </summary>
         /// <param name="useCorporateNetwork">When set to true, the application will try to connect to the corporate network using windows integrated authentication.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more

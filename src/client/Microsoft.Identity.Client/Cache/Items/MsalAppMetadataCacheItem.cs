@@ -10,7 +10,7 @@ using Microsoft.Identity.Json.Linq;
 namespace Microsoft.Identity.Client.Cache.Items
 {
     /// <summary>
-    /// Apps shouldn't rely on its presence, unless the app itself wrote it. It means that SDK should translate absense of app metadata to the default values of its required fields.
+    /// Apps shouldn't rely on its presence, unless the app itself wrote it. It means that SDK should translate absence of app metadata to the default values of its required fields.
     /// Other apps that don't support app metadata should never remove existing app metadata.
     /// App metadata is a non-removable entity.It means there's no need for a public API to remove app metadata, and it shouldn't be removed when removeAccount is called.
     /// App metadata is a non-secret entity. It means that it cannot store any secret information, like tokens, nor PII, like username etc.
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         /// <summary>
         /// The family id of which this application is part of. This is an internal feature and there is currently a single app,
-        /// with id 1. If familyId is empty, it means an app is not part of a family. A missing entry means unkown status.
+        /// with id 1. If familyId is empty, it means an app is not part of a family. A missing entry means unknown status.
         /// </summary>
         public string FamilyId { get; }
 

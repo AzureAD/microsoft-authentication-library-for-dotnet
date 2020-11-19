@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 if (AuthenticationRequestParameters.Account == null )
                 {
-                    _logger.Verbose("No account passed to AcquireTokenSilent");
+                    _logger.Verbose("No account passed to AcquireTokenSilent. ");
                     throw new MsalUiRequiredException(
                        MsalError.UserNullError,
                        MsalErrorMessage.MsalUiRequiredMessage,
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
                 if (!isBrokerConfigured) // IsCurrentBrokerAccount = true
                 {
-                    _logger.Verbose("No account passed to AcquireTokenSilent");
+                    _logger.Verbose("No account passed to AcquireTokenSilent. ");
                     throw new MsalUiRequiredException(
                        MsalError.CurrentBrokerAccount,
                        "Only some brokers (WAM) can log in the current account. ",
@@ -82,11 +82,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
             catch (MsalException ex)
             {
-                _logger.Verbose("Token cache could not satisfy silent request");
+                _logger.Verbose("Token cache could not satisfy silent request. ");
 
                 if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
                 {
-                    _logger.Info("Attempting to use broker instead");
+                    _logger.Info("Attempting to use broker instead. ");
                     return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                 }
 

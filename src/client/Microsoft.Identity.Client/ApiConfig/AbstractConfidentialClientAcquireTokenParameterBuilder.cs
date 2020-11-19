@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     /// <typeparam name="T"></typeparam>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-    [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]  // hide confidentail client on mobile
+    [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
     public abstract class AbstractConfidentialClientAcquireTokenParameterBuilder<T>
         : AbstractAcquireTokenParameterBuilder<T>
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
         ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
         ///  See https://aka.ms/msal-net-pop
         /// </summary>
-        /// <param name="popAuthenticationConfiguration">Configuration properties used to construct a proof of possesion request.</param>
+        /// <param name="popAuthenticationConfiguration">Configuration properties used to construct a proof of possession request.</param>
         /// <remarks>
         /// <list type="bullet">
         /// <item> An Authentication header is automatically added to the request</item>

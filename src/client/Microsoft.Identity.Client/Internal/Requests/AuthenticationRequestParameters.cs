@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = this.RequestContext.Logger;
 
-            // Create Pii enabled string builder
+            // Create PII enabled string builder
             var builder = new StringBuilder(
                 Environment.NewLine + "=== Request Data ===" + Environment.NewLine + "Authority Provided? - " +
                 (Authority != null) + Environment.NewLine);
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             string messageWithPii = builder.ToString();
 
-            // Create no Pii enabled string builder
+            // Create no PII enabled string builder
             builder = new StringBuilder(
                 Environment.NewLine + "=== Request Data ===" +
                 Environment.NewLine + "Authority Provided? - " + (Authority != null) +

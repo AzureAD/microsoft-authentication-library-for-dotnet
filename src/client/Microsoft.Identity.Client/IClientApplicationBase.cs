@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
 
         /// <Summary>
         /// Gets the URL of the authority, or the security token service (STS) from which MSAL.NET will acquire security tokens.
-        /// The return value of this propety is either the value provided by the developer in the constructor of the application, or otherwise
+        /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="ClientApplicationBase.Authority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
         /// </Summary>
         // TODO: move to IAppConfig like ClientId?

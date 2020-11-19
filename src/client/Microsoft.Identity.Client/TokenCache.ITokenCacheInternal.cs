@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
             IdToken idToken = IdToken.Parse(response.IdToken);
             if (idToken == null)
             {
-                requestParams.RequestContext.Logger.Info("ID Token not present in response.");
+                requestParams.RequestContext.Logger.Info("ID Token not present in response. ");
             }
 
             var tenantId = Authority
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Client
         private static string GetPreferredUsernameFromIdToken(bool isAdfsAuthority, IdToken idToken)
         {
             // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
-            // It will be set to "preferred_username not in idtoken"
+            // It will be set to "preferred_username not in id token"
             if (idToken == null)
             {
                 return NullPreferredUsernameDisplayLabel;
@@ -260,7 +260,7 @@ namespace Microsoft.Identity.Client
             {
                 if (isAdfsAuthority)
                 {
-                    //The direct to adfs scenario does not return preferred_username in the id token so it needs to be set to the upn
+                    //The direct to ADFS scenario does not return preferred_username in the id token so it needs to be set to the UPN
                     return !string.IsNullOrEmpty(idToken.Upn)
                         ? idToken.Upn
                         : NullPreferredUsernameDisplayLabel;
@@ -457,7 +457,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
+                requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes. ");
 
                 throw new MsalClientException(
                     MsalError.MultipleTokensMatchedError,
@@ -553,9 +553,7 @@ namespace Microsoft.Identity.Client
             if (candidateRt != null)
                 return candidateRt;
 
-            requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
-
-          
+            requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");          
 
             // ADAL legacy cache does not store FRTs
             if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
@@ -577,7 +575,7 @@ namespace Microsoft.Identity.Client
             var logger = requestParams.RequestContext.Logger;
             if (requestParams?.AuthorityInfo?.CanonicalAuthority == null)
             {
-                logger.Warning("No authority details, can't check app metadata. Returning unknown");
+                logger.Warning("No authority details, can't check app metadata. Returning unknown. ");
                 return null;
             }
 
@@ -599,7 +597,7 @@ namespace Microsoft.Identity.Client
             // version of MSAL which did not record app metadata.
             if (appMetadata == null)
             {
-                logger.Warning("No app metadata found. Returning unknown");
+                logger.Warning("No app metadata found. Returning unknown. ");
                 return null;
             }
 
@@ -627,7 +625,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<MsalAccountCacheItem> accountCacheItems = _accessor.GetAllAccounts();
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
-                logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache.");
+                logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache. ");
 
             AdalUsersForMsal adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 Logger,
@@ -650,7 +648,7 @@ namespace Microsoft.Identity.Client
             accountCacheItems = accountCacheItems.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
-                logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache after environment filtering.");
+                logger.Verbose($"GetAccounts found {rtCacheItems.Count()} RTs and {accountCacheItems.Count()} accounts in MSAL cache after environment filtering. ");
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
             foreach (MsalRefreshTokenCacheItem rtItem in rtCacheItems)

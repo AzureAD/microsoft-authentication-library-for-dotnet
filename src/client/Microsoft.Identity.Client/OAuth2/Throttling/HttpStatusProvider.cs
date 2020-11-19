@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -9,7 +10,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
     internal class HttpStatusProvider : IThrottlingProvider
     {
         /// <summary>
-        /// Default timespan that blocks an application, if HTTP 429 and HTTP 5xx was recieved and Retry-After HTTP header was NOT returned by AAD.
+        /// Default timespan that blocks an application, if HTTP 429 and HTTP 5xx was received and Retry-After HTTP header was NOT returned by AAD.
         /// </summary>
         internal static readonly TimeSpan s_throttleDuration = TimeSpan.FromSeconds(60); // internal for test
 
@@ -35,8 +36,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 // if a retry-after header is present, another provider will take care of this
                 !RetryAfterProvider.TryGetRetryAfterValue(ex.Headers, out _)) 
             {
-                logger.Info($"[Throttling] Http status code {ex.StatusCode} encountered - " +
-                    $"throttling for {s_throttleDuration.TotalSeconds} seconds");
+                logger.Info($"[Throttling] HTTP status code {ex.StatusCode} encountered - " +
+                    $"throttling for {s_throttleDuration.TotalSeconds} seconds. ");
 
                 var thumbprint = ThrottleCommon.GetRequestStrictThumbprint(bodyParams,
                     requestParams.AuthorityInfo.CanonicalAuthority,

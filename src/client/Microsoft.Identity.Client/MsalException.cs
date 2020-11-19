@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client
 
             string innerExceptionContents = InnerException == null 
                 ? string.Empty 
-                : string.Format(CultureInfo.InvariantCulture, "\nInner Excception: {0}", InnerException.ToString());
+                : string.Format(CultureInfo.InvariantCulture, "\nInner Exception: {0}", InnerException.ToString());
 
             return string.Format(
                 CultureInfo.InvariantCulture, 

@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial interface ITokenCache
     {
-
         /// <summary>
         /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
         /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.

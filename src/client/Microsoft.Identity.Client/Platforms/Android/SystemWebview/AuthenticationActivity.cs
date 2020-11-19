@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
         {
             base.OnCreate(bundle);
 
-            // If activity is killed by the os, savedInstance will be the saved bundle.
+            // If activity is killed by the OS, savedInstance will be the saved bundle.
             if (bundle != null)
             {
                 _restarted = true;

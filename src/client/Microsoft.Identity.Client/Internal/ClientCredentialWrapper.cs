@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         #region TestBuilders
-        //The following builders methods are inteded for testing
+        //The following builders methods are intended for testing
         public static ClientCredentialWrapper CreateWithCertificate(X509Certificate2 certificate, IDictionary<string, string> claimsToSign = null)
         {
             return new ClientCredentialWrapper(certificate, claimsToSign);
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Internal
         private void CheckCertificateKeySize(X509Certificate2 cert)
         {
             //Currently, the min key size is enforced on desktop (net 45) as 2048 as it is the current industry standard.
-            //This is not enforced on netCore unfortunalty and adding this enforcement may break customers on netCore.
+            //This is not enforced on netCore unfortunately and adding this enforcement may break customers on netCore.
             //NetCore can only enforce a min key size of 512 since it is enforced by the portal already.
 #if DESKTOP
             if (cert.PublicKey.Key.KeySize < MinKeySizeInBits)

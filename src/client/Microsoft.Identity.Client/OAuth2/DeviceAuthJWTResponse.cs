@@ -15,10 +15,10 @@ namespace Microsoft.Identity.Client.OAuth2
     {
         public DeviceAuthHeader(string base64EncodedCertificate)
         {
-            this.Alg = "RS256";
-            this.Type = "JWT";
-            this.X5c = new List<string>();
-            this.X5c.Add(base64EncodedCertificate);
+            Alg = "RS256";
+            Type = "JWT";
+            X5c = new List<string>();
+            X5c.Add(base64EncodedCertificate);
         }
 
         [JsonProperty("x5c")]
@@ -39,9 +39,9 @@ namespace Microsoft.Identity.Client.OAuth2
         
         public DeviceAuthPayload(string audience, string nonce)
         {
-            this.Nonce = nonce;
-            this.Audience = audience;
-            this.Iat = _defaultDeviceAuthJWTTimeSpan.Value;
+            Nonce = nonce;
+            Audience = audience;
+            Iat = _defaultDeviceAuthJWTTimeSpan.Value;
         }
 
         [JsonProperty("iat")]
@@ -57,21 +57,21 @@ namespace Microsoft.Identity.Client.OAuth2
 
     internal class DeviceAuthJWTResponse
     {
-        private readonly DeviceAuthHeader header;
-        private readonly DeviceAuthPayload payload;
+        private readonly DeviceAuthHeader _header;
+        private readonly DeviceAuthPayload _payload;
 
         public DeviceAuthJWTResponse(string audience, string nonce,
             string base64EncodedCertificate)
         {
-            this.header = new DeviceAuthHeader(base64EncodedCertificate);
-            this.payload = new DeviceAuthPayload(audience, nonce);
+            _header = new DeviceAuthHeader(base64EncodedCertificate);
+            _payload = new DeviceAuthPayload(audience, nonce);
         }
 
         public string GetResponseToSign()
         {
-            return String.Format(CultureInfo.InvariantCulture, "{0}.{1}",
-                Base64UrlHelpers.Encode(JsonHelper.SerializeToJson(header).ToByteArray()),
-                Base64UrlHelpers.Encode(JsonHelper.SerializeToJson(payload).ToByteArray()));
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}",
+                Base64UrlHelpers.Encode(JsonHelper.SerializeToJson(_header).ToByteArray()),
+                Base64UrlHelpers.Encode(JsonHelper.SerializeToJson(_payload).ToByteArray()));
         }
     }
 }

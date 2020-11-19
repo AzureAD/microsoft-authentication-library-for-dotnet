@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Client.Cache
                             (envAliases?.ContainsOrdinalIgnoreCase(Authority.GetEnviroment(u.Authority)) ?? true))
                             .ToLookup(u => u.ClientInfo, u => u.UserInfo)
                             .ToDictionary(group => group.Key, group => group.First());
-
         }
 
         public IEnumerable<AdalUserInfo> GetUsersWithoutClientInfo(IEnumerable<string> envAliases)
