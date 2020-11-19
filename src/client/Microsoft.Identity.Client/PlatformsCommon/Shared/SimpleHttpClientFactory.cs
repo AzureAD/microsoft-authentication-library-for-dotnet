@@ -18,9 +18,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// </remarks>
     internal class SimpleHttpClientFactory : IMsalHttpClientFactory
     {
-        //Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
-        //the httpClient had the possibility to throw an exception stating "Properties can only be modified before sending the first request".
-        //MSAL's httpClient will no longer throw this exception after 4.19.0 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.19.0)
+        //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
         private static readonly Lazy<HttpClient> s_httpClient = new Lazy<HttpClient>(() => InitializeClient());
 
         private static HttpClient InitializeClient()
