@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Client.Http
 
 #if WINDOWS_APP
             // WORKAROUND
-            // On UWP there is a bug in the Http stack that causes an exception to be thrown when moving around a stream.
+            // On UWP there is a bug in the HTTP stack that causes an exception to be thrown when moving around a stream.
             // https://stackoverflow.com/questions/31774058/postasync-throwing-irandomaccessstream-error-when-targeting-windows-10-uwp
             // LoadIntoBufferAsync is necessary to buffer content for multiple reads - see https://stackoverflow.com/questions/26942514/multiple-calls-to-httpcontent-readasasync
             // Documentation is sparse, but it looks like loading the buffer into memory avoids the bug, without

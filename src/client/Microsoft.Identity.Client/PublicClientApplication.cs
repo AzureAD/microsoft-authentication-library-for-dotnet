@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
     /// <summary>
     /// Class to be used to acquire tokens in desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
-    /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only.
+    /// public client applications are not trusted to safely keep application secrets, and therefore they only access web APIs in the name of the user only.
     /// For details see https://aka.ms/msal-net-client-applications
     /// </summary>
     /// <remarks>
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
+        /// Acquires a security token on a device without a web browser, by letting the user authenticate on
         /// another device. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>The method first acquires a device code from the authority and returns it to the caller via

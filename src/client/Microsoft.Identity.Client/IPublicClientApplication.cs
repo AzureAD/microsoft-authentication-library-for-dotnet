@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Interface to be used with desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
-    /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only.
+    /// public client applications are not trusted to safely keep application secrets, and therefore they only access web APIs in the name of the user only.
     /// For details see https://aka.ms/msal-net-client-applications.
     /// </summary>
     public partial interface IPublicClientApplication : IClientApplicationBase

@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             var cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
             if (cachedEntry != null)
             {
-                logger.Verbose($"[Instance Discovery] The network provider found an entry for {environment}");
+                logger.Verbose($"[Instance Discovery] The network provider found an entry for {environment}. ");
                 return cachedEntry;
             }
 
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             CacheInstanceDiscoveryMetadata(discoveryResponse);
 
             cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
-            logger.Verbose($"[Instance Discovery] After hitting the discovery endpoint, the network provider found an entry for {environment} ? {cachedEntry != null}");
+            logger.Verbose($"[Instance Discovery] After hitting the discovery endpoint, the network provider found an entry for {environment} ? {cachedEntry != null}. ");
 
             return cachedEntry;
         }
@@ -111,8 +111,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 authority.Port);
 
             requestContext.Logger.InfoPii(
-                $"Fetching instance discovery from the network from host {discoveryHost}. Endpoint {instanceDiscoveryEndpoint}",
-                $"Fetching instance discovery from the network from host {discoveryHost}");
+                $"Fetching instance discovery from the network from host {discoveryHost}. Endpoint {instanceDiscoveryEndpoint}. ",
+                $"Fetching instance discovery from the network from host {discoveryHost}. ");
 
             return new Uri(instanceDiscoveryEndpoint);
         }

@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Factory responsible for creating HttpClient
-    /// .Net recommends to use a single instance of HttpClient
+    /// .Net recommends to use a single instance of HttpClient.
     /// </summary>
     /// <remarks>
     /// Implementations must be thread safe. Consider creating and configuring an HttpClient in the constructor
@@ -16,11 +16,11 @@ namespace Microsoft.Identity.Client
     public interface IMsalHttpClientFactory
     {
         /// <summary>
-        /// Method returning an Http client that will be used to
+        /// Method returning an HTTP client that will be used to
         /// communicate with Azure AD. This enables advanced scenarios.
-        /// See https://aka.ms/msal-net-application-configuration
+        /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <returns>An Http client</returns>
+        /// <returns>An HTTP client.</returns>
         HttpClient GetHttpClient();
     }
 }

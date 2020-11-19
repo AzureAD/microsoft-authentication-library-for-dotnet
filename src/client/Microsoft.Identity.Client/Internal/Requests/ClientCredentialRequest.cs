@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             else
             {
-                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set");
+                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
             }
 
             // No AT in the cache or AT needs to be refreshed
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (cachedAccessTokenItem != null && isAadUnavailable)
                 {
-                    logger.Info("Returning existing access token. It is not expired, but should be refreshed.");
+                    logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
                     return new AuthenticationResult(
                         cachedAccessTokenItem,
                         null,
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         TokenSource.Cache);
                 }
 
-                logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable.");
+                logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
                 throw;
             }
         }

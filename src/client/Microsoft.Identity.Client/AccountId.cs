@@ -24,12 +24,12 @@ namespace Microsoft.Identity.Client
         public string Identifier { get; }
 
         /// <summary>
-        /// For Azure AD, a string representation for a Guid which is the Object ID of the user owning the account in the tenant
+        /// For Azure AD, a string representation for a GUID which is the Object ID of the user owning the account in the tenant
         /// </summary>
         public string ObjectId { get; }
 
         /// <summary>
-        /// For Azure AD, a string representation for a Guid, which is the ID of the tenant where the account resides.
+        /// For Azure AD, a string representation for a GUID, which is the ID of the tenant where the account resides.
         /// </summary>
         public string TenantId { get; }
 
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor of an AccountId meant for Adfs scenarios since Adfs instances lack tenant ids.
+        /// Constructor of an AccountId meant for ADFS scenarios since ADFS instances lack tenant ids.
         /// </summary>
         /// <param name="adfsIdentifier">Unique identifier for the account if authority is ADFS</param>
         public AccountId(string adfsIdentifier)
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client
 
             if (elements.Length == 1)
             {
-                return new AccountId(str); //Account id is from Adfs; no . in the string
+                return new AccountId(str); //Account id is from ADFS; no . in the string
             }
 
             return new AccountId(str, elements[0], elements[1]);

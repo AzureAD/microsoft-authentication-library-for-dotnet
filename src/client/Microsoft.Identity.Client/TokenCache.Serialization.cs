@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client
 {
     public sealed partial class TokenCache : ITokenCacheInternal
     {
-        // Unkown token cache data support for forwards compatibility.
+        // Unknown token cache data support for forwards compatibility.
         private IDictionary<string, JToken> _unknownNodes;
 
         byte[] ITokenCacheSerializer.SerializeAdalV3()

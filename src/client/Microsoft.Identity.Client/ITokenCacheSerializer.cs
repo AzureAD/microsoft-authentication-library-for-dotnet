@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// This interface will be available in TokenCacheNOtifiactionArgs callback to enable serialization/deserialization of the cache.
+    /// This interface will be available in TokenCacheNotificationArgs callback to enable serialization/deserialization of the cache.
     /// </summary>
     /// <remarks>
     /// The methods in this class are not thread safe. It is expected that they will be called from the token cache callbacks, 
@@ -95,6 +95,5 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         [Obsolete("Support for the MSAL v2 token cache format will be dropped in the next major version", false)]
         void DeserializeMsalV2(byte[] msalV2State);
-
     }
 }

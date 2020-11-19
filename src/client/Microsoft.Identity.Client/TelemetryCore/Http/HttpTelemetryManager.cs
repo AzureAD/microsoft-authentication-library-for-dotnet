@@ -64,7 +64,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 if (!firstFailure)
                     errors.Append(",");
 
-                errors.Append(ev.ApiErrorCode);
+                errors.Append(
+                    // error codes come from the server / broker and can sometimes be full blown sentences,
+                    // with punctuation that is illegal in an HTTP Header 
+                    HttpHeaderSantizer.SantizeHeader(ev.ApiErrorCode));
 
                 if (!firstFailure)
                     failedRequests.Append(",");
@@ -142,6 +145,5 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
             return TelemetryConstants.One;
         }
-
     }
 }

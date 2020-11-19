@@ -11,8 +11,8 @@ namespace Microsoft.Identity.Client.Http
     internal class RedirectUriHelper
     {
         /// <summary>
-        /// Check common redirect uri problems.
-        /// Optionally check that the redirect uri is not the OAuth2 standard redirect uri https://login.microsoftonline.com/common/oauth2/nativeclientb
+        /// Check common redirect URI problems.
+        /// Optionally check that the redirect URI is not the OAuth2 standard redirect URI https://login.microsoftonline.com/common/oauth2/nativeclientb
         /// when using a system browser, because the browser cannot redirect back to the app.
         /// </summary>
         public static void Validate(Uri redirectUri, bool usesSystemBrowser = false)
@@ -50,24 +50,24 @@ namespace Microsoft.Identity.Client.Http
             // It's important to use the original string here because the bundleId is case sensitive
             string actualRedirectUriString = redirectUri.OriginalString;
 
-            // MSAL style redirect uri - case sensitive
+            // MSAL style redirect URI - case sensitive
             if (string.Equals(expectedRedirectUri, actualRedirectUriString.TrimEnd('/'), StringComparison.Ordinal))
             {
-                logger.Verbose("Valid MSAL style redirect Uri detected.");
+                logger.Verbose("Valid MSAL style redirect Uri detected. ");
                 return;
             }
 
-            // ADAL style redirect uri - my_scheme://{bundleID} 
+            // ADAL style redirect URI - my_scheme://{bundleID} 
             if (redirectUri.Authority.Equals(bundleId, StringComparison.OrdinalIgnoreCase))
             {
-                logger.Verbose("Valid ADAL style redirect Uri detected.");
+                logger.Verbose("Valid ADAL style redirect Uri detected. ");
                 return;
             }
 
             throw new MsalClientException(
                 MsalError.CannotInvokeBroker,
                 $"The broker redirect URI is incorrect, it should be {expectedRedirectUri} or app_scheme ://{bundleId} - " +
-                $"please visit https://aka.ms/msal-net-xamarin for details about redirect URIs.");
+                $"please visit https://aka.ms/msal-net-xamarin for details about redirect URIs. ");
         }
     }
 }

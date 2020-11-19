@@ -19,10 +19,10 @@ using System.Security.Cryptography.X509Certificates;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Class to be used for confidential client applications (Web Apps, Web APIs, and daemon applications).
+    /// Class to be used for confidential client applications (web apps, web APIs, and daemon applications).
     /// </summary>
     /// <remarks>
-    /// Confidential client applications are typically applications which run on servers (Web Apps, Web API, or even service/daemon applications).
+    /// Confidential client applications are typically applications which run on servers (web apps, web API, or even service/daemon applications).
     /// They are considered difficult to access, and therefore capable of keeping an application secret (hold configuration
     /// time secrets as these values would be difficult for end users to extract).
     /// A web app is the most common confidential client. The clientId is exposed through the web browser, but the secret is passed only in the back channel
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
         /// Acquires a security token from the authority configured in the app using the authorization code
         /// previously received from the STS.
         /// It uses the OAuth 2.0 authorization code flow (See https://aka.ms/msal-net-authorization-code).
-        /// It's usually used in Web Apps (for instance ASP.NET / ASP.NET Core Web apps) which sign-in users,
+        /// It's usually used in web apps (for instance ASP.NET / ASP.NET Core web apps) which sign-in users,
         /// and can request an authorization code.
         /// This method does not lookup the token cache, but stores the result in it, so it can be looked up
         /// using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires an access token for this application (usually a Web API) from the authority configured in the application,
-        /// in order to access another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
+        /// in order to access another downstream protected web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
         /// See https://aka.ms/msal-net-on-behalf-of.
         /// This confidential client application was itself called with a token which will be provided in the
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.

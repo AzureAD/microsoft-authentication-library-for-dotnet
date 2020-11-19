@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Extensibility
     public static class AcquireTokenInteractiveParameterBuilderExtensions
     {
         /// <summary>
-        ///     Extension method enabling MSAL.NET extenders for public client applications to set a custom web ui
+        ///     Extension method enabling MSAL.NET extenders for public client applications to set a custom web UI
         ///     that will let the user sign-in with Azure AD, present consent if needed, and get back the authorization
         ///     code
         /// </summary>

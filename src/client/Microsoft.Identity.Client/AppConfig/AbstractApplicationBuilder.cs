@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="enableDefaultPlatformLogging">Flag to enable/disable logging to platform defaults.
         /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
-        /// In android, logcat is used. The default value is <c>false</c>
+        /// In android, Logcat is used. The default value is <c>false</c>
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
@@ -375,7 +375,7 @@ namespace Microsoft.Identity.Client
         /// Sets Extra Query Parameters for the query string in the HTTP authentication request
         /// </summary>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
-        /// The string needs to be properly URL-encdoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The string needs to be properly URL-encoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// </param>
         /// <returns></returns>
         public T WithExtraQueryParameters(string extraQueryParameters)
@@ -440,7 +440,7 @@ namespace Microsoft.Identity.Client
 
             CreateAuthorityInfoFromEnums();
 
-            //Adfs does not require client id to be in the form of a Guid
+            //ADFS does not require client id to be in the form of a GUID.
             //if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out _))
             //{
             //    throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
@@ -560,10 +560,10 @@ namespace Microsoft.Identity.Client
         /// Adds a known Azure AD authority to the application to sign-in users from a single
         /// organization (single tenant application) specified by its tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="cloudInstanceUri">Azure Cloud instance</param>
-        /// <param name="tenantId">Guid of the tenant from which to sign-in users</param>
+        /// <param name="cloudInstanceUri">Azure Cloud instance.</param>
+        /// <param name="tenantId">GUID of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(
             string cloudInstanceUri,
             Guid tenantId,
@@ -641,11 +641,11 @@ namespace Microsoft.Identity.Client
         /// name or tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
-        /// worldwide cloud, Azure German Cloud, US government ...)</param>
+        /// worldwide cloud, Azure German Cloud, US government ...).</param>
         /// <param name="tenant">Domain name associated with the Azure AD tenant from which
-        /// to sign-in users. This can also be a guid</param>
+        /// to sign-in users. This can also be a GUID.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,

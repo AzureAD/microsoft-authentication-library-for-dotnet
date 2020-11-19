@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public const string ChallangeRequestCertAuthDelimeter = ";";
 
         /**
-         * Apk packagename that will install AD-Authenticator. It is used to
+         * APK package name that will install AD-Authenticator. It is used to
          * query if this app installed or not from package manager.
          */
         public const string PackageName = "com.microsoft.windowsintune.companyportal";

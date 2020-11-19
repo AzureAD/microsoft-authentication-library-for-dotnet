@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Instance
 
             switch (configAuthorityInfo.AuthorityType)
             {
-                // ADFS and B2C are tenantless, no need to consider tenant
+                // ADFS and B2C are tenant-less, no need to consider tenant
                 case AuthorityType.Adfs:
                     return requestAuthorityInfo == null ?
                         new AdfsAuthority(configAuthorityInfo) :
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Client.Instance
         internal abstract string TenantId { get; }
 
         /// <summary>
-        /// Gets a tenanted authority if the current authority is tenantless.
+        /// Gets a tenanted authority if the current authority is tenant-less.
         /// Returns the original authority on B2C and ADFS
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId);

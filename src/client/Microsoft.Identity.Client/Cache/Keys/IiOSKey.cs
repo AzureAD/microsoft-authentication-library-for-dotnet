@@ -1,4 +1,7 @@
-﻿namespace Microsoft.Identity.Client.Cache.Keys
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+namespace Microsoft.Identity.Client.Cache.Keys
 {
     internal interface IiOSKey
     {

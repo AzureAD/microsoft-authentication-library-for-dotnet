@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// </summary>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
     public class ConfidentialClientApplicationBuilder : AbstractApplicationBuilder<ConfidentialClientApplicationBuilder>
     {
@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a confidential client application instance</returns>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
         public static ConfidentialClientApplicationBuilder CreateWithApplicationOptions(
             ConfidentialClientApplicationOptions options)
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a confidential client application instance</returns>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
         public static ConfidentialClientApplicationBuilder Create(string clientId)
         {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -10,7 +11,9 @@ using System.Net;
 using System.Net.Http;
 using System.Security;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -26,6 +29,7 @@ using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -229,7 +233,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
             appCacheRecorder.AssertAccessCounts(1, 1);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
-            Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);            
+            Assert.IsTrue(appCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.AreEqual(clientID + "_AppTokenCache", appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
 
             // Call again to ensure token cache is hit
@@ -296,6 +300,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(authResult);
         }
+
+
 
         [TestMethod]
         public async Task ConfidentialClientWithSignedAssertionTestAsync()
@@ -455,7 +461,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNull(authResult.IdToken);
         }
-        
+
         [TestMethod]
         [TestCategory(TestCategories.ADFS)]
         public async Task ClientCreds_WithCertificate_Adfs_Async()
@@ -489,7 +495,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cert = await _keyVault.GetCertificateWithPrivateMaterialAsync(AdfsCertName)
                 .ConfigureAwait(false);
             string clientAssertion =
-                GetSignedClientAssertionUsingWilson(Adfs2019LabConstants.Authority, cert);
+                GetSignedClientAssertionUsingWilson(
+                    Adfs2019LabConstants.ConfidentialClientId,
+                    // ADFS token endpoint is ${authority}/oauth2/token
+                    // AAD token endpoint is ${authority}/oauth2/v2.0/token
+                    $"{Adfs2019LabConstants.Authority}/oauth2/token",
+                    cert);
 
             ConfidentialClientApplication msalConfidentialClient =
                 ConfidentialClientApplicationBuilder.Create(Adfs2019LabConstants.ConfidentialClientId)
@@ -511,18 +522,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         private static string GetSignedClientAssertionUsingWilson(
-            string authority,
+            string issuer,
+            string aud,
             X509Certificate2 cert)
         {
-            string aud = $"{authority}/oauth2/token";
+            //string aud = $"{authority}/oauth2/token";
 
             // no need to add exp, nbf as JsonWebTokenHandler will add them by default.
             var claims = new Dictionary<string, object>()
             {
                 { "aud", aud },
-                { "iss", Adfs2019LabConstants.ConfidentialClientId },
+                { "iss", issuer },
                 { "jti", Guid.NewGuid().ToString() },
-                { "sub", Adfs2019LabConstants.ConfidentialClientId }
+                { "sub", issuer }
             };
 
             var securityTokenDescriptor = new SecurityTokenDescriptor
@@ -606,5 +618,122 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await confidentialApp.GetAccountsAsync().ConfigureAwait(false);
             Assert.IsNull(userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
         }
+
+        [TestMethod]
+        public async Task ClientCreds_ClientAssertion_AAD_Wilson_Async()
+        {
+            try
+            {
+                string signedAssertionWilson = GetSignedClientAssertionUsingWilson(
+                       PublicCloudConfidentialClientID,
+                       PublicCloudTestAuthority + "/oauth2/v2.0/token", // for AAD use v2.0, but not for ADFS
+                       GetCertificate());
+
+                var confidentialApp = ConfidentialClientApplicationBuilder
+                    .Create(PublicCloudConfidentialClientID)
+                    .WithAuthority(new Uri(PublicCloudTestAuthority), true)
+                    .WithClientAssertion(signedAssertionWilson)
+                    .WithTestLogging()
+                    .Build();
+
+                var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e);
+                throw;
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientCreds_ClientAssertion_AAD_NoWilson_Async()
+        {
+            try
+            {
+                string signedAssertionNoWilson = GetSignedClientAssertionDirectly(
+                       PublicCloudConfidentialClientID,
+                       PublicCloudTestAuthority + "/oauth2/v2.0/token", // for AAD use v2.0, but not for ADFS
+                       GetCertificate());
+
+                var confidentialApp = ConfidentialClientApplicationBuilder
+                    .Create(PublicCloudConfidentialClientID)
+                    .WithAuthority(new Uri(PublicCloudTestAuthority), true)
+                    .WithClientAssertion(signedAssertionNoWilson)
+                    .WithTestLogging()
+                    .Build();
+
+                var authResult = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e);
+                throw;
+            }
+        }
+
+        private string GetSignedClientAssertionDirectly(
+            string issuer, // client ID
+            string audience, // ${authority}/oauth2/v2.0/token for AAD or ${authority}/oauth2/token for ADFS
+            X509Certificate2 certificate)
+        {
+            const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
+            DateTime validFrom = DateTime.UtcNow;
+            var nbf = ConvertToTimeT(validFrom);
+            var exp = ConvertToTimeT(validFrom + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
+
+            var payload = new Dictionary<string, string>()
+            {
+                { "aud", audience },
+                { "exp", exp.ToString(CultureInfo.InvariantCulture) },
+                { "iss", issuer },
+                { "jti", Guid.NewGuid().ToString() },
+                { "nbf", nbf.ToString(CultureInfo.InvariantCulture) },
+                { "sub", issuer }
+            };
+
+            RSACng rsa = certificate.GetRSAPrivateKey() as RSACng;
+
+            //alg represents the desired signing algorithm, which is SHA-256 in this case
+            //kid represents the certificate thumbprint
+            var header = new Dictionary<string, string>()
+            {
+              { "alg", "RS256"},
+              { "kid", Encode(certificate.GetCertHash()) }
+            };
+
+            string token = Encode(
+                Encoding.UTF8.GetBytes(JObject.FromObject(header).ToString())) + 
+                "." + 
+                Encode(Encoding.UTF8.GetBytes(JObject.FromObject(payload).ToString()));
+
+            string signature = Encode(
+                rsa.SignData(
+                    Encoding.UTF8.GetBytes(token),
+                    HashAlgorithmName.SHA256, 
+                    System.Security.Cryptography.RSASignaturePadding.Pkcs1));
+            return string.Concat(token, ".", signature);
+        }
+
+        private static string Encode(byte[] arg)
+        {
+            char Base64PadCharacter = '=';
+            char Base64Character62 = '+';
+            char Base64Character63 = '/';
+            char Base64UrlCharacter62 = '-';
+            char Base64UrlCharacter63 = '_';
+
+
+            string s = Convert.ToBase64String(arg);
+            s = s.Split(Base64PadCharacter)[0]; // RemoveAccount any trailing padding
+            s = s.Replace(Base64Character62, Base64UrlCharacter62); // 62nd char of encoding
+            s = s.Replace(Base64Character63, Base64UrlCharacter63); // 63rd char of encoding
+
+            return s;
+        }
+
     }
 }

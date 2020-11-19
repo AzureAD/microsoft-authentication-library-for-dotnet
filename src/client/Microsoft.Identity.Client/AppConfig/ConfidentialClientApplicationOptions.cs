@@ -5,7 +5,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Configuration options for a confidential client application
-    /// (Web app / Web API / daemon app). See https://aka.ms/msal-net/application-configuration
+    /// (web app / web API / daemon app). See https://aka.ms/msal-net/application-configuration
     /// </summary>
     public class ConfidentialClientApplicationOptions : ApplicationOptions
     {

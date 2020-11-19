@@ -11,7 +11,7 @@ using Microsoft.Identity.Json.Linq;
 namespace Microsoft.Identity.Client.Cache
 {
     /// <remarks>
-    /// The dictionary serializer does not handle Unknown Nodes
+    /// The dictionary serializer does not handle unknown nodes.
     /// </remarks>
     internal class TokenCacheDictionarySerializer : ITokenCacheSerializable
     {

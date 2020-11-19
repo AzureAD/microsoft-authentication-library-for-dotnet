@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Cache
         public DateTimeOffset? PasswordExpiresOn { get; internal set; }
 
         /// <summary>
-        /// Gets the url where the user can change the expiring password. The value can be null.
+        /// Gets the URL where the user can change the expiring password. The value can be null.
         /// </summary>
         [JsonProperty]
         public Uri PasswordChangeUrl { get; internal set; }

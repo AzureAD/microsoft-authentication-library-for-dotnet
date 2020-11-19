@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     /// If user provided metadata via <see cref="AbstractApplicationBuilder{T}.WithInstanceDiscoveryMetadata(string)"/> use it exclusively. Otherwise:
     /// 
     /// 1. Static cache (this is populated from the network)
-    /// 2. Well-known cache if all environments present in the token cache are known (this is hardcoded into msal)
+    /// 2. Well-known cache if all environments present in the token cache are known (this is hard-coded into MSAL)
     /// 3. Cache stored in token cache (Not currently implemented)
     /// 5. AAD discovery endpoint 
     /// 6. If going to the network fails with an error different than "invalid_instance" (i.e.authority validation failed), use the well-known instance metadata entry for the given authority
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:
 
-                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority");
+                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
                     return await GetMetadataEntryAsync(authority, requestContext).ConfigureAwait(false);
 
                 default:
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 // ADFS and B2C do not support instance discovery 
                 case AuthorityType.Adfs:
                 case AuthorityType.B2C:
-                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority");
+                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
                     return CreateEntryForSingleAuthority(authorityUri);
 
                 default:
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             {
                 if (!requestContext.ServiceBundle.Config.AuthorityInfo.ValidateAuthority)
                 {
-                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery as validate authority is set to false.");
+                    requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery as validate authority is set to false. ");
                     return CreateEntryForSingleAuthority(authorityUri);
                 }
 
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 }
 
                 string message =
-                    "[Instance Discovery] Instance Discovery failed. Potential cause: no network connection or discovery endpoint is busy. See exception below. MSAL will continue without network instance metadata.";
+                    "[Instance Discovery] Instance Discovery failed. Potential cause: no network connection or discovery endpoint is busy. See exception below. MSAL will continue without network instance metadata. ";
 
                 requestContext.Logger.WarningPii(message + " Authority: " + authorityUri, message);
                 requestContext.Logger.WarningPii(ex);

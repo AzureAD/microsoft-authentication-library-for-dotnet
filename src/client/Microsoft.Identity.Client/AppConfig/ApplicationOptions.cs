@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Tenant from which the application will allow users to sign it. This can be:
-        /// a domain associated with a tenant, a guid (tenant id), or a meta-tenant (e.g. consumers).
+        /// a domain associated with a tenant, a GUID (tenant id), or a meta-tenant (e.g. consumers).
         /// This property is mutually exclusive with <see cref="AadAuthorityAudience"/>. If both
         /// are provided, an exception will be thrown.
         /// </summary>
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specific instance in the case of Azure Active Directory.
-        /// It allows users to use the enum instead of the explicit url.
+        /// It allows users to use the enum instead of the explicit URL.
         /// This property is mutually exclusive with <see cref="Instance"/>. If both
         /// are provided, an exception will be thrown.
         /// </summary>
