@@ -382,7 +382,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var mockBrokerStrategy = Substitute.For<ISilentAuthRequestStrategy>();
                 var ar = new AuthenticationResult();
 
-                mockBrokerStrategy.ExecuteAsync(new CancellationToken()).Returns(ar);
+                mockClientStrategy.ExecuteAsync(default).ThrowsForAnyArgs(
+                    new MsalUiRequiredException(MsalError.CurrentBrokerAccount, "msg"));
+                mockBrokerStrategy.ExecuteAsync(default).Returns(ar);
                 _acquireTokenSilentParameters.Account = PublicClientApplication.OperatingSystemAccount;
                 var silentRequest = new SilentRequest(
                     harness.ServiceBundle, 
@@ -395,8 +397,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
 
                 // Assert
-                Assert.AreEqual(result, ar);
-                await mockClientStrategy.DidNotReceiveWithAnyArgs().ExecuteAsync(default).ConfigureAwait(false);
+                Assert.AreEqual(ar, result);
             }
         }
 

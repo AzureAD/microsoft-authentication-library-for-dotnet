@@ -54,8 +54,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public AzureCloudInstance AzureCloudInstance { get; set; } = AzureCloudInstance.None;
 
-        /// <summary>
-        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens.
+
         /// This redirect URI needs to be registered in the app registration. See https://aka.ms/msal-net-register-app for
         /// details on which redirect URIs are defined by default by MSAL.NET and how to register them.
         /// Also use: <see cref="PublicClientApplicationBuilder.WithDefaultRedirectUri"/> which provides
