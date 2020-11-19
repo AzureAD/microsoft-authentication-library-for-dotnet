@@ -31,13 +31,13 @@ namespace Microsoft.Identity.Client.Cache
             {
                 if (rtItem == null)
                 {
-                    logger.Info("No refresh token available. Skipping writing to ADAL legacy cache.");
+                    logger.Info("No refresh token available. Skipping writing to ADAL legacy cache. ");
                     return;
                 }
 
                 if (!string.IsNullOrEmpty(rtItem.FamilyId))
                 {
-                    logger.Info("Not writing FRT in ADAL legacy cache");
+                    logger.Info("Not writing FRT in ADAL legacy cache. ");
                     return;
                 }
 
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Cache
         /// Algorithm to delete:
         ///
         /// DisplayableId cannot be null
-        /// Removal is scoped by enviroment and clientId;
+        /// Removal is scoped by environment and clientId;
         ///
         /// If accountId != null then delete everything with the same clientInfo
         /// otherwise, delete everything with the same displayableId
@@ -222,7 +222,6 @@ namespace Microsoft.Identity.Client.Cache
                         keysToRemove.Add(kvp.Key);
                     }
                 }
-
             }
 
             foreach (AdalTokenCacheKey key in keysToRemove)
@@ -268,10 +267,10 @@ namespace Microsoft.Identity.Client.Cache
                     filtered = true;
                 }
 
-                // We should filter at leasts by one criteria to ensure we retrun adequate RT
+                // We should filter at leasts by one criteria to ensure we return adequate RT
                 if (!filtered)
                 {
-                    logger.Warning("Could not filter ADAL entries by either UPN or unique ID, skipping.");
+                    logger.Warning("Could not filter ADAL entries by either UPN or unique ID, skipping. ");
                     return null;
                 }
 
@@ -302,6 +301,5 @@ namespace Microsoft.Identity.Client.Cache
 
             return null;
         }
-
     }
 }

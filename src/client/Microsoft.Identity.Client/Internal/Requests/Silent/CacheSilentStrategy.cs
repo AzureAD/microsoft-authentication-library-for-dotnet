@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
             else
             {
-                logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set");
+                logger.Info("Skipped looking for an Access Token because ForceRefresh or Claims were set. ");
             }
 
             // No AT or AT.RefreshOn > Now --> refresh the RT
@@ -71,21 +71,21 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 if (MsalError.BadToken.Equals(e.SubError, StringComparison.OrdinalIgnoreCase))
                 {
                     await CacheManager.TokenCacheInternal.RemoveAccountAsync(AuthenticationRequestParameters.Account, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
-                    logger.Warning("Failed to refresh access token because the refresh token is invalid, removing account from cache.");
+                    logger.Warning("Failed to refresh access token because the refresh token is invalid, removing account from cache. ");
                     throw;
                 }
 
                 bool isAadUnavailable = e.IsAadUnavailable();
 
-                logger.Warning($"Refreshing the RT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
+                logger.Warning($"Refreshing the RT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null} ");
 
                 if (cachedAccessTokenItem != null && isAadUnavailable)
                 {
-                    logger.Info("Returning existing access token. It is not expired, but should be refreshed.");
+                    logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
                     return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);
                 }
 
-                logger.Warning("Failed to refresh the RT and cannot use existing AT (expired or missing).");
+                logger.Warning("Failed to refresh the RT and cannot use existing AT (expired or missing). ");
                 throw;
             }
         }
@@ -168,12 +168,12 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             if (isFamilyMember.HasValue && !isFamilyMember.Value)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(
-                    "[FOCI] App is not part of the family, skipping FOCI.");
+                    "[FOCI] App is not part of the family, skipping FOCI. ");
 
                 return null;
             }
 
-            logger.Verbose("[FOCI] App is part of the family or unknown, looking for FRT");
+            logger.Verbose("[FOCI] App is part of the family or unknown, looking for FRT. ");
             var familyRefreshToken = await CacheManager.FindFamilyRefreshTokenAsync(TheOnlyFamilyId).ConfigureAwait(false);
             logger.Verbose("[FOCI] FRT found? " + (familyRefreshToken != null));
 
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     MsalTokenResponse frtTokenResponse = await RefreshAccessTokenAsync(familyRefreshToken, cancellationToken)
                         .ConfigureAwait(false);
 
-                    logger.Verbose("[FOCI] FRT refresh succeeded");
+                    logger.Verbose("[FOCI] FRT refresh succeeded. ");
                     return frtTokenResponse;
                 }
                 catch (MsalServiceException ex)
@@ -198,14 +198,14 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     if (MsalError.InvalidGrantError.Equals(ex?.ErrorCode, StringComparison.OrdinalIgnoreCase) &&
                         MsalError.ClientMismatch.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
                     {
-                        logger.Error("[FOCI] FRT refresh failed - client mismatch");
+                        logger.Error("[FOCI] FRT refresh failed - client mismatch. ");
                         return null;
                     }
 
                     // Rethrow failures to refresh the FRT, other than client_mismatch, because
                     // apps need to handle them in the same way they handle exceptions from refreshing the RT.
                     // For example, some apps have special handling for MFA errors.
-                    logger.Error("[FOCI] FRT refresh failed - other error");
+                    logger.Error("[FOCI] FRT refresh failed - other error. ");
                     throw;
 #endif
                 }
@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 msalTokenResponse.RefreshToken = msalRefreshTokenItem.Secret;
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                    "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead. ");
             }
 
             return msalTokenResponse;
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             var msalRefreshTokenItem = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
             if (msalRefreshTokenItem == null)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache. ");
 
                 throw new MsalUiRequiredException(
                     MsalError.NoTokensFoundError,
@@ -259,8 +259,6 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             };
 
             return dict;
-        }
-
-       
+        }       
     }
 }

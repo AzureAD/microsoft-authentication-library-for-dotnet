@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.SSHCertificates
         }
 
         /// <summary>
-        /// Instructs AAD to return an SSH certificate instead of a Bearer token. Attempts to retrive
+        /// Instructs AAD to return an SSH certificate instead of a Bearer token. Attempts to retrieve
         /// the certificate from the token cache, and if one is not found, attempts to acquire one silently, 
         /// using the refresh token. See https://aka.ms/msal-net-ssh for details.
         /// </summary>

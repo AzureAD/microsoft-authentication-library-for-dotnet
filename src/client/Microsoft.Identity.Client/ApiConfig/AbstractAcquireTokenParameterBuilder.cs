@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Base class for builders of token requests, which attempt to acquire a token
-    /// based on the provided parameters
+    /// based on the provided parameters.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class AbstractAcquireTokenParameterBuilder<T>
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client
         internal IServiceBundle ServiceBundle { get; }
 
         /// <summary>
-        /// Default constructor for AbstractAcquireTokenParameterBuilder
+        /// Default constructor for AbstractAcquireTokenParameterBuilder.
         /// </summary>
         protected AbstractAcquireTokenParameterBuilder() { }
 
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="cancellationToken">Cancellation token. See <see cref="CancellationToken"/> </param>
         /// <returns>Authentication result containing a token for the requested scopes and parameters
-        /// set in the builder</returns>
+        /// set in the builder.</returns>
         /// <remarks>Cancellation is not guaranteed, it is best effort. If the operation reaches a point of no return, e.g.
         /// tokens are acquired and written to the cache, the task will complete even if cancellation was requested.
         /// Do not rely on cancellation tokens for strong consistency.</remarks>
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
         /// Executes the Token request asynchronously.
         /// </summary>
         /// <returns>Authentication result containing a token for the requested scopes and parameters
-        /// set in the builder</returns>
+        /// set in the builder.</returns>
         public Task<AuthenticationResult> ExecuteAsync()
         {
             return ExecuteAsync(CancellationToken.None);
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
         /// to create scopes for legacy applications which used to expose OAuth2 permissions.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         protected T WithScopes(IEnumerable<string> scopes)
         {
             CommonParameters.Scopes = scopes;
@@ -81,12 +81,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request.
         /// </summary>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority
         /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
         {
             CommonParameters.ExtraQueryParameters = extraQueryParameters ?? 
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client
         /// as well as https://aka.ms/msal-net-claim-challenge.
         /// </summary>
         /// <param name="claims">A string with one or multiple claims.</param>
-        /// <returns>The builder to chain .With methods</returns>
+        /// <returns>The builder to chain .With methods.</returns>
         public T WithClaims(string claims)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithClaims);
@@ -110,12 +110,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request.
         /// </summary>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
-        /// The string needs to be properly URL-encdoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The string needs to be properly URL-encoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// </param>
-        /// <returns></returns>
+        /// <returns>The builder to chain .With methods.</returns>
         public T WithExtraQueryParameters(string extraQueryParameters)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithExtraQueryParameters);
@@ -131,13 +131,13 @@ namespace Microsoft.Identity.Client
         /// at the application constructor narrows down the selection to a specific tenant.
         /// This does not change the configured value in the application. This is specific
         /// to applications managing several accounts (like a mail client with several mailboxes).
-        /// See https://aka.ms/msal-net-application-configuration
+        /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="authorityUri">Uri for the authority. In the case when the authority URI is 
         /// a known Azure AD URI, this setting needs to be consistent with what is declared in 
-        /// the application registration portal</param>
+        /// the application registration portal.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAuthority);
@@ -158,10 +158,10 @@ namespace Microsoft.Identity.Client
         /// Adds a known Azure AD authority to the application to sign-in users from a single
         /// organization (single tenant application) specified by its tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="cloudInstanceUri">Azure Cloud instance</param>
-        /// <param name="tenantId">Guid of the tenant from which to sign-in users</param>
+        /// <param name="cloudInstanceUri">Azure Cloud instance.</param>
+        /// <param name="tenantId">GUID of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(
             string cloudInstanceUri,
             Guid tenantId,
@@ -186,8 +186,8 @@ namespace Microsoft.Identity.Client
         /// organization (single tenant application) described by its domain name. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="cloudInstanceUri">Uri to the Azure Cloud instance (for instance
-        /// <c>https://login.microsoftonline.com)</c></param>
-        /// <param name="tenant">domain name associated with the tenant from which to sign-in users</param>
+        /// <c>https://login.microsoftonline.com)</c>.</param>
+        /// <param name="tenant">Tenant Id associated with the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <remarks>
         /// <paramref name="tenant"/> can also contain the string representation of a GUID (tenantId),
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client
         /// it's recommended to use another override (<see cref="WithAuthority(AzureCloudInstance, Guid, bool)"/>
         /// and <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </remarks>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(
             string cloudInstanceUri,
             string tenant,
@@ -221,10 +221,10 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
-        /// worldwide cloud, Azure German Cloud, US government ...)</param>
-        /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
+        /// worldwide cloud, Azure German Cloud, US government ...).</param>
+        /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
@@ -246,11 +246,10 @@ namespace Microsoft.Identity.Client
         /// name or tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
-        /// worldwide cloud, Azure German Cloud, US government ...)</param>
-        /// <param name="tenant">Domain name associated with the Azure AD tenant from which
+        /// worldwide cloud, Azure German Cloud, US government ...).</param>
+        /// <param name="tenant">Tenant Id of the tenant from which to sign-in users. This can also be a GUID.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// to sign-in users. This can also be a guid</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
@@ -271,12 +270,12 @@ namespace Microsoft.Identity.Client
         /// the cloud instance and the sign-in audience. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
-        /// worldwide cloud, Azure German Cloud, US government ...)</param>
+        /// worldwide cloud, Azure German Cloud, US government ...).</param>
         /// <param name="authorityAudience">Sign-in audience (one AAD organization,
         /// any work and school accounts, or any work and school accounts and Microsoft personal
-        /// accounts</param>
+        /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAuthority);
@@ -295,9 +294,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="authorityAudience">Sign-in audience (one AAD organization,
         /// any work and school accounts, or any work and school accounts and Microsoft personal
-        /// accounts</param>
+        /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAuthority);
@@ -311,12 +310,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs
+        /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs.
         /// </summary>
-        /// <param name="authorityUri">Authority URL for an ADFS server</param>
+        /// <param name="authorityUri">Authority URL for an ADFS server.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <remarks>MSAL.NET will only support ADFS 2019 or later.</remarks>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithAdfsAuthority);
@@ -338,8 +337,8 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-b2c-specificities
         /// </summary>
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
-        /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>).
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithB2CAuthority(string authorityUri)
         {
             CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithB2CAuthority);
@@ -355,7 +354,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Sets the correlation id to be used in the authentication request.
         /// </summary>
-        /// <param name="correlationId">correlation id of the authentication request</param>
+        /// <param name="correlationId">Correlation id of the authentication request.</param>
         /// <returns></returns>
         public T WithCorrelationId(Guid correlationId)
         {

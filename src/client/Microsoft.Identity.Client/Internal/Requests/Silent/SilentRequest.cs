@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 if (AuthenticationRequestParameters.Account == null)
                 {
-                    _logger.Verbose("No account passed to AcquireTokenSilent");
+                    _logger.Verbose("No account passed to AcquireTokenSilent. ");
                     throw new MsalUiRequiredException(
                        MsalError.UserNullError,
                        MsalErrorMessage.MsalUiRequiredMessage,
@@ -61,16 +61,16 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 }
 
                 _logger.Verbose("Attempting to acquire token using using local cache...");
-                return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-          
+                return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);          
+
             }
             catch (MsalException ex)
             {
-                _logger.Verbose("Token cache could not satisfy silent request");
+                _logger.Verbose("Token cache could not satisfy silent request. ");
 
                 if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
                 {
-                    _logger.Info("Attempting to use broker instead");
+                    _logger.Info("Attempting to use broker instead. ");
                     return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                 }
 

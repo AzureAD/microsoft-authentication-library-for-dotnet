@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
     ///     that are only used for AcquireToken?
     /// </summary>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
     public sealed class GetAuthorizationRequestUrlParameterBuilder :
         AbstractConfidentialClientAcquireTokenParameterBuilder<GetAuthorizationRequestUrlParameterBuilder>

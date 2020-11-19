@@ -3,7 +3,6 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client

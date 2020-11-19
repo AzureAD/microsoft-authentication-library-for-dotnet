@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
         PromptNeverFailed,
 
         /// <summary>
-        /// An AcquireTokenSilent call failed. This is ussually part of the pattern 
+        /// An AcquireTokenSilent call failed. This is usually part of the pattern 
         /// of calling AcquireTokenSilent for getting a token from the cache, followed by an a different
         /// AcquireToken call for getting a token from AAD. See the error message for details. 
         /// See https://aka.ms/msal-net-UiRequiredException for details.

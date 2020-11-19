@@ -14,10 +14,10 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
-    /// MSAL should only interact with the cache though this object. It is reponsible for firing cache notifications.
+    /// MSAL should only interact with the cache though this object. It is responsible for firing cache notifications.
     /// Flows should only perform (at most) 2 cache accesses: one to read data and one to write tokens. Reading data multiple times 
-    /// (e.g. read all ATs, read all RTs) should not refresh the cache from disk because of perf impact.
-    /// Write operations are still the responsability of TokenCache.
+    /// (e.g. read all ATs, read all RTs) should not refresh the cache from disk because of performance impact.
+    /// Write operations are still the responsibility of TokenCache.
     /// </summary>
     internal class CacheSessionManager : ICacheSessionManager
     {
