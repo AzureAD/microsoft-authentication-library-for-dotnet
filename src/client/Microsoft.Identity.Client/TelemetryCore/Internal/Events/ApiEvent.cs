@@ -6,6 +6,7 @@ using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Constants;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -22,6 +23,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public const string LoginHintKey = EventNamePrefix + "login_hint";
         public const string IsAccessTokenCacheHitKey = EventNamePrefix + "at_cache_hit";
         public const string RegionDiscoveredKey = EventNamePrefix + "region_discovered";
+        public const string RegionSourceKey = EventNamePrefix + "region_source";
 
         public enum ApiIds
         {
@@ -157,6 +159,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         {
             get => this.ContainsKey(RegionDiscoveredKey) ? this[RegionDiscoveredKey] : null;
             set => this[RegionDiscoveredKey] = value;
+        }
+
+        public int RegionSource
+        {
+            get => this.ContainsKey(RegionSourceKey) ? 
+                (int)Enum.Parse(typeof(RegionSource), this[RegionSourceKey]) : 0;
+            set => this[RegionSourceKey] = (value).ToString(CultureInfo.InvariantCulture);
         }
     }
 }
