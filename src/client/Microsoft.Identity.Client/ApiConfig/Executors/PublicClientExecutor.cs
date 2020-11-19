@@ -25,6 +25,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             throw new NotImplementedException();
         }
 
+        public void OnError(MsalAndroid.Exception.MsalException p0)
+        {
+            throw new NotImplementedException();
+        }
+
         public void OnSuccess(MsalAndroid.IAuthenticationResult result)
         {
             Result = result;

@@ -25,7 +25,7 @@
 
 
   
-  <add-node path="//package[@name='com.microsoft.identity.client']">
+  <!--<add-node path="//package[@name='com.microsoft.identity.client']">
     <class
       abstract="false"
       deprecated="not deprecated"
@@ -1033,6 +1033,6 @@
           type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
       </method>
     </interface>
-  </add-node>
+  </add-node>-->
 
 </metadata>
