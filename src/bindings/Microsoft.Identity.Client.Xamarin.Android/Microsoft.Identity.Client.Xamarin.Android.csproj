@@ -56,10 +56,10 @@
     <TransformFile Include="Transforms\EnumMethods.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Identity.Client.Xamarin.Android.Common\Microsoft.Identity.Client.Xamarin.Android.Common.csproj">
-      <Project>{7a226c33-7d93-4556-9343-9be208a62551}</Project>
-      <Name>Microsoft.Identity.Client.Xamarin.Android.Common</Name>
-    </ProjectReference>
+    <EmbeddedReferenceJar Include="Jars\common-3.0.7-sources.jar" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedJar Include="Jars\classes.jar" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.Bindings.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

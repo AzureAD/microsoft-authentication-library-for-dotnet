@@ -8,6 +8,8 @@
   
   -->
 
+  <!--<remove-node path="//class/implements[contains(@name, '.internal')]" />-->
+  
   <attr path="/api/package[@name='com.microsoft.identity.client']/class[@name='AcquireTokenParameters.Builder']/method[@name='self' and count(parameter)=0]"
         name="managedReturn"
   >Java.Lang.Object</attr>
@@ -880,8 +882,52 @@
     </class>
   </add-node>
 
-  <!--<add-node path="//package[@name='com.microsoft.identity.client']">
-      <interface
+  <add-node path="//package[@name='com.microsoft.identity.client']">
+    <class
+    abstract="false"
+    deprecated="not deprecated"
+    jni-extends="Lcom/microsoft/identity/common/exception/BaseException;"
+    extends="com.microsoft.identity.common.exception.BaseException"
+    extends-generic-aware="com.microsoft.identity.common.exception.BaseException"
+    final="false"
+    name="MsalException"
+    jni-signature="Lcom/microsoft/identity/client/exception/MsalException;"
+    source-file-name="MsalException.java"
+    static="false"
+    visibility="public">
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="getErrorCode"
+        native="false"
+        return="java.lang.String"
+        jni-return="Ljava/lang/String;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="()Ljava/lang/String;" />
+      <method
+        abstract="false"
+        deprecated="not deprecated"
+        final="false"
+        name="getMessage"
+        native="false"
+        return="java.lang.String"
+        jni-return="Ljava/lang/String;"
+        static="false"
+        synchronized="false"
+        visibility="public"
+        bridge="false"
+        synthetic="false"
+        jni-signature="()Ljava/lang/String;" />
+    </class>
+  </add-node>
+  
+  <add-node path="//package[@name='com.microsoft.identity.client']">
+    <interface
       abstract="true"
       deprecated="not deprecated"
       final="false"
@@ -987,6 +1033,6 @@
           type-generic-aware="com.microsoft.identity.client.exception.MsalClientException" />
       </method>
     </interface>
-  </add-node>-->
+  </add-node>
 
 </metadata>

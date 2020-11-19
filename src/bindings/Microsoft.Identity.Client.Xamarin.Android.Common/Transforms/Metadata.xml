@@ -7,12 +7,14 @@
   <remove-node path="/api/package[@name='android.support.v4.content']/class[@name='CursorLoader']/method[@name='loadInBackground']" />
   -->
 
-  <attr path="/api/package[@name='com.microsoft.identity.common.internal.broker']/class[@name='BrokerResultFuture']/method[@name='get' and count(parameter)=0]"
+  <!--<attr path="/api/package[@name='com.microsoft.identity.common.internal.broker']/class[@name='BrokerResultFuture']/method[@name='get' and count(parameter)=0]"
       name="managedReturn"
   >Java.Lang.Object</attr>
 
   <attr path="/api/package[@name='com.microsoft.identity.common.internal.broker']/class[@name='BrokerResultFuture']/method[@name='get' and count(parameter)=2 and parameter[1][@type='long'] and parameter[2][@type='java.util.concurrent.TimeUnit']]"
     name="managedReturn"
-  >Java.Lang.Object</attr>
+  >Java.Lang.Object</attr>-->
+  
+  <remove-node path="//package[contains(@name, '.internal')]" />
   
 </metadata>
