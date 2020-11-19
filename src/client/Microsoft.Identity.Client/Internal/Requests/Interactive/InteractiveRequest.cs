@@ -14,7 +14,6 @@ using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-
     /// <summary>
     /// This class decides the workflow of an interactive request. The business rules are: 
     /// 
@@ -23,7 +22,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     /// 1.2. If this fails, e.g. if broker is not installed, the use a web view (goto 2)
     /// 
     /// 2. Use a webview and get an auth code and look at the auth code
-    /// 2.1. If the auth code has a special format, showing that a broker is needed then. Invoke the broker flow (step 1) with a broker installation url
+    /// 2.1. If the auth code has a special format, showing that a broker is needed then. Invoke the broker flow (step 1) with a broker installation URL
     /// 2.2. Otherwise exchange the auth code for tokens (normal authorize_code grant)
     /// </summary>
     internal class InteractiveRequest : RequestBase
@@ -103,21 +102,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (_requestParams.IsBrokerConfigured)
             {
-                _logger.Info("Broker is configured. Starting broker flow without knowing the broker installation app link.");
+                _logger.Info("Broker is configured. Starting broker flow without knowing the broker installation app link. ");
 
                 MsalTokenResponse tokenResponse = await FetchTokensFromBrokerAsync(
-                    null, // we don't have an installation uri yet
+                    null, // we don't have an installation URI yet
                     cancellationToken)
                     .ConfigureAwait(false);
 
                 // if we don't get back a result, then continue with the WebUi 
                 if (tokenResponse != null)
                 {
-                    _logger.Info("Broker attempt completed successfully");
+                    _logger.Info("Broker attempt completed successfully. ");
                     return tokenResponse;
                 }
 
-                _logger.Info("Broker attempt did not complete, most likely because the broker is not installed. Attempting to use a browser / web ui");
+                _logger.Info("Broker attempt did not complete, most likely because the broker is not installed. Attempting to use a browser / web UI. ");
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
@@ -130,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var result = await authorizationFetcher.FetchAuthCodeAndPkceVerifierAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            _logger.Info("An authorization code was retrieved from the /authorize endpoint.");
+            _logger.Info("An authorization code was retrieved from the /authorize endpoint. ");
             string authCode = result.Item1;
             string pkceCodeVerifier = result.Item2;
 
@@ -139,7 +138,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await RunBrokerWithInstallUriAsync(brokerInstallUri, cancellationToken).ConfigureAwait(false);
             }
 
-            _logger.Info("Exchanging the auth code for tokens");
+            _logger.Info("Exchanging the auth code for tokens. ");
             var authCodeExchangeComponent =
                 _authCodeExchangeComponentOverride ??
                 new AuthCodeExchangeComponent(
@@ -154,9 +153,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> RunBrokerWithInstallUriAsync(string brokerInstallUri, CancellationToken cancellationToken)
         {
-            _logger.Info(
-                                "Based on the auth code, the broker flow is required. " +
-                                "Starting broker flow knowing the broker installation app link.");
+            _logger.Info("Based on the auth code, the broker flow is required. " + 
+                "Starting broker flow knowing the broker installation app link. ");
 
             cancellationToken.ThrowIfCancellationRequested();
 

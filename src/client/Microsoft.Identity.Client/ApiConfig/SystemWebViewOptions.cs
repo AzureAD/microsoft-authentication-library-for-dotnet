@@ -91,8 +91,8 @@ namespace Microsoft.Identity.Client
 #if NET_CORE || DESKTOP || NETSTANDARD
 
         /// <summary>
-        /// Use Microsoft Edge to navigate to the given uri. On non-windows platforms it uses 
-        /// whatever browser is the default
+        /// Use Microsoft Edge to navigate to the given URI. On non-windows platforms it uses 
+        /// whatever browser is the default.
         /// </summary>
         public static async Task OpenWithEdgeBrowserAsync(Uri uri)
         {
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
 
 
         /// <summary>
-        /// Use Microsoft Edge Chromium to navigate to the given uri. Requires the browser to be installed.
+        /// Use Microsoft Edge Chromium to navigate to the given URI. Requires the browser to be installed.
         /// On Linux, uses the default system browser instead, as Edge is not available.
         /// </summary>
         public static async Task OpenWithChromeEdgeBrowserAsync(Uri uri)

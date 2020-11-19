@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
-
     /// <summary>
     /// Throttling is the action through which MSAL blocks applications from making repeated 
     /// bad requests to the server. This works by MSAL detecting certain conditions when the server
@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
     /// 
     /// Throttling occurs in the following conditions:
     /// <list type="bullet">
-    /// <item>Afetr receving an RetryAfter header</item>
+    /// <item>After receiving an RetryAfter header</item>
     /// <item>After receiving 429, 5xx HTTP status.</item>    
     /// </list>
     /// This class manages the throttling providers and is itself a provider

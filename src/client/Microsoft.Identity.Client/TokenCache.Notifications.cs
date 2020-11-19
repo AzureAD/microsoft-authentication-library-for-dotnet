@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
         /// member of the cache is <c>true</c></param>
-        /// <remarks>In the case where the delegate is used to serialize the cache entierely (not just a row), it might
+        /// <remarks>In the case where the delegate is used to serialize the cache entirely (not just a row), it might
         /// want to call <see cref="Serialize()"/></remarks>
 #if !SUPPORTS_CUSTOM_CACHE
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]

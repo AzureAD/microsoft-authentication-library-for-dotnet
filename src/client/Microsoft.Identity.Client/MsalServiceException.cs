@@ -135,8 +135,8 @@ namespace Microsoft.Identity.Client
 
         #region Public Properties
         /// <summary>
-        /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c> in the inner
-        /// <see cref="System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
+        /// Gets the status code returned from HTTP layer. This status code is either the <c>HttpStatusCode</c> in the inner
+        /// <see cref="System.Net.Http.HttpRequestException"/> response or the NavigateError Event Status Code in a browser based flow (See
         /// http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
         /// You can use this code for purposes such as implementing retry logic or error investigation.
         /// </summary>
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
         /// If your application is a <see cref="IPublicClientApplication"/>, you should just call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
         /// and add the <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims(string)"/> modifier.
         /// </description></item>
-        /// <item>><description>If your application is a <see cref="IConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize
+        /// <item>><description>If your application is a <see cref="IConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an HTTP unauthorize
         /// exception with a message containing the claims</description></item>
         /// </list>
         /// For more details see https://aka.ms/msal-net-claim-challenge
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client
 
 
         /// <summary>
-        /// Contains the http headers from the server response that indicated an error.
+        /// Contains the HTTP headers from the server response that indicated an error.
         /// </summary>
         /// <remarks>
         /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the
@@ -184,8 +184,7 @@ namespace Microsoft.Identity.Client
         #endregion
 
         /// <remarks>
-        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work
-        /// first.
+        /// The suberror should not be exposed for public consumption yet, as STS needs to do some work first.
         /// </remarks>
         internal string SubError { get; set; }
 

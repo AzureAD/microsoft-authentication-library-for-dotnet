@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         private static SemaphoreSlim s_readyForResponse = new SemaphoreSlim(0);
 
         private static MsalTokenResponse s_androidBrokerTokenResponse = null;
-        //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and reinjected into the response at the end.
+        //Since the correlation ID is not returned from the broker response, it must be stored at the beginning of the authentication call and re-injected into the response at the end.
         private static string s_correlationId;
         private readonly AndroidBrokerHelper _brokerHelper;
         private readonly ICoreLogger _logger;

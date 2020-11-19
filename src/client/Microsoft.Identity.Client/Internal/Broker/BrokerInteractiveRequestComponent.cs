@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             {
                 if (string.IsNullOrEmpty(_optionalBrokerInstallUrl))
                 {
-                    _logger.Info("Broker is required but not installed. An app uri has not been provided.");
+                    _logger.Info("Broker is required but not installed. An app URI has not been provided. ");
                     return null;
                 }
 
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             if (!string.IsNullOrEmpty(msalTokenResponse.AccessToken))
             {
                 _logger.Info(
-                    "Success. Broker response contains an access token");
+                    "Success. Broker response contains an access token. ");
                 return;
             }
 

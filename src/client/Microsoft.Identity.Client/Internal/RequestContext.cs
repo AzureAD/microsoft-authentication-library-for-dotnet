@@ -34,6 +34,5 @@ namespace Microsoft.Identity.Client.Internal
                 ServiceBundle.HttpTelemetryManager,
                 eventToStart);
         }
-
     }
 }

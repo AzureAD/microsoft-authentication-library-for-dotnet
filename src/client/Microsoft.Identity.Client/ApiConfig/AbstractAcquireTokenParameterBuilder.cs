@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client
         /// <paramref name="tenant"/> can also contain the string representation of a GUID (tenantId),
         /// or even <c>common</c>, <c>organizations</c> or <c>consumers</c> but in this case
         /// it's recommended to use another override (<see cref="WithAuthority(AzureCloudInstance, Guid, bool)"/>
-        /// and <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"./>
+        /// and <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </remarks>
         /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(

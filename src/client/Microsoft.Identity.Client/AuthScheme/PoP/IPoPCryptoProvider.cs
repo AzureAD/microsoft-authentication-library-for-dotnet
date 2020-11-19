@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     /// <summary>
     /// An abstraction over an the asymmetric key operations needed by POP, that encapsulates a pair of 
     /// public and private keys and some typical crypto operations.
-    /// All symetric operations are SHA256
+    /// All symmetric operations are SHA256.
     /// </summary>
     /// <remarks>
     /// Important: The 2 methods on this interface will be called at different times but MUST return details of 
@@ -24,12 +24,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     public interface IPoPCryptoProvider
     {
         /// <summary>
-        /// The cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
+        /// The canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
         /// </summary>
         string CannonicalPublicKeyJwk { get; }
 
         /// <summary>
-        /// Algorithm used to sign proof of possesion request. 
+        /// Algorithm used to sign proof of possession request. 
         /// See https://docs.microsoft.com/en-us/azure/key-vault/keys/about-keys#signverify for ECD
         /// See https://docs.microsoft.com/en-us/azure/key-vault/keys/about-keys#signverify-1 for RSA
         /// </summary>
