@@ -34,7 +34,12 @@ namespace Microsoft.Identity.Client
         /// or setting the Agent.
         /// </summary>
         /// <param name="httpClientFactory">HTTP client factory</param>
-        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.</remarks>
+        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.
+        /// Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
+        /// the httpClient had the possibility of throwing an exception stating "Properties can only be modified before sending the first request".
+        /// MSAL's httpClient will no longer throw this exception after 4.19.0 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.19.0)
+        /// see (https://aka.ms/msal-httpclient-info) for more information.
+        /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory)
         {
