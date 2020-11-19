@@ -30,7 +30,6 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
 
             // newline chars must be followed by spaces
             Assert.ThrowsException<FormatException>(() => httpRequest.Headers.Add("x-client-last-telemetry", strangeErrorCode));
-
             
             string santized = HttpHeaderSantizer.SantizeHeader(strangeErrorCode);
             httpRequest.Headers.Add("x-client-last-telemetry", santized);
