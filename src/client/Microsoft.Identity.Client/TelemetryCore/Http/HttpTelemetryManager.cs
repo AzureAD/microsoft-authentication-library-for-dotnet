@@ -64,7 +64,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 if (!firstFailure)
                     errors.Append(",");
 
-                errors.Append(ev.ApiErrorCode);
+                errors.Append(
+                    // error codes come from the server / broker and can sometimes be full blown sentences,
+                    // with punctuation that is illegal in an HTTP Header 
+                    HttpHeaderSantizer.SantizeHeader(ev.ApiErrorCode));
 
                 string correlationId = ev[MsalTelemetryBlobEventNames.MsalCorrelationIdConstStrKey];
                 string apiId = ev[MsalTelemetryBlobEventNames.ApiIdConstStrKey];
@@ -120,7 +123,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ApiIdConstStrKey, out string apiId);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.ForceRefreshId, out string forceRefresh);
             eventInProgress.TryGetValue(MsalTelemetryBlobEventNames.RegionDiscovered, out string regionDiscovered);
-
+            
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
                 $"|{regionDiscovered}";
@@ -136,6 +139,5 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
             return TelemetryConstants.One;
         }
-
     }
 }
