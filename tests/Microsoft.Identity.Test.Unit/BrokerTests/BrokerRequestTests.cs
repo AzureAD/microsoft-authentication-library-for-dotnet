@@ -364,7 +364,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public async Task SpecialAccount_CallsBrokerSilentAuth_Async()
+        public void SpecialAccount_CallsBrokerSilentAuth()
         {
             using (var harness = CreateBrokerHelper())
             {
@@ -387,12 +387,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 mockBrokerStrategy.ExecuteAsync(default).Returns(ar);
                 _acquireTokenSilentParameters.Account = PublicClientApplication.OperatingSystemAccount;
                 var silentRequest = new SilentRequest(
-                    harness.ServiceBundle, 
-                    _parameters, 
-                    _acquireTokenSilentParameters, 
-                    mockClientStrategy, 
+                    harness.ServiceBundle,
+                    _parameters,
+                    _acquireTokenSilentParameters,
+                    mockClientStrategy,
                     mockBrokerStrategy);
-                
+
                 // Act
                 var result = silentRequest.ExecuteTestAsync(new CancellationToken()).Result;
 

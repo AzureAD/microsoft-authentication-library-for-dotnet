@@ -29,9 +29,9 @@ namespace Microsoft.Identity.Client
         {
         }
 
-        private const string CurrentBrokerAccountDescriptor = "current_broker_account";
-        private static IAccount s_currentBrokerAccount = 
-            new Account(CurrentBrokerAccountDescriptor, null, null, null);
+        private const string CurrentOSAccountDescriptor = "current_os_account";
+        private static IAccount s_currentOsAccount = 
+            new Account(CurrentOSAccountDescriptor, null, null, null);
 
         /// <summary>
         /// Currently only the Windows broker is able to login with the current user, see https://aka.ms/msal-net-wam for details.
@@ -44,13 +44,13 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                return s_currentBrokerAccount;
+                return s_currentOsAccount;
             }
         }
 
-        internal static bool IsCurrentBrokerAccount(IAccount account)
+        internal static bool IsOperatingSystemAccount(IAccount account)
         {
-            return string.Equals(account?.HomeAccountId?.Identifier, CurrentBrokerAccountDescriptor, StringComparison.Ordinal);
+            return string.Equals(account?.HomeAccountId?.Identifier, CurrentOSAccountDescriptor, StringComparison.Ordinal);
         }
 
         /// <summary>

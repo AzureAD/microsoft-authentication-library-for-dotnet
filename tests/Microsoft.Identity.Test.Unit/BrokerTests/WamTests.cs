@@ -574,6 +574,30 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public async Task RemoveAccount_DoesNothing_WhenAccountDoesNotMatchWAM_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                //var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+                var requestParams = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityHomeTenant);
+                requestParams.Account = new Account("a.b", "c", "env");
+
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+
+                _webAccountProviderFactory.GetAccountProviderAsync("organizations").
+                    ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+
+
+                // Act Assert
+                await _wamBroker.RemoveAccountAsync(harness.ServiceBundle.Config, requestParams.Account)
+                    .ConfigureAwait(false);
+
+            }
+        }
+
+        [TestMethod]
         public void TestDefaultAccountPluginSelection()
         {
             _webAccountProviderFactory.IsDefaultAccountMsaAsync().Returns(true);
