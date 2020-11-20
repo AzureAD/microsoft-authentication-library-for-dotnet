@@ -525,7 +525,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 var webAccount = await FindWamAccountForMsalAccountAsync(provider, wamPlugin, account, null, appConfig.ClientId)
                     .ConfigureAwait(false);
                 _logger.Info("Found a webAccount? " + (webAccount != null));
-                await webAccount.SignOutAsync();
+
+                await webAccount?.SignOutAsync();
             }
         }
 
