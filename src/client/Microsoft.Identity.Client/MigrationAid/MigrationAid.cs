@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// In MSAL.NET 1.x was an identifier for the user in the guest tenant.
         /// From MSAL.NET 2.x, use <see cref="IAccount.HomeAccountId"/><see cref="AccountId.Identifier"/> to get
-        /// the user identifier (globally unique accross tenants). See https://aka.ms/msal-net-2-released for more details.
+        /// the user identifier (globally unique across tenants). See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client
         /// </description></item>
         /// </list>
         /// These default URIs could change in the future.
-        /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
+        /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the web application / web API.
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
         /// you then need to add the reply URL of the deployed application in the application registration portal.
@@ -288,7 +288,7 @@ namespace Microsoft.Identity.Client
         /// </description></item>
         /// </list>
         /// These default URIs could change in the future.
-        /// In Microsoft.Identity.Client.ConfidentialClientApplication, this can be the URL of the Web application / Web API.
+        /// In Microsoft.Identity.Client.ConfidentialClientApplication, this can be the URL of the web application / web API.
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
         /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
@@ -390,7 +390,7 @@ namespace Microsoft.Identity.Client
     {
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logeed-in in Windows.
+        /// Flag to enable authentication with the user currently logged-in on Windows.
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -486,7 +486,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
+        /// <param name="extraScopesToConsent">scopes that you can request the end user to consent upfront, in addition to the scopes for the protected web API
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
@@ -509,7 +509,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
+        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected web API
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
@@ -613,7 +613,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
+        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected web API
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
@@ -637,7 +637,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
+        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected web API
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
@@ -670,7 +670,7 @@ namespace Microsoft.Identity.Client
             System.Security.SecureString securePassword);
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
+        /// Acquires a security token on a device without a web browser, by letting the user authenticate on
         /// another device. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -692,8 +692,8 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback);
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
-        /// another device, with possiblity of passing extra parameters. This is done in two steps:
+        /// Acquires a security token on a device without a web browser, by letting the user authenticate on
+        /// another device, with possibility of passing extra parameters. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
@@ -718,8 +718,8 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback);
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
-        /// another device, with possiblity of cancelling the token acquisition before it times out. This is done in two steps:
+        /// Acquires a security token on a device without a web browser, by letting the user authenticate on
+        /// another device, with possibility of cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
@@ -741,8 +741,8 @@ namespace Microsoft.Identity.Client
             CancellationToken cancellationToken);
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
-        /// another device, with possiblity of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
+        /// Acquires a security token on a device without a web browser, by letting the user authenticate on
+        /// another device, with possibility of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
@@ -808,7 +808,7 @@ namespace Microsoft.Identity.Client
     {
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logged-in in Windows.
+        /// Flag to enable authentication with the user currently logged-in on Windows.
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -998,7 +998,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
+        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected web API
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
@@ -1025,7 +1025,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
+        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront, in addition to the scopes for the protected web API
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
@@ -1147,7 +1147,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
+        /// <param name="extraScopesToConsent">scopes that you can request the end user to consent upfront, in addition to the scopes for the protected web API
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
@@ -1176,7 +1176,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">scopes that you can request the end user to consent upfront, in addition to the scopes for the protected Web API
+        /// <param name="extraScopesToConsent">scopes that you can request the end user to consent upfront, in addition to the scopes for the protected web API
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
@@ -1214,7 +1214,7 @@ namespace Microsoft.Identity.Client
 
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
+        /// Acquires a security token on a device without a web browser, by letting the user authenticate on
         /// another device. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
@@ -1238,8 +1238,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
-        /// another device, with possiblity of passing extra parameters. This is done in two steps:
+        /// Acquires a security token on a device without a web browser, by letting the user authenticate on
+        /// another device, with possibility of passing extra parameters. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
@@ -1266,8 +1266,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
-        /// another device, with possiblity of cancelling the token acquisition before it times out. This is done in two steps:
+        /// Acquires a security token on a device without a web browser, by letting the user authenticate on
+        /// another device, with possibility of cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
@@ -1292,8 +1292,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
-        /// another device, with possiblity of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
+        /// Acquires a security token on a device without a web browser, by letting the user authenticate on
+        /// another device, with possibility of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
@@ -1429,7 +1429,7 @@ namespace Microsoft.Identity.Client
 
 #if SUPPORTS_CONFIDENTIAL_CLIENT
     /// <summary>
-    /// Component to be used with confidential client applications like Web Apps/API.
+    /// Component to be used with confidential client applications like web apps/APIs.
     /// </summary>
     public partial interface IConfidentialClientApplication
     {
@@ -1532,9 +1532,9 @@ namespace Microsoft.Identity.Client
 #endif
 
     /// <summary>
-    /// Component to be used with confidential client applications like Web Apps/API.
+    /// Component to be used with confidential client applications like web apps/APIs.
     /// This component supports Subject Name + Issuer authentication in order to help, in the future,
-    /// Azure AD certificates rollover
+    /// Azure AD certificates rollover.
     /// </summary>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -1547,7 +1547,7 @@ namespace Microsoft.Identity.Client
         /// in Azure AD: this method will send the public certificate to Azure AD
         /// along with the token request, so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
-        /// (either via portal or powershell/CLI operation)
+        /// (either via portal or PowerShell/CLI operation).
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
@@ -1562,7 +1562,7 @@ namespace Microsoft.Identity.Client
         /// in Azure AD: this method will send the public certificate to Azure AD
         /// along with the token request, so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
-        /// (either via portal or powershell/CLI operation)
+        /// (either via portal or PowerShell/CLI operation)
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
@@ -1675,8 +1675,8 @@ namespace Microsoft.Identity.Client
 #endif
 
         /// <summary>
-        /// [V2 API] Acquires an access token for this application (usually a Web API) from the authority configured in the application, in order to access
-        /// another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of).
+        /// [V2 API] Acquires an access token for this application (usually a web API) from the authority configured in the application, in order to access
+        /// another downstream protected web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of).
         /// This confidential client application was itself called with a token which will be provided in the
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.
         /// </summary>
@@ -1694,8 +1694,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// [V2 API] Acquires an access token for this application (usually a Web API) from a specific authority, in order to access
-        /// another downstream protected Web API on behalf of a user (See https://aka.ms/msal-net-on-behalf-of).
+        /// [V2 API] Acquires an access token for this application (usually a web API) from a specific authority, in order to access
+        /// another downstream protected web API on behalf of a user (See https://aka.ms/msal-net-on-behalf-of).
         /// This confidential client application was itself called with a token which will be provided in the
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.
         /// </summary>
@@ -1717,8 +1717,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// [V2 API] Acquires an access token for this application (usually a Web API) from the authority configured in the application, in order to access
-        /// another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of).
+        /// [V2 API] Acquires an access token for this application (usually a web API) from the authority configured in the application, in order to access
+        /// another downstream protected web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of).
         /// This confidential client application was itself called with a token which will be provided in the
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.
         /// This override sends the certificate, which helps certificate rotation in Azure AD
@@ -1736,8 +1736,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// [V2 API] Acquires an access token for this application (usually a Web API) from a specific authority, in order to access
-        /// another downstream protected Web API on behalf of a user (See https://aka.ms/msal-net-on-behalf-of).
+        /// [V2 API] Acquires an access token for this application (usually a web API) from a specific authority, in order to access
+        /// another downstream protected web API on behalf of a user (See https://aka.ms/msal-net-on-behalf-of).
         /// This confidential client application was itself called with a token which will be provided in the
         /// This override sends the certificate, which helps certificate rotation in Azure AD
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.
@@ -1759,7 +1759,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// [V2 API] Acquires a security token from the authority configured in the app using the authorization code previously received from the STS. It uses
         /// the OAuth 2.0 authorization code flow (See https://aka.ms/msal-net-authorization-code).
-        /// It's usually used in Web Apps (for instance ASP.NET / ASP.NET Core Web apps) which sign-in users, and therefore receive an authorization code.
+        /// It's usually used in web apps (for instance ASP.NET / ASP.NET Core web apps) which sign-in users, and therefore receive an authorization code.
         /// This method does not lookup the token cache, but stores the result in it, so it can be looked up using other methods
         /// such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/>.
         /// </summary>
@@ -1781,7 +1781,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">scopes requested to access a protected API. For this flow (client credentials), the scopes
         /// should be of the form "{ResourceIdUri/.default}" for instance <c>https://management.azure.net/.default</c> or, for Microsoft
         /// Graph, <c>https://graph.microsoft.com/.default</c> as the requested scopes are really defined statically at application registration
-        /// in the portal, and cannot be overriden in the application. See also </param>
+        /// in the portal, and cannot be overridden in the application. See also </param>
         /// <returns>Authentication result containing the token of the user for the requested scopes</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use AcquireTokenForClient instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
@@ -1797,7 +1797,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API. For this flow (client credentials), the scopes
         /// should be of the form "{ResourceIdUri/.default}" for instance <c>https://management.azure.net/.default</c> or, for Microsoft
         /// Graph, <c>https://graph.microsoft.com/.default</c> as the requested scopes are really defined statically at application registration
-        /// in the portal, and cannot be overriden in the application</param>
+        /// in the portal, and cannot be overridden in the application</param>
         /// <param name="forceRefresh">If <c>true</c>, API will ignore the access token in the cache and attempt to acquire new access token using client credentials.
         /// This override can be used in case the application knows that conditional access policies changed</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
@@ -1815,7 +1815,7 @@ namespace Microsoft.Identity.Client
         /// in Azure AD: this method will send the public certificate to Azure AD
         /// along with the token request, so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
-        /// (either via portal or powershell/CLI operation)
+        /// (either via portal or PowerShell/CLI operation)
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
@@ -1834,7 +1834,7 @@ namespace Microsoft.Identity.Client
         /// in Azure AD: this method will send the public certificate to Azure AD
         /// along with the token request, so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
-        /// (either via portal or powershell/CLI operation)
+        /// (either via portal or PowerShell/CLI operation)
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>

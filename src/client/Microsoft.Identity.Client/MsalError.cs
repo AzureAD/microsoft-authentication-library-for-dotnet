@@ -37,11 +37,11 @@ namespace Microsoft.Identity.Client
         /// that the user of your application signs-in and accepts consent. If your application is a <see cref="T:ConfidentialClientApplication"/>.:
         /// <list type="bullet">
         /// <item>
-        /// If it's a Web App you should have previously called <see cref="IConfidentialClientApplication.AcquireTokenByAuthorizationCode(System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// If it's a web app you should have previously called <see cref="IConfidentialClientApplication.AcquireTokenByAuthorizationCode(System.Collections.Generic.IEnumerable{string}, string)"/>
         /// as described in https://aka.ms/msal-net-authorization-code. You need to make sure that you have requested the right scopes. For details
         /// See https://github.com/Azure-Samples/ms-identity-aspnetcore-webapp-tutorial
         /// </item>
-        /// <item>This error should not happen in Web APIs</item>
+        /// <item>This error should not happen in web APIs</item>
         /// </list>
         /// </summary>
         public const string NoTokensFoundError = "no_tokens_found";
