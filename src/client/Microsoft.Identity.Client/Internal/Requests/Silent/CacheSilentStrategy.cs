@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private void ThrowIfCurrentBrokerAccount()
         {
-            if (PublicClientApplication.IsCurrentBrokerAccount(AuthenticationRequestParameters.Account))
+            if (PublicClientApplication.IsOperatingSystemAccount(AuthenticationRequestParameters.Account))
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(
                     "OperatingSystemAccount is only supported by some browsers");

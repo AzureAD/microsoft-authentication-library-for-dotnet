@@ -526,7 +526,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     .ConfigureAwait(false);
                 _logger.Info("Found a webAccount? " + (webAccount != null));
 
-                await webAccount?.SignOutAsync();
+                if (webAccount != null)
+                {
+                    await webAccount.SignOutAsync();
+                }
             }
         }
 
