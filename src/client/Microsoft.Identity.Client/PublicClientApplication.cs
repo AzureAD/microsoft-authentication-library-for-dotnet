@@ -23,6 +23,11 @@ namespace Microsoft.Identity.Client
             PublicClientApplication = publicClientApplication;
         }
 
+        public void OnError(MsalAndroid.Exception.MsalException p0)
+        {
+            
+        }
+
         //public void OnError(MsalAndroid.) { }
     }
 #endif
