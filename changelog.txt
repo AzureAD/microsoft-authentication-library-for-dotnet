@@ -18,6 +18,7 @@ Bug Fixes:
 **Due to changes with the v3 B2C responses, MSAL was crashing due to a new unexpected error code format**. MSAL .NET now sanitizes the error codes for HTTP header transport. See issue [#1881](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1881) for details. 
 **MSAL .NET now throws `MsalUiRequiredException` for more error codes coming from the Android broker**. See issue [#2140](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2140) for details.
 **On iOS, the SSO extension makes background requests, and the NSUrlConnection HttpClient cancels requests when the app moves to the background**. MSAL .NET now sets the `BypassBackgroundSessionCheck` to false. See issue [#2164](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2164) for details.
+**Fix badly named header on WsTrust**. See issue [#2193](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2193) for details.
 
 4.22.0
 ============
