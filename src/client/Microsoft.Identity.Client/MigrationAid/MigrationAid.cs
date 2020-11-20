@@ -390,8 +390,8 @@ namespace Microsoft.Identity.Client
     {
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logged-in on Windows.
-        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// Flag to enable authentication with the user currently signed-in on Windows.
+        /// When set to true, the application will try to connect to the corporate network using Windows Integrated Authentication.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
@@ -777,7 +777,7 @@ namespace Microsoft.Identity.Client
         /// Enterprise Authentication, Private Networks (Client and Server), User Account Information
         /// </remarks>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently signed-in user in Windows</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes);
@@ -790,7 +790,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication.
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
-        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently signed-in user in Windows</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
@@ -808,8 +808,8 @@ namespace Microsoft.Identity.Client
     {
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logged-in on Windows.
-        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// Flag to enable authentication with the user currently signed-in on Windows.
+        /// When set to true, the application will try to connect to the corporate network using Windows Integrated Authentication.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
@@ -1349,7 +1349,7 @@ namespace Microsoft.Identity.Client
         /// Supported on .net desktop and UWP
         /// </remarks>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently signed-in user in Windows</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
@@ -1365,7 +1365,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication.
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
-        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently signed-in user in Windows</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(

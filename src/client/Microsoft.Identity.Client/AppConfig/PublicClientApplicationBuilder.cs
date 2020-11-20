@@ -147,9 +147,9 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logged-in on Windows.
+        /// Flag to enable authentication with the user currently signed-in on Windows.
         /// </summary>
-        /// <param name="useCorporateNetwork">When set to true, the application will try to connect to the corporate network using windows integrated authentication.</param>
+        /// <param name="useCorporateNetwork">When set to true, the application will try to connect to the corporate network using Windows Integrated Authentication.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
         public PublicClientApplicationBuilder WithUseCorporateNetwork(bool useCorporateNetwork)
