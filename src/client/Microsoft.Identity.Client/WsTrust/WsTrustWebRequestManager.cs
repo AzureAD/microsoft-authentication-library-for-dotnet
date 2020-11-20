@@ -61,13 +61,12 @@ namespace Microsoft.Identity.Client.WsTrust
         {
             var headers = new Dictionary<string, string>
             {
-                { "ContentType", "application/soap+xml" },
                 { "SOAPAction", (wsTrustEndpoint.Version == WsTrustVersion.WsTrust2005) ? XmlNamespace.Issue2005.ToString() : XmlNamespace.Issue.ToString() }
             };
 
             var body = new StringContent(
                 wsTrustRequest,
-                Encoding.UTF8, headers["ContentType"]);
+                Encoding.UTF8, "application/soap+xml");
 
             HttpResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, headers, body, requestContext.Logger).ConfigureAwait(false);
 
