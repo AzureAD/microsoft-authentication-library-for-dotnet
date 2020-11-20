@@ -29,6 +29,11 @@ steps:
   inputs:
     version: 2.x
 
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 5.x'
+  inputs:
+    version: 5.x
+
 # Run pre-build code analysis (policheck, credscan, etc)
 - template: template-prebuild-code-analysis.yaml
 
