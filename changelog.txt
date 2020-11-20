@@ -2,10 +2,11 @@
 ============
 
 New Features:
-**Windows Account Manager (WAM) is now available on .NET classic**. See issue [#2181](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2181) for details and [#2182](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2182), which includes a new static `OperatingSystemAccount` property on the `PublicClientApplication` to use the user signed-in on the Windows machine. More information here: https://aka.ms/msal-net-wam.
 **MSAL .NET no longer includes the ref assemblies, which are unsupported by older tools and custom build systems**. See issue [#2100](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2100) for details.
 
 Experimental Features:
+https://aka.ms/msal-net-experimental-features
+**Windows Account Manager (WAM) is now available on .NET classic**. See issue [#2181](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2181) for details and [#2182](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2182), which includes a new static `OperatingSystemAccount` property on the `PublicClientApplication` to use the user signed-in on the Windows machine. More information here: https://aka.ms/msal-net-wam.
 **Proof of Possession (Signed HTTP Request) for confidential clients now support key management**. See issue [#2013](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2013) and https://aka.ms/msal-net-pop for details.
 **Proof of Possession (Signed HTTP Request) has been removed for public clients**.
 **MSAL .NET includes a fallback in case calling the local instance metadata service fails due to an unsupported version**. See issue [#2055](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2055) for details.
