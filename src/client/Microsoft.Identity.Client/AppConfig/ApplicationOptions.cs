@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public AzureCloudInstance AzureCloudInstance { get; set; } = AzureCloudInstance.None;
 
-
+        /// <summary>
         /// This redirect URI needs to be registered in the app registration. See https://aka.ms/msal-net-register-app for
         /// details on which redirect URIs are defined by default by MSAL.NET and how to register them.
         /// Also use: <see cref="PublicClientApplicationBuilder.WithDefaultRedirectUri"/> which provides
