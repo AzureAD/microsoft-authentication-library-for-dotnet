@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (fromServer == null || 
                 AuthenticationRequestParameters?.Account?.HomeAccountId == null ||
-                PublicClientApplication.IsCurrentBrokerAccount(AuthenticationRequestParameters?.Account))
+                PublicClientApplication.IsOperatingSystemAccount(AuthenticationRequestParameters?.Account))
             {
                 return;
             }

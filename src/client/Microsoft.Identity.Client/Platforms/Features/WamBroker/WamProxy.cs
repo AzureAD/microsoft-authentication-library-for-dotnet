@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 if (findResult.Status != FindAllWebAccountsStatus.Success)
                 {
                     var error = findResult.ProviderError;
-                    _logger.Error($"[WAM Proxy] WebAuthenticationCoreManager.FindAllAccountsAsync failed " +
+                    _logger.Info($"[WAM Proxy] WebAuthenticationCoreManager.FindAllAccountsAsync failed " +
                         $" with error code {error.ErrorCode} error message {error.ErrorMessage} and status {findResult.Status}");
 
                     return Enumerable.Empty<WebAccount>().ToList();
