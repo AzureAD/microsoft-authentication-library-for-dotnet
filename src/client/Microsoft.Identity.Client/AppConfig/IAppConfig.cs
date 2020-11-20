@@ -124,8 +124,8 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logged-in on Windows.
-        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// Flag to enable authentication with the user currently signed-in on Windows.
+        /// When set to true, the application will try to connect to the corporate network using Windows Integrated Authentication.
         /// </summary>
         bool UseCorporateNetwork { get; }
 #endif // WINDOWS_APP
