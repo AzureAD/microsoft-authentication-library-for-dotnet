@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal;
+using System.Linq;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
@@ -34,6 +35,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                     {
                         ExpectedUrl = wsTrustAddress,
                         ExpectedMethod = HttpMethod.Post,
+                        AdditionalRequestValidation = (req) =>
+                        {
+                            Assert.IsFalse(req.Headers.Contains("ContentType"));
+                            var soapActionValues = req.Headers.GetValues("SOAPAction");
+                            var soapAction = soapActionValues.Single();
+                            Assert.AreEqual(XmlNamespace.Issue.ToString(), soapAction);
+
+                            // Content Type is set on the content, not on the request!
+                            var contentType = req.Content.Headers.ContentType;
+                            Assert.AreEqual("application/soap+xml", contentType.MediaType);
+                            Assert.AreEqual("utf-8", contentType.CharSet);
+                        },
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
                             Content = new StringContent(
