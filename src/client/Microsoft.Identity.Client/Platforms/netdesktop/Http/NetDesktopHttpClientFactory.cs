@@ -10,6 +10,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Http
 {
     internal class NetDesktopHttpClientFactory : IMsalHttpClientFactory
     {
+        //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
         private static readonly Lazy<HttpClient> _httpClient = new Lazy<HttpClient>(() => InitializeClient());
 
         public HttpClient GetHttpClient()
