@@ -11,7 +11,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Integration.net45.HeadlessTests
+namespace Microsoft.Identity.Test.Integration.Win8
 {
     [TestClass]
     public class DeviceAuthenticationTests
