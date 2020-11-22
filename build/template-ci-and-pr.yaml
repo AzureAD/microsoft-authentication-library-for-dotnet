@@ -34,5 +34,8 @@ steps:
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
 
-# Publish build artifacts
-- template : template-publish-packages-and-symbols.yaml
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: packages'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)\**\DeviceAuth\**\*'
+    ArtifactName: 'drop'
