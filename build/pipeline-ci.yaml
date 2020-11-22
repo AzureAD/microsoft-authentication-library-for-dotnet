@@ -26,8 +26,7 @@ stages:
     pool:
       name: DevEx Win8 Automation
       demands: agent.name -equals MSIDWIN802
-      - msbuild
-      - visualstudio
+
     steps:
 
     - template: template-ci-and-pr.yaml
