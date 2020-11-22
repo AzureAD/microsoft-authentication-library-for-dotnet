@@ -24,8 +24,8 @@ stages:
   jobs:
   - job: 'BuildAndTest' 
     pool:
-      vmImage: 'windows-latest'
-      demands:
+      name: DevEx Win8 Automation
+      demands: agent.name -equals MSIDWIN802
       - msbuild
       - visualstudio
     steps:
