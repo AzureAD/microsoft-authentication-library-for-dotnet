@@ -37,5 +37,5 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: packages'
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)\**\DeviceAuth\**\*'
+    PathtoPublish: '$(System.ArtifactsDirectory)\**\DeviceAuth\**\*'
     ArtifactName: 'drop'
