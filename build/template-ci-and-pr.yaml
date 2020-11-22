@@ -33,3 +33,6 @@ steps:
 - template: template-run-integration-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
+
+# Publish build artifacts
+- template : template-publish-packages-and-symbols.yaml
