@@ -11,5 +11,5 @@ steps:
 - task: VSTest@2
   displayName: 'DeviceAuthTests'
   inputs:
-    testAssemblyVer2: '(System.ArtifactsDirectory)/drop/DeviceAuth/**/*'
+    testAssemblyVer2: '(System.ArtifactsDirectory)/drop/DeviceAuth/bin/debug/Microsoft.Identity.Test.Integration.Win8.dll'
     diagnosticsEnabled: True
