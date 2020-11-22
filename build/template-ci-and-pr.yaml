@@ -33,9 +33,3 @@ steps:
 - template: template-run-integration-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: packages'
-  inputs:
-    PathtoPublish: '$(System.ArtifactsDirectory)\**\DeviceAuth\**\*'
-    ArtifactName: 'drop'
