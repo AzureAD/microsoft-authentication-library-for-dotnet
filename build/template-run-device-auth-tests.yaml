@@ -10,5 +10,5 @@ steps:
 - task: VSTest@2
   displayName: 'DeviceAuthTests'
   inputs:
-    testAssemblyVer2: '(System.ArtifactsDirectory)'
+    testAssemblyVer2: '$(System.ArtifactsDirectory)\drop\*\*'
     diagnosticsEnabled: True
