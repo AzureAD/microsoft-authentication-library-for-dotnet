@@ -23,6 +23,7 @@ stages:
 - stage:
   jobs:
   - job: 'BuildAndTest' 
+  pool:  
     vmImage: 'windows-latest'
       demands:
       - msbuild
