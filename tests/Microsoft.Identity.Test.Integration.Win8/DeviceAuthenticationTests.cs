@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -25,15 +24,8 @@ namespace Microsoft.Identity.Test.Integration.Win8
 
         public async Task PKeyAuthNonInteractiveTestAsync()
         {
-            //if (Environment.OSVersion.Version.Major > 10)
-            //{
-            //    //This test cannot run on Windows 10 or greater
-            //    Assert.Inconclusive();
-            //}
-
             try
             {
-                Trace.WriteLine("Test is starting...");
                 //Arrange
                 var labResponse = await LabUserHelper.GetSpecificUserAsync(_deviceAuthuser).ConfigureAwait(false);
                 var factory = new HttpSnifferClientFactory();
@@ -42,13 +34,11 @@ namespace Microsoft.Identity.Test.Integration.Win8
                     .WithHttpClientFactory(factory)
                     .Build();
 
-                Trace.WriteLine("Lab response found. User is : {0}", labResponse.User.Upn);
                 //Act
                 var authResult = msalPublicClient.AcquireTokenByUsernamePassword(new[] { "user.read" }, _deviceAuthuser, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
                 .WithClaims(JObject.Parse(_claims).ToString())
                 .ExecuteAsync(CancellationToken.None).Result;
 
-                Trace.WriteLine("AuthResult done: {0}", authResult?.Account?.Username);
                 //Assert
                 Assert.IsNotNull(authResult);
                 Assert.IsNotNull(authResult.AccessToken);
@@ -63,12 +53,10 @@ namespace Microsoft.Identity.Test.Integration.Win8
 
                 Assert.IsTrue(!string.IsNullOrEmpty(AuthHeader));
                 Assert.IsTrue(AuthHeader.Contains("PKeyAuth"));
-                Trace.WriteLine("AuthHeader: {0}", AuthHeader);
-                Trace.WriteLine("Test is done...");
             }
             catch(Exception ex)
             {
-                Assert.Fail("Device Auth test failed. " + ex.Message);
+                Assert.Fail("Device Auth test failed. " + ex.Message + " Inner Exception: " + ex.InnerException.Message);
             }
         }
     }
