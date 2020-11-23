@@ -31,11 +31,15 @@ namespace Microsoft.Identity.Test.Integration.Win8
                 var factory = new HttpSnifferClientFactory();
                 var msalPublicClient = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
+                    .WithAuthority("https://login.microsoftonline.com/organizations/")
                     .WithHttpClientFactory(factory)
                     .Build();
 
                 //Act
-                var authResult = msalPublicClient.AcquireTokenByUsernamePassword(new[] { "user.read" }, _deviceAuthuser, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+               var authResult = msalPublicClient.AcquireTokenByUsernamePassword(
+                    new[] { "user.read" },
+                    labResponse.User.Upn,
+                    new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
                 .WithClaims(JObject.Parse(_claims).ToString())
                 .ExecuteAsync(CancellationToken.None).Result;
 
