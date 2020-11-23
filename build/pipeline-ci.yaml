@@ -47,7 +47,7 @@ stages:
 
     steps:
 
-    # Install keyvault secrets
+    # Install KeyVault secrets
     - template: template-install-keyvault-secrets.yaml
 
     - template: template-run-device-auth-tests.yaml
