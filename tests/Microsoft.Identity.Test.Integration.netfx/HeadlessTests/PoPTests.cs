@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task BearerAndPoP_CanCoexist_Async()
         {
             // Arrange
-            PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
             popConfig.HttpMethod = HttpMethod.Get;
 
             //SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
@@ -135,9 +135,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private async Task AcquireAndAcquireSilent_MultipleKeys_Async(LabResponse labResponse)
         {
-            var popConfig1 = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig1 = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
             popConfig1.HttpMethod = HttpMethod.Get;
-            var popConfig2 = new PopAuthenticationConfiguration(new Uri("https://www.bing.com/path3/path4?queryParam5=c&queryParam6=d"));
+            var popConfig2 = new PoPAuthenticationConfiguration(new Uri("https://www.bing.com/path3/path4?queryParam5=c&queryParam6=d"));
             popConfig2.HttpMethod = HttpMethod.Post;
 
             var user = labResponse.User;
@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         public async Task RunTestWithClientSecretAsync(string clientID, string authority, string secret)
         {
-            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
             popConfig.HttpMethod = HttpMethod.Get;
 
             var confidentialClientAuthority = authority;
@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
             popConfig.HttpMethod = HttpMethod.Get;
 
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             //RSA provider
-            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
             popConfig.HttpMethod = HttpMethod.Get;
 
@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             //ECD Provider
-            var popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+            var popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
             popConfig.PopCryptoProvider = new ECDCertificatePopCryptoProvider();
             popConfig.HttpMethod = HttpMethod.Post;
 
@@ -334,7 +334,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// This calls a special endpoint that validates any POP token against a configurable HTTP request.
         /// The HTTP request is configured through headers.
         /// </summary>
-        private async Task VerifyPoPTokenAsync(string clientId, PopAuthenticationConfiguration popConfig, AuthenticationResult result)
+        private async Task VerifyPoPTokenAsync(string clientId, PoPAuthenticationConfiguration popConfig, AuthenticationResult result)
         {
             var httpClient = new HttpClient();
             HttpResponseMessage response;
