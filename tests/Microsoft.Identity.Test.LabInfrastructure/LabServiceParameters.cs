@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         MAMSPO
     }
 
-    public enum HomeDomain //Must add ".com" to end for lab queury
+    public enum HomeDomain //Must add ".com" to end for lab query
     {
         None,
         MsidLab2,
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         MsidLab4
     }
 
-    public enum HomeUPN //Must replace "_" with "@" add ".com" to end for lab queury
+    public enum HomeUPN //Must replace "_" with "@" add ".com" to end for lab query
     {
         None,
         GidLab_Msidlab2,

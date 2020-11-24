@@ -466,7 +466,7 @@ namespace Microsoft.Identity.Json.Linq
 
                 return o;
             }
-        }
+      }
 
         /// <summary>
         /// Creates a <see cref="JObject"/> from an object.
