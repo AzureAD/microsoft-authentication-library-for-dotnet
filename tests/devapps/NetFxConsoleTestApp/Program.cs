@@ -270,7 +270,7 @@ namespace NetFx
 
                             if (s_usePoP)
                             {
-                                var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) {HttpMethod = s_popMethod };
+                                var popConfig = new PoPAuthenticationConfiguration(new Uri(PoPUri)) {HttpMethod = s_popMethod };
                                 silentBuilder = silentBuilder
                                     .WithExtraQueryParameters(GetTestSliceParams())
                                     .WithProofOfPossession(popConfig);
@@ -305,7 +305,7 @@ namespace NetFx
                                     var silentBuilder = pca.AcquireTokenSilent(s_scopes, acc);
                                     if (s_usePoP)
                                     {
-                                        var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
+                                        var popConfig = new PoPAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
 
                                         silentBuilder = silentBuilder
                                             .WithExtraQueryParameters(GetTestSliceParams())
