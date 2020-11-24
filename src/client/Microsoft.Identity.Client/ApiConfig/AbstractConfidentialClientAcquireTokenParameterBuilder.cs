@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
         /// <item>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</item>
         /// </list>
         /// </remarks>
-        public T WithProofOfPossession(PopAuthenticationConfiguration popAuthenticationConfiguration)
+        public T WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
             if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
             {

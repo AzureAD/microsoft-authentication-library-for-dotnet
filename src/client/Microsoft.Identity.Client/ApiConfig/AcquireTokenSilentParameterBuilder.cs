@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
-        public AcquireTokenSilentParameterBuilder WithProofOfPossession(PopAuthenticationConfiguration popAuthenticationConfiguration)
+        public AcquireTokenSilentParameterBuilder WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
