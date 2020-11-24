@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     /// <summary>
     /// Wrapper for new lab service API
     /// </summary>
-    public class LabServiceApi : ILabService
+    public class LabServiceApi
     {
         private string _labAccessAppId;
         private string _labAccessClientSecret;
@@ -32,14 +32,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </summary>
         /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
         /// <returns>Users that match the given query parameters.</returns>
-        public async Task<LabResponse> GetLabResponseAsync(UserQuery query)
-        {
-            var response = await GetLabResponseFromApiAsync(query).ConfigureAwait(false);
 
-            return response;
-        }
-
-        private async Task<LabResponse> GetLabResponseFromApiAsync(UserQuery query)
+        public async Task<LabResponse> GetLabResponseFromApiAsync(UserQuery query)
         {
             //Fetch user
             string result = await RunQueryAsync(query).ConfigureAwait(false);
@@ -52,7 +46,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return CreateLabResponseFromResultStringAsync(result).Result;
         }
 
-        private async Task<LabResponse> CreateLabResponseFromResultStringAsync(string result)
+        internal async Task<LabResponse> CreateLabResponseFromResultStringAsync(string result)
         {
             LabUser[] userResponses = JsonConvert.DeserializeObject<LabUser[]>(result);
 
@@ -134,9 +128,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return await GetLabResponseAsync(uriBuilder.ToString()).ConfigureAwait(false);
         }
 
-        private async Task<string> GetLabResponseAsync(string address)
+        internal async Task<string> GetLabResponseAsync(string address)
         {
-            if (String.IsNullOrWhiteSpace(_labApiAccessToken))
+            if (string.IsNullOrWhiteSpace(_labApiAccessToken))
                 _labApiAccessToken = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret).ConfigureAwait(false);
 
             using (HttpClient httpClient = new HttpClient())
