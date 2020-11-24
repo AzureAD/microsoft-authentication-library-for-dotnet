@@ -16,6 +16,8 @@ namespace NetDesktopWinForms
 {
     public partial class Form1 : Form
     {
+        private readonly SynchronizationContext _syncContext;
+
 
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
@@ -24,7 +26,10 @@ namespace NetDesktopWinForms
             new ClientEntry() { Id = "655015be-5021-4afc-a683-a4223eb5d0e5", Name = "655015be-5021-4afc-a683-a4223eb5d0e5"}
         };
 
-        private static BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
+        private BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
+        private static IAccount s_nullAccount = new NullAccount();
+        private static AccountModel s_nullAccountModel = new AccountModel(s_nullAccount, "");
+        private static AccountModel s_osAccountModel = new AccountModel(PublicClientApplication.OperatingSystemAccount, "Default OS Account");
 
         public Form1()
         {
@@ -40,11 +45,15 @@ namespace NetDesktopWinForms
             //var accountBidingSource = new BindingSource();
             //accountBidingSource.DataSource = s_accounts;
 
+            s_accounts.Add(s_nullAccountModel);
+            s_accounts.Add(s_osAccountModel);
 
             cbxAccount.DataSource = s_accounts;
 
             cbxAccount.DisplayMember = "DisplayValue";
             cbxAccount.SelectedItem = null;
+
+            _syncContext = SynchronizationContext.Current;
         }
 
         public static readonly string UserCacheFile =
@@ -107,7 +116,7 @@ namespace NetDesktopWinForms
                 var pca = CreatePca();
                 AuthenticationResult result = await RunAtsAsync(pca).ConfigureAwait(false);
 
-                LogResult(result);
+                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
             }
             catch (Exception ex)
@@ -120,7 +129,7 @@ namespace NetDesktopWinForms
         private async Task<AuthenticationResult> RunAtsAsync(IPublicClientApplication pca)
         {
             string reqAuthority = pca.Authority;
-            
+
 
             string loginHint = GetLoginHint();
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
@@ -142,17 +151,18 @@ namespace NetDesktopWinForms
                         .ConfigureAwait(false);
             }
 
-            if (cbxAccount.SelectedIndex > 0)
+            if (cbxAccount.SelectedItem != null && 
+                cbxAccount.SelectedItem != s_nullAccount)
             {
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 // Today, apps using MSA-PT must manually target the correct tenant 
-                if ( IsMsaPassthroughConfigured() && acc.HomeAccountId.TenantId == "9188040d-6c67-4c5b-b112-36a304b66dad")
+                if (IsMsaPassthroughConfigured() && acc.HomeAccountId.TenantId == "9188040d-6c67-4c5b-b112-36a304b66dad")
                 {
                     reqAuthority = "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a";
                 }
 
-                Log($"ATS with IAccount for {acc?.Username ?? "null"}");
+                Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await pca.AcquireTokenSilent(GetScopes(), acc)
                     .WithAuthority(reqAuthority)
                     .ExecuteAsync()
@@ -189,7 +199,7 @@ namespace NetDesktopWinForms
         }
 
 
-        private void LogResult(AuthenticationResult ar)
+        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar)
         {
             string message =
 
@@ -205,6 +215,10 @@ namespace NetDesktopWinForms
 
             Log(message);
 
+            await _syncContext;
+
+            Log("Refreshing accounts");
+            await RefreshAccountsAsync().ConfigureAwait(true);
         }
 
         private void Log(string message)
@@ -222,7 +236,7 @@ namespace NetDesktopWinForms
                 var pca = CreatePca();
                 AuthenticationResult result = await RunAtiAsync(pca).ConfigureAwait(false);
 
-                LogResult(result);
+                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
             }
             catch (Exception ex)
@@ -242,7 +256,7 @@ namespace NetDesktopWinForms
             AuthenticationResult result = null;
 
             var builder = pca.AcquireTokenInteractive(GetScopes());
-                
+
 
             Prompt? prompt = GetPrompt();
             if (prompt.HasValue)
@@ -333,11 +347,17 @@ namespace NetDesktopWinForms
 
         private async void getAccountsBtn_Click(object sender, EventArgs e)
         {
+            await RefreshAccountsAsync().ConfigureAwait(false);
+        }
+
+        private async Task RefreshAccountsAsync()
+        {
             var pca = CreatePca();
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
 
             s_accounts.Clear();
-            s_accounts.Add(new AccountModel(new NullAccount()));
+            s_accounts.Add(s_nullAccountModel);
+            s_accounts.Add(s_osAccountModel);
 
             foreach (var acc in accounts)
             {
@@ -353,7 +373,6 @@ namespace NetDesktopWinForms
 
         private async void atsAtiBtn_Click(object sender, EventArgs e)
         {
-            var syncContext = SynchronizationContext.Current;
 
             var pca = CreatePca();
 
@@ -361,18 +380,18 @@ namespace NetDesktopWinForms
             {
                 var result = await RunAtsAsync(pca).ConfigureAwait(false);
 
-                LogResult(result);
+                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
             }
             catch (MsalUiRequiredException ex)
             {
-                await syncContext;
+                await _syncContext;
 
                 Log("UI required Exception! " + ex.ErrorCode + " " + ex.Message);
                 try
                 {
                     var result = await RunAtiAsync(pca).ConfigureAwait(false);
-                    LogResult(result);
+                    await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                 }
                 catch (Exception ex3)
                 {
@@ -443,7 +462,7 @@ namespace NetDesktopWinForms
                 .Single(m => m.Name == "Microsoft.Identity.Client.ITokenCacheInternal.OnAfterAccessAsync")
                 .Invoke(pca.UserTokenCache, new[] { argz });
 
-            await(task as Task).ConfigureAwait(false);
+            await (task as Task).ConfigureAwait(false);
         }
 
         private async void remoteAcc_click(object sender, EventArgs e)
@@ -475,18 +494,19 @@ namespace NetDesktopWinForms
         public string DisplayValue { get; }
         //public string IdValue => $"{_account.HomeAccountId.Identifier}";
 
-        public AccountModel(IAccount account)
+        public AccountModel(IAccount account, string displayValue = null)
         {
             Account = account;
             string env = string.IsNullOrEmpty(Account?.Environment) || Account.Environment == "login.microsoftonline.com" ?
-                "" : 
+                "" :
                 $"({Account.Environment})";
 
-            DisplayValue = $"{Account.Username} {env}";
+            DisplayValue = displayValue ?? $"{Account.Username} {env}";
         }
 
 
     }
+
 
     public class NullAccount : IAccount
     {

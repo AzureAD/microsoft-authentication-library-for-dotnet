@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         {
             var cca = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString()).WithClientSecret("some-secret").Build();
             MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => cca.AcquireTokenForClient(new[] { "scope" }).WithProofOfPosession(null).ExecuteAsync())
+                () => cca.AcquireTokenForClient(new[] { "scope" }).WithProofOfPossession(null).ExecuteAsync())
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.ExperimentalFeature, ex.ErrorCode);

@@ -270,10 +270,10 @@ namespace NetFx
 
                             if (s_usePoP)
                             {
-                                var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) {HttpMethod = s_popMethod };
+                                var popConfig = new PoPAuthenticationConfiguration(new Uri(PoPUri)) {HttpMethod = s_popMethod };
                                 silentBuilder = silentBuilder
                                     .WithExtraQueryParameters(GetTestSliceParams())
-                                    .WithProofOfPosession(popConfig);
+                                    .WithProofOfPossession(popConfig);
                             }
 
 
@@ -305,11 +305,11 @@ namespace NetFx
                                     var silentBuilder = pca.AcquireTokenSilent(s_scopes, acc);
                                     if (s_usePoP)
                                     {
-                                        var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
+                                        var popConfig = new PoPAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
 
                                         silentBuilder = silentBuilder
                                             .WithExtraQueryParameters(GetTestSliceParams())
-                                            .WithProofOfPosession(popConfig);
+                                            .WithProofOfPossession(popConfig);
                                     }
                                     return silentBuilder.ExecuteAsync();
                                 })
@@ -485,7 +485,7 @@ namespace NetFx
         {
             var httpClient = new HttpClient();
             HttpResponseMessage response;
-            var request = new System.Net.Http.HttpRequestMessage(HttpMethod.Get, GraphAPIEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Get, GraphAPIEndpoint);
             request.Headers.Add("Authorization", authHeader);
             response = await httpClient.SendAsync(request).ConfigureAwait(false);
 
@@ -518,7 +518,7 @@ namespace NetFx
         }
 
         /// <summary>
-        /// This calls a special endpoint that validates any POP token against a configurable http request.
+        /// This calls a special endpoint that validates any POP token against a configurable HTTP request.
         /// The HTTP request is configured through headers.
         /// </summary>
         private static async Task CallPoPVerificationAPIAsync(string authHeader)
