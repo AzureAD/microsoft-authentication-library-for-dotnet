@@ -14,7 +14,6 @@ using NSubstitute;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Client;
 using System.Threading;
-using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.Utils;
 using System.Threading.Tasks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -138,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 var provider = PoPProviderFactory.GetOrCreateProvider(testClock);
 
                 await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithProofOfPosession(popConfig)
+                    .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -155,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithProofOfPosession(popConfig)
+                    .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -172,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithProofOfPosession(popConfig)
+                    .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 

@@ -57,13 +57,13 @@ namespace Microsoft.Identity.Client
         /// <item>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</item>
         /// </list>
         /// </remarks>
-        public T WithProofOfPosession(PopAuthenticationConfiguration popAuthenticationConfiguration)
+        public T WithProofOfPossession(PopAuthenticationConfiguration popAuthenticationConfiguration)
         {
             if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
                     MsalError.ExperimentalFeature,
-                    MsalErrorMessage.ExperimentalFeature(nameof(WithProofOfPosession)));
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithProofOfPossession)));
             }
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
