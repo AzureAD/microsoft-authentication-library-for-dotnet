@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult result = await pca
                 .AcquireTokenForClient(s_keyvaultScope)
                 .WithExtraQueryParameters(GetTestSliceParams())
-                .WithProofOfPosession(popConfig)
+                .WithProofOfPossession(popConfig)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var result = await pca
                 .AcquireTokenForClient(s_keyvaultScope)
                 .WithExtraQueryParameters(GetTestSliceParams())
-                .WithProofOfPosession(popConfig1)
+                .WithProofOfPossession(popConfig1)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             result = await pca
                 .AcquireTokenSilent(s_keyvaultScope, accounts.Single())
-                .WithProofOfPosession(popConfig1)
+                .WithProofOfPossession(popConfig1)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Call some other Uri - the same pop assertion can be reused, i.e. no need to call Evo
             result = await pca
               .AcquireTokenSilent(s_keyvaultScope, accounts.Single())
-              .WithProofOfPosession(popConfig2)
+              .WithProofOfPossession(popConfig2)
               .ExecuteAsync()
               .ConfigureAwait(false);
 
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPosession(popConfig)
+                .WithProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.HttpMethod = HttpMethod.Get;
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPosession(popConfig)
+                .WithProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.HttpMethod = HttpMethod.Get;
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPosession(popConfig)
+                .WithProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.HttpMethod = HttpMethod.Post;
 
             var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                .WithProofOfPosession(popConfig)
+                .WithProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 

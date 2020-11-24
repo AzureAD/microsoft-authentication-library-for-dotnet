@@ -15,20 +15,20 @@ namespace Microsoft.Identity.Client.AppConfig
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-    public class PopAuthenticationConfiguration
+    public class PoPAuthenticationConfiguration
     {
         /// <summary>
         /// Constructs the configuration properties used to construct a proof of possession request
         /// </summary>
-        /// <param name="requestUri"></param>
-        public PopAuthenticationConfiguration(Uri requestUri)
+        /// <param name="requestUri"> The Uri of the protected resource which requires a PoP token. The PoP token will be cryptographically bound to it, i.e. to the host and path portions of this uri</param>
+        public PoPAuthenticationConfiguration(Uri requestUri)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
             RequestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
         }
 
         /// <summary>
-        /// An HTTP URI to the protected resource which requires a PoP token. The PoP token will be cryptographically bound to the request.
+        /// The Uri of the protected resource which requires a PoP token. The PoP token will be cryptographically bound to it, i.e. to the host and path portions of this uri
         /// </summary>
         public Uri RequestUri { get; }
 

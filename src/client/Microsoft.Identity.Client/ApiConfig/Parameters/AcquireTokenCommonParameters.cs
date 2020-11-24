@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
 
-        public PopAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
+        public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
 
 
         public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
