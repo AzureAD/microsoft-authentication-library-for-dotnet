@@ -201,7 +201,7 @@ Bug Fixes:
 
 **When migrating a Xamarin application from ADAL.NET to MSAL.NET and preserving the keychain, a CryptographicException can be thrown from the BrokerKeyHelper.** MSAL.NET now does the broker key keychain look up by Service and Account only. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1628).
 
-**WithProofOfPossession produces a token of type POP when it is expected to be PoP**. MSAL.NET will now produce a token of type PoP when WithProofOfPosession() is used. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1711).
+**WithProofOfPossession produces a token of type POP when it is expected to be PoP**. MSAL.NET will now produce a token of type PoP when WithProofOfPossession() is used. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1711).
 
 
 4.10.0
