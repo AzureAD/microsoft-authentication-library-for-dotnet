@@ -84,8 +84,13 @@ namespace Microsoft.Identity.Client.Cache
 
         #endregion
 
+        /// <remarks>
+        /// Possibly refreshes the internal cache by calling OnBeforeAccessAsync and OnAfterAccessAsync delegates.
+        /// </remarks>
         private async Task RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes cacheEventType)
         {
+            //if (TokenCacheInternal.HasBeforeAccessDelegates())
+            //{
             if (!_cacheRefreshedForRead)
             {
                 string telemetryId = _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId();
@@ -103,6 +108,7 @@ namespace Microsoft.Identity.Client.Cache
                         using (_requestParams.RequestContext.CreateTelemetryHelper(cacheEvent))
                         {
                             string key = SuggestedWebCacheKeyFactory.GetKeyFromRequest(_requestParams);
+
                             try
                             {
                                 var args = new TokenCacheNotificationArgs(
@@ -117,6 +123,8 @@ namespace Microsoft.Identity.Client.Cache
                             }
                             finally
                             {
+                                //if (TokenCacheInternal.HasAfterAccessDelegates())
+                                //{
                                 var args = new TokenCacheNotificationArgs(
                                    TokenCacheInternal,
                                    _requestParams.ClientId,
@@ -126,6 +134,7 @@ namespace Microsoft.Identity.Client.Cache
                                    hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                    suggestedCacheKey: key);
                                 await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                                //}
                             }
 
                             _cacheRefreshedForRead = true;
@@ -137,6 +146,7 @@ namespace Microsoft.Identity.Client.Cache
                     TokenCacheInternal.Semaphore.Release();
                 }
             }
+            //}
         }
     }
 }

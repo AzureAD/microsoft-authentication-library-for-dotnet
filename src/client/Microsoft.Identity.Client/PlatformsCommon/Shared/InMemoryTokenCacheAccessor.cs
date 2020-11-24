@@ -154,6 +154,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Get All Values
         public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
+            // return _accessTokenCacheDictionary.Select(kv => kv.Value);
+
             // perf: do not call ConcurrentDictionary.Values as it takes a lock
             List<MsalAccessTokenCacheItem> ats = new List<MsalAccessTokenCacheItem>();
             foreach (var kvp in _accessTokenCacheDictionary)
@@ -166,6 +168,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
+            // return _refreshTokenCacheDictionary.Select(kv => kv.Value);
+
             // perf: do not call ConcurrentDictionary.Values as it takes a lock
             List<MsalRefreshTokenCacheItem> rts = new List<MsalRefreshTokenCacheItem>();
             foreach (var kvp in _refreshTokenCacheDictionary)
@@ -178,6 +182,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
         {
+            // return _idTokenCacheDictionary.Select(kv => kv.Value);
+
             // perf: do not call ConcurrentDictionary.Values as it takes a lock
             List<MsalIdTokenCacheItem> ids = new List<MsalIdTokenCacheItem>();
             foreach (var kvp in _idTokenCacheDictionary)
@@ -190,6 +196,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
         {
+            // return _accountCacheDictionary.Select(kv => kv.Value);
+
             // perf: do not call ConcurrentDictionary.Values as it takes a lock
             List<MsalAccountCacheItem> accounts = new List<MsalAccountCacheItem>();
             foreach (var kvp in _accountCacheDictionary)
@@ -202,6 +210,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
+            // return _appMetadataDictionary.Select(kv => kv.Value);
+
             // perf: do not call ConcurrentDictionary.Values as it takes a lock
             List<MsalAppMetadataCacheItem> metadata = new List<MsalAppMetadataCacheItem>();
             foreach (var kvp in _appMetadataDictionary)

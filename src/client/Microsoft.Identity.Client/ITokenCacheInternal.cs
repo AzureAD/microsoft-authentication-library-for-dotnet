@@ -67,6 +67,10 @@ namespace Microsoft.Identity.Client
         Task OnBeforeAccessAsync(TokenCacheNotificationArgs args);
         Task OnBeforeWriteAsync(TokenCacheNotificationArgs args);
 
+        bool HasAfterAccessDelegates();
+        bool HasBeforeAccessDelegates();
+        bool HasBeforeWriteDelegates();
+
         bool IsApplicationCache { get; }
 
         /// <summary>

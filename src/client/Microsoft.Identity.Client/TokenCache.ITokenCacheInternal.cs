@@ -134,9 +134,13 @@ namespace Microsoft.Identity.Client
 
                 try
                 {
+                    //ITokenCacheInternal tokenCacheInternal = this;
+                    //if (tokenCacheInternal.HasBeforeAccessDelegates() || tokenCacheInternal.HasBeforeWriteDelegates())
+                    //{
+
                     await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
                     await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
-
+                    //}
                     if (msalAccessTokenCacheItem != null)
                     {
                         requestParams.RequestContext.Logger.Info("Saving AT in cache and removing overlapping ATs...");
@@ -189,16 +193,20 @@ namespace Microsoft.Identity.Client
                 }
                 finally
                 {
+                    //ITokenCacheInternal tokenCacheInternal = this;
+                    //if (tokenCacheInternal.HasAfterAccessDelegates())
+                    //{
                     var args2 = new TokenCacheNotificationArgs(
-                     this,
-                     ClientId,
-                     account,
-                     hasStateChanged: true,
-                     (this as ITokenCacheInternal).IsApplicationCache,
-                     (this as ITokenCacheInternal).HasTokensNoLocks(),
-                     suggestedCacheKey: suggestedWebCacheKey);
+                        this,
+                        ClientId,
+                        account,
+                        hasStateChanged: true,
+                        (this as ITokenCacheInternal).IsApplicationCache,
+                        (this as ITokenCacheInternal).HasTokensNoLocks(),
+                        suggestedCacheKey: suggestedWebCacheKey);
 
                     await (this as ITokenCacheInternal).OnAfterAccessAsync(args2).ConfigureAwait(false);
+                    //}
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -285,9 +293,11 @@ namespace Microsoft.Identity.Client
             logger.Info("Looking up access token in the cache.");
             IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
 
+            // TODO: Remove FilterWithLogging
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
 
+            // TODO: remove this check
             // no match found after initial filtering
             if (!tokenCacheItems.Any())
             {
@@ -295,6 +305,7 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
+            // TODO: remove this check
             if (logger.IsLoggingEnabled(LogLevel.Info))
             {
                 logger.Info("Matching entry count - " + tokenCacheItems.Count());
@@ -303,6 +314,7 @@ namespace Microsoft.Identity.Client
             tokenCacheItems = FilterByScopes(requestParams, tokenCacheItems);
             tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);
 
+            // TODO: remove this check
             // no match
             if (!tokenCacheItems.Any())
             {
@@ -553,17 +565,17 @@ namespace Microsoft.Identity.Client
             if (candidateRt != null)
                 return candidateRt;
 
-            requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");          
+            requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
 
             // ADAL legacy cache does not store FRTs
             if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
             {
-              
+
                 return CacheFallbackOperations.GetRefreshToken(
                     Logger,
                     LegacyCachePersistence,
                     aliases,
-                    requestParams.ClientId,                    
+                    requestParams.ClientId,
                     requestParams.Account);
             }
 
@@ -681,9 +693,9 @@ namespace Microsoft.Identity.Client
                     acc.WamAccountIds.ContainsKey(requestParameters.ClientId)))
                 {
                     var wamAccount = new Account(
-                        wamAccountCache.HomeAccountId, 
-                        wamAccountCache.PreferredUsername, 
-                        environment, 
+                        wamAccountCache.HomeAccountId,
+                        wamAccountCache.PreferredUsername,
+                        environment,
                         wamAccountCache.WamAccountIds);
 
                     clientInfoToAccountMap[wamAccountCache.HomeAccountId] = wamAccount;
@@ -780,14 +792,30 @@ namespace Microsoft.Identity.Client
 
                     try
                     {
-                        await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
-                        await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
+                        //ITokenCacheInternal tokenCacheInternal = this;
+
+                        //if (tokenCacheInternal.HasBeforeAccessDelegates() || tokenCacheInternal.HasBeforeWriteDelegates())
+                        //{
+                        //    var args = new TokenCacheNotificationArgs(
+                        //        this,
+                        //        ClientId,
+                        //        account,
+                        //        true,
+                        //        tokenCacheInternal.IsApplicationCache,
+                        //        tokenCacheInternal.HasTokensNoLocks(),
+                        //        account.HomeAccountId.Identifier);
+
+                            await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
+                            await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
+                        //}
 
                         ((ITokenCacheInternal)this).RemoveMsalAccountWithNoLocks(account, requestContext);
                         RemoveAdalUser(account);
                     }
                     finally
                     {
+                        //if (((ITokenCacheInternal)this).HasAfterAccessDelegates())
+                        //{
                         var afterAccessArgs = new TokenCacheNotificationArgs(
                            this,
                            ClientId,
@@ -798,6 +826,7 @@ namespace Microsoft.Identity.Client
                            account.HomeAccountId.Identifier);
 
                         await (this as ITokenCacheInternal).OnAfterAccessAsync(afterAccessArgs).ConfigureAwait(false);
+                        //}
                     }
                 }
                 finally
