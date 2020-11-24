@@ -47,7 +47,7 @@ Bug Fixes:
 ============
 New Features: 
 **MSAL now expose the configured certificate on Confidential Client Application**. This helps manage multiple instances of Confidential Client Application.
-**Experimental WAM intergration on Windows for .NET classic, .NET core and UWP**. See https://aka.ms/msal-net-wam.
+**Experimental WAM integration on Windows for .NET classic, .NET core and UWP**. See https://aka.ms/msal-net-wam.
 
 Bug Fixes: 
 **Fix AcquireTokenByIntegratedWindowsAuthentication on .NET core**. Reverted the HTTP client used on .NET core as it was not possible to use default authentication which is needed for WS-trust. See issue [#1988](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1988).
@@ -195,13 +195,13 @@ New Features:
 
 **MSAL.NET will now remove accounts from the cache that have expired refresh tokens**. MSAL.NET will remove both the refresh token and the associated account if the `suberror` is "bad_token" to avaoid unnecessary calls to AzureAD. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/1720).
 
-**MSAL.NET uses telemetry schema V2** MSAL.NET has been updated to use Http telemetry schema V2. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1681).
+**MSAL.NET uses telemetry schema V2** MSAL.NET has been updated to use HTTP telemetry schema V2. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1681).
 
 Bug Fixes:
 
 **When migrating a Xamarin application from ADAL.NET to MSAL.NET and preserving the keychain, a CryptographicException can be thrown from the BrokerKeyHelper.** MSAL.NET now does the broker key keychain look up by Service and Account only. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1628).
 
-**WithProofOfPosession produces a token of type POP when it is expected to be PoP**. MSAL.NET will now produce a token of type PoP when WithProofOfPosession() is used. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1711).
+**WithProofOfPossession produces a token of type POP when it is expected to be PoP**. MSAL.NET will now produce a token of type PoP when WithProofOfPosession() is used. [Issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1711).
 
 
 4.10.0
