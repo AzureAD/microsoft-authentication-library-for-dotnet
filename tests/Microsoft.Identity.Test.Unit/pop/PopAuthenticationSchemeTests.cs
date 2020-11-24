@@ -43,11 +43,11 @@ namespace Microsoft.Identity.Test.Unit.PoP
 
                 AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config, harness.ServiceBundle));
 
-                config = new PopAuthenticationConfiguration(uri);
+                config = new PoPAuthenticationConfiguration(uri);
                 config.PopCryptoProvider = new InMemoryCryptoProvider();
 
                 AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config, null));
-                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationConfiguration(null));
+                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration(null));
             }
         }
 
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
             {
                 // Arrange
                 Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
-                PoPAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(uri);
+                PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(uri);
                 popConfig.HttpMethod = HttpMethod.Post;
 
                 var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
             using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                PoPAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+                PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
                 popConfig.HttpMethod = HttpMethod.Get;
                 popConfig.PopCryptoProvider = new InMemoryCryptoProvider();
 
