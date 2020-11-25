@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.WsTrust
             string userName,
             RequestContext requestContext)
         {
-            requestContext.Logger.Info("Sending request to userrealm endpoint.");
+            requestContext.Logger.Info("Sending request to userrealm endpoint. ");
 
             IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
 
