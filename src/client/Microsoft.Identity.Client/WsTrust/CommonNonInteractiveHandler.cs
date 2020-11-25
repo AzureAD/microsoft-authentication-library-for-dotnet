@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     MsalError.UserRealmDiscoveryFailed,
                     MsalErrorMessage.UserRealmDiscoveryFailed);
             }
-            if (userRealmResponse.DomainName == Constants.MsaDomainName)
+            if (string.Equals(userRealmResponse.DomainName, Constants.UserRealmMsaDomainName))
             {
                 throw new MsalClientException(
                     MsalError.MsaNotSupportedWithRopc,
