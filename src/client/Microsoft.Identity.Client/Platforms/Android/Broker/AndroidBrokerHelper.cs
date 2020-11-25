@@ -612,13 +612,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             using (_logger.LogMethodDuration())
             {
-                // there may be multiple authenticators from same package
-                // , but there is only one entry for an authenticator type in
-                // AccountManager.
-                // If another app tries to install same authenticator type, it will
-                // queue up and will be active after first one is uninstalled.
-                AuthenticatorDescription[] authenticators = _androidAccountManager.GetAuthenticatorTypes();
-                foreach (AuthenticatorDescription authenticator in authenticators)
+                foreach (AuthenticatorDescription authenticator in Authenticators)
                 {
                     if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType, StringComparison.OrdinalIgnoreCase)
                         && VerifySignature(authenticator.PackageName))
@@ -630,6 +624,19 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                 _logger.Warning("No Authenticator found on the device. ");
                 return false;
+            }
+        }
+
+        // There may be multiple authenticators from same package
+        // , but there is only one entry for an authenticator type in
+        // AccountManager.
+        // If another app tries to install same authenticator type, it will
+        // queue up and will be active after first one is uninstalled.
+        public AuthenticatorDescription[] Authenticators
+        {
+            get
+            {
+                return _androidAccountManager.GetAuthenticatorTypes();
             }
         }
 

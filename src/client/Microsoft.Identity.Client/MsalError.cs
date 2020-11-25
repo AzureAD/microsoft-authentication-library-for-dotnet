@@ -772,6 +772,12 @@ namespace Microsoft.Identity.Client
         public const string BrokerApplicationRequired = "broker_application_required";
 
         /// <summary>
+        /// <para>What happens?</para>A broker operation was attempted but power optimization was detected on the app.
+        /// <para>Mitigation</para>Disable power optimizations
+        /// </summary>
+        public const string AndroidBrokerClientPowerOptimization = "broker_client_power_opt_error";
+
+        /// <summary>
         /// <para>What happens?</para>You are trying to authenticate with the broker but MSAL is unable to read the response from the broker.
         /// <para>Mitigation</para>The currently installed broker may not support MSAL.Xamarin, you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater). see https://aka.ms/Brokered-Authentication-for-Android"
         /// </summary>

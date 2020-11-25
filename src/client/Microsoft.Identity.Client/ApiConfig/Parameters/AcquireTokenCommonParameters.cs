@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
 
+        public bool CheckPowerOptimization { get; set; } = false;
 
         public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
         {

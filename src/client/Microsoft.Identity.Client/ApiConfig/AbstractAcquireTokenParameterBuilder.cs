@@ -355,7 +355,7 @@ namespace Microsoft.Identity.Client
         /// Sets the correlation id to be used in the authentication request.
         /// </summary>
         /// <param name="correlationId">Correlation id of the authentication request.</param>
-        /// <returns></returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithCorrelationId(Guid correlationId)
         {
             CommonParameters.UserProvidedCorrelationId = correlationId;
@@ -366,6 +366,20 @@ namespace Microsoft.Identity.Client
         internal /* for testing */ T WithAuthenticationScheme(IAuthenticationScheme scheme)
         {
             CommonParameters.AuthenticationScheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Determines if the client app cannot access the network due to power saving optimizations or if the device is currently in idle mode
+        /// and will throw an <see cref="MsalClientException"/> with broker_client_power_opt_error as an error code.
+        /// </summary>
+        /// <param name="checkPowerOp">Check for power optimization.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <remarks> Idle mode happens when a device has been sitting unused and unmoving for a sufficiently long period of time,
+        /// so that it decides to go into a lower power-use state. This may involve things like turning off network access to apps.</remarks>
+        public T WithPowerOptimizationCheck(bool checkPowerOp)
+        {
+            CommonParameters.CheckPowerOptimization = checkPowerOp;
             return (T)this;
         }
 

@@ -123,6 +123,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
 
+        public bool CheckPowerOptimization => _commonParameters.CheckPowerOptimization;
+
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 

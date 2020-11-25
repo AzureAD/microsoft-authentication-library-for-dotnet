@@ -17,6 +17,8 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
 using System.Net;
+using Android.OS;
+using System.Linq;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -54,10 +56,23 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
+        private void CheckPowerOptimizationStatus(bool CheckPowerOptimizations = true)
+        {
+            var powerManager = PowerManager.FromContext(Application.Context);
+            if (powerManager.IsDeviceIdleMode &&
+                !powerManager.IsIgnoringBatteryOptimizations(Application.Context.PackageName) )
+            {
+                _logger.Warning("Power optimization detected on the client application: " + Application.Context.PackageName + "\nPlease disable power optimizations.");
+                throw new MsalClientException(MsalError.AndroidBrokerClientPowerOptimization);
+            }
+        }
+
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            CheckPowerOptimizationStatus(authenticationRequestParameters.CheckPowerOptimization);
+
             s_androidBrokerTokenResponse = null;
 
             BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(
@@ -92,6 +107,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
+            CheckPowerOptimizationStatus(authenticationRequestParameters.CheckPowerOptimization);
+
             BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
                 authenticationRequestParameters, acquireTokenSilentParameters);
 
