@@ -475,7 +475,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Check inner exception
                 string expectedError = string.Format(CultureInfo.InvariantCulture,
-                    MsalErrorMessage.HttpRequestUnsuccessful,
+                    MsalErrorMessage.HttpRequestUnsuccessful + "See https://aka.ms/msal-net-ropc for more information. ",
                     "404", "NotFound");
                 Assert.AreEqual(expectedError, result.Message);
 
