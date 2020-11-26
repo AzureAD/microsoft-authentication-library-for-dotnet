@@ -140,8 +140,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ExecuteAsync(CancellationToken.None))
                     .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.MsaNotSupportedWithRopc, result.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.MsaNotSupportedWithRopc, result.Message);
+            Assert.AreEqual(MsalError.RopcDoesNotSupportMsaAccounts, result.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.RopcDoesNotSupportMsaAccounts, result.Message);
         }
 
         [TestMethod]

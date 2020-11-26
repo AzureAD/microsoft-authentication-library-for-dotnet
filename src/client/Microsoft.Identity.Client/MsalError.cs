@@ -281,9 +281,9 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Resource Owner Password Credential (ROPC) grant attempted with an MSA (Microsoft personal) account.
         /// ROPC does not support MSA accounts.
+        /// See https://aka.ms/msal-net-ropc for details.
         /// </summary>
-        public const string MsaNotSupportedWithRopc = "msa_not_supported_with_ropc";
-
+        public const string RopcDoesNotSupportMsaAccounts = "ropc_not_supported_for_msa";
 
         /// <summary>
         /// Federation Metadata URL is missing for federated user.

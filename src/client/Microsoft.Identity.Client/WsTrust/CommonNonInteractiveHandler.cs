@@ -58,8 +58,8 @@ namespace Microsoft.Identity.Client.WsTrust
             if (string.Equals(userRealmResponse.DomainName, Constants.UserRealmMsaDomainName))
             {
                 throw new MsalClientException(
-                    MsalError.MsaNotSupportedWithRopc,
-                    MsalErrorMessage.MsaNotSupportedWithRopc);
+                    MsalError.RopcDoesNotSupportMsaAccounts,
+                    MsalErrorMessage.RopcDoesNotSupportMsaAccounts);
             }
 
             _requestContext.Logger.InfoPii(

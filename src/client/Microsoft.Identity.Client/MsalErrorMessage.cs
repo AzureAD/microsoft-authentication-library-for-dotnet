@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
 
         public const string UserRealmDiscoveryFailed = "User realm discovery failed. ";
 
-        public const string MsaNotSupportedWithRopc = "ROPC does not support MSA accounts. ";
+        public const string RopcDoesNotSupportMsaAccounts = "ROPC does not support MSA accounts. See https://aka.ms/msal-net-ropc for details. ";
 
         public const string WsTrustEndpointNotFoundInMetadataDocument =
             "WS-Trust endpoint not found in metadata document. ";
