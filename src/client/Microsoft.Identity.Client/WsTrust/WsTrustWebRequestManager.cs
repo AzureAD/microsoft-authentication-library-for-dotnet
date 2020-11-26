@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.WsTrust
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string message = string.Format(CultureInfo.CurrentCulture,
-                        MsalErrorMessage.HttpRequestUnsuccessful + "See aka.ms/msal-net-ropc for more information. ",
+                        MsalErrorMessage.HttpRequestUnsuccessful + "See https://aka.ms/msal-net-ropc for more information. ",
                         (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
                 throw MsalServiceExceptionFactory.FromHttpResponse(
