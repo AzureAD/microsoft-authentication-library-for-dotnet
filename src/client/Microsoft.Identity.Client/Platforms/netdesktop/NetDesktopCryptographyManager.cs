@@ -13,11 +13,18 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Win32.SafeHandles;
 using Microsoft.Identity.Client.Platforms.net45.Native;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class NetDesktopCryptographyManager : ICryptographyManager
     {
+        private static ConcurrentDictionary<string, RSA> CertificateToRsaMap = new ConcurrentDictionary<string, RSA>();
+        private static ConcurrentDictionary<string, RSACryptoServiceProvider> CertificateToRsaCspMap = new ConcurrentDictionary<string, RSACryptoServiceProvider>();
+        private static int maximumCertificateToRsaMap = 1000;
+        object clearMapLock = new object();
+
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             return string.IsNullOrEmpty(input) ? null : Base64UrlHelpers.Encode(CreateSha256HashBytes(input));
@@ -85,10 +92,21 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 return rsa.SignData(messageBytes, sha);
             }
 #else
-            using (var key = certificate.GetRSAPrivateKey())
+            if (!CertificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
             {
-                return key.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                if (CertificateToRsaMap.Count == maximumCertificateToRsaMap)
+                {
+                    ClearCertificateToRsaMap clearCertificateToRsaMap = new ClearCertificateToRsaMap(CertificateToRsaMap, clearMapLock);
+                    (new Thread(new ThreadStart(clearCertificateToRsaMap.Clear))).Start();
+
+                    CertificateToRsaMap = new ConcurrentDictionary<string, RSA>();
+                }
+
+                CertificateToRsaMap[certificate.Thumbprint] = certificate.GetRSAPrivateKey();
+                rsa = CertificateToRsaMap[certificate.Thumbprint];
             }
+
+            return rsa.SignData(messageBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 #endif
         }
 
@@ -100,11 +118,14 @@ namespace Microsoft.Identity.Client.Platforms.net45
         private static RSACryptoServiceProvider GetCryptoProviderForSha256_Net45(X509Certificate2 certificate)
         {
             RSACryptoServiceProvider rsaProvider;
-
-
             try
             {
-                rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
+                if (!CertificateToRsaCspMap.TryGetValue(certificate.Thumbprint, out rsaProvider))
+                {
+                    rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
+                    if (rsaProvider != null)
+                        CertificateToRsaMap[certificate.Thumbprint] = rsaProvider;
+                }
             }
             catch (CryptographicException e)
             {
@@ -116,7 +137,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             if (rsaProvider == null)
             {
-                throw new MsalClientException("The provided certificate has a key that is not accessable.");
+                throw new MsalClientException("The provided certificate has a key that is not accessible.");
             }
 
             const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
@@ -126,6 +147,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
             // Another provider type related to rsa, PROV_RSA_SIG == 2 that only supports Sha1 is no longer supported
             if ((rsaProvider.CspKeyContainerInfo.ProviderType == 1 || rsaProvider.CspKeyContainerInfo.ProviderType == 12) && !rsaProvider.CspKeyContainerInfo.HardwareDevice)
             {
+                if (CertificateToRsaCspMap.TryGetValue(certificate.Thumbprint, out RSACryptoServiceProvider rsacsp))
+                    return rsacsp;
+
                 CspParameters csp = new CspParameters
                 {
                     ProviderType = PROV_RSA_AES,
@@ -143,7 +167,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 // With this flag, a CryptographicException is thrown instead.
                 //
                 csp.Flags |= CspProviderFlags.UseExistingKey;
-                return new RSACryptoServiceProvider(csp);
+                CertificateToRsaCspMap[certificate.Thumbprint] = new RSACryptoServiceProvider(csp);
+                return CertificateToRsaCspMap[certificate.Thumbprint];
             }
 
             return rsaProvider;
@@ -201,6 +226,30 @@ namespace Microsoft.Identity.Client.Platforms.net45
             GC.KeepAlive(certificate);
 
             return certContext;
+        }
+
+        internal class ClearCertificateToRsaMap
+        {
+            ConcurrentDictionary<string, RSA> _rsaToCertificateMap;
+            object _clearMapLock;
+
+            internal ClearCertificateToRsaMap(ConcurrentDictionary<string, RSA> rsaToCertificateMap, object clearMapLock)
+            {
+                _rsaToCertificateMap = rsaToCertificateMap;
+                _clearMapLock = clearMapLock;
+            }
+
+            internal void Clear()
+            {
+                lock (_clearMapLock)
+                {
+                    foreach (RSA rsa in _rsaToCertificateMap.Values)
+                        if (rsa != null)
+                            rsa.Dispose();
+
+                    _rsaToCertificateMap.Clear();
+                }
+            }
         }
     }
 }
