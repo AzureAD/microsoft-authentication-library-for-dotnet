@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                      accountProvider,
                      authenticationRequestParameters,
-                     isForceLoginPrompt: true,
+                     isForceLoginPrompt: false,
                      isInteractive: true,
                      isAccountInWam: false)
                     .ConfigureAwait(true);

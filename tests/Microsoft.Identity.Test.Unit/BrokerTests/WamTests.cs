@@ -514,7 +514,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _aadPlugin.CreateWebTokenRequestAsync(
                     wamAccountProvider,
                     requestParams,
-                    isForceLoginPrompt: true,
+                    isForceLoginPrompt: false,
                      isInteractive: true,
                      isAccountInWam: false)
                     .Returns(Task.FromResult(webTokenRequest));
