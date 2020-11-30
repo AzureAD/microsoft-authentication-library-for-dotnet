@@ -28,6 +28,9 @@ namespace Microsoft.Identity.Client.WsTrust
         [JsonProperty(PropertyName = "cloud_audience_urn")]
         public string CloudAudienceUrn { get; set; }
 
+        [JsonProperty(PropertyName = "domain_name")]
+        public string DomainName { get; set; }
+
         public bool IsFederated => string.Equals(AccountType, "federated", StringComparison.OrdinalIgnoreCase);
         public bool IsManaged => string.Equals(AccountType, "managed", StringComparison.OrdinalIgnoreCase);
     }

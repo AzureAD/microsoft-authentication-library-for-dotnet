@@ -25,6 +25,8 @@ namespace Microsoft.Identity.Client.Internal
         public const string OrganizationsTenant = "organizations";
         public const string CommonTenant = "common";
 
+        public const string UserRealmMsaDomainName = "live.com";
+
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {
             return string.Format(
