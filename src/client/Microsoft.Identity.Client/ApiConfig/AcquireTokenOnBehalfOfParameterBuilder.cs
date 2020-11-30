@@ -65,6 +65,26 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Specifies if the client application should force refreshing the
+        /// token from the user token cache. By default the token is taken from the
+        /// the user token cache (forceRefresh=false)
+        /// </summary>
+        /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the user token cache
+        /// and attempt to acquire new access token using the refresh token for the account
+        /// if one is available. This can be useful in the case when the application developer wants to make
+        /// sure that conditional access policies are applied immediately, rather than after the expiration of the access token.
+        /// The default is <c>false</c></param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>Avoid unnecessarily setting <paramref name="forceRefresh"/> to <c>true</c> true in order to
+        /// avoid negatively affecting the performance of your application</remarks>
+        public AcquireTokenOnBehalfOfParameterBuilder WithForceRefresh(bool forceRefresh)
+        {
+            CommonParameters.AddApiTelemetryFeature(ApiTelemetryFeature.WithForceRefresh, forceRefresh);
+            Parameters.ForceRefresh = forceRefresh;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

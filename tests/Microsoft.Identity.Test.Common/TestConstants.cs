@@ -131,6 +131,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string RegionName = "REGION_NAME";
         public const string Region = "centralus";
 
+        public const string UserAssertion = "fake_access_token";
+
         //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
         public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj
 IxMTIyWhcNMzAwNTIyMDcwMDAwWjAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCh7HjK

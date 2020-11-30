@@ -64,9 +64,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunOnBehalfOfTestAsync(aadUser2, false).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(adfsUser, true).ConfigureAwait(false);
             await RunOnBehalfOfTestAsync(aadUser2, true).ConfigureAwait(false);
+            await RunOnBehalfOfTestAsync(aadUser2, false, true).ConfigureAwait(false);
         }
 
-        private async Task<IConfidentialClientApplication> RunOnBehalfOfTestAsync(LabUser user, bool silentCallShouldSucceed)
+        private async Task<IConfidentialClientApplication> RunOnBehalfOfTestAsync(
+            LabUser user,
+            bool silentCallShouldSucceed,
+            bool forceRefresh = false)
         {
             SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             AuthenticationResult authResult;
@@ -107,20 +111,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             s_inMemoryTokenCache.Bind(cca.UserTokenCache);
 
             authResult = await cca.AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(authResult.AccessToken))
+                .WithForceRefresh(forceRefresh)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
-            
-            Assert.AreEqual(
-                silentCallShouldSucceed, 
+
+            if (!forceRefresh)
+            {
+                Assert.AreEqual(
+                silentCallShouldSucceed,
                 authResult.AuthenticationResultMetadata.TokenSource == TokenSource.Cache);
+            }
+            else
+            {
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            }
 
             MsalAssert.AssertAuthResult(authResult, user);
             Assert.IsNotNull(authResult.IdToken); // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1950
             Assert.IsTrue(authResult.Scopes.Any(s => string.Equals(s, s_scopes.Single(), StringComparison.OrdinalIgnoreCase)));
 
             return cca;
-        }
-
-      
+        }      
     }
 }
