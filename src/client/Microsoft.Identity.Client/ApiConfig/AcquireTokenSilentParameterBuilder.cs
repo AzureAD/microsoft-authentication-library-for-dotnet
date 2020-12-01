@@ -60,7 +60,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-
         /// <summary>
         /// Specifies if the client application should force refreshing the
         /// token from the user token cache. By default the token is taken from the
@@ -133,7 +132,7 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
-        public AcquireTokenSilentParameterBuilder WithProofOfPosession(PopAuthenticationConfiguration popAuthenticationConfiguration)
+        public AcquireTokenSilentParameterBuilder WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
@@ -141,7 +140,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new MsalClientException(
                     MsalError.ExperimentalFeature,
-                    MsalErrorMessage.ExperimentalFeature(nameof(WithProofOfPosession)));
+                    MsalErrorMessage.ExperimentalFeature(nameof(WithProofOfPossession)));
             }
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));

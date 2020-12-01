@@ -14,7 +14,6 @@ using NSubstitute;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Client;
 using System.Threading;
-using Microsoft.Identity.Client.PlatformsCommon;
 using Microsoft.Identity.Client.Utils;
 using System.Threading.Tasks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -40,15 +39,15 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 HttpMethod method = HttpMethod.Post;
                 HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
                 var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
-                PopAuthenticationConfiguration config = null;
+                PoPAuthenticationConfiguration config = null;
 
                 AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config, harness.ServiceBundle));
 
-                config = new PopAuthenticationConfiguration(uri);
+                config = new PoPAuthenticationConfiguration(uri);
                 config.PopCryptoProvider = new InMemoryCryptoProvider();
 
                 AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationScheme(config, null));
-                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationConfiguration(null));
+                AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration(null));
             }
         }
 
@@ -59,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
             {
                 // Arrange
                 Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
-                PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(uri);
+                PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(uri);
                 popConfig.HttpMethod = HttpMethod.Post;
 
                 var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
@@ -111,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
             using (var harness = CreateTestHarness())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                PopAuthenticationConfiguration popConfig = new PopAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
+                PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b"));
                 popConfig.HttpMethod = HttpMethod.Get;
                 popConfig.PopCryptoProvider = new InMemoryCryptoProvider();
 
@@ -138,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
                 var provider = PoPProviderFactory.GetOrCreateProvider(testClock);
 
                 await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithProofOfPosession(popConfig)
+                    .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -155,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithProofOfPosession(popConfig)
+                    .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -172,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.PoP
 
                 provider = PoPProviderFactory.GetOrCreateProvider(testClock);
                 await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithProofOfPosession(popConfig)
+                    .WithProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 

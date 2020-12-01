@@ -134,11 +134,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(Authority)
                 .Build();
 
-            await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+            var result = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
                     .ExecuteAsync(CancellationToken.None))
                     .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.RopcDoesNotSupportMsaAccounts, result.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.RopcDoesNotSupportMsaAccounts, result.Message);
         }
 
         [TestMethod]

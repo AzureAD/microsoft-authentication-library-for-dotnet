@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.WsTrust
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string message = string.Format(CultureInfo.CurrentCulture,
-                        MsalErrorMessage.HttpRequestUnsuccessful,
+                        MsalErrorMessage.HttpRequestUnsuccessful + "See https://aka.ms/msal-net-ropc for more information. ",
                         (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
                 throw MsalServiceExceptionFactory.FromHttpResponse(
@@ -61,13 +61,12 @@ namespace Microsoft.Identity.Client.WsTrust
         {
             var headers = new Dictionary<string, string>
             {
-                { "ContentType", "application/soap+xml" },
                 { "SOAPAction", (wsTrustEndpoint.Version == WsTrustVersion.WsTrust2005) ? XmlNamespace.Issue2005.ToString() : XmlNamespace.Issue.ToString() }
             };
 
             var body = new StringContent(
                 wsTrustRequest,
-                Encoding.UTF8, headers["ContentType"]);
+                Encoding.UTF8, "application/soap+xml");
 
             HttpResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, headers, body, requestContext.Logger).ConfigureAwait(false);
 
@@ -117,7 +116,7 @@ namespace Microsoft.Identity.Client.WsTrust
             string userName,
             RequestContext requestContext)
         {
-            requestContext.Logger.Info("Sending request to userrealm endpoint.");
+            requestContext.Logger.Info("Sending request to userrealm endpoint. ");
 
             IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
 

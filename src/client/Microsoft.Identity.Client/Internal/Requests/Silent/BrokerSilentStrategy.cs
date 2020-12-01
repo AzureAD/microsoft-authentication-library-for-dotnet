@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             MsalTokenResponse msalTokenResponse;
 
-            if (!PublicClientApplication.IsCurrentBrokerAccount(_authenticationRequestParameters.Account))
+            if (!PublicClientApplication.IsOperatingSystemAccount(_authenticationRequestParameters.Account))
             {
                 msalTokenResponse = await Broker.AcquireTokenSilentAsync(
                       _authenticationRequestParameters,

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 return s_userCache[query];
             }
 
-            var response = await s_labService.GetLabResponseAsync(query).ConfigureAwait(false);
+            var response = await s_labService.GetLabResponseFromApiAsync(query).ConfigureAwait(false);
             if (response == null)
             {
                 throw new LabUserNotFoundException(query, "Found no users for the given query.");
@@ -40,6 +40,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             Debug.WriteLine("User cache miss. Returning user from lab: " + response.User.Upn);
 
             return response;
+        }
+
+        // only set up for this format of query: {URI-scheme}://{URI-host}/{resource-path}/UPN
+        public static async Task<LabResponse> GetLabUserDataForSpecificUserAsync(string upn)
+        {
+            string result = await s_labService.GetLabResponseAsync(LabApiConstants.LabEndPoint + "/" + upn).ConfigureAwait(false);
+            return s_labService.CreateLabResponseFromResultStringAsync(result).Result;
         }
 
         public static Task<LabResponse> GetDefaultUserAsync()
@@ -80,8 +87,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetSpecificUserAsync(string upn)
         {
-            var query = new UserQuery();
-            return GetLabUserDataAsync(query);
+            return GetLabUserDataForSpecificUserAsync(upn);
         }
 
         public static Task<LabResponse> GetArlingtonUserAsync()
@@ -126,7 +132,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             if (KeyVaultSecretsProvider == null)
             {
-                throw new InvalidOperationException("Error: Keyvault secrets provider is not set");
+                throw new InvalidOperationException("Error: KeyVault secrets provider is not set");
             }
 
             try

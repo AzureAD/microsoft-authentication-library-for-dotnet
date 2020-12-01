@@ -34,7 +34,12 @@ namespace Microsoft.Identity.Client
         /// or setting the Agent.
         /// </summary>
         /// <param name="httpClientFactory">HTTP client factory</param>
-        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.</remarks>
+        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.
+        /// Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
+        /// the httpClient had the possibility of throwing an exception stating "Properties can only be modified before sending the first request".
+        /// MSAL's httpClient will no longer throw this exception after 4.19.0 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.19.0)
+        /// see (https://aka.ms/msal-httpclient-info) for more information.
+        /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory)
         {
@@ -284,7 +289,7 @@ namespace Microsoft.Identity.Client
         /// <param name="redirectUri">URL where the STS will call back the application with the security token.
         /// This parameter is not required for desktop or UWP applications (as a default is used).
         /// It's not required for mobile applications that don't use a broker
-        /// It is required for Web Apps</param>
+        /// It is required for web apps</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithRedirectUri(string redirectUri)
         {

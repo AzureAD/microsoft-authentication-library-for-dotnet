@@ -514,7 +514,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _aadPlugin.CreateWebTokenRequestAsync(
                     wamAccountProvider,
                     requestParams,
-                    isForceLoginPrompt: true,
+                    isForceLoginPrompt: false,
                      isInteractive: true,
                      isAccountInWam: false)
                     .Returns(Task.FromResult(webTokenRequest));
@@ -570,6 +570,30 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 await AssertException.TaskThrowsAsync<FileNotFoundException>( // Since WebAccount is a real object, it throws this exception
                     () => _wamBroker.RemoveAccountAsync(harness.ServiceBundle.Config, requestParams.Account))
                     .ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task RemoveAccount_DoesNothing_WhenAccountDoesNotMatchWAM_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                //var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+                var requestParams = harness.CreateAuthenticationRequestParameters(
+                    TestConstants.AuthorityHomeTenant);
+                requestParams.Account = new Account("a.b", "c", "env");
+
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+
+                _webAccountProviderFactory.GetAccountProviderAsync("organizations").
+                    ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+
+
+                // Act Assert
+                await _wamBroker.RemoveAccountAsync(harness.ServiceBundle.Config, requestParams.Account)
+                    .ConfigureAwait(false);
+
             }
         }
 

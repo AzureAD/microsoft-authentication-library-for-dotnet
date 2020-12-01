@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 webTokenRequest = await wamPlugin.CreateWebTokenRequestAsync(
                      accountProvider,
                      authenticationRequestParameters,
-                     isForceLoginPrompt: true,
+                     isForceLoginPrompt: false,
                      isInteractive: true,
                      isAccountInWam: false)
                     .ConfigureAwait(true);
@@ -525,7 +525,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 var webAccount = await FindWamAccountForMsalAccountAsync(provider, wamPlugin, account, null, appConfig.ClientId)
                     .ConfigureAwait(false);
                 _logger.Info("Found a webAccount? " + (webAccount != null));
-                await webAccount.SignOutAsync();
+
+                if (webAccount != null)
+                {
+                    await webAccount.SignOutAsync();
+                }
             }
         }
 

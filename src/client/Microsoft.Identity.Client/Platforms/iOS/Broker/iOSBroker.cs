@@ -139,7 +139,18 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             brokerRequest.Add(BrokerParameter.Username, authenticationRequestParameters.Account?.Username ?? string.Empty);
             brokerRequest.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
-            brokerRequest.Add(BrokerParameter.Prompt, acquireTokenInteractiveParameters.Prompt.PromptValue);
+
+            var prompt = acquireTokenInteractiveParameters.Prompt;
+
+            if (prompt == Prompt.NoPrompt || prompt == Prompt.NotSpecified)
+            {
+                brokerRequest.Add(BrokerParameter.Prompt, Prompt.SelectAccount.PromptValue);
+            }
+            else
+            {
+                brokerRequest.Add(BrokerParameter.Prompt, acquireTokenInteractiveParameters.Prompt.PromptValue);
+            }
+            
             if (!string.IsNullOrEmpty(authenticationRequestParameters.Claims))
             {
                 brokerRequest.Add(BrokerParameter.Claims, authenticationRequestParameters.Claims);
