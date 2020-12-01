@@ -154,16 +154,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Get All Values
         public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
-            // return _accessTokenCacheDictionary.Select(kv => kv.Value);
-
-            // perf: do not call ConcurrentDictionary.Values as it takes a lock
-            List<MsalAccessTokenCacheItem> ats = new List<MsalAccessTokenCacheItem>();
-            foreach (var kvp in _accessTokenCacheDictionary)
-            {
-                ats.Add(kvp.Value);
-            }
-
-            return ats;
+            return _accessTokenCacheDictionary.Select(kv => kv.Value);
         }
 
         public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()

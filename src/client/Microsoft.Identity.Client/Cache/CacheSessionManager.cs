@@ -89,64 +89,64 @@ namespace Microsoft.Identity.Client.Cache
         /// </remarks>
         private async Task RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes cacheEventType)
         {
-            //if (TokenCacheInternal.HasBeforeAccessDelegates())
-            //{
-            if (!_cacheRefreshedForRead)
+            if (TokenCacheInternal.HasBeforeAccessDelegates())
             {
-                string telemetryId = _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId();
-                var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup, telemetryId)
+                if (!_cacheRefreshedForRead)
                 {
-                    TokenType = cacheEventType
-                };
-
-                await TokenCacheInternal.Semaphore.WaitAsync().ConfigureAwait(false);
-
-                try
-                {
-                    if (!_cacheRefreshedForRead) // double check locking
+                    string telemetryId = _requestParams.RequestContext.CorrelationId.AsMatsCorrelationId();
+                    var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup, telemetryId)
                     {
-                        using (_requestParams.RequestContext.CreateTelemetryHelper(cacheEvent))
+                        TokenType = cacheEventType
+                    };
+
+                    await TokenCacheInternal.Semaphore.WaitAsync().ConfigureAwait(false);
+
+                    try
+                    {
+                        if (!_cacheRefreshedForRead) // double check locking
                         {
-                            string key = SuggestedWebCacheKeyFactory.GetKeyFromRequest(_requestParams);
-
-                            try
+                            using (_requestParams.RequestContext.CreateTelemetryHelper(cacheEvent))
                             {
-                                var args = new TokenCacheNotificationArgs(
-                                   TokenCacheInternal,
-                                   _requestParams.ClientId,
-                                   _requestParams.Account,
-                                   hasStateChanged: false,
-                                   TokenCacheInternal.IsApplicationCache,
-                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
-                                   suggestedCacheKey: key);
-                                await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
-                            }
-                            finally
-                            {
-                                //if (TokenCacheInternal.HasAfterAccessDelegates())
-                                //{
-                                var args = new TokenCacheNotificationArgs(
-                                   TokenCacheInternal,
-                                   _requestParams.ClientId,
-                                   _requestParams.Account,
-                                   hasStateChanged: false,
-                                   TokenCacheInternal.IsApplicationCache,
-                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
-                                   suggestedCacheKey: key);
-                                await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
-                                //}
-                            }
+                                string key = SuggestedWebCacheKeyFactory.GetKeyFromRequest(_requestParams);
 
-                            _cacheRefreshedForRead = true;
+                                try
+                                {
+                                    var args = new TokenCacheNotificationArgs(
+                                       TokenCacheInternal,
+                                       _requestParams.ClientId,
+                                       _requestParams.Account,
+                                       hasStateChanged: false,
+                                       TokenCacheInternal.IsApplicationCache,
+                                       hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                       suggestedCacheKey: key);
+                                    await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
+                                }
+                                finally
+                                {
+                                    if (TokenCacheInternal.HasAfterAccessDelegates())
+                                    {
+                                        var args = new TokenCacheNotificationArgs(
+                                            TokenCacheInternal,
+                                           _requestParams.ClientId,
+                                           _requestParams.Account,
+                                           hasStateChanged: false,
+                                           TokenCacheInternal.IsApplicationCache,
+                                           hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                           suggestedCacheKey: key);
+                                        await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                                    }
+                                }
+
+                                _cacheRefreshedForRead = true;
+                            }
                         }
                     }
-                }
-                finally
-                {
-                    TokenCacheInternal.Semaphore.Release();
+                    finally
+                    {
+                        TokenCacheInternal.Semaphore.Release();
+                    }
                 }
             }
-            //}
         }
     }
 }
