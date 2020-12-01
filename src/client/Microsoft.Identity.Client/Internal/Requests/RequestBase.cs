@@ -165,6 +165,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.AuthorityType = AuthenticationRequestParameters.AuthorityInfo.AuthorityType.ToString();
             }
 
+            apiEvent.IsTokenCacheSerialized = (AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal).IsTokenCacheSerialized();
+
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
 
