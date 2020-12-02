@@ -56,14 +56,23 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        private void CheckPowerOptimizationStatus(bool CheckPowerOptimizations = true)
+        ///Check if the network is available. If the network is unavailable due to power optimization,
+        ///a <see cref="MsalClientException"/>will be thrown with error code <see cref="MsalError.AndroidBrokerClientPowerOptimization"/> 
+        private void CheckPowerOptimizationStatus(bool CheckPowerOptimizations = false)
         {
             var powerManager = PowerManager.FromContext(Application.Context);
-            if (powerManager.IsDeviceIdleMode &&
+
+            //Power optimization checking was added in API 23
+            if (CheckPowerOptimizations &&
+                Build.VERSION.SdkInt == BuildVersionCodes.M &&
+                powerManager.IsDeviceIdleMode &&
                 !powerManager.IsIgnoringBatteryOptimizations(Application.Context.PackageName) )
             {
                 _logger.Warning("Power optimization detected on the client application: " + Application.Context.PackageName + "\nPlease disable power optimizations.");
-                throw new MsalClientException(MsalError.AndroidBrokerClientPowerOptimization);
+                
+                throw new MsalClientException(MsalError.AndroidBrokerClientPowerOptimization,
+                    "Connection is not available to aqcuire token because power optimization is "
+                        + "enabled. And the device is in doze mode or the app is standby.");
             }
         }
 

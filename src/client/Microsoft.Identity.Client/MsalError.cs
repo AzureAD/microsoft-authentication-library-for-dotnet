@@ -775,7 +775,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para>A broker operation was attempted but power optimization was detected on the app.
         /// <para>Mitigation</para>Disable power optimizations
         /// </summary>
-        public const string AndroidBrokerClientPowerOptimization = "broker_client_power_opt_error";
+        public const string AndroidBrokerClientPowerOptimization = "broker_no_network_connection_power_optimization";
 
         /// <summary>
         /// <para>What happens?</para>You are trying to authenticate with the broker but MSAL is unable to read the response from the broker.

@@ -369,6 +369,7 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+#if ANDROID || NETSTANDARD
         /// <summary>
         /// Determines if the client app cannot access the network due to power saving optimizations or if the device is currently in idle mode
         /// and will throw an <see cref="MsalClientException"/> with broker_client_power_opt_error as an error code.
@@ -382,7 +383,7 @@ namespace Microsoft.Identity.Client
             CommonParameters.CheckPowerOptimization = checkPowerOp;
             return (T)this;
         }
-
+#endif
         /// <summary>
         /// Validates the parameters of the AcquireToken operation.
         /// </summary>
