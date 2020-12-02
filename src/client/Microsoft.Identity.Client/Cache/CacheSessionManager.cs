@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Cache
         /// </remarks>
         private async Task RefreshCacheForReadOperationsAsync(CacheEvent.TokenTypes cacheEventType)
         {
-            if (TokenCacheInternal.HasBeforeAccessDelegates())
+            if (TokenCacheInternal.IsTokenCacheSerialized())
             {
                 if (!_cacheRefreshedForRead)
                 {
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.Cache
                                 }
                                 finally
                                 {
-                                    if (TokenCacheInternal.HasAfterAccessDelegates())
+                                    if (TokenCacheInternal.IsTokenCacheSerialized())
                                     {
                                         var args = new TokenCacheNotificationArgs(
                                             TokenCacheInternal,

@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client
                 try
                 {
                     ITokenCacheInternal tokenCacheInternal = this;
-                    if (tokenCacheInternal.HasBeforeAccessDelegates() || tokenCacheInternal.HasBeforeWriteDelegates())
+                    if (tokenCacheInternal.IsTokenCacheSerialized())
                     {
                         var args = new TokenCacheNotificationArgs(
                             this,
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client
                 finally
                 {
                     ITokenCacheInternal tokenCacheInternal = this;
-                    if (tokenCacheInternal.HasAfterAccessDelegates())
+                    if (tokenCacheInternal.IsTokenCacheSerialized())
                     {
                         var args = new TokenCacheNotificationArgs(
                             this,
@@ -746,7 +746,7 @@ namespace Microsoft.Identity.Client
 
                     try
                     {
-                        if (tokenCacheInternal.HasBeforeAccessDelegates() || tokenCacheInternal.HasBeforeWriteDelegates())
+                        if (tokenCacheInternal.IsTokenCacheSerialized() || tokenCacheInternal.IsTokenCacheSerialized())
                         {
                             var args = new TokenCacheNotificationArgs(
                                 this,
@@ -766,7 +766,7 @@ namespace Microsoft.Identity.Client
                     }
                     finally
                     {
-                        if (tokenCacheInternal.HasAfterAccessDelegates())
+                        if (tokenCacheInternal.IsTokenCacheSerialized())
                         {
                             var afterAccessArgs = new TokenCacheNotificationArgs(
                                 this,
