@@ -48,18 +48,18 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// 1.  Acquire Token For Client with Region successfully
-        ///        Current_request = 2 | ATC_ID, 0 | 0, centralus, 1
+        ///        Current_request = 2 | ATC_ID, 0 | centralus, 1, 0
         ///        Last_request = 2 | 0 | | |
         /// 
         /// 2. Acquire Token for client with Region -> HTTP error 503 (Service Unavailable)
         ///
-        ///        Current_request = 2 | ATC_ID, 1 | 0, centralus, 3
+        ///        Current_request = 2 | ATC_ID, 1 | centralus, 3, 0
         ///        Last_request = 2 | 0 | | |
         ///
         /// 3. Acquire Token For Client with Region -> successful
         ///
         /// Sent to the server - 
-        ///        Current_request = 2 | ATC_ID, 1 | 0, centralus, 3
+        ///        Current_request = 2 | ATC_ID, 1 | centralus, 3, 0
         ///        Last_request = 2 | 0 |  ATC_ID, corr_step_2  | ServiceUnavailable | centralus, 3
         /// </summary>
         [TestMethod]
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// Acquire token for client with serialized token cache successfully
-        ///    Current_request = 2 | ATC_ID, 0 | 1, centralus, 1
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1
         ///    Last_request = 2 | 0 | | |
         /// </summary>
         [TestMethod]
@@ -225,16 +225,16 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.IsTrue(actualTelemetryParts[1].EndsWith(forceRefresh ? "1" : "0")); // force_refresh flag
 
-            Assert.AreEqual(isCacheSerialized ? "1" : "0", actualTelemetryParts[2].Split(',')[0]);
-            Assert.AreEqual(TestConstants.Region, actualTelemetryParts[2].Split(',')[1]);
+            Assert.AreEqual(isCacheSerialized ? "1" : "0", actualTelemetryParts[2].Split(',')[2]);
+            Assert.AreEqual(TestConstants.Region, actualTelemetryParts[2].Split(',')[0]);
 
             if (isFirstRequest)
             {
-                Assert.IsTrue(actualTelemetryParts[2].EndsWith(((int)RegionSource.EnvVariable).ToString(CultureInfo.InvariantCulture)));
+                Assert.AreEqual("1", actualTelemetryParts[2].Split(',')[1]);
             }
             else
             {
-                Assert.IsTrue(actualTelemetryParts[2].EndsWith(((int)RegionSource.Cache).ToString(CultureInfo.InvariantCulture)));
+                Assert.AreEqual("3", actualTelemetryParts[2].Split(',')[1]);
             }
         }
 

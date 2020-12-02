@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// Expected format: 2|api_id,force_refresh|platform_config
-        /// platform_config: is_token_cache_serialized,region,region_source
+        /// platform_config: region,region_source,is_token_cache_serialized
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
@@ -127,15 +127,15 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             var regionalFields = new StringBuilder();
             if (!string.IsNullOrEmpty(regionDiscovered))
             {
-                regionalFields.Append(",");
                 regionalFields.Append(regionDiscovered);
                 regionalFields.Append(",");
                 regionalFields.Append((regionSource));
+                regionalFields.Append(",");
             }
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
-                $"|{ConvertFromStringToBitwise(isTokenCacheSerialized)}{regionalFields}";
+                $"|{regionalFields}{ConvertFromStringToBitwise(isTokenCacheSerialized)}";
         }
 
         private string ConvertFromStringToBitwise(string value)
