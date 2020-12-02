@@ -125,17 +125,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
             // Since regional fields will only be logged in case it is opted.
             var regionalFields = new StringBuilder();
-            if (!string.IsNullOrEmpty(regionDiscovered))
-            {
-                regionalFields.Append(regionDiscovered);
-                regionalFields.Append(",");
-                regionalFields.Append((regionSource));
-                regionalFields.Append(",");
-            }
+            regionalFields.Append(regionDiscovered);
+            regionalFields.Append(",");
+            regionalFields.Append((regionSource));
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
-                $"|{regionalFields}{ConvertFromStringToBitwise(isTokenCacheSerialized)}";
+                $"|{regionalFields},{ConvertFromStringToBitwise(isTokenCacheSerialized)}";
         }
 
         private string ConvertFromStringToBitwise(string value)
