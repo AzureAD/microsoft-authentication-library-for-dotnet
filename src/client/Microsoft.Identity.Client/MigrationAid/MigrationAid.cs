@@ -1455,6 +1455,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         [Obsolete("Use AcquireTokenOnBehalfOf instead. " + MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(
             IEnumerable<string> scopes,
             UserAssertion userAssertion,
