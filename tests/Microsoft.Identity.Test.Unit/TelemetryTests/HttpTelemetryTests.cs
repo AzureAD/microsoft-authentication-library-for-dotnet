@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.IsTrue(actualTelemetryParts[1].EndsWith(forceRefresh ? "1" : "0")); // force_refresh flag
 
-            Assert.AreEqual(isCacheSerialized ? ",1" : ",0", actualTelemetryParts[2]); // is_cache_serialized
+            Assert.AreEqual(isCacheSerialized ? "1" : "0", actualTelemetryParts[2]); // is_cache_serialized
         }
 
         private static void AssertPreviousTelemetry(
