@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CommonCache.Test.Common\CommonCache.Test.Common.csproj" />
+    <PackageReference Include="CommandLineParser" version="2.4.3" />
+    <PackageReference Include="Newtonsoft.Json" version="12.0.1" />
+    <PackageReference Include="System.Collections" version="4.0.11" />
+    <PackageReference Include="System.Console" version="4.0.0" />
+    <PackageReference Include="System.Diagnostics.Debug" version="4.0.11" />
+    <PackageReference Include="System.Globalization" version="4.0.11" />
+    <PackageReference Include="System.IO" version="4.1.0" />
+    <PackageReference Include="System.Linq" version="4.1.0" />
+    <PackageReference Include="System.Linq.Expressions" version="4.1.0" />
+    <PackageReference Include="System.Reflection" version="4.1.0" />
+    <PackageReference Include="System.Reflection.Extensions" version="4.0.1" />
+    <PackageReference Include="System.Reflection.TypeExtensions" version="4.1.0" />
+    <PackageReference Include="System.Resources.ResourceManager" version="4.0.1" />
+    <PackageReference Include="System.Runtime" version="4.1.0" />
+    <PackageReference Include="System.Runtime.Extensions" version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NodeScript\index.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NodeScript\package-lock.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NodeScript\package.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>
