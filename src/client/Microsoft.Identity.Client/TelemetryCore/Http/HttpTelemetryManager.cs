@@ -76,15 +76,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 failedRequests.Append(",");
                 failedRequests.Append(ev.CorrelationId);
 
-                if (ev.ContainsKey(MsalTelemetryBlobEventNames.RegionDiscovered))
-                {
-                    if (!firstFailure)
-                        platformFields.Append(",");
-
-                    platformFields.Append(ev.RegionDiscovered);
+                if (!firstFailure)
                     platformFields.Append(",");
-                    platformFields.Append(ev.RegionSource);
-                }
+
+                platformFields.Append(ev.RegionDiscovered);
+                platformFields.Append(",");
+                platformFields.Append(ev.RegionSource);
 
                 firstFailure = false;
             }
