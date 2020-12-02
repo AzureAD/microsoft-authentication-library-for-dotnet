@@ -79,9 +79,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 if (!firstFailure)
                     platformFields.Append(",");
 
+                ev.TryGetValue(MsalTelemetryBlobEventNames.RegionSource, out string regionSource);
                 platformFields.Append(ev.RegionDiscovered);
                 platformFields.Append(",");
-                platformFields.Append(ev.RegionSource);
+                platformFields.Append(regionSource);
 
                 firstFailure = false;
             }
