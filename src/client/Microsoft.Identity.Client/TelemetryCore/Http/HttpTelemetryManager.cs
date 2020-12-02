@@ -76,15 +76,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 failedRequests.Append(",");
                 failedRequests.Append(ev.CorrelationId);
 
-                if (ev.ContainsKey(MsalTelemetryBlobEventNames.RegionDiscovered))
-                {
-                    if (!firstFailure)
-                        platformFields.Append(",");
-
-                    platformFields.Append(ev.RegionDiscovered);
+                if (!firstFailure)
                     platformFields.Append(",");
-                    platformFields.Append(ev.RegionSource);
-                }
+
+                ev.TryGetValue(MsalTelemetryBlobEventNames.RegionSource, out string regionSource);
+                platformFields.Append(ev.RegionDiscovered);
+                platformFields.Append(",");
+                platformFields.Append(regionSource);
 
                 firstFailure = false;
             }
@@ -125,17 +123,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
             // Since regional fields will only be logged in case it is opted.
             var regionalFields = new StringBuilder();
-            if (!string.IsNullOrEmpty(regionDiscovered))
-            {
-                regionalFields.Append(regionDiscovered);
-                regionalFields.Append(",");
-                regionalFields.Append((regionSource));
-                regionalFields.Append(",");
-            }
+            regionalFields.Append(regionDiscovered);
+            regionalFields.Append(",");
+            regionalFields.Append((regionSource));
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
-                $"|{regionalFields}{ConvertFromStringToBitwise(isTokenCacheSerialized)}";
+                $"|{regionalFields},{ConvertFromStringToBitwise(isTokenCacheSerialized)}";
         }
 
         private string ConvertFromStringToBitwise(string value)
