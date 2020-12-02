@@ -130,11 +130,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 regionalFields.Append(regionDiscovered);
                 regionalFields.Append(",");
                 regionalFields.Append((regionSource));
+                regionalFields.Append(",");
             }
 
             return $"{TelemetryConstants.HttpTelemetrySchemaVersion2}" +
                 $"|{apiId},{ConvertFromStringToBitwise(forceRefresh)}" +
-                $"|{regionalFields},{ConvertFromStringToBitwise(isTokenCacheSerialized)}";
+                $"|{regionalFields}{ConvertFromStringToBitwise(isTokenCacheSerialized)}";
         }
 
         private string ConvertFromStringToBitwise(string value)
