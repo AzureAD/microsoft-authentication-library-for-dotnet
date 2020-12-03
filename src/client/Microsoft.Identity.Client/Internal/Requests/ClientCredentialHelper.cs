@@ -58,7 +58,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
-                    if ((clientCredential.CachedAssertion == null || clientCredential.ValidTo != 0) && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertion)
+                    if ((clientCredential.CachedAssertion == null || clientCredential.ValidTo != 0) 
+                        && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertion
+                        && clientCredential.AuthenticationType != ConfidentialClientAuthenticationType.SignedClientAssertionDelegate)
                     {
                         if (!ValidateClientAssertion(clientCredential, endpoints.SelfSignedJwtAudience, sendX5C))
                         {
@@ -91,6 +93,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.SignedClientAssertion)
                     {
                         parameters[OAuth2Parameter.ClientAssertion] = clientCredential.SignedAssertion;
+                    }
+                    else if (clientCredential.AuthenticationType == ConfidentialClientAuthenticationType.SignedClientAssertionDelegate)
+                    {
+                        parameters[OAuth2Parameter.ClientAssertion] = clientCredential.SignedAssertionDelegate();
                     }
                     else
                     {
