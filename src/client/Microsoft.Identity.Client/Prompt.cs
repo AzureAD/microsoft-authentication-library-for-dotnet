@@ -14,6 +14,9 @@ namespace Microsoft.Identity.Client
         ///     which would present to the user a list of accounts from which one can be selected for
         ///     authentication.
         /// </summary>
+        /// <remarks>
+        /// This is the default prompt for backwards compatibility reasons. Please use <see cref="Prompt.NoPrompt"/> for the best user experience.
+        /// </remarks>
         public static readonly Prompt SelectAccount = new Prompt("select_account");
 
         /// <summary>
@@ -29,13 +32,10 @@ namespace Microsoft.Identity.Client
         public static readonly Prompt Consent = new Prompt("consent");
 
         /// <summary>
-        ///     Does not request any specific UI to the service, which therefore decides based on the
-        ///     number of signed-in identities.
-        ///     This Prompt is, for the moment, recommended for Azure AD B2C scenarios where
-        ///     the developer does not want the user to re-select the account (for instance when applying
-        ///     policies like EditProfile, or ResetPassword, which should apply to the currently signed-in account.
-        ///     It's not recommended to use this Prompt in Azure AD scenarios at the moment).
+        /// Let the identity service decide on the best user experience, based on browser cookies and 
+        /// on the login hint, which can be specified using WithAccount() or WithLoginHint()
         /// </summary>
+        /// <remarks>This is the recommended prompt</remarks>
         public static readonly Prompt NoPrompt = new Prompt("no_prompt");
 
 #if DESKTOP || WINDOWS_APP
