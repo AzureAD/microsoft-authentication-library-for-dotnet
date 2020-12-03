@@ -37,11 +37,12 @@ namespace Microsoft.Identity.Client
             IConfidentialClientApplicationWithCertificate,
             IByRefreshToken
     {
-        internal ConfidentialClientApplication(ApplicationConfiguration configuration)
+        internal ConfidentialClientApplication(
+            ApplicationConfiguration configuration)
             : base(configuration)
         {
             GuardMobileFrameworks();
-            AppTokenCacheInternal = new TokenCache(ServiceBundle, true);
+            AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;
         }
 
@@ -164,7 +165,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public X509Certificate2 Certificate { get; }
 
-        internal ITokenCacheInternal AppTokenCacheInternal { get; set; }
+        internal ITokenCacheInternal AppTokenCacheInternal { get; }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(
             AcquireTokenCommonParameters commonParameters,

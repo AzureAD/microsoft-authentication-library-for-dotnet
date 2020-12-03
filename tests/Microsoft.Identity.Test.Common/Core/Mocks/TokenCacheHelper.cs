@@ -15,14 +15,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static long ValidExpiresIn = 28800;
         public static long ValidExtendedExpiresIn = 57600;
 
-        internal void PopulateCacheForClientCredential(ITokenCacheAccessor accessor)
+        internal void PopulateCacheForClientCredential(ITokenCacheAccessor accessor, int tokensQuantity = 1)
         {
-
-            var atItem = CreateAccessTokenItem();
-            accessor.SaveAccessToken(atItem);
+            for (int i = 1; i <= tokensQuantity; i++)
+            {
+                var atItem = CreateAccessTokenItem(string.Format(System.Globalization.CultureInfo.InvariantCulture, TestConstants.ScopeStrFormat, i));
+                accessor.SaveAccessToken(atItem);
+            }
         }
 
-        internal static MsalAccessTokenCacheItem CreateAccessTokenItem()
+        internal static MsalAccessTokenCacheItem CreateAccessTokenItem(string scopes = "")
         {
             string clientInfo = MockHelpers.CreateClientInfo();
             string homeAccId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
@@ -30,7 +32,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                TestConstants.ProductionPrefCacheEnvironment,
                TestConstants.ClientId,
-               TestConstants.s_scope.AsSingleString(),
+               string.IsNullOrEmpty(scopes) ? TestConstants.s_scope.AsSingleString() : scopes,
                TestConstants.Utid,
                "",
                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),

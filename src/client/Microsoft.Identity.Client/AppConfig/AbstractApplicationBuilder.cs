@@ -183,6 +183,13 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+
+        internal T WithUserTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
+        {
+            Config.UserTokenCacheInternalForTest = tokenCacheInternal;
+            return (T)this;
+        }
+
         /// <summary>
         /// Sets the logging callback. For details see https://aka.ms/msal-net-logging
         /// </summary>
