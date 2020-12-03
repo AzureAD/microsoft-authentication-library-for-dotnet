@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
@@ -149,16 +150,26 @@ namespace CommonCache.Test.Unit
             await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);
         }
 
+        
         [DataTestMethod]
         [DataRow(CacheProgramType.MsalNode, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalNode->MsalV3 msal v3 cache")]
-        [DataRow(CacheProgramType.MsalNode, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalNode->AdalV5 msal v3 cache")]
-        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalNode, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalNode msal v3 cache")]
-        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalNode, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalNode msal v3 cache")]
+        //[DataRow(CacheProgramType.MsalNode, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalNode->AdalV5 msal v3 cache")]
+        //[DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalNode, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalNode msal v3 cache")]
+        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalNode, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalNode msal v3 cache")]
         public async Task TestMsalNodeCacheCompatibilityAsync(
           CacheProgramType interactiveType,
           CacheProgramType silentType,
           CacheStorageType cacheStorageType)
         {
+            ProcessUtils processUtils = new ProcessUtils();
+            const string npm = "npm.cmd";
+            string npmPath = await processUtils.FindProgramAsync(npm, default).ConfigureAwait(false);
+            string executablePath = "node.exe";
+
+            executablePath = await processUtils.FindProgramAsync(executablePath, default).ConfigureAwait(false);
+
+            Trace.WriteLine($"npm {npmPath} node {executablePath}");
+
             var executor = new CacheTestExecutor(s_labUsers, cacheStorageType);
             await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);
         }
