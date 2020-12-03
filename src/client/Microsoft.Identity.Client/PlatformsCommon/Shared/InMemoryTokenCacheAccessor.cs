@@ -161,22 +161,22 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
-            return _refreshTokenCacheDictionary.Select(kv => kv.Value);
+            return _refreshTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
         public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
         {
-            return _idTokenCacheDictionary.Select(kv => kv.Value);
+            return _idTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
         public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
         {
-            return _accountCacheDictionary.Select(kv => kv.Value);
+            return _accountCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
         public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
-            return _appMetadataDictionary.Select(kv => kv.Value);
+            return _appMetadataDictionary.Select(kv => kv.Value).ToList();
         }
         #endregion
 
