@@ -66,6 +66,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+
         /// <summary>
         /// Configures the public client application to use the recommended reply URI for the platform. 
         /// See https://aka.ms/msal-net-default-reply-uri.

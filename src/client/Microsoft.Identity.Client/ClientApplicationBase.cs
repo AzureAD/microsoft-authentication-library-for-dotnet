@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle, false);
+                UserTokenCacheInternal = config.UserTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, false);
             }
         }
 
