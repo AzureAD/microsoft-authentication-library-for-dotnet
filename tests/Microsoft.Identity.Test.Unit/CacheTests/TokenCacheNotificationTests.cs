@@ -13,6 +13,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -268,6 +269,39 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsTrue(cacheAccessRecorder4.LastBeforeWriteNotificationArgs.HasTokens);
                 Assert.IsFalse(cacheAccessRecorder4.LastAfterAccessNotificationArgs.HasTokens);
             }
+        }
+
+        [TestMethod]
+        public async Task TestNotSubscribedAsync()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(new Uri(TestConstants.AuthorityTestTenant))
+                .WithRedirectUri(TestConstants.RedirectUri)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
+
+            cca.AppTokenCacheInternal = Substitute.For<ITokenCacheInternal>();
+
+            // Uncommenting these two lines should break the test
+            var inMemoryTokenCache = new InMemoryTokenCache();
+            inMemoryTokenCache.Bind(cca.AppTokenCache);
+
+            TokenCacheHelper tokenCacheHelper = new TokenCacheHelper();
+
+            tokenCacheHelper.PopulateCacheForClientCredential(cca.AppTokenCacheInternal.Accessor, 10);
+
+            // This is what I called originally, but the call went to AAD, since mocked cache does not give implementation
+            //await cca.AcquireTokenForClient(TestConstants.s_scope)
+            //    .WithForceRefresh(false)
+            //    .ExecuteAsync(System.Threading.CancellationToken.None).ConfigureAwait(true);
+            
+            await cca.GetAccountsAsync().ConfigureAwait(true);
+
+            // Assert
+            await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeWriteAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnAfterAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
         }
     }
 }
