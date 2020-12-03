@@ -10,11 +10,11 @@ using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
 {
-    public class AcqruireTokenForClientLargeCacheTests
+    public class AcquireTokenForClientLargeCacheTests
     {
         private AcquireTokenForClientParameterBuilder _acquireTokenForClientBuilder;
 
-        [Params(100, 1000, 10000, 100000)]
+        [Params(100000)]
         public int TokenCacheSize { get; set; }
 
         [GlobalSetup]
