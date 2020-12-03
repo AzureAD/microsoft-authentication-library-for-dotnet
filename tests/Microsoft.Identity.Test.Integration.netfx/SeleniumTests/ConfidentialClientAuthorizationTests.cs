@@ -104,10 +104,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             cacheAccess.AssertAccessCounts(0, 0);
 
             Trace.WriteLine("Part 2 - Use a browser to login and to capture the authorization code ");
-            var seleniumUi = new SeleniumWebUI((driver) =>
+            var seleniumUi = new SeleniumWebUI((driver, ct) =>
             {
                 Trace.WriteLine("Starting Selenium automation");
-                driver.PerformLogin(labResponse.User, Prompt.SelectAccount, false, false);
+                SeleniumLoginDriver seleniumLoginDriver =
+                    new SeleniumLoginDriver(driver, labResponse.User, TestContext, ct);
+                seleniumLoginDriver.PerformInteractiveLogin(
+                    Prompt.SelectAccount, withLoginHint: false, adfsOnly: false);
+                
             }, TestContext);
 
             CancellationTokenSource cts = new CancellationTokenSource(s_timeout);

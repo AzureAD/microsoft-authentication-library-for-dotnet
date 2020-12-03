@@ -20,7 +20,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
     {
         private static readonly TimeSpan ImplicitTimespan = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan ExplicitTimespan = TimeSpan.FromSeconds(20);
-        private static readonly TimeSpan ShortExplicitTimespan = TimeSpan.FromSeconds(5);
 
         public static IWebDriver CreateDefaultWebDriver()
         {
@@ -29,7 +28,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
-            //options.AddArguments("headless");
+            options.AddArguments("headless");
 
             var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
             if (string.IsNullOrEmpty(env))
@@ -94,6 +93,23 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         }
 
         #endregion
+
+        public static void CheckElementNotPresent(this IWebDriver driver, By by, TestContext testContext, string failureMessage)
+        {
+            try
+            {
+                var el = driver.FindElement(by);
+                if (el.Enabled && el.Displayed)
+                {
+                    driver.SaveScreenshot(testContext, failureMessage);
+                    throw new InvalidOperationException(failureMessage);
+                }
+            }
+            catch
+            {
+                // all good, move along
+            }
+        }
 
         public static IWebElement WaitForElementToBeVisibleAndEnabled(
             this IWebDriver driver,
@@ -175,148 +191,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             return driver.FindElement(By.Id(id));
         }
 
-        public static void PerformLogin(this IWebDriver driver, LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
-        {
-            UserInformationFieldIds fields = new UserInformationFieldIds(user);
-
-            EnterUsername(driver, user, withLoginHint, adfsOnly, fields);
-            EnterPassword(driver, user, fields);
-
-            HandleConsent(driver, user, fields, prompt);
-            HandleStaySignedIn(driver);
-        }
-
-        private static void HandleStaySignedIn(IWebDriver driver)
-        {
-            try
-            {
-                Trace.WriteLine("Finding the Stay Signed In - Yes button");
-                var yesBtn = driver.WaitForElementToBeVisibleAndEnabled(
-                    By.Id(CoreUiTestConstants.WebSubmitId));
-                yesBtn?.Click();
-            }
-            catch
-            {
-                Trace.WriteLine("Stay Signed In button not found");
-            }
-        }
-
-        private static void HandleConsent(IWebDriver driver, LabUser user, UserInformationFieldIds fields, Prompt prompt)
-        {
-            // For MSA, a special consent screen seems to come up every now and then
-            if (user.Upn.Contains("outlook.com"))
-            {
-                try
-                {
-                    Trace.WriteLine("Finding accept prompt");
-                    var acceptBtn = driver.WaitForElementToBeVisibleAndEnabled(
-                        ByIds(CoreUiTestConstants.ConsentAcceptId, fields.AADSignInButtonId),
-                        waitTime: ShortExplicitTimespan,
-                        ignoreFailures: true);
-                    acceptBtn?.Click();
-                }
-                catch
-                {
-                    Trace.WriteLine("No accept prompt found accept prompt");
-                }
-            }
-
-            if (prompt == Prompt.Consent)
-            {
-                Trace.WriteLine("Consenting...");
-                driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.AADSignInButtonId)).Click();
-            }
-        }
-
-        private static void EnterPassword(IWebDriver driver, LabUser user, UserInformationFieldIds fields)
-        {
-            Trace.WriteLine("Logging in ... Entering password");
-            string password = user.GetOrFetchPassword();
-            string passwordField = fields.GetPasswordInputId();
-            driver.WaitForElementToBeVisibleAndEnabled(By.Id(passwordField)).SendKeys(password);
-
-            Trace.WriteLine("Logging in ... Clicking next after password");
-            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.GetPasswordSignInButtonId())).Click();
-        }
-
-        private static void EnterUsername(IWebDriver driver, LabUser user, bool withLoginHint, bool adfsOnly, UserInformationFieldIds fields)
-        {
-            if (adfsOnly && !withLoginHint)
-            {
-                Trace.WriteLine("Logging in ... Entering username");
-                driver.FindElement(By.Id(CoreUiTestConstants.AdfsV4UsernameInputdId)).SendKeys(user.Upn);
-            }
-            else
-            {
-                if (!withLoginHint)
-                {
-                    Trace.WriteLine("Logging in ... Entering username");
-                    driver.FindElementById(fields.AADUsernameInputId).SendKeys(user.Upn.Contains("EXT") ? user.HomeUPN : user.Upn);
-
-                    Trace.WriteLine("Logging in ... Clicking <Next> after username");
-                    driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.AADSignInButtonId)).Click();
-
-                    try
-                    {
-                        driver.FindElementById(fields.AADSignInButtonId).Click();
-                        Trace.WriteLine("Yes, workaround ok");
-                    }
-                    catch
-                    {
-                        Trace.WriteLine("No, workaround failed");
-                    }
-                }
-
-                if (user.FederationProvider == FederationProvider.AdfsV2 && (user.UserType == UserType.Federated))
-                {
-                    Trace.WriteLine("Logging in ... AFDSv2 - Entering the username again, this time in the ADFSv2 form");
-                    driver.FindElementById(CoreUiTestConstants.AdfsV2WebUsernameInputId).SendKeys(user.Upn);
-                }
-            }
-        }
-
-        public static void PerformDeviceCodeLogin(
-            DeviceCodeResult deviceCodeResult,
-            LabUser user,
-            TestContext testContext,
-            bool isAdfs = false)
-        {
-            using (var seleniumDriver = CreateDefaultWebDriver())
-            {
-                try
-                {
-                    var fields = new UserInformationFieldIds(user);
-
-                    Trace.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
-
-                    string codeId = isAdfs ? "userCodeInput" : "code";
-                    string continueId = isAdfs ? "confirmationButton" : "continueBtn";
-
-                    seleniumDriver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
-                    seleniumDriver
-                        // Device Code Flow web ui is undergoing A/B testing and is sometimes different - use 2 IDs
-                        .FindElement(SeleniumExtensions.ByIds("otc", codeId))
-                        .SendKeys(deviceCodeResult.UserCode);
-
-                    IWebElement continueBtn = seleniumDriver.WaitForElementToBeVisibleAndEnabled(
-                        SeleniumExtensions.ByIds(fields.AADSignInButtonId, continueId));
-                    continueBtn?.Click();
-
-                    seleniumDriver.PerformLogin(user, Prompt.SelectAccount, false, isAdfs);
-                    Thread.Sleep(1000); // allow the browser to redirect
-
-                    seleniumDriver?.SaveScreenshot(testContext, "device_code_end");
-
-                    Trace.WriteLine("Authentication complete");
-                }
-                catch (Exception ex)
-                {
-                    Trace.WriteLine("Browser automation failed " + ex);
-                    seleniumDriver?.SaveScreenshot(testContext);
-                    throw;
-                }
-            }
-
-        }
+      
     }
 }

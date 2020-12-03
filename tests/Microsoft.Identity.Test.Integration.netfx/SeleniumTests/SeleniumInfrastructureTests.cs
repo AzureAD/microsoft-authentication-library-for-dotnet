@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     .Build();
 
             // This should fail after a few seconds
-            var seleniumLogic = new SeleniumWebUI((driver) =>
+            var seleniumLogic = new SeleniumWebUI((driver, ct) =>
             {
                 Trace.WriteLine("Looking for an element that does not exist");
                 driver.FindElement(By.Id("i_hope_this_element_does_not_exist"));
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     .Build();
 
             // The timeout is greater than the timeout of the TCP listener
-            var seleniumLogic = new SeleniumWebUI((driver) =>
+            var seleniumLogic = new SeleniumWebUI((driver, ct) =>
             {
                 Trace.WriteLine("Doing nothing for while, until the TCP listener times out");
                 Task.Delay(TimeSpan.FromSeconds(3));  

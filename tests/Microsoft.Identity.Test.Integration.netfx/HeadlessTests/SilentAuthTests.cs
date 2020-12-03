@@ -48,8 +48,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [TestCategory(TestCategories.MSA)]
-        [Ignore] // Failing sporadically https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1045664 
+        [TestCategory(TestCategories.MSA)]       
         public async Task SilentAuth_MsaUser_ForceRefresh_Async()
         {
             var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
@@ -63,11 +62,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Part 1 - Acquire a token with device code with msa user");
             AuthenticationResult authResult = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
             {
-                SeleniumExtensions.PerformDeviceCodeLogin(
-                    deviceCodeResult,
-                    labResponse.User,
-                    TestContext,
-                    false);
+                var driver = SeleniumExtensions.CreateDefaultWebDriver();
+                SeleniumLoginDriver seleniumLoginDriver =
+                   new SeleniumLoginDriver(driver, labResponse.User, TestContext, default);
+
+                seleniumLoginDriver.PerformDeviceCodeLogin(deviceCodeResult, isAdfs: false);
 
                 return Task.FromResult(0);
             }).ExecuteAsync()

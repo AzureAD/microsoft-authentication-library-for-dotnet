@@ -274,10 +274,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
         {
-            return new SeleniumWebUI((driver) =>
+            return new SeleniumWebUI((driver, ct) =>
             {
                 Trace.WriteLine("Starting Selenium automation");
-                driver.PerformLogin(user, prompt, withLoginHint, adfsOnly);
+                SeleniumLoginDriver seleniumLoginDriver =
+                    new SeleniumLoginDriver(driver, user, TestContext, ct);
+                seleniumLoginDriver.PerformInteractiveLogin(
+                    prompt, withLoginHint, adfsOnly);
             }, TestContext);
         }
     }

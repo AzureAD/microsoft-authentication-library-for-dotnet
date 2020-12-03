@@ -109,8 +109,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var userCacheAccess = pca.UserTokenCache.RecordAccess();
 
             var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
-            {
-                SeleniumExtensions.PerformDeviceCodeLogin(deviceCodeResult, labResponse.User, TestContext, false);
+            {                
+                var driver = SeleniumExtensions.CreateDefaultWebDriver();
+                SeleniumLoginDriver seleniumLoginDriver =
+                   new SeleniumLoginDriver(driver, labResponse.User, TestContext, default);
+               
+                seleniumLoginDriver.PerformDeviceCodeLogin(deviceCodeResult, isAdfs: false);
                 return Task.FromResult(0);
             }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 

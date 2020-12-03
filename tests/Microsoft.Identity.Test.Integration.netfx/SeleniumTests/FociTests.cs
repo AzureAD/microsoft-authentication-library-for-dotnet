@@ -70,11 +70,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 Trace.WriteLine("Get a token interactively with an app from the family.");
                 AuthenticationResult authResult = await pca_fam1.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
                 {
-                    SeleniumExtensions.PerformDeviceCodeLogin(
-                        deviceCodeResult,
-                        labResponse.User,
-                        TestContext,
-                        false);
+                    var driver = SeleniumExtensions.CreateDefaultWebDriver();
+                    SeleniumLoginDriver seleniumLoginDriver =
+                       new SeleniumLoginDriver(driver, labResponse.User, TestContext, default);
+
+                    seleniumLoginDriver.PerformDeviceCodeLogin(deviceCodeResult, isAdfs: false);
 
                     return Task.FromResult(0);
                 }).ExecuteAsync()

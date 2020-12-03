@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     internal class SeleniumWebUI : ICustomWebUi
     {
-        private readonly Action<IWebDriver> _seleniumAutomationLogic;
+        private readonly Action<IWebDriver, CancellationToken> _seleniumAutomationLogic;
         private readonly TestContext _testContext;
         private readonly ICoreLogger _logger;
 
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
   </body>
 </html>";
 
-        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TestContext testContext, ICoreLogger logger = null)
+        public SeleniumWebUI(Action<IWebDriver, CancellationToken> seleniumAutomationLogic, TestContext testContext, ICoreLogger logger = null)
         {
             _seleniumAutomationLogic = seleniumAutomationLogic;
             _testContext = testContext;
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 // but make sure to start the TCP listener first
                 CancellationTokenSource innerSource = new CancellationTokenSource();
                 var tcpCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(
-                    innerSource.Token, 
+                    innerSource.Token,
                     externalCancellationToken);
 
                 Task<Uri> listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
@@ -124,9 +124,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     },
                     tcpCancellationToken.Token);
 
+                CancellationTokenSource seleniumCts = new CancellationTokenSource();
                 var seleniumAutomationTask = Task.Factory.StartNew(() =>
                     {
-                        _seleniumAutomationLogic(driver);
+
+                        _seleniumAutomationLogic(driver, seleniumCts.Token);
                         _logger.Info("Selenium automation finished");
                     });
 
@@ -138,6 +140,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 // No need to wait to post a nice message in the browser
                 if (authCodeUri != null)
                 {
+                    seleniumCts.Cancel();
                     return authCodeUri;
                 }
 
