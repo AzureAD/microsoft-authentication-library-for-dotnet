@@ -38,13 +38,11 @@ Example output (should go in ResultsFilePath):
 
 */
 
-
 var msal = require("@azure/msal-node");
 const { Console } = require("console");
 const { promises: fs } = require("fs");
 
 async function readTestInputAsync() {
-
     if (process.argv.length < 4) {
         console.error("No arguments given. Expecting an input file path");
         throw "No arguments given. Expecting an input file path.";
@@ -62,7 +60,6 @@ async function readTestInputAsync() {
 
 async function createPCAAsync(testInput, userIndex) {
     const cachePath = testInput.CacheFilePath;
-
 
     const beforeCacheAccess = async (cacheContext) => {
         const fileExists = async path => !!(await fs.stat(path).catch(e => false));
@@ -165,7 +162,6 @@ async function saveFailureResultAsync(testInput, error) {
 
     console.log("Saving the failure to " + testInput.ResultsFilePath);
     await fs.writeFile(testInput.ResultsFilePath,  JSON.stringify(fullResult));
-
 }
 
 (async () => {
@@ -182,7 +178,3 @@ async function saveFailureResultAsync(testInput, error) {
         
     }
 })();
-
-
-
-
