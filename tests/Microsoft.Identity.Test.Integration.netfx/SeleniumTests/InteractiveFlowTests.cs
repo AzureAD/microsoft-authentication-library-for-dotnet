@@ -130,53 +130,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        [Ignore("Lab needs a way to provide multiple account types(AAD, ADFS, MSA) that can sign into the same client id")]
-        public async Task MultiUserCacheCompatabilityTestAsync()
-        {
-            // Arrange
-
-            //Acquire AT for default lab account
-            LabResponse labResponseDefault = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            AuthenticationResult defaultAccountResult = await RunTestForUserAsync(labResponseDefault).ConfigureAwait(false);
-
-            //Acquire AT for ADFS 2019 account
-            LabResponse labResponseFederated = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
-            var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, false).ConfigureAwait(false);
-
-            //Acquire AT for MSA account
-            LabResponse labResponseMsa = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-            labResponseMsa.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
-            var msaAccountResult = await RunTestForUserAsync(labResponseMsa).ConfigureAwait(false);
-
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponseDefault.App.AppId).BuildConcrete();
-
-            AuthenticationResult authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, defaultAccountResult.Account)
-                                                       .ExecuteAsync()
-                                                       .ConfigureAwait(false);
-            Assert.IsNotNull(authResult);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNotNull(authResult.IdToken);
-
-            pca = PublicClientApplicationBuilder.Create(labResponseFederated.App.AppId).BuildConcrete();
-
-            authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, federatedAccountResult.Account)
-                                  .ExecuteAsync()
-                                  .ConfigureAwait(false);
-            Assert.IsNotNull(authResult);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNull(authResult.IdToken);
-
-            pca = PublicClientApplicationBuilder.Create(LabApiConstants.MSAOutlookAccountClientID).BuildConcrete();
-
-            authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, msaAccountResult.Account)
-                                  .ExecuteAsync()
-                                  .ConfigureAwait(false);
-            Assert.IsNotNull(authResult);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNull(authResult.IdToken);
-        }
-
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
         {
             IPublicClientApplication pca;

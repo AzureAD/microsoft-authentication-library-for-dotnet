@@ -81,8 +81,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.MSA)]
-        [Ignore] // Failing sporadically https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1045664 
+        [TestCategory(TestCategories.MSA)]       
         public async Task DeviceCodeFlowMsaTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);

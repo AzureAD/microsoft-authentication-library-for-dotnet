@@ -39,16 +39,17 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
           bool withLoginHint = false,
           bool adfsOnly = false)
         {
-            _cancellationToken.ThrowIfCancellationRequested();
-            EnterUsername(withLoginHint, adfsOnly);
-            _cancellationToken.ThrowIfCancellationRequested();
-            EnterPassword();
+            if (!_cancellationToken.IsCancellationRequested)
+                EnterUsername(withLoginHint, adfsOnly);
+
+            if (!_cancellationToken.IsCancellationRequested)
+                EnterPassword();
 
             if (!_cancellationToken.IsCancellationRequested)
                 HandleConsent(prompt);
 
             if (!_cancellationToken.IsCancellationRequested)
-                HandleStaySignedIn();
+                HandleStaySignedIn();         
         }
 
         public void PerformDeviceCodeLogin(
@@ -97,6 +98,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Trace.WriteLine("Logging in ... Clicking next after password");
             _driver.WaitForElementToBeVisibleAndEnabled(By.Id(_htmlFieldIds.GetPasswordSignInButtonId())).Click();
 
+            Thread.Sleep(500); // allow the browser to redirect
+
+            // the SeleniumWebUi should have stopped us by now...
             if (!_cancellationToken.IsCancellationRequested)
             {
                 Trace.WriteLine("Checking that the password field is no longer present");
