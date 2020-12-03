@@ -37,11 +37,11 @@ namespace CommonCache.Test.Common
             var executable = findArgs;
             try
             {
-                Console.WriteLine($"Calling:  where {findArgs}");
+                Trace.WriteLine($"Calling:  where {findArgs}");
                 ProcessRunResults whereResults = await RunProcessAsync("where", findArgs, cancellationToken).ConfigureAwait(false);
                 if (whereResults != null)
                 {
-                    Console.WriteLine($"Search result: {whereResults}");
+                    Trace.WriteLine($"Search result: {whereResults}");
                     if (!string.IsNullOrEmpty(whereResults.StandardOut))
                     {
                         var results = whereResults.StandardOut.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
@@ -54,7 +54,7 @@ namespace CommonCache.Test.Common
             }
             catch (ProcessRunException ex)
             {
-                Console.WriteLine(ex.ProcessStandardOutput);
+                Trace.WriteLine(ex.ProcessStandardOutput);
                 throw;
             }
 
