@@ -123,18 +123,15 @@ namespace Microsoft.Identity.Client.Cache
                                 }
                                 finally
                                 {
-                                    if (TokenCacheInternal.IsTokenCacheSerialized())
-                                    {
-                                        var args = new TokenCacheNotificationArgs(
-                                            TokenCacheInternal,
-                                           _requestParams.ClientId,
-                                           _requestParams.Account,
-                                           hasStateChanged: false,
-                                           TokenCacheInternal.IsApplicationCache,
-                                           hasTokens: TokenCacheInternal.HasTokensNoLocks(),
-                                           suggestedCacheKey: key);
-                                        await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
-                                    }
+                                    var args = new TokenCacheNotificationArgs(
+                                        TokenCacheInternal,
+                                       _requestParams.ClientId,
+                                       _requestParams.Account,
+                                       hasStateChanged: false,
+                                       TokenCacheInternal.IsApplicationCache,
+                                       hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                       suggestedCacheKey: key);
+                                    await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                                 }
 
                                 _cacheRefreshedForRead = true;

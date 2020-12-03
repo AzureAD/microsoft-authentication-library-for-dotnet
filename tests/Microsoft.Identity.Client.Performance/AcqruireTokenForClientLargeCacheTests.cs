@@ -10,8 +10,7 @@ using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("AsyncUsage.CSharp.Usage", "UseConfigureAwait:Use ConfigureAwait", Justification = "Test project, inapplicable.")]
-    public class GetAllAccessTokensTests
+    public class AcqruireTokenForClientLargeCacheTests
     {
         private AcquireTokenForClientParameterBuilder _acquireTokenForClientBuilder;
 
@@ -44,7 +43,7 @@ namespace Microsoft.Identity.Test.Performance
         public async Task<AuthenticationResult> AcquireTokenForClientTestAsync()
         {
             return await _acquireTokenForClientBuilder
-                .ExecuteAsync(System.Threading.CancellationToken.None);
+                .ExecuteAsync(System.Threading.CancellationToken.None).ConfigureAwait(true);
         }
     }
 }
