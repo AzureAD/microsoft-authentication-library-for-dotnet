@@ -8,7 +8,7 @@ New Features:
 Bug Fixes:
 **MSAL .NET will not force the user to enter their credentials when logging-in with WAM**. See issue [#2233](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2233) for details. 
 **MSAL .NET now throws an actionable error message when ROPC is attempted with MSA accounts**. See issue [#2169](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2169) for details.
-**MSAL .NET now supports WithForceRefresh for AcquireTokenOnBehalfOfParameterBuilder**. See issue [#2232](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2232) for details.
+**MSAL .NET now supports `WithForceRefresh` as part of the `AcquireTokenOnBehalfOfParameterBuilder`**. See issue [#2232](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2232) for details.
 **Fix PlatformNotSupportedException in MacOS**. See issue [#2251](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2251) for details.
 **AcquireTokenOnBehalfOfAsync is now not visible in the Intellisense**. See issue [#2263](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2263) for details.
 
