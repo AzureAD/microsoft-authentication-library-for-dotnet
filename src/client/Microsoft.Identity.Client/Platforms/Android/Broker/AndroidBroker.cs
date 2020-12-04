@@ -56,27 +56,23 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
-        ///Check if the network is available. If the network is unavailable due to power optimization,
-        ///a <see cref="MsalClientException"/>will be thrown with error code <see cref="MsalError.AndroidBrokerClientPowerOptimization"/> 
+        ///Check if the network is available.
         private void CheckPowerOptimizationStatus()
+        {
+            checkPackageForPowerOptimization(Application.Context.PackageName);
+            checkPackageForPowerOptimization(_brokerHelper.Authenticators.FirstOrDefault().PackageName);
+        }
+
+        private void checkPackageForPowerOptimization(string package)
         {
             var powerManager = PowerManager.FromContext(Application.Context);
 
             //Power optimization checking was added in API 23
-            if (Build.VERSION.SdkInt == BuildVersionCodes.M &&
+            if ((int)Build.VERSION.SdkInt >= (int)BuildVersionCodes.M &&
                 powerManager.IsDeviceIdleMode &&
-                !powerManager.IsIgnoringBatteryOptimizations(Application.Context.PackageName))
+                !powerManager.IsIgnoringBatteryOptimizations(package))
             {
-                _logger.Warning("Power optimization detected on the client application: " + Application.Context.PackageName + " and the device is in doze mode or the app is standby. \n" +
-                    "Please disable power optimizations for this application to authenticate.");
-            }
-
-            var brokerPackage = _brokerHelper.Authenticators.FirstOrDefault().PackageName;
-            if (Build.VERSION.SdkInt == BuildVersionCodes.M &&
-                powerManager.IsDeviceIdleMode &&
-                !powerManager.IsIgnoringBatteryOptimizations(brokerPackage))
-            {
-                _logger.Warning("Power optimization detected on the Authenticator application: " + brokerPackage + " and the device is in doze mode or the app is standby. \n" +
+                _logger.Error("Power optimization detected for the application: " + package + " and the device is in doze mode or the app is standby. \n" +
                     "Please disable power optimizations for this application to authenticate.");
             }
         }
