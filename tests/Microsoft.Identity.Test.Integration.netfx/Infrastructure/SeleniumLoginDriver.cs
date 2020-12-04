@@ -34,7 +34,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             _testContext = testContext;
             _cancellationToken = cancellationToken;
             _htmlFieldIds = new UserInformationFieldIds(user);
-
         }
 
         public void PerformInteractiveLogin(
