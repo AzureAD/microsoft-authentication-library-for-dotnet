@@ -369,21 +369,6 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-#if ANDROID || NETSTANDARD
-        /// <summary>
-        /// Determines if the client app cannot access the network due to power saving optimizations or if the device is currently in idle mode
-        /// and will throw an <see cref="MsalClientException"/> with broker_client_power_opt_error as an error code.
-        /// </summary>
-        /// <param name="checkPowerOp">Check for power optimization.</param>
-        /// <returns>The builder to chain the .With methods.</returns>
-        /// <remarks> Idle mode happens when a device has been sitting unused and unmoving for a sufficiently long period of time,
-        /// so that it decides to go into a lower power-use state. This may involve things like turning off network access to apps.</remarks>
-        public T WithPowerOptimizationCheck(bool checkPowerOp)
-        {
-            CommonParameters.CheckPowerOptimization = checkPowerOp;
-            return (T)this;
-        }
-#endif
         /// <summary>
         /// Validates the parameters of the AcquireToken operation.
         /// </summary>

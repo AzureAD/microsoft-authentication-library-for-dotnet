@@ -58,21 +58,26 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         ///Check if the network is available. If the network is unavailable due to power optimization,
         ///a <see cref="MsalClientException"/>will be thrown with error code <see cref="MsalError.AndroidBrokerClientPowerOptimization"/> 
-        private void CheckPowerOptimizationStatus(bool CheckPowerOptimizations = false)
+        private void CheckPowerOptimizationStatus()
         {
             var powerManager = PowerManager.FromContext(Application.Context);
 
             //Power optimization checking was added in API 23
-            if (CheckPowerOptimizations &&
-                Build.VERSION.SdkInt == BuildVersionCodes.M &&
+            if (Build.VERSION.SdkInt == BuildVersionCodes.M &&
                 powerManager.IsDeviceIdleMode &&
-                !powerManager.IsIgnoringBatteryOptimizations(Application.Context.PackageName) )
+                !powerManager.IsIgnoringBatteryOptimizations(Application.Context.PackageName))
             {
-                _logger.Warning("Power optimization detected on the client application: " + Application.Context.PackageName + "\nPlease disable power optimizations.");
-                
-                throw new MsalClientException(MsalError.AndroidBrokerClientPowerOptimization,
-                    "Connection is not available to aqcuire token because power optimization is "
-                        + "enabled. And the device is in doze mode or the app is standby.");
+                _logger.Warning("Power optimization detected on the client application: " + Application.Context.PackageName + " and the device is in doze mode or the app is standby. \n" +
+                    "Please disable power optimizations for this application to authenticate.");
+            }
+
+            var brokerPackage = _brokerHelper.Authenticators.FirstOrDefault().PackageName;
+            if (Build.VERSION.SdkInt == BuildVersionCodes.M &&
+                powerManager.IsDeviceIdleMode &&
+                !powerManager.IsIgnoringBatteryOptimizations(brokerPackage))
+            {
+                _logger.Warning("Power optimization detected on the Authenticator application: " + brokerPackage + " and the device is in doze mode or the app is standby. \n" +
+                    "Please disable power optimizations for this application to authenticate.");
             }
         }
 
@@ -80,7 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            CheckPowerOptimizationStatus(authenticationRequestParameters.CheckPowerOptimization);
+            CheckPowerOptimizationStatus();
 
             s_androidBrokerTokenResponse = null;
 
@@ -93,10 +98,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             try
             {
                 await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
-
-                // todo: needed? 
-                // brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username);              
-
                 await AcquireTokenInteractiveViaBrokerAsync(brokerRequest).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -116,7 +117,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            CheckPowerOptimizationStatus(authenticationRequestParameters.CheckPowerOptimization);
+            CheckPowerOptimizationStatus();
 
             BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
                 authenticationRequestParameters, acquireTokenSilentParameters);
