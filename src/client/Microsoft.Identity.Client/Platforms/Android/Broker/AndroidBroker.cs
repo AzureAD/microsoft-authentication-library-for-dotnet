@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 powerManager.IsDeviceIdleMode &&
                 !powerManager.IsIgnoringBatteryOptimizations(package))
             {
-                _logger.Error("Power optimization detected for the application: " + package + " and the device is in doze mode or the app is standby. \n" +
+                _logger.Error("Power optimization detected for the application: " + package + " and the device is in doze mode or the app is in standby. \n" +
                     "Please disable power optimizations for this application to authenticate.");
             }
         }
