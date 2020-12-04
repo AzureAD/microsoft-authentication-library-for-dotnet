@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         public const string ScopeStr = "r1/scope1 r1/scope2";
+        public const string ScopeStrFormat = "r{0}/scope1 r{0}/scope2";
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";

@@ -8,11 +8,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -268,6 +271,110 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsTrue(cacheAccessRecorder4.LastBeforeWriteNotificationArgs.HasTokens);
                 Assert.IsFalse(cacheAccessRecorder4.LastAfterAccessNotificationArgs.HasTokens);
             }
+        }
+
+        [TestMethod]
+        public async Task GetAccounts_DoesNotFireNotifications_WhenTokenCacheIsNotSerialized_Async()
+        {
+            // Arrange
+            var userTokenCacheInternal = Substitute.For<ITokenCacheInternal>();
+            var semaphore = new SemaphoreSlim(1, 1);
+            userTokenCacheInternal.Semaphore.Returns(semaphore);
+            
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(new Uri(TestConstants.AuthorityTestTenant))
+                .WithRedirectUri(TestConstants.RedirectUri)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithUserTokenCacheInternalForTest(userTokenCacheInternal)
+                .BuildConcrete();
+
+            userTokenCacheInternal.IsTokenCacheSerialized().Returns(false);
+            
+            // Act
+            await cca.GetAccountsAsync().ConfigureAwait(false);
+
+            // Assert
+            await cca.UserTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.UserTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeWriteAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.UserTokenCacheInternal.DidNotReceiveWithAnyArgs().OnAfterAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+
+
+            // Arrange
+            userTokenCacheInternal.IsTokenCacheSerialized().Returns(true);
+
+            // Act
+            await cca.GetAccountsAsync().ConfigureAwait(true);
+
+            // Assert
+            await cca.UserTokenCacheInternal.Received().OnBeforeAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.UserTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeWriteAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.UserTokenCacheInternal.Received().OnAfterAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+
+
+        }    
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_DoesNotFireNotifications_WhenTokenCacheIsNotSerialized_Async()
+        {
+            // Arrange
+            var appTokenCache = Substitute.For<ITokenCacheInternal>();
+            var semaphore = new SemaphoreSlim(1, 1);
+            appTokenCache.Semaphore.Returns(semaphore);
+
+            appTokenCache.FindAccessTokenAsync(default).ReturnsForAnyArgs(TokenCacheHelper.CreateAccessTokenItem());
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithAppTokenCacheInternalForTest(appTokenCache)
+                .BuildConcrete();
+
+            appTokenCache.IsTokenCacheSerialized().Returns(false);
+
+            // Act
+            await cca.AcquireTokenForClient(new[] { "https://resource/.default" }).ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeWriteAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnAfterAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+
+
+            // Arrange
+            appTokenCache.IsTokenCacheSerialized().Returns(true);
+
+            // Act
+            await cca.AcquireTokenForClient(new[] { "https://resource/.default" }).ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            await cca.AppTokenCacheInternal.Received().OnBeforeAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.AppTokenCacheInternal.DidNotReceiveWithAnyArgs().OnBeforeWriteAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+            await cca.AppTokenCacheInternal.Received().OnAfterAccessAsync(Arg.Any<TokenCacheNotificationArgs>()).ConfigureAwait(true);
+        }
+
+        [TestMethod]
+        public void IsSerializedTest()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+               .Create(TestConstants.ClientId)
+               .WithClientSecret(TestConstants.ClientSecret)
+               .BuildConcrete();
+
+            Assert.IsFalse((cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+            Assert.IsFalse((cca.UserTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+
+            var inMemoryTokenCache = new InMemoryTokenCache();
+            inMemoryTokenCache.Bind(cca.AppTokenCache);
+
+            Assert.IsTrue((cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+            Assert.IsFalse((cca.UserTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+
+            inMemoryTokenCache.Bind(cca.UserTokenCache);
+
+            Assert.IsTrue((cca.AppTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+            Assert.IsTrue((cca.UserTokenCache as ITokenCacheInternal).IsTokenCacheSerialized());
+
         }
     }
 }
