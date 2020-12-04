@@ -16,7 +16,7 @@ namespace CommonCache.Test.Common
 
         public override string ToString()
         {
-            return $"StdOut: {StandardOut} \r\n StdErr: {StandardError} ";
+            return $"StdOut: {StandardOut} \n StdErr: {StandardError} ";
         }
     }
 }

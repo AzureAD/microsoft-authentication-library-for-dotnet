@@ -160,16 +160,7 @@ namespace CommonCache.Test.Unit
           CacheProgramType interactiveType,
           CacheProgramType silentType,
           CacheStorageType cacheStorageType)
-        {
-            ProcessUtils processUtils = new ProcessUtils();
-            const string npm = "npm.cmd";
-            string npmPath = await processUtils.FindProgramAsync(npm, default).ConfigureAwait(false);
-            string executablePath = "node.exe";
-
-            executablePath = await processUtils.FindProgramAsync(executablePath, default).ConfigureAwait(false);
-
-            Trace.WriteLine($"npm {npmPath} node {executablePath}");
-
+        {           
             var executor = new CacheTestExecutor(s_labUsers, cacheStorageType);
             await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);
         }

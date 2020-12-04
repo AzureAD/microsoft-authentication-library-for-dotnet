@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
@@ -31,7 +32,7 @@ namespace CommonCache.Test.Unit.Utils
             CacheProgramType secondProgram,
             CancellationToken cancellationToken)
         {
-            Console.WriteLine($"Running {firstProgram} -> {secondProgram}...");
+            Trace.WriteLine($"Running {firstProgram} -> {secondProgram}...");
 
             CommonCacheTestUtils.DeleteAllTestCaches();
             CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
@@ -47,22 +48,22 @@ namespace CommonCache.Test.Unit.Utils
             var cacheProgramFirst = CacheProgramFactory.CreateCacheProgram(cacheProgramType, _cacheStorageType);
 
             var results = await cacheProgramFirst.ExecuteAsync(_labUsers, cancellationToken).ConfigureAwait(false);
-            Console.WriteLine();
-            Console.WriteLine("------------------------------------");
+           
+            Trace.WriteLine("------------------------------------");
             if (isFirst)
             {
-                Console.WriteLine($"First Results: {cacheProgramType}");
+                Trace.WriteLine($"First Results: {cacheProgramType}");
             }
             else
             {
-                Console.WriteLine($"Second Results: {cacheProgramType}");
+                Trace.WriteLine($"Second Results: {cacheProgramType}");
             }
-            Console.WriteLine("stdout:");
-            Console.WriteLine(results.StdOut);
-            Console.WriteLine();
-            Console.WriteLine("stderr:");
-            Console.WriteLine(results.StdErr);
-            Console.WriteLine("------------------------------------");
+            Trace.WriteLine("stdout:");
+            Trace.WriteLine(results.StdOut);
+            Trace.WriteLine("-------");
+            Trace.WriteLine("stderr:");
+            Trace.WriteLine(results.StdErr);
+            Trace.WriteLine("------------------------------------");
             Assert.IsFalse(results.ExecutionResults.IsError, $"{cacheProgramType} should not fail: {results.ExecutionResults.ErrorMessage}");
             Assert.IsFalse(results.ProcessExecutionFailed, $"{cacheProgramFirst.ExecutablePath} should not fail");
 
@@ -84,32 +85,32 @@ namespace CommonCache.Test.Unit.Utils
         {
             if (File.Exists(CommonCacheTestUtils.AdalV3CacheFilePath))
             {
-                Console.WriteLine($"Adal Cache Exists at: {CommonCacheTestUtils.AdalV3CacheFilePath}");
-                Console.WriteLine("Adal Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.AdalV3CacheFilePath).Length));
+                Trace.WriteLine($"Adal Cache Exists at: {CommonCacheTestUtils.AdalV3CacheFilePath}");
+                Trace.WriteLine("Adal Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.AdalV3CacheFilePath).Length));
             }
             else
             {
-                Console.WriteLine($"Adal Cache DOES NOT EXIST at: {CommonCacheTestUtils.AdalV3CacheFilePath}");
+                Trace.WriteLine($"Adal Cache DOES NOT EXIST at: {CommonCacheTestUtils.AdalV3CacheFilePath}");
             }
 
             if (File.Exists(CommonCacheTestUtils.MsalV2CacheFilePath))
             {
-                Console.WriteLine($"MSAL V2 Cache Exists at: {CommonCacheTestUtils.MsalV2CacheFilePath}");
-                Console.WriteLine("MSAL V2 Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV2CacheFilePath).Length));
+                Trace.WriteLine($"MSAL V2 Cache Exists at: {CommonCacheTestUtils.MsalV2CacheFilePath}");
+                Trace.WriteLine("MSAL V2 Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV2CacheFilePath).Length));
             }
             else
             {
-                Console.WriteLine($"MSAL V2 Cache DOES NOT EXIST at: {CommonCacheTestUtils.MsalV2CacheFilePath}");
+                Trace.WriteLine($"MSAL V2 Cache DOES NOT EXIST at: {CommonCacheTestUtils.MsalV2CacheFilePath}");
             }
 
             if (File.Exists(CommonCacheTestUtils.MsalV3CacheFilePath))
             {
-                Console.WriteLine($"MSAL V3 Cache Exists at: {CommonCacheTestUtils.MsalV3CacheFilePath}");
-                Console.WriteLine("MSAL V3 Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV3CacheFilePath).Length));
+                Trace.WriteLine($"MSAL V3 Cache Exists at: {CommonCacheTestUtils.MsalV3CacheFilePath}");
+                Trace.WriteLine("MSAL V3 Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV3CacheFilePath).Length));
             }
             else
             {
-                Console.WriteLine($"MSAL V3 Cache DOES NOT EXIST at: {CommonCacheTestUtils.MsalV3CacheFilePath}");
+                Trace.WriteLine($"MSAL V3 Cache DOES NOT EXIST at: {CommonCacheTestUtils.MsalV3CacheFilePath}");
             }
         }
     }
