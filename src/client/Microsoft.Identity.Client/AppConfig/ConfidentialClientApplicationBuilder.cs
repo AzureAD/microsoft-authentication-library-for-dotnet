@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientAssertionDelegate">delegate computing the client assertion used to prove the identity of the application to Azure AD.
         /// This is a delegete that computes a Base-64 encoded JWT for each authentication call.</param>
-        /// <returns></returns>
+        /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<string> clientAssertionDelegate)
         {
             if (clientAssertionDelegate == null)
