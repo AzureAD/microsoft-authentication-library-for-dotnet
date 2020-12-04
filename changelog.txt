@@ -3,6 +3,7 @@
 
 New Features:
 **`AcquireTokenForClient` and `AcquireTokenSilent` have improved performance, especially for large token caches**. See issue [#2204](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2204) for details.
+** TokenCache notifications are not fired when the TokenCache is not serialized by developers, improving performance of all APIs utilising the token cache ** 
 **MSAL .NET now sends the whether the token cache is serialized to telemetry**. See issue [#2185](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2185) for details.
 
 Bug Fixes:
