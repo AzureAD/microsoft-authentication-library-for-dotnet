@@ -136,7 +136,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the application client assertion. See https://aka.ms/msal-net-client-assertion
+        /// Sets the application client assertion. See https://aka.ms/msal-net-client-assertion.
+        /// This will create an assertion that will be held within the client application's memory for the duration of the client.
+        /// You can use <see cref="WithClientAssertion(Func{string})"/> to set a delegate that will be executed for each authentication request. 
+        /// This will allow you to update the client asserion used by the client application once the assertion expires.
         /// </summary>
         /// <param name="signedClientAssertion">The client assertion used to prove the identity of the application to Azure AD. This is a Base-64 encoded JWT.</param>
         /// <returns></returns>

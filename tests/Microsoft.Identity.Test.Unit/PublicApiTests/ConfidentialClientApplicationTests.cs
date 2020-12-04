@@ -581,8 +581,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
 
                 // assert client credential
-                Assert.IsNotNull(app.ClientCredential.SignedAssertion);
-                Assert.AreEqual(TestConstants.DefaultClientAssertion, app.ClientCredential.SignedAssertion);
+                Assert.IsNotNull(app.ClientCredential.SignedAssertionDelegate);
+                Assert.AreEqual(TestConstants.DefaultClientAssertion, app.ClientCredential.SignedAssertionDelegate());
             }
         }
 
