@@ -10,6 +10,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     {
         public UserAssertion UserAssertion { get; set; }
         public bool SendX5C { get; set;}
+        public bool ForceRefresh { get; set; }
 
         /// <inheritdoc />
         public void LogParameters(ICoreLogger logger)
@@ -17,6 +18,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             var builder = new StringBuilder();
             builder.AppendLine("=== OnBehalfOfParameters ===");
             builder.AppendLine("SendX5C: " + SendX5C);
+            builder.AppendLine("ForceRefresh: " + ForceRefresh);
             logger.Info(builder.ToString());
         }
     }

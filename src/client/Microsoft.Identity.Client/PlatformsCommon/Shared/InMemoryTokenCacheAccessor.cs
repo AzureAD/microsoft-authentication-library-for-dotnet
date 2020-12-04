@@ -20,6 +20,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     {
         // perf improvement: intialize the capacity and concurrency level 
         // since most websites would use distributed caching, these dictionaries would mostly hold a single item
+
+        // perf: do not use ConcurrentDictionary.Values as it takes a lock
         private readonly ConcurrentDictionary<string, MsalAccessTokenCacheItem> _accessTokenCacheDictionary =
             new ConcurrentDictionary<string, MsalAccessTokenCacheItem>(1, 1);
 
@@ -154,62 +156,27 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Get All Values
         public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
-            // perf: do not call ConcurrentDictionary.Values as it takes a lock
-            List<MsalAccessTokenCacheItem> ats = new List<MsalAccessTokenCacheItem>();
-            foreach (var kvp in _accessTokenCacheDictionary)
-            {
-                ats.Add(kvp.Value);
-            }
-
-            return ats;
+            return _accessTokenCacheDictionary.Select(kv => kv.Value);
         }
 
         public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
-            // perf: do not call ConcurrentDictionary.Values as it takes a lock
-            List<MsalRefreshTokenCacheItem> rts = new List<MsalRefreshTokenCacheItem>();
-            foreach (var kvp in _refreshTokenCacheDictionary)
-            {
-                rts.Add(kvp.Value);
-            }
-
-            return rts;
+            return _refreshTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
         public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
         {
-            // perf: do not call ConcurrentDictionary.Values as it takes a lock
-            List<MsalIdTokenCacheItem> ids = new List<MsalIdTokenCacheItem>();
-            foreach (var kvp in _idTokenCacheDictionary)
-            {
-                ids.Add(kvp.Value);
-            }
-
-            return ids;
+            return _idTokenCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
         public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
         {
-            // perf: do not call ConcurrentDictionary.Values as it takes a lock
-            List<MsalAccountCacheItem> accounts = new List<MsalAccountCacheItem>();
-            foreach (var kvp in _accountCacheDictionary)
-            {
-                accounts.Add(kvp.Value);
-            }
-
-            return accounts;
+            return _accountCacheDictionary.Select(kv => kv.Value).ToList();
         }
 
         public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
         {
-            // perf: do not call ConcurrentDictionary.Values as it takes a lock
-            List<MsalAppMetadataCacheItem> metadata = new List<MsalAppMetadataCacheItem>();
-            foreach (var kvp in _appMetadataDictionary)
-            {
-                metadata.Add(kvp.Value);
-            }
-
-            return metadata;
+            return _appMetadataDictionary.Select(kv => kv.Value).ToList();
         }
         #endregion
 

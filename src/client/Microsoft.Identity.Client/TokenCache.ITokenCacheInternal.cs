@@ -19,6 +19,10 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// IMPORTANT: this class is perf critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
+    /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
+    /// </summary>
     public sealed partial class TokenCache : ITokenCacheInternal
     {
         async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem>> ITokenCacheInternal.SaveTokenResponseAsync(
@@ -119,23 +123,27 @@ namespace Microsoft.Identity.Client
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
             try
             {
-                var args = new TokenCacheNotificationArgs(
-                    this,
-                    ClientId,
-                    account,
-                    hasStateChanged: true,
-                    (this as ITokenCacheInternal).IsApplicationCache,
-                    hasTokens: (this as ITokenCacheInternal).HasTokensNoLocks(),
-                    suggestedCacheKey: suggestedWebCacheKey);
-
 #pragma warning disable CS0618 // Type or member is obsolete
                 HasStateChanged = true;
 #pragma warning restore CS0618 // Type or member is obsolete
 
                 try
                 {
-                    await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
-                    await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
+                    ITokenCacheInternal tokenCacheInternal = this;
+                    if (tokenCacheInternal.IsTokenCacheSerialized())
+                    {
+                        var args = new TokenCacheNotificationArgs(
+                            this,
+                            ClientId,
+                            account,
+                            hasStateChanged: true,
+                            tokenCacheInternal.IsApplicationCache,
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            suggestedCacheKey: suggestedWebCacheKey);
+
+                        await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
+                        await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
+                    }
 
                     if (msalAccessTokenCacheItem != null)
                     {
@@ -189,16 +197,20 @@ namespace Microsoft.Identity.Client
                 }
                 finally
                 {
-                    var args2 = new TokenCacheNotificationArgs(
-                     this,
-                     ClientId,
-                     account,
-                     hasStateChanged: true,
-                     (this as ITokenCacheInternal).IsApplicationCache,
-                     (this as ITokenCacheInternal).HasTokensNoLocks(),
-                     suggestedCacheKey: suggestedWebCacheKey);
+                    ITokenCacheInternal tokenCacheInternal = this;
+                    if (tokenCacheInternal.IsTokenCacheSerialized())
+                    {
+                        var args = new TokenCacheNotificationArgs(
+                            this,
+                            ClientId,
+                            account,
+                            hasStateChanged: true,
+                            tokenCacheInternal.IsApplicationCache,
+                            tokenCacheInternal.HasTokensNoLocks(),
+                            suggestedCacheKey: suggestedWebCacheKey);
 
-                    await (this as ITokenCacheInternal).OnAfterAccessAsync(args2).ConfigureAwait(false);
+                        await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                    }
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -271,6 +283,12 @@ namespace Microsoft.Identity.Client
             return idToken.PreferredUsername;
         }
 
+        /// <summary>
+        /// IMPORTANT: this class is perf critical; any changes must be benchmarked using Microsoft.Identity.Test.Performace.
+        /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
+        /// 
+        /// Scenario: client_creds with default in-memory cache can get to ~500k tokens
+        /// </summary>
         async Task<MsalAccessTokenCacheItem> ITokenCacheInternal.FindAccessTokenAsync(
             AuthenticationRequestParameters requestParams)
         {
@@ -282,38 +300,30 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            logger.Info("Looking up access token in the cache.");
-            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true);
+            logger.Verbose("Looking up access token in the cache.");
+            // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
+            // as this method is NOT locked by the semaphore
+            IEnumerable<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensWithNoLocks(true).ToList();
 
             tokenCacheItems = FilterByHomeAccountTenantOrAssertion(requestParams, tokenCacheItems);
             tokenCacheItems = FilterByTokenType(requestParams, tokenCacheItems);
-
-            // no match found after initial filtering
-            if (!tokenCacheItems.Any())
-            {
-                logger.Info("No matching entry found for user or assertion");
-                return null;
-            }
-
-            if (logger.IsLoggingEnabled(LogLevel.Info))
-            {
-                logger.Info("Matching entry count - " + tokenCacheItems.Count());
-            }
-
             tokenCacheItems = FilterByScopes(requestParams, tokenCacheItems);
             tokenCacheItems = await FilterByEnvironmentAsync(requestParams, tokenCacheItems).ConfigureAwait(false);
 
+            // perf: take a snapshot as calling Count(), Any() etc. on the IEnumerable evaluates it each time
+            IReadOnlyList<MsalAccessTokenCacheItem> finalList = tokenCacheItems.ToList();
+
             // no match
-            if (!tokenCacheItems.Any())
+            if (finalList.Count == 0)
             {
-                logger.Info("No tokens found for matching authority, client_id, user and scopes.");
+                logger.Verbose("No tokens found for matching authority, client_id, user and scopes.");
                 return null;
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, tokenCacheItems);
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem = GetSingleResult(requestParams, finalList);
             msalAccessTokenCacheItem = FilterByKeyId(msalAccessTokenCacheItem, requestParams);
 
-            return GetUnexpiredAccessTokenOrNull(requestParams, msalAccessTokenCacheItem);
+            return FilterByExpiry(msalAccessTokenCacheItem, requestParams);
         }
 
         private static IEnumerable<MsalAccessTokenCacheItem> FilterByScopes(
@@ -342,7 +352,6 @@ namespace Microsoft.Identity.Client
                             "Filtering by token type");
             return tokenCacheItems;
         }
-
 
         private static IEnumerable<MsalAccessTokenCacheItem> FilterByHomeAccountTenantOrAssertion(
             AuthenticationRequestParameters requestParams,
@@ -394,7 +403,7 @@ namespace Microsoft.Identity.Client
             return tokenCacheItems;
         }
 
-        private MsalAccessTokenCacheItem GetUnexpiredAccessTokenOrNull(AuthenticationRequestParameters requestParams, MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        private MsalAccessTokenCacheItem FilterByExpiry(MsalAccessTokenCacheItem msalAccessTokenCacheItem, AuthenticationRequestParameters requestParams)
         {
             var logger = requestParams.RequestContext.Logger;
             if (msalAccessTokenCacheItem != null)
@@ -446,25 +455,20 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        private static MsalAccessTokenCacheItem GetSingleResult(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> filteredItems)
+        private static MsalAccessTokenCacheItem GetSingleResult(
+            AuthenticationRequestParameters requestParams,
+            IReadOnlyList<MsalAccessTokenCacheItem> filteredItems)
         {
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem;
-
             // if only one cached token found
-            if (filteredItems.Count() == 1)
+            if (filteredItems.Count == 1)
             {
-                msalAccessTokenCacheItem = filteredItems.First();
-            }
-            else
-            {
-                requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes. ");
-
-                throw new MsalClientException(
-                    MsalError.MultipleTokensMatchedError,
-                    MsalErrorMessage.MultipleTokensMatched);
+                return filteredItems[0];
             }
 
-            return msalAccessTokenCacheItem;
+            requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes. ");
+            throw new MsalClientException(
+                MsalError.MultipleTokensMatchedError,
+                MsalErrorMessage.MultipleTokensMatched);
         }
 
         private async Task<IEnumerable<MsalAccessTokenCacheItem>> FilterByEnvironmentAsync(AuthenticationRequestParameters requestParams, IEnumerable<MsalAccessTokenCacheItem> filteredItems)
@@ -553,17 +557,17 @@ namespace Microsoft.Identity.Client
             if (candidateRt != null)
                 return candidateRt;
 
-            requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");          
+            requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT. ");
 
             // ADAL legacy cache does not store FRTs
             if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
             {
-              
+
                 return CacheFallbackOperations.GetRefreshToken(
                     Logger,
                     LegacyCachePersistence,
                     aliases,
-                    requestParams.ClientId,                    
+                    requestParams.ClientId,
                     requestParams.Account);
             }
 
@@ -681,9 +685,9 @@ namespace Microsoft.Identity.Client
                     acc.WamAccountIds.ContainsKey(requestParameters.ClientId)))
                 {
                     var wamAccount = new Account(
-                        wamAccountCache.HomeAccountId, 
-                        wamAccountCache.PreferredUsername, 
-                        environment, 
+                        wamAccountCache.HomeAccountId,
+                        wamAccountCache.PreferredUsername,
+                        environment,
                         wamAccountCache.WamAccountIds);
 
                     clientInfoToAccountMap[wamAccountCache.HomeAccountId] = wamAccount;
@@ -763,52 +767,56 @@ namespace Microsoft.Identity.Client
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, RequestContext requestContext)
         {
             await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
+
             try
             {
                 requestContext.Logger.Info("Removing user from cache..");
 
+                ITokenCacheInternal tokenCacheInternal = this;
+
                 try
                 {
-                    var args = new TokenCacheNotificationArgs(
-                        this,
-                        ClientId,
-                        account,
-                        true,
-                        (this as ITokenCacheInternal).IsApplicationCache,
-                        (this as ITokenCacheInternal).HasTokensNoLocks(),
-                        account.HomeAccountId.Identifier);
-
-                    try
+                    if (tokenCacheInternal.IsTokenCacheSerialized())
                     {
-                        await (this as ITokenCacheInternal).OnBeforeAccessAsync(args).ConfigureAwait(false);
-                        await (this as ITokenCacheInternal).OnBeforeWriteAsync(args).ConfigureAwait(false);
+                        var args = new TokenCacheNotificationArgs(
+                            this,
+                            ClientId,
+                            account,
+                            true,
+                            tokenCacheInternal.IsApplicationCache,
+                            tokenCacheInternal.HasTokensNoLocks(),
+                            account.HomeAccountId.Identifier);
 
-                        ((ITokenCacheInternal)this).RemoveMsalAccountWithNoLocks(account, requestContext);
-                        RemoveAdalUser(account);
+                        await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
+                        await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
                     }
-                    finally
-                    {
-                        var afterAccessArgs = new TokenCacheNotificationArgs(
-                           this,
-                           ClientId,
-                           account,
-                           true,
-                           (this as ITokenCacheInternal).IsApplicationCache,
-                           hasTokens: (this as ITokenCacheInternal).HasTokensNoLocks(),
-                           account.HomeAccountId.Identifier);
 
-                        await (this as ITokenCacheInternal).OnAfterAccessAsync(afterAccessArgs).ConfigureAwait(false);
-                    }
+                    tokenCacheInternal.RemoveMsalAccountWithNoLocks(account, requestContext);
+                    RemoveAdalUser(account);
                 }
                 finally
                 {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
+                    if (tokenCacheInternal.IsTokenCacheSerialized())
+                    {
+                        var afterAccessArgs = new TokenCacheNotificationArgs(
+                            this,
+                            ClientId,
+                            account,
+                            true,
+                            tokenCacheInternal.IsApplicationCache,
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            account.HomeAccountId.Identifier);
+
+                        await tokenCacheInternal.OnAfterAccessAsync(afterAccessArgs).ConfigureAwait(false);
+                    }
                 }
             }
             finally
             {
+#pragma warning disable CS0618 // Type or member is obsolete
+                HasStateChanged = false;
+#pragma warning restore CS0618 // Type or member is obsolete
+
                 _semaphoreSlim.Release();
             }
         }

@@ -28,19 +28,27 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
     {
         private MockHttpAndServiceBundle _harness;
         private PublicClientApplication _app;
+
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            _harness?.Dispose();
+            base.TestCleanup();
+        }
+
         /// <summary>
         /// 1.  Acquire Token Interactive successfully
-        ///        Current_request = 2 | ATI_ID, 0 |
+        ///        Current_request = 2 | ATI_ID, 0 | 0
         ///        Last_request = 2 | 0 | | |
         /// 2. Acquire token silent with AT served from cache ... no calls to /token endpoint
         ///        
         /// 3. Acquire token silent with AT not served from cache (AT expired)
-        ///         Current_request = 2 | ATS_ID, 0 |
+        ///         Current_request = 2 | ATS_ID, 0 | 0
         ///         Last_request = 2 | 1 | | |
         ///         
         /// 4. Acquire Token silent with force_refresh = true -> error invalid_client
         /// Sent to server - 
-        ///         Current_request = 2 | ATS_ID, 1 |
+        ///         Current_request = 2 | ATS_ID, 1 | 0
         ///         Last_request = 2 | 0 | | |
         ///         
         /// State of client after error response is returned – (the successful silent request counter was flushed, last_request is reset, and now we add the error from step 4)
@@ -48,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// 
         /// 5. Acquire Token silent with force_refresh = true -> error interaction_required
         /// Sent to the server - 
-        ///         Current_request = 2 | ATS_ID, 1 |
+        ///         Current_request = 2 | ATS_ID, 1 | 0
         ///         Last_request = 2 | 0 | ATS_ID, corr_step_4 | invalid_client
         /// State of client after response is returned - 
         ///         Last_request = 2 | 0 | ATS_ID, corr_step_5 | interaction_required
@@ -58,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// 
         /// 7. Acquire Token interactive -> HTTP error 503 (Service Unavailable)
         ///
-        ///        Current_request = 2 | ATI_ID, 0 |
+        ///        Current_request = 2 | ATI_ID, 0 | 0
         ///        Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, | interaction_required, 
         ///       authentication_canceled|
         ///
@@ -70,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// 8. Acquire Token interactive -> successful
         ///
         /// Sent to the server - 
-        ///        Current_request = 2 | ATI_ID, 0 |
+        ///        Current_request = 2 | ATI_ID, 0 | 0
         ///        Last_request = 2 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, ATI-ID, corr_step-6b  | interaction_required, 
         ///        authentication_canceled, ServiceUnavailable |
         ///
@@ -79,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         ///
         /// 9. Acquire Token Silent with force-refresh -> successful
         /// Sent to the server - 
-        ///         Current_request = 2 | ATI_ID, 1 |
+        ///         Current_request = 2 | ATI_ID, 1 | 0
         ///         Last_request = NULL
         /// State of the client after response is returned - 
         ///        Last_request = 2 | 1 | | |
@@ -168,6 +176,34 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 9. Acquire Token Silent with force-refresh -> successful");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaRefreshGrant, false).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, forceRefresh: false);
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
+            }
+        }
+
+        /// <summary>
+        /// Acquire token with serialized token cache successfully
+        ///    Current_request = 2 | ATC_ID, 0 | 1
+        ///    Last_request = 2 | 0 | | |
+        /// </summary>
+        [TestMethod]
+        public async Task TelemetryTestSerializedTokenCacheAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithHttpManager(_harness.HttpManager)
+                            .WithDefaultRedirectUri()
+                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
+                            .BuildConcrete();
+
+                var inMemoryTokenCache = new InMemoryTokenCache();
+                inMemoryTokenCache.Bind(_app.UserTokenCache);
+
+                Trace.WriteLine("Step 1. Acquire Token Interactive successful");
+                var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, forceRefresh: false, isCacheSerialized: true);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
         }
@@ -350,7 +386,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         private static void AssertCurrentTelemetry(
             HttpRequestMessage requestMessage, 
             ApiIds apiId, 
-            bool forceRefresh)
+            bool forceRefresh,
+            bool isCacheSerialized = false)
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single();
@@ -365,6 +402,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 actualTelemetryParts[1].Split(',')[0]); // current_api_id
 
             Assert.IsTrue(actualTelemetryParts[1].EndsWith(forceRefresh ? "1" : "0")); // force_refresh flag
+
+            Assert.AreEqual(isCacheSerialized ? "1" : "0", actualTelemetryParts[2].Split(',')[2]); // is_cache_serialized
         }
 
         private static void AssertPreviousTelemetry(

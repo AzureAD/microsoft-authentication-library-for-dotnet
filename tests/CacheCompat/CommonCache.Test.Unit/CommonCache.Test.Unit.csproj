@@ -44,9 +44,16 @@
       <MsalJavaSourceFiles Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.MsalJava\bin\$(Configuration)\**\*.java">
         <InProject>false</InProject>
       </MsalJavaSourceFiles>
+      <MsalNodeFiles Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.MsalNode\bin\$(Configuration)\**\*">
+        <InProject>false</InProject>
+      </MsalNodeFiles>
+      <MsalNodeSourceFiles Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.MsalNode\bin\$(Configuration)\**\NodeScript\*.*">
+        <InProject>false</InProject>
+      </MsalNodeSourceFiles>
     </ItemGroup>
 
-    <Message Text="COPYING CACHECOMPAT DEPENDENCY FILES $(OutputPath)" Importance="high" />
+    <Message Text="COPYING CACHECOMPAT DEPENDENCY FILES @(MsalNodeFiles)" Importance="high" />
+    
     <Copy SourceFiles="@(AdalV3Files)" DestinationFolder="$(OutputPath)\AdalV3" />
     <Copy SourceFiles="@(AdalV4Files)" DestinationFolder="$(OutputPath)\AdalV4" />
     <Copy SourceFiles="@(AdalV5Files)" DestinationFolder="$(OutputPath)\AdalV5" />
@@ -55,5 +62,7 @@
     <Copy SourceFiles="@(MsalPythonFiles)" DestinationFolder="$(OutputPath)\MsalPython" />
     <Copy SourceFiles="@(MsalJavaFiles)" DestinationFolder="$(OutputPath)\MsalJava" />
     <Copy SourceFiles="@(MsalJavaSourceFiles)" DestinationFolder="$(OutputPath)\MsalJava\src\main\java" />
+    <Copy SourceFiles="@(MsalNodeFiles)" DestinationFolder="$(OutputPath)\MsalNode" />
+    <Copy SourceFiles="@(MsalNodeSourceFiles)" DestinationFolder="$(OutputPath)\MsalNode\NodeScript" />
   </Target>
 </Project>

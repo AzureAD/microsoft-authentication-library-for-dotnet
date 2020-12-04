@@ -27,13 +27,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string[] s_scopes = { "User.Read" };
         public string CurrentApiId { get; set; }
 
-        // Http Telemetry Constants
+        // HTTP Telemetry Constants
         private static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
-        private const string XClientCurrentTelemetryROPC = "2|1003,0|";
-        private const string XClientCurrentTelemetryROPCFailure = "2|1003,0|";
+        private const string XClientCurrentTelemetryROPC = "2|1003,0|,,0";
+        private const string XClientCurrentTelemetryROPCFailure = "2|1003,0|,,0";
         private const string XClientLastTelemetryROPC = "2|0|||";
         private const string XClientLastTelemetryROPCFailure =
-            "2|0|1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|";
+            "2|0|1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|,";
         private const string ApiIdAndCorrelationIdSection =
             "1003,ad8c894a-557f-48c0-b045-c129590c344e";
         private const string InvalidGrantError = "invalid_grant";
@@ -134,11 +134,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(Authority)
                 .Build();
 
-            await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+            var result = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 msalPublicClient
                     .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
                     .ExecuteAsync(CancellationToken.None))
                     .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.RopcDoesNotSupportMsaAccounts, result.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.RopcDoesNotSupportMsaAccounts, result.Message);
         }
 
         [TestMethod]

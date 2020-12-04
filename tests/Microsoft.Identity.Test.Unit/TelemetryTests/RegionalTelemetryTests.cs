@@ -48,19 +48,19 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
         /// <summary>
         /// 1.  Acquire Token For Client with Region successfully
-        ///        Current_request = 2 | ATC_ID, 0 | region
+        ///        Current_request = 2 | ATC_ID, 0 | centralus, 1, 0
         ///        Last_request = 2 | 0 | | |
         /// 
         /// 2. Acquire Token for client with Region -> HTTP error 503 (Service Unavailable)
         ///
-        ///        Current_request = 2 | ATC_ID, 1 | region
+        ///        Current_request = 2 | ATC_ID, 1 | centralus, 3, 0
         ///        Last_request = 2 | 0 | | |
         ///
         /// 3. Acquire Token For Client with Region -> successful
         ///
         /// Sent to the server - 
-        ///        Current_request = 2 | ATC_ID, 1 | region
-        ///        Last_request = 2 | 0 |  ATC_ID, corr_step_2  | ServiceUnavailable | region
+        ///        Current_request = 2 | ATC_ID, 1 | centralus, 3, 0
+        ///        Last_request = 2 | 0 |  ATC_ID, corr_step_2  | ServiceUnavailable | centralus, 3
         /// </summary>
         [TestMethod]
         public async Task TelemetryAcceptanceTestAsync()
@@ -106,6 +106,36 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             }
             
+        }
+
+        /// <summary>
+        /// Acquire token for client with serialized token cache successfully
+        ///    Current_request = 2 | ATC_ID, 0 | centralus, 1, 1
+        ///    Last_request = 2 | 0 | | |
+        /// </summary>
+        [TestMethod]
+        public async Task TelemetrySerializedTokenCacheTestAsync()
+        {
+            try
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+
+                var inMemoryTokenCache = new InMemoryTokenCache();
+                inMemoryTokenCache.Bind(_app.AppTokenCache);
+
+                Trace.WriteLine("Acquire token for client with token serialization.");
+                var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
+                AssertCurrentTelemetry(result.HttpRequest,
+                    ApiIds.AcquireTokenForClient,
+                    forceRefresh: false,
+                    isFirstRequest: true,
+                    isCacheSerialized: true); 
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0); 
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            }
         }
 
         private enum AcquireTokenForClientOutcome
@@ -178,7 +208,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             HttpRequestMessage requestMessage, 
             ApiIds apiId, 
             bool forceRefresh,
-            bool isFirstRequest)
+            bool isFirstRequest,
+            bool isCacheSerialized = false)
         {
             string actualCurrentTelemetry = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single();
@@ -194,15 +225,16 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.IsTrue(actualTelemetryParts[1].EndsWith(forceRefresh ? "1" : "0")); // force_refresh flag
 
+            Assert.AreEqual(isCacheSerialized ? "1" : "0", actualTelemetryParts[2].Split(',')[2]);
             Assert.AreEqual(TestConstants.Region, actualTelemetryParts[2].Split(',')[0]);
 
             if (isFirstRequest)
             {
-                Assert.IsTrue(actualTelemetryParts[2].EndsWith(((int)RegionSource.EnvVariable).ToString(CultureInfo.InvariantCulture)));
+                Assert.AreEqual("1", actualTelemetryParts[2].Split(',')[1]);
             }
             else
             {
-                Assert.IsTrue(actualTelemetryParts[2].EndsWith(((int)RegionSource.Cache).ToString(CultureInfo.InvariantCulture)));
+                Assert.AreEqual("3", actualTelemetryParts[2].Split(',')[1]);
             }
         }
 

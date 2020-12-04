@@ -22,10 +22,17 @@ namespace CommonCache.Test.Unit
             var api = new LabServiceApi();
             LabResponse labResponse = (await api.GetLabResponseFromApiAsync(UserQuery.PublicAadUserQuery).ConfigureAwait(false));
             return new LabUserData(
-                labResponse.User.Upn, 
-                labResponse.User.GetOrFetchPassword(), 
-                labResponse.User.AppId,
-                labResponse.User.TenantId);
+              labResponse.User.Upn,
+              labResponse.User.GetOrFetchPassword(),
+              labResponse.User.AppId,
+              labResponse.User.TenantId);
+
+            //return new LabUserData(
+            //    "user",
+            //    "",
+            //    "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            //    "49f548d0-12b7-4169-a390-bb5304d24462");
+
         }
 
         [AssemblyInitialize]
@@ -137,6 +144,21 @@ namespace CommonCache.Test.Unit
             CacheProgramType interactiveType,
             CacheProgramType silentType,
             CacheStorageType cacheStorageType)
+        {
+            var executor = new CacheTestExecutor(s_labUsers, cacheStorageType);
+            await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        [Ignore] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2272
+        [DataTestMethod]
+        [DataRow(CacheProgramType.MsalNode, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalNode->MsalV3 msal v3 cache")]
+        [DataRow(CacheProgramType.MsalNode, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalNode->AdalV5 msal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalNode, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalNode msal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalNode, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalNode msal v3 cache")]
+        public async Task TestMsalNodeCacheCompatibilityAsync(
+          CacheProgramType interactiveType,
+          CacheProgramType silentType,
+          CacheStorageType cacheStorageType)
         {
             var executor = new CacheTestExecutor(s_labUsers, cacheStorageType);
             await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);

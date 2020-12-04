@@ -75,6 +75,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         bool HasTokensNoLocks();
 
+        bool IsTokenCacheSerialized();
+
         #endregion
     }
 }

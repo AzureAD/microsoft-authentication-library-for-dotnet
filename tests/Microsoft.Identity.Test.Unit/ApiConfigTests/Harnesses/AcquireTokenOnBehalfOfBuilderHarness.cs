@@ -8,13 +8,14 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-
 namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
 {
     internal class AcquireTokenOnBehalfOfBuilderHarness : AbstractBuilderHarness
     {
         public AcquireTokenOnBehalfOfParameters OnBehalfOfParametersReceived { get; private set; }
         public IConfidentialClientApplication ClientApplication { get; private set; }
+
+        public IConfidentialClientApplicationExecutor Executor => (IConfidentialClientApplicationExecutor)ClientApplication;
 
         public async Task SetupAsync()
         {
@@ -26,11 +27,15 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
                 CancellationToken.None).ConfigureAwait(false);
         }
 
-        public void ValidateInteractiveParameters(bool expectedSendX5C = false, UserAssertion expectedUserAssertion = null)
+        public void ValidateOnBehalfOfParameters(
+            string expectedUserAssertion,
+            bool expectedSendX5C = false,
+            bool forceRefresh = false)
         {
             Assert.IsNotNull(OnBehalfOfParametersReceived);
             Assert.AreEqual(expectedSendX5C, OnBehalfOfParametersReceived.SendX5C);
-            Assert.AreEqual(expectedUserAssertion, OnBehalfOfParametersReceived.UserAssertion);
+            Assert.AreEqual(expectedUserAssertion, OnBehalfOfParametersReceived.UserAssertion.Assertion);
+            Assert.AreEqual(forceRefresh, OnBehalfOfParametersReceived.ForceRefresh);
         }
     }
 }

@@ -60,7 +60,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-
         /// <summary>
         /// Specifies if the client application should force refreshing the
         /// token from the user token cache. By default the token is taken from the

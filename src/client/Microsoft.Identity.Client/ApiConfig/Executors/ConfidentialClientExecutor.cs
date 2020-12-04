@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidentail client on mobile
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
     internal class ConfidentialClientExecutor : AbstractExecutor, IConfidentialClientApplicationExecutor
     {
