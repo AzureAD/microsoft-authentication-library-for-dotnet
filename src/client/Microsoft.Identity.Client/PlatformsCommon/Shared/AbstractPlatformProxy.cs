@@ -78,8 +78,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return _deviceModel.Value;
         }
 
-        /// <inheritdoc />
-        public abstract string GetEnvironmentVariable(string variable);
 
         /// <inheritdoc />
         public string GetOperatingSystem()
@@ -95,12 +93,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// <inheritdoc />
         public abstract Task<string> GetUserPrincipalNameAsync();
-
-        /// <inheritdoc />
-        public abstract bool IsDomainJoined();
-
-        /// <inheritdoc />
-        public abstract Task<bool> IsUserLocalAsync(RequestContext requestContext);
 
         /// <inheritdoc />
         public string GetCallingApplicationName()

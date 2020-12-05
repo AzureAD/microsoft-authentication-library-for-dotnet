@@ -27,7 +27,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class AadAuthorityTests : TestBase
     {
 
-#if NET_CORE
         [TestMethod]
         public void ImmutableTest()
         {
@@ -35,8 +34,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             CoreAssert.IsImmutable<AdfsAuthority>();
             CoreAssert.IsImmutable<B2CAuthority>();
         }
-#endif
-
 
         [TestMethod]
         public void CreateEndpointsWithCommonTenantTest()

@@ -12,7 +12,8 @@ using Microsoft.Identity.Client.UI;
 namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 {
     /// <summary>
-    /// Common operations for extracting platform / operating system specifics
+    /// Common operations for extracting platform / operating system specifics. 
+    /// Scope: per app
     /// </summary>
     internal interface IPlatformProxy
     {
@@ -26,8 +27,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// <returns>device model or null</returns>
         string GetDeviceModel();
 
-        string GetEnvironmentVariable(string variable);
-
         string GetOperatingSystem();
 
         string GetProcessorArchitecture();
@@ -37,14 +36,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<string> GetUserPrincipalNameAsync();
-
-        /// <summary>
-        /// Returns true if the current OS logged in user is AD or AAD joined.
-        /// </summary>
-        /// <returns></returns>
-        bool IsDomainJoined();
-
-        Task<bool> IsUserLocalAsync(RequestContext requestContext);
 
         /// <summary>
         /// Returns the name of the calling assembly

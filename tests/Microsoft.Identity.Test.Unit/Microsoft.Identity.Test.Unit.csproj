@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
+    <TargetFrameworkNetDesktop461>net472</TargetFrameworkNetDesktop461>
+    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+    <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
+      
+    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet5Win)</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -21,7 +25,6 @@
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
 
-    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
 
     <Compile Remove="Resources\**" />
@@ -30,11 +33,13 @@
     <None Update="Resources\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472' ">
+  <Import Project="../../build/platform_and_feature_flags.props"/>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472' or '$(TargetFramework)' == 'netcoreapp3.1' ">
     <PackageReference Include="System.Windows.Forms" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
@@ -42,6 +47,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net472' ">
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
+  </PropertyGroup>
+   <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0-windows10.0.17763.0' ">
+    <DefineConstants>$(DefineConstants);NET5_WIN</DefineConstants>
   </PropertyGroup>
 
 </Project>

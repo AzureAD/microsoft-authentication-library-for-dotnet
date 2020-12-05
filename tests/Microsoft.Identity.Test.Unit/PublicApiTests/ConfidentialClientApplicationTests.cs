@@ -710,7 +710,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
 
-#if !NET_CORE
+#if DESKTOP
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
 #endif
         }

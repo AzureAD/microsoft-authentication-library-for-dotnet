@@ -23,32 +23,32 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public Task<MsalTokenResponse> AcquireTokenInteractiveAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
 
         public Task<MsalTokenResponse> AcquireTokenSilentAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
 
         public void HandleInstallUrl(string appLink)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
 
         public Task<IEnumerable<IAccount>> GetAccountsAsync(string clientID, string redirectUri)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
 
         public Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
 
         public Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
     }
 }

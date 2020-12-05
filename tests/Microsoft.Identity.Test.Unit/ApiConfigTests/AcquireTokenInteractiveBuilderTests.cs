@@ -199,12 +199,10 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
 #endif
 
-#if NET_CORE
+#if NET_CORE || NET5_WIN
         [TestMethod]
         public async Task TestAcquireTokenInteractive_EmbeddedNetCore_Async()
         {
-            var customWebUi = Substitute.For<ICustomWebUi>();
-
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                  AcquireTokenInteractiveParameterBuilder.Create(_harness.Executor, TestConstants.s_scope)
                                                          .WithUseEmbeddedWebView(true)

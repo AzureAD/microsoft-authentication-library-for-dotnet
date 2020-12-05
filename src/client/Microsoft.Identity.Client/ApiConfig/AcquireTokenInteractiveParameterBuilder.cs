@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
-#if NET_CORE || NETSTANDARD
+#if NET_CORE || NETSTANDARD || NET5_WIN
             if (useEmbeddedWebView)
             {
                 throw new MsalClientException(MsalError.WebviewUnavailable, "An embedded webview is not available on this platform. " +
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="options">Data object with options</param>
         /// <returns>The builder to chain the .With methods</returns>
-#if !(NET_CORE || NETSTANDARD || DESKTOP)
+#if !SUPPORTS_OS_SYSTEM_BROWSER
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] // hide everywhere but NetStandard
 #endif
         public AcquireTokenInteractiveParameterBuilder WithSystemWebViewOptions(SystemWebViewOptions options)

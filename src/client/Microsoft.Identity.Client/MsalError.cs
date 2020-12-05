@@ -28,16 +28,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InteractionRequired = "interaction_required";
 
-#if !DESKTOP && !NET_CORE
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
         /// <summary>
         /// No token was found in the token cache.
         /// <para>Mitigation:</para> If your application is a <see cref="IPublicClientApplication"/> call <c>AcquireTokenInteractive</c> so
-        /// that the user of your application signs-in and accepts consent. If your application is a <see cref="T:ConfidentialClientApplication"/>.:
+        /// that the user of your application signs-in and accepts consent.
         /// <list type="bullet">
         /// <item>
-        /// If it's a web app you should have previously called <see cref="IConfidentialClientApplication.AcquireTokenByAuthorizationCode(System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// If it's a web app you should have previously called IConfidentialClientApplication.AcquireTokenByAuthorizationCode
         /// as described in https://aka.ms/msal-net-authorization-code. You need to make sure that you have requested the right scopes. For details
         /// See https://github.com/Azure-Samples/ms-identity-aspnetcore-webapp-tutorial
         /// </item>
@@ -45,7 +42,6 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// </summary>
         public const string NoTokensFoundError = "no_tokens_found";
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// This error code comes back from <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is
@@ -530,9 +526,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string B2CAuthorityHostMismatch = "B2C_authority_host_mismatch";
 
-#if !DESKTOP && !NET_CORE
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
         /// <summary>
         /// Duplicate query parameter was found in extraQueryParameters.
         /// <para>What happens?</para> You have used <c>extraQueryParameter</c> of overrides
@@ -540,9 +533,7 @@ namespace Microsoft.Identity.Client
         /// URL (either because you had it in another way, or the library added it).
         /// <para>Mitigation [App Development]</para> RemoveAccount the duplicate parameter from the token acquisition override.
         /// </summary>
-        /// <seealso cref="ConfidentialClientApplication.GetAuthorizationRequestUrlAsync(System.Collections.Generic.IEnumerable{string}, string, string, string, System.Collections.Generic.IEnumerable{string}, string)"/>
         public const string DuplicateQueryParameterError = "duplicate_query_parameter";
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// The request could not be performed because of a failure in the UI flow.

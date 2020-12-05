@@ -15,16 +15,12 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
-#if !DESKTOP && !NET_CORE
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
     /// <Summary>
     /// Abstract class containing common API methods and properties. Both <see cref="Microsoft.Identity.Client.PublicClientApplication"/> and 
-    /// <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>
+    /// ConfidentialClientApplication
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
     public abstract partial class ClientApplicationBase : IClientApplicationBase
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         /// <Summary>
         /// Default Authority used for interactive calls.

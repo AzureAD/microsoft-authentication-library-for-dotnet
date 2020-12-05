@@ -12,8 +12,6 @@ using System.Collections.Generic;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE
-
     [TestClass]
     [DeploymentItem(@"Resources\testCert.crtfile")]
     public class RequestValidationHelperTests
@@ -214,5 +212,4 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             return (long)diff.TotalSeconds;
         }
     }
-#endif
 }

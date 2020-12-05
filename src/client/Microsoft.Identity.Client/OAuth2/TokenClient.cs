@@ -114,7 +114,6 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
 
 
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE
             if (_requestParams.ClientCredential != null)
             {
                 Dictionary<string, string> ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
@@ -130,7 +129,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     _oAuth2Client.AddBodyParameter(entry.Key, entry.Value);
                 }
             }
-#endif
+
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.ClaimsAndClientCapabilities);
 

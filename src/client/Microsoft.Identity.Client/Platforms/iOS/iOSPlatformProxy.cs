@@ -32,30 +32,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public override bool IsSystemWebViewAvailable => true;
 
         public override bool UseEmbeddedWebViewDefault => false;
-
-        /// <summary>
-        /// Get the user logged
-        /// </summary>
+        
         public override Task<string> GetUserPrincipalNameAsync()
         {
             return Task.FromResult(string.Empty);
         }
-
-        public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
-        {
-            return Task.FromResult(false);
-        }
-
-        public override bool IsDomainJoined()
-        {
-            return false;
-        }
-
-        public override string GetEnvironmentVariable(string variable)
-        {
-            return null;
-        }
-
         protected override  string InternalGetProcessorArchitecture()
         {
             return null;

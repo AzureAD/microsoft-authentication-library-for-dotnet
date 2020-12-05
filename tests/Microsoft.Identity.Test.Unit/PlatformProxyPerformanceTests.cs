@@ -71,12 +71,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public void ValidateIsDomainJoinedPerformance()
-        {
-            ValidateMethodPerformance(DomainJoinedAllowedMilliseconds, "IsDomainJoined", proxy => proxy.IsDomainJoined());
-        }
-
-        [TestMethod]
         public void ValidateGetCallingApplicationNamePerformance()
         {
             ValidateMethodPerformance(AllowedMilliseconds, "GetCallingApplicationName", proxy => proxy.GetCallingApplicationName());
