@@ -35,6 +35,18 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         public Net5WinPlatformProxy(ICoreLogger logger)
             : base(logger)
         {
-        }      
+        }
+
+        public override IBroker CreateBroker(CoreUIParent uiParent)
+        {
+            return base.OverloadBrokerForTest ?? new Features.WamBroker.WamBroker(uiParent, Logger);
+        }
+
+        public override bool CanBrokerSupportSilentAuth()
+        {
+            return true;
+        }
+
+        public override bool BrokerSupportsWamAccounts => true;
     }
 }

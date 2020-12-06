@@ -1,4 +1,4 @@
-﻿#if DESKTOP
+﻿#if SUPPORTS_BROKER
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

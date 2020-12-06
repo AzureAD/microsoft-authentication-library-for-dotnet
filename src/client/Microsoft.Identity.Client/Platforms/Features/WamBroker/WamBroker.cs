@@ -19,7 +19,7 @@ using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-#if DESKTOP || NET_CORE
+#if DESKTOP || NET5_WIN
 using Microsoft.Identity.Client.Platforms.Features.Windows;
 using System.Runtime.InteropServices;
 #endif
@@ -296,7 +296,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             return WindowsNativeMethods.GetForegroundWindow();
 
-#elif NET_CORE
+#elif NET5_WIN
+            // TODO: add support for parent window handle via .WithParent
             return WindowsNativeMethods.GetForegroundWindow();
 #endif
         }

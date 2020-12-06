@@ -19,6 +19,8 @@ namespace NetCoreWinFormsWAM
 
     public partial class Form1 : Form
     {
+        private readonly SynchronizationContext _syncContext;
+
 
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
         {
@@ -27,7 +29,10 @@ namespace NetCoreWinFormsWAM
             new ClientEntry() { Id = "655015be-5021-4afc-a683-a4223eb5d0e5", Name = "655015be-5021-4afc-a683-a4223eb5d0e5"}
         };
 
-        private static BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
+        private BindingList<AccountModel> s_accounts = new BindingList<AccountModel>();
+        private static IAccount s_nullAccount = new NullAccount();
+        private static AccountModel s_nullAccountModel = new AccountModel(s_nullAccount, "");
+        private static AccountModel s_osAccountModel = new AccountModel(PublicClientApplication.OperatingSystemAccount, "Default OS Account");
 
         public Form1()
         {
@@ -43,11 +48,15 @@ namespace NetCoreWinFormsWAM
             //var accountBidingSource = new BindingSource();
             //accountBidingSource.DataSource = s_accounts;
 
+            s_accounts.Add(s_nullAccountModel);
+            s_accounts.Add(s_osAccountModel);
 
             cbxAccount.DataSource = s_accounts;
 
             cbxAccount.DisplayMember = "DisplayValue";
             cbxAccount.SelectedItem = null;
+
+            _syncContext = SynchronizationContext.Current;
         }
 
         public static readonly string UserCacheFile =
@@ -68,6 +77,7 @@ namespace NetCoreWinFormsWAM
             var pca = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
+                .WithExperimentalFeatures(true)
                 .WithBroker(this.useBrokerChk.Checked)
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
@@ -92,11 +102,11 @@ namespace NetCoreWinFormsWAM
 
             tokenCache.SetAfterAccess(notificationArgs =>
             {
-                    // if the access operation resulted in a cache update
-                    if (notificationArgs.HasStateChanged)
+                // if the access operation resulted in a cache update
+                if (notificationArgs.HasStateChanged)
                 {
-                        // reflect changes in the persistent store
-                        File.WriteAllBytes(file, notificationArgs.TokenCache.SerializeMsalV3());
+                    // reflect changes in the persistent store
+                    File.WriteAllBytes(file, notificationArgs.TokenCache.SerializeMsalV3());
                 }
             });
         }
@@ -109,7 +119,7 @@ namespace NetCoreWinFormsWAM
                 var pca = CreatePca();
                 AuthenticationResult result = await RunAtsAsync(pca).ConfigureAwait(false);
 
-                LogResult(result);
+                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
             }
             catch (Exception ex)
@@ -144,7 +154,8 @@ namespace NetCoreWinFormsWAM
                         .ConfigureAwait(false);
             }
 
-            if (cbxAccount.SelectedIndex > 0)
+            if (cbxAccount.SelectedItem != null &&
+                cbxAccount.SelectedItem != s_nullAccount)
             {
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
@@ -154,7 +165,7 @@ namespace NetCoreWinFormsWAM
                     reqAuthority = "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a";
                 }
 
-                Log($"ATS with IAccount for {acc?.Username ?? "null"}");
+                Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await pca.AcquireTokenSilent(GetScopes(), acc)
                     .WithAuthority(reqAuthority)
                     .ExecuteAsync()
@@ -191,7 +202,7 @@ namespace NetCoreWinFormsWAM
         }
 
 
-        private void LogResult(AuthenticationResult ar)
+        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar)
         {
             string message =
 
@@ -207,6 +218,10 @@ namespace NetCoreWinFormsWAM
 
             Log(message);
 
+            await _syncContext;
+
+            Log("Refreshing accounts");
+            await RefreshAccountsAsync().ConfigureAwait(true);
         }
 
         private void Log(string message)
@@ -224,7 +239,7 @@ namespace NetCoreWinFormsWAM
                 var pca = CreatePca();
                 AuthenticationResult result = await RunAtiAsync(pca).ConfigureAwait(false);
 
-                LogResult(result);
+                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
             }
             catch (Exception ex)
@@ -243,8 +258,14 @@ namespace NetCoreWinFormsWAM
 
             AuthenticationResult result = null;
 
-            var builder = pca.AcquireTokenInteractive(GetScopes())
-                .WithPrompt(GetPrompt());
+            var builder = pca.AcquireTokenInteractive(GetScopes());
+
+
+            Prompt? prompt = GetPrompt();
+            if (prompt.HasValue)
+            {
+                builder = builder.WithPrompt(prompt.Value);
+            }
 
             if (!string.IsNullOrEmpty(loginHint))
             {
@@ -295,46 +316,48 @@ namespace NetCoreWinFormsWAM
             return msa;
         }
 
-        private Prompt GetPrompt()
+        private Prompt? GetPrompt()
         {
-            return Prompt.SelectAccount; // TODO... WAM only works has "default" and "Force" prompts...
-                                         //string prompt = null;
-                                         //promptCbx.Invoke((MethodInvoker)delegate
-                                         //{
-                                         //    prompt = promptCbx.Text;
-                                         //});
 
-            //if (string.IsNullOrEmpty(prompt))
-            //    return Prompt.SelectAccount;
+            string prompt = null;
+            promptCbx.Invoke((MethodInvoker)delegate
+            {
+                prompt = promptCbx.Text;
+            });
 
+            if (string.IsNullOrEmpty(prompt))
+                return null;
 
-            //switch (prompt)
-            //{
+            switch (prompt)
+            {
 
-            //    case "select_account":
-            //        return Prompt.SelectAccount;
-            //    case "force_login":
-            //        return Prompt.ForceLogin;
-            //    case "no_prompt":
-            //        return Prompt.NoPrompt;
-            //    case "consent":
-            //        return Prompt.Consent;
-            //    case "never":
-            //        return Prompt.Never;
+                case "select_account":
+                    return Prompt.SelectAccount;
+                case "force_login":
+                    return Prompt.ForceLogin;
+                case "no_prompt":
+                    return Prompt.NoPrompt;
+                case "consent":
+                    return Prompt.Consent;
 
-
-            //    default:
-            //        throw new NotImplementedException();
-            //}
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         private async void getAccountsBtn_Click(object sender, EventArgs e)
+        {
+            await RefreshAccountsAsync().ConfigureAwait(false);
+        }
+
+        private async Task RefreshAccountsAsync()
         {
             var pca = CreatePca();
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
 
             s_accounts.Clear();
-            s_accounts.Add(new AccountModel(new NullAccount()));
+            s_accounts.Add(s_nullAccountModel);
+            s_accounts.Add(s_osAccountModel);
 
             foreach (var acc in accounts)
             {
@@ -350,7 +373,6 @@ namespace NetCoreWinFormsWAM
 
         private async void atsAtiBtn_Click(object sender, EventArgs e)
         {
-            var syncContext = SynchronizationContext.Current;
 
             var pca = CreatePca();
 
@@ -358,18 +380,18 @@ namespace NetCoreWinFormsWAM
             {
                 var result = await RunAtsAsync(pca).ConfigureAwait(false);
 
-                LogResult(result);
+                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
             }
             catch (MsalUiRequiredException ex)
             {
-                await syncContext;
+                await _syncContext;
 
                 Log("UI required Exception! " + ex.ErrorCode + " " + ex.Message);
                 try
                 {
                     var result = await RunAtiAsync(pca).ConfigureAwait(false);
-                    LogResult(result);
+                    await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                 }
                 catch (Exception ex3)
                 {
@@ -442,6 +464,21 @@ namespace NetCoreWinFormsWAM
 
             await (task as Task).ConfigureAwait(false);
         }
+
+        private async void remoteAcc_click(object sender, EventArgs e)
+        {
+            if (cbxAccount.SelectedIndex == 0)
+            {
+                throw new InvalidOperationException("[TEST APP FAILURE] Please select an account");
+            }
+
+            var pca = CreatePca();
+            var acc = (cbxAccount.SelectedItem as AccountModel).Account;
+
+            await pca.RemoveAsync(acc).ConfigureAwait(false);
+
+            Log("Removed account " + acc.Username);
+        }
     }
 
     public class ClientEntry
@@ -457,18 +494,19 @@ namespace NetCoreWinFormsWAM
         public string DisplayValue { get; }
         //public string IdValue => $"{_account.HomeAccountId.Identifier}";
 
-        public AccountModel(IAccount account)
+        public AccountModel(IAccount account, string displayValue = null)
         {
             Account = account;
             string env = string.IsNullOrEmpty(Account?.Environment) || Account.Environment == "login.microsoftonline.com" ?
                 "" :
                 $"({Account.Environment})";
 
-            DisplayValue = $"{Account.Username} {env}";
+            DisplayValue = displayValue ?? $"{Account.Username} {env}";
         }
 
 
     }
+
 
     public class NullAccount : IAccount
     {
