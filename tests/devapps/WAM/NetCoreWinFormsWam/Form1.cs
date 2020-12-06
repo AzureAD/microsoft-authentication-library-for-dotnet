@@ -82,6 +82,7 @@ namespace NetCoreWinFormsWAM
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
                 .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
+                .WithParentActivityOrWindow(() => this.Handle)
                 .WithExtraQueryParameters(extraQp)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();

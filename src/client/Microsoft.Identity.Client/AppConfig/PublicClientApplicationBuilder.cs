@@ -13,7 +13,7 @@ using UIKit;
 using Android.App;
 #endif
 
-#if DESKTOP
+#if DESKTOP || NET5_WIN
 using System.Windows.Forms;
 #endif
 
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP
+#if DESKTOP || NET5_WIN
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.

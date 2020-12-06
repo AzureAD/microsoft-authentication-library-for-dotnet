@@ -22,11 +22,9 @@ using Windows.Security.Credentials;
 #if DESKTOP || NET5_WIN
 using Microsoft.Identity.Client.Platforms.Features.Windows;
 using System.Runtime.InteropServices;
-#endif
-
-#if DESKTOP
 using System.Windows.Forms;
 #endif
+
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
@@ -280,7 +278,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 #if WINDOWS_APP
             // On UWP there is no need for a window handle
             return IntPtr.Zero;
-#elif DESKTOP
+#else
 
             if (uiParent?.OwnerWindow is IntPtr ptr)
             {
@@ -295,11 +293,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             }
 
             return WindowsNativeMethods.GetForegroundWindow();
-
-#elif NET5_WIN
-            // TODO: add support for parent window handle via .WithParent
-            return WindowsNativeMethods.GetForegroundWindow();
 #endif
+
         }
 
         private void AddPOPParamsToRequest(WebTokenRequest webTokenRequest)

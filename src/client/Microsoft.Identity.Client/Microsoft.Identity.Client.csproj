@@ -155,9 +155,9 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
 
-    <!-- This build only package reference is here to fix a bug in the WinRT interop. 
+    <!-- This package reference is here to fix a bug in the WinRT interop. 
     It should not be required after the december release of .NET 5 SDK -->
-    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="1.1.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="1.1.0" />
 
   </ItemGroup>
 
