@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             var webUi = _webUIFactory.CreateAuthenticationDialog(_parent, _requestContext);
 
             // Assert
-            Assert.IsTrue(webUi is InteractiveWebUI);
+            Assert.IsTrue(webUi is WebBrowserInteractiveWebUI);
         }
 
         [TestMethod]

@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
 #endif
 
-#if NET_CORE || NET5_WIN
+#if NET_CORE 
         [TestMethod]
         public async Task TestAcquireTokenInteractive_EmbeddedNetCore_Async()
         {
