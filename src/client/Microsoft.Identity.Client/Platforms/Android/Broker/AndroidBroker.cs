@@ -17,6 +17,8 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
 using System.Net;
+using Android.OS;
+using System.Linq;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -54,10 +56,33 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             }
         }
 
+        ///Check if the network is available.
+        private void CheckPowerOptimizationStatus()
+        {
+            checkPackageForPowerOptimization(Application.Context.PackageName);
+            checkPackageForPowerOptimization(_brokerHelper.Authenticators.FirstOrDefault().PackageName);
+        }
+
+        private void checkPackageForPowerOptimization(string package)
+        {
+            var powerManager = PowerManager.FromContext(Application.Context);
+
+            //Power optimization checking was added in API 23
+            if ((int)Build.VERSION.SdkInt >= (int)BuildVersionCodes.M &&
+                powerManager.IsDeviceIdleMode &&
+                !powerManager.IsIgnoringBatteryOptimizations(package))
+            {
+                _logger.Error("Power optimization detected for the application: " + package + " and the device is in doze mode or the app is in standby. \n" +
+                    "Please disable power optimizations for this application to authenticate.");
+            }
+        }
+
         public async Task<MsalTokenResponse> AcquireTokenInteractiveAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            CheckPowerOptimizationStatus();
+
             s_androidBrokerTokenResponse = null;
 
             BrokerRequest brokerRequest = BrokerRequest.FromInteractiveParameters(
@@ -69,10 +94,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             try
             {
                 await _brokerHelper.InitiateBrokerHandshakeAsync(_parentActivity).ConfigureAwait(false);
-
-                // todo: needed? 
-                // brokerPayload[BrokerParameter.BrokerAccountName] = AndroidBrokerHelper.GetValueFromBrokerPayload(brokerPayload, BrokerParameter.Username);              
-
                 await AcquireTokenInteractiveViaBrokerAsync(brokerRequest).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -92,6 +113,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
+            CheckPowerOptimizationStatus();
+
             BrokerRequest brokerRequest = BrokerRequest.FromSilentParameters(
                 authenticationRequestParameters, acquireTokenSilentParameters);
 

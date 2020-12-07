@@ -30,7 +30,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
 
-
         public void AddApiTelemetryFeature(ApiTelemetryFeature feature)
         {
             _apiTelemetry[MatsConverter.AsString(feature)] = TelemetryConstants.True;

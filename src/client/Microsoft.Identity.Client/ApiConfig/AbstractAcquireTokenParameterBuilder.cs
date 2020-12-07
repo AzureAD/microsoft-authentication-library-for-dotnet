@@ -355,7 +355,7 @@ namespace Microsoft.Identity.Client
         /// Sets the correlation id to be used in the authentication request.
         /// </summary>
         /// <param name="correlationId">Correlation id of the authentication request.</param>
-        /// <returns></returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public T WithCorrelationId(Guid correlationId)
         {
             CommonParameters.UserProvidedCorrelationId = correlationId;
