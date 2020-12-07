@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         null,
                         broker,
                         "install_url");
-#if DESKTOP
+#if SUPPORTS_BROKER
                 Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         _acquireTokenSilentParameters,
                         broker);
 
-#if DESKTOP
+#if SUPPORTS_BROKER
                 Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable());

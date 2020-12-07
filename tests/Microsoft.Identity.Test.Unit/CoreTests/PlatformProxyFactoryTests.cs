@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 client1.MaxResponseContentBufferSize);
         }
 
-#if NET_CORE
+#if NET_CORE || NET5_WIN
         [TestMethod]
         public void PlatformProxy_HttpClient_NetCore()
         {
@@ -141,41 +141,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
 
         }
-
-        [TestMethod]
-        public void GetEnvRetrievesAValue()
-        {
-            try
-            {
-                // Arrange
-                Environment.SetEnvironmentVariable("proxy_foo", "bar");
-
-                var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
-
-                // Act
-                string actualValue = proxy.GetEnvironmentVariable("proxy_foo");
-                string actualEmptyValue = proxy.GetEnvironmentVariable("no_such_env_var_exists");
-
-
-                // Assert
-                Assert.AreEqual("bar", actualValue);
-                Assert.IsNull(actualEmptyValue);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("proxy_foo", "");
-            }
-        }
-
-        [TestMethod]
-        public void GetEnvThrowsArgNullEx()
-        {
-
-            AssertException.Throws<ArgumentNullException>(
-                () =>
-                PlatformProxyFactory.CreatePlatformProxy(null).GetEnvironmentVariable(""));
-        }
-
 
     }
 }

@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Test.Unit
             Trace.WriteLine("Framework: .NET FX");
 #elif NET_CORE
             Trace.WriteLine("Framework: .NET Core");
+#elif NET5_WIN
+            Trace.WriteLine("Framework: .NET5-Win");
 #endif
             Trace.WriteLine("Test started " + TestContext.TestName);
             TestCommon.ResetInternalStaticCaches();

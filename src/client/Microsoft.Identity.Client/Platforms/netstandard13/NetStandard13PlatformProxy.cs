@@ -33,13 +33,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
                 "For Integrated Windows Authentication and Username/Password flows, please use .WithUsername() before calling ExecuteAsync(). " +
                 "For more details see https://aka.ms/msal-net-iwa");
         }
-
-        public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
-        {
-            return Task.FromResult(false);
-        }
-
-        /// <inheritdoc />
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
             if (useRecommendedRedirectUri)
@@ -54,21 +47,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         protected override string InternalGetProductName()
         {
             return "MSAL.CoreCLR";
-        }
-
-        public override bool IsDomainJoined()
-        {
-            return false;
-        }
-
-        public override string GetEnvironmentVariable(string variable)
-        {
-            if (string.IsNullOrWhiteSpace(variable))
-            {
-                throw new ArgumentNullException(nameof(variable));
-            }
-
-            return Environment.GetEnvironmentVariable(variable);
         }
 
         protected override string InternalGetProcessorArchitecture()
@@ -154,8 +132,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         protected override IFeatureFlags CreateFeatureFlags() => new NetStandardFeatureFlags();
 
         public override Task StartDefaultOsBrowserAsync(string url)
-        {
-            Microsoft.Identity.Client.Platforms.Shared.NetStdCore.PlatformProxyShared.StartDefaultOsBrowser(url);
+        {            
             return Task.FromResult(0);
         }
 

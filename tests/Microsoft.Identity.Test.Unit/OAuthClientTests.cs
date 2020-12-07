@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit
                     var serverEx = exception as MsalServiceException;
                     Assert.IsNotNull(serverEx);
                     Assert.AreEqual((int)HttpStatusCode.BadRequest, serverEx.StatusCode);
-                    Assert.IsNull(serverEx.ResponseBody);
+                    Assert.IsTrue(string.IsNullOrEmpty(serverEx.ResponseBody));
                     Assert.AreEqual(MsalError.HttpStatusCodeNotOk, serverEx.ErrorCode);
                 }).ConfigureAwait(false);
         }

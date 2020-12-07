@@ -38,7 +38,7 @@ namespace NetFx
     },  
   }";
         // This app has http://localhost redirect uri registered
-        private static readonly string s_clientIdForPublicApp = "c0186a6c-0bfc-4d83-9543-c2295b676f3b";
+        private static readonly string s_clientIdForPublicApp = "b16e7986-f7dd-4a31-96d7-d24445a38b4b";
 
         private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
         private const string PoPUri = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
@@ -46,7 +46,7 @@ namespace NetFx
         private static readonly HttpMethod s_popMethod = HttpMethod.Get;
 
         private static bool s_usePoP = false;
-        private static bool s_useBroker = true;
+        private static bool s_useBroker = false;
 
         // These are not really secret as they do not protect anything, but validaton tools will complain
         // if we have secrets in the code. 
@@ -81,12 +81,14 @@ namespace NetFx
 
         private static int s_currentAuthority = 0;
 
-        public static void Main(string[] args)
+#pragma warning disable UseAsyncSuffix // Use Async suffix
+        public static async Task Main(string[] args)
+#pragma warning restore UseAsyncSuffix // Use Async suffix
         {
             Console.ResetColor();
             Console.BackgroundColor = ConsoleColor.Black;
             var pca = CreatePca();
-            RunConsoleAppLogicAsync(pca).Wait();
+            await RunConsoleAppLogicAsync(pca).ConfigureAwait(false);
         }
 
         private static string GetAuthority()
@@ -120,7 +122,7 @@ namespace NetFx
 
             if (s_useBroker)
             {
-                builder = builder.WithBroker(true);
+                builder = builder.WithExperimentalFeatures().WithBroker(true);
             }
 
             var pca = builder.Build();

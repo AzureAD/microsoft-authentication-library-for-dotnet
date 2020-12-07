@@ -9,6 +9,12 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 
+#if NET5_WIN
+using Microsoft.Identity.Client.Platforms.net5win;
+#elif DESKTOP
+using Microsoft.Identity.Client.Platforms.netdesktop;
+#endif
+
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
     internal class AccountPicker : IAccountPicker

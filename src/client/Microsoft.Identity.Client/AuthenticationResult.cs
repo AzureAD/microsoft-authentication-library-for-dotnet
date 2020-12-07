@@ -10,15 +10,11 @@ using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client
 {
-#if !DESKTOP && !NET_CORE
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
     /// <summary>
     /// Contains the results of one token acquisition operation in <see cref="PublicClientApplication"/>
-    /// or <see cref="T:ConfidentialClientApplication"/>. For details see https://aka.ms/msal-net-authenticationresult
+    /// or ConfidentialClientApplication. For details see https://aka.ms/msal-net-authenticationresult
     /// </summary>
     public partial class AuthenticationResult
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         private readonly IAuthenticationScheme _authenticationScheme;
 

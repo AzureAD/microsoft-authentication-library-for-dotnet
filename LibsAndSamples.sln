@@ -82,6 +82,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9
 		changelog.txt = changelog.txt
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
+		build\platform_and_feature_flags.props = build\platform_and_feature_flags.props
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject

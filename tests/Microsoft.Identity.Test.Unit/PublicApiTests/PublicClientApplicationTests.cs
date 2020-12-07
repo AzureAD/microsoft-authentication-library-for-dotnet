@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Validate new default redirect uri
 #if DESKTOP
                 Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
-#elif NET_CORE
+#elif NET_CORE || NET5_WIN
                 Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
 #endif
             }

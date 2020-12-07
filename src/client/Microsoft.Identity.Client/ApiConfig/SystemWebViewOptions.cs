@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client
     /// It can however respond with a 200 OK message or a 302 Redirect, which can be configured here.
     /// For more details see https://aka.ms/msal-net-os-browser
     /// </summary>
-#if !(NET_CORE || NETSTANDARD || DESKTOP)
+#if !SUPPORTS_OS_SYSTEM_BROWSER
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
     public class SystemWebViewOptions
@@ -81,14 +81,14 @@ namespace Microsoft.Identity.Client
 
         internal static void ValidatePlatformAvailability()
         {
-#if !(NET_CORE || NETSTANDARD || DESKTOP)
+#if !SUPPORTS_OS_SYSTEM_BROWSER
             throw new PlatformNotSupportedException(
                 "WithSystemWebViewOptions API is only supported on .NET Classic and .NET Core. " +
                 "No options are available on other platforms.");
 #endif
         }
 
-#if NET_CORE || DESKTOP || NETSTANDARD
+#if SUPPORTS_OS_SYSTEM_BROWSER
 
         /// <summary>
         /// Use Microsoft Edge to navigate to the given URI. On non-windows platforms it uses 

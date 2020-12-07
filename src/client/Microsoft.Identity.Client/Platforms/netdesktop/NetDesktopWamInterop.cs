@@ -1,5 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
+#if !NET45
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -8,9 +11,8 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.netdesktop
 {
-#if !WINDOWS_APP
     internal static class WebAuthenticationCoreManagerInterop
     {
         public static IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr hWnd, WebTokenRequest request)
@@ -27,7 +29,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             Guid guid = typeof(IAsyncOperation<WebTokenRequestResult>).GUID;
 
             return webAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(hWnd, request, webAccount, ref guid);
-
         }
     }
 
@@ -148,5 +149,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             return accountsSettingsPaneInterop.ShowAddAccountForWindowAsync(hWnd, ref guid);
         }
     }
-#endif
 }
+#endif
+

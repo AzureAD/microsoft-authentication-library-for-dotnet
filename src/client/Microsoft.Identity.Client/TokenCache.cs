@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
-#if !DESKTOP && !NET_CORE
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
 

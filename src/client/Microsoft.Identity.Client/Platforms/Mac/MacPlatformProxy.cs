@@ -37,26 +37,6 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             return Task.FromResult(string.Empty);
         }
 
-        public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
-        {
-            return Task.FromResult(false);
-        }
-
-        public override bool IsDomainJoined()
-        {
-            return false;
-        }
-
-        public override string GetEnvironmentVariable(string variable)
-        {
-            if (string.IsNullOrWhiteSpace(variable))
-            {
-                throw new ArgumentNullException(nameof(variable));
-            }
-
-            return Environment.GetEnvironmentVariable(variable);
-        }
-
         protected override string InternalGetProcessorArchitecture()
         {
             return null;

@@ -22,6 +22,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 
 #if NET_CORE
             return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);
+#elif NET5_WIN
+            return new Microsoft.Identity.Client.Platforms.net5win.Net5WinPlatformProxy(finalLogger);
 #elif ANDROID
             return new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy(finalLogger);
 #elif iOS
