@@ -151,7 +151,6 @@ namespace Microsoft.Identity.Client.Platforms.net5win
                 Guid.Parse("81EA942C-4F09-4406-A538-838D9B14B7E6");
 
 
-
             //IAccountsSettingsPaneInterop accountsSettingsPaneInterop = 
             //    (IAccountsSettingsPaneInterop)WindowsRuntimeMarshal.GetActivationFactory(typeof(AccountsSettingsPane));
             //Guid guid = typeof(AccountsSettingsPane).GetInterface("IAccountsSettingsPane").GUID;
