@@ -163,7 +163,6 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         {
             IWebAuthenticationCoreManagerInterop webAuthenticationCoreManagerInterop =
                 WebAuthenticationCoreManager.As<IWebAuthenticationCoreManagerInterop>();
-            
 
 
             IAccountsSettingsPaneInterop accountsSettingsPaneInterop =
