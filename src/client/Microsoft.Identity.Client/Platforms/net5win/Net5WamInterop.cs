@@ -177,7 +177,6 @@ namespace Microsoft.Identity.Client.Platforms.net5win
             accountsSettingsPaneInterop.ShowAddAccountForWindowAsync(hWnd, ref guid, out IntPtr result);
 
             return MarshalInterface<IAsyncAction>.FromAbi(result);
-
         }
     }
 }
