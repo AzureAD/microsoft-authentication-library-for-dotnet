@@ -94,13 +94,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
 #else
             if (!CertificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
             {
-                if (CertificateToRsaMap.Count == maximumCertificateToRsaMap)
-                {
-                    ClearCertificateToRsaMap clearCertificateToRsaMap = new ClearCertificateToRsaMap(CertificateToRsaMap, clearMapLock);
-                    (new Thread(new ThreadStart(clearCertificateToRsaMap.Clear))).Start();
-
-                    CertificateToRsaMap = new ConcurrentDictionary<string, RSA>();
-                }
+                if (CertificateToRsaMap.Count >= maximumCertificateToRsaMap)
+                    CertificateToRsaMap.Clear();
 
                 CertificateToRsaMap[certificate.Thumbprint] = certificate.GetRSAPrivateKey();
                 rsa = CertificateToRsaMap[certificate.Thumbprint];
@@ -121,11 +116,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             try
             {
                 if (!CertificateToRsaCspMap.TryGetValue(certificate.Thumbprint, out rsaProvider))
-                {
                     rsaProvider = certificate.PrivateKey as RSACryptoServiceProvider;
-                    if (rsaProvider != null)
-                        CertificateToRsaMap[certificate.Thumbprint] = rsaProvider;
-                }
             }
             catch (CryptographicException e)
             {
@@ -167,6 +158,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 // With this flag, a CryptographicException is thrown instead.
                 //
                 csp.Flags |= CspProviderFlags.UseExistingKey;
+                if (CertificateToRsaCspMap.Count >= maximumCertificateToRsaMap)
+                    CertificateToRsaCspMap.Clear();
+
                 CertificateToRsaCspMap[certificate.Thumbprint] = new RSACryptoServiceProvider(csp);
                 return CertificateToRsaCspMap[certificate.Thumbprint];
             }
@@ -226,30 +220,6 @@ namespace Microsoft.Identity.Client.Platforms.net45
             GC.KeepAlive(certificate);
 
             return certContext;
-        }
-
-        internal class ClearCertificateToRsaMap
-        {
-            ConcurrentDictionary<string, RSA> _rsaToCertificateMap;
-            object _clearMapLock;
-
-            internal ClearCertificateToRsaMap(ConcurrentDictionary<string, RSA> rsaToCertificateMap, object clearMapLock)
-            {
-                _rsaToCertificateMap = rsaToCertificateMap;
-                _clearMapLock = clearMapLock;
-            }
-
-            internal void Clear()
-            {
-                lock (_clearMapLock)
-                {
-                    foreach (RSA rsa in _rsaToCertificateMap.Values)
-                        if (rsa != null)
-                            rsa.Dispose();
-
-                    _rsaToCertificateMap.Clear();
-                }
-            }
         }
     }
 }
