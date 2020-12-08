@@ -46,7 +46,7 @@ steps:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
-    Solution: 'Libs.sln'
+    Solution: 'LibsAndSamples.sln'
 
 # Run Unit Tests
 - template: template-run-unit-tests.yaml
