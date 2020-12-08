@@ -48,6 +48,17 @@ steps:
     MsalClientSemVer: $(MsalClientSemVer)
     Solution: 'LibsAndSamples.sln'
 
+# Run Post-build code analysis (e.g. Roslyn)
+- template: template-postbuild-code-analysis.yaml
+
+# Pack and sign all of the nuget packages
+- template: template-pack-and-sign-all-nugets.yaml
+
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 3.x'
+  inputs:
+    version: 3.x
+
 # Run Unit Tests
 - template: template-run-unit-tests.yaml
   parameters:
@@ -59,12 +70,6 @@ steps:
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
     condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-
-# Run Post-build code analysis (e.g. Roslyn)
-- template: template-postbuild-code-analysis.yaml
-
-# Pack and sign all of the nuget packages
-- template: template-pack-and-sign-all-nugets.yaml
 
 # Publish nuget packages and symbols to VSTS package manager.
 - template: template-publish-packages-and-symbols.yaml
