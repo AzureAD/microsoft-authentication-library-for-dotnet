@@ -63,13 +63,13 @@ steps:
 - template: template-run-unit-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
-    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+    condition: eq(variables['RunTests'], 'true')
 
 # Run Integration Tests
 - template: template-run-integration-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
-    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+    condition: eq(variables['RunTests'], 'true')
 
 # Publish nuget packages and symbols to VSTS package manager.
 - template: template-publish-packages-and-symbols.yaml
