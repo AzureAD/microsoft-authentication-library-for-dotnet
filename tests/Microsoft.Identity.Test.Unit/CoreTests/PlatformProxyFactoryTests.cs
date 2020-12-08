@@ -159,7 +159,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsTrue(proxy.CreateBroker(null) is WamBroker);
 #else
             Assert.IsTrue(proxy.CreateBroker(null) is NullBroker);
-            Assert.IsFalse(proxy.CanBrokerSupportSilentAuth());
 #endif
 
             Assert.IsTrue(proxy.IsSystemWebViewAvailable);
