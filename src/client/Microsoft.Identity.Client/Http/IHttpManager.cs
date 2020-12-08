@@ -33,5 +33,11 @@ namespace Microsoft.Identity.Client.Http
             Dictionary<string, string> headers,
             StringContent body,
             ICoreLogger logger);
+
+        Task<HttpResponse> SendGetWithTimeoutAsync(
+            Uri endpoint,
+            IDictionary<string, string> headers,
+            ICoreLogger logger,
+            int timeoutInMs);
     }
 }

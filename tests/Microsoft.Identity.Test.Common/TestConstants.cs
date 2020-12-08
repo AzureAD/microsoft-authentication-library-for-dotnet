@@ -131,6 +131,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string RegionName = "REGION_NAME";
         public const string Region = "centralus";
+        public const int TimeoutInMs = 2000;
 
         public const string UserAssertion = "fake_access_token";
 

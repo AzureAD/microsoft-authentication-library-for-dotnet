@@ -106,6 +106,30 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
+        public void TestSendGetWithTimeoutNoFailure()
+        {
+            var queryParams = new Dictionary<string, string>
+            {
+                ["key1"] = "qp1",
+                ["key2"] = "qp2"
+            };
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddSuccessTokenResponseMockHandlerForGet(queryParameters: queryParams);
+
+                var response = httpManager.SendGetWithTimeoutAsync(
+                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
+                    queryParams,
+                    null,
+                    TestConstants.TimeoutInMs).Result;
+
+                Assert.IsNotNull(response);
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            }
+        }
+
+        [TestMethod]
         public async Task TestSendGetWithHttp500TypeFailureAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -247,6 +271,57 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     Assert.IsNotNull(exc);
                     Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
                     Assert.IsTrue(exc.InnerException is TaskCanceledException);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSendGetWithTimeoutFailureAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Get);
+
+                try
+                {
+                    var msalHttpResponse = await httpManager.SendGetWithTimeoutAsync(
+                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                new Dictionary<string, string>(),
+                                                                Substitute.For<ICoreLogger>(),
+                                                                TestConstants.TimeoutInMs)
+                                                            .ConfigureAwait(false);
+                    Assert.Fail("request should have failed");
+                }
+                catch (MsalServiceException exc)
+                {
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
+                    Assert.IsTrue(exc.InnerException is TaskCanceledException);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSendGetWithTimeoutWithHttp500TypeFailureAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.ServiceUnavailable);
+
+                try
+                {
+                    var msalHttpResponse = await httpManager.SendGetWithTimeoutAsync(
+                                                            new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                            null,
+                                                            Substitute.For<ICoreLogger>(),
+                                                            TestConstants.TimeoutInMs)
+                                                        .ConfigureAwait(false);
+                    Assert.Fail("request should have failed");
+                }
+                catch (MsalServiceException exc)
+                {
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
                 }
             }
         }

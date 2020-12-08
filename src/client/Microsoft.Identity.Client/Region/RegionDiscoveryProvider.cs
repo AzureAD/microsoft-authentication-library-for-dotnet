@@ -17,9 +17,10 @@ namespace Microsoft.Identity.Client.Region
     internal sealed class RegionDiscoveryProvider : IRegionDiscoveryProvider
     {
         private const string RegionName = "REGION_NAME";
+        private const int TimeoutInMs = 2000;
 
         // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
-        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute";
+        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute/location";
         private const string DefaultApiVersion = "2020-06-01";
 
         private readonly IHttpManager _httpManager;
@@ -75,27 +76,19 @@ namespace Microsoft.Identity.Client.Region
                 {
                     { "Metadata", "true" }
                 };
-                
-                HttpResponse response = await _httpManager.SendGetAsync(BuildImdsUri(DefaultApiVersion), headers, logger).ConfigureAwait(false);
+
+                HttpResponse response = await _httpManager.SendGetWithTimeoutAsync(BuildImdsUri(DefaultApiVersion), headers, logger, TimeoutInMs).ConfigureAwait(false);
 
                 // A bad request occurs when the version in the IMDS call is no longer supported.
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
                     string apiVersion = await GetImdsUriApiVersionAsync(logger, headers).ConfigureAwait(false); // Get the latest version
-                    response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger).ConfigureAwait(false); // Call again with updated version
+                    response = await _httpManager.SendGetWithTimeoutAsync(BuildImdsUri(apiVersion), headers, logger, TimeoutInMs).ConfigureAwait(false); // Call again with updated version
                 }
 
                 if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                 {
-                    LocalImdsResponse localImdsResponse = JsonHelper.DeserializeFromJson<LocalImdsResponse>(response.Body);
-
-                    if (localImdsResponse != null && !localImdsResponse.location.IsNullOrEmpty())
-                    {
-                        logger.Info($"[Region discovery] Call to local IMDS returned region: {localImdsResponse.location}");
-                        LogTelemetryData(localImdsResponse.location, RegionSource.Imds, requestContext);
-
-                        return localImdsResponse.location;
-                    }
+                    return response.Body;
                 }
                     
                 logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
@@ -130,7 +123,7 @@ namespace Microsoft.Identity.Client.Region
         {
             Uri imdsErrorUri = new Uri(ImdsEndpoint);
 
-            HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger).ConfigureAwait(false);
+            HttpResponse response = await _httpManager.SendGetWithTimeoutAsync(imdsErrorUri, headers, logger, TimeoutInMs).ConfigureAwait(false);
 
             // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
             if (response.StatusCode == HttpStatusCode.BadRequest)
@@ -158,6 +151,7 @@ namespace Microsoft.Identity.Client.Region
         {
             UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
             uriBuilder.AppendQueryParameters($"api-version={apiVersion}");
+            uriBuilder.AppendQueryParameters("format=text");
             return uriBuilder.Uri;
         }
 

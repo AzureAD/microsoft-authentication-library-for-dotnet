@@ -30,7 +30,7 @@ namespace TestApp
 {
     class Program
     {
-        static string clientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+        static string s_clientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
 #pragma warning disable UseAsyncSuffix // Use Async suffix
         static async Task Main(string[] args)
 #pragma warning restore UseAsyncSuffix // Use Async suffix
@@ -85,9 +85,13 @@ namespace TestApp
 
         private static async Task AcquireTokenAsync(X509Certificate2 certificate, bool withAzureRegion = true)
         {
-            string[] scopes = new string[] { $"{clientId}/.default", };
+            string[] scopes = new string[] { $"{s_clientId}/.default", };
+            Dictionary<string, string> dict = new Dictionary<string, string>
+            {
+                ["allowestsrnonmsi"] = "true"
+            };
 
-            var cca = ConfidentialClientApplicationBuilder.Create(clientId)
+            var cca = ConfidentialClientApplicationBuilder.Create(s_clientId)
                 .WithAuthority("https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47")
                 .WithCertificate(certificate)
                 .WithExperimentalFeatures(true)
@@ -96,8 +100,9 @@ namespace TestApp
 
             Console.WriteLine("CCA created");
 
-            var result = await cca.AcquireTokenForClient(scopes)
+            AuthenticationResult result = await cca.AcquireTokenForClient(scopes)
             .WithAzureRegion(withAzureRegion)
+            .WithExtraQueryParameters(dict)
             .ExecuteAsync()
             .ConfigureAwait(false);
 

@@ -69,22 +69,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             {
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             }
-            
         }
 
         [TestMethod]
-        public async Task SuccessfulResponseFromLocalImdsAsync ()
+        public async Task SuccessfulResponseFromLocalImdsAsync()
         {
-
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
-                        ResourceHelper.GetTestResourceRelativePath("local-imds-response.json"))));
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
 
             IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
             InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
-
         }
 
         [TestMethod]
@@ -104,15 +100,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             {
                 Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             }
-
         }
 
         [TestMethod]
         public async Task ResponseMissingRegionFromLocalImdsAsync()
         {
-
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
-                        ResourceHelper.GetTestResourceRelativePath("local-imds-response-without-region.json"))));
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(string.Empty));
 
             try
             {
@@ -155,8 +148,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.BadRequest));
             AddMockedResponse(MockHelpers.CreateFailureMessage(System.Net.HttpStatusCode.BadRequest, File.ReadAllText(
                         ResourceHelper.GetTestResourceRelativePath("local-imds-error-response.json"))), expectedParams: false);
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
-                        ResourceHelper.GetTestResourceRelativePath("local-imds-response.json"))), apiVersion: "2020-10-01");
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region), apiVersion: "2020-10-01");
 
             IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
             InstanceDiscoveryMetadataEntry regionalMetadata = await regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
@@ -215,12 +207,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             if (expectedParams)
             {
                 queryParams.Add("api-version", apiVersion);
+                queryParams.Add("format", "text");
 
                 _httpManager.AddMockHandler(
                    new MockHttpMessageHandler
                    {
                        ExpectedMethod = HttpMethod.Get,
-                       ExpectedUrl = "http://169.254.169.254/metadata/instance/compute",
+                       ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/location",
                        ExpectedRequestHeaders = new Dictionary<string, string>
                         {
                             { "Metadata", "true" }
@@ -235,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute",
+                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/location",
                         ExpectedRequestHeaders = new Dictionary<string, string>
                             {
                             { "Metadata", "true" }

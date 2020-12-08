@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
@@ -74,6 +75,78 @@ namespace Microsoft.Identity.Client.Http
             ICoreLogger logger)
         {
             return await ExecuteWithRetryAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true).ConfigureAwait(false);
+        }
+
+        public async Task<HttpResponse> SendGetWithTimeoutAsync(
+            Uri endpoint,
+            IDictionary<string, string> headers,
+            ICoreLogger logger,
+            int timeoutInMs)
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            cts.CancelAfter(timeoutInMs);
+
+            bool is5xxError;
+            HttpResponse response;
+
+            try
+            {
+                response = await ExecuteWithCancellationTokenAsync(endpoint, headers, null, HttpMethod.Get, cts.Token).ConfigureAwait(false);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return response;
+                }
+
+                logger.Info(string.Format(CultureInfo.InvariantCulture,
+                    MsalErrorMessage.HttpRequestUnsuccessful,
+                    (int)response.StatusCode, response.StatusCode));
+
+
+                is5xxError = (int)response.StatusCode >= 500 && (int)response.StatusCode < 600;
+            }
+            catch (TaskCanceledException exception)
+            {
+                logger.Error("The HTTP request failed or it was canceled. " + exception.Message);
+                throw new MsalServiceException(
+                    MsalError.RequestTimeout,
+                    "Request to the endpoint timed out.",
+                    exception);
+            }
+
+            if (is5xxError)
+            {
+                throw MsalServiceExceptionFactory.FromHttpResponse(
+                    MsalError.ServiceNotAvailable,
+                    "Service is unavailable to process the request",
+                    response);
+            }
+
+            return response;
+        }
+
+        private async Task<HttpResponse> ExecuteWithCancellationTokenAsync(
+            Uri endpoint,
+            IDictionary<string, string> headers,
+            HttpContent body,
+            HttpMethod method,
+            CancellationToken cancellationToken)
+        {
+            HttpClient client = GetHttpClient();
+
+            using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
+            {
+                requestMessage.Method = method;
+                requestMessage.Content = body;
+
+                using (HttpResponseMessage responseMessage =
+                    await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
+                {
+                    HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
+                    returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();
+                    return returnValue;
+                }
+            }
         }
 
         private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)

@@ -356,11 +356,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 CreateSuccessWebFingerResponseMessage("https://fs.contoso.com");
         }
 
-        public static HttpResponseMessage CreateSuccessResponseMessage(string sucessResponse)
+        public static HttpResponseMessage CreateSuccessResponseMessage(string successResponse)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
-                new StringContent(sucessResponse);
+                new StringContent(successResponse);
             responseMessage.Content = content;
             return responseMessage;
         }

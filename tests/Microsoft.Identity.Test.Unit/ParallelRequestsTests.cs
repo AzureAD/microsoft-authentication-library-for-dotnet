@@ -295,5 +295,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             throw new NotImplementedException();
         }
+
+        public Task<HttpResponse> SendGetWithTimeoutAsync(Uri endpoint, IDictionary<string, string> headers, ICoreLogger logger, int timeoutInMs)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
