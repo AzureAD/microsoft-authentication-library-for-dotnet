@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client
 #endif
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-#if DESKTOP || WINDOWS_APP
+#if DESKTOP || WINDOWS_APP || NET5_WIN
             if (!Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
