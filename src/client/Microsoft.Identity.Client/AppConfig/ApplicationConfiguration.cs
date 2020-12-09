@@ -63,7 +63,9 @@ namespace Microsoft.Identity.Client
         public bool UseRecommendedDefaultRedirectUri { get; internal set; }
 
         internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
-        internal ILegacyCachePersistence AppTokenLegacyCachePersistenceForTest { get; set; }
+
+        internal ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
+        internal ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public bool ExperimentalFeaturesEnabled { get; set; } = false;
 

@@ -31,13 +31,8 @@ namespace Microsoft.Identity.Client
 
         bool ITokenCacheInternal.IsTokenCacheSerialized()
         {
-            if (BeforeAccess != null || AfterAccess != null || BeforeWrite != null || 
-                AsyncBeforeAccess != null || AsyncAfterAccess != null || AsyncBeforeWrite != null)
-            {
-                return true;
-            }
-
-            return false;
+            return BeforeAccess != null || AfterAccess != null || BeforeWrite != null ||
+                AsyncBeforeAccess != null || AsyncAfterAccess != null || AsyncBeforeWrite != null;
         }
 
         async Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)

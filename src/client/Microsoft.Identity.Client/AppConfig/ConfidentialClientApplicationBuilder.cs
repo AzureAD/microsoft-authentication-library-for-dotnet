@@ -174,6 +174,12 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        internal ConfidentialClientApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
+        {
+            Config.AppTokenCacheInternalForTest = tokenCacheInternal;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override void Validate()
         {
