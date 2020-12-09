@@ -19,11 +19,13 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         /// </summary>
         /// <remarks>Cancellation is very important as this is typically a long running unmonitored operation</remarks>
         /// <param name="port">the port to listen to</param>
+        /// <param name="path">the path to listen in</param>
         /// <param name="responseProducer">The message to be displayed, or url to be redirected to will be created by this callback</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Full redirect uri</returns>
         Task<Uri> ListenToSingleRequestAndRespondAsync(
             int port,
+            string path,
             Func<Uri, MessageAndHttpCode> responseProducer,
             CancellationToken cancellationToken);
     }
