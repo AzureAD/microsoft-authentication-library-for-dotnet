@@ -23,13 +23,6 @@ variables:
   
 steps:
 
-# For some reason the signing task ask for dotnet core 2
-- task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 2.x'
-  inputs:
-    version: 2.x
-  condition: eq(variables['RunTests'], 'true')
-
 - task: UseDotNet@2
   displayName: 'Use .Net Core sdk 5.x'
   inputs:
@@ -52,23 +45,20 @@ steps:
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml
 
+# Run All Tests
+- template: template-run-all-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
+
+# For some reason the signing task ask for dotnet core 2
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 2.x'
+  inputs:
+    version: 2.x
+  condition: eq(variables['RunTests'], 'true')
+
 # Pack and sign all of the nuget packages
 - template: template-pack-and-sign-all-nugets.yaml
-
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 3.x'
-  inputs:
-    version: 3.x
-
-# Run Unit Tests
-- template: template-run-unit-tests.yaml
-  parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
-
-# Run Integration Tests
-- template: template-run-integration-tests.yaml
-  parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
 
 # Publish nuget packages and symbols to VSTS package manager.
 - template: template-publish-packages-and-symbols.yaml
