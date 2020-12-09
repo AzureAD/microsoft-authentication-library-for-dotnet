@@ -154,6 +154,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsWebUi\**\*.cs" />
 
     <!-- This package reference is here to fix a bug in the WinRT interop. 
     It should not be required after the december release of .NET 5 SDK -->
@@ -169,12 +170,8 @@
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\Windows\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsWebUi\**\*.cs" />
 
-    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
-    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.cs" SubType="Component" />
-    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\WinFormWebAuthenticationDialog.cs" SubType="Form" />
-    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
-    <Compile Update="$(PathToMsalSources)\Platforms\netdesktop\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -254,15 +251,6 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid10)' ">
     <PackageReference Include="Xamarin.AndroidX.Browser" Version="1.0.0" />
-  </ItemGroup>
-
-  <!-- This is here to workaround designer issues so VS sees them appropriately -->
-  <ItemGroup>
-    <None Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
-    <None Update="$(PathToMsalSources)\Platforms\netdesktop\CustomWebBrowser.cs" SubType="Component" />
-    <None Update="$(PathToMsalSources)\Platforms\netdesktop\WinFormWebAuthenticationDialog.cs" SubType="Form" />
-    <None Update="$(PathToMsalSources)\Platforms\netdesktop\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
-    <None Update="$(PathToMsalSources)\Platforms\netdesktop\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
   </ItemGroup>
 
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">

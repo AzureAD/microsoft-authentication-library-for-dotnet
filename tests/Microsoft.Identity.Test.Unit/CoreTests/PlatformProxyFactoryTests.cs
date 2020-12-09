@@ -11,6 +11,12 @@ using System.Linq;
 using Microsoft.Identity.Client.Http;
 using System.Net;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal;
+
+#if SUPPORTS_BROKER
+using Microsoft.Identity.Client.Platforms.Features.WamBroker;
+#endif
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
 {
@@ -139,7 +145,39 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 ServicePointManager.DnsRefreshTimeout = originalDnsTimeout;
                 ServicePointManager.DefaultConnectionLimit = originalConnLimit;
             }
+        }
 
+
+        [TestMethod]
+        public void FlagDefaultsTest()
+        {
+            var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
+
+#if SUPPORTS_BROKER
+            Assert.IsTrue(proxy.BrokerSupportsWamAccounts);
+            Assert.IsTrue(proxy.CanBrokerSupportSilentAuth());
+            Assert.IsTrue(proxy.CreateBroker(null) is WamBroker);
+#else
+            Assert.IsTrue(proxy.CreateBroker(null) is NullBroker);
+#endif
+
+            Assert.IsTrue(proxy.IsSystemWebViewAvailable);
+            Assert.AreSame(
+                Constants.DefaultRedirectUri,
+                proxy.GetDefaultRedirectUri("cid", false));
+
+#if DESKTOP || NET5_WIN
+            Assert.IsTrue(proxy.UseEmbeddedWebViewDefault);
+            Assert.AreSame(
+                Constants.NativeClientRedirectUri,
+                proxy.GetDefaultRedirectUri("cid", true));
+
+#else
+            Assert.IsFalse(proxy.UseEmbeddedWebViewDefault);
+             Assert.AreSame(
+                Constants.LocalHostRedirectUri,
+                proxy.GetDefaultRedirectUri("cid", true));
+#endif
         }
 
     }

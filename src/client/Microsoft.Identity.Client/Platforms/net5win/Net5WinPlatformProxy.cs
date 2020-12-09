@@ -48,5 +48,20 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         }
 
         public override bool BrokerSupportsWamAccounts => true;
+
+        protected override IWebUIFactory CreateWebUiFactory() => new Net5WebUiFactory();
+
+        public override bool UseEmbeddedWebViewDefault => true;
+
+        public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
+        {
+            if (useRecommendedRedirectUri)
+            {
+                return Constants.NativeClientRedirectUri;
+            }
+
+            return Constants.DefaultRedirectUri;
+        }
+
     }
 }

@@ -19,6 +19,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     [TestCategory("Broker")]
     public class WamGetAccountsTests : TestBase
     {
+#if SUPPORTS_BROKER
         [TestMethod]
         public async Task WAM_AccountIdWriteback_Async()
         {
@@ -60,6 +61,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.IsFalse(accounts2.Any());
             }
         }
+#endif
 
         [TestMethod]
         public async Task WAM_AccountIds_GetMerged_Async()
@@ -111,11 +113,16 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var accounts2 = await pca2.GetAccountsAsync().ConfigureAwait(false);
 
                 // Assert
+#if SUPPORTS_BROKER
                 var wamAccountIds = (accounts1.Single() as IAccountInternal).WamAccountIds;
                 Assert.AreEqual(2, wamAccountIds.Count);
                 Assert.AreEqual("wam2", wamAccountIds[TestConstants.ClientId]);
                 Assert.AreEqual("wam3", wamAccountIds[TestConstants.ClientId2]);
                 CoreAssert.AssertDictionariesAreEqual(wamAccountIds, (accounts2.Single() as IAccountInternal).WamAccountIds, StringComparer.Ordinal);
+#else
+                Assert.IsTrue(accounts1.All(a => (a as IAccountInternal).WamAccountIds == null));
+                Assert.IsTrue(accounts2.All(a => (a as IAccountInternal).WamAccountIds == null));
+#endif
             }
         }
 
@@ -153,10 +160,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 // Assert
                 Assert.AreEqual(2, accounts.Count());
-
+#if SUPPORTS_BROKER
                 var wamAccountIds = (accounts.Single(acc => acc.HomeAccountId.Identifier == commonAccId) as IAccountInternal).WamAccountIds;
                 Assert.AreEqual(1, wamAccountIds.Count);
                 Assert.AreEqual("wam_acc_id", wamAccountIds[TestConstants.ClientId]);
+#else
+                Assert.IsTrue(accounts.All(a => (a as IAccountInternal).WamAccountIds == null));
+#endif
             }
         }
 
