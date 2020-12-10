@@ -5,6 +5,7 @@ steps:
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET FX)'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netfx\bin\**\net4*\Microsoft.Identity.Test.Integration.NetFx.dll'
@@ -16,6 +17,7 @@ steps:
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET Core)'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\netcore*\Microsoft.Identity.Test.Integration.NetCore.dll'

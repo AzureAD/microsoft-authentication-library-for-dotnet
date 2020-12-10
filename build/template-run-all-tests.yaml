@@ -1,0 +1,19 @@
+# template-run-all-tests.yaml
+# Run all  tests across the LibsAndSamples.sln project
+
+parameters:
+  BuildConfiguration: 'debug'
+
+steps:
+
+- template: template-install-keyvault-secrets.yaml
+
+# Run Unit Tests
+- template: template-run-unit-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
+
+# Run Integration Tests
+- template: template-run-integration-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
