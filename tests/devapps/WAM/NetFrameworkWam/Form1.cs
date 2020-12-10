@@ -158,12 +158,16 @@ namespace NetDesktopWinForms
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 // Today, apps using MSA-PT must manually target the correct tenant 
-                if (IsMsaPassthroughConfigured() && acc.HomeAccountId.TenantId == "9188040d-6c67-4c5b-b112-36a304b66dad")
-                {
-                    reqAuthority = "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a";
-                }
+                //if (IsMsaPassthroughConfigured() && acc.HomeAccountId.TenantId == "9188040d-6c67-4c5b-b112-36a304b66dad")
+                //{
+                //    reqAuthority = "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a";
+                //}
+
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
+
+                await MoveToBackgroundThreadIfConfiguredAsync().ConfigureAwait(true);
+
                 return await pca.AcquireTokenSilent(GetScopes(), acc)
                     .WithAuthority(reqAuthority)
                     .ExecuteAsync()
@@ -174,6 +178,14 @@ namespace NetDesktopWinForms
             return await pca.AcquireTokenSilent(GetScopes(), (IAccount)null)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+        }
+
+        private async Task MoveToBackgroundThreadIfConfiguredAsync()
+        {
+            if (cbxBackgroundThread.Enabled)
+            {
+                await Task.Delay(500).ConfigureAwait(false);
+            }
         }
 
         private string[] GetScopes()
@@ -248,6 +260,7 @@ namespace NetDesktopWinForms
 
         private async Task<AuthenticationResult> RunAtiAsync(IPublicClientApplication pca)
         {
+
             string loginHint = GetLoginHint();
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
             {
@@ -255,6 +268,7 @@ namespace NetDesktopWinForms
             }
 
             AuthenticationResult result = null;
+            
 
             var builder = pca.AcquireTokenInteractive(GetScopes());
 
@@ -281,9 +295,9 @@ namespace NetDesktopWinForms
                 Log($"ATI without login_hint or account. It should display the account picker");
             }
 
+            await MoveToBackgroundThreadIfConfiguredAsync().ConfigureAwait(false);
+
             result = await builder.ExecuteAsync().ConfigureAwait(false);
-
-
             return result;
         }
 

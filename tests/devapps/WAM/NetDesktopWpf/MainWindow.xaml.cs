@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Desktop;
 
 namespace NetDesktopWpf
 {
@@ -37,7 +38,8 @@ namespace NetDesktopWpf
         {
             var pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
-                .WithBroker(true)
+                .WithExperimentalFeatures(true)
+                .WithWindowsBroker(true)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 

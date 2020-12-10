@@ -17,6 +17,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             NetSetupDomainName
         }
 
+
+        [DllImport("kernel32.dll")]
+        public static extern uint GetCurrentProcessId();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
         private const int PROCESSOR_ARCHITECTURE_AMD64 = 9;
         private const int PROCESSOR_ARCHITECTURE_ARM = 5;
         private const int PROCESSOR_ARCHITECTURE_IA64 = 6;
@@ -67,6 +74,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetConsoleWindow();
 
         [StructLayout(LayoutKind.Sequential)]
         private struct SYSTEM_INFO

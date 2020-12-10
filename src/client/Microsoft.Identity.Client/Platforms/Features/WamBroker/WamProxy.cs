@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Core;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
+using System.Threading;
 
 #if NET5_WIN
 using Microsoft.Identity.Client.Platforms.net5win;
@@ -20,10 +21,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
     internal class WamProxy : IWamProxy
     {
         private readonly ICoreLogger _logger;
+        private readonly SynchronizationContext _synchronizationContext;
 
-        public WamProxy(ICoreLogger logger)
+        public WamProxy(ICoreLogger logger, System.Threading.SynchronizationContext synchronizationContext)
         {
             _logger = logger;
+            _synchronizationContext = synchronizationContext;
         }
 
         public async Task<IWebTokenRequestResultWrapper> GetTokenSilentlyAsync(WebAccount webAccount, WebTokenRequest webTokenRequest)
@@ -49,6 +52,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             WebTokenRequest webTokenRequest)
         {
 #if WINDOWS_APP
+            // UWP requires being on the UI thread
+            await _synchronizationContext;
+
             WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(webTokenRequest);
 #else
 
@@ -64,6 +70,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
            WebAccount wamAccount)
         {
 #if WINDOWS_APP
+
+            // UWP requires being on the UI thread
+            await _synchronizationContext;
+
             WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(
                 webTokenRequest, 
                 wamAccount);
@@ -113,7 +123,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return findResult.Accounts;
             }
         }
-
-    
     }
 }

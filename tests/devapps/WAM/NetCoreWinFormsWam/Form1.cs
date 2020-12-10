@@ -13,8 +13,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+#if NETCOREAPP3_1
 using Microsoft.Identity.Client.Desktop;
-
+#endif
 namespace NetCoreWinFormsWAM
 {
 
@@ -79,12 +80,14 @@ namespace NetCoreWinFormsWAM
                 .Create(clientId)
                 .WithAuthority(this.authorityCbx.Text)
                 .WithExperimentalFeatures(true)
-                //.WithBroker(this.useBrokerChk.Checked)
+#if NETCOREAPP3_1
                 .WithWindowsBroker(this.useBrokerChk.Checked)
+#else
+                .WithBroker(this.useBrokerChk.Checked)
+#endif
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
-                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                .WithParentActivityOrWindow(() => this.Handle)
+                .WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")                
                 .WithExtraQueryParameters(extraQp)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
@@ -260,8 +263,10 @@ namespace NetCoreWinFormsWAM
             }
 
             AuthenticationResult result = null;
+            var scopes = GetScopes();
 
-            var builder = pca.AcquireTokenInteractive(GetScopes());
+            var builder = pca.AcquireTokenInteractive(scopes)
+                .WithParentActivityOrWindow(this.Handle);
 
 
             Prompt? prompt = GetPrompt();
@@ -286,6 +291,8 @@ namespace NetCoreWinFormsWAM
                 Log($"ATI without login_hint or account. It should display the account picker");
             }
 
+
+            await Task.Delay(500).ConfigureAwait(false);
             result = await builder.ExecuteAsync().ConfigureAwait(false);
 
 

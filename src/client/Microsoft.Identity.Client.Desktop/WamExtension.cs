@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,21 +20,23 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
+#if NETSTANDARD
+            throw new PlatformNotSupportedException(
+                "Windows Broker integration is not available on NetStandard. " +
+                "Please reference Microsoft.Identity.Client and Microsoft.Identity.Client.Desktop from the entry-point project to target a supported platform");
+#else
             if (!builder.Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
                     MsalError.ExperimentalFeature,
                     MsalErrorMessage.ExperimentalFeature(nameof(WithWindowsBroker)));
             }
-            builder.Config.IsBrokerEnabled = enableBroker;
 
-#if !NETSTANDARD
-
+            builder.Config.IsBrokerEnabled = true;
             builder.Config.BrokerCreatorFunc =
                 (uiParent, logger) => new Platforms.Features.WamBroker.WamBroker(uiParent, logger);
-#endif
             return builder;
-
+#endif
         }
     }
 }

@@ -8,12 +8,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+#if NET47
+using Microsoft.Identity.Client.Desktop;
+#endif
 using Microsoft.Identity.Client.SSHCertificates;
 using Microsoft.Identity.Client.Utils;
 
@@ -38,7 +42,7 @@ namespace NetFx
     },  
   }";
         // This app has http://localhost redirect uri registered
-        private static readonly string s_clientIdForPublicApp = "b16e7986-f7dd-4a31-96d7-d24445a38b4b";
+        private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
 
         private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
         private const string PoPUri = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
@@ -111,6 +115,9 @@ namespace NetFx
 
             return cca;
         }
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
         private static IPublicClientApplication CreatePca()
         {
             var builder = PublicClientApplicationBuilder
@@ -122,7 +129,17 @@ namespace NetFx
 
             if (s_useBroker)
             {
-                builder = builder.WithExperimentalFeatures().WithBroker(true);
+                IntPtr consoleWindowHandle = GetConsoleWindow();
+                Func<IntPtr> c = () => consoleWindowHandle;
+
+                builder = builder
+                    .WithParentActivityOrWindow(c)
+                    .WithExperimentalFeatures()
+                    
+#if NET47
+                    .WithWindowsBroker(true)
+#endif
+                    .WithBroker(true);
             }
 
             var pca = builder.Build();
@@ -229,8 +246,10 @@ namespace NetFx
 
                             break;
                         case '4':
-                            
-                            var interactiveBuilder = pca.AcquireTokenInteractive(s_scopes);                            
+                            IntPtr x = GetConsoleWindow();
+                            var interactiveBuilder = pca
+                                .AcquireTokenInteractive(s_scopes);
+                                
                                                        
                             //interactiveBuilder = interactiveBuilder.WithAccount(account2);
 
