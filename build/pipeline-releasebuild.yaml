@@ -59,7 +59,6 @@ steps:
   displayName: 'Use .Net Core sdk 2.x'
   inputs:
     version: 2.x
-  condition: eq(variables['RunTests'], 'true')
 
 # Pack and sign all of the nuget packages
 - template: template-pack-and-sign-all-nugets.yaml
