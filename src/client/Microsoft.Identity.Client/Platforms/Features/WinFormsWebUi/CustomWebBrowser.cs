@@ -13,17 +13,17 @@ namespace Microsoft.Identity.Client.Platforms.net45
         private const int S_OK = 0;
         private const int S_FALSE = 1;
         private const int WM_CHAR = 0x102;
-        private static readonly HashSet<Shortcut> shortcutBlacklist = new HashSet<Shortcut>();
+        private static readonly HashSet<Shortcut> shortcutDisallowedList = new HashSet<Shortcut>();
         private CustomWebBrowserEvent webBrowserEvent;
         private AxHost.ConnectionPointCookie webBrowserEventCookie;
 
         static CustomWebBrowser()
         {
-            shortcutBlacklist.Add(Shortcut.AltBksp);
-            shortcutBlacklist.Add(Shortcut.AltDownArrow);
-            shortcutBlacklist.Add(Shortcut.AltLeftArrow);
-            shortcutBlacklist.Add(Shortcut.AltRightArrow);
-            shortcutBlacklist.Add(Shortcut.AltUpArrow);
+            shortcutDisallowedList.Add(Shortcut.AltBksp);
+            shortcutDisallowedList.Add(Shortcut.AltDownArrow);
+            shortcutDisallowedList.Add(Shortcut.AltLeftArrow);
+            shortcutDisallowedList.Add(Shortcut.AltRightArrow);
+            shortcutDisallowedList.Add(Shortcut.AltUpArrow);
         }
 
         protected override WebBrowserSiteBase CreateWebBrowserSiteBase()
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     {
                         int num = ((int) msg.wParam) | (int) ModifierKeys;
                         Shortcut s = (Shortcut) num;
-                        if (shortcutBlacklist.Contains(s))
+                        if (shortcutDisallowedList.Contains(s))
                         {
                             return S_OK;
                         }
