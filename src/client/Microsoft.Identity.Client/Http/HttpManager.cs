@@ -40,31 +40,35 @@ namespace Microsoft.Identity.Client.Http
             Uri endpoint,
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
-            ICoreLogger logger)
+            ICoreLogger logger,
+            CancellationToken cancellationToken = default)
         {
             HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendPostAsync(endpoint, headers, body, logger).ConfigureAwait(false);
+            return await SendPostAsync(endpoint, headers, body, logger, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
-            ICoreLogger logger)
+            ICoreLogger logger,
+            CancellationToken cancellationToken = default)
         {
-            return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, logger).ConfigureAwait(false);
+            return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, logger, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<HttpResponse> SendGetAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
-            ICoreLogger logger)
+            ICoreLogger logger,
+            bool retry = true,
+            CancellationToken cancellationToken = default)
         {
-            return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, logger).ConfigureAwait(false);
+            return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: retry, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, ICoreLogger)"/>
+        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, ICoreLogger, CancellationToken)"/>
         /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
         /// with the request.
         /// </summary>
@@ -72,81 +76,10 @@ namespace Microsoft.Identity.Client.Http
             Uri uri,
             Dictionary<string, string> headers,
             StringContent body,
-            ICoreLogger logger)
-        {
-            return await ExecuteWithRetryAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true).ConfigureAwait(false);
-        }
-
-        public async Task<HttpResponse> SendGetWithTimeoutAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
             ICoreLogger logger,
-            int timeoutInMs)
+            CancellationToken cancellationToken = default)
         {
-            CancellationTokenSource cts = new CancellationTokenSource();
-            cts.CancelAfter(timeoutInMs);
-
-            bool is5xxError;
-            HttpResponse response;
-
-            try
-            {
-                response = await ExecuteWithCancellationTokenAsync(endpoint, headers, null, HttpMethod.Get, cts.Token).ConfigureAwait(false);
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    return response;
-                }
-
-                logger.Info(string.Format(CultureInfo.InvariantCulture,
-                    MsalErrorMessage.HttpRequestUnsuccessful,
-                    (int)response.StatusCode, response.StatusCode));
-
-
-                is5xxError = (int)response.StatusCode >= 500 && (int)response.StatusCode < 600;
-            }
-            catch (TaskCanceledException exception)
-            {
-                logger.Error("The HTTP request failed or it was canceled. " + exception.Message);
-                throw new MsalServiceException(
-                    MsalError.RequestTimeout,
-                    "Request to the endpoint timed out.",
-                    exception);
-            }
-
-            if (is5xxError)
-            {
-                throw MsalServiceExceptionFactory.FromHttpResponse(
-                    MsalError.ServiceNotAvailable,
-                    "Service is unavailable to process the request",
-                    response);
-            }
-
-            return response;
-        }
-
-        private async Task<HttpResponse> ExecuteWithCancellationTokenAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            HttpContent body,
-            HttpMethod method,
-            CancellationToken cancellationToken)
-        {
-            HttpClient client = GetHttpClient();
-
-            using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
-            {
-                requestMessage.Method = method;
-                requestMessage.Content = body;
-
-                using (HttpResponseMessage responseMessage =
-                    await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
-                {
-                    HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
-                    returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();
-                    return returnValue;
-                }
-            }
+            return await ExecuteWithRetryAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
@@ -171,7 +104,8 @@ namespace Microsoft.Identity.Client.Http
             HttpMethod method,
             ICoreLogger logger,
             bool doNotThrow = false,
-            bool retry = true)
+            bool retry = true,
+            CancellationToken cancellationToken = default)
         {
             Exception timeoutException = null;
             bool isRetryable = false;
@@ -188,7 +122,7 @@ namespace Microsoft.Identity.Client.Http
                     clonedBody = await CloneHttpContentAsync(body).ConfigureAwait(false);
                 }
 
-                response = await ExecuteAsync(endpoint, headers, clonedBody, method).ConfigureAwait(false);
+                response = await ExecuteAsync(endpoint, headers, clonedBody, method, cancellationToken).ConfigureAwait(false);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -261,8 +195,11 @@ namespace Microsoft.Identity.Client.Http
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
-            HttpMethod method)
+            HttpMethod method,
+            CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             HttpClient client = GetHttpClient();
 
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
@@ -271,7 +208,7 @@ namespace Microsoft.Identity.Client.Http
                 requestMessage.Content = body;
 
                 using (HttpResponseMessage responseMessage =
-                    await client.SendAsync(requestMessage).ConfigureAwait(false))
+                    await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                 {
                     HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
                     returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();

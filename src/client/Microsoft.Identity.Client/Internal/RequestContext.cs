@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -20,11 +21,14 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public ApiEvent ApiEvent { get; set; }
 
-        public RequestContext(IServiceBundle serviceBundle, Guid correlationId)
+        public CancellationToken UserCancellationToken { get; }
+
+        public RequestContext(IServiceBundle serviceBundle, Guid correlationId, CancellationToken cancellationToken = default)
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
             Logger = MsalLogger.Create(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
+            UserCancellationToken = cancellationToken;
         }
 
         public TelemetryHelper CreateTelemetryHelper(EventBase eventToStart)
