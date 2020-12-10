@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.UI
         internal bool UseCorporateNetwork { get; set; }
 #endif
 
-#if DESKTOP || NET5_WIN
+#if DESKTOP || NET5_WIN 
         internal object OwnerWindow { get; set; }
 
         /// <summary>

@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// <summary>
         /// iOS broker does not handle silent flow
         /// </summary>
-        public Task RemoveAccountAsync(IApplicationConfiguration applicationConfiguration, IAccount account)
+        public Task RemoveAccountAsync(IAppConfigInternal applicationConfiguration, IAccount account)
         {
             throw new NotImplementedException();
         }

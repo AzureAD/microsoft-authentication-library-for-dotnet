@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private readonly object _lockObject = new object();
 
         public static ITelemetryClient CreateMats(
-            IApplicationConfiguration applicationConfiguration,
+            IAppConfigInternal applicationConfiguration,
             IPlatformProxy platformProxy,
             ITelemetryConfig telemetryConfig)
         {
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         }
 
         private TelemetryClient(
-            IApplicationConfiguration applicationConfiguration,
+            IAppConfigInternal applicationConfiguration,
             IPlatformProxy platformProxy,
             IErrorStore errorStore,
             IUploader uploader,

@@ -82,6 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<MsalTokenResponse> FetchTokensFromBrokerAsync(string brokerInstallUrl, CancellationToken cancellationToken)
         {
             IBroker broker = _serviceBundle.PlatformProxy.CreateBroker(
+                _serviceBundle.Config,
                 _interactiveParameters.UiParent);
 
             ITokenRequestComponent brokerInteractiveRequest =

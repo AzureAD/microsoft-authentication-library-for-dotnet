@@ -6,14 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
-    internal sealed class ApplicationConfiguration : IApplicationConfiguration
+    internal sealed class ApplicationConfiguration : IAppConfigInternal
     {
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
@@ -40,6 +43,8 @@ namespace Microsoft.Identity.Client
         public string IosKeychainSecurityGroup { get; internal set; }
 
         public bool IsBrokerEnabled { get; internal set; }
+
+        public Func<CoreUIParent, ICoreLogger, IBroker> BrokerCreatorFunc { get; set; }
 
         public ITelemetryConfig TelemetryConfig { get; internal set; }
 

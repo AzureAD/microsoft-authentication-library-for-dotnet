@@ -120,19 +120,32 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// On Android and iOS, brokers enable Single-Sign-On, device identification,
+        /// Brokers enable Single-Sign-On, device identification,
         /// and application identification verification. To enable one of these features,
         /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-brokers 
         /// for more information on platform specific settings required to enable the broker.
+        /// 
+        /// On iOS and Android, Autheticator and Company Portal serve as brokers.
+        /// On Windows, WAM (Windows Account Manager) serves as broker. See https://aka.ms/msal-net-wam
         /// </summary>
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
-#if !SUPPORTS_BROKER
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
-#endif
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
+#if NET45
+            throw new PlatformNotSupportedException("The Windows broker is not available on .NET Framework 4.5, please use at least .NET Framework 4.6.2");
+#endif
+
+#if NET461
+            if (Config.BrokerCreatorFunc == null)
+            {
+                throw new PlatformNotSupportedException(
+                    "The Windows broker is not directly available on MSAL for .NET Framework." +
+                    " To use it, please install the nuget package named Microsoft.Identity.Client.Desktop " +
+                    "and use the extension method .WithWindowsBroker(true)");
+            }
+#endif
 #if DESKTOP || WINDOWS_APP || NET5_WIN
             if (!Config.ExperimentalFeaturesEnabled)
             {
@@ -142,8 +155,10 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
+#pragma warning disable CS0162 // Unreachable code detected
             Config.IsBrokerEnabled = enableBroker;
             return this;
+#pragma warning restore CS0162 // Unreachable code detected
         }
 
 #if WINDOWS_APP

@@ -37,9 +37,11 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         {
         }
 
-        public override IBroker CreateBroker(CoreUIParent uiParent)
+        public override IBroker CreateBroker(IAppConfigInternal appConfig, CoreUIParent uiParent)
         {
-            return base.OverloadBrokerForTest ?? new Features.WamBroker.WamBroker(uiParent, Logger);
+            return appConfig.BrokerCreatorFunc != null ?
+                appConfig.BrokerCreatorFunc(uiParent, Logger) :
+                new Features.WamBroker.WamBroker(uiParent, Logger);
         }
 
         public override bool CanBrokerSupportSilentAuth()

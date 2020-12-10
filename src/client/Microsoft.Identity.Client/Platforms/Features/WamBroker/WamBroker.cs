@@ -317,7 +317,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return window.Handle;
             }
 
-            return WindowsNativeMethods.GetForegroundWindow();
+            return WindowsNativeMethods.GetForegroundWindow(); 
 #endif
 
         }
@@ -527,7 +527,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                    "GetTokenSilentlyAsync");
         }
 
-        public async Task RemoveAccountAsync(IApplicationConfiguration appConfig, IAccount account)
+        public async Task RemoveAccountAsync(IAppConfigInternal appConfig, IAccount account)
         {
             string homeTenantId = account?.HomeAccountId?.TenantId;
             if (!string.IsNullOrEmpty(homeTenantId))

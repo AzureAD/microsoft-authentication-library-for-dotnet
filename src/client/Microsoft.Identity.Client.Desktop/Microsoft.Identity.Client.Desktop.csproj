@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+
+    <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
+    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+    <!--<TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>-->
+    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>
+
+    <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
+
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
+    <!--This should be passed from the VSTS build-->
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1</MsalClientSemVer>
+    <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
+    <Version>$(MsalClientSemVer)</Version>
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->
+    <Title>MSAL.NET extension for desktop scenarios for older .NET platforms</Title>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+    <Authors>Microsoft</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
+    <PackageReleaseNotes>The changelog is available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/changelog.txt and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap </PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>
+      This package contains binaries needed to use the Windows broker and other features with MSAL on older 
+      platforms such as .NET Framework and .NET Core 3.x      
+    </Description>
+    <PackageTags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Authentication Manager</PackageTags>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+    <Product>Microsoft Authentication Library Desktop</Product>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
+    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+    <DefineConstants>$(DefineConstants);NET_STANDARD</DefineConstants>
+  </PropertyGroup>
+   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' or '$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
+     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" LinkBase="WAM" />
+     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.17763.1000" />
+     <Reference Include="System.Windows.Forms" />
+
+   </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+ 
+
+</Project>

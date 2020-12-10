@@ -1,8 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET45
-
+#if !NETSTANDARD
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -151,4 +150,3 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
     }
 }
 #endif
-
