@@ -5,13 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -28,6 +33,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         private MockHttpManager _httpManager;
         private RequestContext _testRequestContext;
         private ApiEvent _apiEvent;
+        private CancellationTokenSource _userCancellationTokenSource;
 
         [TestInitialize]
         public override void TestInitialize()
@@ -36,10 +42,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             _harness = base.CreateTestHarness();
             _httpManager = _harness.HttpManager;
-            _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
+            _userCancellationTokenSource = new CancellationTokenSource();
+            _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid(), _userCancellationTokenSource.Token);
             _apiEvent = new ApiEvent(
-                _harness.ServiceBundle.DefaultLogger, 
-                _harness.ServiceBundle.PlatformProxy.CryptographyManager, 
+                _harness.ServiceBundle.DefaultLogger,
+                _harness.ServiceBundle.PlatformProxy.CryptographyManager,
                 Guid.NewGuid().AsMatsCorrelationId());
             _testRequestContext.ApiEvent = _apiEvent;
         }
@@ -52,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
-        public async Task SuccessfulResponseFromEnvironmentVariableAsync ()
+        public async Task SuccessfulResponseFromEnvironmentVariableAsync()
         {
             try
             {
@@ -82,6 +89,86 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsNotNull(regionalMetadata);
             Assert.AreEqual("centralus.login.microsoft.com", regionalMetadata.PreferredNetwork);
         }
+
+        private class HttpSnifferClientFactory : IMsalHttpClientFactory
+        {
+            readonly HttpClient _httpClient;
+
+            public IList<(HttpRequestMessage, HttpResponseMessage)> RequestsAndResponses { get; }
+
+            public HttpSnifferClientFactory()
+            {
+                RequestsAndResponses = new List<(HttpRequestMessage, HttpResponseMessage)>();
+
+                var recordingHandler = new RecordingHandler2((req, res) =>
+                {
+                    RequestsAndResponses.Add((req, res));
+                });
+                recordingHandler.InnerHandler = new HttpClientHandler();
+                _httpClient = new HttpClient(recordingHandler);
+            }
+
+            public HttpClient GetHttpClient()
+            {
+                return _httpClient;
+            }
+
+            private class RecordingHandler2 : DelegatingHandler
+            {
+                private readonly Action<HttpRequestMessage, HttpResponseMessage> _recordingAction;
+
+                public RecordingHandler2(Action<HttpRequestMessage, HttpResponseMessage> recordingAction)
+                {
+                    _recordingAction = recordingAction;
+                }
+
+                protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+                {
+                    var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                    _recordingAction.Invoke(request, response);
+                    return response;
+                }
+            }
+        }
+
+       
+
+        [TestMethod]
+        public async Task NoImdsCancellation_UserCancelled_Async()
+        {
+            var httpManager = new HttpManager(new SimpleHttpClientFactory());
+
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(
+                httpManager, 
+                new NetworkCacheMetadataProvider());
+
+            _userCancellationTokenSource.Cancel();
+
+            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"),
+                _testRequestContext))
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("region_discovery_failed", ex.ErrorCode);
+        }
+
+        [TestMethod]
+        public async Task ImdsTimeout_Async()
+        {
+            var httpManager = new HttpManager(new SimpleHttpClientFactory());
+
+            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(
+                httpManager,
+                new NetworkCacheMetadataProvider(),
+                imdsCallTimeout: 1);
+
+            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"),
+                _testRequestContext))
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("region_discovery_failed", ex.ErrorCode);
+        }      
 
         [TestMethod]
         public async Task NonPublicCloudTestAsync()
@@ -125,7 +212,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task ErrorResponseFromLocalImdsAsync()
         {
-            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound)); 
+            AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.NotFound));
 
             try
             {
@@ -221,7 +308,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                        ExpectedQueryParams = queryParams,
                        ResponseMessage = responseMessage
                    });
-            } 
+            }
             else
             {
                 _httpManager.AddMockHandler(

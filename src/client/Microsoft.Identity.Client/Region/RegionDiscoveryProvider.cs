@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Client.Region
     internal sealed class RegionDiscoveryProvider : IRegionDiscoveryProvider
     {
         private const string RegionName = "REGION_NAME";
-        private const int TimeoutInMs = 2000;
 
         // For information of the current api-version refer: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#versioning
         private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute/location";
@@ -26,11 +25,16 @@ namespace Microsoft.Identity.Client.Region
 
         private readonly IHttpManager _httpManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
+        private readonly int _imdsCallTimeout;
 
-        public RegionDiscoveryProvider(IHttpManager httpManager, INetworkCacheMetadataProvider networkCacheMetadataProvider = null)
+        public RegionDiscoveryProvider(
+            IHttpManager httpManager, 
+            INetworkCacheMetadataProvider networkCacheMetadataProvider = null, 
+            int imdsCallTimeout = 2000)
         {
             _httpManager = httpManager;
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
+            _imdsCallTimeout = imdsCallTimeout;
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
@@ -95,24 +99,24 @@ namespace Microsoft.Identity.Client.Region
                 logger.Info($"[Region discovery] Call to local IMDS failed with status code: {response.StatusCode} or an empty response.");
 
                 throw MsalServiceExceptionFactory.FromImdsResponse(
-                MsalError.RegionDiscoveryFailed,
-                MsalErrorMessage.RegionDiscoveryFailed,
-                response);
-            }
-            catch (MsalServiceException)
+                    MsalError.RegionDiscoveryFailed,
+                    MsalErrorMessage.RegionDiscoveryFailed,
+                    response);
+            }  
+            catch (OperationCanceledException e)
             {
-                throw;
+                throw new MsalServiceException("region_discovery_failed", "app cancelled or timeout expired", e);
             }
-            catch (Exception e)
+            catch (Exception e) when (!(e is MsalServiceException))
             {
-                logger.Info("[Region discovery] Call to local imds failed." + e.Message);
-                throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed);
+                logger.Info("[Region discovery] Call to local imds failed. " + e);
+                throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed, e);
             }
         }
 
         private CancellationToken GetCancellationToken(CancellationToken userCancellationToken)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(TimeoutInMs);
+            CancellationTokenSource tokenSource = new CancellationTokenSource(_imdsCallTimeout);
             CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(userCancellationToken);
 
             return linkedTokenSource.Token;
