@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Region
         private CancellationToken GetCancellationToken(CancellationToken userCancellationToken)
         {
             CancellationTokenSource tokenSource = new CancellationTokenSource(_imdsCallTimeoutMs);
-            CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(userCancellationToken);
+            CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(userCancellationToken, tokenSource.Token);
 
             return linkedTokenSource.Token;
         }
