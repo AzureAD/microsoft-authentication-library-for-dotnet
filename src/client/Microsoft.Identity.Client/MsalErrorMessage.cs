@@ -298,6 +298,7 @@ namespace Microsoft.Identity.Client
         public const string SSHCertUsedAsHttpHeader = "MSAL was configured to request SSH certificates from AAD, and these cannot be used as an HTTP authentication header. Developers are responsible for transporting the SSH certificates to the target machines. ";
         public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication. ";
         public const string RegionDiscoveryFailed = "Region discovery for the instance failed. Region discovery can only be made if the service resides in Azure function or Azure VM. See https://aka.ms/msal-net-region-discovery for more details. ";
+        public const string RegionDiscoveryFailedWithTimeout = "Region discovery failed due to app cancellation or timeout.";
         public const string RegionDiscoveryNotAvailable = "Region discovery cannot be performed for ADFS authority. Do not set `WithAzureRegion` to true. ";
 
         public static string AuthorityTypeMismatch(

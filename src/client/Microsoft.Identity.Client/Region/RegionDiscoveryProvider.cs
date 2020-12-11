@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Region
 
         private readonly IHttpManager _httpManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
-        private readonly int _imdsCallTimeout;
+        private readonly int _imdsCallTimeoutMs;
 
         public RegionDiscoveryProvider(
             IHttpManager httpManager, 
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.Region
         {
             _httpManager = httpManager;
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? new NetworkCacheMetadataProvider();
-            _imdsCallTimeout = imdsCallTimeout;
+            _imdsCallTimeoutMs = imdsCallTimeout;
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Region
             {
                 if (MsalError.RequestTimeout.Equals(e.ErrorCode))
                 {
-                    throw new MsalServiceException("region_discovery_failed", "app cancelled or timeout expired", e);
+                    throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailedWithTimeout, e);
                 }
 
                 throw e;
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client.Region
 
         private CancellationToken GetCancellationToken(CancellationToken userCancellationToken)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(_imdsCallTimeout);
+            CancellationTokenSource tokenSource = new CancellationTokenSource(_imdsCallTimeoutMs);
             CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(userCancellationToken);
 
             return linkedTokenSource.Token;
