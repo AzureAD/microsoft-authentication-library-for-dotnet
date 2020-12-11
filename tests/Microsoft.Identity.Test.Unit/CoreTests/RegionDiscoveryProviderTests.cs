@@ -131,8 +131,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             }
         }
 
-       
-
         [TestMethod]
         public async Task NoImdsCancellation_UserCancelled_Async()
         {
@@ -149,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 _testRequestContext))
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("region_discovery_failed", ex.ErrorCode);
+            Assert.AreEqual(MsalError.RegionDiscoveryFailed, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -167,7 +165,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 _testRequestContext))
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("region_discovery_failed", ex.ErrorCode);
+            Assert.AreEqual(MsalError.RegionDiscoveryFailed, ex.ErrorCode);
         }      
 
         [TestMethod]
@@ -300,7 +298,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                    new MockHttpMessageHandler
                    {
                        ExpectedMethod = HttpMethod.Get,
-                       ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/location",
+                       ExpectedUrl = TestConstants.ImdsUrl,
                        ExpectedRequestHeaders = new Dictionary<string, string>
                         {
                             { "Metadata", "true" }
@@ -315,7 +313,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/location",
+                        ExpectedUrl = TestConstants.ImdsUrl,
                         ExpectedRequestHeaders = new Dictionary<string, string>
                             {
                             { "Metadata", "true" }

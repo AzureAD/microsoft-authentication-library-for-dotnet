@@ -132,6 +132,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string RegionName = "REGION_NAME";
         public const string Region = "centralus";
         public const int TimeoutInMs = 2000;
+        public const string ImdsUrl = "http://169.254.169.254/metadata/instance/compute/location";
 
         public const string UserAssertion = "fake_access_token";
 
