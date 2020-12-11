@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        public void TestSendGetWithCancelledToken()
+        public void TestSendGetWithCanceledToken()
         {
             var queryParams = new Dictionary<string, string>
             {
@@ -117,6 +117,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             using (var httpManager = new MockHttpManager())
             {
+                httpManager.AddSuccessTokenResponseMockHandlerForGet(queryParameters: queryParams);
+
                 CancellationTokenSource cts = new CancellationTokenSource();
                 cts.Cancel();
 
@@ -127,12 +129,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         queryParams,
                         Substitute.For<ICoreLogger>(),
                         cancellationToken: cts.Token).Result;
-                    Assert.Fail("request should have failed");
+                    
+                    Assert.Fail("Request should have failed due to cancelled token.");
                 }
-                catch (Exception exc)
+                catch (AggregateException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.IsTrue(exc.InnerException is OperationCanceledException);
+                    Assert.IsTrue(exc.InnerException is MsalServiceException);
                 }
             }
         }

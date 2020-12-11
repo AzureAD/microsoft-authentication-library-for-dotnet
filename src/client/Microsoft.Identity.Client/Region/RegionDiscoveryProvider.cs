@@ -103,11 +103,16 @@ namespace Microsoft.Identity.Client.Region
                     MsalErrorMessage.RegionDiscoveryFailed,
                     response);
             }  
-            catch (OperationCanceledException e)
+            catch (MsalServiceException e)
             {
-                throw new MsalServiceException("region_discovery_failed", "app cancelled or timeout expired", e);
+                if (MsalError.RequestTimeout.Equals(e.ErrorCode))
+                {
+                    throw new MsalServiceException("region_discovery_failed", "app cancelled or timeout expired", e);
+                }
+
+                throw e;
             }
-            catch (Exception e) when (!(e is MsalServiceException))
+            catch (Exception e)
             {
                 logger.Info("[Region discovery] Call to local imds failed. " + e);
                 throw new MsalServiceException(MsalError.RegionDiscoveryFailed, MsalErrorMessage.RegionDiscoveryFailed, e);

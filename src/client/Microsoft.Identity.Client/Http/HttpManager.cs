@@ -141,6 +141,12 @@ namespace Microsoft.Identity.Client.Http
             {
                 logger.Error("The HTTP request failed or it was canceled. " + exception.Message);
                 isRetryable = true;
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    isRetryable = false;
+                }
+
                 timeoutException = exception;
             }
 
@@ -198,8 +204,6 @@ namespace Microsoft.Identity.Client.Http
             HttpMethod method,
             CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             HttpClient client = GetHttpClient();
 
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
