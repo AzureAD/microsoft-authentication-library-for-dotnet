@@ -30,8 +30,11 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
 
-                Http.HttpResponse httpResponse = await _serviceBundle.HttpManager.SendGetAsync(new Uri(webFingerUrl), null, requestContext.Logger)
-                                                       .ConfigureAwait(false);
+                Http.HttpResponse httpResponse = await _serviceBundle.HttpManager.SendGetAsync(
+                    new Uri(webFingerUrl), 
+                    null, 
+                    requestContext.Logger, 
+                    cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {

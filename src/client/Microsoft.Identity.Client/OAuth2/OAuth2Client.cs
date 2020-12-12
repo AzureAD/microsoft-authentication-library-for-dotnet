@@ -103,7 +103,11 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
                 else
                 {
-                    response = await _httpManager.SendGetAsync(endpointUri, _headers, requestContext.Logger).ConfigureAwait(false);
+                    response = await _httpManager.SendGetAsync(
+                        endpointUri, 
+                        _headers, 
+                        requestContext.Logger,
+                        cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
                 }
 
                 DecorateHttpEvent(method, requestContext, response, httpEvent);

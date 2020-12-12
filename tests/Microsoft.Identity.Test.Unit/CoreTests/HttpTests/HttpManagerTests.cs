@@ -14,6 +14,7 @@ using Microsoft.Identity.Test.Common;
 using NSubstitute;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using System.Threading;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
@@ -102,6 +103,65 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            }
+        }
+
+        [TestMethod]
+        public void TestSendGetWithCanceledToken()
+        {
+            var queryParams = new Dictionary<string, string>
+            {
+                ["key1"] = "qp1",
+                ["key2"] = "qp2"
+            };
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddSuccessTokenResponseMockHandlerForGet(queryParameters: queryParams);
+
+                CancellationTokenSource cts = new CancellationTokenSource();
+                cts.Cancel();
+
+                try
+                {
+                    var response = httpManager.SendGetAsync(
+                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
+                        queryParams,
+                        Substitute.For<ICoreLogger>(),
+                        cancellationToken: cts.Token).Result;
+                    
+                    Assert.Fail("Request should have failed due to cancelled token.");
+                }
+                catch (AggregateException exc)
+                {
+                    Assert.IsNotNull(exc);
+                    Assert.IsTrue(exc.InnerException is MsalServiceException);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSendGetWithRetryFalseHttp500TypeFailureAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
+
+                try
+                {
+                    var msalHttpResponse = await httpManager.SendGetAsync(
+                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                null,
+                                                                Substitute.For<ICoreLogger>(),
+                                                                retry: false)
+                                                            .ConfigureAwait(false);
+                    Assert.Fail("request should have failed");
+                }
+                catch (MsalServiceException exc)
+                {
+                    Assert.IsNotNull(exc);
+                    Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
+                }
             }
         }
 

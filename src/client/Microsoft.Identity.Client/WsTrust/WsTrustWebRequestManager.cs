@@ -31,7 +31,11 @@ namespace Microsoft.Identity.Client.WsTrust
             IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
 
             var uri = new UriBuilder(federationMetadataUrl);
-            HttpResponse httpResponse = await _httpManager.SendGetAsync(uri.Uri, msalIdParams, requestContext.Logger).ConfigureAwait(false);
+            HttpResponse httpResponse = await _httpManager.SendGetAsync(
+                uri.Uri, 
+                msalIdParams, 
+                requestContext.Logger,
+                cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string message = string.Format(CultureInfo.CurrentCulture,
