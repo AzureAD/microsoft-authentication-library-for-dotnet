@@ -136,17 +136,8 @@ namespace Microsoft.Identity.Client.UI
         internal bool UseCorporateNetwork { get; set; }
 #endif
 
-#if DESKTOP || NET5_WIN 
-        internal object OwnerWindow { get; set; }
-
-        /// <summary>
-        /// Initializes an instance for a provided parent window.
-        /// </summary>
-        /// <param name="ownerWindow">Parent window object reference. OPTIONAL.</param>
-        public CoreUIParent(object ownerWindow)
-        {
-            OwnerWindow = ownerWindow;
-        }
+#if DESKTOP || NET5_WIN || NET_CORE
+        internal object OwnerWindow { get; set; }       
 #endif
     }
 }

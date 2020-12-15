@@ -21,7 +21,6 @@ using Microsoft.Win32;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Platforms.Features.Windows;
 using Microsoft.Identity.Client.Platforms.netcore;
 
 namespace Microsoft.Identity.Client.Platforms.net5win

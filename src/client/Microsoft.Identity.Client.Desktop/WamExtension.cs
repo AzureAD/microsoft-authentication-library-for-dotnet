@@ -17,29 +17,21 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
-#if NETSTANDARD
-            throw new PlatformNotSupportedException(
-                "The Windows Broker is not available on NetStandard " +
-                "Please reference Microsoft.Identity.Client and Microsot.Identity.Client.Desktop directly " +
-                "from your application");
-#else
             if (!builder.Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
                     MsalError.ExperimentalFeature,
                     MsalErrorMessage.ExperimentalFeature(nameof(WithWindowsBroker)));
             }
-
             builder.Config.IsBrokerEnabled = enableBroker;
+
+#if !NETSTANDARD
 
             builder.Config.BrokerCreatorFunc =
                 (uiParent, logger) => new Platforms.Features.WamBroker.WamBroker(uiParent, logger);
-            return builder;
 #endif
+            return builder;
+
         }
-
-       
     }
-
-    
 }

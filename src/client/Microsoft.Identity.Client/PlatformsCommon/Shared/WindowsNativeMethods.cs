@@ -5,7 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Microsoft.Identity.Client.Platforms.Features.Windows
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal static class WindowsNativeMethods
     {
@@ -82,6 +82,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.Windows
             public readonly int dwAllocationGranularity;
             public readonly short wProcessorLevel;
             public readonly short wProcessorRevision;
-        }       
+        }
     }
 }

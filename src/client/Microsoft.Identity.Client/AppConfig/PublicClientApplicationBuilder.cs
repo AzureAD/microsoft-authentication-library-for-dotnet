@@ -137,16 +137,16 @@ namespace Microsoft.Identity.Client
             throw new PlatformNotSupportedException("The Windows broker is not available on .NET Framework 4.5, please use at least .NET Framework 4.6.2");
 #endif
 
-#if NET461
+#if NET461 || NET_CORE
             if (Config.BrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
-                    "The Windows broker is not directly available on MSAL for .NET Framework." +
+                    "The Windows broker is not directly available on MSAL for .NET Framework or .NET Core 3.x" +
                     " To use it, please install the nuget package named Microsoft.Identity.Client.Desktop " +
-                    "and use the extension method .WithWindowsBroker(true)");
+                    "and call the extension method .WithWindowsBroker(true)");
             }
 #endif
-#if DESKTOP || WINDOWS_APP || NET5_WIN
+#if NET461 || WINDOWS_APP || NET5_WIN
             if (!Config.ExperimentalFeaturesEnabled)
             {
                 throw new MsalClientException(
@@ -254,7 +254,9 @@ namespace Microsoft.Identity.Client
 
             return WithParentFunc(() => (object)windowFunc());
         }
+#endif
 
+#if DESKTOP || NET5_WIN || NET_CORE
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.

@@ -3,7 +3,7 @@
 
     <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <!--<TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>-->
+    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
     <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>

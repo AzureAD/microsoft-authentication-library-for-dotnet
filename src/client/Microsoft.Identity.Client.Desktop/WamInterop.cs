@@ -10,7 +10,7 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 
-namespace Microsoft.Identity.Client.Platforms.netdesktop
+namespace Microsoft.Identity.Client.Platforms
 {
     internal static class WebAuthenticationCoreManagerInterop
     {
