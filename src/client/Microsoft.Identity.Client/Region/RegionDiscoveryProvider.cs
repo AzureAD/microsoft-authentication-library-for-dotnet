@@ -38,6 +38,14 @@ namespace Microsoft.Identity.Client.Region
             _imdsCallTimeoutMs = imdsCallTimeout;
         }
 
+        /*
+         * To be used only for tests
+         */
+        public void clearStaticCache()
+        {
+            s_region = null;
+        }
+
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             ICoreLogger logger = requestContext.Logger;
