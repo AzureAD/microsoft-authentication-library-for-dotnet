@@ -54,7 +54,10 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
     [System.Runtime.InteropServices.InterfaceType(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIInspectable)]
     internal interface IWebAuthenticationCoreManagerInterop
     {
-        IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(IntPtr appWindow, WebTokenRequest request, [System.Runtime.InteropServices.In] ref Guid riid);
+        IAsyncOperation<WebTokenRequestResult> RequestTokenForWindowAsync(
+            IntPtr appWindow, 
+            WebTokenRequest request, 
+            [System.Runtime.InteropServices.In] ref Guid riid);
         IAsyncOperation<WebTokenRequestResult> RequestTokenWithWebAccountForWindowAsync(IntPtr appWindow, WebTokenRequest request, WebAccount webAccount, [System.Runtime.InteropServices.In] ref Guid riid);
     }
 

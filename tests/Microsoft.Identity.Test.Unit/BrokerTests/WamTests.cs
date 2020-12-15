@@ -490,6 +490,50 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public async Task ATI_WithDefaultUser_Async()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var requestParams = harness.CreateAuthenticationRequestParameters(TestConstants.AuthorityHomeTenant); // AAD
+                requestParams.Account = PublicClientApplication.OperatingSystemAccount;
+
+                var wamAccountProvider = new WebAccountProvider("id", "user@contoso.com", null);
+                var webTokenRequest = new WebTokenRequest(wamAccountProvider);
+
+                // will use the AAD provider because the authority is tenanted (i.e. AAD only)
+                _webAccountProviderFactory
+                    .GetAccountProviderAsync(TestConstants.AuthorityHomeTenant)
+                    .ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
+
+                _aadPlugin.CreateWebTokenRequestAsync(
+                    wamAccountProvider,
+                    requestParams,
+                    isForceLoginPrompt: false,
+                    isAccountInWam: true,
+                    isInteractive: true)
+                    .Returns(Task.FromResult(webTokenRequest));
+
+                var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
+                webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
+                var webTokenResponse = new WebTokenResponse();
+                webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
+
+                _wamProxy.RequestTokenForWindowAsync(Arg.Any<IntPtr>(), webTokenRequest).
+                    Returns(Task.FromResult(webTokenResponseWrapper));
+                _aadPlugin.ParseSuccesfullWamResponse(webTokenResponse).Returns(_msalTokenResponse);
+
+                // Act
+                var result = await _wamBroker.AcquireTokenInteractiveAsync(
+                    requestParams,
+                    new AcquireTokenInteractiveParameters()).ConfigureAwait(false);
+
+                // Assert 
+                Assert.AreSame(_msalTokenResponse, result);
+            }
+        }
+
+        [TestMethod]
         public async Task ATI_WithPicker_Async()
         {
             string homeAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
