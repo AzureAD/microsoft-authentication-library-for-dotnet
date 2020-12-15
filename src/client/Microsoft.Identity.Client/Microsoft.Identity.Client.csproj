@@ -50,6 +50,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DisableExtraReferences>true</DisableExtraReferences>
     <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
