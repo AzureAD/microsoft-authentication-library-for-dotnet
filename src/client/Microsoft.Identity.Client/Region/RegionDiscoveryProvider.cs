@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Client.Region
         private readonly IHttpManager _httpManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
         private readonly int _imdsCallTimeoutMs;
+        private static string s_region;
 
         public RegionDiscoveryProvider(
             IHttpManager httpManager, 
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client.Region
                 Uri regionalizedAuthority = await BuildAuthorityWithRegionAsync(authority, requestContext).ConfigureAwait(false);
                 CacheInstanceDiscoveryMetadata(CreateEntry(authority, regionalizedAuthority));
 
-                cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
+                cachedEntry = _networkCacheMetadataProvider.GetMetadata(regionalizedAuthority.Host, logger);
                 logger.Verbose($"[Region Discovery] Created metadata for the regional environment {environment} ? {cachedEntry != null}");
             }
             else
@@ -177,7 +178,7 @@ namespace Microsoft.Identity.Client.Region
         {
             return new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { orginalAuthority.Host, regionalizedAuthority.Host },
+                Aliases = new[] { regionalizedAuthority.Host },
                 PreferredCache = orginalAuthority.Host,
                 PreferredNetwork = regionalizedAuthority.Host
             };
@@ -193,16 +194,20 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<Uri> BuildAuthorityWithRegionAsync(Uri canonicalAuthority, RequestContext requestContext)
         {
-            string region = await GetRegionAsync(requestContext).ConfigureAwait(false);
+            if (s_region.IsNullOrEmpty())
+            {
+                s_region = await GetRegionAsync(requestContext).ConfigureAwait(false);
+            }
+            
             var builder = new UriBuilder(canonicalAuthority);
 
             if (KnownMetadataProvider.IsPublicEnvironment(canonicalAuthority.Host))
             {
-                builder.Host = $"{region}.login.microsoft.com";
+                builder.Host = $"{s_region}.login.microsoft.com";
             }
             else
             {
-                builder.Host = $"{region}.{builder.Host}";
+                builder.Host = $"{s_region}.{builder.Host}";
             }
 
             return builder.Uri;
